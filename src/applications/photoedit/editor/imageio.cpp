@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -92,11 +92,7 @@ ImageIO::Status ImageIO::load( const QImage& image, int levels )
 
 bool ImageIO::isSaveSupported() const
 {
-    QByteArray current = format();
-    QList<QByteArray> supported( QImageWriter::supportedImageFormats() );
-    for( int i = 0; i < supported.size(); i++ )
-        if( supported[ i ] == current ) return true;
-    return false;
+    return QImageWriter::supportedImageFormats().contains( format() );
 }
 
 bool ImageIO::isReadOnly() const
@@ -191,12 +187,7 @@ double ImageIO::factor( int n ) const
 // Return image at level
 QImage ImageIO::image(int level)
 {
-    // return image_samples[ level ];
-    if ( image_levels < 1 ) {
-        return QImage();
-    } else {
-        return image_samples[ level ];
-    }
+    return image_levels < 1 ? QImage() : image_samples[ level ];
 }
 
 QImage ImageIO::image( const QRect& rect, int level ) const

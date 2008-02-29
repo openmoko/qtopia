@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -44,6 +44,7 @@
 #include <qvalidator.h>
 #include <qlineedit.h>
 #include <qtextedit.h>
+#include <QTextBrowser>
 #include <qdesktopwidget.h>
 #include <qtranslator.h>
 #include <qsoundqss_qws.h>
@@ -540,7 +541,8 @@ public:
         if ( targetWidget ) {
             QWidget *table = targetWidget->findChild<QWidget*>("qt_calendar_calendarview");
             table->removeEventFilter(this);
-            dateFrame->deleteLater();
+            if (dateFrame)
+                dateFrame->deleteLater();
             dateFrame = 0;
             dateText = 0;
         }
@@ -666,10 +668,12 @@ public:
     ShadowWidget(int size);
 
     int shadowSize() const { return shSize; }
+    void setTarget(QWidget *w);
 
 protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent *r);
+    bool eventFilter(QObject *o, QEvent *e);
 
 private:
     inline int alphaAt(int dist, int maxDist) const;
@@ -678,6 +682,7 @@ private:
 private:
     static QMap<int,QBrush*> brushes;
     int shSize;
+    QPointer<QWidget> widget;
 };
 
 QMap<int,QBrush*> ShadowWidget::brushes;
@@ -690,6 +695,31 @@ ShadowWidget::ShadowWidget(int size)
     QPalette pal;
     pal.setBrush(QPalette::Background, QColor(0,0,0,0));
     setPalette(pal);
+}
+
+void ShadowWidget::setTarget(QWidget *w)
+{
+    if (widget != w) {
+        if (w) {
+            setGeometry(w->x()+shadowSize(), w->y()+shadowSize(),
+                    w->width(), w->height());
+            w->installEventFilter(this);
+        } else if (widget) {
+            widget->removeEventFilter(this);
+        }
+        widget = w;
+    }
+}
+
+bool ShadowWidget::eventFilter(QObject *o, QEvent *e)
+{
+    if (e->type() == QEvent::Resize && widget && (QWidget*)o == widget) {
+        setGeometry(widget->x()+shadowSize(),
+                widget->y()+shadowSize(),
+                widget->width(), widget->height());
+    }
+
+    return false;
 }
 
 int ShadowWidget::alphaAt(int dist, int maxDist) const
@@ -1036,6 +1066,7 @@ public:
             cg = d->geometry();
             int lb = cg.left()-fg.left()+desktopRect.left();
             int bb = fg.bottom() - cg.bottom();
+            d->setFixedSize(desktopRect.width() - frameWidth, h);
             d->setGeometry(lb, desktopRect.bottom() - h - bb + 1,
                     desktopRect.width() - frameWidth, h);
         }
@@ -1288,7 +1319,7 @@ public:
             l = ((QComboBox*)w)->lineEdit();
         if (l) {
             if (l->text().length() == 0 || l->isReadOnly())
-                ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::Cancel);
+                ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::RevertEdit);
             else if (l->cursorPosition() == 0)
                 ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::NoLabel);
             else
@@ -1296,13 +1327,41 @@ public:
         } else if (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")) {
             QTextEdit *l = (QTextEdit*)w;
             if (l->document()->isEmpty() || l->isReadOnly()) {
-                ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::Cancel);
+                ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::RevertEdit);
             } else {
                 if (l->textCursor().position() == 0)
                     ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::NoLabel);
                 else
                     ContextKeyManager::instance()->setStandard(w, Qt::Key_Back, QSoftMenuBar::BackSpace);
             }
+        }
+    }
+#endif
+
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    static void updateButtonSoftKeys(QWidget *w)
+    {
+        QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
+        if (b && b->isCheckable()) {
+            if (w->inherits("QCheckBox")) {
+                if (b->isChecked())
+                    ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::Deselect);
+                else
+                    ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::Select);
+            }
+        }
+    }
+
+    static void updateBrowserSoftKeys(QWidget *w)
+    {
+        QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
+        if (!tb || ContextKeyManager::instance()->haveCustomLabelForWidget(w, Qt::Key_Select, w->hasEditFocus()))
+            return;
+        if (tb->textCursor().hasSelection() &&
+            !tb->textCursor().charFormat().anchorHref().isEmpty()) {
+            ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::Select);
+        } else {
+            ContextKeyManager::instance()->setStandard(w, Qt::Key_Select, QSoftMenuBar::NoLabel);
         }
     }
 #endif
@@ -1319,7 +1378,6 @@ public:
     QPointer<CalendarMenu> calendarMenu;
     QPointer<CalendarTextNavigation> calendarNav;
     QBasicTimer singleFocusTimer;
-    QPointer<QWidget> updateBlockedWidget;
 # ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
     QBasicTimer fadeInTimer;
     double fadeInOpacity;
@@ -1405,7 +1463,7 @@ static void setVolume(int t=0, int percent=-1)
   \endlist
   The following signals are emitted:
   \list
-  \o appMessage() - if the application receives a \l {QCop Messages}{QCop} message on the
+  \o appMessage() - if the application receives a \l {Qtopia IPC Layer}{Qtopia IPC} message on the
   QPE/Application/\i{appname} channel.
   \o flush() - when synching begins
   \o reload() - when syching ends.
@@ -1428,7 +1486,7 @@ static void setVolume(int t=0, int percent=-1)
   \o inputMethodHint() - retrieves the input method hint.
  \endlist
 
-  \ingroup qtopiaemb
+  \ingroup environment
 */
 
 /*!
@@ -1524,7 +1582,7 @@ static void setVolume(int t=0, int percent=-1)
   \fn void QtopiaApplication::appMessage( const QString& msg, const QByteArray& data )
 
   This signal is emitted when a message is received on the
-  application's QPE/Application/\i{appname}  \l {QCop Messages}{QCop} channel.
+  application's QPE/Application/\i{appname}  \l {Qtopia IPC Layer}{Qtopia} channel.
 
   The slot to which you connect this signal uses \a msg and \a data
   in the following way:
@@ -2156,15 +2214,6 @@ static bool isSingleFocusWidget(QWidget *focus)
     return singleFocusWidget;
 }
 
-static bool needUpdateOnEditFocus(QWidget *w)
-{
-    return (qobject_cast<QLineEdit*>(w)
-        || qobject_cast<QTextEdit*>(w)
-        || qobject_cast<QAbstractSpinBox*>(w)
-        || qobject_cast<QComboBox*>(w)
-        || qobject_cast<QDateTimeEdit*>(w)
-        || w->property("updateOnEditFocus").toBool());
-}
 #endif
 
 void QtopiaApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
@@ -3109,16 +3158,6 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         QWidget *w = (QWidget *)o;
 
         if (e->type() == QEvent::LeaveEditFocus) {
-            if (!needUpdateOnEditFocus(w)) {
-                //XXX Qt 4.2 always generates an update when edit focus changes.
-                // For widgets that do not have a different appearance for
-                // edit vs. navigation focus, this results in unnecessary
-                // updates.  We block this here for now.
-                if (d->updateBlockedWidget)
-                    d->updateBlockedWidget->setAttribute(Qt::WA_UpdatesDisabled, false);
-                w->setAttribute(Qt::WA_UpdatesDisabled, true);
-                d->updateBlockedWidget = w;
-            }
 /*
             qDebug() << "QEvent::LeaveEditFocus" << w;
         } else if (e->type() == QEvent::EnterEditFocus) {
@@ -3161,20 +3200,23 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 QSoftMenuBar::addMenuTo(w, d->editMenu, QSoftMenuBar::EditFocus);
             }
         }
-        if (!mousePreferred && w->inherits("QTextEdit")) {
-            QTextEdit *te = (QTextEdit*)w;
-            te->viewport()->setBackgroundRole(e->type() == QEvent::EnterEditFocus
-                    ? QPalette::Base : QPalette::Background);
+ 
+        QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
+        if ( b && b->isCheckable() && !mousePreferred ) {
+            connect(b, SIGNAL(toggled(bool)),
+                qApp, SLOT(buttonChange(bool)));
+        }
+        
+        QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
+        if ( tb && !mousePreferred ) {
+            connect(tb, SIGNAL(highlighted(const QString&)),
+                    qApp, SLOT(textBrowserHighlightChange(const QString&)));
         }
 #endif
     }
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     else if ( e->type() == QEvent::FocusOut ) {
         QWidget *w = (QWidget *)o;
-        if (d->updateBlockedWidget) {
-            d->updateBlockedWidget->setAttribute(Qt::WA_UpdatesDisabled, false);
-            d->updateBlockedWidget = 0;
-        }
         QFocusEvent *fe = (QFocusEvent*)e;
         if ((fe->reason() == Qt::PopupFocusReason)
                 || (!focusWidget() && w->topLevelWidget()->isVisible() && activeWindow())) {
@@ -3188,15 +3230,21 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 d->editMenu= 0;
             }
         }
+        
+        QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
+        if ( b && b->isCheckable() && !mousePreferred ) {
+            disconnect(b, SIGNAL(toggled(bool)),
+                qApp, SLOT(buttonChange(bool)));
+        }
+        QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
+        if ( tb && !mousePreferred ) {
+            disconnect(tb, SIGNAL(highlighted(const QString&)),
+                    qApp, SLOT(textBrowserHighlightChange(const QString&)));
+        }
     } else if (e->type() == QEvent::Show) {
         QMessageBox *mb = 0;
-        if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
+        if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal))
             mb = qobject_cast<QMessageBox*>(o);
-            if (mb) {
-                hideMessageBoxButtons( mb );
-                return true;
-            }
-        }
         QDialog *dlg = qobject_cast<QDialog*>(o);
         if (!mb && dlg && !Qtopia::hasKey(Qt::Key_No)) { // no context menu for QMessageBox
             if (!isMenuLike(dlg)) {
@@ -3238,10 +3286,8 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                 QRect desktopRect(desktop->screenGeometry(desktop->primaryScreen()));
                 shadow = new ShadowWidget(desktopRect.width() < 240 ? 3 : 5);
                 d->shadowMap.insert(w, shadow);
+                shadow->setTarget(w);
             }
-            shadow->setGeometry(w->x()+shadow->shadowSize(),
-                                w->y()+shadow->shadowSize(),
-                                w->width(), w->height());
             shadow->show();
 #ifdef QTOPIA_ENABLE_FADE_IN_WINDOW
         } else if (w && w->isWindow()) {
@@ -3473,6 +3519,12 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 bool QtopiaApplication::notify(QObject* o, QEvent* e)
 {
     bool r = QApplication::notify(o,e);
+    if (e->type() == QEvent::Show && o->isWidgetType()
+        && ((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
+        QMessageBox *mb = qobject_cast<QMessageBox*>(o);
+        if (mb)
+            hideMessageBoxButtons( mb );
+    }
 #if defined(QTOPIA_KEYPAD_NAVIGATION)
     if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = (QKeyEvent*)e;
@@ -3523,7 +3575,7 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
                     || le->cursorPosition() > 0)
                     label = QSoftMenuBar::BackSpace;
                 else if (le->text().length() == 0)
-                    label = QSoftMenuBar::Cancel;
+                    label = QSoftMenuBar::RevertEdit;
             }
         } else if (QTextEdit *te = qobject_cast<QTextEdit*>(o)) {
             setBack = true;
@@ -3752,6 +3804,22 @@ void QtopiaApplication::multiLineEditTextChange()
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     if (!mousePreferred)
         QtopiaApplicationData::updateContext((QWidget*)sender());
+#endif
+}
+
+void QtopiaApplication::buttonChange(bool)
+{
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    if (!mousePreferred)
+        QtopiaApplicationData::updateButtonSoftKeys((QWidget*)sender());
+#endif
+}
+
+void QtopiaApplication::textBrowserHighlightChange(const QString &)
+{
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    if (!mousePreferred)
+        QtopiaApplicationData::updateBrowserSoftKeys((QWidget*)sender());
 #endif
 }
 

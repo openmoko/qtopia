@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -113,8 +113,8 @@ void ProfileEditDialog::init()
 #endif
 
     infoLayout = new QGridLayout();
-    infoLayout->setSpacing( 2 );
-    infoLayout->setMargin( 2 );
+    infoLayout->setSpacing( 6 );
+    infoLayout->setMargin( 6 );
     infoLayout->setColumnStretch(1, 1);
 
     lblName = new QLabel( tr( "Name" ), infoTab );
@@ -138,8 +138,8 @@ void ProfileEditDialog::init()
     infoLayout->addWidget( masterVolume, 1, 1 );
 
     infoTabLayout = new QVBoxLayout( infoTab );
-    infoTabLayout->setSpacing( 1 );
-    infoTabLayout->setMargin( 2 );
+    infoTabLayout->setSpacing( 6 );
+    infoTabLayout->setMargin( 6 );
     infoTabLayout->addLayout( infoLayout );
 
     autoAnswer = new QCheckBox( tr( "Auto Answer" ), infoTab );
@@ -154,6 +154,12 @@ void ProfileEditDialog::init()
     editSchedule = new QPushButton( tr( "Edit" ), infoTab );
     editSchedule->setEnabled( false );
     infoTabLayout->addWidget( editSchedule );
+
+#if !defined (QTOPIA_CELL) && !defined (QTOPIA_VOIP)
+    autoAnswer->setVisible( false );
+    vibrateAlert->setVisible( false );
+    infoTabLayout->addStretch(0);
+#endif
 
     QScrollArea *scrollArea1 = new QScrollArea();
     scrollArea1->setFocusPolicy(Qt::NoFocus);
@@ -198,7 +204,7 @@ void ProfileEditDialog::init()
 
     lblAlert2 = new QLabel( tr( "Alert" ), messageToneGroup );
     messageToneLayout->addWidget( lblAlert2, 0, 0 );
-    
+
     lblTone2 = new QLabel( tr( "Duration" ), messageToneGroup );
     messageToneLayout->addWidget( lblTone2, 1, 0 );
 
@@ -228,7 +234,9 @@ void ProfileEditDialog::init()
     scrollArea2->setWidget( toneTab );
     scrollArea2->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 
+#if defined (QTOPIA_CELL) || defined (QTOPIA_VOIP)
     tabWidget->addTab( scrollArea2, tr( "Tones" ) );
+#endif
 
     // properties tab
     settingTab =  new QWidget( tabWidget );
@@ -674,6 +682,15 @@ void ProfileEditDialog::addSetting( const QPhoneProfile::Setting s )
 #endif
 }
 
+bool ProfileEditDialog::event(QEvent *e)
+{
+    if ( e->type() == QEvent::WindowDeactivate ) {
+        ringTone->stopSound();
+        messageTone->stopSound();
+    }
+    return QDialog::event(e);
+}
+
 //==========================================================================
 
 PhoneProfileItem::PhoneProfileItem(const QPhoneProfile &pr, QListWidget *l)
@@ -828,15 +845,16 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     actionSpeedDial = new QAction( QIcon(":icon/phone/speeddial"), tr("Add to Speed Dial..."), this );
     connect( actionSpeedDial, SIGNAL(triggered()), this, SLOT(addToSpeedDial()) );
 
+#ifdef QTOPIA_CELL // airplane mode only makes sense in cell network environment.
     actionPlane = new QAction( QIcon( ":icon/aeroplane" ), tr("Airplane Safe Mode"), this );
     actionPlane->setCheckable(true);
     actionPlane->setChecked(profMan.planeMode());
     connect( actionPlane, SIGNAL(toggled(bool)), this, SLOT(setPlaneMode(bool)) );
     actionPlane->setEnabled(profMan.planeModeAvailable());
     actionPlane->setVisible(profMan.planeModeAvailable());
+#endif
 
-
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_KEYPAD_NAVIGATION
     contextMenu = QSoftMenuBar::menuFor(this);
     contextMenu->addAction(actionNew);
     contextMenu->addAction(actionEdit);
@@ -844,9 +862,11 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     contextMenu->addAction(actionActivate);
     contextMenu->addAction(actionSpeedDial);
 
+#ifdef QTOPIA_CELL
     if (actionPlane->isEnabled())
         contextMenu->insertSeparator(actionSpeedDial);
     contextMenu->addAction(actionPlane);
+#endif
 #endif
 
     connect(itemlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(activateProfileAndClose(QListWidgetItem*)));
@@ -880,6 +900,10 @@ void ProfileSelect::loadConfig()
 
     QList<int> ids = profMan.profileIds();
     for(int ii = 0; ii < ids.count(); ++ii) {
+#ifndef QTOPIA_CELL
+        if ( profMan.profile(ids.at(ii)).planeMode() )
+            continue;
+#endif
         PhoneProfileItem *pItem = new PhoneProfileItem(profMan.profile(ids.at(ii)), itemlist);
 
         if(profMan.profile(ids.at(ii)).id() == profMan.activeProfile().id()) {
@@ -981,8 +1005,6 @@ void ProfileSelect::setActiveProfile( PhoneProfileItem *pItem, bool force )
                     QStyle::PixelMetric(QStyle::PM_SmallIconSize), true ), tr("Profile '%1' activated").arg( activeProfile->text() ) );
             // activate plane mode
             setPlaneMode( pItem->profile().planeMode() );
-            // show/hide plane mode info
-            actionPlane->setChecked( pItem->profile().planeMode() );
         }
     }
 }
@@ -1125,14 +1147,19 @@ void ProfileSelect::removeCurrentProfile()
 
 void ProfileSelect::setPlaneMode(bool p)
 {
+#ifdef QTOPIA_CELL
     if ( activeProfile->profile().planeMode() && !p ) {
         QMessageBox::warning( this, tr( "Airplane Mode" ),
                 tr( "<qt>Cannot turn off Airplane Safe Mode when the profile <b>Airplane</b> is active.</qt>" ) );
         actionPlane->setChecked( true );
         return;
     }
+    actionPlane->setChecked(p);
     profMan.setPlaneModeOverride(p);
     activeDisplay->setPlaneMode(p, profMan.planeModeAvailable());
+#else
+    Q_UNUSED(p);
+#endif
 }
 
 void ProfileSelect::updateIcons()

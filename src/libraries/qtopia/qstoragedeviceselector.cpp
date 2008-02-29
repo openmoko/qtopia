@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -51,7 +51,7 @@
   \brief The QStorageDeviceSelector class displays a list of available storage
          locations.
 
-  \ingroup qtopiaemb
+  \ingroup io
   \sa QDocumentPropertiesDialog
  */
 
@@ -216,10 +216,9 @@ QString QStorageDeviceSelector::installationPath() const
  */
 QString QStorageDeviceSelector::documentPath() const
 {
-    // FIXME Storage.conf should be made a little more flexible so that we don't have to have magic like this
     const QFileSystem *fs = storage->fileSystemOf(locations[currentIndex()]);
-    if ( fs && fs->disk() == "HOME" )
-        return locations[ currentIndex() ]+"/Documents/";
+    if ( fs )
+        return fs->documentsPath() + "/";
     else
         return locations[ currentIndex() ]+"/";
 }

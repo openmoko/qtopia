@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -245,10 +245,8 @@ HomeScreen::HomeScreen(QWidget *parent, Qt::WFlags f)
     contextMenu->installEventFilter(this);
 
     actionLock = new QAction(QIcon(":icon/padlock"), tr("Key Lock"), this);
-    if (!Qtopia::mousePreferred()) {
-        connect(actionLock, SIGNAL(triggered()), keyLock, SLOT(lock()));
-        contextMenu->addAction(actionLock);
-    }
+    connect(actionLock, SIGNAL(triggered()), keyLock, SLOT(lock()));
+    contextMenu->addAction(actionLock);
 
     QAction *actionProfile = new QAction(QIcon( ":icon/Note" ), tr("Profile..."), this);
     connect( actionProfile, SIGNAL(triggered()), this, SLOT(showProfileSelector()) );
@@ -414,6 +412,8 @@ void HomeScreen::themeItemClicked(ThemeItem *item)
             if ( worldmap != 0 )
                 worldmap->showCity();
         }
+    } else if ( in == "star" ) {
+        qwsServer->processKeyEvent('*', Qt::Key_Asterisk, Qt::NoModifier, true, false);
     }
 }
 
@@ -436,16 +436,23 @@ void HomeScreen::showLockInformation()
     QString pix("padlock");
 
     if(lock) {
+        if (Qtopia::mousePreferred())
+            QtopiaApplication::setInputMethodHint(this, QtopiaApplication::AlwaysOff);
+        else
+            qwsServer->suspendMouse();
+
         m_contextMenu->hide();
         setContextBarLocked(true);
-            } else {
+    } else {
         setContextBarLocked(false);
-                    }
+    }
 
     if(!lock) {
         // No lock
         if (Qtopia::mousePreferred())
             QtopiaApplication::setInputMethodHint(this, "phoneonly");
+        else
+            qwsServer->resumeMouse();
     } else if(keyLock->emergency()
 #ifdef QTOPIA_CELL
               || simLock->emergency()
@@ -632,6 +639,18 @@ bool HomeScreen::eventFilter(QObject *, QEvent *e)
 #else
     bool locked = !calls && (keyLock->locked());
 #endif
+    if(locked && (e->type() == QEvent::MouseButtonPress ||
+                  e->type() == QEvent::MouseButtonRelease ||
+                  e->type() == QEvent::MouseButtonDblClick ||
+                  e->type() == QEvent::MouseMove)) {
+        QMouseEvent *me = (QMouseEvent *)e;
+        ThemeItem *item = itemAt(me->pos());
+        if (item && item->itemName() == "star")
+            return false;
+        else
+            return true;
+    }
+
     if(locked && e->type() == QEvent::KeyPress) {
         if(keyLock->locked())
             keyLock->processKeyEvent((QKeyEvent *)e);

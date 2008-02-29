@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -243,7 +243,8 @@ NumberDisplay::NumberDisplay( QWidget *parent )
     mFontSizes += 18;
     mFontSizes += 16;
     mFontSizes += 14;
-    mFontSizes += 12;
+    mFontSizes += 11;
+    mFontSizes += 8;
 
     QFont f = font();
     f.setBold( true );
@@ -399,8 +400,6 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
     w -= (mgn*2);
     h -= (mgn*2);
 
-    int size = 0;
-    int pSize = 0;
     QFont f = font();
     f.setBold( true );
     QString n = mNumber;
@@ -410,41 +409,16 @@ void NumberDisplay::paintEvent( QPaintEvent *e )
         n.append("</u>");
     }
 
-    bool fits = false;
-    while( size < 5 )
+    int size = 0;
+    while( size < mFontSizes.count() )
     {
-        pSize = mFontSizes[size];
-        f.setPointSize( pSize );
+        f.setPointSize( mFontSizes[size] );
         p.setFont( f );
         QRect br = p.boundingRect( x, y, w, h, 0, n );
         //we want the largest point size that will fit.
         if( !(br.width() >= w) && !(br.height() >= h ) )
-        {
-            fits = true;
             break;
-        }
         ++size;
-    }
-
-    if( !fits )
-    {
-        //smallest font won't fit on one line. add spaces so word break works
-        QString sn;
-        QFontMetrics fm = p.fontMetrics();
-        int tcw = 0;
-        int cw = 0;
-        for( int i = 0 ; i < (int)n.length() ; ++i )
-        {
-            cw = fm.width( n[i] );
-            if( (tcw + mLargestCharWidth) >= w )
-            {
-                sn += " ";
-                tcw = 0;
-            }
-            tcw += cw;
-            sn += n[i];
-        }
-        n = sn;
     }
 
     QTextDocument doc;

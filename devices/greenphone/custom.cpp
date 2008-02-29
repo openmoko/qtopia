@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -34,8 +34,8 @@
 #define _LCDCTRL_IOCTL_BRIGHTNESS 4
 #define PM_DISPLAY_ON           10
 #define PM_DISPLAY_OFF          11
-#define PM_KPBL_OFF             22
-#define PM_KPBL_ON              23
+#define KPBL_ON                 1
+#define KPBL_OFF                2
 
 
 QTOPIA_EXPORT int qpe_sysBrightnessSteps()
@@ -57,7 +57,12 @@ QTOPIA_EXPORT void qpe_setBrightness(int b)
             ::ioctl(ipmcFd, IPMC_IOCTL_SEND_PMCOMM, PM_DISPLAY_OFF);
         } else if (b == 1) {
             ::ioctl(ipmcFd, IPMC_IOCTL_SEND_PMCOMM, PM_DISPLAY_ON);
-            ::ioctl(ipmcFd, IPMC_IOCTL_SEND_PMCOMM, PM_KPBL_OFF);
+
+            int kpblFd = ::open("/dev/omega_kpbl", O_RDWR);
+            if (kpblFd >= 0) {
+                ::ioctl(kpblFd, KPBL_OFF, 0);
+                ::close(kpblFd);
+            }
         } else {
             ::ioctl(ipmcFd, IPMC_IOCTL_SEND_PMCOMM, PM_DISPLAY_ON);
         }

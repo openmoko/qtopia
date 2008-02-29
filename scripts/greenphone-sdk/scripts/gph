@@ -4,10 +4,6 @@
 
 QPEVER=`version`
 
-PHONEIP="10.10.10.20"
-HOSTIP="10.10.10.21"
-VERBOSE=1
-
 gp_failed()
 {
   if [ "$VERBOSE" = "0" ]; then
@@ -24,7 +20,7 @@ gp_ok()
 {
   if [ "$VERBOSE" = "0" ]; then
     echo -e "[\033[01;32m  OK  \033[00m]"
-  fi 
+  fi
 }
 
 #---------------------------------------------------------------
@@ -34,12 +30,18 @@ gp_net()
   # Bring up network to greenphone
 
   sudo modprobe usbnet>/dev/null 2>&1
-  sudo ifconfig eth1 down >/dev/null 2>&1
-  sudo ifconfig eth1 $HOSTIP up >/dev/null 2>&1
+  if [ "$DEVNODE" = "" ] ; then
+    echo "Networking failed. Please unplug and plug the Greenphone back in."
+    return 1;
+  fi
 
+  sudo ifdown $DEVNODE >/dev/null 2>&1
+  sudo ifup $DEVNODE >/dev/null 2>&1
 
-  TEST=`ping -c 1 -i 2 $PHONEIP | grep "100%" -c`
-  if [ "$TEST" = "1" ]; then
+  # Figure out the IP now that the device is up
+  PHONEIP=`phoneip`
+
+  if ! ping -c 1 -i 2 $PHONEIP 1>/dev/null 2>&1 ; then
     echo "Networking failed. Please unplug and plug the Greenphone back in."
     return 1;
   else
@@ -58,7 +60,7 @@ gp_source()
   # gp_config when run sets this to x86 or greenphone
 
   if [ -e `pwd`/Makefile ]; then
-    ARCH=`grep PREFIX Makefile |head -n1|awk 'BEGIN{FS="/"}{print $6}'`
+    ARCH=`grep IMAGE Makefile |head -n1|awk 'BEGIN{FS="/"}{print $6}'`
   else
     ARCH="greenphone" 
   fi
@@ -156,13 +158,13 @@ gp_package()
     gp_source
     if [ "$VERBOSE" = "0" ] ; then
       echo -n "Creating package         "
-      if make packages FORMAT=ipk >$OUTPUT; then
+      if make packages FORMAT=qpk >$OUTPUT; then
         return 0;
       else
         return 1;
       fi
     else
-      if make packages FORMAT=ipk; then
+      if make packages FORMAT=qpk; then
         return 0;
       else
         return 1;
@@ -194,7 +196,7 @@ gp_install()
         return 0;
       else
         return 1;
-      fi
+      fi> $pkg_dir/packages.list
     fi
     return 0;
   fi
@@ -202,66 +204,36 @@ gp_install()
   if ! gp_net; then
     return 1; 
   fi
-  if [ "$IPKG" = "1" ] ;then
-    # Installing prebuilt ipk file
-    LIST=$IPKGNAME
+  if [ "$QPKG" = "1" ] ;then
+    # Installing prebuilt qpk file
+    LIST=$QPKGNAME
   else
     LIST=`ls -1 pkg|awk '{printf $1" "}'`
   fi
+  sudo mkdir -p $QPKWEBSERVER
+  sudo cp -f pkg/*.qpk $QPKWEBSERVER
+  sudo mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
 
+  for PKG in $LIST; do
+    echo "Installing ${PKG}"
 #----------
 cat>gpbuild-install.sh<<EOF
 #!/bin/sh
 . /opt/Qtopia.rom/qpe.env
-FAILED=0
-LIST="$LIST"
-for i in \$LIST
-do
-  echo "\$i"
-  if ! pkg.sh /mnt/user_local/\$i; then
-    echo "FAILED!"
-    FAILED=1
-  fi 
-  rm -f /mnt/user_local/\$i
-done
-if [ "\$FAILED" = "0" ] ; then
-  echo "SUCCESSFUL!"
-fi
+qcop service send PackageManager 'installPackageConfirm(QString)' 'http://${HOSTIP}/${PKG}.qpd'
+sleep 3
+echo DONE
 EOF
-#---------- 
-
-  if [ "$VERBOSE" = "0" ] ; then
-    echo -n "Installing package       "
-    if ping -c 1 $PHONEIP >$OUTPUT;then
-      for i in $LIST
-      do
-        cd pkg;ftpput -u anonymous $PHONEIP / $i;cd ..
-      done
-      ftpput -u anonymous $PHONEIP / gpbuild-install.sh
-      rm -f gpbuild-install.sh
-      if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user/home/Documents/gpbuild-install.sh\r"; expect root@'; then
-        expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user/home/Documents/gpbuild-install.sh\r"; expect root@'
-        return 0;
-      else 
-        return 1;
-      fi
+#---------
+    ftpput -u anonymous $PHONEIP / gpbuild-install.sh
+    rm -f gpbuild-install.sh
+    if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-install.sh\r"; expect root@'; then
+      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-install.sh\r"; expect root@'
+    else 
+      return 1;
     fi
-  else
-    if ping -c 1 $PHONEIP;then
-      for i in $LIST
-      do
-        cd pkg;ftpput -u anonymous $PHONEIP / $i;cd ..
-      done
-      ftpput -u anonymous $PHONEIP / gpbuild-install.sh
-      rm -f gpbuild-install.sh
-      if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user/home/Documents/gpbuild-install.sh\r"; expect root@'; then
-        expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user/home/Documents/gpbuild-install.sh\r"; expect root@'
-        return 0;
-      else 
-        return 1;
-      fi
-    fi
-  fi
+  done;
+  return 0;
 }
 
 #---------------------------------------------------------------
@@ -299,8 +271,8 @@ fi
 #---------- 
     ftpput -u anonymous $PHONEIP / gpbuild-run.sh
     rm -f gpbuild-run.sh
-    if expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user/home/Documents/gpbuild-run.sh\r"; expect root@'; then
-      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user/home/Documents/gpbuild-run.sh\r"; expect root@'
+    if expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-run.sh\r"; expect root@'; then
+      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-run.sh\r"; expect root@'
       return 0;
     else 
       return 1;
@@ -335,8 +307,8 @@ EOF
 #---------- 
     ftpput -u anonymous $PHONEIP / gpbuild-rescan.sh
     rm -f gpbuild-rescan.sh
-    if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user/home/Documents/gpbuild-rescan.sh\r"; expect root@'; then
-      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user/home/Documents/gpbuild-rescan.sh\r"; expect root@'
+    if expect -c 'set timeout 300;log_user 0; spawn telnet '$PHONEIP'; expect root@; send "sh /mnt/user_local/gpbuild-rescan.sh\r"; expect root@'; then
+      expect -c 'log_user 0; spawn telnet '$PHONEIP'; expect root@; send "rm -f /mnt/user_local/gpbuild-rescan.sh\r"; expect root@'
       return 0;
     else 
       return 1;
@@ -358,12 +330,13 @@ PACKAGE=0
 INSTALL=0
 RUN=0
 OUTPUT=""
-IPKG=0
-IPKGNAME=""
+QPKG=0
+QPKGNAME=""
 QDEBUG=""
 QRELEASE=""
 OPTS=""
 RESCAN=0
+QPKWEBSERVER=/var/www
 
 # Read in arguments and determine what to do
 
@@ -425,15 +398,16 @@ while [ -n "$1" ]; do
     exit
     ;;
   -console)
-    gp_net
-    telnet $PHONEIP
+    if gp_net; then
+      telnet $PHONEIP
+    fi
     exit
     ;;
-  -ipk)
+  -qpk)
     INSTALL=1
-    IPKG=1 
+    QPKG=1 
     shift
-    IPKGNAME=$1
+    QPKGNAME=$1
     ;; 
   *)
     echo $1: unknown argument
@@ -551,7 +525,7 @@ if [ "$HELP" = "yes" ] ;then
   echo 
   echo " -net        bring up network to greenphone"
   echo " -console    console on greenphone"
-  echo " -ipk <file> install ipk to greenphone, next arg it ipk filename"
+  echo " -qpk <file> install qpk to SDK http server for installation"
   echo " -rescan     Tell Qtopia to rescan for new documents and applications"
   echo
 fi

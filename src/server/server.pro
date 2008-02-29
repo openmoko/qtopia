@@ -120,9 +120,9 @@ build_helix {
 equals(LAUNCH_METHOD,quicklaunch) {
     SERVER_SOURCES+=quickexeapplicationlauncher.cpp
     SERVER_HEADERS+=quickexeapplicationlauncher.h
-} 
+}
 
-SXE_HEADERS=qsxemangle.h securitymonitor.h sandboxedprocess.h    
+SXE_HEADERS=qsxemangle.h securitymonitor.h sandboxedprocess.h
 SXE_SOURCES=qsxemangle.cpp securitymonitor.cpp sandboxedprocess.cpp
 
 TRANSLATABLES+=$$SXE_HEADERS $$SXE_SOURCES
@@ -177,9 +177,6 @@ BLUETOOTH_HEADERS=audiomanager.h \
                   bluetooth/hs/btheadsettask.h \
                   bluetooth/hs/qbluetoothhsagserver_p.h \
                   bluetooth/hs/qbluetoothhsservice_p.h \
-                  bluetooth/hf/bthandsfreetask.h \
-                  bluetooth/hf/qbluetoothhfagserver_p.h \
-                  bluetooth/hf/qbluetoothhfservice_p.h \
                   bluetooth/scomisc_p.h
 
 BLUETOOTH_SOURCES=audiomanager.cpp \
@@ -188,14 +185,21 @@ BLUETOOTH_SOURCES=audiomanager.cpp \
                   bluetooth/btpowerservice.cpp \
                   bluetooth/hs/btheadsettask.cpp \
                   bluetooth/hs/qbluetoothhsagserver.cpp \
-                  bluetooth/hs/qbluetoothhsservice.cpp \
+                  bluetooth/hs/qbluetoothhsservice.cpp
+
+isEmpty(DEVICE_CONFIG_PATH) {
+    BLUETOOTH_SOURCES+=bluetooth/scomisc.cpp
+}
+
+BLUETOOTH_PHONE_HEADERS+=bluetooth/dun/btdialupservice.h \
+                  bluetooth/hf/bthandsfreetask.h \
+                  bluetooth/hf/qbluetoothhfagserver_p.h \
+                  bluetooth/hf/qbluetoothhfservice_p.h
+
+BLUETOOTH_PHONE_SOURCES+=bluetooth/dun/btdialupservice.cpp \
                   bluetooth/hf/bthandsfreetask.cpp \
                   bluetooth/hf/qbluetoothhfagserver.cpp \
-                  bluetooth/hf/qbluetoothhfservice.cpp \
-                  bluetooth/scomisc.cpp
-
-BLUETOOTH_PHONE_HEADERS+=bluetooth/dun/btdialupservice.h
-BLUETOOTH_PHONE_SOURCES+=bluetooth/dun/btdialupservice.cpp
+                  bluetooth/hf/qbluetoothhfservice.cpp
 
 TRANSLATABLES+=$$BLUETOOTH_HEADERS $$BLUETOOTH_SOURCES $$BLUETOOTH_PHONE_HEADERS $$BLUETOOTH_PHONE_SOURCES
 
@@ -324,7 +328,7 @@ PHONE_SOURCES=\
     phone/secondarythemeddisplay.cpp \
     phone/phonepowermanager.cpp \
     phone/receivewindow.cpp \
-    phone/homescreenwidgets.cpp 
+    phone/homescreenwidgets.cpp
 
 TELEPHONY_SOURCES=\
     phone/externalaccess.cpp \
@@ -345,10 +349,14 @@ TELEPHONY_SOURCES=\
 enable_modem {
     PHONE_HEADERS+=phone/cellmodemmanager.h\
                    phone/cellbroadcastcontrol.h\
-                   phone/phoneserverdummymodem.h
+                   phone/phoneserverdummymodem.h\
+                   phone/gsmkeyactions.h\
+                   phone/gsmkeyfilter.h
     PHONE_SOURCES+=phone/cellmodemmanager.cpp\
                    phone/cellbroadcastcontrol.cpp\
-                   phone/phoneserverdummymodem.cpp
+                   phone/phoneserverdummymodem.cpp\
+                   phone/gsmkeyactions.cpp\
+                   phone/gsmkeyfilter.cpp
 }
 
 enable_voip {
@@ -406,7 +414,7 @@ SAMPLES_SOURCES=\
 SAMPLES_HEADERS=\
     phone/samples/slideinmessagebox.h \
     phone/samples/wheelbrowser.h \
-    phone/samples/qpixmapwheel.h 
+    phone/samples/qpixmapwheel.h
 
 enable_modem:enable_cell {
     SAMPLES_SOURCES+=\
@@ -463,7 +471,7 @@ enable_modem:enable_cell {
         phone/samples/e2/e2_colors.h
 }
 
-samplespics.files=$$QTOPIA_DEPOT_PATH/pics/samples/* 
+samplespics.files=$$QTOPIA_DEPOT_PATH/pics/samples/*
 samplespics.path=/pics/samples
 samplespics.hint=pics
 
@@ -495,6 +503,12 @@ phone {
     enable_infrared {
         PHONE_HEADERS+=$$INFRARED_HEADERS
         PHONE_SOURCES+=$$INFRARED_SOURCES
+    }
+
+    # This is necessary for Handsfree / Headset to work
+    equals(QTOPIA_SOUND_SYSTEM,alsa) {
+    	depends(3rdparty/libraries/alsa)
+    	DEFINES+=HAVE_ALSA
     }
 
     HEADERS+=$$PHONE_HEADERS
@@ -639,6 +653,7 @@ settings.files=\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/ServerWidgets.conf\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Security.conf\
     $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/IniValueSpace.conf\
+    $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/BluetoothServices.conf\
     $$QPEDIR/etc/default/Trolltech/IconSizes.conf
 !isEmpty(HARDWARE_CONF_FILE) {
     settings.files+=$$HARDWARE_CONF_FILE
@@ -704,9 +719,13 @@ INSTALLS+=help
 
 beam.files=$$QTOPIA_DEPOT_PATH/etc/beam
 beam.path=/etc
-INSTALLS+=beam 
+INSTALLS+=beam
 
-tasks.files=$$QTOPIA_DEPOT_PATH/etc/Tasks.cfg
+!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/Tasks.cfg) {
+    tasks.files=$$DEVICE_CONFIG_PATH/etc/Tasks.cfg
+} else {
+    tasks.files=$$QTOPIA_DEPOT_PATH/etc/Tasks.cfg
+}
 tasks.path=/etc
 INSTALLS+=tasks
 
@@ -927,7 +946,7 @@ enable_singleexec {
         cmds=$$fromfile(singleexec_reader.pri,SINGLEEXEC_READER_CMD)
         #message(singleexec_reader tells us:)
         for(c,cmds) {
-            contains(QMAKE_QUIRKS,keep_quotes) {
+            contains(QMAKE_BEHAVIORS,keep_quotes) {
                 c~=s/^"//
                 c~=s/"$//
             }

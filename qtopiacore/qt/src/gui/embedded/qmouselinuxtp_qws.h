@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -26,6 +26,7 @@ class QWSLinuxTPMouseHandlerPrivate;
 
 class QWSLinuxTPMouseHandler : public QWSCalibratedMouseHandler
 {
+    friend class QWSLinuxTPMouseHandlerPrivate;
 public:
     explicit QWSLinuxTPMouseHandler(const QString & = QString(),
                                     const QString & = QString());

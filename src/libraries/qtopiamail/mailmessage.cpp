@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -18,6 +18,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #include <qtopia/mail/mailmessage.h>
 #include <qtopia/mail/qpstream.h>
 #include <qtopia/mail/base64stream.h>
@@ -44,10 +45,10 @@ QString MailMessage::decodeQuotedPrintable( const QString &s, bool RFC2047)
 {
     QByteArray out;
     QDataStream outstream(&out,QIODevice::WriteOnly);
-    QTextStream instream(s.toAscii(),QIODevice::ReadOnly);
+    QTextStream instream(s.toLatin1(),QIODevice::ReadOnly);
     QPStream ps;
     ps.decode(&instream,&outstream,RFC2047,true);
-    return QString().fromAscii(out.data(),out.length());
+    return QString().fromLatin1(out.data(),out.length());
 }
 
 /*
@@ -58,8 +59,8 @@ encode binary data, set it as a part, then access it again.
 */
 QString MailMessage::decodeBase64( const QString &encoded )
 {
-    QByteArray result = QByteArray::fromBase64(encoded.toAscii());
-    return QString().fromAscii(result.data(),result.length());
+    QByteArray result = QByteArray::fromBase64(encoded.toLatin1());
+    return QString().fromLatin1(result.data(),result.length());
 }
 
 QString MailMessage::encodeBase64(QByteArray fileData)
@@ -87,16 +88,16 @@ QString MailMessage::encodeQuotedPrintable( const QByteArray &fileData, bool RFC
 QString MailMessage::decodeEncodedWord(const QString &str)
 {
     QString out( str.mid(2, str.length() - 4) );    // strip ?=  =?
-    QByteArray charSet, encoding, word;
+    QString charSet, encoding, word;
     QString result;
 
     int i = out.indexOf('?', 0 );
     if ( i != -1 ) {
         int i2 = out.indexOf('?', i+1);
         if ( i2 != -1 ) {
-            charSet = out.mid(0, i).toUpper().toLocal8Bit();
-            encoding = out.mid(i + 1, 1).toUpper().toLocal8Bit();
-            word = out.mid(i2 + 1).toLocal8Bit();
+            charSet = out.mid(0, i).toUpper();
+            encoding = out.mid(i + 1, 1).toUpper();
+            word = out.mid(i2 + 1);
 
             if ( encoding == "Q") {
                  result = decodeQuotedPrintable( word, true );
@@ -104,8 +105,8 @@ QString MailMessage::decodeEncodedWord(const QString &str)
                  result = decodeBase64( word );
             } else
                 return str;     //incorrectly formed, do nothing
-        result = decodeCharset(result,charSet);
-        return result;
+            result = decodeCharset(result, charSet);
+            return result;
         }
     }
 
@@ -207,11 +208,11 @@ static LongString decode( const LongString &encoded, TransferEncoding te )
             break;
         case Base64:
             // Todo - do this efficiently by streaming to a file and creating file longstring
-            str = LongString( MailMessage::decodeBase64( encoded.toQString() ).toLocal8Bit() );
+            str = LongString( MailMessage::decodeBase64( encoded.toQString() ).toLatin1() );
             break;
         case QuotedPrintable:
             // Todo - do this efficiently by streaming to a file and creating file longstring
-            str = LongString( MailMessage::decodeQuotedPrintable( encoded.toQString() ).toLocal8Bit() );
+            str = LongString( MailMessage::decodeQuotedPrintable( encoded.toQString() ).toLatin1() );
             break;
     }
     return str;
@@ -220,7 +221,7 @@ static LongString decode( const LongString &encoded, TransferEncoding te )
 static QString decodeCharset( const QString &encoded, const QString& _charset )
 {
     // Remove quotes from the charset, if necessary.
-    QByteArray charset = MailMessage::unquoteString( _charset ).toLocal8Bit();
+    QByteArray charset = MailMessage::unquoteString( _charset ).toLatin1();
 
     // Get the codec that is associated with the character set.
     if ( charset.length() == 0 )
@@ -482,7 +483,7 @@ QString MailMessage::fileName() const
 
 void MailMessage::fromRFC822(const QString &s)
 {
-    fromRFC822( s.toLocal8Bit() );
+    fromRFC822( s.toLatin1() );
 }
 
 void MailMessage::fromRFC822(const QByteArray &ba)
@@ -1081,18 +1082,18 @@ void MailMessage::parseMimePart(LongString body, QString boundary, int &bodyId)
     QString lineShift = "\n";
     QString delimiter = lineShift + lineShift;
 
-    pos = body.indexOf(QString(boundary+"--").toLocal8Bit(), 0);
+    pos = body.indexOf(QString(boundary+"--").toLatin1(), 0);
 
     while (body.length() > 0) {
-        pos = body.indexOf(boundary.toLocal8Bit(), 0);
+        pos = body.indexOf(boundary.toLatin1(), 0);
 
     //check if we are at the final boundary position.
 
-    endPos = body.indexOf(QString(boundary+"--").toLocal8Bit(),0);
+    endPos = body.indexOf(QString(boundary+"--").toLatin1(),0);
     if(pos == endPos)
         break; //we are done.
 
-        pos = body.indexOf(delimiter.toLocal8Bit(), pos);
+        pos = body.indexOf(delimiter.toLatin1(), pos);
 
         if (pos < 0) // run out of parts
             break;
@@ -1163,7 +1164,7 @@ void MailMessage::parseMimePart(LongString body, QString boundary, int &bodyId)
             location = mimeHeader.mid(pos, endPos - pos).trimmed();
         }
 
-        pos = mimeBody.indexOf( QString("\n" + boundary).toLocal8Bit(), 0);
+        pos = mimeBody.indexOf( QString("\n" + boundary).toLatin1(), 0);
         if (pos == -1)                  //should not occur, malformed mail
             pos = mimeBody.length();
 
@@ -1583,7 +1584,7 @@ bool MailMessage::encodeMail()
         newBody += "--" + _boundary + "--";
     }
 
-    _rawMessageBody = newBody.toLocal8Bit();
+    _rawMessageBody = newBody.toLatin1();
 
     return true;
 }
@@ -1722,7 +1723,7 @@ void MailMessagePart::setLongEncodedBody(const LongString &ls, TransferEncoding 
 
 void MailMessagePart::setEncodedBody(const QString &s, TransferEncoding te)
 {
-    _body = s.toLocal8Bit();
+    _body = s.toLatin1();
     _transferEncoding = te;
 }
 
@@ -1752,11 +1753,13 @@ QString MailMessagePart::decodedBody() const
         }
         case QuotedPrintable:
         {
-            return MailMessage::decodeQuotedPrintable( _body.toQByteArray() );
+            QByteArray d = _body.toQByteArray();
+            return MailMessage::decodeQuotedPrintable( QString::fromLatin1(d.data(),d.length()) );
         }
         case Base64:
         {
-            return  MailMessage::decodeBase64( _body.toQByteArray() );
+            QByteArray d = _body.toQByteArray();
+            return  MailMessage::decodeBase64( QString::fromLatin1(d.data(),d.length()) );
         }
     }
 

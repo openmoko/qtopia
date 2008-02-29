@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -118,7 +118,7 @@ void ImageUI::paintEvent( QPaintEvent* )
     // anyway, due to the parent-child hierarchy, so if you emit this signal as well you get
     // (infinite) recursion.
     // TODO - it would be better to emit this signal and break the connections that shouldn't
-    // be there (Navigator and RegionSelector, I think from memory) -- not being done now due ot
+    // be there (Navigator and RegionSelector, I think from memory) -- not being done now due to
     // lack of time.
     //emit updated();
 }

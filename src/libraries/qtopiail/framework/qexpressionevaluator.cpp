@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -322,12 +322,12 @@ struct ExpressionMachineOperandDataRef {
 
 union ExpressionMachineOperandData {
     ExpressionMachineOperandData() {
-        ref.count = 0;
+        ref = 0;
     }
     bool b; // .1 bytes
     int i; // 4 bytes
     double d; // 8 bytes
-    ExpressionMachineOperandDataRef ref; // 8 bytes
+    ExpressionMachineOperandDataRef *ref; // 8 bytes
 #ifdef QTOPIAIL
     int termId; // 4 bytes
 #endif
@@ -368,8 +368,8 @@ struct ExpressionMachineOperand {
     mutable ExpressionMachineOperandData d;
 private:
     /* Private Methods */
-    void addref( const ExpressionMachineOperand& _this );
-    void decref();
+    void addref() const;
+    void decref() const;
 };
 
 //+========================================================================================================================+
@@ -1347,54 +1347,60 @@ ExpressionMachineOperand::ExpressionMachineOperand( const ExpressionMachineOpera
 ExpressionMachineOperand::ExpressionMachineOperand( ExpressionMachineOperand::Type t )
     : type(t)
 {
-    addref(*this);
+    addref();
 }
 
 ExpressionMachineOperand::~ExpressionMachineOperand()
 {
-    if( d.ref.count > 0 )
-        decref();
+    decref();
 }
 
-void ExpressionMachineOperand::addref( const ExpressionMachineOperand& _this )
+void ExpressionMachineOperand::addref() const
 {
-    if( _this.type == ExpressionMachineOperand::String
+    if( type == ExpressionMachineOperand::String
 #ifndef QTOPIAIL
-            || _this.type == ExpressionMachineOperand::Term
+        || type == ExpressionMachineOperand::Term
 #endif
       )
     {
-        ExpressionMachineOperandData* dta = &_this.d;
+        ExpressionMachineOperandData& dta = d;
         // if ref is 0, create
-        if( dta->ref.count == 0 ) {
-            if( _this.type == ExpressionMachineOperand::String )
-                dta->ref.s = new QByteArray;
+        if( !dta.ref ) {
+            dta.ref = new ExpressionMachineOperandDataRef;
+            dta.ref->count = 0;
+            if( type == ExpressionMachineOperand::String )
+                dta.ref->s = new QByteArray;
 #ifndef QTOPIAIL
-            else if ( _this.type == ExpressionMachineOperand::Term )
-                dta->ref.t = new QValueSpaceItem;
+            else if ( type == ExpressionMachineOperand::Term )
+                dta.ref->t = new QValueSpaceItem;
 #endif
         }
-        dta->ref.count++;
+        dta.ref->count++;
     }
 }
 
-void ExpressionMachineOperand::decref()
+void ExpressionMachineOperand::decref() const
 {
     if( type == ExpressionMachineOperand::String
 #ifndef QTOPIAIL
             || type == ExpressionMachineOperand::Term
 #endif
-      ) {
-        if( d.ref.count == 0 )
+      ) 
+    {
+        if( !d.ref )
             return;
-        d.ref.count--;
-        if( d.ref.count == 0 ) {
-            if( type == ExpressionMachineOperand::String )
-                delete d.ref.s;
+        d.ref->count--;
+        if( d.ref->count == 0 ) {
+            if( type == ExpressionMachineOperand::String ) {
+                delete d.ref->s;
+            }
 #ifndef QTOPIAIL
-            else if ( type == ExpressionMachineOperand::Term )
-                delete d.ref.t;
+            else if ( type == ExpressionMachineOperand::Term ) {
+                delete d.ref->t;
+            }
 #endif
+            delete d.ref;
+            d.ref = 0;
         }
     }
 }
@@ -1402,10 +1408,8 @@ void ExpressionMachineOperand::decref()
 ExpressionMachineOperand& ExpressionMachineOperand::operator=( const ExpressionMachineOperand& other )
 {
     // Inc other if ref counted, so we don't delete it if it's us
-    addref( other );
-
-    if( d.ref.count > 0 )
-        decref();
+    other.addref();
+    decref();
 
     // copy over
     type = other.type;
@@ -1416,21 +1420,10 @@ ExpressionMachineOperand& ExpressionMachineOperand::operator=( const ExpressionM
 
 void ExpressionMachineOperand::create( const ExpressionMachineOperand::Type& t )
 {
-    if( d.ref.count > 0 ) // d.ref.count == 0 means this item is a null item. its data is not valid, so don't try and decref it
-        decref();
-
+    decref();
     type = t;
-
-    if( type == ExpressionMachineOperand::String ) {
-        d.ref.s = new QByteArray;
-        d.ref.count = 1;
-    }
-#ifndef QTOPIAIL
-    else if ( type == ExpressionMachineOperand::Term ) {
-        d.ref.t = new QValueSpaceItem;
-        d.ref.count = 1;
-    }
-#endif
+    d.ref = 0;
+    addref();
 }
 
 //+========================================================================================================================+
@@ -1551,7 +1544,7 @@ void ExpressionCodeGenerator::generateDataCode( ExpressionParserNode* data ) {
 #ifdef QTOPIAIL
         operand.d.termId = m_termCount++;
 #else
-        *operand.d.ref.t = QValueSpaceItem( data->vskey );
+        *operand.d.ref->t = QValueSpaceItem( data->vskey );
 #endif
         switch( data->returnType ) {
             case ExpressionToken::String:
@@ -1617,7 +1610,7 @@ void ExpressionCodeGenerator::generateDataCode( ExpressionParserNode* data ) {
     } else if( data->returnType == ExpressionToken::String ) {
         runtimeType = ExpressionMachineOperand::String;
         ExpressionMachineOperand string( ExpressionMachineOperand::String );
-        *string.d.ref.s = data->token.data;
+        *string.d.ref->s = data->token.data;
         m_data.append( string  );
     } else
         qFatal("ExpressionCodeGenerator - Cannot generate data code for node that is not data type");
@@ -2091,7 +2084,7 @@ ExpressionMachine::~ExpressionMachine() {
 #define DO_DOP(a) op_result.create(ExpressionMachineOperand::Double); op_result.d.d = a; m_s.append( op_result );
 #define DO_IOP(a) op_result.create(ExpressionMachineOperand::Integer); op_result.d.i = a; m_s.append( op_result );
 #define DO_BOP(a) op_result.create(ExpressionMachineOperand::Bool); op_result.d.b = a; m_s.append( op_result );
-#define DO_SOP(a) op_result.create(ExpressionMachineOperand::String); *op_result.d.ref.s = a; m_s.append( op_result );
+#define DO_SOP(a) op_result.create(ExpressionMachineOperand::String); *op_result.d.ref->s = a; m_s.append( op_result );
 #define DO_FPOP(a) op_result.create(ExpressionMachineOperand::FixedPoint); fpr = a; \
                    op_result.d.f.precision = fpr.precision; op_result.d.f.value = fpr.value; \
                        m_s.append( op_result ); fpr.value = 0; fpr.precision = 0;
@@ -2426,7 +2419,7 @@ bool ExpressionMachine::execute() {
                         if( cv.isNull() )
                             return false;
                         op_result.create(ExpressionMachineOperand::String);
-                        *op_result.d.ref.s = cv.toString().toUtf8();
+                        *op_result.d.ref->s = cv.toString().toUtf8();
                         m_s.append( op_result );
                         break;
                     }
@@ -2502,7 +2495,7 @@ QString ExpressionMachine::dumpInfo() const {
                 break;
                 case ExpressionMachineOperand::String:
                 {
-                string += QString("\"") + m_d[j].d.ref.s->constData() + "\"";
+                string += QString("\"") + m_d[j].d.ref->s->constData() + "\"";
                 }
                 break;
                 case ExpressionMachineOperand::Bool:
@@ -2598,7 +2591,7 @@ QVariant ExpressionMachine::processTerm( const QVariant::Type& t ) {
     Q_ASSERT(m_t.contains(termId) != false);
     cv = m_t[termId]->value();
 #else
-    cv = m_s.last().d.ref.t->value();
+    cv = m_s.last().d.ref->t->value();
     m_s.pop_back();
     if( cv.isNull() ) { // FIXME : decide on the semantics of handling runtime errors. a valuesapce key that currently has a null value shouldn't
                         // necessarily trigger a 'hard' error
@@ -2642,8 +2635,9 @@ int ExpressionMachine::stackInteger() {
             break;
         case ExpressionMachineOperand::String:
         {
-            Q_ASSERT(data.d.ref.s != 0);
-            const char *c = data.d.ref.s->constData();
+            Q_ASSERT(data.d.ref != 0);
+            Q_ASSERT(data.d.ref->s != 0);
+            const char *c = data.d.ref->s->constData();
             if( c == 0 ) i = 0;
             else i = atoi(c);
             // FIXME : should check error code, runtime error if can't convert
@@ -2667,8 +2661,9 @@ QByteArray ExpressionMachine::stackString() {
     QByteArray s;
     switch( data.type ) {
         case ExpressionMachineOperand::String:
-            Q_ASSERT(data.d.ref.s != 0);
-            s = *data.d.ref.s;
+            Q_ASSERT(data.d.ref != 0);
+            Q_ASSERT(data.d.ref->s != 0);
+            s = *data.d.ref->s;
             break;
         case ExpressionMachineOperand::Double:
             {
@@ -2719,8 +2714,9 @@ double ExpressionMachine::stackDouble() {
             break;
         case ExpressionMachineOperand::String:
         {
-            Q_ASSERT(data.d.ref.s != 0);
-            d = atof((data.d.ref.s->constData()));
+            Q_ASSERT(data.d.ref != 0);
+            Q_ASSERT(data.d.ref->s != 0);
+            d = atof((data.d.ref->s->constData()));
             // FIXME : should check error code, runtime error if can't convert
             break;
         }
@@ -2756,8 +2752,9 @@ QFixedPointNumber ExpressionMachine::stackFixedPoint() {
             break;
         case ExpressionMachineOperand::String:
         {
-            Q_ASSERT(data.d.ref.s != 0);
-            f = (const char*)data.d.ref.s->constData();
+            Q_ASSERT(data.d.ref != 0);
+            Q_ASSERT(data.d.ref->s != 0);
+            f = (const char*)data.d.ref->s->constData();
             // FIXME : error checking?
             //Q_ASSERT(ok == true); // failing is a bug, as semantic checking was not properly done
             break;
@@ -2793,8 +2790,9 @@ bool ExpressionMachine::stackBool() {
             b = data.d.d != 0.0;
             break;
         case ExpressionMachineOperand::String:
-            Q_ASSERT(data.d.ref.s != 0);
-            b = !data.d.ref.s->isEmpty();
+            Q_ASSERT(data.d.ref != 0);
+            Q_ASSERT(data.d.ref->s != 0);
+            b = !data.d.ref->s->isEmpty();
             break;
         case ExpressionMachineOperand::Integer:
             b = data.d.i != 0;
@@ -3143,7 +3141,7 @@ bool QExpressionEvaluator::setExpression( const QByteArray& expr )
 #ifndef QTOPIAIL
                 for( int i = 0 ; i < data.count() ; ++i )
                     if( data[i].type == ExpressionMachineOperand::Term )
-                        connect(data[i].d.ref.t, SIGNAL(contentsChanged()), this, SIGNAL(termsChanged()));
+                        connect(data[i].d.ref->t, SIGNAL(contentsChanged()), this, SIGNAL(termsChanged()));
 #endif
                 d->machine = new ExpressionMachine( ss->instructions(), data
 #ifdef QTOPIAIL

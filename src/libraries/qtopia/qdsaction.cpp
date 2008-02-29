@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -251,9 +251,7 @@ void QDSActionPrivate::startTimer()
 
 QString QDSActionPrivate::responseChannel()
 {
-    QString channel = "QPE/";
-    channel += QDS::RESPONSE_CHANNEL;
-    channel += "/";
+    QString channel = "QPE/QDSResponse/";
     channel += mId.toString();
 
     return channel;
@@ -304,6 +302,8 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
     either QDSData::exec() or QDSData::invoke().
 
     \sa QDSServiceInfo
+
+    \ingroup ipc
 */
 
 /*!
@@ -554,7 +554,7 @@ bool QDSAction::invoke()
 
 /*!
     Performs the QDS service request synchronously. The return value provides
-    the result of the request, see QDSAction::ReturnCode. Beware, this call
+    the result of the request, see QDSAction::ResponseCode. Beware, this call
     will block until the response has been received from the QDS service
     or the request times out.
 
@@ -597,7 +597,7 @@ int QDSAction::exec()
 
 /*!
     Performs the QDS service request with \a requestData synchronously. The return
-    value provides the result of the request, see QDSAction::ReturnCode.
+    value provides the result of the request, see QDSAction::ResponseCode.
     Beware, this call will block until the response has been received from the
     QDS service or the request times out.
 

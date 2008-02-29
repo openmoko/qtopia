@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -20,10 +20,7 @@
 ****************************************************************************/
 
 #include "shutdownsplash.h"
-#include <QPixmap>
-#include <QLabel>
-#include <QApplication>
-#include <QDesktopWidget>
+#include <QWaitWidget>
 
 /*!
   \class ShutdownSplashScreen
@@ -31,7 +28,7 @@
   \brief The ShutdownSplashScreen class displays a static splash screen while the system is restarting.
 
   The ShutdownSplashScreen class displays a full screen image,
-  \c {:image/bigwait} while the system is restarting.  It uses the
+  while the system is restarting.  It uses the
   SystemShutdownHandler hook to ensure that it is run during restart.  For best
   results, the \c {ShutdownSplashScreen} task should be given highest priority
   for the SystemShutdownHandler to ensure that it appears as soon as possible.
@@ -45,18 +42,10 @@
 /*! \internal */
 bool ShutdownSplashScreen::systemRestart()
 {
-    QPixmap pix;
-    pix = QPixmap(QLatin1String(":image/bigwait"));
-
-    QLabel *lblWait = new QLabel(0);
-    lblWait->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                            Qt::WindowStaysOnTopHint);
-    lblWait->setAttribute(Qt::WA_DeleteOnClose);
-    lblWait->setPixmap(pix);
-    lblWait->setAlignment(Qt::AlignCenter);
-    QDesktopWidget *desktop = QApplication::desktop();
-    lblWait->setGeometry(desktop->screenGeometry(desktop->primaryScreen()));
-    lblWait->show();
+    QWaitWidget* w = new QWaitWidget( 0 );
+    w->setAttribute( Qt::WA_DeleteOnClose );
+    w->setCancelEnabled( false );
+    w->show();
     return true;
 }
 

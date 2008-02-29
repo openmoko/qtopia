@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -41,6 +41,8 @@ static const char* const QSERIALCOMMACCESSORY_CONTYPE = "connectionType";
     QSerialCommAccessoryProvider.
 
     \sa QSerialCommAccessoryProvider, QHardwareInterface
+
+  \ingroup hardware
 */
 
 /*!
@@ -108,6 +110,7 @@ QSerialCommAccessory::connectionType() const
     level of functionality that is supported.
 
     \sa QSerialCommAccessory
+  \ingroup hardware
 */
 
 /*!

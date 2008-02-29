@@ -4,9 +4,12 @@ PROJECTS*=\
     devtools/qipkg-simple\
     devtools/chvol\
     devtools/startupflags\
-    devtools/dbservices\
-    plugins/qtopiacore/mousedrivers/greenphone\
     plugins/qtopiacore/kbddrivers/greenphone
+
+enable_modem {
+    PROJECTS*=\
+        devtools/fixbdaddr
+}
 
 !free_package|free_plus_binaries {
     for(p,PHONEVENDORS) {

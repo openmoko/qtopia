@@ -16,11 +16,11 @@
 </ul>
 <a name="replacing-the-qtopia-launcher"></a>
 <h2>Replacing the Qtopia Launcher</h2>
-<p>In some cases it is desirable to have a customized launcher interface better suited to the application on the target device. Qtopia supports custom launcher user interfaces via the <tt>ServerInterface</tt>. This interface provides the infrastructure necessary to implement a launcher while maintaining compatibility with the Qtopia application and document models.</p>
+<p>In some cases it is desirable to have a customized launcher interface better suited to the application on the target device. Qtopia supports custom launcher user interfaces via the <tt>QAbstractServerInterface</tt>. This interface provides the infrastructure necessary to implement a launcher while maintaining compatibility with the Qtopia application and document models.</p>
 <p>The launcher user interface is part of the Qtopia server - <tt>$QPEDIR/src/server</tt> which provides services such as syncing and file-system management.</p>
-<p>The default Qtopia launcher is implemented by the <tt>Launcher</tt> class. The first step when writing a user interface is to implement a class derived from <tt>ServerInterface</tt>. This interface provides the functionality to display the applications and documents available on a Qtopia device.</p>
+<p>The default Qtopia launcher is implemented by the <tt>Launcher</tt> class. The first step when writing a user interface is to implement a class derived from <tt>QAbstractServerInterface</tt>. This interface provides the functionality to display the applications and documents available on a Qtopia device.</p>
 <p>The <tt>createGUI()</tt> and <tt>destroyGUI()</tt> functions must be implemented to create and show the launcher and any other user interface components.</p>
-<p>The functions provided by the <tt>ServerInterface</tt> manage the addition and removal of applications and documents as necessary. The <tt>ServerInterface</tt> documentation describes the functions in detail.</p>
+<p>The functions provided by the <tt>QAbstractServerInterface</tt> manage the addition and removal of applications and documents as necessary. The <tt>QAbstractServerInterface</tt> documentation describes the functions in detail.</p>
 <a name="reusable-user-interface-components"></a>
 <h2>Reusable User-Interface Components</h2>
 <p>In addition to the launcher it is necessary to provide some system components, such as input methods and status display.</p>
@@ -42,8 +42,8 @@
 <p>The Qtopia libraries also assume that QPE/InputMethod QCOP channel is available and supports the messages in <a href="inputmethodservice.html">InputMethodService</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

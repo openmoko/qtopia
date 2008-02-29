@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -53,6 +53,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QTranslatableSettings>
 #include "messagecontrol.h"
 
 static bool profilesControlModem = true;
@@ -71,7 +72,7 @@ public:
       m_status(0), m_autoRegisterTimer(0), m_profiles(0),
       m_profilesBlocked(false), m_callForwarding(0),
       m_callForwardingEnabled(false), m_simToolkitAvailable(false), m_cbs(0),
-      m_rfFunc(0), m_simMissingTimer(0) {}
+      m_rfFunc(0), m_simMissingTimer(0), m_emergencyPhoneBook(0) {}
 
     CellModemManager::State m_state;
     QNetworkRegistration *m_netReg;
@@ -79,6 +80,7 @@ public:
     bool m_aerialStable;
     QPinManager *m_pinManager;
     QString m_operator;
+    QString m_operatorCountry;
     QTelephony::RegistrationState m_regState;
     QString m_location;
     QValueSpaceObject *m_status;
@@ -91,6 +93,7 @@ public:
     QCellBroadcast *m_cbs;
     QPhoneRfFunctionality *m_rfFunc;
     QTimer *m_simMissingTimer;
+    QPhoneBook *m_emergencyPhoneBook;
 };
 
 /*!
@@ -119,6 +122,7 @@ public:
   \row \o \c {/Telephony/Status/Roaming} \o Set to true if the network is in the roaming statem otherwise false.
   \row \o \c {/Telephony/Status/CellLocation} \o Set to the current cell location.  This is equivalent to the value returned by the cellLocation() method.
   \row \o \c {/Telephony/Status/OperatorName} \o Set to the current network operator name.  This is equivalent to the value returned by the networkOperator() method.
+  \row \o \c {/Telephony/Status/OperatorCountry} \o Set to the current network operator's country name, if available.  This is equivalent to the value returned by the networkOperatorCountry() method.
   \row \o \c {/Telephony/Status/CallDivert} \o True if voice calls will be unconditionally diverted, false otherwise.
   \row \o \c {/Telephony/Status/PlaneModeAvailable} \o True if the modem supports "plane mode".  Possible values are "Yes", "No" or "Unknown".  The "Unknown" value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.
   \row \o \c {/Telephony/Status/ModemStatus} \o Set to the string value of the current State enumeration value.
@@ -228,6 +232,7 @@ CellModemManager::CellModemManager(QObject *parent)
 
     QSimInfo *simInfo = new QSimInfo( "modem", this );
     connect( simInfo, SIGNAL(removed()), this, SLOT(simRemoved()) );
+    connect( simInfo, SIGNAL(inserted()), this, SLOT(simInserted()) );
     QSimToolkit *simToolkit = new QSimToolkit( QString(), this );
     connect(simToolkit,
             SIGNAL(command(const QSimCommand&)),
@@ -503,16 +508,17 @@ class EmergencyNumberList : public QStringList
 public:
     EmergencyNumberList()
     {
-        append("112");
-        append("911");
-        append("000");
+        append("112");      // GSM 02.30, Europe
+        append("911");      // GSM 02.30, US and Canada
+        append("08");       // GSM 02.30, Mexico
+        append("000");      // Australia
     }
 };
 Q_GLOBAL_STATIC(EmergencyNumberList, emergencyNumbers);
 
 /*!
   Return the list of emergency numbers.  This list is currently \c {112},
-  \c {911} and \c {000} but may change in the future.
+  \c {911}, \c {08}, and \c {000} but may change in the future.
  */
 QStringList CellModemManager::emergencyNumbers()
 {
@@ -597,7 +603,34 @@ void CellModemManager::simMissingTimeout()
     doStateChanged(SIMMissing);
 }
 
-void CellModemManager::pinStatus(const QString& type,
+void CellModemManager::fetchEmergencyNumbers()
+{
+    if ( !d->m_emergencyPhoneBook ) {
+        d->m_emergencyPhoneBook = new QPhoneBook( "modem", this ); // No tr
+        connect
+            ( d->m_emergencyPhoneBook,
+              SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
+              this,
+              SLOT(emergencyNumbersFetched(QString,QList<QPhoneBookEntry>)) );
+    }
+    d->m_emergencyPhoneBook->getEntries( "EN" );    // No tr
+}
+
+void CellModemManager::emergencyNumbersFetched
+    ( const QString& store, const QList<QPhoneBookEntry>& list )
+{
+    if ( store == "EN" ) {          // No tr
+        QList<QPhoneBookEntry>::ConstIterator it;
+        QStringList *en = ::emergencyNumbers();
+        for ( it = list.begin(); it != list.end(); ++it ) {
+            QString number = (*it).number();
+            if ( !number.isEmpty() && !en->contains( number ) )
+                en->append( number );
+        }
+    }
+}
+
+void CellModemManager::pinStatus(const QString& type, 
                                    QPinManager::Status status,
                                    const QPinOptions&)
 {
@@ -691,6 +724,12 @@ void CellModemManager::simCommand(const QSimCommand &cmd)
     }
 }
 
+void CellModemManager::simInserted()
+{
+    // Arrange for the emergency number phone book to be read upon insert.
+    QTimer::singleShot( 1000, this, SLOT(fetchEmergencyNumbers()) );
+}
+
 void CellModemManager::simRemoved()
 {
     if(d->m_simToolkitAvailable) {
@@ -745,6 +784,7 @@ void CellModemManager::updateStatus()
                               registrationState() == QTelephony::RegistrationRoaming);
     d->m_status->setAttribute("CellLocation", cellLocation());
     d->m_status->setAttribute("OperatorName", networkOperator());
+    d->m_status->setAttribute("OperatorCountry", networkOperatorCountry());
     d->m_status->setAttribute("CallDivert", callForwardingEnabled());
     d->m_status->setAttribute("SimToolkitAvailable", simToolkitAvailable());
     d->m_status->setAttribute("PlaneModeAvailable", planeModeSupported()?"Yes":"No");
@@ -842,6 +882,15 @@ void CellModemManager::currentOperatorChanged()
 
     d->m_operator = d->m_netReg->currentOperatorName();
 
+    QString id = d->m_netReg->currentOperatorId();
+    if ( !id.startsWith( QChar('2') ) ) {
+        d->m_operatorCountry = QString();
+    } else {
+        QTranslatableSettings settings( "Trolltech", "GsmOperatorCountry" );
+        settings.beginGroup( "Countries" );
+        d->m_operatorCountry = settings.value( id.mid(1,3) ).toString();
+    }
+
     if(Ready == state()) {
         emit networkOperatorChanged(d->m_operator);
         updateStatus();
@@ -856,6 +905,18 @@ QString CellModemManager::networkOperator() const
 {
     if(Ready == state())
         return d->m_operator;
+    else
+        return QString();
+}
+
+/*!
+  Returns the current network operator's country.  This call will always
+  return an empty string unless CellModemManager is in the Ready state.
+  */
+QString CellModemManager::networkOperatorCountry() const
+{
+    if(Ready == state())
+        return d->m_operatorCountry;
     else
         return QString();
 }

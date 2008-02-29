@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,8 +28,9 @@
 
 #ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#include <qtopiaapplication.h>
 #endif
+#include <qtopiaapplication.h>
+#include <qtranslatablesettings.h>
 
 AccountPage::AccountPage(
         QtopiaNetwork::Type type, const QtopiaNetworkProperties& cfg,
@@ -61,7 +62,28 @@ AccountPage::~AccountPage()
 QtopiaNetworkProperties AccountPage::properties()
 {
     QtopiaNetworkProperties props;
-    props.insert( "Info/Name", name->text() );
+
+    //prevent duplication of interface names
+    QStringList allInterfaces = QtopiaNetwork::availableNetworkConfigs( accountType );
+    QStringList allNames;
+    foreach( QString iface, allInterfaces ) {
+        QTranslatableSettings cfg( iface, QSettings::IniFormat );
+        allNames << cfg.value(QLatin1String("Info/Name")).toString();
+    } 
+    QString n = name->text();
+    bool initialName = true;
+    int idx = 1;
+    int count = allNames.count( n );
+    //find next available name
+    //note: allNames always contains this iface too. we must ensure that we don't trigger a false positive.
+    while( (count > 1 && initialName) || ( count>=1 && !initialName ) ) { 
+        n = name->text()+QString::number(idx);
+        idx++; 
+        initialName = false;
+        count = allNames.count( n );
+    } 
+   
+    props.insert( "Info/Name", n );
     if ( accountType & ~QtopiaNetwork::BluetoothDUN )
         props.insert( "Properties/Autostart", startup->currentIndex() ? "y" : "n" );
 

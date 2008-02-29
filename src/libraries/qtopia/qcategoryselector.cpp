@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -437,9 +437,12 @@ signals:
 protected:
     virtual void currentChanged(const QModelIndex &current, const QModelIndex &)
     {
+        scrollTo(current);
         emit rowChanged(current.row());
     }
 };
+
+
 
 class QCategoryListDelegate : public QItemDelegate
 {
@@ -459,7 +462,8 @@ public:
     enum SelectorWidget {
         Unspecified = 0,
         ComboBox,
-        ListView
+        ListView,
+        Dialog
     };
 
     QCategorySelectData(const QString &s, QCategorySelector::ContentFlags f, QCategorySelector *parent);
@@ -477,8 +481,11 @@ public:
 
     QCategoryListView *listView;
     QComboBox *comboBox;
+    QToolButton *dialogButton;
 
     QCategorySelector::ContentFlags flags;
+
+    QCategoryFilter selectedCategories;
 
     QString scope;
 
@@ -502,7 +509,7 @@ signals:
 
 QCategorySelectData::QCategorySelectData( const QString &s,
         QCategorySelector::ContentFlags f, QCategorySelector *parent )
-    : QObject(parent), model(0), listView(0), comboBox(0), flags(f)
+    : QObject(parent), model(0), listView(0), comboBox(0), dialogButton(0), flags(f)
 {
     manuallyUpdating = false;
     scope = s;
@@ -513,10 +520,12 @@ QCategorySelectData::QCategorySelectData( const QString &s,
     //  Determine the type of widget used
     //
 
-    if ( (f & QCategorySelector::ListView) )
+    if ( ((f & QCategorySelector::ViewMask) == QCategorySelector::ListView) )
         type = ListView;
-    else if ( (f & QCategorySelector::ComboView) )
+    else if ( ((f & QCategorySelector::ViewMask) == QCategorySelector::ComboView) )
         type = ComboBox;
+    else if ( ((f & QCategorySelector::ViewMask) == QCategorySelector::DialogView) )
+        type = Dialog;
     else
         setType();
 
@@ -545,6 +554,9 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         listView->setIconSize(QSize(sz,sz));
         listView->setItemDelegate(new QCategoryListDelegate());
         listView->setModel(model);
+        if (sz > listView->fontMetrics().height())
+            listView->setSpacing((sz-listView->fontMetrics().height())/2);
+        listView->setUniformItemSizes(true);
         vb->addWidget(listView);
 
         connect(listView, SIGNAL(activated(const QModelIndex &)),
@@ -563,13 +575,13 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         editCatAction = new QAction(QIcon(":icon/edit"), tr("Edit"), this);
         connect(editCatAction, SIGNAL(triggered()), this, SLOT(editCategory()));
         editCatAction->setWhatsThis(tr("Edit the highlighted category."));
-        editCatAction->setEnabled(false);
+        editCatAction->setVisible(false);
         contextMenu->addAction(editCatAction);
 
         deleteCatAction = new QAction(QIcon(":icon/trash"), tr("Delete"), this);
         connect(deleteCatAction, SIGNAL(triggered()), this, SLOT(deleteCategory()));
         deleteCatAction->setWhatsThis(tr("Delete the highlighted category."));
-        deleteCatAction->setEnabled(false);
+        deleteCatAction->setVisible(false);
         contextMenu->addAction(deleteCatAction);
 
         connect(listView, SIGNAL(rowChanged(int)), this, SLOT(rowChanged(int)));
@@ -580,7 +592,7 @@ QCategorySelectData::QCategorySelectData( const QString &s,
 #ifdef QTOPIA_KEYPAD_NAVIGATION
         QSoftMenuBar::setLabel(listView, Qt::Key_Back, QSoftMenuBar::Back);
 #endif
-    } else {
+    } else if( type == ComboBox ) {
         QHBoxLayout *hb = new QHBoxLayout(parent);
         hb->setMargin(0);
         hb->setSpacing(0);
@@ -608,6 +620,15 @@ QCategorySelectData::QCategorySelectData( const QString &s,
                 connect(eb, SIGNAL(clicked()), parent, SLOT(showDialog()));
             }
         }
+    } else {
+        QVBoxLayout *layout = new QVBoxLayout( parent );
+        layout->setMargin( 0 );
+        layout->setSpacing( 0 );
+        dialogButton = new  QToolButton(parent);
+        dialogButton->setFocusPolicy( Qt::TabFocus );
+        dialogButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        layout->addWidget(dialogButton);
+        connect(dialogButton, SIGNAL(clicked()), parent, SLOT(showDialog()));
     }
 
    // slot was private, and empty.
@@ -716,6 +737,15 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
         if(somethingChecked)
             return QCategoryFilter::List;
     }
+    else if(dialogButton)
+    {
+        if( selectedCategories.acceptAll() )
+            return QCategoryFilter::All;
+        else if( selectedCategories.acceptUnfiledOnly() )
+            return QCategoryFilter::Unfiled;
+        else
+            return QCategoryFilter::List;
+    }
 
     if(allOptionPresent)
         return QCategoryFilter::All;
@@ -745,7 +775,7 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
   selections.  A QToolButton is also provided so that users can edit the
   Categories manually.
 
-  \ingroup qtopiaemb
+  \ingroup categories
 */
 
 /*!
@@ -777,8 +807,10 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
   \value IncludeUnfiled Include Unfiled Categories option.
   \value ListView Force items to appear as a list widget rather than a combo box
   \value ComboView Force items to appear in a combo box rather than a list widget.
+  \value DialogView Force the selector to appear as a button that displays a dialog containing the list widget.
   \value Filter Selector is used to create a filter for viewing categoriesed objects.
   \value Editor Selector is used to edit categories of an object.
+  \value ViewMask Masks the view selection flags.
 */
 
 /*!
@@ -891,6 +923,14 @@ void QCategorySelector::selectCategories(const QStringList &categoryids)
         }
 
     }
+    if( d->dialogButton )
+    {
+        d->selectedCategories = QCategoryFilter( categoryids );;
+        if( categoryids.count() > 1 )
+            d->dialogButton->setText( QCategoryManager::multiLabel() );
+        else
+            d->dialogButton->setText( d->cats->label( categoryids.first() ) );
+    }
 
     emit categoriesSelected(selectedCategories());
     emit filterSelected(selectedFilter());
@@ -959,6 +999,10 @@ QStringList QCategorySelector::selectedCategories() const
 
         return cats;
     }
+    else if(d->dialogButton)
+    {
+        return d->selectedCategories.requiredCategories();
+    }
 
     return QStringList();
 }
@@ -982,7 +1026,7 @@ QCategoryFilter QCategorySelector::selectedFilter() const
 QSize QCategorySelector::sizeHint () const
 {
     // FIXME - HACK for list not showing when items above 4
-    if( !d->comboBox && d->model->rowCount() > 4 )
+    if( d->listView && d->model->rowCount() > 4 )
     {
         QDesktopWidget *desktop = QApplication::desktop();
         return desktop->availableGeometry(desktop->screenNumber(this)).size();
@@ -1006,6 +1050,9 @@ void QCategorySelector::selectAll()
         } else if( d->listView ) {
             d->listView->setCurrentIndex( d->model->index( pos, 0 ) );
             d->model->toggleItem( pos );
+        } else if( d->dialogButton ) {
+            d->selectedCategories = QCategoryFilter( QCategoryFilter::All );
+            d->dialogButton->setText( QCategoryManager::allLabel() );
         }
     }
 }
@@ -1026,6 +1073,9 @@ void QCategorySelector::selectUnfiled()
         } else if( d->listView ) {
             d->listView->setCurrentIndex( d->model->index( pos, 0 ) );
             d->model->toggleItem( pos );
+        } else if( d->dialogButton ) {
+            d->selectedCategories = QCategoryFilter( QCategoryFilter::Unfiled );
+            d->dialogButton->setText( QCategoryManager::unfiledLabel() );
         }
     }
 }
@@ -1040,14 +1090,24 @@ void QCategorySelector::showDialog()
     dlg.setModal(true);
 
     // XXX not enough.  need to select all and unfiled appropriately as well
-    QStringList catids = selectedCategories();
-    if (catids.isEmpty()) {
-        if (d->allOptionPresent)
-            dlg.selectAll();
-        else
-            dlg.selectUnfiled();
-    } else {
-        dlg.selectCategories(catids);
+
+    switch( d->selectedFilterType() )
+    {
+    case QCategoryFilter::All:
+        dlg.selectAll();
+        break;
+    case QCategoryFilter::List:
+        {
+            QStringList catids = selectedCategories();
+            if( !catids.isEmpty() )
+            {
+                dlg.selectCategories( catids );
+                break;
+            }
+        }
+    default:
+        dlg.selectUnfiled();
+
     }
 
 #ifndef QTOPA_DESKTOP
@@ -1108,7 +1168,7 @@ QCategoryDialogData::QCategoryDialogData(const QString &s,
   Signals and slots are provided to notify the application of the users
   selections.
 
-  \ingroup qtopiaemb
+  \ingroup categories
 */
 
 /*!
@@ -1161,9 +1221,9 @@ void QCategoryDialog::keyPressEvent(QKeyEvent* e)
     if(e->key() == Qt::Key_Select)
         accept();
     else if(e->key() == Qt::Key_Back)
-    {
         accept();
-    }
+    else if (e->key() == Qt::Key_Hangup)
+        e->ignore();
 }
 #endif
 

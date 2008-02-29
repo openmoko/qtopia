@@ -29,7 +29,7 @@ qt:mac:!no_carbon {
 }
 
 # Hide symbols
-qtopia_visibility:contains(QT_CONFIG,reduce_exports) {
+qtopia_visibility:contains(QTE_CONFIG,reduce_exports) {
    CONFIG+=hide_symbols
 }
 
@@ -41,20 +41,22 @@ QMAKE_RCC       = $$QTDIR/bin/rcc
 QMAKE_INCDIR_QT = $$QTDIR/include
 QMAKE_LIBDIR_QT = $$QTDIR/lib
 
-# By popular demand this now works everywhere
-win32:RMRF=rmdir /s /q
-else:RMRF=rm -rf
-cleaninstall.commands=$$COMMAND_HEADER
-PREFIXES=$(IMAGE) $(DIMAGE)
-for(prefix,PREFIXES) {
-    win32:cleaninstall.commands+=if exist $$prefix
-    cleaninstall.commands+=$$RMRF $$prefix $$LINE_SEP
+!no_cleaninstall {
+    # By popular demand this now works everywhere
+    win32:RMRF=rmdir /s /q
+    else:RMRF=rm -rf
+    cleaninstall.commands=$$COMMAND_HEADER
+    PREFIXES=$(IMAGE) $(DIMAGE)
+    for(prefix,PREFIXES) {
+        win32:cleaninstall.commands+=if exist $$prefix
+        cleaninstall.commands+=$$RMRF $$prefix $$LINE_SEP
+    }
+    cleaninstall.commands+=$$MAKE install
+    QMAKE_EXTRA_TARGETS+=cleaninstall
+    cinstall.commands=
+    cinstall.depends=cleaninstall
+    QMAKE_EXTRA_TARGETS+=cinstall
 }
-cleaninstall.commands+=$$MAKE install
-QMAKE_EXTRA_TARGETS+=cleaninstall
-cinstall.commands=
-cinstall.depends=cleaninstall
-QMAKE_EXTRA_TARGETS+=cinstall
 
 # Test integration
 depotProject:part_of_qtopia {
@@ -97,7 +99,12 @@ QMAKE_EXTRA_TARGETS*=test
     # Desktop apps (not Qtopia Desktop) get an RPATH to the host Qt lib directory
     # so they can run without LD_LIBRARY_PATH.
     desktop:app:!qtopiadesktop:!isEmpty(QTOPIA_RPATH) {
-        LIBS+=$${QTOPIA_RPATH}$$fixpath($$DQTDIR/lib)
+        dqt=$$DQTDIR
+        !equals(QTOPIA_SDKROOT,$$QPEDIR) {
+            dqt=$$QTOPIA_SDKROOT/qtopiacore/host
+        }
+        LIBS+=$${QTOPIA_RPATH}$$fixpath($$dqt/lib)
+        # This is where the test libs go
         LIBS+=$${QTOPIA_RPATH}$$fixpath($$QTOPIA_SDKROOT/lib/host)
     }
 

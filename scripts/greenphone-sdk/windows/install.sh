@@ -1,6 +1,8 @@
 #!/bin/sh
 ROOT_UID=0
 VMPLAYER_DIR=`which vmplayer`
+cat license.txt
+more release.txt
 clear
 echo "Qtopia Greenphone SDK Linux Installation"
 echo

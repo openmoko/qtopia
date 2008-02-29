@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -94,7 +94,7 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
   a \c {deviceButtonMappingChanged()} message is sent on the \c {QPE/System}
   channel.
 
-  \ingroup qtopiaemb
+    \ingroup userinput
 */
 
 /*!

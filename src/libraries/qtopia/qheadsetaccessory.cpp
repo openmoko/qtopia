@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -49,6 +49,8 @@ static const char* const QHEADSETACCESSORY_CONTYPE     = "connectionType";
     volume on the headset using setMicrophoneVolume() and setSpeakerVolume().
 
     \sa QHeadsetAccessoryProvider, QHardwareInterface
+
+    \ingroup hardware
 */
 
 /*!
@@ -184,6 +186,8 @@ void QHeadsetAccessory::setSpeakerVolume( const int volume )
     attributes using the set methods.  They then override setMicrophoneVolume()
     and setSpeakerVolume() to update the headset hardware when the volume is
     modified.
+
+    \ingroup hardware
 */
 
 /*!

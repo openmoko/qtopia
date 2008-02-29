@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -352,6 +352,7 @@ public:
 QNullSerialIODeviceMultiplexer::QNullSerialIODeviceMultiplexer( QSerialIODevice *device, QObject *parent )
     : QSerialIODeviceMultiplexer( parent )
 {
+    qLog(Modem) << "Multiplexing has been disabled.";
     d = new QNullSerialIODeviceMultiplexerPrivate();
 
     d->device = device;

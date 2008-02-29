@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -18,8 +18,6 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
-#ifdef HAVE_ALSA
 
 #include "btheadsettask.h"
 #include "qtopiaserverapplication.h"
@@ -40,5 +38,3 @@ BtHeadsetService::~BtHeadsetService()
 }
 
 QTOPIA_TASK( BtHeadsetService, BtHeadsetService );
-
-#endif

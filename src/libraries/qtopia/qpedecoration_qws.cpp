@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -652,15 +652,12 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
     QRect tbr( rect.left(), rect.top() - titleHeight, rect.width(), titleHeight );
 
 #ifndef QT_NO_PALETTE
-    QRegion oldClip = painter->clipRegion();
     if (paintAll || decRegion & Borders) {
-        painter->setClipRegion( oldClip - QRegion( tbr ) );     // reduce flicker
         wdiface->drawArea( QWindowDecorationInterface::Border, painter, &wd );
-        painter->setClipRegion( oldClip );
         handled |= true;
     }
 
-    if (paintAll || decRegion & Title && titleRect.width() > 0) {
+    if ((paintAll || decRegion & Title) && titleRect.width() > 0 && titleRect.height() > 0) {
         const QPalette &pal = widget->palette();
         QBrush titleBrush;
         QPen   titlePen;
@@ -673,6 +670,7 @@ bool QtopiaDecoration::paint(QPainter *painter, const QWidget *widget, int decRe
             titlePen   = pal.color(QPalette::Text);
         }
 
+        QRegion oldClip = painter->clipRegion();
         painter->setClipRegion( QRegion( titleRect ) ); // reduce flicker
         wdiface->drawArea( QWindowDecorationInterface::Title, painter, &wd );
         painter->setClipRegion( oldClip );

@@ -4,3 +4,8 @@ version()
 {
   cat `pwd`/src/libraries/qtopiabase/version.h | grep QPE_VERSION |awk '{print $3}'|sed 's/"//g'
 }
+
+qt_version()
+{
+  cat `pwd`/qtopiacore/qt/src/corelib/global/qglobal.h | grep QT_VERSION_STR |awk '{print $3}'|sed 's/"//g'
+}

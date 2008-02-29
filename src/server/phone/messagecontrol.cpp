@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -55,7 +55,7 @@ MessageControl::MessageControl() :
     doNewCount(false);
 }
 
-void MessageControl::doNewCount(bool write, bool fromSystem)
+void MessageControl::doNewCount(bool write, bool fromSystem, bool notify)
 {
     if(write) {
         QSettings setting("Trolltech", "qpe");
@@ -67,9 +67,9 @@ void MessageControl::doNewCount(bool write, bool fromSystem)
 
     phoneValueSpace.setAttribute("NewMessages", QVariant(messageCount()));
     if ( !fromSystem )
-        emit messageCount(messageCount(), smsFull(), false);
+        emit messageCount(messageCount(), smsFull(), false, notify);
     else
-        emit messageCount(messageCount(), false, true);
+        emit messageCount(messageCount(), false, true, notify);
 }
 
 /*! Returns the MessageControl instance. */
@@ -129,7 +129,7 @@ void MessageControl::sysMessage(const QString& message, const QByteArray &data)
          stream >> count;
          if (count != mmsCount) {
              mmsCount = count;
-             doNewCount();
+             doNewCount(true,false,false);
          }
     }
     else if( message == "newSystemCount(int)" ){
@@ -137,7 +137,7 @@ void MessageControl::sysMessage(const QString& message, const QByteArray &data)
         stream >> count;
         if( count != systemCount ){
             systemCount = count;
-            doNewCount( true, true );
+            doNewCount( true, true, true);
         }
     }
 }

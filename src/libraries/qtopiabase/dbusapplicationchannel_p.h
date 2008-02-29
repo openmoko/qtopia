@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 Trolltech AS. All rights reserved.
+** Copyright (C) 2000-2007 Trolltech AS. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **

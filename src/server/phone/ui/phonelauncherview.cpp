@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -443,7 +443,7 @@ void PhoneLauncherView::focusInEvent(QFocusEvent *event)
 {
     QGraphicsView::focusInEvent(event);
 
-    if ( selectedItem ) {
+    if ( selectedItem && event->reason() != Qt::PopupFocusReason) {
         selectedItem->startAnimating();
     }
 }

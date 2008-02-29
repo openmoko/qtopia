@@ -43,7 +43,7 @@ for(it,QTOPIA_DEPENDS) {
                 next()
             }
             for(c,cmds) {
-                contains(QMAKE_QUIRKS,keep_quotes) {
+                contains(QMAKE_BEHAVIORS,keep_quotes) {
                     c~=s/^"//
                     c~=s/"$//
                 }

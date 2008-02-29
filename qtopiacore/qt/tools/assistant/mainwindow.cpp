@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -273,7 +273,7 @@ void MainWindow::about()
                    "<p>Version %2 %3</p></center>"
                    "<p>%4</p>"
                    "<p>%5</p>"
-                   "<p>Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.</p>"
+                   "<p>Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.</p>"
                    "<p>The program is provided AS IS with NO WARRANTY OF ANY KIND,"
                    " INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A"
                    " PARTICULAR PURPOSE.<p/>")

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -89,15 +89,15 @@ bool lessThan(const QVariant &left, const QVariant &right) {
   \internal
   \class QRecordIOMerge
   \module qpepim
-  \ingroup qpepim
-  \brief The QRecordIOMerge class provids a way of merging records from multiple
+  \ingroup pim
+  \brief The QRecordIOMerge class provides a way of merging records from multiple
   subclasses of QRecordIO.
 
-  The QRecordIOMerge class provids a way of merging records from multiple
+  The QRecordIOMerge class provides a way of merging records from multiple
   subclasses of QRecordIO.  It does this in a not biased way and with much
   caching.
 
-  Caching is incremental.  Not recomended if any recordIO is likely to exceed
+  Caching is incremental.  Not recommended if any QRecordIO is likely to exceed
   10000 items, but is useful for multiple medium level lists.
 */
 
@@ -222,7 +222,7 @@ int QRecordIOMerge::index(const QUniqueId &id) const
 
 /*!
   \internal
-  clears the index cache and starts recaching.
+  clears the index cache and starts re-caching.
 */
 void QRecordIOMerge::clearIndex()
 {
@@ -323,17 +323,17 @@ void QRecordIOMerge::indexNext()
 /*!
   \class QBiasedRecordIOMerge
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QBiasedRecordIOMerge class provides a way of merging records from multiple
   subclasses of QRecordIO.
 
-  The QBiasedRecordIOMerge class provids a way of merging records from multiple
+  The QBiasedRecordIOMerge class provides a way of merging records from multiple
   subclasses of QRecordIO.  It is suitable for cases where the main list
-  arbitarilly large and the other lists are small.  100000 items only takes
+  arbitrarily large and the other lists are small.  100000 items only takes
   25% longer to merge than if the longest list was 10000 items.
-  Caches the shorter lists in respect ot the longer lists.
+  Caches the shorter lists in respect to the longer lists.
 
-  Performance should be sufficient up untill on of the shorter list is about
+  Performance should be sufficient up until on of the shorter list is about
   5000 items.
 
   \internal
@@ -528,7 +528,7 @@ int QBiasedRecordIOMerge::index(const QRecordIO *model, int r) const
     // could bsearch model() 0..r;
     // or could have one additional map.
     int earlier = 0;
-    // again, could besearch, but expected to be pretty small.
+    // again, could bsearch, but expected to be pretty small.
     foreach(int skip, mSkips) {
         if (skip <= r) {
             earlier++;
@@ -568,7 +568,7 @@ int QBiasedRecordIOMerge::index(const QUniqueId &id) const
   in the next event loop.
 
   This is because rebuilds can be expensive and if all models
-  change will result in unneccisary rebuilds
+  change will result in unnecessary rebuilds
 */
 void QBiasedRecordIOMerge::updateCache()
 {
@@ -719,7 +719,7 @@ bool QBiasedRecordIOMerge::compare(const QVariant &left, const QVariant &right)
 /*!
   \class QRecordIO
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QRecordIO class provides an interface that will allow merging
   of records into a single list.
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -280,6 +280,14 @@ void PhoneQuickDialerScreen::selectedNumber( const QString &num, const QUniqueId
         close();
         return;
     }
+    // Filter for special GSM key sequences.
+    bool filtered = false;
+    emit filterSelect( num, filtered );
+    if ( filtered ) {
+        mNumber = QString();
+        close();
+        return;
+    }
     mNumber = num;
     close();
     emit numberSelected( mNumber, cnt );
@@ -380,6 +388,15 @@ void PhoneQuickDialerScreen::rejectEmpty( const QString &t )
 {
     if( t.isEmpty() && !isVisible() )
         close();
+    else {
+        // Fitler special GSM key sequences that act immediately (e.g. *#06#).
+        bool filtered = false;
+        emit filterKeys( t, filtered );
+        if ( filtered ) {
+            mNumber = QString();
+            close();
+        }
+    }
 }
 
 void PhoneQuickDialerScreen::appendDigits( const QString &digits, bool refresh,

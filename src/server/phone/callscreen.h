@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,7 @@ class QVBoxLayout;
 class CallItemModel;
 class SecondaryCallScreen;
 class ThemeListModel;
+class CallAudioHandler;
 
 class CallScreen;
 
@@ -63,6 +64,9 @@ signals:
     void decreaseCallVolume();
     void muteRing();
     void listEmpty();
+    void testKeys(const QString&, bool&);
+    void filterKeys(const QString&, bool&);
+    void filterSelect(const QString&, bool&);
 
 public slots:
     void stateChanged();
@@ -87,14 +91,16 @@ private slots:
     void callSelected(const QModelIndex&);
     void callClicked(const QModelIndex&);
     void themeItemClicked(ThemeItem*);
-    void speaker();
+    void actionGsmSelected();
+    void updateLabels();
 
 private:
-    void clearDtmfDigits();
+    void clearDtmfDigits(bool clearOneChar = false);
     void appendDtmfDigits(const QString &);
     void setSelectMode(bool);
     int callListHeight() const;
     bool dialNumbers(const QString & numbers);
+    void setGsmMenuItem();
 
 private:
     QString dtmfActiveCall;
@@ -113,15 +119,17 @@ private:
     QAction *actionMerge;
     QAction *actionSplit;
     QAction *actionTransfer;
-    QAction *actionSpeaker;
+    QAction *actionGsm;
     int activeCount;
     int holdCount;
     bool incoming;
     bool keypadVisible;
     QVBoxLayout *mLayout;
     QTimer* updateTimer;
+    QTimer* gsmActionTimer;
     SecondaryCallScreen *secondaryCallScreen;
     ThemeListModel* m_model;
+	CallAudioHandler* m_callAudioHandler;
 };
 
 #endif

@@ -142,3 +142,4 @@ video/x-msvideo			avi
 video/x-sgi-movie		movie
 x-conference/x-cooltalk		ice
 x-world/x-vrml			wrl vrml
+application/qtopia-package qpd

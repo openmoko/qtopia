@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -58,6 +58,8 @@
     As a simple data storage class the data fields are public (like a struct).
     However, in most cases IMActionDescriptions should simply be created and
     passed to the server, with little or no manipulation.
+
+  \ingroup userinput
 */
 
 
@@ -174,6 +176,8 @@ void QIMActionDescription::setIconFileName(const QString &string) {d->m_iconFile
     or keyboard events can do so by overriding inputModifier()
 
     \sa {Tutorial: Create an Input method Plug-in that Modifies Keyboard Input}
+
+  \ingroup userinput
 */
 
 /*!

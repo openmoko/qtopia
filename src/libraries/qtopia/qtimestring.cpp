@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -219,6 +219,8 @@ QString QTimeStringData::numberDate(const QDate &d, QTimeString::Length length) 
   \warning The length of a string can still vary among languages.
 
   \sa QtopiaApplication::dateFormatChanged(), QtopiaApplication::clockChanged()
+
+  \ingroup time
 */
 
 
@@ -356,90 +358,12 @@ QStringList QTimeString::formatOptions()
 }
 
 /*!
-  Parses a user-entered \a date into component \a year, \a month, and \a day,
-  according to the user's format preferences.
-
-  If \a date is partial (eg. "9-11"), the undefined components will not be changed.
-
-  Returns true if \a date was well-formed, otherwise returns false and no
-  components are changed.
+  \deprecated
+  Use \l{QDate::fromString()} instead.
 */
 bool QTimeString::parseDate(const QString& date, int& year, int& month, int& day)
 {
-    QTimeStringData *d = QTimeStringData::getInstance();
-    QString format = d->currentNumberFormat();
-    format.remove(QRegExp("[^DMY]"));
-    bool ok = true;
-    bool fixyear = false;
-    if ( format == "DMY" ) {
-        switch ( date.length() ) {
-          case 8:
-          case 6:
-            year = date.mid(4).toInt(); // 110901
-            fixyear = true;
-          case 3:
-          case 4:
-            month = date.mid(2,2).toInt();
-          case 2:
-          case 1:
-            day = date.left(2).toInt();
-            break;
-        default:
-            ok = false;
-        }
-    } else if ( format == "MDY" ) {
-        switch ( date.length() ) {
-          case 8:
-          case 6:
-            year = date.mid(4).toInt(); // 091101 09112001
-            fixyear = true;
-          case 3:
-          case 4:
-            day = date.mid(2,2).toInt(); // 911
-          case 2:
-          case 1:
-            month = date.left(2).toInt(); // 11
-            break;
-        default:
-            ok = false;
-        }
-    } else if ( format == "YMD" ) {
-        switch ( date.length() ) {
-          case 8:
-          case 7:
-            year = date.left(4).toInt(); // 20010911
-            month = date.mid(4,2).toInt();
-            day = date.mid(6).toInt();
-            break;
-          case 6:
-          case 5:
-            month = date.mid(4,2).toInt(); // 200109
-          case 4:
-          case 3:
-            year = date.left(4).toInt(); // 2001
-            break;
-          case 2:
-          case 1:
-            day = date.left(2).toInt(); // 11
-            break;
-        default:
-            ok = false;
-        }
-    } else {
-        QDate d = QDate::fromString(date);
-        if ( (ok=d.isValid()) ) {
-            year = d.year();
-            month = d.month();
-            day = d.day();
-        }
-    }
-    if ( fixyear ) {
-        if ( year < 100 ) {
-            if ( year < 50 ) year += 2000;
-            else year += 1900;
-        }
-    }
-    return ok;
+    return bool();
 }
 
 

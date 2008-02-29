@@ -15,7 +15,6 @@
 <li><a href="#compiling-liblcms">Compiling liblcms</a></li>
 <li><a href="#compiling-libmng">Compiling libmng</a></li>
 <li><a href="#compiling-libjpeg62">Compiling libjpeg62</a></li>
-<li><a href="#compiling-libuuid-e2fsprogs">Compiling libuuid (e2fsprogs)</a></li>
 <li><a href="#compiling-libz">Compiling libz</a></li>
 <li><a href="#compiling-tslib">Compiling tslib</a></li>
 </ul>
@@ -26,7 +25,6 @@
 <li><a href="#compiling-liblcms">liblcms</a></li>
 <li><a href="#compiling-libmng">libmng</a></li>
 <li><a href="#compiling-libjpeg62">libjpeg62</a></li>
-<li><a href="#compiling-libuuid-e2fsprogs">libuuid</a></li>
 <li><a href="#compiling-libz">libz</a></li>
 <li><a href="#compiling-tslib">tslib</a></li>
 </ul>
@@ -46,15 +44,6 @@
         --enable-shared --build=$(TOOLCHAIN_TARGET_DIR) --host=arm-linux
     make CC=&quot;arm-linux-gcc&quot; AR=&quot;arm-linux-ar rv&quot; AR2=&quot;arm-linux-ranlib&quot; CXX=&quot;arm-linux-g++&quot;  \
         DESTDIR=&quot;$(TOOLCHAIN_TARGET_DIR)&quot;</pre>
-<a name="compiling-libuuid-e2fsprogs"></a>
-<h2>Compiling libuuid (e2fsprogs)</h2>
-<p>To compile the <tt>libuuid</tt> library for a device run the following:</p>
-<pre>    ./configure --enable-elf-shlibs --enable-dynamic-e2fsck --disable-nls --mandir=/usr/share/man  \
-        --infodir=/usr/share/info --enable-compression  \
-        --with-ccopts='-O2 -g -fsigned-char -D__NO_STRING_INLINES' --host=arm-linux
-    make -C util CFLAGS='-O2 -g -fsigned-char -D__NO_STRING_INLINES'
-    make
-    make install # as root if required</pre>
 <a name="compiling-libz"></a>
 <h2>Compiling libz</h2>
 <p>To compile the <tt>libz</tt> library for a device run the following:</p>
@@ -73,8 +62,8 @@
     make -k install # as root if required</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

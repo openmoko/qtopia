@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -57,6 +57,7 @@ signals:
     void volumeChanged(int volume);
     void volumeMuted(bool muted);
     void controlAvailable(const QString& control);
+    void controlUnavailable(const QString& control);
 
 private slots:
     void stateChanged(QtopiaMedia::State state);
@@ -65,6 +66,7 @@ private slots:
     void volChanged(int volume);
     void volMuted(bool muted);
     void advertiseInterface(const QString&);
+    void revokeInterface(const QString&);
 
 private:
     MediaSession* m_mediaSession;

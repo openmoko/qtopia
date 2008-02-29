@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,6 +38,8 @@
     QVibrateAccessoryProvider.
 
     \sa QVibrateAccessoryProvider, QHardwareInterface
+
+    \ingroup hardware
 */
 
 /*!
@@ -141,6 +143,7 @@ void QVibrateAccessory::setVibrateNow( const bool value )
     indicate the level of functionality that is supported.
 
     \sa QVibrateAccessory
+    \ingroup hardware
 */
 
 /*!

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -66,7 +66,7 @@ void SandboxedProcess::setupChildProcess()
 
     //current default values are arbitrary
     resources << RLIMIT_AS;
-    limits <<  conf.value( "AddressSpace", 5120000 ).toULongLong();
+    limits <<  conf.value( "AddressSpace", 51200000 ).toULongLong();
 
     resources << RLIMIT_CPU;
     limits << conf.value( "CpuTime", 5).toUInt();

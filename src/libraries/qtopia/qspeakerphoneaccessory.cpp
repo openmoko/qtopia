@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,6 +38,8 @@
     QSpeakerPhoneAccessoryProvider.
 
     \sa QSpeakerPhoneAccessoryProvider, QHardwareInterface
+
+  \ingroup hardware
 */
 
 /*!
@@ -99,6 +101,8 @@ void QSpeakerPhoneAccessory::setOnSpeaker( bool value )
     implement the required functionality.
 
     \sa QSpeakerPhoneAccessory
+
+    \ingroup hardware
 */
 
 /*!

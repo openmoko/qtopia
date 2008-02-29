@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -44,6 +44,8 @@
   An application may register as many termination handlers as required,
   however only the most recently installed termination handler will be used in
   the case an abnormal termination.
+
+  \ingroup environment
  */
 
 

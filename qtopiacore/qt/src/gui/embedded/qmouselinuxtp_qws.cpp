@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -233,10 +233,8 @@ void QWSLinuxTPMouseHandlerPrivate::readMouseData()
 
                 mousePos = totalMousePos / (sampleCount - 1);
 
-# if defined(QT_QWS_IPAQ_RAW) || defined(QT_QWS_EBX_RAW)
-#warning FIXME transform
-//                mousePos = handler->transform(mousePos);
-# endif
+                mousePos = handler->transform(mousePos);
+
                 if(!waspressed)
                     oldmouse = mousePos;
                 QPoint dp = mousePos - oldmouse;

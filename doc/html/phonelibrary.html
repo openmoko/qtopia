@@ -17,7 +17,7 @@
 <li><a href="#automatic-starting-of-telephony-services">Automatic Starting of Telephony Services</a></li>
 <li><a href="#modem-services">Modem Services</a></li>
 </ul>
-<p>This document describes the design of the Qtopia Phone Library. The complete list of library classes can be found on the <a href="qtopiaphone.html">Phone Classes</a> page.</p>
+<p>This document describes the design of the Qtopia Phone Library. The complete list of library classes can be found on the Phone Classes page.</p>
 <a name="services-and-interfaces"></a>
 <h2>Services and Interfaces</h2>
 <p>Handlers in the telephony system are referred to as <i>services</i>. Each service has a unique name, such as <tt>modem</tt>, <tt>voip</tt>, etc. By convention, service names are lower case. Within each service is a list of interfaces for functionality areas such as network registration, phone calls, SMS, SIM Application Toolkit, etc.</p>
@@ -94,7 +94,7 @@
     {
         ...
     }</pre>
-<p>The VoIP service creates an instance of <tt>VoIPSMSSender</tt>, passing the <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Server</a> flag to the base class constructor. This tells the Qtopia Phone Library to advertise <tt>VoIPSMSSender</tt> as the implementation of the interface QSMSSender for the service <tt>voip</tt>. The Qtopia Phone Library uses <a href="qcop.html">QCop</a> and the <a href="valuespace.html">value space</a> to effect communication between the client application and the service. There is more information on how this process works in the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>, which is the base class for all telephony interfaces.</p>
+<p>The VoIP service creates an instance of <tt>VoIPSMSSender</tt>, passing the <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Server</a> flag to the base class constructor. This tells the Qtopia Phone Library to advertise <tt>VoIPSMSSender</tt> as the implementation of the interface QSMSSender for the service <tt>voip</tt>. The Qtopia Phone Library uses Qtopia IPC and the <a href="valuespace.html">value space</a> to effect communication between the client application and the service. There is more information on how this process works in the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>, which is the base class for all telephony interfaces.</p>
 <p>The <tt>VoIPSMSSender</tt> instance can be created anywhere in the system, usually in the daemon that implements the VoIP telephony service. The example VoIP implementation that comes with Qtopia is implemented by the <tt>sipagent</tt> daemon.</p>
 <p>Telephony services do not need to be part of the <tt>qpe</tt> process, or any other special Qtopia application, although they can be. The default implementation of the GSM <tt>modem</tt> service is created by <tt>qpe</tt>, but other modem implementations could be in separate daemons.</p>
 <p>Most telephony services will have more than one interface. The QTelephonyService class makes it easy to create large numbers of related interfaces within a service. Our VoIP implementation would look something like this:</p>
@@ -138,8 +138,8 @@
 <p>The <a href="syscust-gsm.html">GSM Modem Integration</a> page describes how to write a modem vendor plugin.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

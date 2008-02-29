@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -246,10 +246,17 @@ const QString &ContentLinkPrivate::file() const
         } else if ( cType.contains('/') ) {
             QString documentPath;
 
-            if( cMedia.isEmpty() || cMedia == Qtopia::homePath() )
+            if( cMedia.isEmpty() )
                 documentPath = Qtopia::documentDir();
             else
-                documentPath = cMedia + '/';
+            {
+                QFileSystem fs = QFileSystem::fromFileName( cMedia );
+
+                if( !fs.isNull() )
+                    documentPath = fs.documentsPath() + '/';
+                else
+                    documentPath = Qtopia::documentDir();
+            }
 
             that->cPath =
                     QString(documentPath+cType+QLatin1String("/")+safeFileName(that->cName));
@@ -572,11 +579,16 @@ const QList< QDrmRights::Permission > &ContentLinkPrivate::mimeTypePermissions()
 
 void ContentLinkPrivate::setProperty(const QString& key, const QString& value, const QString& group)
 {
+    if( !(cExtraLoaded & Properties) )
+    {
+        cPropertyList = persistenceEngine()->readProperties( cId );
+
+        cExtraLoaded |= Properties;
+    }
+
     QPair<QString, QString> realKey(key,group);
-    if (!value.isEmpty())
-        cPropertyList[realKey] = value;
-    else
-        cPropertyList.remove(realKey);
+
+    cPropertyList[realKey] = value;
 }
 
 QString ContentLinkPrivate::property(const QString& key, const QString& group) const

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -46,7 +46,7 @@
   over QCopChannels.
 
   QCop messages allow applications to communicate with each other by
-  sending messages using \c QCopEnvelope and receivng messages by connecting
+  sending messages using \c QCopEnvelope and receiving messages by connecting
   to a \c QCopChannel.
 
   To send a message, use the following protocol:
@@ -80,9 +80,9 @@
                this, SLOT(fooBarMessage(const QString&,const QByteArray&)) );
   \endcode
   \endlist
-  See also: \l {QCop Messages}{QCop Messages} and \l {Services}{Services}.
+  See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.
 
-  \ingroup qtopiaemb
+  \ingroup ipc
 */
 
 /*!

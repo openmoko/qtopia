@@ -121,7 +121,7 @@
 </ul>
 <p>The following signals are emitted:</p>
 <ul>
-<li><a href="qtopiaapplication.html#appMessage">appMessage</a>() - if the application receives a <a href="qcop.html">QCop</a> message on the QPE/Application/<i>appname</i> channel.</li>
+<li><a href="qtopiaapplication.html#appMessage">appMessage</a>() - if the application receives a Qtopia IPC message on the QPE/Application/<i>appname</i> channel.</li>
 <li>flush() - when synching begins</li>
 <li>reload() - when syching ends.</li>
 </ul>
@@ -180,7 +180,7 @@
 <h3 class="fn"><a name="dtor.QtopiaApplication"></a>QtopiaApplication::~QtopiaApplication ()</h3>
 <p>Destroys the <a href="qtopiaapplication.html">QtopiaApplication</a>.</p>
 <h3 class="fn"><a name="appMessage"></a>void QtopiaApplication::appMessage ( const <a href="qstring.html">QString</a> &amp; <i>msg</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when a message is received on the application's QPE/Application/<i>appname</i> <a href="qcop.html">QCop</a> channel.</p>
+<p>This signal is emitted when a message is received on the application's QPE/Application/<i>appname</i> Qtopia channel.</p>
 <p>The slot to which you connect this signal uses <i>msg</i> and <i>data</i> in the following way:</p>
 <pre>    void MyWidget::receive( const QString&amp; msg, const QByteArray&amp; data )
     {
@@ -324,8 +324,8 @@
 <p>Determine if this application will keep running because there are widgets or tasks still being used.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

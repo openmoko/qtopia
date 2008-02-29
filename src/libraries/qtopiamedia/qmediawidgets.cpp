@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -29,7 +29,7 @@
     \brief The QMediaStateLabel class displays icons for the various states of
     media playback.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaStateLabel class is useful for displaying standard icons
     for conveying state information about media playback.
@@ -166,7 +166,7 @@ QString Millisecond::toString() const
     \brief The QMediaProgressLabel class displays the current progress of a
     playing media content as a text label.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaProgressLabel class can be used in conjunction with the
     QMediaContent class to display the playback progress of a media
@@ -464,7 +464,7 @@ SlimlineProgress::SlimlineProgress( QWidget* parent )
     \brief The QMediaProgressWidget class displays the current progress of a
     playing media content as a progress bar.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaProgressWidget class can be used in conjunction with the
     QMediaContent class to display the playback progress of a media
@@ -577,7 +577,7 @@ void QMediaProgressWidget::deactivate()
     \brief The QMediaVolumeLabel class displays icons for the various levels of
     volume.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaVolumeLabel class is useful for displaying standard icons
     for conveying volume information.
@@ -745,7 +745,7 @@ void VolumeTask::execute()
     \brief The QMediaVolumeWidget class displays the current volume level of a
     media content object as a progress bar.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaVolumeWidget class can be used in conjunction with the
     QMediaContent class to display the current volume of a media content
@@ -1175,7 +1175,7 @@ void SeekMonitor::deactivate()
     \brief The QMediaSeekWidget class allows the user to seek within a media content
     object.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     The QMediaSeekWidget class can be used in conjunction with the
     QMediaContent class to enable the user to seek within a media content

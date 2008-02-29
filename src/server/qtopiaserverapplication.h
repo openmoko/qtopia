@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 #include <QList>
 #ifdef QTOPIA_TEST
 # include <qtest/qtopiasystemtestslave.h>
+class TestKeyFilter;
 #endif
 class QWSEvent;
 
@@ -52,7 +53,7 @@ public:
     void removeQWSEventFilter(QWSEventFilter *);
 
     // Tasks
-    static bool startup(int &argc, char **argv);
+    static bool startup(int &argc, char **argv, const QList<QByteArray> &startupGroups);
     static QString taskConfigFile();
 
     static QObject *qtopiaTask(const QByteArray &taskName,
@@ -92,7 +93,8 @@ private:
     QList<QWSEventFilter *> m_filters;
     static QtopiaServerApplication *m_instance;
 #ifdef QTOPIA_TEST
-    QtopiaServerTestSlave server_slave;
+    QtopiaServerTestSlave m_serverSlave;
+    TestKeyFilter *m_testKeyFilter;
 #endif
 };
 

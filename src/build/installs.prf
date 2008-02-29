@@ -54,6 +54,7 @@ for(it,INSTALLS) {
         command=$$COMMAND_HEADER\
             $$fixpath($$QPEDIR/bin/installpic)\
                 $$LITERAL_QUOTE$$LANGUAGES$$LITERAL_QUOTE\
+                $$LITERAL_QUOTE$$IMAGE_EXTENSION_ORDER$$LITERAL_QUOTE\
                 $$ICON_SIZE\
                 $$SRCDIR\
                 $$LITERAL_QUOTE$$fixpath($(INSTALL_ROOT)$$path)$$LITERAL_QUOTE\
@@ -144,15 +145,17 @@ for(it,INSTALLS) {
     }
     contains(hint,desktop) {
         # .desktop file installer (docapi uses a database instead of .desktop files)
-        INSTALLS-=$$it
+        eval($${it}.CONFIG+=no_default_install)
         files=$$eval($${it}.files)
         path=$$eval($${it}.path)
-        command=$$COMMAND_HEADER\
+        pkg.targets+=install_$${it}
+        command=\
             $$fixpath($$QPEDIR/bin/content_installer) $(INSTALL_ROOT)\
                 $$QTOPIA_DEPOT_PATH $$QTOPIA_PREFIX $$fixpath($$files)
         eval(docapi_$${it}.commands=\$$command)
         eval(docapi_$${it}.CONFIG=no_path)
         INSTALLS+=docapi_$$it
+        pkg.no_install+=docapi_$$it
     }
     contains(hint,dawg) {
         # .dawg generator

@@ -70,7 +70,7 @@
 <p>Returns the list of known network devices of type <i>type</i>. If <i>type</i> is <tt>Any</tt> it returns all known devices. A device is considered to be known if a configuration file exists for it. The returned Qtopia network interface handles are equivalent to the full qualified path to the configuration file.</p>
 <p>See also <a href="qtopianetwork.html#availableNetworkConfigs">QtopiaNetwork::availableNetworkConfigs</a>().</p>
 <h3 class="fn"><a name="connected"></a>void QNetworkState::connected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is send when Qtopia changes from offline to online. If the connectivity state of a particular device is required QNetworkDevice::state should be used.</p>
+<p>This signal is send when Qtopia changes from offline to online. If the connectivity state of a particular device is required <a href="qnetworkdevice.html#state">QNetworkDevice::state</a>() should be used.</p>
 <p>See also <a href="qtopianetwork.html#online">QtopiaNetwork::online</a>().</p>
 <h3 class="fn"><a name="defaultGatewayChanged"></a>void QNetworkState::defaultGatewayChanged ( <a href="qstring.html">QString</a> <i>handle</i>, const <a href="qnetworkinterface.html">QNetworkInterface</a> &amp; <i>local</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the default gateway for network packages changes. Such a change usually implies that a new route and new DNS information have been set. <i>handle</i> is the new default interface and <i>local</i> contains the IP details for <i>handle</i>. An empty <i>handle</i> implies that no new default gateway is available. This may happen when the last online interface changes its state to offline.</p>
@@ -80,7 +80,7 @@
 <h3 class="fn"><a name="deviceType"></a><a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> QNetworkState::deviceType ( const <a href="qstring.html">QString</a> &amp; <i>devHandle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the type of <i>devHandle</i>.</p>
 <h3 class="fn"><a name="disconnected"></a>void QNetworkState::disconnected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is send when Qtopia changes from online to offline. If the connectivity state of a particular device is required QNetworkDevice::state should be used.</p>
+<p>This signal is send when Qtopia changes from online to offline. If the connectivity state of a particular device is required <a href="qnetworkdevice.html#state">QNetworkDevice::state</a>() should be used.</p>
 <p>See also <a href="qtopianetwork.html#online">QtopiaNetwork::online</a>().</p>
 <h3 class="fn"><a name="gateway"></a><a href="qstring.html">QString</a> QNetworkState::gateway () const</h3>
 <p>Returns the handle to the network interface that is currently used as default gateway for network packages. If the network is offline the function returns an empty string.</p>
@@ -88,8 +88,8 @@
 <p>This function returns the list of all interface which are online at the time of the function call. The returned list contains the interfaces handles.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

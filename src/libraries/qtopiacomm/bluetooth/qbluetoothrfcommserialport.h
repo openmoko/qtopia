@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -42,8 +42,10 @@ public:
     QString createTty( const QBluetoothAddress& local, const QBluetoothAddress &remote, int channel);
     void releaseTty();
     QString boundDevice() const;
+    int id() const;
 
     static QStringList listBindings();
+    static bool releaseTty(int id);
 
 private:
     QBluetoothRfcommSerialPortPrivate* d;

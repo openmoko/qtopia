@@ -12,9 +12,9 @@ fi
 
 PREFIX="$(grep '^opt\.prefix\.value=' $QPEDIR/config.cache | sed 's/^opt\.prefix\.value=//')"
 
-# make sure binaries and libraries can be found
+# make sure binaries can be found (not requried for Qtopia!)
 export PATH=$PREFIX/bin:$PATH
-export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
 
 # set an alternate value for HOME (to keep different Qtopia versions' files separate)
 if [ ! -z "$QPEHOME" ]; then

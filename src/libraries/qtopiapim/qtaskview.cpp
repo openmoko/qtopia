@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@
 /*!
   \class QTaskDelegate
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QTaskDelegate class provides item drawing for QTaskModel items.
 
   The QTaskDelegate class provides drawing of QTaskModel items to aid in consistent
@@ -207,7 +207,7 @@ QSize QTaskDelegate::sizeHint(const QStyleOptionViewItem & option,
 /*!
   \class QTaskListView
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QTaskListView class provides a list view widget with some convenience functions
   for use with QTaskModel.
 
@@ -313,7 +313,7 @@ public:
 /*!
   \class QTaskSelector
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QTaskSelector class provides a way of selecting a task from a QTaskModel.
 
   The QTaskSelector dialog allows selecting an existing or new task.

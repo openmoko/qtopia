@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,9 @@
 #include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QPainter>
+#include <QBoxLayout>
+
+#include "qsoftmenubar.h"
 
 static const int BoxSize = 14;
 
@@ -36,10 +39,9 @@ class PriorityEdit : public QListWidget
 {
     Q_OBJECT
 public:
-    PriorityEdit(QWidget *parent)
+    PriorityEdit(QWidget *parent=0)
         : QListWidget(parent)
     {
-        setWindowFlags(Qt::Popup);
         setAutoScroll( false );
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -62,27 +64,6 @@ public:
         if (p > 5 || p < 1)
             p = 1;
         setCurrentItem(item(p - 1));
-    }
-
-    void setCellGeometry(const QRect &r)
-    {
-        // r is in contents position, not global.
-        QPoint pos = r.bottomLeft();
-        if (parentWidget())
-            pos = parentWidget()->mapToGlobal(pos);
-
-
-        QDesktopWidget *desktop = QApplication::desktop();
-        int sh = desktop->availableGeometry(desktop->primaryScreen()).height();                     // screen height
-
-        QSize size(r.width() + frameWidth() * 2,
-                5 * sizeHintForRow(0) + frameWidth() * 2);
-
-        if (pos.y() + size.height() > sh) {
-            pos.setY(pos.y() - size.height() - r.height());
-        }
-
-        setGeometry(QRect(pos, size));
     }
 
 signals:
@@ -111,6 +92,114 @@ private slots:
         emit prioritySelected(this);
         emit cancelEdit(this);
     }
+};
+
+// QAbstractItemViews make poor popups because
+// they don't call QWidget::mousePressEvent, which
+// means that they don't auto close themselves if
+// they are a popup.
+//
+// They also override qwidget::event to not handle
+// mousePressEvent at all, but to avoid assumptions
+// about future behaviour just add a wrapper
+// frame class
+class PriorityEditFrame : public QFrame
+{
+    Q_OBJECT
+public:
+    PriorityEditFrame(QWidget *p)
+        : QFrame(p, Qt::Popup), _cancelled(false), _closeOnRelease(false)
+    {
+        setFrameStyle(QFrame::NoFrame);
+        setMinimumWidth(1);
+
+        _pe = new PriorityEdit();
+
+        QHBoxLayout *l = new QHBoxLayout();
+        l->setMargin(0);
+        l->setSpacing(0);
+        l->addWidget(_pe);
+        setLayout(l);
+
+        setFocusProxy(_pe);
+
+        connect(_pe, SIGNAL(cancelEdit(QWidget*)), this, SLOT(subCancelEdit(QWidget*)));
+        connect(_pe, SIGNAL(prioritySelected(QWidget*)), this, SLOT(subPrioritySelected(QWidget*)));
+
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
+    }
+
+    ~PriorityEditFrame() { }
+    int priority() const { return _pe->priority(); }
+    void setPriority(int p) { _pe->setPriority(p); }
+    void setCellGeometry(const QRect &r)
+    {
+        // r is in contents position, not global.
+        QPoint pos = r.bottomLeft();
+        QPoint tlpos = r.topLeft();
+        if (parentWidget()) {
+            pos = parentWidget()->mapToGlobal(pos);
+            tlpos = parentWidget()->mapToGlobal(tlpos);
+        }
+
+        QDesktopWidget *desktop = QApplication::desktop();
+        int sh = desktop->availableGeometry(desktop->primaryScreen()).height();                     // screen height
+
+        QSize size(r.width() + frameWidth() * 2,
+                5 * _pe->sizeHintForRow(0) + frameWidth() * 2);
+
+        if (pos.y() + size.height() > sh) {
+            pos.setY(pos.y() - size.height() - r.height());
+        }
+        setGeometry(QRect(pos, size));
+        layout()->update();
+    //    _pe->setGeometry(QRect(0,0,size.width(), size.height()));
+
+        // Now work out the original cell geometry in our new coords
+        tlpos = mapFromGlobal(tlpos);
+        _origcell = QRect(tlpos, r.size());
+    }
+
+protected:
+    // The only wrinkle is if the user clicks on the cell that
+    // created this editor.  Ideally the editor would just close,
+    // and not popup again.  Unfortunately, QAbstractItemView creates
+    // an editor on mouseReleaseEvent as well, so we can't just use
+    // the default QWidget behaviour of closing on the press, since
+    // that lets the view get the releaseEvent.  We defer closing the popup
+    // frame until the mouseRelease handler, in this case.
+    void mousePressEvent(QMouseEvent *me)
+    {
+        if (_origcell.contains(me->pos()))
+            _closeOnRelease = true;
+        else
+            QFrame::mousePressEvent(me);
+    }
+
+    void mouseReleaseEvent(QMouseEvent *)
+    {
+        if(_closeOnRelease)
+            close();
+    }
+
+    void hideEvent(QHideEvent *) { subCancelEdit(this); }
+
+signals:
+    void cancelEdit(QWidget *);
+    void prioritySelected(QWidget *);
+
+private slots:
+    // Try to make sure we only send one cancelEdit when we get
+    // hidden
+    void subCancelEdit(QWidget *) { if (!_cancelled) emit cancelEdit(this); _cancelled = true;}
+
+    void subPrioritySelected(QWidget *) { emit prioritySelected(this); }
+
+private:
+    PriorityEdit * _pe;
+    bool _cancelled;
+    bool _closeOnRelease;
+    QRect _origcell;
 };
 
 /// Delegate
@@ -255,7 +344,7 @@ QWidget *TaskTableDelegate::createEditor(QWidget *w, const QStyleOptionViewItem 
 
     if (i.column() == QTaskModel::Priority) {
         int p = c->data(i, Qt::EditRole).toInt();
-        PriorityEdit *pe = new PriorityEdit(w);
+        PriorityEditFrame *pe = new PriorityEditFrame(w);
         pe->setPriority(p);
 
         connect(pe, SIGNAL(prioritySelected(QWidget *)), this, SIGNAL(commitData(QWidget *)));
@@ -271,21 +360,21 @@ QWidget *TaskTableDelegate::createEditor(QWidget *w, const QStyleOptionViewItem 
 
 void TaskTableDelegate::setEditorData(QWidget *w, const QModelIndex &i) const
 {
-    PriorityEdit *pe = qobject_cast<PriorityEdit *>(w);
+    PriorityEditFrame *pe = qobject_cast<PriorityEditFrame *>(w);
     if (pe)
         pe->setPriority(i.model()->data(i, Qt::EditRole).toInt());
 }
 
 void TaskTableDelegate::setModelData(QWidget *w, QAbstractItemModel *m, const QModelIndex &i) const
 {
-    PriorityEdit *pe = qobject_cast<PriorityEdit *>(w);
+    PriorityEditFrame *pe = qobject_cast<PriorityEditFrame *>(w);
     if (pe) {
         m->setData(i, QVariant(pe->priority()), Qt::EditRole);
     }
 }
 
 // still waiting for this function to be given some real power.
-bool TaskTableDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem &, const QModelIndex &i)
+bool TaskTableDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem & sovi, const QModelIndex &i)
 {
     QTaskModel *c = qobject_cast<QTaskModel *>(model);
     QKeyEvent *ke = (QKeyEvent *)e;
@@ -294,22 +383,25 @@ bool TaskTableDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const 
         return false;
     if (( e->type() == QEvent::KeyRelease &&
                 (ke->key() == Qt::Key_Space || ke->key() == Qt::Key_Select))
-            || ( e->type() == QEvent::MouseButtonPress && me->button() == Qt::LeftButton))
+            || ( ( e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseButtonDblClick) && me->button() == Qt::LeftButton))
     {
         switch(i.column()) {
             case QTaskModel::Priority:
+                // We do allow items other than the current one to be adjusted
                 return false; // editor handles this
             case QTaskModel::Completed:
-            {
-                // the fact it is necessary to read DisplayRole and write
-                // EditRole may be a bug
-                bool current = c->data(i, Qt::DisplayRole).toBool();
-                c->setData(i, QVariant(!current), Qt::EditRole);
+                // We do allow items that are not selected to be toggled.
+                emit toggleItemCompleted(i);
                 return true;
-            }
+
             case QTaskModel::Description:
-                emit showItem(i);
-                return true;
+                // We only show items that are selected (have focus)
+                // otherwise we let the view change the selection.
+                if (sovi.state & QStyle::State_HasFocus) {
+                    emit showItem(i);
+                    return true;
+                }
+                return false;
             default:
                 break;
         }
@@ -349,7 +441,7 @@ QSize TaskTableDelegate::sizeHint(const QStyleOptionViewItem &o, int column) con
 
 void TaskTableDelegate::updateEditorGeometry(QWidget *w, const QStyleOptionViewItem &o, const QModelIndex &) const
 {
-    PriorityEdit *pe = qobject_cast<PriorityEdit *>(w);
+    PriorityEditFrame *pe = qobject_cast<PriorityEditFrame *>(w);
     if (pe)
         pe->setCellGeometry(o.rect);
 }

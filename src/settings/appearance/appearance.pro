@@ -10,8 +10,8 @@ phone {
 TRANSLATABLES += appearancesettingsbase.ui \
                     appearancesettingsbasephone.ui
 
-HEADERS		= appearance.h themeparser.h
-SOURCES		= appearance.cpp themeparser.cpp main.cpp
+HEADERS		= appearance.h itemcontrol.h themeparser.h
+SOURCES		= appearance.cpp itemcontrol.cpp themeparser.cpp main.cpp
 
     
 !phone {

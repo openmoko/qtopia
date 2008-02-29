@@ -21,7 +21,9 @@
 <ul>
 <li><div class="fn"/><b><a href="qstoragemetainfo.html#QStorageMetaInfo">QStorageMetaInfo</a></b> ( QObject * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qstoragemetainfo.html#dtor.QStorageMetaInfo">~QStorageMetaInfo</a></b> ()</li>
+<li><div class="fn"/>const QFileSystem * <b><a href="qstoragemetainfo.html#applicationsFileSystem">applicationsFileSystem</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qstoragemetainfo.html#cardInfoString">cardInfoString</a></b> ()</li>
+<li><div class="fn"/>const QFileSystem * <b><a href="qstoragemetainfo.html#documentsFileSystem">documentsFileSystem</a></b> ()</li>
 <li><div class="fn"/>QStringList <b><a href="qstoragemetainfo.html#fileSystemNames">fileSystemNames</a></b> ( QFileSystemFilter * <i>filter</i>, bool <i>connectedOnly</i> = true )</li>
 <li><div class="fn"/>const QFileSystem * <b><a href="qstoragemetainfo.html#fileSystemOf">fileSystemOf</a></b> ( const QString &amp; <i>filename</i>, bool <i>connectedOnly</i> = true )</li>
 <li><div class="fn"/>QList&lt;QFileSystem *&gt; <b><a href="qstoragemetainfo.html#fileSystems">fileSystems</a></b> ( QFileSystemFilter * <i>filter</i>, bool <i>connectedOnly</i> = true )</li>
@@ -46,11 +48,18 @@
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QStorageMetaInfo * <b><a href="qstoragemetainfo.html#instance">instance</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
@@ -66,10 +75,14 @@
 <p>Constructor that determines the current mount points of the filesystem. The standard <i>parent</i> parameters is passed on to <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QStorageMetaInfo"></a>QStorageMetaInfo::~QStorageMetaInfo ()</h3>
 <p>Destroys the <a href="qstoragemetainfo.html">QStorageMetaInfo</a> object.</p>
+<h3 class="fn"><a name="applicationsFileSystem"></a>const <a href="qfilesystem.html">QFileSystem</a> * QStorageMetaInfo::applicationsFileSystem ()</h3>
+<p>Returns a pointer to the file system on which the default applications path is located.</p>
 <h3 class="fn"><a name="cardInfoString"></a><a href="qstring.html">QString</a> QStorageMetaInfo::cardInfoString ()</h3>
 <p>Returns a string containing the name, path, size and read/write parameters of all known filesystems</p>
 <h3 class="fn"><a name="disksChanged"></a>void QStorageMetaInfo::disksChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Is emitted when a disk has been mounted or unmounted, such as when a CF card has been inserted.</p>
+<h3 class="fn"><a name="documentsFileSystem"></a>const <a href="qfilesystem.html">QFileSystem</a> * QStorageMetaInfo::documentsFileSystem ()</h3>
+<p>Returns a pointer to the file system on which the default documents path is located.</p>
 <h3 class="fn"><a name="fileSystemNames"></a><a href="qstringlist.html">QStringList</a> QStorageMetaInfo::fileSystemNames ( <a href="qfilesystemfilter.html">QFileSystemFilter</a> * <i>filter</i>, bool <i>connectedOnly</i> = true )</h3>
 <p>Returns a list of file system names (matching the <i>filter</i> ). Use <i>connectedOnly</i> to return a list of only the filesystems that are connected.</p>
 <h3 class="fn"><a name="fileSystemOf"></a>const <a href="qfilesystem.html">QFileSystem</a> * QStorageMetaInfo::fileSystemOf ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, bool <i>connectedOnly</i> = true )</h3>
@@ -79,12 +92,13 @@
 <h3 class="fn"><a name="installLocationsString"></a><a href="qstring.html">QString</a> QStorageMetaInfo::installLocationsString ()</h3>
 <p>Includes the same information as <a href="qstoragemetainfo.html#cardInfoString">QStorageMetaInfo::cardInfoString</a>() and the path where documents can be installed</p>
 <p>See also <a href="qstoragemetainfo.html#cardInfoString">cardInfoString</a>().</p>
+<h3 class="fn"><a name="instance"></a>QStorageMetaInfo * QStorageMetaInfo::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <h3 class="fn"><a name="update"></a>void QStorageMetaInfo::update ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Updates the mount and free space information for each mount point and is automatically called when a disk is mounted or unmounted.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

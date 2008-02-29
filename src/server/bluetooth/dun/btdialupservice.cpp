@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -34,9 +34,6 @@
 #include <qtopialog.h>
 #include <qvaluespace.h>
 
-#include <qcommservicemanager.h>
-#include <qnetworkregistration.h>
-
 class BtDialupServiceProvider : public QBluetoothAbstractService
 {
     Q_OBJECT
@@ -44,26 +41,19 @@ public:
     BtDialupServiceProvider( BtDialupService* parent );
 
     void start(int channel);
-    void delayedStart();
     void stop();
     void setSecurityOptions( QBluetooth::SecurityOptions options );
     void allowPendingConnection( bool isAllowed );
 
     QString translatableDisplayName() const;
 
-protected:
-    void timerEvent( QTimerEvent* event );
-
 private slots:
     void newConnection();
     void initiateModemEmulator();
     void emulatorStateChanged();
-    void registrationChanged();
-    void delayedShutdown();
 
 private:
     void cleanActiveConnections();
-    void shutdownService();
 
 private:
     BtDialupService* m_parent;
@@ -74,20 +64,13 @@ private:
     QList<QBluetoothRfcommSerialPort*> runningConnections;
 
     QValueSpaceItem* modemEmulatorVS;
-    QCommServiceManager* commManager;
-    QNetworkRegistration* netReg;
-    int channel;
-    bool serviceRunning;
-
-    int delayedShutdownTimerId;
 
     QCommDeviceSession *m_session;
 };
 
 BtDialupServiceProvider::BtDialupServiceProvider( BtDialupService* parent )
     : QBluetoothAbstractService( QLatin1String("DialupNetworking"), parent ),
-        localDev( 0 ), commManager( 0 ), netReg( 0 ), channel( -1 ), serviceRunning( false ),
-        delayedShutdownTimerId( 0 )
+        localDev( 0 )
 {
     m_parent = parent;
     server = new QBluetoothRfcommServer( this );
@@ -99,86 +82,8 @@ BtDialupServiceProvider::BtDialupServiceProvider( BtDialupService* parent )
     m_session = 0;
 }
 
-void BtDialupServiceProvider::timerEvent( QTimerEvent* event )
-{
-    if ( event->timerId() == delayedShutdownTimerId ) {
-        if ( delayedShutdownTimerId )
-            killTimer( delayedShutdownTimerId );
-        delayedShutdownTimerId = 0;
-        if ( !netReg )
-            shutdownService();
-        else if ( netReg->registrationState() != QTelephony::RegistrationHome
-                    && netReg->registrationState() != QTelephony::RegistrationRoaming )
-            shutdownService();
-        else
-            qLog(Bluetooth) << "Aborting delayed shutdown of DUN due to updated network registration";
-   }
-}
-
-
-//Sometimes the network registration becomes available, disappears and becomes available again
-//To prevent the stop of the service during such a transitional period we add a small
-//grace period to the shutdown process. The service will not abort for another 15s in the hope
-//that the registration returns. If the network registration is still insufficient after 15s
-//abort the service and announce it to the BluetoothServiceManager.
-void BtDialupServiceProvider::delayedShutdown()
-{
-    if ( delayedShutdownTimerId )  //delayed shutdown already running
-        return;
-
-    qLog(Bluetooth) << "Delaying shutdown of DUN due to missing network registration";
-    delayedShutdownTimerId = startTimer( 15000 );
-}
-
 void BtDialupServiceProvider::start(int ch)
 {
-    if ( !commManager ) {
-        commManager = new QCommServiceManager( this );
-        connect( commManager, SIGNAL(servicesChanged()), this, SLOT(registrationChanged()));
-    }
-    channel = ch;
-    registrationChanged(); //first update
-}
-
-//ensure that the service isn't available/running while we have an
-//invalid network registration
-void BtDialupServiceProvider::registrationChanged()
-{
-    if ( commManager->supports<QNetworkRegistration>().contains(QLatin1String("modem")) ) {
-        if ( !netReg ) {
-            netReg = new QNetworkRegistration( QLatin1String("modem"), this );
-            connect( netReg, SIGNAL(registrationStateChanged()),
-                     this, SLOT(registrationChanged()) );
-        }
-    } else if ( netReg ) {
-        //we just lost the modem -> our modem network registration
-        //is useless now -> shutdown the service
-        qLog(Bluetooth) << "Bluetooth dial-up network service lost network registration";
-        delete netReg;
-        netReg = 0;
-        shutdownService();
-        return;
-    } else { //no modem network registration service available
-        shutdownService();
-        return;
-    }
-
-    QTelephony::RegistrationState state = netReg->registrationState();
-    if ( state == QTelephony::RegistrationHome
-            || state == QTelephony::RegistrationRoaming ) {
-        if ( channel >= 0 && !serviceRunning ) {
-            delayedStart();
-        }
-        return;
-    } else if (serviceRunning) {
-        //we dropped out of network registration -> stop service
-        delayedShutdown();
-    }
-}
-
-void BtDialupServiceProvider::delayedStart()
-{
-    serviceRunning = true;
     QBluetoothLocalDeviceManager manager;
     QBluetoothLocalDevice dev( manager.defaultDevice() );
     if ( !dev.isValid() ) {
@@ -191,13 +96,12 @@ void BtDialupServiceProvider::delayedStart()
     if ( server->isListening() )
         server->close();
 
-    if ( !server->listen( dev.address(), channel) ) {
+    if ( !server->listen( dev.address(), ch) ) {
         emit started(QBluetooth::NotRunning, tr("Cannot listen for incoming connections.") );
         return;
     }
 
-    if ( !sdpRegister( dev.address(), QBluetooth::DialupNetworkingProfile,
-                channel ) )
+    if ( !sdpRegister( dev.address(), QBluetooth::DialupNetworkingProfile, ch ) )
     {
         server->close();
         emit started(QBluetooth::SDPServerError,
@@ -210,46 +114,17 @@ void BtDialupServiceProvider::delayedStart()
 
 void BtDialupServiceProvider::stop()
 {
-    if ( channel >= 0 ) //prevent pending (delayed) start
-        channel = -1;
-
-    if ( !serviceRunning )
-        return;
-
-    if ( server->isListening() )
-        server->close();
-    cleanActiveConnections();
-
-    channel = -1;
-    serviceRunning = false;
-
     if ( !sdpUnregister() ) {
         emit stopped( QBluetooth::SDPServerError,
                 tr("Error unregistering from SDP server") );
-        return;
     }
 
-    emit stopped(QBluetooth::NoError, QString());
-    qLog(Bluetooth) << QLatin1String("Dial-up Networking Service stopped");
-}
-
-//This function can stop the service at any time by emitting an error signal.
-//The stop() function is only called during regular service stops requested by the
-//Bluetooth service manager.
-//If the service is not running this function does nothing.
-void BtDialupServiceProvider::shutdownService()
-{
-    if ( !serviceRunning )
-        return;
-
-    qLog(Bluetooth) << "Shutdown of DUN due to missing network registration";
     if ( server->isListening() )
         server->close();
     cleanActiveConnections();
-    serviceRunning = false;
-    channel = -1;
-    sdpUnregister();
-    emit error( QBluetooth::NotRunning, tr("Lost network contact") );
+
+    emit stopped(QBluetooth::NoError, QString());
+    qLog(Bluetooth) << QLatin1String("Dial-up Networking Service stopped");
 }
 
 void BtDialupServiceProvider::cleanActiveConnections()
@@ -279,25 +154,16 @@ void BtDialupServiceProvider::newConnection()
     if ( !server->hasPendingConnections() )
         return;
 
-    bool refuseConnections = false;
-    if ( !netReg
-            || (netReg->registrationState() != QTelephony::RegistrationHome
-                && netReg->registrationState() != QTelephony::RegistrationRoaming )
-       )
-        refuseConnections = true; //can happen during delayed shutdown
-
     while ( server->hasPendingConnections() ) {
         QBluetoothRfcommSocket* s =
                 static_cast<QBluetoothRfcommSocket *>(server->nextPendingConnection());
-        if ( !refuseConnections ) {
-            QBluetoothRfcommSerialPort* port = new QBluetoothRfcommSerialPort( this );
-            QString dev = port->createTty( s );
-            if ( !dev.isEmpty() ) {
-                pendingConnections.append ( port );
-            } else {
-                qLog(Bluetooth) << "BtDialupService: Cannot create rfcomm device. Ignoring incoming connection.";
-                delete port;
-            }
+        QBluetoothRfcommSerialPort* port = new QBluetoothRfcommSerialPort( this );
+        QString dev = port->createTty( s );
+        if ( !dev.isEmpty() ) {
+            pendingConnections.append ( port );
+        } else {
+            qLog(Bluetooth) << "BtDialupService: Cannot create rfcomm device. Ignoring incoming connection.";
+            delete port;
         }
         s->close();
         delete s;
@@ -343,7 +209,7 @@ void BtDialupServiceProvider::emulatorStateChanged()
         port = iter.next();
         QString devName = port->boundDevice();
         if ( devName.isEmpty() || !serialPorts.contains(devName) ) {
-            qLog(Bluetooth) << "Bluetooth Dialup session terminated.";
+            qLog(Bluetooth) << "Bluetooth Dialup session on" << devName  <<" terminated.";
             iter.remove();
             delete port;
         }

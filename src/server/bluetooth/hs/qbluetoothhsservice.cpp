@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -19,8 +19,6 @@
 **
 ****************************************************************************/
 
-#ifdef HAVE_ALSA
-
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include "qbluetoothhsservice_p.h"
 #include "qbluetoothhsagserver_p.h"
@@ -36,9 +34,10 @@
 #include <bluetooth/bluetooth.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "bluetooth/scomisc_p.h"
-#include <alsa/asoundlib.h>
 
 class QBluetoothHeadsetServicePrivate
 {
@@ -54,7 +53,7 @@ public:
     int m_speakerVolume;
     int m_microphoneVolume;
 
-    snd_hwdep_t *m_audioDev;
+    void *m_audioDev;
     QCommDeviceSession *m_session;
 
     QBluetoothAddress m_addr;
@@ -89,7 +88,7 @@ QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service,
 QBluetoothHeadsetService::~QBluetoothHeadsetService()
 {
     if (m_data) {
-        snd_hwdep_close(m_data->m_audioDev);
+        bt_sco_close(m_data->m_audioDev);
         delete m_data->m_server;
         delete m_data->m_scoSocket;
         delete m_data->m_client;
@@ -105,7 +104,7 @@ void QBluetoothHeadsetService::initialize()
     if (audioDev.isEmpty()) {
         qWarning("No headset audio devices available...");
     }
-    else if (snd_hwdep_open(&m_data->m_audioDev, audioDev.constData(), O_RDWR) < 0) {
+    else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
         qWarning("Unable to open audio device: %s", audioDev.constData());
     }
     else if ( !supports<QBluetoothAudioGateway>() ) {
@@ -333,7 +332,7 @@ void QBluetoothHeadsetService::releaseAudio()
         return;
 
     bt_sco_set_fd(m_data->m_audioDev, -1);
-    close(m_data->m_scofd);
+    ::close(m_data->m_scofd);
     m_data->m_scofd = -1;
 
     m_data->m_interface->setValue("AudioEnabled", false);
@@ -591,5 +590,3 @@ QString QBluetoothHeadsetService::translatableDisplayName() const
 {
     return tr("Headset Audio Gateway");
 }
-
-#endif

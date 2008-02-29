@@ -110,8 +110,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QAppointmentModel class provides access to the Calendar data.</p>
-<p>The QAppointmentModel is used to access the Calendar data. It is a descendent of <a href="qabstractitemmodel.html">QAbstractItemModel</a> so is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a> as well as any developer custom Views.</p>
-<p>QAppointmentModel provides functions for sorting and some filtering of items. For filters or sorting that is not provided by QAppointmentModel it is recommend that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> is used to wrap QAppointmentModel.</p>
+<p>The QAppointmentModel is used to access the Calendar data. It is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a>, so it is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as any custom developer Views.</p>
+<p>QAppointmentModel provides functions for sorting and some filtering of items. For filters or sorting that is not provided by QAppointmentModel it is recommended that <a href="qsortfilterproxymodel.html">QSortFilterProxyModel</a> is used to wrap QAppointmentModel.</p>
 <p>QAppointmentModel will refresh when changes are made in other instances of QAppointmentModel or from other applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -120,11 +120,11 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QAppointmentModel::TimedDuration</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">Occurrences that have times and dates specified for when they start and end.</td></tr>
-<tr><td valign="top"><tt>QAppointmentModel::AllDayDuration</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">Occurrences that only have a dates specified for when they start and end.</td></tr>
+<tr><td valign="top"><tt>QAppointmentModel::AllDayDuration</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">Occurrences that only have a date specified for when they start and end.</td></tr>
 <tr><td valign="top"><tt>QAppointmentModel::AnyDuration</tt></td><td align="center" valign="top"><tt>TimedDuration | AllDayDuration</tt></td><td valign="top">Occurrences with either date only or date and time specified for when they start and end.</td></tr>
 </table></p>
 <h3 class="fn"><a name="Field-enum"></a>enum QAppointmentModel::Field</h3>
-<p>Enumerates the columns when in table mode and columns used for sorting. Is a subset of data retrievable from a <a href="qappointment.html">QAppointment</a>.</p>
+<p>Enumerates the columns when in table mode and columns used for sorting. This is a subset of data retrievable from a <a href="qappointment.html">QAppointment</a>.</p>
 <h3 class="fn"><a name="QAppointmentModelRole-enum"></a>enum QAppointmentModel::QAppointmentModelRole</h3>
 <p>Extends <a href="qt.html#ItemDataRole-enum">Qt::ItemDataRole</a></p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -144,7 +144,7 @@
 <p>Returns the appointment for the row specified by <i>index</i>. The column of <i>index</i> is ignored.</p>
 <h3 class="fn"><a name="appointment-2"></a><a href="qappointment.html">QAppointment</a> QAppointmentModel::appointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the appointment with the identefier <i>id</i>. The appointment does not have to be in the current filter mode for it to be returned.</p>
+<p>Returns the appointment with the identifier <i>id</i>. The appointment does not have to be in the current filter mode for it to be returned.</p>
 <h3 class="fn"><a name="appointment-3"></a><a href="qappointment.html">QAppointment</a> QAppointmentModel::appointment ( int <i>row</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the appointment for the <i>row</i> specified.</p>
@@ -160,7 +160,7 @@
 <p>Returns the number of columns for the given <i>parent</i>.</p>
 <p>Reimplemented from <a href="qabstractitemmodel.html#columnCount">QAbstractItemModel</a>.</p>
 <h3 class="fn"><a name="context"></a><a href="qappointmentcontext.html">QAppointmentContext</a> * QAppointmentModel::context ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
-<p>Returns the context that contains the appointment with identifer <i>id</i>. If the contact does not exists returns 0.</p>
+<p>Returns the context that contains the appointment with identifier <i>id</i>. If the contact does not exists returns 0.</p>
 <h3 class="fn"><a name="contexts"></a>const <a href="qlist.html">QList</a>&lt;<a href="qappointmentcontext.html">QAppointmentContext</a> *&gt; &amp; QAppointmentModel::contexts () const</h3>
 <p>Returns the contexts of appointment data that can be shown by the appointment model.</p>
 <h3 class="fn"><a name="count"></a>int QAppointmentModel::count () const</h3>
@@ -170,7 +170,7 @@
 <p>Reimplemented from <a href="qabstractitemmodel.html#data">QAbstractItemModel</a>.</p>
 <p>See also <a href="qappointmentmodel.html#setData">setData</a>().</p>
 <h3 class="fn"><a name="durationType"></a><a href="qappointmentmodel.html#DurationType-enum">DurationType</a> QAppointmentModel::durationType () const</h3>
-<p>Returns the duration type of appointments currnetly included in the model.</p>
+<p>Returns the duration type of appointments currently included in the model.</p>
 <p>See also <a href="qappointmentmodel.html#setDurationType">setDurationType</a>().</p>
 <h3 class="fn"><a name="editable"></a>bool QAppointmentModel::editable ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns true if the appointment for <i>index</i> can be updated or removed. Otherwise returns false.</p>
@@ -284,7 +284,7 @@
 <p>Also refreshes the model.</p>
 <p>See also <a href="qappointmentmodel.html#visibleSources">visibleSources</a>().</p>
 <h3 class="fn"><a name="source"></a><a href="qpimsource.html">QPimSource</a> QAppointmentModel::source ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
-<p>Returns the source identifier that contains the appointment with identier <i>id</i>. If the appointment does not exist returns a null source.</p>
+<p>Returns the source identifier that contains the appointment with identifier <i>id</i>. If the appointment does not exist returns a null source.</p>
 <h3 class="fn"><a name="sourceExists"></a>bool QAppointmentModel::sourceExists ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
 <p>Returns true if the appointment uid <i>id</i> is stored in the storage source <i>source</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="updateAppointment"></a>bool QAppointmentModel::updateAppointment ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i> )</h3>
@@ -295,8 +295,8 @@
 <p>See also <a href="qappointmentmodel.html#setVisibleSources">setVisibleSources</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

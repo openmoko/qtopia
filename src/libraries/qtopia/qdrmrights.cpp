@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,8 @@ Q_IMPLEMENT_USER_METATYPE_ENUM( QDrmRights::Permission );
 
     A drm rights object represents the rights associated with an item of content for a permission.  It is composed of a
     permission, the current status of the rights, and a list of constraints imposed on the consumption of the content.
+
+    \ingroup drm
  */
 
  /*!
@@ -81,6 +83,8 @@ public:
     Additionally a constraint may be assigned any number of name/value attributes to convey more complex information.
     For example a constraint restricting the duration content can be accessed may include the duration as the value
     of the constraint and include the times the duration started and will end as attributes.
+
+    \ingroup drm
 */
 
 /*!
@@ -320,8 +324,8 @@ QString QDrmRights::toString( Permission permission, Status status )
         case Execute:    return QObject::tr( "%1 execute license"  , "%1=Invalid/Valid/Future"       ).arg( validity );
         case Print:      return QObject::tr( "%1 print license" , "%1=Invalid/Valid/Future"          ).arg( validity );
         case Export:     return QObject::tr( "%1 export license" , "%1=Invalid/Valid/Future"         ).arg( validity );
-        case Distribute: return QObject::tr( "%1 distribution permission" , "%1=Invalid/Valid/Future").arg( validity );
-        case Preview:    return QObject::tr( "%1 preview permission" , "%1=Invalid/Valid/Future"     ).arg( validity );
+        case Distribute: return QObject::tr( "%1 distribution license" , "%1=Invalid/Valid/Future").arg( validity );
+        case Preview:    return QObject::tr( "%1 preview license" , "%1=Invalid/Valid/Future"     ).arg( validity );
         default:
             return QString();
     }

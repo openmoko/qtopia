@@ -41,6 +41,8 @@
 <tr valign="top" class="odd"><th><a href="externalaccess.html">ExternalAccess</a></th><td>Starts the modem emulator on a serial port to allow external access via a serial cable</td></tr>
 <tr valign="top" class="even"><th><a href="gsmlegal.html">GSMLegal</a></th><td>Placeholder for licensing information</td></tr>
 <tr valign="top" class="odd"><th><a href="genericmemorymonitortask.html">GenericMemoryMonitorTask</a></th><td>Implements a simple page-fault driven memory monitor task</td></tr>
+<tr valign="top" class="even"><th><a href="gsmkeyactions.html">GsmKeyActions</a></th><td>Handles special GSM actions for requesting and controlling supplementary services</td></tr>
+<tr valign="top" class="odd"><th><a href="gsmkeyfilter.html">GsmKeyFilter</a></th><td>Filters key sequences looking for GSM control actions</td></tr>
 <tr valign="top" class="even"><th><a href="homescreenwidgets.html">HomeScreenWidgets</a></th><td>Factory for homescreen widgets</td></tr>
 <tr valign="top" class="odd"><th><a href="ivaluespacelayer.html">IValueSpaceLayer</a></th><td>Support for adding new logical data layers to the Qtopia Value Space</td></tr>
 <tr valign="top" class="even"><th><a href="idmangler.html">IdMangler</a></th><td>Servers to randomize key generation for SXE</td></tr>
@@ -60,231 +62,83 @@
 <tr valign="top" class="even"><th><a href="phonetouchdialerscreen.html">PhoneTouchDialerScreen</a></th><td>Implements a touchscreen dialer</td></tr>
 <tr valign="top" class="odd"><th><a href="pkim.html">PkIM</a></th><td>Input method based on a standard telephone keypad. Also provides full screen handwriting input</td></tr>
 <tr valign="top" class="even"><th><a href="powermanagertask.html">PowerManagerTask</a></th><td>Implements the device's power management functionality</td></tr>
-<tr valign="top" class="odd"><th><a href="q3accel.html">Q3Accel</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3action.html">Q3Action</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3actiongroup.html">Q3ActionGroup</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3asciicache.html">Q3AsciiCache</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3asciicacheiterator.html">Q3AsciiCacheIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3asciidict.html">Q3AsciiDict</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3asciidictiterator.html">Q3AsciiDictIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3button.html">Q3Button</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3buttongroup.html">Q3ButtonGroup</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3cstring.html">Q3CString</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3cache.html">Q3Cache</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3cacheiterator.html">Q3CacheIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvas.html">Q3Canvas</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvasellipse.html">Q3CanvasEllipse</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvasitem.html">Q3CanvasItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvasitemlist.html">Q3CanvasItemList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvasline.html">Q3CanvasLine</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvaspixmap.html">Q3CanvasPixmap</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvaspixmaparray.html">Q3CanvasPixmapArray</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvaspolygon.html">Q3CanvasPolygon</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvaspolygonalitem.html">Q3CanvasPolygonalItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvasrectangle.html">Q3CanvasRectangle</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvasspline.html">Q3CanvasSpline</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvassprite.html">Q3CanvasSprite</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3canvastext.html">Q3CanvasText</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3canvasview.html">Q3CanvasView</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3checklistitem.html">Q3CheckListItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3checktableitem.html">Q3CheckTableItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3colordrag.html">Q3ColorDrag</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3combobox.html">Q3ComboBox</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3combotableitem.html">Q3ComboTableItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3databrowser.html">Q3DataBrowser</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3datatable.html">Q3DataTable</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3dataview.html">Q3DataView</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3dateedit.html">Q3DateEdit</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3datetimeedit.html">Q3DateTimeEdit</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3datetimeeditbase.html">Q3DateTimeEditBase</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3deepcopy.html">Q3DeepCopy</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3dict.html">Q3Dict</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3dictiterator.html">Q3DictIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3dns.html">Q3Dns</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3dockarea.html">Q3DockArea</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3dockwindow.html">Q3DockWindow</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3dragobject.html">Q3DragObject</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3dropsite.html">Q3DropSite</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3editorfactory.html">Q3EditorFactory</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3filedialog.html">Q3FileDialog</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3fileiconprovider.html">Q3FileIconProvider</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3filepreview.html">Q3FilePreview</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3frame.html">Q3Frame</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3ftp.html">Q3Ftp</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3grid.html">Q3Grid</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3gridview.html">Q3GridView</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3groupbox.html">Q3GroupBox</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3hbox.html">Q3HBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3hbuttongroup.html">Q3HButtonGroup</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3hgroupbox.html">Q3HGroupBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3header.html">Q3Header</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3http.html">Q3Http</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3httpheader.html">Q3HttpHeader</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3httprequestheader.html">Q3HttpRequestHeader</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3httpresponseheader.html">Q3HttpResponseHeader</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3icondrag.html">Q3IconDrag</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3icondragitem.html">Q3IconDragItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3iconview.html">Q3IconView</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3iconviewitem.html">Q3IconViewItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3imagedrag.html">Q3ImageDrag</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3intcache.html">Q3IntCache</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3intcacheiterator.html">Q3IntCacheIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3intdict.html">Q3IntDict</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3intdictiterator.html">Q3IntDictIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3listbox.html">Q3ListBox</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3listboxitem.html">Q3ListBoxItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3listboxpixmap.html">Q3ListBoxPixmap</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3listboxtext.html">Q3ListBoxText</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3listview.html">Q3ListView</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3listviewitem.html">Q3ListViewItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3listviewitemiterator.html">Q3ListViewItemIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3localfs.html">Q3LocalFs</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3mainwindow.html">Q3MainWindow</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3memarray.html">Q3MemArray</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3mimesourcefactory.html">Q3MimeSourceFactory</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3multilineedit.html">Q3MultiLineEdit</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3networkoperation.html">Q3NetworkOperation</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3networkprotocol.html">Q3NetworkProtocol</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3paintdevicemetrics.html">Q3PaintDeviceMetrics</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3painter.html">Q3Painter</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3picture.html">Q3Picture</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3pointarray.html">Q3PointArray</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3popupmenu.html">Q3PopupMenu</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3process.html">Q3Process</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3progressbar.html">Q3ProgressBar</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3progressdialog.html">Q3ProgressDialog</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3ptrcollection.html">Q3PtrCollection</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3ptrdict.html">Q3PtrDict</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3ptrdictiterator.html">Q3PtrDictIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3ptrlist.html">Q3PtrList</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3ptrlistiterator.html">Q3PtrListIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3ptrqueue.html">Q3PtrQueue</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3ptrstack.html">Q3PtrStack</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3ptrvector.html">Q3PtrVector</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3rangecontrol.html">Q3RangeControl</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3scrollview.html">Q3ScrollView</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3semaphore.html">Q3Semaphore</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3serversocket.html">Q3ServerSocket</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3shared.html">Q3Shared</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3signal.html">Q3Signal</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3simplerichtext.html">Q3SimpleRichText</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3socket.html">Q3Socket</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3socketdevice.html">Q3SocketDevice</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3sqlcursor.html">Q3SqlCursor</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3sqleditorfactory.html">Q3SqlEditorFactory</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3sqlfieldinfo.html">Q3SqlFieldInfo</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3sqlform.html">Q3SqlForm</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3sqlpropertymap.html">Q3SqlPropertyMap</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3sqlrecordinfo.html">Q3SqlRecordInfo</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3sqlselectcursor.html">Q3SqlSelectCursor</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3storeddrag.html">Q3StoredDrag</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3strilist.html">Q3StrIList</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3strlist.html">Q3StrList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3strlistiterator.html">Q3StrListIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3stylesheet.html">Q3StyleSheet</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3stylesheetitem.html">Q3StyleSheetItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3syntaxhighlighter.html">Q3SyntaxHighlighter</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3tabdialog.html">Q3TabDialog</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3table.html">Q3Table</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3tableitem.html">Q3TableItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3tableselection.html">Q3TableSelection</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3textbrowser.html">Q3TextBrowser</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3textdrag.html">Q3TextDrag</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3textedit.html">Q3TextEdit</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3textstream.html">Q3TextStream</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3textview.html">Q3TextView</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3timeedit.html">Q3TimeEdit</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3toolbar.html">Q3ToolBar</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3uridrag.html">Q3UriDrag</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3url.html">Q3Url</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3urloperator.html">Q3UrlOperator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3vbox.html">Q3VBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3vbuttongroup.html">Q3VButtonGroup</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3vgroupbox.html">Q3VGroupBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3valuelist.html">Q3ValueList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3valuelistconstiterator.html">Q3ValueListConstIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3valuelistiterator.html">Q3ValueListIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3valuestack.html">Q3ValueStack</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3valuevector.html">Q3ValueVector</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3whatsthis.html">Q3WhatsThis</a></th></tr>
-<tr valign="top" class="even"><th><a href="q3widgetstack.html">Q3WidgetStack</a></th></tr>
-<tr valign="top" class="odd"><th><a href="q3wizard.html">Q3Wizard</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaperformancetest.html">QAPerformanceTest</a></th><td>Performance testing instrumentation to the Qtopia Server</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a></th><td>Allows developers to replace the &quot;application browser screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractbutton.html">QAbstractButton</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a></th><td>Manages power state of a communications device</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractdialerscreen.html">QAbstractDialerScreen</a></th><td>Allows developers to replace the &quot;dialer screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractextensionmanager.html">QAbstractExtensionManager</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractfileengine.html">QAbstractFileEngine</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractformbuilder.html">QAbstractFormBuilder</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractgraphicsshapeitem.html">QAbstractGraphicsShapeItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractipcinterface.html">QAbstractIpcInterface</a></th><td>Facilities for implementing the client and server sides of IPC communications paths</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a></th><td>Convenient wrapper to create the interfaces within a server group</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a></th><td>Method to discover the active IPC interfaces and server interface groups</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractitemdelegate.html">QAbstractItemDelegate</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractitemmodel.html">QAbstractItemModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractitemview.html">QAbstractItemView</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractlistmodel.html">QAbstractListModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractprintdialog.html">QAbstractPrintDialog</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractproxymodel.html">QAbstractProxyModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractscrollarea.html">QAbstractScrollArea</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractserverinterface.html">QAbstractServerInterface</a></th><td>Allows the Qtopia Server UI to be replaced</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractslider.html">QAbstractSlider</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractsocket.html">QAbstractSocket</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractspinbox.html">QAbstractSpinBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstracttablemodel.html">QAbstractTableModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstracttextdocumentlayout.html">QAbstractTextDocumentLayout</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessible.html">QAccessible</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessiblebridge.html">QAccessibleBridge</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessiblebridgeplugin.html">QAccessibleBridgePlugin</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessibleevent.html">QAccessibleEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessibleinterface.html">QAccessibleInterface</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessibleobject.html">QAccessibleObject</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessibleplugin.html">QAccessiblePlugin</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessiblewidget.html">QAccessibleWidget</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaction.html">QAction</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qactionevent.html">QActionEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qactiongroup.html">QActionGroup</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qanalogclock.html">QAnalogClock</a></th><td>Displays an analog clock face</td></tr>
-<tr valign="top" class="even"><th><a href="qapplication.html">QApplication</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qappointment.html">QAppointment</a></th><td>Holds the data of a calendar appointment</td></tr>
-<tr valign="top" class="even"><th><a href="qappointmentcontext.html">QAppointmentContext</a></th><td>Represents a storage context of appointment data</td></tr>
-<tr valign="top" class="odd"><th><a href="qappointmentmodel.html">QAppointmentModel</a></th><td>Access to the Calendar data</td></tr>
-<tr valign="top" class="even"><th><a href="qassistantclient.html">QAssistantClient</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qatchat.html">QAtChat</a></th><td>Simple mechanism for sending AT commands to modems</td></tr>
-<tr valign="top" class="even"><th><a href="qatchatscript.html">QAtChatScript</a></th><td>Mechanism to run pppd chat scripts</td></tr>
-<tr valign="top" class="odd"><th><a href="qatresult.html">QAtResult</a></th><td>Access to the results of an AT modem command</td></tr>
-<tr valign="top" class="even"><th><a href="qatresultparser.html">QAtResultParser</a></th><td>Support for parsing the response to AT modem commands</td></tr>
-<tr valign="top" class="odd"><th><a href="qatutils.html">QAtUtils</a></th><td>Utility functions for use with AT modems</td></tr>
-<tr valign="top" class="even"><th><a href="qbasictimer.html">QBasicTimer</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbatteryaccessory.html">QBatteryAccessory</a></th><td>Access to a battery on the device</td></tr>
-<tr valign="top" class="even"><th><a href="qbatteryaccessoryprovider.html">QBatteryAccessoryProvider</a></th><td>Interface for battery devices to integrate into Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="qbitarray.html">QBitArray</a></th></tr>
-<tr valign="top" class="even"><th><a href="qbitmap.html">QBitmap</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a></th><td>Represents an abstract Bluetooth server socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a></th><td>Abstract class for running a Bluetooth service within the Qtopia Bluetooth framework</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a></th><td>Represents an abstract Bluetooth client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothaddress.html">QBluetoothAddress</a></th><td>Represents a bluetooth address (bdaddr)</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a></th><td>Interface to a Bluetooth Audio Gateway</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</a></th><td>Allows the user to perform a bluetooth device discovery and select a particular device</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a></th><td>Filter on the devices that are displayed by a QBluetoothDeviceSelector</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></th><td>Represents a local bluetooth device</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothlocaldevicemanager.html">QBluetoothLocalDeviceManager</a></th><td>Access to local Bluetooth devices</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothobexserver.html">QBluetoothObexServer</a></th><td>Listens for OBEX client connections</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a></th><td>Represents a passkey entry proxy</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a></th><td>Encapsulates a Bluetooth PIN request</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a></th><td>Represents a remote bluetooth device</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothreply.html">QBluetoothReply</a></th><td>Wrapper object that contains a reply, and an error indicator</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a></th><td>Represents a serial device which enables access to a bluetooth serial port protocol</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a></th><td>Represents an RFCOMM server socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a></th><td>Represents an RFCOMM client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothscoserver.html">QBluetoothScoServer</a></th><td>Represents a SCO server socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothscosocket.html">QBluetoothScoSocket</a></th><td>Represents an SCO client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothservicecontrolserver.html">QBluetoothServiceControlServer</a></th><td>Control interface for a QBluetoothAbstractService using Qtopia IPC mechanisms</td></tr>
+<tr valign="top" class="odd"><th><a href="qaperformancetest.html">QAPerformanceTest</a></th><td>Performance testing instrumentation to the Qtopia Server</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a></th><td>Allows developers to replace the &quot;application browser screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractbutton.html">QAbstractButton</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a></th><td>Manages power state of a communications device</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractdialerscreen.html">QAbstractDialerScreen</a></th><td>Allows developers to replace the &quot;dialer screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="even"><th><a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractextensionmanager.html">QAbstractExtensionManager</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractfileengine.html">QAbstractFileEngine</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractformbuilder.html">QAbstractFormBuilder</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractgraphicsshapeitem.html">QAbstractGraphicsShapeItem</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractipcinterface.html">QAbstractIpcInterface</a></th><td>Facilities for implementing the client and server sides of IPC communications paths</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a></th><td>Convenient wrapper to create the interfaces within a server group</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a></th><td>Method to discover the active IPC interfaces and server interface groups</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractitemdelegate.html">QAbstractItemDelegate</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractitemmodel.html">QAbstractItemModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractitemview.html">QAbstractItemView</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractlistmodel.html">QAbstractListModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractprintdialog.html">QAbstractPrintDialog</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractproxymodel.html">QAbstractProxyModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractscrollarea.html">QAbstractScrollArea</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractserverinterface.html">QAbstractServerInterface</a></th><td>Allows the Qtopia Server UI to be replaced</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractslider.html">QAbstractSlider</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractsocket.html">QAbstractSocket</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractspinbox.html">QAbstractSpinBox</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstracttablemodel.html">QAbstractTableModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstracttextdocumentlayout.html">QAbstractTextDocumentLayout</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessible.html">QAccessible</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessiblebridge.html">QAccessibleBridge</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessiblebridgeplugin.html">QAccessibleBridgePlugin</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessibleevent.html">QAccessibleEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessibleinterface.html">QAccessibleInterface</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessibleobject.html">QAccessibleObject</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessibleplugin.html">QAccessiblePlugin</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessiblewidget.html">QAccessibleWidget</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaction.html">QAction</a></th></tr>
+<tr valign="top" class="even"><th><a href="qactionevent.html">QActionEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qactiongroup.html">QActionGroup</a></th></tr>
+<tr valign="top" class="even"><th><a href="qanalogclock.html">QAnalogClock</a></th><td>Displays an analog clock face</td></tr>
+<tr valign="top" class="odd"><th><a href="qapplication.html">QApplication</a></th></tr>
+<tr valign="top" class="even"><th><a href="qappointment.html">QAppointment</a></th><td>Holds the data of a calendar appointment</td></tr>
+<tr valign="top" class="odd"><th><a href="qappointmentcontext.html">QAppointmentContext</a></th><td>Represents a storage context of appointment data</td></tr>
+<tr valign="top" class="even"><th><a href="qappointmentmodel.html">QAppointmentModel</a></th><td>Access to the Calendar data</td></tr>
+<tr valign="top" class="odd"><th><a href="qassistantclient.html">QAssistantClient</a></th></tr>
+<tr valign="top" class="even"><th><a href="qatchat.html">QAtChat</a></th><td>Simple mechanism for sending AT commands to modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qatchatscript.html">QAtChatScript</a></th><td>Mechanism to run pppd chat scripts</td></tr>
+<tr valign="top" class="even"><th><a href="qatresult.html">QAtResult</a></th><td>Access to the results of an AT modem command</td></tr>
+<tr valign="top" class="odd"><th><a href="qatresultparser.html">QAtResultParser</a></th><td>Support for parsing the response to AT modem commands</td></tr>
+<tr valign="top" class="even"><th><a href="qatutils.html">QAtUtils</a></th><td>Utility functions for use with AT modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qbasictimer.html">QBasicTimer</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbatteryaccessory.html">QBatteryAccessory</a></th><td>Access to a battery on the device</td></tr>
+<tr valign="top" class="odd"><th><a href="qbatteryaccessoryprovider.html">QBatteryAccessoryProvider</a></th><td>Interface for battery devices to integrate into Qtopia</td></tr>
+<tr valign="top" class="even"><th><a href="qbitarray.html">QBitArray</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qbitmap.html">QBitmap</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a></th><td>Represents an abstract Bluetooth server socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a></th><td>Abstract class for running a Bluetooth service within the Qtopia Bluetooth framework</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a></th><td>Represents an abstract Bluetooth client socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothaddress.html">QBluetoothAddress</a></th><td>Represents a bluetooth address (bdaddr)</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a></th><td>Interface to a Bluetooth Audio Gateway</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</a></th><td>Allows the user to perform a bluetooth device discovery and select a particular device</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a></th><td>Filter on the devices that are displayed by a QBluetoothDeviceSelector</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></th><td>Represents a local bluetooth device</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothlocaldevicemanager.html">QBluetoothLocalDeviceManager</a></th><td>Access to local Bluetooth devices</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothobexserver.html">QBluetoothObexServer</a></th><td>Listens for OBEX client connections</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a></th><td>Represents a passkey entry proxy</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a></th><td>Encapsulates a Bluetooth PIN request</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a></th><td>Represents a remote bluetooth device</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothreply.html">QBluetoothReply</a></th><td>Wrapper object that contains a reply, and an error indicator</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a></th><td>Represents a RFCOMM serial device and enables access to a bluetooth serial port protocol</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a></th><td>Represents an RFCOMM server socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a></th><td>Represents an RFCOMM client socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothscoserver.html">QBluetoothScoServer</a></th><td>Represents a SCO server socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothscosocket.html">QBluetoothScoSocket</a></th><td>Represents an SCO client socket</td></tr>
 <tr valign="top" class="odd"><th><a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a></th><td>Access to information about Bluetooth services within the Qtopia Bluetooth services framework</td></tr>
+<tr valign="top" class="even"><th><a href="qbootsourceaccessory.html">QBootSourceAccessory</a></th><td>Access to the boot source which triggered the boot sequence</td></tr>
+<tr valign="top" class="odd"><th><a href="qbootsourceaccessoryprovider.html">QBootSourceAccessoryProvider</a></th><td>Interface for boot source device to integrate into Qtopia</td></tr>
 <tr valign="top" class="even"><th><a href="qboxlayout.html">QBoxLayout</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qbrush.html">QBrush</a></th></tr>
 <tr valign="top" class="even"><th><a href="qbuffer.html">QBuffer</a></th></tr>
@@ -984,7 +838,7 @@
 <tr valign="top" class="even"><th><a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a></th><td>Interface to messages on a Qtopia IPC channel which simplifies remote signal and slot invocations</td></tr>
 <tr valign="top" class="odd"><th><a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a></th><td>Encapsulates and sends QCop messages over QtopiaChannels</td></tr>
 <tr valign="top" class="even"><th><a href="qtopiaipcsendenvelope.html">QtopiaIpcSendEnvelope</a></th><td>Mechanism to send Qtopia IPC messages with an argument number of arguments</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopianetwork.html">QtopiaNetwork</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qtopianetwork.html">QtopiaNetwork</a></th><td>Functions for starting/stopping of network devices/interfaces</td></tr>
 <tr valign="top" class="even"><th><a href="qtopianetworkconfiguration.html">QtopiaNetworkConfiguration</a></th><td>Defines the interface to network interface configurations</td></tr>
 <tr valign="top" class="odd"><th><a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a></th><td>Describes the minimum interface that a network plug-in must provide</td></tr>
 <tr valign="top" class="even"><th><a href="qtopianetworkproperties.html">QtopiaNetworkProperties</a></th><td>Reflects the content of a network interface configuration file</td></tr>
@@ -1040,8 +894,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

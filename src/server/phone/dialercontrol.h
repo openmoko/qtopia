@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -32,6 +32,7 @@
 #include <QPhoneProfileManager>
 class DialerControlPrivate;
 class QCBSMessage;
+class QDialOptions;
 
 // Will be renamed CallControl
 class DialerControl : public QObject
@@ -87,6 +88,9 @@ signals:
     void callDialing( const QPhoneCall &call );
 
     void autoAnswerCall();
+
+    void modifyDial( QDialOptions& options, bool& handledAlready );
+
 public slots:
     QPhoneCall createCall( const QString& callType = "Voice" ); // No tr
 
@@ -96,8 +100,17 @@ public slots:
     // End the current call.
     void endCall();
 
+    // End a call with a specific modem identifier.
+    void endCall( int id );
+
+    // Activate a call with a specific modem identifier.
+    void activateCall( int id );
+
     // End all calls.
     void endAllCalls();
+
+    // End the held call.
+    void endHeldCalls();
 
     // Accept an incoming connection.
     void accept();
@@ -120,6 +133,9 @@ public slots:
 
     // Join the active and on hold connections and hangup.
     void transfer();
+
+    // Deflect the incoming call to a new number.
+    void deflect( const QString& number );
 
     void recordCall( const QPhoneCall &call );
 

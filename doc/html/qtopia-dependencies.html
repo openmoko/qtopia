@@ -16,7 +16,6 @@
 <li><a href="#sounds-and-qtopia">Sounds and Qtopia</a></li>
 <li><a href="#video4linux">Video4Linux</a></li>
 <li><a href="#zlib-usage-in-qtopia">zlib Usage in Qtopia</a></li>
-<li><a href="#libuuid-usage-in-qtopia-aka-e2fsprogs">libuuid Usage in Qtopia (aka e2fsprogs)</a></li>
 <li><a href="#libjpeg-usage-in-qtopia">libjpeg Usage in Qtopia</a></li>
 <li><a href="#xorg-or-x11-usage-in-qtopia">xorg or x11 Usage in Qtopia</a></li>
 <li><a href="#related-topics">Related topics</a></li>
@@ -48,9 +47,8 @@
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Property</th><th>Version(s)</th></tr></thead>
 <tr valign="top" class="odd"><td>Minimum</td><td>GCC 3.2</td></tr>
-<tr valign="top" class="even"><td>Recommended</td><td>GCC 3.2.1, GCC 3.3.3, GCC 3.3.5, GCC 3.4.3</td></tr>
-<tr valign="top" class="odd"><td>Experimental</td><td>GCC4.01 and GCC 4.1.0</td></tr>
-<tr valign="top" class="even"><td>Not recommended</td><td>GCC 3.3.1</td></tr>
+<tr valign="top" class="even"><td>Recommended</td><td>GCC 3.2.1, GCC 3.3.3, GCC 3.3.5, GCC 3.4.3, GCC 4.1.1 (uses symbol visibility)</td></tr>
+<tr valign="top" class="odd"><td>Not recommended</td><td>GCC 3.3.1, GCC 4.0.2</td></tr>
 </table></p>
 <p>For further information about GCC see: <a href="http://www.gnu.org">http://www.gnu.org</a></p>
 <a name="sounds-and-qtopia"></a>
@@ -78,25 +76,13 @@
 <a name="zlib-usage-in-qtopia"></a>
 <h2>zlib Usage in Qtopia</h2>
 <p>The <tt>zlib</tt> library can be downloaded from the <a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/ </a> site.</p>
-<a name="libuuid-usage-in-qtopia-aka-e2fsprogs"></a>
-<h2>libuuid Usage in Qtopia (aka e2fsprogs)</h2>
-<p>The <tt>uuid</tt> library is not provided with Qtopia. It can be downloaded from the <a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/ </a> site.</p>
-<p>Alternately if you have a SuSE Linux distribution it is likely to be provided by the package <tt>e2fsprogs-devel</tt>. On Debian it is provided by <tt>uuid-dev</tt>. The library should be in the standard location, for example, <tt>/usr/lib/libuuid.so</tt>.</p>
-<p>To check that the package is installed use your package management tool, for example :</p>
-<pre>    rpm -qa | grep e2fsprogs</pre>
-<p>. If it is not there then install it (and any dependencies) from your distributor's CD or local mirror.</p>
-<p><b>Note:</b> Not having e2fsprogs-devel installed will produce the following type of linker error:</p>
-<pre>    /usr/lib/gcc-lib/i586-suse-Linux/3.3.3/../../../../i586-suse-linux/bin/ld:
-    cannot find -luuid</pre>
-<p>If the library is installed and you still experienced this linker error then check your -L and -R settings to Qtopia's <tt>./configure</tt> script and ensure the location of the library is set in the script.</p>
-<p>Information about cross compiling <tt>libuuid</tt> can be found in the <a href="syscust-3rdparty.html#compiling-libuuid-e2fsprogs">Compiling libuuid (e2fsprogs)</a></p>
 <a name="libjpeg-usage-in-qtopia"></a>
 <h2>libjpeg Usage in Qtopia</h2>
 <p>The <tt>jpeg</tt> library is not provided with Qtopia, however it is required that Qtopia Core be configured with JPEG support.</p>
 <p>The <tt>libjpeg</tt> library can be downloaded from the <a href="http://www.ijg.org/">http://www.ijg.org/ </a> site.</p>
 <p>Alternately if you have a SuSE Linux distribution it is likely to be provided by the package <tt>libjpeg</tt>. The library should be in the standard location, for example, <tt>/usr/lib/libjpeg.so</tt>.</p>
 <p>To check that the <tt>libjpeg</tt> package is installed use your package management tool, for example:</p>
-<pre>     rpm -qa | grep libjpeg</pre>
+<pre>    rpm -qa | grep libjpeg</pre>
 <p>. If it is not there then install it (and any dependencies) from your distributor's CD or local mirror.</p>
 <p>Information about cross compiling <tt>libjpeg</tt> can be found at <a href="syscust-3rdparty.html#compiling-libjpeg62">Compiling libjpeg62</a>.</p>
 <a name="xorg-or-x11-usage-in-qtopia"></a>
@@ -116,8 +102,8 @@
 <p>To see the outline of steps required to customize Qtopia for a new device see: <a href="syscust-index.html">System Customization Guide </a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

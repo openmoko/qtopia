@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -151,7 +151,7 @@ QUniqueId QAppointmentSqlIO::addAppointment(const QAppointment& appointment, con
         if (added.isValid() && added.hasAlarm())
             addAlarm(added);
 
-        notifyAdded(appointment);
+	notifyAdded(added);
         invalidateCache();
         emit recordsUpdated();
     }

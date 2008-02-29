@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/qt4-network.qdoc -->
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4-network.qdoc -->
 <head>
   <title>Qt 4.2: The Network Module in Qt 4</title>
   <link rel="prev" href="qt4-sql.html" />
@@ -89,7 +89,7 @@
 <p>The <a href="qhostinfo.html">QHostInfo</a> class has been redesigned to use the operating system's getaddrinfo() function instead of implementing the DNS protocol. Internally, <a href="qhostinfo.html">QHostInfo</a> simply starts a thread and calls getaddrinfo() in that thread. This wasn't possible in Qt 3 because getaddrinfo() is a blocking call and Qt 3 could be configured without multithreading support.</p>
 <p>The <a href="porting4.html#qsocketdevice">QSocketDevice</a> class in Qt 3 is no longer part of the public Qt API. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> to send or receive UDP datagrams, use <a href="qudpsocket.html">QUdpSocket</a> instead. If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> because it supported blocking sockets, use <a href="qtcpsocket.html">QTcpSocket</a> or <a href="qudpsocket.html">QUdpSocket</a> instead and use the blocking functions (<a href="qabstractsocket.html#waitForConnected">waitForConnected()</a>, <a href="qabstractsocket.html#waitForConnected">waitForReadyRead()</a>, etc.). If you used <a href="porting4.html#qsocketdevice">QSocketDevice</a> from a non-GUI thread because it was the only reentrant networking class in Qt 3, use <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qtcpserver.html">QTcpServer</a>, or <a href="qudpsocket.html">QUdpSocket</a> instead.</p>
 <p>Internally, Qt 4 has a class called QSocketLayer that provides a cross-platform low-level socket API. It resembles the old <a href="porting4.html#qsocketdevice">QSocketDevice</a> class. We might make it public in a later release if users ask for it.</p>
-<p>As an aid to porting to Qt 4, the <a href="qt3support.html">Qt3Support</a> library includes <a href="q3dns.html">Q3Dns</a>, <a href="q3serversocket.html">Q3ServerSocket</a>, <a href="q3socket.html">Q3Socket</a>, and <a href="q3socketdevice.html">Q3SocketDevice</a> classes.</p>
+<p>As an aid to porting to Qt 4, the <a href="qt3support.html">Qt3Support</a> library includes Q3Dns, Q3ServerSocket, Q3Socket, and Q3SocketDevice classes.</p>
 <p>
 [Previous: <a href="qt4-sql.html">The Qt 4 Database GUI Layer</a>]
 [<a href="qt4-intro.html">Home</a>]
@@ -97,7 +97,7 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
 <td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
 </tr></table></div></address></body>

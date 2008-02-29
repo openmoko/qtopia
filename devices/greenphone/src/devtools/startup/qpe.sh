@@ -1,14 +1,13 @@
 #!/bin/ash
 
-QTOPIA_IMAGE_PATH=/
+QTOPIA_IMAGE_PATH=""
 QTOPIA_TOOLS=/mnt/user/tools
-QTOPIA_IMAGE=/
 
 # Set generic Greenphone Qtopia variables here.
 # Set Qtopia image location dependent variables in
 # the appropriate trolltech_*_startup.sh script or
 # the appropriate trolltech_*_flash.sh script.
-export QWS_MOUSE_PROTO="greenphonemousehandler"
+export QWS_MOUSE_PROTO="linuxtp"
 export QWS_KEYBOARD="greenphonekbdhandler greenphonedetecthandler"
 export QWS_SIZE="240x320"
 export QTOPIA_PHONE_DEVICE="/dev/ttyS0:115200"
@@ -18,17 +17,15 @@ restore_default()
     echo "TROLL: Restoring system default"
 
     # Restore $HOME
-    rm -rf /mnt/user/home
-    rm -rf /mnt/user/sd_home
-
-    cd /mnt/user
-    tar -xzf $QTOPIA_IMAGE_PATH/home_default.tgz
+    rm -rf /mnt/disk2/home/*
 
     # Restore writeable Qtopia filesystem
     rm -rf $QPEDIR/*
-    cd $QPEDIR
-    tar -xzf $QTOPIA_IMAGE_PATH/qtopia_default.tgz
-    export PATH=$QTOPIA_TOOLS:$PATH
+    if tar -xzf /opt/Qtopia.rom/qtopia_default.tgz -C /mnt/disk2/Qtopia; then
+        md5sum /opt/Qtopia.rom/qtopia_default.tgz > /mnt/disk2/.qtopia_default.m
+    else
+        echo "TROLL: Error extracting qtopia_default.tgz"
+    fi
 
     startupflags.sh RESTOREDEFAULTS_FLAG 0
 
@@ -36,32 +33,21 @@ restore_default()
     exec $0
 }
 
-# FIXME
-# This is a temporary fix for the slow initial boot after the database
-# has been deleted. The kernel process "tffs1" consumes nearly 100%
-# CPU usage when recreating the database. This fix reduces the performance
-# impact by storing the database journal on a tmpfs.
-# Symlink $HOME/Applications/Qtopia to /tmp/Apps_Qtopia
-# Symlink all known files stored in $HOME/Applications/Qtopia that should
-# be on persistant storage from /tmp/Apps_Qtopia/* to $HOME/Applications/.Qtopia
+# Certain database access patterns in Qtopia 4.1 exposed a performance
+# limitation in the disc-on-chip IO subsystem. This problem is evident from the
+# kernel process "tffs1" consuming nearly 100% CPU usage during filesystem
+# access. Qtopia 4.2 no longer triggers this issue. The following code removes
+# the symlink magic that worked around the problem for Qtopia 4.1 builds.
 if [ -L $HOME/Applications/Qtopia ]; then
-    echo "TROLL: Implementing fast boot fix"
-    rm -rf /tmp/Apps_Qtopia
-    mkdir -p /tmp/Apps_Qtopia
+    echo "TROLL: Disabling fast boot fix, not required for Qtopia 4.2+"
 
-    if [ ! -e $HOME/Applications/.Qtopia ]; then
-        mkdir $HOME/Applications/.Qtopia
-    fi
+    rm -f $HOME/Applications/Qtopia
 
     if [ -d $HOME/Applications/.Qtopia ]; then
-        # symlink back all known files which should be on persistent storage
-        [ ! -e /tmp/Apps_Qtopia/qtopia_db.sqlite ] && ln -s $HOME/Applications/.Qtopia/qtopia_db.sqlite /tmp/Apps_Qtopia/qtopia_db.sqlite
-        [ ! -e /tmp/Apps_Qtopia/drm ] && ln -s $HOME/Applications/.Qtopia/drm /tmp/Apps_Qtopia/drm
-        [ ! -e /tmp/Apps_Qtopia/QUniqueIdTrackerFile ] && ln -s $HOME/Applications/.Qtopia/QUniqueIdTrackerFile /tmp/Apps_Qtopia/QUniqueIdTrackerFile
-    else
-        echo "TROLL: $HOME/Applications/.Qtopia is not a directory.  All changes to the database will be lost on reboot."
+        mv $HOME/Applications/.Qtopia $HOME/Applications/Qtopia
     fi
 fi
+
 
 KILLPROGS="qpe quicklauncher qss mediaplayer sipagent phonebounce modem_keep_alive.sh"
 

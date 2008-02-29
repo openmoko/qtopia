@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -93,7 +93,7 @@ static QReadWriteLock databaseLock;
   To be notified of these events, create a QContentSet object and connect
   to its \l{QContentSet::changed()}{changed(QContentId)} signal.
 
-  \ingroup qtopiaemb
+  \ingroup content
 */
 
 /*!
@@ -151,6 +151,7 @@ QContent::QContent()
     : d( 0 )
 {
     d = new ContentLinkPrivate;
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -189,13 +190,17 @@ QContent::QContent( QContentId id )
         create( databaseLink );
     }
     else
+    {
+        d = new ContentLinkPrivate;
         qWarning() << "No content for id" << id;
+    }
 
     databaseLock.unlock();
 
     contentCacheMutex.lock();
     contentCache->insert(id, new QContent(*this));
     contentCacheMutex.unlock();
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -211,7 +216,10 @@ QContent::QContent( QContentId id )
 QContent::QContent( const QFileInfo &fi, bool store )
     : d( 0 )
 {
+    d = new ContentLinkPrivate;
+
     init( fi, store );
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -227,7 +235,10 @@ QContent::QContent( const QFileInfo &fi, bool store )
 QContent::QContent( const QString &fileName, bool store )
     : d( 0 )
 {
+    d = new ContentLinkPrivate;
+
     init( QFileInfo( fileName ), store );
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -238,7 +249,6 @@ void QContent::init( const QFileInfo &fi, bool store )
 {
     if ( fi.fileName().isEmpty() )
     {
-        d = new ContentLinkPrivate;
         return;
     }
     // note - this method is slow on Unix (see doco for QFileInfo)
@@ -279,7 +289,8 @@ void QContent::init( const QFileInfo &fi, bool store )
         if( !installContent( filepath ) )
             return;
 
-        if ( d && d->isValid() && store == true)
+        Q_ASSERT(d != NULL);
+        if ( d != NULL && d->isValid() && store == true)
         {
             databaseLock.lockForWrite();
             ChangeType change = QContent::Added;
@@ -338,18 +349,17 @@ void QContent::init( const QFileInfo &fi, bool store )
 */
 bool QContent::installContent( const QString &filePath )
 {
-    QString path = !d || !d->fileKnown() ? filePath : d->file();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    
+    QString path = !d->fileKnown() ? filePath : d->file();
 
     if( linkFileKnown() )
         return true;
 
     if( path.isEmpty() || !QFile::exists( path ) )
         return false;
-
-    if( !d )
-        d = new ContentLinkPrivate;
-
-    d->cExtraLoaded |= ContentLinkPrivate::Properties;
 
     if( DrmContentPrivate::installContent( path, this ) )
     {
@@ -359,10 +369,10 @@ bool QContent::installContent( const QString &filePath )
     }
     else if( !QContentFactory::installContent( path, this ) && QFileInfo( path ).isDir() )
     {   // If a neither a DRM or content plugin can identify a folder as a content item ignore it.
-        d = 0;
-
         return false;
     }
+
+    d->cExtraLoaded |= ContentLinkPrivate::Properties;
 
     if( !d->fileKnown() && !linkFileKnown() )
         setFile( path );
@@ -389,6 +399,7 @@ QContent::QContent( const QContent &other )
     : d( 0 )
 {
     (*this) = other;  // use assignment operator
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -398,6 +409,7 @@ QContent::QContent( const QContent &other )
 QContent::QContent( ContentLinkPrivate *link  )
     : d( link )
 {
+    Q_ASSERT(d != NULL);
 }
 
 /*!
@@ -416,7 +428,11 @@ QContent::~QContent()
 */
 bool QContent::isValid(bool force) const
 {
-    return d ? d->isValid(force) : false;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    else
+        return d->isValid(force);
 }
 
 /*!
@@ -424,7 +440,11 @@ bool QContent::isValid(bool force) const
 */
 QString QContent::name() const
 {
-    return d ? d->name() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->name();
 }
 
 /*!
@@ -434,7 +454,11 @@ QString QContent::name() const
 */
 QString QContent::type() const
 {
-    return d ? d->type() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->type();
 }
 
 /*!
@@ -442,7 +466,11 @@ QString QContent::type() const
 */
 qint64 QContent::size() const
 {
-    return d ? d->size() : Q_INT64_C(-1);
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return 0;
+    else
+        return d->size();
 }
 
 /*!
@@ -456,8 +484,11 @@ qint64 QContent::size() const
  */
 QIcon QContent::icon() const
 {
-    static const QIcon dummy;
-    return d ? d->icon() : dummy;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QIcon();
+    else
+        return d->icon();
 }
 
 /*!
@@ -471,8 +502,11 @@ QIcon QContent::icon() const
 */
 QIcon QContent::icon( QDrmRights::Permission permission ) const
 {
-    static const QIcon dummy;
-    return d ? d->icon( permission ) : dummy;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QIcon();
+    else
+        return d->icon( permission );
 }
 
 
@@ -557,15 +591,11 @@ void QContent::installBatch( const QList<QFileInfo> &batch )
             qWarning("QContent::installBatch: couldn't start transaction");
         foreach(QContent content, list.values(dbid))
         {
-            // d==0 _sometimes_ here.
-            if(content.d)
-            {
-                content.d->batchLoading = true;
-                ChangeType ctype=Updated;
-                content.commit(ctype);
-                if(content.id() != QContent::InvalidId)
-                    cidctypemap[content.id()]=ctype;
-            }
+            content.d->batchLoading = true;
+            ChangeType ctype=Updated;
+            content.commit(ctype);
+            if(content.id() != QContent::InvalidId)
+                cidctypemap[content.id()]=ctype;
         }
         if(!db.commit())
             qWarning("QContent::installBatch: couldn't commit transaction");
@@ -644,7 +674,11 @@ QContentId QContent::execToContent( const QString& bin )
 */
 QContent::DrmState QContent::drmState() const
 {
-    return d != NULL ? d->drm : Unprotected;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return Unprotected;
+    else
+        return d->drm;
 }
 
 /*!
@@ -659,7 +693,11 @@ QContent::DrmState QContent::drmState() const
 */
 QContent::UsageMode QContent::usageMode() const
 {
-    return d!= NULL ? d->um : UnknownUsage;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return UnknownUsage;
+    else
+        return d->um;
 }
 
 /*!
@@ -671,7 +709,11 @@ QContent::UsageMode QContent::usageMode() const
  */
 QContent::Role QContent::role() const
 {
-    return d!= NULL ? d->um : UnknownUsage;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return UnknownUsage;
+    else
+        return d->um;
 }
 
 /*!
@@ -679,8 +721,9 @@ QContent::Role QContent::role() const
 */
 void QContent::setRole( Role role )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
 
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
@@ -696,7 +739,11 @@ void QContent::setRole( Role role )
 */
 QString QContent::comment() const
 {
-    return d != NULL ? d->comment() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->comment();
 }
 
 /*!
@@ -704,8 +751,9 @@ QString QContent::comment() const
 */
 void QContent::setComment( const QString &comment )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
 
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
@@ -746,7 +794,11 @@ bool QContent::error() const
 */
 QDrmRights::Permissions QContent::permissions( bool force ) const
 {
-    return d ? d->permissions( force ) : QDrmRights::Unrestricted;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QDrmRights::InvalidPermission;
+    else
+        return d->permissions( force );
 }
 
 /*!
@@ -759,7 +811,11 @@ QDrmRights::Permissions QContent::permissions( bool force ) const
 */
 QDrmRights QContent::rights( QDrmRights::Permission permission ) const
 {
-    return d ? d->rights( permission ) : QDrmRights();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QDrmRights();
+    else
+        return d->rights( permission );
 }
 
 /*!
@@ -768,7 +824,11 @@ QDrmRights QContent::rights( QDrmRights::Permission permission ) const
 */
 bool QContent::fileKnown() const
 {
-    return d ? d->fileKnown() : false;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    else
+        return d->fileKnown();
 }
 
 /*!
@@ -777,7 +837,11 @@ bool QContent::fileKnown() const
 */
 QString QContent::linkFile() const
 {
-    return d ? d->linkFile() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->linkFile();
 }
 
 /*!
@@ -787,7 +851,10 @@ QString QContent::linkFile() const
 */
 QString QContent::file() const
 {
-    return d ? d->file() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    return d->file();
 }
 
 /*!
@@ -795,7 +862,10 @@ QString QContent::file() const
 */
 QList< QDrmRights::Permission > QContent::mimeTypePermissions() const
 {
-    return d ? d->mimeTypePermissions() : QList< QDrmRights::Permission >();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QList<QDrmRights::Permission>();
+    return d->mimeTypePermissions();
 }
 
 /*!
@@ -804,7 +874,11 @@ QList< QDrmRights::Permission > QContent::mimeTypePermissions() const
 
 QStringList QContent::mimeTypeIcons() const
 {
-    return d ? d->mimeTypeIcons() : QStringList();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QStringList();
+    else
+        return d->mimeTypeIcons();
 }
 
 /*!
@@ -813,7 +887,11 @@ QStringList QContent::mimeTypeIcons() const
 */
 QStringList QContent::mimeTypes() const
 {
-    return d ? d->mimeTypes() : QStringList();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QStringList();
+    else
+        return d->mimeTypes();
 }
 
 /*!
@@ -822,9 +900,10 @@ QStringList QContent::mimeTypes() const
  */
 void QContent::setMimeTypes( const QStringList &mimeTypes )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -838,17 +917,18 @@ void QContent::setMimeTypes( const QStringList &mimeTypes )
 */
 QStringList QContent::categories() const
 {
-    if (d) {
-        if (!(d->cExtraLoaded & ContentLinkPrivate::Categories)) {
-            QContent *that = const_cast<QContent*>(this);
-            databaseLock.lockForRead();
-            that->d->cCategories = that->database()->categoriesById(id());
-            databaseLock.unlock();
-            that->d->cExtraLoaded |= ContentLinkPrivate::Categories;
-        }
-        return d->cCategories;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QStringList();
+    
+    if (!(d->cExtraLoaded & ContentLinkPrivate::Categories)) {
+        QContent *that = const_cast<QContent*>(this);
+        databaseLock.lockForRead();
+        that->d->cCategories = that->database()->categoriesById(id());
+        databaseLock.unlock();
+        that->d->cExtraLoaded |= ContentLinkPrivate::Categories;
     }
-    return QStringList();
+    return d->cCategories;
 }
 
 /*!
@@ -856,9 +936,8 @@ QStringList QContent::categories() const
 */
 QContent &QContent::operator=( const QContent &other )
 {
-    //if (other.id() == InvalidId && ! other.type().startsWith("Folder/"))
-    //    return (*this);
     d = other.d;   // shallow QSharedData copy
+    Q_ASSERT(d != NULL);
     return (*this);
 }
 
@@ -897,7 +976,7 @@ bool QContent::isPreloaded() const
 QString QContent::executableName() const
 {
     if (role() == Application)
-        return d ? d->file() : QString();
+        return file();
     else
     {
         QMimeType mt(type());
@@ -919,9 +998,10 @@ QString QContent::executableName() const
 
 void QContent::setExecutableName(const QString &exec)
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -938,7 +1018,10 @@ void QContent::setExecutableName(const QString &exec)
 
 void QContent::execute() const
 {
-    if (d)
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    else
         d->execute();
 }
 
@@ -951,7 +1034,10 @@ void QContent::execute() const
 
 void QContent::execute(const QStringList& args) const
 {
-    if (d)
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    else
         d->execute(args);
 }
 
@@ -963,7 +1049,11 @@ void QContent::execute(const QStringList& args) const
 
 QString QContent::iconName() const
 {
-    return d ? d->iconName() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->iconName();
 }
 
 /*!
@@ -975,10 +1065,10 @@ QString QContent::iconName() const
  */
 void QContent::setName(const QString& docname)
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
-    if( d->cName != docname )
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    else if( d->cName != docname )
     {
         if( d->contentState() == ContentLinkPrivate::Committed )
             d->cContentState = ContentLinkPrivate::Edited;
@@ -1001,9 +1091,10 @@ void QContent::setName(const QString& docname)
  */
 void QContent::setType(const QString& doctype)
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -1029,9 +1120,10 @@ void QContent::setType(const QString& doctype)
 */
 void QContent::setIcon(const QString& iconpath)
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -1081,9 +1173,10 @@ bool QContent::isDocument() const
 */
 void QContent::setProperty(const QString& key, const QString& value, const QString &group)
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -1111,7 +1204,11 @@ void QContent::setProperty( Property key, const QString &value )
 */
 QString QContent::property(const QString& key, const QString &group) const
 {
-    return d ? d->property(key, group) : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->property(key, group);
 }
 
 /*!
@@ -1159,9 +1256,10 @@ QString QContent::propertyKey( Property property )
 */
 void QContent::setCategories( const QStringList &categoryList )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
     if( d->contentState() == ContentLinkPrivate::Committed )
         d->cContentState = ContentLinkPrivate::Edited;
 
@@ -1181,46 +1279,47 @@ void QContent::setCategories( const QStringList &categoryList )
 */
 bool QContent::commit(ChangeType &change)
 {
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+
 #ifndef QTOPIA_CONTENT_INSTALLER
-    if ( d && d->isValid() ) {
-#else
-    if ( d ) {
+    if ( !d->isValid() )
+        return false;
 #endif
 
-        if( d->cContentState == ContentLinkPrivate::New )
-            init( QFileInfo( linkFileKnown() ? linkFile() : file() ), false );
-        else if(d->cNameChanged)
-            d->syncFileName();
+    if( d->cContentState == ContentLinkPrivate::New )
+        init( QFileInfo( linkFileKnown() ? linkFile() : file() ), false );
+    else if(d->cNameChanged)
+        d->syncFileName();
 
-        databaseLock.lockForWrite();
-        d->cId = database()->postLink( d.data(), change );
-        if (id() != InvalidId) {
-            invalidate(d->cId);
-            if( d->cExtraLoaded & ContentLinkPrivate::Categories )
-            {
-                database()->removeCategoryMap(id());
-                foreach(QString cat, d->cCategories)
-                    database()->appendNewCategoryMap(cat, d->um == Application ? QLatin1String("Applications") : (d->um == Data ? QLatin1String("Data") : QLatin1String("Documents")), id(), QString::null, !d->batchLoading);
-            }
-            QMap<QPair<QString,QString>,QString>::const_iterator pit = d->cPropertyList.constBegin();
-            while (pit != d->cPropertyList.constEnd()) {
-                QPair<QString, QString> realKey = pit.key();
-                database()->writeProperty(id(), realKey.first, pit.value(), realKey.second);
-                pit++;
-            }
-            if( !d->cMimeTypeIcons.isEmpty() )
-                database()->writeProperty( d->cId, QLatin1String("MimeTypeIcons"), d->cMimeTypeIcons.join( QLatin1String(";") ), QLatin1String("Desktop Entry") );
-            databaseLock.unlock();
-            d->cContentState = ContentLinkPrivate::Committed;
-            if(!d->batchLoading)
-                updateSets(id(), change);
+    databaseLock.lockForWrite();
+    d->cId = database()->postLink( d.data(), change );
+    if (id() != InvalidId) {
+        invalidate(d->cId);
+        if( d->cExtraLoaded & ContentLinkPrivate::Categories )
+        {
+            database()->removeCategoryMap(id());
+            foreach(QString cat, d->cCategories)
+                database()->appendNewCategoryMap(cat, d->um == Application ? QLatin1String("Applications") : (d->um == Data ? QLatin1String("Data") : QLatin1String("Documents")), id(), QString::null, !d->batchLoading);
         }
-        else
-            databaseLock.unlock();
-        return id() != InvalidId;
+        QMap<QPair<QString,QString>,QString>::const_iterator pit = d->cPropertyList.constBegin();
+        while (pit != d->cPropertyList.constEnd()) {
+            QPair<QString, QString> realKey = pit.key();
+            database()->writeProperty(id(), realKey.first, pit.value(), realKey.second);
+            pit++;
+        }
+        if( !d->cMimeTypeIcons.isEmpty() )
+            database()->writeProperty( d->cId, QLatin1String("MimeTypeIcons"), d->cMimeTypeIcons.join( QLatin1String(";") ), QLatin1String("Desktop Entry") );
+        databaseLock.unlock();
+        d->cContentState = ContentLinkPrivate::Committed;
+        if(!d->batchLoading)
+            updateSets(id(), change);
     }
     else
-        return false;
+        databaseLock.unlock();
+
+    return id() != InvalidId;
 }
 
 /*!
@@ -1228,9 +1327,10 @@ bool QContent::commit(ChangeType &change)
 */
 void QContent::setFile( const QString& filename )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
 #ifndef QTOPIA_CONTENT_INSTALLER
     if( d->contentState() == ContentLinkPrivate::New )
     {
@@ -1248,9 +1348,12 @@ void QContent::setFile( const QString& filename )
  */
 void QContent::removeFiles()
 {
-    if(QFileInfo(file()).isWritable() && !file().startsWith(Qtopia::qtopiaDir()+"/"))
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    else if(QFileInfo(file()).isWritable() && !file().startsWith(Qtopia::qtopiaDir()+"/"))
     {
-        if ( d && !type().startsWith("Folder/") && type() != "Applications"
+        if ( !type().startsWith("Folder/") && type() != "Applications"
             && type() != "Games" && type() != "Settings" && fileKnown()) {
             d->removeFiles();
         }
@@ -1273,9 +1376,10 @@ void QContent::removeLinkFile()
  */
 void QContent::setLinkFile( const QString& filename )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return;
+    
 #ifndef QTOPIA_CONTENT_INSTALLER
     if( d->contentState() == ContentLinkPrivate::New )
     {
@@ -1293,7 +1397,11 @@ void QContent::setLinkFile( const QString& filename )
 */
 QString QContent::media() const
 {
-    return d ? d->media() : QString();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QString();
+    else
+        return d->media();
 }
 
 /*!
@@ -1302,10 +1410,11 @@ QString QContent::media() const
 */
 bool QContent::setMedia( const QString &media )
 {
-    if( !d )
-        d = new ContentLinkPrivate;
-
-    return d->setMedia( media );
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    else
+        return d->setMedia( media );
 }
 
 /*!
@@ -1314,7 +1423,11 @@ bool QContent::setMedia( const QString &media )
 */
 QContentId QContent::id() const
 {
-    return d ? d->cId : QContent::InvalidId;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QContent::InvalidId;
+    else
+        return d->cId;
 }
 
 /*!
@@ -1325,7 +1438,11 @@ QContentId QContent::id() const
 */
 QIODevice *QContent::open(QIODevice::OpenMode mode)
 {
-    bool newFile = d && d->contentState() == ContentLinkPrivate::New && QFile( file() ).size() == 0;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return NULL;
+
+    bool newFile = d->contentState() == ContentLinkPrivate::New && QFile( file() ).size() == 0;
 
     QIODevice *dev = d ? d->open(mode) : 0;
     if (dev && !newFile && mode & QIODevice::WriteOnly || mode & QIODevice::Append
@@ -1344,7 +1461,11 @@ QIODevice *QContent::open(QIODevice::OpenMode mode)
  */
 QIODevice *QContent::open() const
 {
-    return d && fileKnown() ? d->open( QIODevice::ReadOnly ) : 0;
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return NULL;
+    else
+        return fileKnown() ? d->open( QIODevice::ReadOnly ) : 0;
 }
 
 /*!
@@ -1354,6 +1475,10 @@ QIODevice *QContent::open() const
 */
 bool QContent::save(const QByteArray &data)
 {
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    
     QIODevice *dev = open(QIODevice::WriteOnly);
     if (!dev)
         return false;
@@ -1416,8 +1541,12 @@ bool QContent::copyContent(const QContent &from)
 
 bool QContent::copyTo(const QString &newPath)
 {
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+    
     bool ok;
-    if(!d)
+    if(!isValid())
         return false;
     QContent newCopy(*this);
     newCopy.d->cId = QContent::InvalidId;
@@ -1440,6 +1569,10 @@ bool QContent::copyTo(const QString &newPath)
 
 bool QContent::moveTo(const QString &newPath)
 {
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return false;
+
     if(copyTo(newPath)) {
         removeFiles();
         *this = QContent(newPath);
@@ -1571,7 +1704,11 @@ void QContent::updateSets(QContentId id, QContent::ChangeType c)
 
 QDateTime QContent::lastUpdated() const
 {
-    return d ? d->lastUpdated() : QDateTime();
+    Q_ASSERT(d != NULL);
+    if (d == NULL)
+        return QDateTime();
+    else
+        return d->lastUpdated();
 }
 
 QDataStream& operator<<(QDataStream& ds, const QContentId &id)
@@ -1608,15 +1745,21 @@ QDBusArgument &operator<<(QDBusArgument &a, const QContentId &id)
 
 QTOPIA_EXPORT QDebug &operator<<(QDebug &debug, const QContent &content)
 {
-    if (content.d)
-        return debug << content.d.data();
-    else
-        return debug << "(QContent::InvalidId)";
+    return debug << content.d.data();
 }
 
 uint qHash(const QContentId &id)
 {
-    static QByteArray colon(":");
-    QByteArray tmp=QByteArray::number(id.first) + colon + QByteArray::number(id.second);
-    return qHash(tmp);
+    const uchar *p = reinterpret_cast<const uchar *>(&id);
+    int n = sizeof(id);
+    uint h = 0;
+    uint g;
+
+    while (n--) {
+        h = (h << 4) + *p++;
+        if ((g = (h & 0xf0000000)) != 0)
+            h ^= g >> 23;
+        h &= ~g;
+    }
+    return h;
 }

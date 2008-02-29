@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,40 +43,6 @@
 //
 // DocumentLauncherView implementation
 
-class MyDocPropertiesDialog : public QDialog
-{
-    Q_OBJECT
-    public:
-        MyDocPropertiesDialog( const QContent &lnk, QWidget* parent = 0 );
-        ~MyDocPropertiesDialog();
-
-        void done(int);
-
-    private:
-        QDocumentPropertiesWidget *d;
-};
-
-MyDocPropertiesDialog::MyDocPropertiesDialog( const QContent &l, QWidget* parent )
-    : QDialog( parent )
-{
-    setWindowTitle( tr("Properties") );
-
-    QVBoxLayout *vbox = new QVBoxLayout( this );
-    d = new QDocumentPropertiesWidget( l, this );
-    vbox->addWidget( d );
-    connect( d, SIGNAL(done()), this, SLOT(reject()) );
-}
-
-MyDocPropertiesDialog::~MyDocPropertiesDialog()
-{
-}
-
-void MyDocPropertiesDialog::done(int ok)
-{
-    if ( ok )
-        d->applyChanges();
-    QDialog::done( ok );
-}
 
 class QLabeledProgressBar : public QProgressBar
 {
@@ -251,10 +217,9 @@ void DocumentLauncherView::propertiesDoc()
         propLnk = doc;
         if (propDlg)
             delete propDlg;
-        propDlg = new MyDocPropertiesDialog(propLnk, this);
+        propDlg = new QDocumentPropertiesDialog(propLnk, this);
         propDlg->setObjectName("document-properties");
         QtopiaApplication::showDialog(propDlg);
-        propDlg->setWindowState(propDlg->windowState() | Qt::WindowMaximized);
     }
 }
 

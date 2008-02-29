@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -735,7 +735,7 @@ void QGoogleCalendarContext::syncAccount(const QString &email)
     QGoogleCalendarFetcher *f = new QGoogleCalendarFetcher(s, email, mAccounts[email].password, url, this);
 
     connect(f, SIGNAL(fetchProgressChanged(int, int)), this, SLOT(updateFetchingProgress(int, int)));
-    connect(f, SIGNAL(completed(int)), this, SLOT(updateFetchingState(int)));
+    connect(f, SIGNAL(completed(QGoogleCalendarContext::Status)), this, SLOT(updateFetchingState(QGoogleCalendarContext::Status)));
 
     mFetchers.append(f);
     f->fetch();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -42,7 +42,7 @@
 /*!
   \class QContactDelegate
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactDelegate class provides item drawing for QContactModel items.
 
   The QContactDelegate class provides drawing of QContactModel items to aid in consistent
@@ -301,7 +301,7 @@ QSize QContactDelegate::sizeHint(const QStyleOptionViewItem & option,
 /*!
   \class QContactListView
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactListView class provides a list view widget with some convenience functions
   for use with QContactModel.
 
@@ -433,7 +433,7 @@ public:
 /*!
   \class QContactSelector
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactSelector class provides a way of selecting a contact from a QContactModel.
 
   The QContactSelector dialog allows selecting an existing or new contact.
@@ -563,7 +563,7 @@ public:
 /*!
   \class QPhoneTypeSelector
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QPhoneTypeSelector class a way of selecting a single phone number from or for
   a QContact.
 

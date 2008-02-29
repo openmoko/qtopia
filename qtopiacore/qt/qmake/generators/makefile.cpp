@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -2002,8 +2002,14 @@ MakefileGenerator::writeExtraCompilerTargets(QTextStream &t)
                 continue;
 
             QString cmd = replaceExtraCompilerVariables(tmp_cmd, escapeFilePaths(inputs), QStringList(tmp_out));
-            t << escapeFilePath(tmp_out) << ": " << valList(escapeFilePaths(inputs)) << " " << valList(escapeFilePaths(deps)) << "\n\t"
-              << cmd << endl << endl;
+            t << escapeFilePath(tmp_out) << ":";
+            // compiler.CONFIG+=explicit_dependencies means that ONLY compiler.depends gets to cause Makefile dependencies
+            if(project->values((*it) + ".CONFIG").indexOf("explicit_dependencies") != -1) {
+                t << " " << valList(escapeFilePaths(fileFixify(tmp_dep, Option::output_dir, Option::output_dir)));
+            } else {
+                t << " " << valList(escapeFilePaths(inputs)) << " " << valList(escapeFilePaths(deps));
+            }
+            t << "\n\t" << cmd << endl << endl;
             continue;
         }
         for(QStringList::ConstIterator input = tmp_inputs.begin(); input != tmp_inputs.end(); ++input) {

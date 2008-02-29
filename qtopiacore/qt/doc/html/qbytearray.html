@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/src/corelib/tools/qbytearray.cpp -->
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/src/corelib/tools/qbytearray.cpp -->
 <head>
   <title>Qt 4.2: QByteArray Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -14,8 +14,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QByteArray Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
 <p>The QByteArray class provides an array of bytes. <a href="#details">More...</a></p>
-<pre> #include &lt;QByteArray&gt;</pre><p>Inherited by <a href="q3cstring.html">Q3CString</a>.</p>
-<p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
+<pre> #include &lt;QByteArray&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
 <li><a href="qbytearray-members.html">List of all members, including inherited members</a></li>
 <li><a href="qbytearray-qt3.html">Qt 3 support members</a></li>
@@ -174,30 +173,30 @@
 <li><div class="fn"/>int <b><a href="qbytearray.html#qstrnicmp">qstrnicmp</a></b> ( const char * <i>str1</i>, const char * <i>str2</i>, uint <i>len</i> )</li>
 <li><div class="fn"/>uint <b><a href="qbytearray.html#qstrnlen">qstrnlen</a></b> ( const char * <i>str</i>, uint <i>maxlen</i> )</li>
 <li><div class="fn"/>int <b><a href="qbytearray.html#qvsnprintf">qvsnprintf</a></b> ( char * <i>str</i>, size_t <i>n</i>, const char * <i>fmt</i>, va_list <i>ap</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-31">operator!=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-32">operator!=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-33">operator!=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-30">operator!=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-31">operator!=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-not-eq-32">operator!=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-2">operator+</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-19">operator+</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-20">operator+</a></b> ( const QByteArray &amp; <i>a1</i>, char <i>a2</i> )</li>
-<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-21">operator+</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-22">operator+</a></b> ( char <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-10">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-11">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-12">operator&lt;</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-16">operator+</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-17">operator+</a></b> ( const QByteArray &amp; <i>a1</i>, char <i>a2</i> )</li>
+<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-18">operator+</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>const QByteArray <b><a href="qbytearray.html#operator-2b-19">operator+</a></b> ( char <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-8">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-9">operator&lt;</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-10">operator&lt;</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-lt-lt-34">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-9">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-10">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-11">operator&lt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-46">operator==</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-47">operator==</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-48">operator==</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-9">operator&gt;</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-10">operator&gt;</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-11">operator&gt;</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-9">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-10">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-11">operator&gt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-7">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-8">operator&lt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-lt-eq-9">operator&lt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-44">operator==</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-45">operator==</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-eq-eq-46">operator==</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-7">operator&gt;</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-8">operator&gt;</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-9">operator&gt;</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-7">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-8">operator&gt;=</a></b> ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbytearray.html#operator-gt-eq-9">operator&gt;=</a></b> ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</li>
 <li><div class="fn"/>QDataStream &amp; <b><a href="qbytearray.html#operator-gt-gt-16">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</li>
 </ul>
 <a name="details"></a>
@@ -1010,78 +1009,78 @@
 <p><b>Warning:</b> Since vsnprintf() shows different behavior on certain platforms, you should not rely on the return value or on the fact that you will always get a 0 terminated string back.</p>
 <p>Ideally, you should never call this function but use <a href="qstring.html#sprintf">QString::sprintf</a>() instead.</p>
 <p>See also <a href="qbytearray.html#qsnprintf">qsnprintf</a>() and <a href="qstring.html#sprintf">QString::sprintf</a>().</p>
-<h3 class="fn"><a name="operator-not-eq-31"></a>bool operator!= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-30"></a>bool operator!= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is not equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-not-eq-32"></a>bool operator!= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-31"></a>bool operator!= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is not equal to string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-not-eq-33"></a>bool operator!= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-32"></a>bool operator!= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is not equal to byte array <i>a2</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-2b-2"></a>const QByteArray operator+ ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a byte array that is the result of concatenating byte array <i>a1</i> and byte array <i>a2</i>.</p>
 <p>See also <a href="qbytearray.html#operator-2b-eq">QByteArray::operator+=</a>().</p>
-<h3 class="fn"><a name="operator-2b-19"></a>const QByteArray operator+ ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-2b-16"></a>const QByteArray operator+ ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a byte array that is the result of concatenating byte array <i>a1</i> and string <i>a2</i>.</p>
-<h3 class="fn"><a name="operator-2b-20"></a>const QByteArray operator+ ( const QByteArray &amp; <i>a1</i>, char <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-2b-17"></a>const QByteArray operator+ ( const QByteArray &amp; <i>a1</i>, char <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a byte array that is the result of concatenating byte array <i>a1</i> and character <i>a2</i>.</p>
-<h3 class="fn"><a name="operator-2b-21"></a>const QByteArray operator+ ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-2b-18"></a>const QByteArray operator+ ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a byte array that is the result of concatenating string <i>a1</i> and byte array <i>a2</i>.</p>
-<h3 class="fn"><a name="operator-2b-22"></a>const QByteArray operator+ ( char <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-2b-19"></a>const QByteArray operator+ ( char <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a byte array that is the result of concatenating character <i>a1</i> and byte array <i>a2</i>.</p>
-<h3 class="fn"><a name="operator-lt-10"></a>bool operator&lt; ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-8"></a>bool operator&lt; ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically less than byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-11"></a>bool operator&lt; ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-9"></a>bool operator&lt; ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically less than string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-12"></a>bool operator&lt; ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-10"></a>bool operator&lt; ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically less than byte array <i>a2</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-lt-lt-34"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QByteArray &amp; <i>ba</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes byte array <i>ba</i> to the stream <i>out</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-lt-eq-9"></a>bool operator&lt;= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-eq-7"></a>bool operator&lt;= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically less than or equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-eq-10"></a>bool operator&lt;= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-eq-8"></a>bool operator&lt;= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically less than or equal to string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-lt-eq-11"></a>bool operator&lt;= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-eq-9"></a>bool operator&lt;= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically less than or equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-eq-eq-46"></a>bool operator== ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-44"></a>bool operator== ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-eq-eq-47"></a>bool operator== ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-45"></a>bool operator== ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is equal to string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-eq-eq-48"></a>bool operator== ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-46"></a>bool operator== ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-9"></a>bool operator&gt; ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-7"></a>bool operator&gt; ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically greater than byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-10"></a>bool operator&gt; ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-8"></a>bool operator&gt; ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically greater than string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-11"></a>bool operator&gt; ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-9"></a>bool operator&gt; ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically greater than byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-eq-9"></a>bool operator&gt;= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-eq-7"></a>bool operator&gt;= ( const QByteArray &amp; <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically greater than or equal to byte array <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-eq-10"></a>bool operator&gt;= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-eq-8"></a>bool operator&gt;= ( const QByteArray &amp; <i>a1</i>, const char * <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if byte array <i>a1</i> is lexically greater than or equal to string <i>a2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-eq-11"></a>bool operator&gt;= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-eq-9"></a>bool operator&gt;= ( const char * <i>a1</i>, const QByteArray &amp; <i>a2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>a1</i> is lexically greater than or equal to byte array <i>a2</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-gt-gt-16"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QByteArray &amp; <i>ba</i> )</h3>
@@ -1137,7 +1136,7 @@
 <p>Use <a href="qbytearray.html#toUpper">toUpper</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
 <td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
 </tr></table></div></address></body>

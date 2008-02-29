@@ -13,7 +13,6 @@ DQT_PROJECTS=\
     libraries/qt/corelib\
     libraries/qt/gui\
     libraries/qt/network\
-    libraries/qt/opengl\
     libraries/qt/sql\
     libraries/qt/xml\
     libraries/qt/qt3support\
@@ -29,6 +28,7 @@ DQT_PROJECTS=\
     tools/qt/designer/src/plugins\
     tools/qt/linguist
 !win:DQT_PROJECTS+=tools/qt/qvfb
+contains(DQT_CONFIG,opengl):DQT_PROJECTS+=libraries/qt/opengl
 !equals(DQT_MINOR_VERSION,1):DQT_PROJECTS+=libraries/qt/svg
 qtopia_depot:DQT_PROJECTS*=tools/qt/qdoc3
 win32:DQT_PROJECTS*=\

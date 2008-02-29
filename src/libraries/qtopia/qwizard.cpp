@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -55,7 +55,7 @@
   Note: if one page of the wizard has controls which enable and disable other pages
   use connectPageEnabler instead of calling setAppropriate manually.
 
-  \ingroup qtopiaemb
+  \ingroup dialogs
 */
 
 class QWizardPrivate : public QWidget

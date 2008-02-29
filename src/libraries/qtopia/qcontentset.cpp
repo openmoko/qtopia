@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -300,7 +300,7 @@ int FilteredLessThanFunctor::timeCompareDescending(const QContent& left, const Q
      \endlist
   \endlist
 
-  \ingroup qtopiaemb
+  \ingroup content
 */
 
 /*!
@@ -1099,6 +1099,8 @@ public:
   QAbstractItemModel subclass
 
   The QContentSetModel provides a model to represent the data in a QContentSet.
+
+  \ingroup content
 */
 
 /*!

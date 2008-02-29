@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -107,7 +107,7 @@ void SelectedItemConnector::animationStateChanged(QTimeLine::State state)
 {
     // We're only interested in when the timeline finishes.
     if ( state == QTimeLine::NotRunning ) {
-        selectedItem->update(selectedItem->boundingRect());
+        selectedItem->animationFinished();
     }
 }
 

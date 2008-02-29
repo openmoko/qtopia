@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -117,14 +117,11 @@ void QBluetoothServiceController_Private::setSecurityOptions(const QString &name
 QBluetooth::SecurityOptions QBluetoothServiceController_Private::securityOptions(const QString &name)
 {
     QVariant options = serviceValue(name, "Security");
-    qLog(Bluetooth) << "READ SECURITY:" << options;
+    if (options.isValid())
+        return static_cast<QBluetooth::SecurityOptions>(options.toInt());
 
-
-    if (options.canConvert<QBluetooth::SecurityOptions>())
-        return options.value<QBluetooth::SecurityOptions>();
-
-    qLog(Bluetooth) << "But can't convert!";
-    return QBluetooth::SecurityOptions(-1);
+    qLog(Obex) << "QBluetoothServiceController::securityOptions() no valid security options for service:" << name;
+    return 0;
 }
 
 QString QBluetoothServiceController_Private::translatableDisplayName(const QString &name)

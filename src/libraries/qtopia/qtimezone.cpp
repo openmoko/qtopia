@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -68,6 +68,7 @@ public:
             r.setDate(QDate(1970, 1, 1));
             r.setTime(QTime(0,0,0));
         }
+        r.setTimeSpec(Qt::UTC);
 
         return r;
     }
@@ -222,6 +223,8 @@ bool TimeZoneData::isValid() const
 
 int TimeZoneData::findTranstionTimeIndex( const QDateTime & c, bool utc ) const
 {
+    QDateTime ct = c;
+    ct.setTimeSpec(Qt::UTC);
     for ( int i = 0; i < (int)transitionTimes.count(); ++i ) {
         transitionInfo transTime = transitionTimes[i];
         ttinfo transInfo = timeTypes[ transTime.timeTypeIndex ];
@@ -231,7 +234,7 @@ int TimeZoneData::findTranstionTimeIndex( const QDateTime & c, bool utc ) const
         if ( !utc )
             thisItTime = thisItTime.addSecs( transInfo.utcOffset );
 
-        if ( thisItTime > c ) {
+        if(thisItTime > ct) {
             // gone one too far; we've passed it. return the previous one, if
             // it exists
             if ( i > 0 )
@@ -300,7 +303,9 @@ QDateTime TimeZoneData::fromUtc( const QDateTime &utc ) const
     if ( !isValid() ) { qWarning("TimeZoneData::fromUtc invalid"); return QDateTime(); }
     // convert from utc to "this" timezone
     int timeIndex = findTimeTypeIndex( utc, true );
-    return utc.addSecs( timeTypes[ timeIndex ].utcOffset );
+    QDateTime rv = utc.addSecs( timeTypes[ timeIndex ].utcOffset );
+    rv.setTimeSpec(Qt::LocalTime);
+    return rv;
 }
 
 QDateTime TimeZoneData::convert( const QDateTime &,
@@ -787,7 +792,7 @@ QStringList TzCache::ids()
   QTimeZone provides access to timezone data and conversion between
   times in different time zones and formats.
 
-  \ingroup qtopiaemb
+  \ingroup time
 */
 
 /*!

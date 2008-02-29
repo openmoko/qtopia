@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,8 @@
 
 #include <QDialog>
 #include <QModelIndex>
+#include <QtopiaAbstractService>
+#include <QDSActionRequest>
 
 class PackageModel;
 class QTreeView;
@@ -31,11 +33,12 @@ class QMenu;
 class QActionGroup;
 class QTextEdit;
 class QAction;
+class QShowEvent;
 
 class PackageView : public QDialog
 {
     Q_OBJECT
-
+    friend class PackageManagerService;
 public:
 
     PackageView(QWidget* parent = 0, Qt::WFlags flags = 0);
@@ -51,6 +54,8 @@ protected:
 #ifdef QTOPIA_PHONE
     void keyPressEvent( QKeyEvent * );
 #endif
+
+    void showEvent( QShowEvent * );
 
 private slots:
     void init();
@@ -70,6 +75,8 @@ private:
     PackageModel *model;
     QTextEdit *info;
     QString prevTarget;
+
+    bool listsPrepared;
 
     QMenu *menuServers;
     QMenu *menuTarget;

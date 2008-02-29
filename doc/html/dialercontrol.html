@@ -41,9 +41,13 @@
 <h3>Public Slots</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#accept">accept</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="dialercontrol.html#activateCall">activateCall</a></b> ( int <i>id</i> )</li>
+<li><div class="fn"/>void <b><a href="dialercontrol.html#deflect">deflect</a></b> ( const QString &amp; <i>number</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#dial">dial</a></b> ( const QString &amp; <i>number</i>, bool <i>sendcallerid</i>, const QString &amp; <i>callType</i> = &quot;Voice&quot;, const QUniqueId &amp; <i>contact</i> = QUniqueId() )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#endAllCalls">endAllCalls</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#endCall">endCall</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="dialercontrol.html#endCall-2">endCall</a></b> ( int <i>id</i> )</li>
+<li><div class="fn"/>void <b><a href="dialercontrol.html#endHeldCalls">endHeldCalls</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#hold">hold</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#join">join</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#recordCall">recordCall</a></b> ( const QPhoneCall &amp; <i>call</i> )</li>
@@ -68,6 +72,7 @@
 <li><div class="fn"/>void <b><a href="dialercontrol.html#callMissed">callMissed</a></b> ( const QPhoneCall &amp; <i>call</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#callPutOnHold">callPutOnHold</a></b> ( const QPhoneCall &amp; <i>call</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#missedCount">missedCount</a></b> ( int <i>missedCalls</i> )</li>
+<li><div class="fn"/>void <b><a href="dialercontrol.html#modifyDial">modifyDial</a></b> ( QDialOptions &amp; <i>options</i>, bool &amp; <i>handledAlready</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#pendingTonesChanged">pendingTonesChanged</a></b> ( const QPhoneCall &amp; <i>call</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#requestFailed">requestFailed</a></b> ( const QPhoneCall &amp; <i>call</i>, QPhoneCall::Request <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="dialercontrol.html#stateChanged">stateChanged</a></b> ()</li>
@@ -100,6 +105,8 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="accept"></a>void DialerControl::accept ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Accepts an incoming call. Has no effect if there is no incoming call.</p>
+<h3 class="fn"><a name="activateCall"></a>void DialerControl::activateCall ( int <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Activate a specific call with the modem identifier <i>id</i>. This will typically only work with GSM calls that set the QPhoneCall::modemIdentifier() value. It is used to implement the GSM <tt>2x SEND</tt> key sequence where <tt>x</tt> is the identifier.</p>
 <h3 class="fn"><a name="activeCalls"></a><a href="qlist.html">QList</a>&lt;QPhoneCall&gt; DialerControl::activeCalls () const</h3>
 <p>Returns the list of calls in the active state (i.e. not on hold).</p>
 <h3 class="fn"><a name="activeCallsCount"></a>uint DialerControl::activeCallsCount () const</h3>
@@ -132,6 +139,8 @@
 <p>Returns the list of calls on hold.</p>
 <h3 class="fn"><a name="callsOnHoldCount"></a>uint DialerControl::callsOnHoldCount () const</h3>
 <p>Returns the number of calls on hold.</p>
+<h3 class="fn"><a name="deflect"></a>void DialerControl::deflect ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Deflect the incoming call to a new <i>number</i>.</p>
 <h3 class="fn"><a name="dial"></a>void DialerControl::dial ( const <a href="qstring.html">QString</a> &amp; <i>number</i>, bool <i>sendcallerid</i>, const <a href="qstring.html">QString</a> &amp; <i>callType</i> = &quot;Voice&quot;, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>contact</i> = QUniqueId() )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Dials a <i>number</i> if there are no currently active calls. If a <i>contact</i> is specified, it is used as the contact to display and insert into the call history. Before calling this function, you should check that there are no incoming calls, or active calls. If <i>sendcallerid</i> is true, then send the caller's identifier as part of the dial sequence.</p>
 <p>If <i>callType</i> is &quot;Voice&quot; a GSM call will be dialed. If <i>callType</i> is &quot;VoIP&quot; a VoIP call will be dialed.</p>
@@ -140,6 +149,11 @@
 <h3 class="fn"><a name="endCall"></a>void DialerControl::endCall ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Ends the current call(s). The current call(s) is searched for in this order:</p>
 <p>1. Currently dialing call 2. Active calls 3. Incoming call 4. Calls on Hold</p>
+<h3 class="fn"><a name="endCall-2"></a>void DialerControl::endCall ( int <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>End a specific call with the modem identifier <i>id</i>. This will typically only work with GSM calls that set the QPhoneCall::modemIdentifier() value. It is used to implement the GSM <tt>1x SEND</tt> key sequence where <tt>x</tt> is the identifier.</p>
+<h3 class="fn"><a name="endHeldCalls"></a>void DialerControl::endHeldCalls ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>End the held calls.</p>
 <h3 class="fn"><a name="hasActiveCalls"></a>bool DialerControl::hasActiveCalls () const</h3>
 <p>Returns true if there are any active calls (i.e. calls not on hold).</p>
 <h3 class="fn"><a name="hasCallsOnHold"></a>bool DialerControl::hasCallsOnHold () const</h3>
@@ -162,6 +176,8 @@
 <p>Returns the number of missed calls.</p>
 <h3 class="fn"><a name="missedCount"></a>void DialerControl::missedCount ( int <i>missedCalls</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the number of <i>missedCalls</i> changes.</p>
+<h3 class="fn"><a name="modifyDial"></a>void DialerControl::modifyDial ( QDialOptions &amp; <i>options</i>, bool &amp; <i>handledAlready</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Emitted whenever a dial is about to be performed with the information in <i>options</i>. This gives other parts of the server (e.g. <a href="gsmkeyactions.html">GsmKeyActions</a>) the ability to modify the request if it contains supplementary service information. The <i>handledAlready</i> parameter is set to false prior to emitting the signal. If a slot sets this to true, then <a href="dialercontrol.html">DialerControl</a> will assume that the request was already handled and the normal dial should not be performed.</p>
 <h3 class="fn"><a name="pendingTonesChanged"></a>void DialerControl::pendingTonesChanged ( const QPhoneCall &amp; <i>call</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the pending tones for the <i>call</i> changes.</p>
 <h3 class="fn"><a name="recordCall"></a>void DialerControl::recordCall ( const QPhoneCall &amp; <i>call</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -175,12 +191,13 @@
 <h3 class="fn"><a name="stateChanged"></a>void DialerControl::stateChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when any call state changes.</p>
 <h3 class="fn"><a name="transfer"></a>void DialerControl::transfer ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Joins the active calls and calls on hold to form a multiparty call, and then detaches the local user.</p>
 <h3 class="fn"><a name="unhold"></a>void DialerControl::unhold ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Makes calls on hold active.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

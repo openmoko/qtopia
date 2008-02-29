@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -25,7 +25,6 @@
 #include <qcontent.h>
 
 #include <qobject.h>
-#include <qstring.h>
 #include <qrect.h>
 #include <qimage.h>
 #include <qsize.h>
@@ -35,7 +34,8 @@
 
 #define DEFAULT_LEVELS 4
 
-class ImageIO : public QObject {
+class ImageIO : public QObject
+{
     Q_OBJECT
 public:
     ImageIO( QObject* parent = 0 );

@@ -29,7 +29,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QCopEnvelope class encapsulates and sends QCop messages over QCopChannels.</p>
-<p>QCop messages allow applications to communicate with each other by sending messages using <tt>QCopEnvelope</tt> and receivng messages by connecting to a <tt>QCopChannel</tt>.</p>
+<p>QCop messages allow applications to communicate with each other by sending messages using <tt>QCopEnvelope</tt> and receiving messages by connecting to a <tt>QCopChannel</tt>.</p>
 <p>To send a message, use the following protocol:</p>
 <pre>    QCopEnvelope e(channelname, messagename);
     e &lt;&lt; parameter1 &lt;&lt; parameter2 &lt;&lt; ...;</pre>
@@ -49,7 +49,7 @@
               this, SLOT(fooBarMessage(const QString&amp;,const QByteArray&amp;)) );</pre>
 </li>
 </ul>
-<p>See also: <a href="qcop.html">QCop Messages</a> and <a href="services.html">Services</a>.</p>
+<p>See also: Qtopia IPC and <a href="services.html">Services</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QCopEnvelope"></a>QCopEnvelope::QCopEnvelope ( const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )</h3>
@@ -58,8 +58,8 @@
 <p>Writes the message and then destroys the <a href="qcopenvelope.html">QCopEnvelope</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

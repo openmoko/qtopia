@@ -22,9 +22,9 @@ KEYBOARDSOURCES =  ../keyboard/keyboard.cpp \
 HEADERS+=$$KEYBOARDHEADERS
 SOURCES+=$$KEYBOARDSOURCES
 
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*.png
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*
 pics.path=/pics/keyboard
-
+pics.hint=pics
 #INSTALLS += pics //already installed by keyboard
  
 pkg.name=qpe-dockedkeyboard

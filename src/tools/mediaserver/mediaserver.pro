@@ -4,6 +4,9 @@ qtopia_project(qtopia app)
 TARGET=mediaserver
 CONFIG+=no_tr
 
+QMAKE_CXXFLAGS_WARN_ON+=-Wno-non-virtual-dtor
+
+
 HEADERS =   \
             helixengine.h \
             helixsession.h \
@@ -23,13 +26,13 @@ HEADERS =   \
             devicemanager.h \
             contentdevice.h 
 
-
 HEADERS +=  \
             helixutil.h \
             helixplayer.h \
             helixsite.h \
             helixvideosurface.h \
             reporterror.h
+
 
 SOURCES =   \
             helixengine.cpp \

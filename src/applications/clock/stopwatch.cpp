@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,7 @@
 #include <QKeySequence>
 #include <QAnalogClock>
 
+
 static const int sw_prec = 2;
 static const int magic_daily = 2292922;
 static const int magic_countdown = 2292923;
@@ -77,12 +78,21 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
         stopStart->setIconSize(QSize(iconSz, iconSz));
         stopStart->setIcon( QIcon( ":icon/select" ) );
         stopStart->setText( " " + stopStart->text() );
-        stopStart->setShortcut(QKeySequence(Qt::Key_Select));
+        //stopStart->setShortcut(QKeySequence(Qt::Key_Select));
         reset->setText("# " + reset->text());
         reset->setShortcut(QKeySequence(Qt::Key_NumberSign));
-        stopStart->setFocusPolicy(Qt::NoFocus);
-        reset->setFocusPolicy(Qt::NoFocus);
-        QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+
+        // The buttons DO need keyboard focus, otherwise it is not possible to operate them
+        // on a non-touchscreen phone.
+        //stopStart->setFocusPolicy(Qt::NoFocus);
+        //reset->setFocusPolicy(Qt::NoFocus);
+
+        // Took this next line out because it doesn't apply when the Reset button has the focus.
+        // There's no longer any need for it anyway, because we have re-introduced focus.
+        //QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+
+        // Make sure the stop/start button is the one that has focus at first.
+        stopStart->setFocus(Qt::OtherFocusReason);
     }
 #endif
 
@@ -118,8 +128,10 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
 
 #ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred()) {
-        nextLapBtn->setFocusPolicy ( Qt::NoFocus );
-        prevLapBtn->setFocusPolicy ( Qt::NoFocus );
+        // The buttons DO need keyboard focus, otherwise it is not possible to operate them
+        // on a non-touchscreen phone.
+        //nextLapBtn->setFocusPolicy ( Qt::NoFocus );
+        //prevLapBtn->setFocusPolicy ( Qt::NoFocus );
     }
 #endif
 
@@ -180,7 +192,7 @@ void StopWatch::stopStartStopWatch()
         if (!Qtopia::mousePreferred()) {
             stopStart->setIcon( QIcon( ":icon/select" ) );
             stopStart->setText( " " + stopStart->text() );
-            stopStart->setShortcut(Qt::Key_Select);
+            //stopStart->setShortcut(Qt::Key_Select);
             reset->setText( "# " + reset->text() );
             reset->setShortcut(Qt::Key_NumberSign);
         }
@@ -198,7 +210,7 @@ void StopWatch::stopStartStopWatch()
         if (!Qtopia::mousePreferred()) {
             stopStart->setIcon( QIcon( ":icon/select" ) );
             stopStart->setText( " " + stopStart->text() );
-            stopStart->setShortcut(Qt::Key_Select);
+//            stopStart->setShortcut(Qt::Key_Select);
             reset->setText( "# " + reset->text() );
             reset->setShortcut(Qt::Key_NumberSign);
         }
@@ -322,10 +334,13 @@ void StopWatch::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
     updateClock();
+    /*
+      // We don't need to do this, because we are giving the stop/start button the focus in the ctor.
 #ifdef QTOPIA_PHONE
     if (!Qtopia::mousePreferred()) {
-        setFocus();
+           setFocus();
     }
 #endif
+    */
 }
 

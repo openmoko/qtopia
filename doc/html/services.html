@@ -13,7 +13,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Services<br /><small></small></h1>
 <a name="top"></a><a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Application Services are standardized APIs to access functionality supplied by other applications. They allow applications to invoke the services of other applications, while allowing the specific application providing the service to be selected by the system integrator or end-user. Messages between applications are delivered via <a href="qcop.html">QCop</a>.</p>
+<p>Application Services are standardized APIs to access functionality supplied by other applications. They allow applications to invoke the services of other applications, while allowing the specific application providing the service to be selected by the system integrator or end-user. Messages between applications are delivered via Qtopia IPC.</p>
 <a name="pre-defined-services"></a>
 <h2>Pre-defined Services</h2>
 <p>The following provides a list of the pre-defined services:</p>
@@ -27,10 +27,10 @@
 <td><a href="contactsservice.html">Contacts</a></td>
 <td align="right"><b>I&nbsp;</b></td>
 <td><a href="inputmethodservice.html">InputMethod</a></td>
+<td align="right"><b>S&nbsp;</b></td>
+<td><a href="settingsservice.html">Settings</a></td>
 <td align="right"></td>
-<td><a href="settingsmanagerservice.html">SettingsManager</a></td>
-<td align="right"></td>
-<td><a href="timeservice.html">Time</a></td>
+<td><a href="telephonyservice.html">Telephony</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -38,6 +38,18 @@
 <td align="right"></td>
 <td><a href="contactsphoneservice.html">ContactsPhone</a></td>
 <td align="right"><b>P&nbsp;</b></td>
+<td><a href="packagemanagerservice.html">PackageManager</a></td>
+<td align="right"></td>
+<td><a href="settingsmanagerservice.html">SettingsManager</a></td>
+<td align="right"></td>
+<td><a href="timeservice.html">Time</a></td>
+</tr>
+<tr>
+<td align="right"><b>C&nbsp;</b></td>
+<td><a href="calendarservice.html">Calendar</a></td>
+<td align="right"><b>D&nbsp;</b></td>
+<td><a href="dateservice.html">Date</a></td>
+<td align="right"></td>
 <td><a href="photoeditservice.html">PhotoEdit</a></td>
 <td align="right"></td>
 <td><a href="smsservice.html">SMS</a></td>
@@ -45,10 +57,10 @@
 <td><a href="timemonitorservice.html">TimeMonitor</a></td>
 </tr>
 <tr>
-<td align="right"><b>C&nbsp;</b></td>
-<td><a href="calendarservice.html">Calendar</a></td>
-<td align="right"><b>D&nbsp;</b></td>
-<td><a href="dateservice.html">Date</a></td>
+<td align="right"></td>
+<td><a href="cameraservice.html">Camera</a></td>
+<td align="right"></td>
+<td><a href="dialerservice.html">Dialer</a></td>
 <td align="right"></td>
 <td><a href="profilesservice.html">Profiles</a></td>
 <td align="right"></td>
@@ -58,9 +70,9 @@
 </tr>
 <tr>
 <td align="right"></td>
-<td><a href="cameraservice.html">Camera</a></td>
-<td align="right"></td>
-<td><a href="dialerservice.html">Dialer</a></td>
+<td><a href="cleanupwizardservice.html">CleanupWizard</a></td>
+<td align="right"><b>E&nbsp;</b></td>
+<td><a href="emailservice.html">Email</a></td>
 <td align="right"><b>Q&nbsp;</b></td>
 <td><a href="qtopiaappservice.html">Qtopia</a></td>
 <td align="right"><b>T&nbsp;</b></td>
@@ -70,25 +82,13 @@
 </tr>
 <tr>
 <td align="right"></td>
-<td><a href="cleanupwizardservice.html">CleanupWizard</a></td>
-<td align="right"><b>E&nbsp;</b></td>
-<td><a href="emailservice.html">Email</a></td>
+<td><a href="clockservice.html">Clock</a></td>
+<td align="right"><b>H&nbsp;</b></td>
+<td><a href="helpservice.html">Help</a></td>
 <td align="right"></td>
 <td><a href="qtopiapowermanagerservice.html">QtopiaPowerManager</a></td>
 <td align="right"></td>
 <td><a href="tasksservice.html">Tasks</a></td>
-<td>
-</td>
-</tr>
-<tr>
-<td align="right"></td>
-<td><a href="clockservice.html">Clock</a></td>
-<td align="right"><b>H&nbsp;</b></td>
-<td><a href="helpservice.html">Help</a></td>
-<td align="right"><b>S&nbsp;</b></td>
-<td><a href="settingsservice.html">Settings</a></td>
-<td align="right"></td>
-<td><a href="telephonyservice.html">Telephony</a></td>
 <td>
 </td>
 </tr>
@@ -193,8 +193,8 @@
 <p>Some services may be parameterised on the type of data to be processed. Different applications may handle different data types. The <a href="datasharing.html">Qtopia Data Sharing (QDS)</a> system should be used for these types of services.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

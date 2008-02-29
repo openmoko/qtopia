@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -58,7 +58,7 @@ public slots:
 private:
     void init();
     void createPeerId();
-    bool writeSystemFiles();
+    int writeSystemFiles();
 
 
 private slots:
@@ -74,8 +74,6 @@ private:
     DialingBTPage* dialPage;
     AdvancedBTPage* advPage;
     AccountPage* accPage;
-
-    QString errorText;
 };
 
 //BluetoothUI
@@ -230,13 +228,11 @@ void BluetoothUI::accept()
         config->writeProperties( props );
 
         createPeerId();
-        errorText = "";
-        if ( writeSystemFiles() || errorText.isEmpty() )
+        int retCode = writeSystemFiles();
+        if ( retCode == 0 ) 
             QDialog::accept();
-        else
-            QMessageBox::warning(this, tr("Error"), "<qt>"+errorText+"</qt>",
-                    QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
-
+        else if ( retCode > 0 ) 
+            stack->setCurrentIndex( retCode );
     } else {
         stack->setCurrentIndex( 0 );
     }
@@ -259,7 +255,13 @@ void BluetoothUI::createPeerId( )
     }
 }
 
-bool BluetoothUI::writeSystemFiles()
+/*
+  Return values:
+    -1 -> general error not connected to specific configuration
+    0  -> no error
+    >0 -> returned number gives indication of widget that could fix the problem
+  */
+int BluetoothUI::writeSystemFiles()
 {
     const QtopiaNetworkProperties prop = config->getProperties();
 
@@ -279,9 +281,10 @@ bool BluetoothUI::writeSystemFiles()
 
     dial = prop.value( QLatin1String("Serial/DialString") ).toString();
     if ( dial.isEmpty() ) {
-        errorText = tr("Missing dial string");
-        qLog(Network) << QLatin1String("Missing dial string");
-        return false;
+        QMessageBox::warning(this, tr("Error"), "<qt>"+tr("Missing dial number")+"</qt>",
+                QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+        qLog(Network) << QLatin1String("Missing dial number");
+        return 2; //index of dial parameter widget
     } else {
         a += QLatin1String("ATD") + dial + QLatin1String("\n");
         a += QLatin1String("CONNECT \"\"");
@@ -299,7 +302,7 @@ bool BluetoothUI::writeSystemFiles()
         fc.close();
     } else {
         qLog(Network) << "Cannot write connect chat file";
-        return false;
+        return -1;
     }
 
     QStringList params;
@@ -354,7 +357,7 @@ bool BluetoothUI::writeSystemFiles()
         tmpPeer.close();
     } else {
         fc.remove(); //delete connect chat
-        return false; //cannot write peer file
+        return -1; //cannot write peer file
     }
 
     QStringList args;
@@ -367,7 +370,7 @@ bool BluetoothUI::writeSystemFiles()
     QProcess::execute(Qtopia::qtopiaDir()+"bin/btdun-network", args);
     QFile::remove( peerFileName );
 
-    return true;
+    return 0;
 }
 
 //BluetoothConfig

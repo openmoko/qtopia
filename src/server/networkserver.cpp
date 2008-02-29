@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -798,8 +798,8 @@ void QtopiaNetworkServer::setDefaultGateway( const QString& handle, bool exclude
   is used by netsetup in order to enforce the global start of an interface.
 
   Unsetting the life time property of a network session that is extended but doesn't have any
-  subscribed applications, will cause the stopping of this interface. It is not possible to stop
-  an interface w/o calling this interface.
+  subscribed applications, will cause the stop of this interface. Applications can stop
+  privileged network devices by calling \l QtopiaNetwork::privilegedInterfaceStop(). 
   */
 void QtopiaNetworkServer::setExtendedInterfaceLifetime( const QString& handle, bool isExtended )
 {

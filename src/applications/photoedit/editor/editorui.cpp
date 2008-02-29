@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -23,71 +23,55 @@
 
 #include <qsoftmenubar.h>
 
-#include <qstring.h>
-
+#include <QAction>
 #include <QMenu>
 #include <QCloseEvent>
-#include <QtDebug>
+#ifndef QTOPIA_PHONE
+#include <QToolBar>
+#include <QMenuBar>
+#endif
 
 EditorUI::EditorUI( QWidget* parent, Qt::WFlags f )
     : QMainWindow( parent, f )
 {
+#ifndef QTOPIA_PHONE
     // Make open action
     open_action = new QAction( QIcon( ":icon/fileopen" ), tr( "Open" ), this );
-    connect( open_action, SIGNAL( triggered() ), this, SIGNAL( open() ) );
     open_action->setWhatsThis( tr( "Open an image." ) );
+    connect( open_action, SIGNAL( triggered() ), this, SIGNAL( open() ) );
+#endif
 
     // Make crop action
-#ifdef QTOPIA_PHONE
-    QAction *crop_action;
-#endif
-    crop_action = new QAction( QIcon( ":icon/cut" ), tr( "Crop" ), this );
+    QAction *crop_action = new QAction( QIcon( ":icon/cut" ), tr( "Crop" ), this );
     crop_action->setWhatsThis( tr( "Crop the image." ) );
-    connect( crop_action, SIGNAL( triggered() ),
-        this, SIGNAL( crop() ) );
+    connect( crop_action, SIGNAL( triggered() ), this, SIGNAL( crop() ) );
 
     // Make brightness action
-#ifdef QTOPIA_PHONE
-    QAction *brightness_action;
-#endif
-    brightness_action = new QAction( QIcon( ":icon/color" ), tr( "Brightness" ), this );
+    QAction *brightness_action = new QAction( QIcon( ":icon/color" ), tr( "Brightness" ), this );
     brightness_action->setWhatsThis( tr( "Adjust the image brightness." ) );
-    connect( brightness_action, SIGNAL( triggered() ),
-        this, SIGNAL( brightness() ) );
+    connect( brightness_action, SIGNAL( triggered() ), this, SIGNAL( brightness() ) );
 
     // Make rotate actions
-#ifdef QTOPIA_PHONE
-    QAction *rotate_action;
-#endif
-    rotate_action = new QAction( QIcon( ":icon/rotate" ), tr( "Rotate" ), this );
+    QAction *rotate_action = new QAction( QIcon( ":icon/rotate" ), tr( "Rotate" ), this );
     rotate_action->setWhatsThis( tr( "Rotate the image." ) );
-    connect( rotate_action, SIGNAL( triggered() ),
-        this, SIGNAL( rotate() ) );
+    connect( rotate_action, SIGNAL( triggered() ), this, SIGNAL( rotate() ) );
 
     // Make zoom action
-#ifdef QTOPIA_PHONE
-    QAction *zoom_action;
-#endif
-    zoom_action = new QAction( QIcon( ":icon/find" ), tr( "Zoom" ), this );
+    QAction *zoom_action = new QAction( QIcon( ":icon/find" ), tr( "Zoom" ), this );
     zoom_action->setWhatsThis( tr( "Zoom in and out." ) );
-    connect( zoom_action, SIGNAL( triggered() ),
-        this, SIGNAL( zoom() ) );
+    connect( zoom_action, SIGNAL( triggered() ), this, SIGNAL( zoom() ) );
 
     // Make fullscreen action
-#ifdef QTOPIA_PHONE
-    QAction *fullscreen_action;
-#endif
-    fullscreen_action = new QAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this );
+    QAction *fullscreen_action = new QAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this );
     fullscreen_action->setWhatsThis( tr( "View the image in full screen." ) );
-    connect( fullscreen_action, SIGNAL( triggered() ),
-        this, SIGNAL( fullScreen() ) );
+    connect( fullscreen_action, SIGNAL( triggered() ), this, SIGNAL( fullScreen() ) );
 
 #ifdef QTOPIA_PHONE
     // Clear context bar
     QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
 
     // Construct context menu
-    context_menu = QSoftMenuBar::menuFor( this );
+    QMenu *context_menu = QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
     context_menu->addAction( crop_action );
     context_menu->addAction( brightness_action );
@@ -96,16 +80,12 @@ EditorUI::EditorUI( QWidget* parent, Qt::WFlags f )
     context_menu->addAction( zoom_action );
     context_menu->addAction( fullscreen_action );
     context_menu->addSeparator();
-
-    QMenu* menu = (QMenu*)context_menu;
-    menu->addAction( QIcon( ":icon/cancel" ),
-        tr( "Cancel" ), this, SIGNAL( cancel() ) );
+    context_menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SIGNAL( cancel() ) );
 #else
     // Construct menu bar
-    toolbar = new QToolBar( this );
+    QToolBar *toolbar = new QToolBar( this );
     toolbar->setMovable( false );
-    // toolbar->setHorizontalStretchable( true );
-    menubar = new QMenuBar( toolbar );
+    QMenuBar *menubar = new QMenuBar( toolbar );
     toolbar->addWidget( menubar );
     addToolBar( toolbar );
     toolbar = new QToolBar( this );
@@ -153,7 +133,6 @@ void EditorUI::removeFileItems()
     open_action->setVisible( false );
 }
 #endif
-
 
 void EditorUI::closeEvent( QCloseEvent *e )
 {

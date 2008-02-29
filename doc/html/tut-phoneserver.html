@@ -29,20 +29,20 @@
 </li>
 <li>Once the signal has been connected, the application issues the query as follows:<pre>    line-&gt;query( PhoneLine::SIMIdentity );</pre>
 </li>
-<li><tt>PhoneLine::query</tt> calls the private phone handler method <tt>query</tt>.<p>For this example the query method is <tt>PhoneLineQCop::query</tt> which sends a QCop message to the phone server on the <tt>QPE/Phone</tt> channel.</p>
+<li><tt>PhoneLine::query</tt> calls the private phone handler method <tt>query</tt>.<p>For this example the query method is <tt>PhoneLineQCop::query</tt> which sends a Qtopia IPC message to the phone server on the <tt>QPE/Phone</tt> channel.</p>
 </li>
 <li>The phone server listening on the <tt>QPE/Phone</tt> channel, receives the message in <tt>PhoneServerQCop::phoneMessage</tt> and dispatches it to its <tt>PhoneLine</tt> object.<p><b>Note:</b> The <tt>PhoneLine</tt> for the phone server contains a private <tt>PhoneLineAt</tt> object rather than the <tt>PhoneLineQCop</tt> object used by applications.</p>
 </li>
 <li>The phone server calls <tt>PhoneLineAt::query</tt> which determines the AT command to execute to perform the request. In this case, the command is <tt>AT+CIMI</tt>.</li>
 <li>After the command is executed, the <tt>PhoneLineAt::queryDone</tt> method decodes the response and emits the <tt>queryResult</tt> signal.</li>
-<li>The <tt>queryResult</tt> signal is intercepted by the phone server <tt>PhoneServerQCop::queryResult</tt> in <tt>phoneserver.cpp</tt>) and turned into a QCop message on the <tt>QPE/Phone</tt> channel.</li>
-<li>The QCop message is received in the application by <tt>PhoneLineQCop::stateListen</tt> which emits the <tt>queryResult</tt> signal to the application's <tt>AppClass::simIdResult</tt> slot.</li>
+<li>The <tt>queryResult</tt> signal is intercepted by the phone server <tt>PhoneServerQCop::queryResult</tt> in <tt>phoneserver.cpp</tt>) and turned into a Qtopia IPC message on the <tt>QPE/Phone</tt> channel.</li>
+<li>The Qtopia IPC message is received in the application by <tt>PhoneLineQCop::stateListen</tt> which emits the <tt>queryResult</tt> signal to the application's <tt>AppClass::simIdResult</tt> slot.</li>
 </ol>
 <p>This completes the example. Other commands and notifications within the phone library follow a similar pattern.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -401,7 +401,7 @@ void QSpeedDialDialog::store(const int item)
   action (eg. adding a QContact's phone number to Speed Dial list), use
   QSpeedDial::addWithDialog.
 
-  \ingroup qtopiaemb
+  \ingroup userinput
 */
 
 /*!
@@ -793,7 +793,7 @@ int QSpeedDialList::currentRow() const
   To directly modify the Speed Dial settings, use remove() and set().
   Use find() to retrieve the assigned action for a given input.
 
-  \ingroup qtopiaemb
+  \ingroup userinput
 */
 
 /*!

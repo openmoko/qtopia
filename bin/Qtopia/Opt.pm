@@ -115,6 +115,11 @@ sub opt_get_options
                         $paramstring =~ s/%/$paramname/g;
                     }
                     my $funcref = $optref->{$set."func"};
+                    # Don't let an invisible switch cause variables to change!
+                    if ( defined($vis) && !$vis ) {
+                        my $dummy;
+                        $funcref = \$dummy;
+                    }
                     if ( !defined($funcref) ) {
                         if ( !defined($optref->{"value"}) ) {
                             if ( defined($optref->{"type"}) && $optref->{"type"} eq '@' ) {

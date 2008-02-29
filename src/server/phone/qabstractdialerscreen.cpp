@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -78,3 +78,21 @@
   will resolve the \a number into a speed dial action and perform it
   appropriately.
  */
+
+/*!
+  \fn void QAbstractDialerScreen::filterKeys(const QString& input, bool& filtered)
+
+  Emitted whenever a key is entered which modified the \a input.
+  Slots connected to this signal may elect to filter out the input
+  and handle it themselves.  If they do, \a filtered should be
+  set to true.
+*/
+
+/*!
+  \fn void QAbstractDialerScreen::filterSelect(const QString& input, bool& filtered)
+
+  Emitted when the user selects the \a input within the dialer,
+  usually by pressing the call button.  Slots connected to this signal
+  may elect to filter out the input and handle it themselves.
+  If they do, \a filtered should be set to true.
+*/

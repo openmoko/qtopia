@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -35,7 +35,7 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 /*!
   \class QPimSource
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QPimSource class holds identifying information for a storage source of PIM data.
 
   The QPimSource class include a universal identifier representing the QPimContext
@@ -79,15 +79,15 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 /*!
   \class QPimContext
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QPimContext class represents a storage context of PIM data.
 
-  The QPimContext class represenets a storage context of PIM data, such as SIM Card
-  contacts or contacts stored on the phone in Qtopia's native format.  The
+  The QPimContext class represents a storage context of PIM data, such as SIM Card
+  contacts or contacts stored on the device in Qtopia's native format.  The
   class can be used to perform operations that relate to a specific context of
   PIM data.
 
-  QPimContext should not be subclassed directly.  Instead on of the data type
+  QPimContext should not be subclassed directly.  Instead, one of the data type
   specific contexts should be used.  These are QContactContext, QTaskContext
   and QAppointmentContext.
 
@@ -145,14 +145,14 @@ bool QPimContext::editable() const { return false; }
 /*!
   \fn void QPimContext::setVisibleSources(const QSet<QPimSource> &visible)
 
-  Fitlers the model that created this context to only show pim for this source
+  Filters the model that created this context to only show records for the source
   that is contained in \a visible.  Does not affect data from other contexts.
 */
 
 /*!
   \fn QSet<QPimSource> QPimContext::visibleSources() const
 
-  Returns the set of PIM data source that are controlled by this context and are
+  Returns the set of PIM data sources that are controlled by this context and are
   visible in the model that created the context.
 */
 
@@ -221,10 +221,10 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \class QContactContext
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactContext class represents a storage context of contact data.
 
-  The QContactContext class represenets a storage context of contact data,
+  The QContactContext class represents a storage context of contact data,
   such as SIM Card contacts or contacts stored on the phone in Qtopia's native
   format.  The class can be used to perform operations that relate to a
   specific context of PIM data.
@@ -249,7 +249,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QUniqueId QContactContext::addContact(const QContact &contact, const QPimSource &source)
 
   Adds the \a contact to the PIM data \a source if it is controlled by this context.
-  If the contact is sucessfully add returns the new unique id for this contact,
+  If the contact is successfully added, returns the new unique id for this contact,
   otherwise returns a null id.
 */
 
@@ -257,7 +257,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QList<QContact> QContactContext::exportContacts(const QPimSource &source, bool &ok) const
 
   Exports the contacts stored in the PIM data \a source and returns them as a list.
-  The source must be controlled by this context.  If sucessful sets \a ok to true,
+  The source must be controlled by this context.  If successful sets \a ok to true,
   otherwise sets \a ok to false.
 
   There isn't necessarily going to be a one to one match to contacts in the PIM
@@ -305,10 +305,10 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \class QAppointmentContext
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QAppointmentContext class represents a storage context of appointment data.
 
-  The QAppointmentContext class represenets a storage context of appointment data.
+  The QAppointmentContext class represents a storage context of appointment data.
   The class can be used to perform operations that relate to a specific context of PIM data.
 
   Currently there is no way for applications to implement their own contexts.
@@ -331,14 +331,14 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QUniqueId QAppointmentContext::addAppointment(const QAppointment &appointment, const QPimSource &source)
 
   Adds the \a appointment to the PIM data \a source if it is controlled by this context.
-  If the appointment is sucessfully add returns the new unique id for this appointment,
+  If the appointment is successfully added, returns the new unique id for this appointment,
   otherwise returns a null id.
 */
 
 /*!
   \fn bool QAppointmentContext::removeOccurrence(const QUniqueId &id, const QDate &date)
 
-  Mark the repeating appointment identified by \a id in the this context so as not
+  Mark the repeating appointment identified by \a id in this context so as not
   to occur on \a date.  Returns true if the appointment was successfully updated,
   otherwise returns false.
 */
@@ -354,7 +354,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QUniqueId QAppointmentContext::replaceRemaining(const QUniqueId &id, const QAppointment &appointment)
 
   Modifies the appointment identified by \a id to not repeat after the first
-  occurrance of \a appointment and adds \a appointment do the PIM data source
+  occurrence of \a appointment and adds \a appointment do the PIM data source
   that stores the appointment identified by \a id.  Returns the unique id for
   the new appointment if successful, otherwise returns a null id.
 */
@@ -363,11 +363,11 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QList<QAppointment> QAppointmentContext::exportAppointments(const QPimSource &source, bool &ok) const
 
   Exports the appointments stored in the PIM data \a source and returns them as a list.
-  The source must be controlled by this context.  If sucessful sets \a ok to true,
+  The source must be controlled by this context.  If successful sets \a ok to true,
   otherwise sets \a ok to false.
 
   There isn't necessarily going to be a one to one match to appointments in the PIM
-  data source.  appointments may be merged or split over multiple appointments to form
+  data source.  Appointments may be merged or split over multiple appointments to form
   the list.
 */
 
@@ -411,10 +411,10 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 /*!
   \class QTaskContext
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QTaskContext class represents a storage context of task data.
 
-  The QTaskContext class represenets a storage context of task data.
+  The QTaskContext class represents a storage context of task data.
   The class can be used to perform operations that relate to a specific context of PIM data.
 
   Currently there is no way for applications to implement their own contexts.
@@ -437,7 +437,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QUniqueId QTaskContext::addTask(const QTask &task, const QPimSource &source)
 
   Adds the \a task to the PIM data \a source if it is controlled by this context.
-  If the task is sucessfully add returns the new unique id for this task,
+  If the task is successfully added, returns the new unique id for this task,
   otherwise returns a null id.
 */
 
@@ -445,7 +445,7 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
   \fn QList<QTask> QTaskContext::exportTasks(const QPimSource &source, bool &ok) const
 
   Exports the tasks stored in the PIM data \a source and returns them as a list.
-  The source must be controlled by this context.  If sucessful sets \a ok to true,
+  The source must be controlled by this context.  If successful sets \a ok to true,
   otherwise sets \a ok to false.
 
   There isn't necessarily going to be a one to one match to tasks in the PIM

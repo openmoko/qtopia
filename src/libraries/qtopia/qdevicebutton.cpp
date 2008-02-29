@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,7 +30,7 @@
     The location and number of buttons will vary from device to
     device and the button is described in the help documentation by \c userText() and \c pixmap().
 
-    \ingroup qtopiaemb
+    \ingroup userinput
 */
 
 /*!

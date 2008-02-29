@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2006-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2006-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -63,9 +63,9 @@ LoggingView::LoggingView( QWidget* parent, Qt::WFlags /*fl*/ )
     if ( loginitread.error() == QProcess::FailedToStart ) {
         delete logfollow;
         logfollow = 0;
-        setText("<h2>Not available</h2>"
+        setText(tr("<h2>Not available</h2>"
             "<p>This tool requires the <tt>logread</tt> program and the corresponding <tt>syslogd</tt>. "
-            "<p>You may still adjust logging categories from <img src=:icon/options>."
+            "<p>You may still adjust logging categories from <img src=:icon/options>.")
         );
     } else {
         setWordWrapMode(QTextOption::ManualWrap);

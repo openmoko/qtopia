@@ -25,9 +25,11 @@
 <li><div class="fn"/>QString <b><a href="qatutils.html#encodeNumber">encodeNumber</a></b> ( const QString &amp; <i>value</i>, bool <i>keepPlus</i> = false )</li>
 <li><div class="fn"/>QByteArray <b><a href="qatutils.html#fromHex">fromHex</a></b> ( const QString &amp; <i>hex</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#nextString">nextString</a></b> ( const QString &amp; <i>buf</i>, uint &amp; <i>posn</i> )</li>
+<li><div class="fn"/>bool <b><a href="qatutils.html#octalEscapes">octalEscapes</a></b> ()</li>
 <li><div class="fn"/>uint <b><a href="qatutils.html#parseNumber">parseNumber</a></b> ( const QString &amp; <i>str</i>, uint &amp; <i>posn</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#quote">quote</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#quote-2">quote</a></b> ( const QString &amp; <i>str</i>, QTextCodec * <i>codec</i> )</li>
+<li><div class="fn"/>void <b><a href="qatutils.html#setOctalEscapes">setOctalEscapes</a></b> ( bool <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qatutils.html#skipField">skipField</a></b> ( const QString &amp; <i>str</i>, uint &amp; <i>posn</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#stripNumber">stripNumber</a></b> ( const QString &amp; <i>number</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#toHex">toHex</a></b> ( const QByteArray &amp; <i>binary</i> )</li>
@@ -54,6 +56,9 @@
 <p>Convert a hexadecimal string, <i>hex</i>, into a byte array.</p>
 <h3 class="fn"><a name="nextString"></a><a href="qstring.html">QString</a> QAtUtils::nextString ( const <a href="qstring.html">QString</a> &amp; <i>buf</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Extract the next quoted string from <i>buf</i>, starting at <i>posn</i>.</p>
+<h3 class="fn"><a name="octalEscapes"></a>bool QAtUtils::octalEscapes ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Determine if <a href="qatutils.html#nextString">nextString</a>() should parse backslash escape sequences in octal rather than the default of hexadecimal.</p>
+<p>See also <a href="qatutils.html#setOctalEscapes">setOctalEscapes</a>().</p>
 <h3 class="fn"><a name="parseNumber"></a>uint QAtUtils::parseNumber ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Utility function for parsing a number from position <i>posn</i> in <i>str</i>.</p>
 <h3 class="fn"><a name="quote"></a><a href="qstring.html">QString</a> QAtUtils::quote ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -61,6 +66,13 @@
 <h3 class="fn"><a name="quote-2"></a><a href="qstring.html">QString</a> QAtUtils::quote ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, <a href="qtextcodec.html">QTextCodec</a> * <i>codec</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Quote <i>str</i> so that it is suitable to be sent as an AT command argument and use <i>codec</i> to encode the string. The caller will need to add double quotes to the start and end of the return value to complete the AT command argument.</p>
+<h3 class="fn"><a name="setOctalEscapes"></a>void QAtUtils::setOctalEscapes ( bool <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Indicate that <a href="qatutils.html#nextString">nextString</a>() should parse backslash escape sequences in octal if <i>value</i> is true, rather than the default of hexadecimal (</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QAtUtils::is</tt></td><td align="center" valign="top">&nbsp;</td><td valign="top">false).</td></tr>
+</table></p>
+<p>See also <a href="qatutils.html#octalEscapes">octalEscapes</a>().</p>
 <h3 class="fn"><a name="skipField"></a>void QAtUtils::skipField ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Utility function for skipping a comma-delimited field starting at <i>posn</i> within <i>str</i>.</p>
 <h3 class="fn"><a name="stripNumber"></a><a href="qstring.html">QString</a> QAtUtils::stripNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -69,8 +81,8 @@
 <p>Convert the byte array, <i>binary</i>, into a hexadecimal string.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

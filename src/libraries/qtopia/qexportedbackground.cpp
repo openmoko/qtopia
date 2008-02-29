@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QPalette>
 #include <QSettings>
+#include <QDesktopWidget>
 
 #include "qglobalpixmapcache.h"
 #include "qexportedbackground.h"
@@ -166,7 +167,9 @@ void QExportedBackground::initExportedBackground(int width, int height, int scre
     }
     QGlobalPixmapCache::find(bgKey, *expBg.bgPm);
     if (expBg.bgPm->isNull()) {
-        *expBg.bgPm = QPixmap(width, height);
+        QImage::Format fmt = QApplication::desktop()->depth() <= 16 ? QImage::Format_RGB16 : QImage::Format_ARGB32_Premultiplied;
+        QImage img(width, height, fmt);
+        *expBg.bgPm = QPixmap::fromImage(img);
         if(!QGlobalPixmapCache::insert(bgKey, *expBg.bgPm)) {
             qWarning() << "Could not store exported background in global cache";
             return;
@@ -221,7 +224,7 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
     colour.getRgb(&sr, &sg, &sb);
     int div =level+1;
     QSize dataSize = qt_screen->mapToDevice(QSize(src.width(),src.height()));
-    if (src.depth() == 16) {
+    if (src.depth() == 16 && dest.depth() == 16) {
         sr = (sr << 8) & 0xF800;
         sg = (sg << 3) & 0x07e0;
         sb = sb >> 3;
@@ -235,7 +238,7 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
             quint32 b = ((spix & 0x001f) + sb*level)/div;
             *dp = (r&0xF800) | (g&0x07e0) | (b&0x001f);
         }
-    } else if (src.depth() == 32) {
+    } else if (src.depth() == 32 && dest.depth() == 32) {
         int map[3*256];
         int const_sr = sr*level;
         int const_sg = sg*level;
@@ -257,6 +260,29 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
             g = map[g+256];
             b = map[b+512];
             *drgb = qRgb(r, g, b);
+        }
+    } else if (src.depth() == 32 && dest.depth() == 16) {
+        int map[3*256];
+        int const_sr = sr*level;
+        int const_sg = sg*level;
+        int const_sb = sb*level;
+        for (int i = 0; i < 256; i++)
+        {
+            map[i] = ((const_sr+i)/div);
+            map[i+256] = ((const_sg+i)/div);
+            map[i+512] = ((const_sb+i)/div);
+        }
+        QRgb *srgb = (QRgb*)src.qwsBits();
+        ushort *dp = (ushort *)dest.qwsBits();
+        int count = src.qwsBytesPerLine()/sizeof(QRgb) * src.height();
+        for (int i = 0; i < count; i++, srgb++, dp++) {
+            int r = (*srgb >> 16) & 0xff;
+            int g = (*srgb >> 8) & 0xff;
+            int b = *srgb & 0xff;
+            r = map[r];
+            g = map[g+256];
+            b = map[b+512];
+            *dp = (((r>>3)<<11)&0xF800) | (((g>>2)<<5)&0x07e0) | ((b>>3)&0x001f);
         }
     }
 }

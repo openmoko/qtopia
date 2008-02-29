@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -57,6 +57,7 @@ public slots:
     void setDaySpan( int starthour, int endhour );
 
     void firstTimed();
+    void firstAllDay();
     void lastTimed();
     void lastAllDay();
     void nextOccurrence();
@@ -66,9 +67,14 @@ public slots:
     void setCurrentOccurrence(const QOccurrence &o);
     void setCurrentAppointment(const QAppointment &a);
 
-    void ensureVisible(const QModelIndex &index);
+    void timedSelectionChanged(const QModelIndex &index);
+    void allDayOccurrenceChanged(const QModelIndex &index);
+    void allDayOccurrenceActivated(const QModelIndex &index);
 
     void updateHiddenIndicator(int hidden);
+
+    void modelsReset();
+    void categorySelected( const QCategoryFilter &c );
 
 signals:
     void removeOccurrence( const QOccurrence& );
@@ -78,6 +84,7 @@ signals:
     void beamAppointment( const QAppointment& );
     void newAppointment();
     void newAppointment( const QString & );
+    void newAppointment( const QDateTime &dstart, const QDateTime &dend );
     void showDetails();
     void dateChanged();
     void selectionChanged();
@@ -102,6 +109,9 @@ private:
     QOccurrenceModel *allDayModel;
     CompressedTimeManager *mTimeManager;
     QScrollArea *mScrollArea;
+
+    QUniqueId lastSelectedTimedId;
+    QUniqueId lastSelectedAllDayId;
 
     bool allDayFocus;
 };

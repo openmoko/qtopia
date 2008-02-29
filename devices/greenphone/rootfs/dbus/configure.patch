@@ -1,0 +1,15 @@
+--- dbus-0.62/configure.in              2006-08-28 11:40:04.000000000 +1000
++++ dbus-0.62-grenphone/configure.in    2006-08-28 11:40:26.000000000 +1000
+@@ -705,6 +705,7 @@
+     exit (0);
+ ]])],
+               [have_abstract_sockets=yes],
++              [have_abstract_sockets=no],
+               [have_abstract_sockets=no])
+ AC_LANG_POP(C)
+ AC_MSG_RESULT($have_abstract_sockets)
+--- dbus-0.62/config.cache	        2005-03-20 05:36:14.000000000 +1000
++++ dbus-0.62-greenphone/config.cache	2006-11-15 08:56:51.000000000 +1000
+@@ -0,0 +1,2 @@
++ac_cv_func_posix_getpwnam_r=${ac_cv_func_posix_getpwnam_r=yes}
++

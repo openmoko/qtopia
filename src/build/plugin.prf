@@ -39,7 +39,7 @@ no_link_test:CONFIG-=link_test
             echo \$$obj | grep $$LITERAL_SQUOTE\/main\.o$$LITERAL_SQUOTE >/dev/null 2>&1 || OBJECTS=$$LITERAL_QUOTE\$$OBJECTS \$$obj$$LITERAL_QUOTE;\
         done
     link_line="$$QMAKE_LINK $$QMAKE_LFLAGS"
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         link_line~=s/^"//
         link_line~=s/"$//
     }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,7 +38,7 @@
 
   For some image formats QThumbnail will efficiently generate thumbnails by scaling the image as it is being loaded. For other formats the whole image will be loaded and then scaled.
 
-  \ingroup qtopiaemb
+  \ingroup multimedia
 */
 
 #include "qthumbnail.h"

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -53,7 +53,7 @@ static QStringList serviceList_p(const QString& d, const QString n)
   \brief The QtopiaService class allows applications to provide services for use
   by other applications.
 
-  \ingroup qtopiaemb
+    \ingroup ipc
 
   A QtopiaService is a named collection of features that an application
   may choose to provide. For example, web browsers providing
@@ -68,7 +68,7 @@ static QStringList serviceList_p(const QString& d, const QString n)
   \brief The QtopiaServiceRequest class allows applications to request services from
   other applications.
 
-  \ingroup qtopiaemb
+    \ingroup ipc
 
   A \c QtopiaServiceRequest encapsulates a \c QtopiaService and the message to be sent to
   that service. It is similar to a \c QtopiaIpcEnvelope, but uses service names

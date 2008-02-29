@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -58,7 +58,7 @@ int QPdaStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
   \class QPEStyle
   \brief The QPEStyle class implements the default Qtopia widget style.
 
-  \ingroup qtopiaemb
+  \ingroup appearance
 */
 
 // QDOC_SKIP_BEGIN

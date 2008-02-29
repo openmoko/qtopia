@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -92,6 +92,8 @@ public:
     inline QRectF selectionRect() const
     { return selectionRect(this->cursor); }
 
+    QString anchorForCursor(const QTextCursor &anchor) const;
+
     void keyPressEvent(QKeyEvent *e);
     void mousePressEvent(Qt::MouseButton button, const QPointF &pos,
                          Qt::KeyboardModifiers modifiers,
@@ -102,15 +104,15 @@ public:
     void mouseDoubleClickEvent(QEvent *e, Qt::MouseButton button, const QPointF &pos);
     void contextMenuEvent(const QPoint &screenPos, const QPointF &docPos, QWidget *contextWidget);
     void focusEvent(QFocusEvent *e);
-
+#ifdef QT_KEYPAD_NAVIGATION
+    void editFocusEvent(QEvent *e);
+#endif
     bool dragEnterEvent(QEvent *e, const QMimeData *mimeData);
     void dragLeaveEvent();
     bool dragMoveEvent(QEvent *e, const QMimeData *mimeData, const QPointF &pos);
     bool dropEvent(const QMimeData *mimeData, const QPointF &pos, Qt::DropAction dropAction, QWidget *source);
 
     void inputMethodEvent(QInputMethodEvent *);
-
-    bool findNextPrevAnchor(bool next, int &start, int &end);
 
     QTextDocument *doc;
     bool cursorOn;
@@ -149,6 +151,9 @@ public:
 
     QPalette palette;
     bool hasFocus;
+#ifdef QT_KEYPAD_NAVIGATION
+    bool hasEditFocus;
+#endif
     Qt::LayoutDirection layoutDirection;
     bool isEnabled;
 

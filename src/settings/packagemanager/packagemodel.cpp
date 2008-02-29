@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -122,8 +122,6 @@ PackageModel::PackageModel( QObject* parent )
     // can only have a max of 4 columns, if more are needed, change the
     // macros used for PackageModel::index(...) below
     // columnHeads << "Name" << "Size";
-
-    QTimer::singleShot( 0, this, SLOT( init() ));
 }
 
 PackageModel::~PackageModel()
@@ -132,7 +130,7 @@ PackageModel::~PackageModel()
         delete storage;
 }
 
-void PackageModel::init()
+void PackageModel::populateLists()
 {
     QSettings serverConf( "Trolltech", "PackageServers" );
     serverConf.clear();
@@ -227,13 +225,16 @@ void PackageModel::activateItem( const QModelIndex &item )
     QModelIndex parent = item.parent();
     if ( !parent.isValid() )
         return;
+
+    QString dataItem = data( item, Qt::DisplayRole ).toString();
+
     AbstractPackageController *c = rootItems[parent.row()];
     c->install( item.row() );
     QString html;
     if ( c == installed )
-        html = tr( "Uninstalling %1 ..." ).arg( data( item, Qt::DisplayRole ).toString() );
+        html = tr( "Uninstalling %1 ..." ).arg( dataItem );
     else
-        html = tr( "Installing %1 ..." ).arg( data( item, Qt::DisplayRole ).toString() );
+        html = tr( "Installing %1 ..." ).arg( dataItem );
     emit infoHtml( html );
 }
 

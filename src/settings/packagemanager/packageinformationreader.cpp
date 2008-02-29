@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QtDebug>
 
 
 /**
@@ -109,6 +110,7 @@ void PackageInformationReader::reset()
     pkg.version = QString::null;
     pkg.trust = QString::null;
     pkg.files.clear();
+    pkg.url = QString();
     error = QString::null;
     isError = false;
     hasContent = false;
@@ -212,6 +214,11 @@ void PackageInformationReader::readLine( const QString &line )
         QString fileList = lineStr.mid( colon ).trimmed();
         pkg.files = fileList.split( QLatin1String( " " ), QString::SkipEmptyParts );
         if ( !pkg.files.isEmpty() ) hasContent = true;
+    }
+    else if ( lineStr.startsWith( QLatin1String( "URL:" ), Qt::CaseInsensitive ))
+    {
+        pkg.url = lineStr.mid( colon ).trimmed();
+        if ( !pkg.url.isEmpty() ) hasContent = true;
     }
     else
     {

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
     \class QMediaHandle
     \brief The QMediaHandle class is used to refer to an activated media content
            within Qtopia's Media System.
+    \ingroup multimedia
 */
 
 /*!

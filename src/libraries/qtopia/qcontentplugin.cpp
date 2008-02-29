@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -32,6 +32,8 @@
 
     The QContentPlugin class provides an interface to discover the attributes of a file that should
     be assigned to a new QContent.
+
+  \ingroup content
 */
 
 /*!
@@ -57,6 +59,8 @@ QContentPlugin::~QContentPlugin()
     \class QContentFactory
 
     Creates QContentHandlers.
+
+  \ingroup content
 */
 
 Q_GLOBAL_STATIC( ContentPluginManager, pluginManager );

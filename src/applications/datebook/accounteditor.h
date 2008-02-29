@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,6 +30,7 @@ class QListWidget;
 class QAction;
 class QTimer;
 class QAppointmentModel;
+class QListWidgetItem;
 
 class AccountEditor : public QWidget
 {
@@ -57,6 +58,12 @@ private slots:
     void populate();
 
     void hideProgressBar();
+
+    void currentAccountChanged(QListWidgetItem *);
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e);
+
 private:
     QAppointmentModel *mModel;
 

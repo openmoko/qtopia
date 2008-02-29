@@ -7,8 +7,8 @@ qtopiaconf.hint=themecfg
 qtopiaconf.outdir=$$PWD
 qtopiadata.files=$$QTOPIA_DEPOT_PATH/etc/themes/qtopia/*.xml $$QTOPIA_DEPOT_PATH/etc/themes/qtopia/*rc
 qtopiadata.path=/etc/themes/qtopia
-qtopiapics.files=$$QTOPIA_DEPOT_PATH/pics/themes/qtopia
-qtopiapics.path=/pics/themes
+qtopiapics.files=$$QTOPIA_DEPOT_PATH/pics/themes/qtopia/*
+qtopiapics.path=/pics/themes/qtopia
 qtopiapics.hint=pics
 
 INSTALLS+=qtopiaconf qtopiadata qtopiapics

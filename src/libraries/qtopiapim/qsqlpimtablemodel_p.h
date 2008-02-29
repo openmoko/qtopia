@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -52,6 +52,7 @@ public:
     QList<QVariant> orderKey(const QUniqueId &) const;
 
     int row(const QUniqueId & tid) const;
+    bool contains(const QUniqueId &id) const;
     int predictedRow(const QList<QVariant> &k) const;
     int count() const;
 

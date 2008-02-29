@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -46,6 +46,8 @@ public:
         control = new QMediaControl(QMediaHandle(id), mediaContent);
         QObject::connect( control, SIGNAL(controlAvailable(const QString&)),
             mediaContent, SIGNAL(controlAvailable(const QString&)) );
+        QObject::connect( control, SIGNAL(controlUnavailable(const QString&)),
+            mediaContent, SIGNAL(controlUnavailable(const QString&)) );
 
         foreach (QString const& controlName, control->controls())
         {
@@ -106,6 +108,9 @@ public:
             m_mediaControl->start();
         }
     }
+
+    \ingroup multimedia
+    \ingroup content
 */
 
 /*!

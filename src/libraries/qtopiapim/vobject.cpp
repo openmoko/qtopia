@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -629,8 +629,8 @@ static const char *AAlarmFields[] = {
     0
     };
 
-/* ExDate -- has unamed fields */
-/* RDate -- has unamed fields */
+/* ExDate -- has unnamed fields */
+/* RDate -- has unnamed fields */
 
 static const char *DAlarmFields[] = {
     VCRunTimeProp,
@@ -1706,6 +1706,7 @@ DLLEXPORT(void) writeVObjectToFile(char *fname, VObject *o)
     }
 
     writeVObject( f,o );
+    fclose(f);
 }
 
 DLLEXPORT(void) writeVObjectsToFile(char *fname, VObject *list)
@@ -1720,6 +1721,7 @@ DLLEXPORT(void) writeVObjectsToFile(char *fname, VObject *list)
         writeVObject(f,list);
         list = nextVObjectInList(list);
     }
+    fclose(f);
 }
 
 DLLEXPORT(const char *) vObjectTypeInfo(VObject *o)

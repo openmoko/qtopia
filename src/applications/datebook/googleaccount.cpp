@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -71,4 +71,35 @@ void GoogleAccount::setName(const QString &name)
 void GoogleAccount::setFeedType(QGoogleCalendarContext::FeedType type)
 {
     accessCombo->setCurrentIndex(int(type));
+}
+
+/* validate the settings - need email and perhaps password */
+void GoogleAccount::accept()
+{
+    if (email().isEmpty()) {
+        if (QMessageBox::warning(this, tr("Google Account"),
+                tr("<qt>An email address is required.  Cancel editing?</qt>"),
+                QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            reject();
+            return;
+        } else {
+            nameText->setFocus();
+            return;
+        }
+    }
+
+    if (feedType() == QGoogleCalendarContext::FullPrivate
+            && password().isEmpty()) {
+        if (QMessageBox::warning(this, tr("Google Account"),
+                tr("<qt>A password is required for this account access type.  Cancel editing?</qt>"),
+                QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            reject();
+            return;
+        } else {
+            passwordText->setFocus();
+            return;
+        }
+    }
+
+    QDialog::accept();
 }

@@ -470,7 +470,7 @@ set_optvar( "image", +{
 set_optvar( "prefix", +{
     "set" => [ "%=s", "Set the runtime location of Qtopia to <dir>." ],
     "arg" => "dir",
-    "default" => opt("image", "default"),
+    "default" => sub { opt_resolve("image") },
     "visible" => $qtopia_visref,
     "showauto" => sub { opt("edition") },
     "config_pri" => "QTOPIA_PREFIX=%",
@@ -509,6 +509,14 @@ set_optvar( "launch_method", +{
     "showauto" => 1,
     "config_pri" => "LAUNCH_METHOD=%\n".
                     "equals(LAUNCH_METHOD,normal):CONFIG+=no_quicklaunch",
+});
+set_optvar( "force_quicklaunch", +{
+    "set" => [ "%", "Force apps using QTOPIA_MAIN to be quicklaunched. This results in larger binaries but faster launching." ],
+    "unset" => [ "no-%", "Do not force apps using QTOPIA_MAIN to be quicklaunched." ],
+    "default" => 0,
+    "visible" => $qtopia_visref,
+    "autodep" => $qtopia_autoref,
+    "config_pri" => "CONFIG+=force_quicklaunch",
 });
 set_optvar( "singleexec", +{
     "set" => [ "%",
@@ -549,8 +557,9 @@ set_optvar( "languages", +{
     "config_pri" => "LANGUAGES=%",
 });
 set_optvar( "iconsize", +{
-    "set" => [ "%=s",
-        "Non-scalable icons are installed at the requested size. Can be a single number (for square icons) or WxH. Images will be scaled from one of the available sizes." ],
+    "set" => [ "%=s", "Non-scalable icons are installed at the requested size. ".
+                      "Can be a single number (for square icons) or WxH. ".
+                      "Images will be scaled from one of the available sizes." ],
     "arg" => "size",
     "available" => sub {
         my @avail;
@@ -562,6 +571,19 @@ set_optvar( "iconsize", +{
     "showauto" => 1,
     "config_pri" => "QTOPIA_ICON_SIZE=%",
 });
+set_optvar( "image_extension_order", +{
+    "set" => [ "%=s", "An image may exist with multiple extensions but only 1 of these will be installed. ".
+                      "This list determines the priority of extensions. ".
+                      "An image with multiple extensions, none of which appear in this list will have the first ".
+                      "(as determined by perl's glob(\"\$file.*\");) extension chosen." ],
+    "arg" => "ext,ext",
+    "type" => "multi-value",
+    "available" => [ "png", "gif", "xpm" ],
+    "default" => sub { join(" ", Qtopia::Opt::_resolve_to_array(opt("image_extension_order", "available"))); },
+    "showauto" => 1,
+    "config_pri" => "IMAGE_EXTENSION_ORDER=%",
+});
+add_note("You CANNOT force extensions other than .svg to have the highest priority with -image-extension-order.");
 set_optvar( "displaysize", +{
     "set" => [ "%=s",
         "Resources (images) suitable for the requested size are installed. ".
@@ -779,6 +801,7 @@ set_optvar( "sxe_discovery", +{
 });
 set_optvar( "bluetooth", +{
     "set" => [ "%", "Enable Bluetooth." ],
+    "setfunc" => sub { opt("bluetooth") = 1; opt("dbus") = 1; },
     "unset" => [ "no-%", "Disable Bluetooth." ],
     "default" => 0,
     "visible" => $qtopia_visref,
@@ -811,14 +834,15 @@ set_optvar( "dbuspath", +{
     "config_pri" => "DBUS_PREFIX=%",
     "showauto" => 1,
 });
-set_optvar( "dbusipc", +{
-    "set" => [ "%", "Enable DBUS IPC support (instead of QCop)." ],
-    "unset" => [ "no-%", "Disable DBUS IPC support." ],
-    "default" => 0,
-    "visible" => $qtopia_visref,
-    "autodep" => $qtopia_autoref,
-    "config_pri" => "CONFIG+=enable_dbusipc",
-});
+# FIXME: Disable this configuration switch until DBUS IPC support is resurrected
+#set_optvar( "dbusipc", +{
+#    "set" => [ "%", "Enable DBUS IPC support (instead of QCop)." ],
+#    "unset" => [ "no-%", "Disable DBUS IPC support." ],
+#    "default" => 0,
+#    "visible" => $qtopia_visref,
+#    "autodep" => $qtopia_autoref,
+#    "config_pri" => "CONFIG+=enable_dbusipc",
+#});
 set_optvar( "drm", +{
     "set" => [ "%", "Enable support for DRM (Using the Beep Science DRM Agent v2.3)." ],
     "unset" => [ "no-%", "Disable support for DRM." ],
@@ -1026,6 +1050,14 @@ set_optvar( "test", +{
     "default" => 0,
     "config_pri" => "CONFIG+=qtopiatest",
 });
+set_optvar( "perftest", +{
+    "set" => [ "%", "Enables code based performance testing in Qtopia Core." ],
+    "unset" => [ "no-%", "Disable the code based performance testing in Qtopia Core." ],
+    "visible" => $qtopia_visref,
+    "autodep" => $qtopia_autoref,
+    "default" => 0
+});
+
 add_note("Qtopia should not be configured with -test for a final release as it creates a potential security hole.");
 set_optvar( "samples", +{
     "set" => [ "enable-%", "Enable server widget samples." ],
@@ -1107,8 +1139,8 @@ set_optvar( "qmake", +{
     "set" => [ "%", "hidden" ],
     "unset" => [ "no-%", "hidden" ],
     "value" => 1,
-    "quirks" => "",
-    "config_pri" => "QMAKE_QUIRKS=%{quirks}",
+    "behaviors" => "",
+    "config_pri" => "QMAKE_BEHAVIORS=%{behaviors}",
 });
 set_optvar( "qmake_debug", +{
     "set" => [ "%", "hidden" ],
@@ -1185,6 +1217,11 @@ set_optvar( "libqtopiaphonemodem", +{
                       "QTOPIA_LIBQTOPIAPHONEMODEM_VERSION=%{version}",
                       "QTOPIA_LIBQTOPIAPHONEMODEM_MAJOR_VERSION=%{major_version}",
                       "QTOPIA_LIBQTOPIAPHONEMODEM_MINOR_VERSION=%{minor_version}" ],
+});
+set_optvar( "overloaded_virtual", +{
+    "role" => "placeholder",
+    "value" => 1,
+    "config_pri" => "CONFIG+=enable_woverloaded_virtual",
 });
 
 # If we are a non-depot or desktop-only package, turn on Qtopia Desktop
@@ -1475,12 +1512,7 @@ if ( $shadow ) {
     if ( index( $QPEDIR, fixpath("$depotpath/") ) != -1 ) {
 	die "ERROR: You cannot shadow build from inside the source tree\n";
     }
-    # Clean out any builds found in the Qtopia source tree
-    clean_qtopia_sources();
-}
 
-# Setup the shadow build dir
-if ( $shadow ) {
     symlink_all_files("bin");
     symlink_all_files("scripts");
 
@@ -1497,6 +1529,9 @@ if ( $shadow ) {
     symlink_file($depotpath."/sounds",$QPEDIR."/sounds");
     symlink_file($depotpath."/help",$QPEDIR."/help");
     symlink_file($depotpath."/i18n",$QPEDIR."/i18n");
+
+    # Clean out any builds found in the Qtopia source tree
+    clean_qtopia_sources();
 }
 mkpath("$QPEDIR/lib/host");
 
@@ -2043,37 +2078,37 @@ if ( !opt("skip_dqt") ) {
 Qtopia::Opt::write_config_cache();
 system("$QPEDIR/bin/write_config_pri", "tests");
 
-# Different qmake versions have different quirks. Detect them here so the build system can work around them.
+# Different qmake versions have different behaviors. Detect them here so the build system can work around them.
 {
-    print "Testing for qmake quirks: ";
+    print "Testing for qmake behaviors: ";
     print "\n" if ( opt("verbose") );
     my $out;
-    configtest("qmake_quirks", "outvar", $out, "platform", "qmake_only");
-    my @quirks;
-    my @lines = grep /QMAKE_QUIRKS:/, split(/\n/, $out);
+    configtest("qmake_behaviors", "outvar", $out, "platform", "qmake_only");
+    my @behaviors;
+    my @lines = grep /QMAKE_BEHAVIORS:/, split(/\n/, $out);
     my $line = pop(@lines);
     if ( $line ) {
-        @quirks = split(/\s+/, ($line =~ /QMAKE_QUIRKS: (.*)/)[0]);
+        @behaviors = split(/\s+/, ($line =~ /QMAKE_BEHAVIORS: (.*)/)[0]);
     }
-    if ( @quirks ) {
-        opt("qmake", "quirks") = lc(join(" ", @quirks));
-        $out = uc(join(", ", @quirks))
+    if ( @behaviors ) {
+        opt("qmake", "behaviors") = lc(join(" ", @behaviors));
+        $out = uc(join(", ", @behaviors))
     } else {
         $out = "NONE";
     }
     print "$out\n";
     my %test;
-    map { $test{$_}++ } @quirks;
+    map { $test{$_}++ } @behaviors;
     if ( $test{func_out_join} ) {
-        die "ERROR: Qtopia cannot work around the FUNC_OUT_JOIN quirk in qmake.\n".
+        die "ERROR: Qtopia cannot work around the FUNC_OUT_JOIN behavior in qmake.\n".
             "       Please use a newer version of Qt.\n";
     }
     if ( $test{var_parse} ) {
-        die "ERROR: Qtopia cannot work around the VAR_PARSE quirk in qmake.\n".
+        die "ERROR: Qtopia cannot work around the VAR_PARSE behavior in qmake.\n".
             "       Please use a newer version of Qt.\n";
     }
     if ( exists($test{keep_quotes}) ) {
-        die "ERROR: Qtopia cannot work around the KEEP_QUOTES quirk in qmake.\n".
+        die "ERROR: Qtopia cannot work around the KEEP_QUOTES behavior in qmake.\n".
             "       Please use a newer version of Qt.\n";
     }
 }
@@ -2253,6 +2288,9 @@ if ( opt("edition") && !opt("qte_config") ) {
                "-qconfig $qconfig -fast -no-glib -no-cups -no-qdbus ".
                "-DQT_NO_PLUGIN_CHECK -DQT_EXTERNAL_SOUND_SERVER ".
                "-confirm-license";
+    if ( opt("perftest") ) {
+        $args .= " -DQTOPIA_PERFTEST";
+    }
     map { $args .= " -no-sql-".basename($_) if ( basename($_) ne "tmp" && -d $_ ); } glob("$qt_depot_path/src/plugins/sqldrivers/*");
     $args .= " -qt-sql-sqlite";
     if ( opt("release") ) {
@@ -2560,6 +2598,20 @@ if ( opt("phonelibs") ) {
     }
 }
 
+if ( opt("dbus") ) {
+    print "Testing for dbus: ";
+    print "\n" if ( opt("verbose") );
+    my $dbustest = configtest("dbus", "env", "DBUS_PREFIX=".opt("dbuspath"));
+    if ( $dbustest ) {
+        print "OK\n";
+    } else {
+        print "FAIL\n";
+        print "DBUS is disabled.\n";
+        opt("dbus", "auto") = 1;
+        opt("dbus") = 0;
+    }
+}
+
 if ( opt("bluetooth") ) {
     if ( not opt("dbus") ) {
         print "Bluetooth support requires dbus.\n";
@@ -2568,19 +2620,32 @@ if ( opt("bluetooth") ) {
     }
 }
 
-if ( opt("dbusipc") ) {
-    if ( not opt("dbus") ) {
-        print "QCop over DBUS IPC support requires dbus.\n";
-        opt("dbusipc", "auto") = 1;
-        opt("dbusipc") = 0;
-    }
-}   
+#if ( opt("dbusipc") ) {
+#    if ( not opt("dbus") ) {
+#        print "QCop over DBUS IPC support requires dbus.\n";
+#        opt("dbusipc", "auto") = 1;
+#        opt("dbusipc") = 0;
+#    }
+#}   
 
 if ( opt("vpn") ) {
     if ( !opt("ssl") ) {
         print "VPN requires SSL\n";
         opt("vpn", "auto") = 1;
         opt("vpn") = 0;
+    }
+}
+
+if ( opt("overloaded_virtual") ) {
+    print "Testing for -Woverloaded-virtual: ";
+    print "\n" if ( opt("verbose") );
+    my $ok = configtest("overloaded_virtual", "env", "XPLATFORM_ABSOLUTE=".opt("xplatform", "absolute")." PLATFORM_ABSOLUTE=".opt("platform", "absolute")." MAKECMD=".opt("make")." QPEDIR=$QPEDIR DQTDIR=$DQTDIR test=overloaded_virtual FLAG=-Woverloaded-virtual");
+    if ( $ok ) {
+        print "OK\n";
+    } else {
+        print "FAIL\n";
+        print "Use of -Woverloaded-virtual is disabled.\n";
+        opt("overloaded_virtual") = 0;
     }
 }
 

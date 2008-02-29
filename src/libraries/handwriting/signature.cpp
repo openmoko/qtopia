@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -109,9 +109,9 @@ QVector<int> QIMPenSignature::createBase( const QVector<int> &a, int e )
   This is braindead at the moment (no smooth scaling) and fixing this is
   probably one of the simpler ways to improve performance.
 
-  The \a t parameter is if it loops.
+  The \a circular parameter is if it loops.
 */
-void QIMPenSignature::scale( unsigned int dcount, bool t )
+void QIMPenSignature::scale( unsigned int dcount, bool circular )
 {
     uint scount = count();
 
@@ -122,19 +122,19 @@ void QIMPenSignature::scale( unsigned int dcount, bool t )
         for ( uint i = 0; i < dcount; i++ ) {
             next = (i+1) * scount / dcount;
             int maxval = 0;
-            if ( t ) {
+            if ( circular ) {
                 for ( int j = si; j < next; j++ ) {
                     maxval = at(j) > maxval ? at(j) : maxval;
                 }
             }
             int sum = 0;
             for ( int j = si; j < next; j++ ) {
-                if ( t && maxval - at(j) > 128 )
+                if ( circular && maxval - at(j) > 128 )
                     sum += 256;
                 sum += at(j);
             }
             me[i] = sum / (next-si);
-            if ( t && me[i] > 256 )
+            if ( circular && me[i] > 256 )
                 me[i] %= 256;
             si = next;
         }
@@ -149,45 +149,48 @@ void QIMPenSignature::scale( unsigned int dcount, bool t )
     }
 }
 
-
-int QIMPenSignature::calcError(const QIMPenSignature &other) const
+int QIMPenSignature::calcError(const QIMPenSignature &other, const QVector<int> &weight) const
 {
     if (slides()) {
         QVector<int> base = createBase( *this, 2 );
         int err = INT_MAX;
         for ( int i = 0; i < 4; i++ ) {
-            int e = calcError( base, other, i, loops() );
+            int e = calcError( base, other, i, loops(), weight );
             if ( e < err )
                 err = e;
         }
         return err;
     } else {
-        return calcError(*this, other, 0, loops());
+        return calcError(*this, other, 0, loops(), weight);
     }
+
 }
+
 /*!
   Perform a correlation of the supplied arrays.  \a base should have
   win.count() + 2 * \a off points to enable sliding \a win over the
-  \a base data.  If \a t is true, the comparison takes into account
-  the circular nature of the angular data.
+  \a base data.  If \a circular is true, the comparison takes into account
+  the circular nature of the angular data.  If \a weight is not empty, will modify the error
+  values for each point by the value in weight for the same index as a scale from 0 to 256.
   Returns the best (lowest error) match.
 */
-
-int QIMPenSignature::calcError( const QVector<int> &base,
-                           const QVector<int> &win, int off, bool t )
+int QIMPenSignature::calcError(const QVector<int> &base,
+        const QVector<int> &win, int off, bool circular, const QVector<int> &weight)
 {
     int err = 0;
 
     for ( int i = 0; i < win.count(); i++ ) {
         int d = qAbs( base[(int)i+off] - win[(int)i] );
-        if ( t && d > 128 )
+        if ( circular && d > 128 )
             d -= 256;
-        err += qAbs( d );
+
+        if (weight.count())
+            err += (qAbs( d ) * weight[i]) >> 8;
+        else
+            err += qAbs( d );
     }
 
-    err /= win.count();
-
-    return err;
+    return err / win.count();
 }
 
 TanSignature::TanSignature(const QIMPenStroke &stroke)
@@ -232,6 +235,7 @@ AngleSignature::AngleSignature(const QIMPenStroke &stroke)
 }
 
 AngleSignature::~AngleSignature() {}
+
 
 void AngleSignature::calcSignature(const QIMPenStroke &stroke)
 {

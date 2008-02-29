@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <libgen.h>
 
 struct linkname
 {
@@ -159,6 +160,8 @@ tar_extract_regfile(TAR *t, char *realname)
 	int i, k;
 	char buf[T_BLOCKSIZE];
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 #ifdef DEBUG
 	printf("==> tar_extract_regfile(t=0x%lx, realname=\"%s\")\n", t,
@@ -177,8 +180,8 @@ tar_extract_regfile(TAR *t, char *realname)
 	uid = th_get_uid(t);
 	gid = th_get_gid(t);
 
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -284,6 +287,8 @@ tar_extract_hardlink(TAR * t, char *realname)
 	char *linktgt = NULL;
 	linkname_t *lnp;
 	libtar_hashptr_t hp;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISLNK(t))
 	{
@@ -292,8 +297,8 @@ tar_extract_hardlink(TAR * t, char *realname)
 	}
 
 	filename = (realname ? realname : th_get_pathname(t));
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -328,6 +333,8 @@ int
 tar_extract_symlink(TAR *t, char *realname)
 {
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISSYM(t))
 	{
@@ -336,8 +343,8 @@ tar_extract_symlink(TAR *t, char *realname)
 	}
 
 	filename = (realname ? realname : th_get_pathname(t));
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -368,6 +375,8 @@ tar_extract_chardev(TAR *t, char *realname)
 	mode_t mode;
 	unsigned long devmaj, devmin;
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISCHR(t))
 	{
@@ -380,8 +389,8 @@ tar_extract_chardev(TAR *t, char *realname)
 	devmaj = th_get_devmajor(t);
 	devmin = th_get_devminor(t);
 
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -410,6 +419,8 @@ tar_extract_blockdev(TAR *t, char *realname)
 	mode_t mode;
 	unsigned long devmaj, devmin;
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISBLK(t))
 	{
@@ -422,8 +433,8 @@ tar_extract_blockdev(TAR *t, char *realname)
 	devmaj = th_get_devmajor(t);
 	devmin = th_get_devminor(t);
 
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -451,6 +462,8 @@ tar_extract_dir(TAR *t, char *realname)
 {
 	mode_t mode;
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISDIR(t))
 	{
@@ -461,8 +474,8 @@ tar_extract_dir(TAR *t, char *realname)
 	filename = (realname ? realname : th_get_pathname(t));
 	mode = th_get_mode(t);
 
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;
@@ -509,6 +522,8 @@ tar_extract_fifo(TAR *t, char *realname)
 {
 	mode_t mode;
 	char *filename;
+        char *cpyfn;
+        int mkdirres;
 
 	if (!TH_ISFIFO(t))
 	{
@@ -519,8 +534,8 @@ tar_extract_fifo(TAR *t, char *realname)
 	filename = (realname ? realname : th_get_pathname(t));
 	mode = th_get_mode(t);
 
-        char *cpyfn = strdup( filename );
-        int mkdirres = mkdirhier(dirname(cpyfn));
+        cpyfn = strdup( filename );
+        mkdirres = mkdirhier(dirname(cpyfn));
         free( cpyfn );
 	if (mkdirres == -1)
 		return -1;

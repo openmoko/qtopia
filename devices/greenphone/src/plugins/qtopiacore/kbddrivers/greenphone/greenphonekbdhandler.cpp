@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -145,6 +145,8 @@ void GreenphoneKbdHandler::readKbdData()
         unicode = 0xffff;
         modifiers = 0;
         qLog(Input) << "keypressed: code=" << key_code << " (" << (((key_code & 0x80)==0) ? "Down":"Up") << ")";
+        qLog(Performance) << "keypressed: code=" << key_code << " (" << (((key_code & 0x80)==0) ? "Down":"Up") << ")"
+                          << " : " << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
         Phkey = key_code & 0x7F;
 
         switch(Phkey)
@@ -210,14 +212,9 @@ void GreenphoneKbdHandler::readKbdData()
                        break;
 
             // Keys on left hand side of device
-            // Volume Up
-            case 0x07:
-                       key_code2 = Qt::Key_F5;
-                       unicode = 0xffff;
+            case 0x07: key_code2 = Qt::Key_VolumeUp;
                        break;
-            // Volume Down
-            case 0x14: key_code2 = Qt::Key_F6;
-                       unicode = 0xffff;
+            case 0x14: key_code2 = Qt::Key_VolumeDown;
                        break;
 
             // Keys on right hand side of device

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -32,15 +32,24 @@
 #include <qtopianamespace.h>
 
 /*!
-
   \class QtopiaNetwork
+  \brief The QtopiaNetwork class provides functions for starting/stopping of network devices/interfaces.
 
-  This class provides static convinience functions for various network parameter.
+  This class provides functions for starting/stopping of network devices/interfaces.
 
   In general it allows the managing of existing network configurations.
-  The managment functions include the starting and stopping of interfaces and
-  other functions which may be useful for applications which monitor the
-  connectivity state of the Qtopia device.
+  The management functions include the starting and stopping of interfaces and
+  other functions which may be useful for applications which want to influence the
+  connectivity state of Qtopia. 
+
+  Monitoring functionality is provided by:
+  
+  \list
+    \o QNetworkState - very generic connectivity information related to Qtopia
+    \o QNetworkDevice - specific information about the state of a particular hardware device
+  \endlist
+
+  \ingroup io
 */
 
 /*!
@@ -81,7 +90,7 @@
 */
 
 /*!
-  Starts that the network interface identified by \a handle. If the interface is running allready
+  Starts that the network interface identified by \a handle. If the interface is running already
   this function does nothing.
 
   \a options is used internally by some network plugins.
@@ -169,10 +178,15 @@ void QtopiaNetwork::lockdown( bool isLocked )
   \internal
 
   Sets the life time of the interface \a handle to \a isExtended. If \a isExtended is \c TRUE
-  \a handle will remain online indefinitly. Usually the session manager keeps track of interfaces
-  started by applications and closes the connection when the application quits.
+  \a handle will remain online indefinitly. Usually the session manager would keep track of interfaces
+  started by applications and shuts the device down  when the application quits. However the life time flag
+  prevents the session manager from doing so.
 
-  This function can only be called by the Qtopia server and the netsetup application (enforced by SXE).
+  The extended life time flag can only be set if \a handle (the associated network device) is in the state
+  QtopiaNetworkInterface::Up, QtopiaNetworkInterfaces::Demand or QtopiaNetworkInterfaces::Pending. The flag
+  immediately resets as soon as the device leaves one of these three states.
+
+  Currently this function can only be called by the Qtopia server and the netsetup application (enforced by SXE).
   */
 void QtopiaNetwork::extendInterfaceLifetime( const QString& handle, bool isExtended )
 {
@@ -189,6 +203,7 @@ QString QtopiaNetwork::settingsDir()
 }
 
 /*!
+  \internal 
   Returns the type of network interface defined by \a handle.
 */
 QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
@@ -397,7 +412,8 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
     This can be used to check the general connectivity status of the Qtopia environment.
     A device is considered to be online if it is either Up, Demand or Pending.
 
-    Dynamic state updates on a per device base can be obtained by using QNetworkDevice.
+    More detailed state updates on a per device base can be obtained by using QNetworkDevice
+    and overal state change notifications across all network devices are provided by QNetworkState.
 */
 bool QtopiaNetwork::online()
 {

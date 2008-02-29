@@ -25,7 +25,7 @@ linstall_template=$$COMMAND_HEADER\
 !isEmpty(TRANSLATABLES) {
     # Basic .ts to .qm conversion
     linstall.commands="$$linstall_template"
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         linstall.commands~=s/^"//
         linstall.commands~=s/"$//
     }
@@ -57,7 +57,7 @@ for(it,INSTALLS) {
     contains(hint,nct) {
         # Convert the non-code .ts file to .qm
         commands="$$linstall_template"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             commands~=s/^"//
             commands~=s/"$//
         }
@@ -87,7 +87,7 @@ for(it,INSTALLS) {
     contains(hint,themecfg) {
         # Convert the theme .ts file to .qm
         commands="$$linstall_template"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             commands~=s/^"//
             commands~=s/"$//
         }

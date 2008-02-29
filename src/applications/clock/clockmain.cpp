@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,7 @@
 #include <qtopiaipcenvelope.h>
 #include <qsettings.h>
 #include <qtimestring.h>
+#include <QtopiaServiceRequest>
 #ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
 #endif
@@ -86,6 +87,10 @@ ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
     actionStopWatch = contextMenu->addAction(tr("Stop Watch"));
     actionAlarm = contextMenu->addAction(QIcon(":icon/alarmbell"), tr("Alarm"));
     stack->setCurrentIndex(clockIndex);
+    actionClock->setEnabled(false);
+
+    QAction *action = contextMenu->addAction(tr("Set Time..."));
+    connect(action, SIGNAL(triggered()), this, SLOT(setTime()));
 
     QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
 #endif
@@ -140,12 +145,14 @@ void ClockMain::appMessage( const QString &msg, const QByteArray &data )
 void ClockMain::raisePage(QAction *a)
 {
 #ifdef QTOPIA_PHONE
-    int page = clockIndex;
+    int page = -1;
     if (a == actionStopWatch)
         page = stopwatchIndex;
     else if (a == actionAlarm)
         page = alarmIndex;
-    if (stack->currentWidget() != stack->widget(page))
+    else if (a == actionClock)
+        page = clockIndex;
+    if (page >= 0 && stack->currentWidget() != stack->widget(page))
         stack->setCurrentIndex(page);
 #else
     Q_UNUSED(a);
@@ -154,13 +161,16 @@ void ClockMain::raisePage(QAction *a)
 
 void ClockMain::pageRaised(int idx)
 {
-    if (idx == clockIndex)
+    if (idx == clockIndex) {
         setObjectName("clock"); // No tr
-    else if (idx == alarmIndex) {
+    } else if (idx == alarmIndex) {
         setObjectName("alarms"); // No tr
-    }
-    else if (idx == stopwatchIndex)
+    } else if (idx == stopwatchIndex) {
         setObjectName("stopwatch"); // No tr
+    }
+    actionClock->setEnabled(idx != clockIndex);
+    actionStopWatch->setEnabled(idx != stopwatchIndex);
+    actionAlarm->setEnabled(idx != alarmIndex);
 }
 
 void ClockMain::closeEvent( QCloseEvent *e )
@@ -171,6 +181,12 @@ void ClockMain::closeEvent( QCloseEvent *e )
     } else {
         QWidget::closeEvent(e);
     }
+}
+
+void ClockMain::setTime()
+{
+    QtopiaServiceRequest req("Time", "editTime()");
+    req.send();
 }
 
 /*!

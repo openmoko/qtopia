@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -50,7 +50,6 @@ void DateBookGui::init()
     setWindowIcon(QPixmap(":image/DateBook"));
 
     //setToolBarsMovable( false );
-    setBackgroundRole(QPalette::Button);
 
     // Create the actions
 
@@ -119,6 +118,9 @@ void DateBookGui::init()
     connect(actionAccounts, SIGNAL(triggered()), this, SLOT(showAccountSettings()));
     // be default, dont' show this.  dependent on features of model loaded.
     actionAccounts->setVisible(false);
+
+    actionCategory = new QAction(QIcon(":icon/viewcategory"), tr("View Category..."), this );
+    connect( actionCategory, SIGNAL(triggered()), this, SLOT(selectCategory()));
 
     actionSettings = new QAction(QIcon(":icon/settings"), tr("Settings..."), g);
     connect(actionSettings, SIGNAL(triggered()), this, SLOT(showSettings()));
@@ -213,6 +215,7 @@ void DateBookGui::init()
 
     contextMenu->addAction( actionToday );
     contextMenu->addAction( actionMonth );
+    contextMenu->addAction( actionCategory);
     contextMenu->addAction( actionAccounts );
     contextMenu->addAction( actionSettings );
 #endif

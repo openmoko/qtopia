@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -97,6 +97,8 @@ SelectedItem::SelectedItem(const QString &_backgroundFileName,
     , currentY(-1)
     , destX(-1)
     , destY(-1)
+    , xDrift(-1)
+    , yDrift(-1)
 {
     // The item supports selection. Enabling this feature will enable setSelected()
     // to toggle selection for the item.
@@ -128,12 +130,6 @@ void SelectedItem::createMoveTimeLine()
 
     moveTimeLine = new QTimeLine(slideTimeInterval,connector);
     moveTimeLine->setFrameRange(0,100);
-    // Reduce the number of times the timeline fires per second, to improve performance. 100 ms will
-    // be about 10 per second.
-    //moveTimeLine->setUpdateInterval(100);
-    // The default update interval is 40 ms (about 25 frames per second), but we will increase
-    // this to get smoother action on fast keyboard strokes.
-    //moveTimeLine->setUpdateInterval(20);
     QObject::connect(moveTimeLine,SIGNAL(frameChanged(int)),connector,SLOT(moving(int)));
     QObject::connect(moveTimeLine,SIGNAL(stateChanged(QTimeLine::State)),connector,SLOT(movingStateChanged(QTimeLine::State)));
 }
@@ -147,10 +143,6 @@ void SelectedItem::createPlayTimeLine()
 
     playTimeLine = new QTimeLine(ANIMATION_TIME,connector);
     playTimeLine->setFrameRange(0,100);
-    // Reduce the number of times the timeline fires per second, otherwise some platforms
-    // may not be able to handle the sorts of transformations that an Animator will typically
-    // demand. 100ms apart will be about 10 per second.
-    //playTimeLine->setUpdateInterval(100);
     QObject::connect(playTimeLine,SIGNAL(frameChanged(int)),connector,SLOT(playing(int)));
     QObject::connect(playTimeLine,SIGNAL(stateChanged(QTimeLine::State)),connector,SLOT(animationStateChanged(QTimeLine::State)));
 }
@@ -342,7 +334,7 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
     // Draw the background.
     drawBackground(painter);
 
-    if ( isAnimating() ) {
+    if ( animationState() == Animating ) {
         // During animation, we get multiple calls to paint(...). In each, we paint the next
         // frame of the movie.
         if ( movie ) {
@@ -368,13 +360,9 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
 
             // During moveStep(...), we calculated new positions for the two items when they
             // are drawn as SelectedItems. This calculation takes into account the magnified
-            // area between the two pixmaps. If these values have not yet been calculated (i.e.
-            // they are -1) we will skip this draw (this happens when animation must be stopped in
-            // favour of a move, so that the finishing animation schedules a repaint).
-            if ( currentX > -1 ) {
-                draw(painter,currentItem->selectedPic(),currentX,currentY);
-                draw(painter,destItem->selectedPic(),destX,destY);
-            }
+            // area between the two pixmaps.
+            draw(painter,currentItem->selectedPic(),currentX,currentY);
+            draw(painter,destItem->selectedPic(),destX,destY);
         } else {
             // We're not sliding, we're just drawing 'item' as the selected item.
             draw(painter,currentItem->selectedPic(),static_cast<int>(rect().x()),static_cast<int>(rect().y()));
@@ -710,6 +698,28 @@ void SelectedItem::triggerItemSelected(GridItem *item)
     connector->triggerItemSelected(item);
 }
 
+qreal SelectedItem::getXDrift()
+{
+    if ( xDrift == -1 ) {
+        // Hasn't been worked out yet.
+        xDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().width())
+                 - rect().width();
+    }
+
+    return xDrift;
+}
+
+qreal SelectedItem::getYDrift()
+{
+    if ( yDrift == -1 ) {
+        // Hasn't been worked out yet.
+        yDrift = ((1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR) * rect().height())
+                 - rect().height();
+    }
+
+    return yDrift;
+}
+
 /*!
   \internal
   \fn void SelectedItem::moveTo(GridItem *_destItem)
@@ -728,17 +738,23 @@ void SelectedItem::moveTo(GridItem *_destItem)
         destItem = 0;
     }
     if ( moveTimeLine->state() != QTimeLine::NotRunning ) {
-        moveTimeLine->stop();
+        moveTimeLine->stop();  // triggers moveFinished
         // TODO: This is because Qt's QTimeLine has a bug which doesn't reset the frames
         // when you stop the timeline. When you restart, it acts as though it has been paused.
         // Repair when Qt bug is resolved.
         //createMoveTimeLine();
     }
-    if ( isAnimating() ) {
-        stopAnimation();
-    }
 
+    // The order is important here. It is possible that this move request is interrupting an
+    // animation. If that's the case, we'll want to stop the animation - BUT that will trigger
+    // animationFinished() which calls for a redraw that we don't actually want. We set destItem
+    // FIRST (so it's non-zero), so that animationFinished() can check if there's a move in the
+    // pipeline, and refrain from drawing.
     destItem = _destItem;
+
+    if ( isAnimating() ) {
+        stopAnimation(); // triggers animationFinished()
+    }
 
     // Start the timer. This will cause moveStep(int) to be called, periodically.
     moveTimeLine->start();
@@ -760,11 +776,11 @@ void SelectedItem::moveStep(int n)
         return;
     }
 
-    // Work out the amount you have to move by, for this step.
-    // Find the total amount you have to move by (for each of x and y), and use the
-    // percentage to find the amount you have to move from the source for this step only.
+    // Find out how where the SelectedItem box ought to be at this stage in the move, and
+    // shift it accordingly.
     QRect destRect = getGeometry(destItem);
-    QRect srcRect = getGeometry(currentItem);
+    QRect srcRect = getGeometry(currentItem); // we might be in the middle of a move, so don't use rect() here!
+
     qreal moveByX = (destRect.x() - srcRect.x()) * percent;
     qreal moveByY = (destRect.y() - srcRect.y()) * percent;
 
@@ -776,35 +792,40 @@ void SelectedItem::moveStep(int n)
 
     setRect(srcRect.x() + moveByX,srcRect.y() + moveByY,srcRect.width(),srcRect.height());
 
-    // We also have to find where the  2 images are going to sit within their designated areas,
+    // We also have to find where the 2 images are going to sit within their designated areas,
     // because SelectedItem is essentially a magnified version of an underlying GridItem, and
-    // when we're moving between two, the area between them is magnified too.
+    // when we're moving between two, the area between them is magnified too, i.e. the dest
+    // item will move TOWARDS its usual position, while the current (soon-to-be-old) item will
+    // move AWAY FROM its usual position.
 
     // Find the "ordinary" positions of the two items, i.e. the top left-hand corners
     // of the 2 items when they are magnified as SelectedItems.
-    QPoint pos = getPos(currentItem);
-    currentX = pos.x();
-    currentY = pos.y();
-    pos = getPos(destItem);
-    destX = pos.x();
-    destY = pos.y();
+    currentX = srcRect.x();
+    currentY = srcRect.y();
+    destX = destRect.x();
+    destY = destRect.y();
 
-    qreal totalXDistanceToTravel = 0;
-    qreal totalYDistanceToTravel = 0;
-    if ( currentItem->getColumn() != destItem->getColumn() ) {
-        // Moving sideways - find how far we have to move, and magnify that distance.
-        totalXDistanceToTravel = (destItem->rect().x() - currentItem->rect().x()) * (1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR);
-        totalXDistanceToTravel *= GridItem::SELECTED_IMAGE_SIZE_FACTOR;
-        currentX -= static_cast<int>(percent * totalXDistanceToTravel);
-        destX += static_cast<int>((1.0-percent) * totalXDistanceToTravel);
-    }
-    if ( currentItem->getRow() != destItem->getRow() ) {
-        // Moving up-down - find how far we have to move, and magnify that distance.
-        totalYDistanceToTravel = (destItem->rect().y() - currentItem->rect().y()) * (1 + GridItem::SELECTED_IMAGE_SIZE_FACTOR);
-        totalYDistanceToTravel *= GridItem::SELECTED_IMAGE_SIZE_FACTOR;
-        currentY -= static_cast<int>(percent * totalYDistanceToTravel);
-        destY += static_cast<int>((1.0-percent) * totalYDistanceToTravel);
-    }
+    // Find the x position of current and dest items.
+    if ( currentItem->getColumn() < destItem->getColumn() ) {
+        // Moving from left to right.
+        currentX -= qRound(percent * getXDrift()); // current (left) drifts away to the left over time
+        destX += qRound((1-percent) * getXDrift()); // destination (right) drifts in from the right over time
+    } else if ( currentItem->getColumn() > destItem->getColumn() ) {
+        // Moving from right to left.
+        currentX += qRound(percent * getXDrift()); // current (right) drifts away to the right over time
+        destX -= qRound((1-percent) * getXDrift()); // destination (left) drifts in from the left over time
+    } // else, if they're equal, currentX & destX will be their usual positions
+
+    // Find the y position of current and dest items.
+    if ( currentItem->getRow() < destItem->getRow() ) {
+        // Moving down.
+        currentY -= qRound(percent * getYDrift()); // current (top) drifts upwards over time
+        destY += qRound((1-percent) * getYDrift()); // destination (bottom) drifts up from below over time
+    } else if ( currentItem->getRow() > destItem->getRow() ) {
+        // Moving up.
+        currentY += qRound(percent * getYDrift()); // current (bottom) drifts downwards over time
+        destY -= qRound((1-percent) * getYDrift()); // destination (top) drifts down from above over time
+    } // else, if they're equal, currentY & destY will be their usual positions
 }
 
 /*!
@@ -820,11 +841,6 @@ void SelectedItem::moveFinished()
     }
 
     destItem = 0;
-
-    currentX = -1;
-    currentY = -1;
-    destX = -1;
-    destY = -1;
 }
 
 /*!
@@ -840,14 +856,29 @@ void SelectedItem::playStep(int _animationStage)
     update(boundingRect());
 }
 
+SelectedItem::AnimationState SelectedItem::animationState() const
+{
+    if ( movie && (movie->state() == QMovie::Running) ) {
+        return Animating;
+    }
+    if ( playTimeLine && (playTimeLine->state() == QTimeLine::Running) ) {
+        return Animating;
+    }
+    if ( playTimeLine && animationPending ) {
+        return AnimationPending;
+    }
+    return NotAnimating;
+}
+
 /*!
   \internal
   \fn bool SelectedItem::isAnimating()
+  Returns true if the item is currently animating or about to animate.
 */
-bool SelectedItem::isAnimating()
+bool SelectedItem::isAnimating() const
 {
-    return ( (movie && (movie->state() == QMovie::Running)) ||
-             (playTimeLine && (animationPending || playTimeLine->state() == QTimeLine::Running)) );
+    AnimationState state = animationState();
+    return ( state == Animating || state == AnimationPending );
 }
 
 /*!
@@ -863,7 +894,7 @@ void SelectedItem::stopAnimation()
     }
     if ( playTimeLine ) {
         animationPending = false;
-        playTimeLine->stop();
+        playTimeLine->stop(); // triggers animationFinished()
         // TODO: This is because Qt's QTimeLine has a bug which doesn't reset the frames
         // when you stop the timeline. When you restart, it acts as though it has been paused.
         // Repair when Qt bug is resolved.
@@ -905,7 +936,6 @@ void SelectedItem::startAnimationDelayed()
         }
         if ( currentItem->getSelectedAnimator() ) {
             // We can start animating manually.
-            //playTimeLine->setDuration(currentItem->getAnimationDurationHint());
             playTimeLine->start();
         }
         // Otherwise, no animation for this item.
@@ -915,9 +945,18 @@ void SelectedItem::startAnimationDelayed()
 /*!
   \internal
   \fn void SelectedItem::animationFinished()
-  Refreshes this item.
+  Refreshes this item when the animation is done, unless a move request has interrupted
+  the animation, in which case this method does nothing and lets the move handle drawing
+  from now on.
 */
 void SelectedItem::animationFinished()
 {
-    update(boundingRect());
+    // We only want to do a redraw IF a move is not already in progress. This is because
+    // a move request can interrupt an animation. The move request resets values such as
+    // currentX and Y, so if we try to draw to finish off the animation we'll get bogus values.
+    // We let the move callbacks take care of it, instead.
+    if ( !destItem ) {
+        // No move in progress, so redraw.
+       update(boundingRect());
+    }
 }

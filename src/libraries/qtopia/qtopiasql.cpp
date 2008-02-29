@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -496,6 +496,13 @@ QSqlDatabase *QtopiaSql::connectDatabase(const QString &connName)
     if (!db->open())
         qWarning() << "Could not connect" << d->name << db->lastError().text();
 
+#if defined(Q_USE_SQLITE)
+    // Execute these if for no other reason than to flush the SQLite schema
+    QSqlQuery xsql( *db );
+    xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
+    xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
+#endif
+
     return db;
 }
 
@@ -697,7 +704,8 @@ bool QtopiaSql::loadSchema(QSqlDatabase &db, const QString &resource, bool trans
 QSqlError QtopiaSql::exec(const QString &query, QSqlDatabase& db, bool inTransaction)
 {
     QSqlError result = QSqlError();
-    QSqlQuery qry(query, db);
+    QSqlQuery qry(db);
+    qry.prepare(query);
     if (inTransaction && db.driver()->hasFeature(QSqlDriver::Transactions))
         if(!db.driver()->beginTransaction())
             qLog(Sql) << __PRETTY_FUNCTION__ << "Error executing beginTransaction:" << db.lastError();
@@ -831,7 +839,8 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
 #if defined(Q_USE_SQLITE)
         xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
         xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
-        xsql.exec(QLatin1String("PRAGMA temp_store_directory = '/tmp';"));
+        // Unnecessary because temp_store = memory 
+        // xsql.exec(QLatin1String("PRAGMA temp_store_directory = '/tmp';"));
 #endif
         dbs->insert(id, db);
         QtopiaSqlPrivate::connectionNames.localData()->insert(id, connName);
@@ -976,7 +985,8 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
         QSqlQuery xsql( db );
         xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
         xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
-        xsql.exec(QLatin1String("PRAGMA temp_store_directory = '/tmp';"));
+        // Once temp_store is "memory" the temp_store_directory has no effect
+        // xsql.exec(QLatin1String("PRAGMA temp_store_directory = '/tmp';"));
         QtopiaSqlPrivate::connectionNames.localData()->insert(dbid, connName);
         QtopiaSqlPrivate::dbPaths.insert(dbid, path);
         QtopiaSqlPrivate::masterAttachedConns.insert(dbid, db);

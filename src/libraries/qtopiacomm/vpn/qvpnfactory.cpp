@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -33,7 +33,7 @@
   \class QVPNFactory
   \brief The QVPNFactory class creates QVPNClient objects.
 
-  \ingroup communication
+  \ingroup io
 
   The virtual private network factory creates a QVPNCLient object
   for a given ID or type with QVPNFactory::create().

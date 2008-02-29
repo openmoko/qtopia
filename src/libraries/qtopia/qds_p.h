@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,14 +30,6 @@
 
 namespace QDS
 {
-    static const QString SERVICE_TAG        = "QDS"; // No tr
-    static const QString PROVIDER_CHANNEL   = "QPE/Application/"; // No tr
-    static const QString RESPONSE_CHANNEL   = "QDSResponse"; // No tr
-    static const QString SERVICES_DIR_END   = "qds"; // No tr
-    static const QString SERVICES_DIR       = Qtopia::qtopiaDir() +
-                                              "etc/" +
-                                              SERVICES_DIR_END; // No tr
-
     static const int SERVERING_HEARTBEAT_PERIOD = 1000;
     static const int REQUEST_TIMEOUT            = 20000;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -72,8 +72,8 @@ public slots:
     void activateItem(const QModelIndex&);
     void sendUpdatedText( const QModelIndex& );
     void userTargetChoice( const QString & );
+    void populateLists();
 private slots:
-    void init();
     void publishTargets();
     void controllerUpdate();
     void packageInstalled( const InstallControl::PackageInfo & );

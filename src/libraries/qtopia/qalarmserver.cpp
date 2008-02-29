@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -302,7 +302,7 @@ void TimerReceiverObject::timerEvent( QTimerEvent * )
 
 /*!
   Schedules an alarm to go off at (or soon after) time \a when. When
-  the alarm goes off, the \l {QCop Messages}{QCop} \a message will
+  the alarm goes off, the \l {Qtopia IPC Layer}{Qtopia IPC} \a message will
   be sent to \a channel, with \a data as a parameter.
 
   If \a channel does not contain the \c{/} character, it will be interpreted
@@ -367,7 +367,7 @@ void Qtopia::addAlarm ( QDateTime when, const QString& channel,
   Deletes previously scheduled alarms which match \a when, \a channel,
   \a message, and \a data.
 
-  Passing null values for \a when, \a channel, or for the \l {QCop Messages}{QCop} \a message, acts as a wildcard meaning "any".
+  Passing null values for \a when, \a channel, or for the \l {Qtopia IPC Layer}{Qtopia IPC} \a message, acts as a wildcard meaning "any".
   Similarly, passing -1 for \a data indicates "any".
 
   If there is no matching alarm, nothing happens.
@@ -448,7 +448,7 @@ void Qtopia::writeHWClock()
 
 /*!
   Schedules an alarm to go off at (or soon after) time \a when. When
-  the alarm goes off, the \l {QCop Messages}{QCop} \a message will
+  the alarm goes off, the \l {Qtopia IPC Layer}{Qtopia IPC} \a message will
   be sent to \a channel, with \a data as a parameter.
 
   This slot corresponds to the QCop message

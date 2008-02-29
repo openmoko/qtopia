@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -92,24 +92,56 @@ QString AppointmentDetails::createPreviewText( const QAppointment &ev )
         QString word;
         if ( ev.repeatRule() == QAppointment::Daily )
             if ( ev.frequency() > 1 )
-                word = tr("every %1 days", "eg. every 2 days");
+                word = tr("every %1 days", "eg. every 2 days", ev.frequency());
             else
                 word = tr("every day");
-        else if ( ev.repeatRule() == QAppointment::Weekly )
+        else if ( ev.repeatRule() == QAppointment::Weekly ) {
+            int repDays = 0;
+            int dayOfWeek;
+            QString repStr;
+
+            for (dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
+                if (ev.repeatOnWeekDay(dayOfWeek)) {
+                    repDays++;
+                }
+            }
+
             if ( ev.frequency() > 1 )
-                word = tr("every %1 weeks", "eg. every 2 weeks");
+                word = tr("every %2 weeks on %1", "eg. every 2 weeks on: Monday, Wednesday", ev.frequency());
             else
-                word = tr("every week");
+                word = tr("every week on %1", "e.g. every week on: Monday, Thursday");
+
+            if (repDays > 0) {
+                Qt::DayOfWeek startDay = Qtopia::weekStartsOnMonday() ? Qt::Monday : Qt::Sunday;
+                dayOfWeek = startDay;
+                do {
+                    if (ev.repeatOnWeekDay(dayOfWeek)) {
+                        if (!repStr.isEmpty())
+                            repStr += tr(",", "list separator - e.g. Monday_, _Tuesday") + " ";
+                        repStr += QTimeString::nameOfWeekDay(dayOfWeek, QTimeString::Long);
+                    }
+                    if (dayOfWeek == 7)
+                        dayOfWeek = 1;
+                    else
+                        dayOfWeek++;
+                } while (dayOfWeek != startDay);
+            } else {
+                repStr = QTimeString::nameOfWeekDay(ev.startInCurrentTZ().date().dayOfWeek(), QTimeString::Long);
+            }
+
+            word = word.arg(repStr);
+        }
         else if ( ev.repeatRule() == QAppointment::MonthlyDate ||
                   ev.repeatRule() == QAppointment::MonthlyDay ||
                   ev.repeatRule() == QAppointment::MonthlyEndDay )
+            /// XXX this could also get extra information
             if ( ev.frequency() > 1 )
-                word = tr("every %1 months", "eg. every 2 months");
+                word = tr("every %1 months", "eg. every 2 months", ev.frequency());
             else
                 word = tr("every month");
         else if ( ev.repeatRule() == QAppointment::Yearly )
             if ( ev.frequency() > 1 )
-                word = tr("every %1 years", "eg. every 2 years");
+                word = tr("every %1 years", "eg. every 2 years", ev.frequency());
             else
                 word = tr("every year");
         text += "<b>" + tr("Repeat: ") + "</b>";

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -100,6 +100,8 @@ public:
     QString m_incoming;
     bool m_first_packet;
     QBuffer m_tmpBuffer;
+
+    QSocketNotifier *m_notifier;
 };
 
 QObexPushService_Private::QObexPushService_Private(QObexSocket *socket, QObexPushService *parent)
@@ -121,10 +123,10 @@ QObexPushService_Private::QObexPushService_Private(QObexSocket *socket, QObexPus
     OBEX_SetUserCallBack(m_self, qobex_receiver_callback, this);
     OBEX_SetUserData(m_self, this);
 
-    QSocketNotifier *sn = new QSocketNotifier( OBEX_GetFD( m_self ),
-                                               QSocketNotifier::Read,
-                                               this );
-    connect( sn, SIGNAL(activated(int)), this, SLOT(processInput()) );
+    m_notifier = new QSocketNotifier( OBEX_GetFD( m_self ),
+                                      QSocketNotifier::Read,
+                                      this );
+    connect( m_notifier, SIGNAL(activated(int)), this, SLOT(processInput()) );
 }
 
 QObexPushService_Private::~QObexPushService_Private()
@@ -397,7 +399,11 @@ void QObexPushService_Private::handlePut(obex_object_t *object)
     QObexHeader hdr;
     getHeaders( m_self, object, hdr);
 
-    if (!m_parent->acceptFile(hdr.name(), hdr.mimeType(), hdr.length())) {
+    m_notifier->setEnabled(false);
+    bool isAccepted = m_parent->acceptFile(hdr.name(), hdr.mimeType(), hdr.length());
+    m_notifier->setEnabled(true);
+
+    if (!isAccepted) {
         qLog(Obex) << "Rejecting file";
         OBEX_ObjectSetRsp(object, OBEX_RSP_FORBIDDEN, OBEX_RSP_FORBIDDEN);
         return;

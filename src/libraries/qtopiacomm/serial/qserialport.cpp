@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -201,6 +201,17 @@ bool QSerialPort::open( OpenMode mode )
         }
         d->isTty = ::isatty( d->fd );
 
+        qLog(Modem) << "Device:" << d->device << "is a tty device:" << (d->isTty ? "True" : "False");
+
+        int fdflags;
+        if ((fdflags = fcntl(d->fd, F_GETFL)) == -1 ||
+             fcntl(d->fd, F_SETFL, fdflags & ~O_NONBLOCK) < 0)
+        {
+            perror("couldn't reset non-blocking mode");
+            return false;
+        }
+
+        qLog(Modem) << "NONBLOCK successfully reset";
     }
 #endif
 #ifdef USE_TERMIOS
@@ -292,7 +303,7 @@ bool QSerialPort::open( OpenMode mode )
         }
         ::cfsetispeed( &t, speed );
         ::cfsetospeed( &t, speed );
-        if( ::tcsetattr( d->fd, TCSAFLUSH, &t ) < 0 )
+        if( ::tcsetattr( d->fd, TCSANOW, &t ) < 0 )
             qLog(Modem) << "tcsetattr(" << d->fd << ") errno = " << errno;
         int status = TIOCM_DTR | TIOCM_RTS;
         ::ioctl( d->fd, TIOCMBIS, &status );
@@ -316,9 +327,9 @@ bool QSerialPort::open( OpenMode mode )
     connect( d->notifier, SIGNAL(activated(int)),
              this, SLOT(internalReadyRead()) );
     QIODevice::setOpenMode( mode | QIODevice::Unbuffered );
+
     return true;
 }
-
 
 /*!
     Close the serial device.
@@ -411,6 +422,7 @@ qint64 QSerialPort::readData( char *data, qint64 maxlen )
     if ( d->fd == -1 ) {
         return -1;
     }
+
     while ( ( result = ::read( d->fd, data, (int)maxlen ) ) < 0 ) {
         if ( errno != EINTR ) {
             if ( errno == EWOULDBLOCK ) {
@@ -420,6 +432,7 @@ qint64 QSerialPort::readData( char *data, qint64 maxlen )
             return -1;
         }
     }
+
     if ( !result && ( !d->isTty || ( !d->keepOpen && !dsr() ) ) ) {
         // We've received a close notification.  This might happen
         // with the phone simulator if it is shut down before Qtopia.

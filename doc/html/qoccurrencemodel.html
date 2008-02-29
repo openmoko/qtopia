@@ -99,12 +99,12 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QOccurrenceModel class provides access to the Calendar data.</p>
-<p>The QOccurrenceModel is used to access the Calendar data. It is a descendent of <a href="qabstractitemmodel.html">QAbstractItemModel</a> so is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a> as well as any developer custom Views.</p>
-<p>It differes from the <a href="qappointmentmodel.html">QAppointmentModel</a> in that it will show each occurrence of appointments as a separate item in the model. Since some appointments have infinite occurrences a date range must be specified to limit the total set of occurrences included in the model.</p>
+<p>The QOccurrenceModel is used to access the Calendar data. It is a descendant of <a href="qabstractitemmodel.html">QAbstractItemModel</a> so is suitable for use with the Qt View classes such as <a href="qlistview.html">QListView</a> and <a href="qtableview.html">QTableView</a>, as well as any custom developer Views.</p>
+<p>It differs from the <a href="qappointmentmodel.html">QAppointmentModel</a> in that it will show each occurrence of appointments as a separate item in the model. Since some appointments have infinite occurrences a date range must be specified to limit the total set of occurrences included in the model.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QOccurrenceModel"></a>QOccurrenceModel::QOccurrenceModel ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qoccurrencemodel.html">QOccurrenceModel</a> contains appointments that occur in the range of <i>start</i> to <i>end</i>. The model will have the parent <i>parent</i>.</p>
+<p>Constructs a <a href="qoccurrencemodel.html">QOccurrenceModel</a> that contains appointments that occur in the range of <i>start</i> to <i>end</i>. The model will have the parent <i>parent</i>.</p>
 <h3 class="fn"><a name="QOccurrenceModel-2"></a>QOccurrenceModel::QOccurrenceModel ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, int <i>count</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qoccurrencemodel.html">QOccurrenceModel</a> that contains appointments that occur in the range of <i>start</i> for a total of <i>count</i> occurrences. The model will have the parent <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QOccurrenceModel"></a>QOccurrenceModel::~QOccurrenceModel ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -140,7 +140,7 @@
 <p>Reimplemented from <a href="qabstractitemmodel.html#data">QAbstractItemModel</a>.</p>
 <p>See also <a href="qoccurrencemodel.html#setData">setData</a>().</p>
 <h3 class="fn"><a name="durationType"></a><a href="qappointmentmodel.html#DurationType-enum">QAppointmentModel::DurationType</a> QOccurrenceModel::durationType () const</h3>
-<p>Returns the duration type of occurrences currnetly included in the model.</p>
+<p>Returns the duration type of occurrences currently included in the model.</p>
 <p>See also <a href="qoccurrencemodel.html#setDurationType">setDurationType</a>().</p>
 <h3 class="fn"><a name="editable"></a>bool QOccurrenceModel::editable ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns true if the occurrence for <i>index</i> can be updated or removed. Otherwise returns false.</p>
@@ -148,19 +148,19 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if the appointment for <i>id</i> can be updated or removed. Otherwise returns false.</p>
 <h3 class="fn"><a name="fetchCompleted"></a>void QOccurrenceModel::fetchCompleted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the occurrence model finished caching changes resulting to a change to the stored appointments.</p>
+<p>This signal is emitted when the occurrence model finished caching changes resulting from a change to the stored appointments.</p>
 <p>See also <a href="qoccurrencemodel.html#completeFetch">completeFetch</a>() and <a href="qoccurrencemodel.html#fetching">fetching</a>().</p>
 <h3 class="fn"><a name="fetching"></a>bool QOccurrenceModel::fetching () const</h3>
-<p>Returns true if the occurrence model has not yet updated the list of occurrence due to a change in storred appointments.</p>
+<p>Returns true if the occurrence model has not yet updated the list of occurrence due to a change in stored appointments.</p>
 <p>See also <a href="qoccurrencemodel.html#fetchCompleted">fetchCompleted</a>() and <a href="qoccurrencemodel.html#completeFetch">completeFetch</a>().</p>
 <h3 class="fn"><a name="id"></a><a href="quniqueid.html">QUniqueId</a> QOccurrenceModel::id ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Return the id for the appointment represented by the occurrence at the row specified by <i>index</i>. If index is null or out of the range of the model will return a null id.</p>
 <h3 class="fn"><a name="index"></a><a href="qmodelindex.html">QModelIndex</a> QOccurrenceModel::index ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const</h3>
-<p>If the model contains an occurrence representing an appointment with uid <i>id</i> returns the index of the first occurrence.. Otherwise returns a null <a href="qmodelindex.html">QModelIndex</a></p>
+<p>If the model contains an occurrence representing an appointment with uid <i>id</i> returns the index of the first occurrence. Otherwise returns a null <a href="qmodelindex.html">QModelIndex</a></p>
 <p>See also <a href="qoccurrencemodel.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="index-2"></a><a href="qmodelindex.html">QModelIndex</a> QOccurrenceModel::index ( const <a href="qoccurrence.html">QOccurrence</a> &amp; <i>o</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>If the model contains an occurrence <i>o</i> returns the index of that occurrence.. Otherwise returns a null <a href="qmodelindex.html">QModelIndex</a></p>
+<p>If the model contains an occurrence <i>o</i> returns the index of that occurrence. Otherwise returns a null <a href="qmodelindex.html">QModelIndex</a></p>
 <h3 class="fn"><a name="index-3"></a><a href="qmodelindex.html">QModelIndex</a> QOccurrenceModel::index ( int <i>row</i>, int <i>column</i> = 0, const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the index of the item in the model specified by the given <i>row</i>, <i>column</i> and <i>parent</i> index.</p>
@@ -182,7 +182,7 @@
 <p>Returns the occurrence for the row specified by <i>index</i>. The column of <i>index</i> is ignored.</p>
 <h3 class="fn"><a name="occurrence-2"></a><a href="qoccurrence.html">QOccurrence</a> QOccurrenceModel::occurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the occurrence that occurs on the <i>date</i> specified for the appointment with uid <i>id</i>. If thhe appointment does not exists or does not occur on the <i>date</i>, returns a null occurrence</p>
+<p>Returns the occurrence that occurs on the <i>date</i> specified for the appointment with uid <i>id</i>. If the appointment does not exists or does not occur on the <i>date</i>, returns a null occurrence.</p>
 <h3 class="fn"><a name="occurrence-3"></a><a href="qoccurrence.html">QOccurrence</a> QOccurrenceModel::occurrence ( int <i>row</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the occurrence at the <i>row</i> specified.</p>
@@ -191,7 +191,7 @@
 <p>Reimplemented from <a href="qabstractitemmodel.html#parent">QAbstractItemModel</a>.</p>
 <h3 class="fn"><a name="rangeEnd"></a><a href="qdatetime.html">QDateTime</a> QOccurrenceModel::rangeEnd () const</h3>
 <p>Returns the end of the range specified that occurrences must start before to be included in the model.</p>
-<p>If the range was specified by a start and count will return a null <a href="qdatetime.html">QDateTime</a>.</p>
+<p>If the range was specified by a start and a count, this will return a null <a href="qdatetime.html">QDateTime</a>.</p>
 <h3 class="fn"><a name="rangeStart"></a><a href="qdatetime.html">QDateTime</a> QOccurrenceModel::rangeStart () const</h3>
 <p>Returns the start of the range specified that occurrences must end after to be included in the model</p>
 <h3 class="fn"><a name="rebuildCache"></a>void QOccurrenceModel::rebuildCache ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -219,7 +219,7 @@
 <p>Sets the model to only contain the first <i>count</i> occurrences that occur after the <i>start</i> of the specified range</p>
 <h3 class="fn"><a name="setRange-2"></a>void QOccurrenceModel::setRange ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Sets the model to only contain ocurrences that occur between the <i>start</i> and <i>end</i> of the specified range.</p>
+<p>Sets the model to only contain occurrences that occur between the <i>start</i> and <i>end</i> of the specified range.</p>
 <h3 class="fn"><a name="setVisibleSources"></a>void QOccurrenceModel::setVisibleSources ( const <a href="qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; &amp; <i>list</i> )</h3>
 <p>Sets the <a href="qappointmentmodel.html">QAppointmentModel</a> to show only appointments contained in the storage sources specified by <i>list</i>.</p>
 <p>Also refreshes the model.</p>
@@ -231,8 +231,8 @@
 <p>See also <a href="qoccurrencemodel.html#setVisibleSources">setVisibleSources</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

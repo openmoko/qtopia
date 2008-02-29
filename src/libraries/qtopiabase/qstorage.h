@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 #include <qtopiaglobal.h>
 #include <qobject.h>
 #include <qlist.h>
+#include <QSharedDataPointer>
 
 class QFileSystem;
 class QFileSystemFilter;
@@ -35,6 +36,7 @@ template class QTOPIABASE_EXPORT QList<QFileSystem*>;
 //MOC_SKIP_END
 #endif
 
+class QStorageMetaInfoPrivate;
 
 class QTOPIABASE_EXPORT QStorageMetaInfo : public QObject
 {
@@ -45,9 +47,13 @@ public:
 
     QList<QFileSystem*> fileSystems( QFileSystemFilter *filter, bool connectedOnly=true );
     const QFileSystem *fileSystemOf( const QString &filename, bool connectedOnly=true );
+    const QFileSystem *applicationsFileSystem();
+    const QFileSystem *documentsFileSystem();
     QStringList fileSystemNames( QFileSystemFilter *filter, bool connectedOnly=true ); // libqtopia
     QString cardInfoString();
     QString installLocationsString();
+
+    static QStorageMetaInfo *instance();
 
 signals:
     void disksChanged();
@@ -58,57 +64,60 @@ public slots:
 private slots:
     void cardMessage( const QString& msg, const QByteArray& data );
 private:
+    QStorageMetaInfoPrivate *d;
+
     QString infoString( QList<QFileSystem*> filesystems, const QString &extension );
-    QList<QFileSystem*> mFileSystems;
-    QtopiaChannel *channel;
 };
 
+class QFileSystemPrivate;
 
 class QTOPIABASE_EXPORT QFileSystem
 {
 public:
-    const QString &disk() const { return mDisk; }
-    const QString &path() const { return mPath; }
-    const QString &prevPath() const { return mPrevPath; }
-    const QString &options() const { return mOptions; }
-    const QString &name() const { return mName; }
-    bool isRemovable() const { return mRemovable; }
-    bool applications() const { return mApplications; }
-    bool documents() const { return mDocuments; }
-    bool contentDatabase() const { return mContentDatabase; }
-    bool isConnected() const { return mConnected; }
 
-    long blockSize() const { return mBlockSize; }
-    long totalBlocks() const { return mTotalBlocks; }
-    long availBlocks() const { return mAvailBlocks; }
+    QFileSystem();
+    QFileSystem( const QFileSystem &other );
+    ~QFileSystem();
 
-    bool isWritable() const { return mOptions.contains("rw"); }
+    QFileSystem &operator =( const QFileSystem &other );
+
+    bool isNull() const;
+
+    const QString &disk() const;
+    const QString &path() const;
+    const QString &prevPath() const;
+    const QString &options() const;
+    const QString &name() const;
+    const QString &documentsPath() const;
+    const QString &applicationsPath() const;
+    bool isRemovable() const;
+    bool applications() const;
+    bool documents() const;
+    bool contentDatabase() const;
+    bool isConnected() const;
+
+    long blockSize() const;
+    long totalBlocks() const;
+    long availBlocks() const;
+
+    bool isWritable() const;
+
+    static QFileSystem fromFileName( const QString &fileName, bool connectedOnly = true );
+    static QFileSystem documentsFileSystem();
+    static QFileSystem applicationsFileSystem();
 
 private:
-    friend class QStorageMetaInfo;
+    QSharedDataPointer < QFileSystemPrivate > d;
+
     QFileSystem( const QString &disk, const QString &path, const QString &prevPath, const QString &options,
-                const QString &name, bool removable, bool applications, bool documents,
-                bool contentDatabase, bool connected);
-    ~QFileSystem() {};
+                 const QString &name, const QString &documentsPath, const QString &applicationsPath, bool removable,
+                 bool applications, bool documents, bool contentDatabase, bool connected);
+
+    friend class QStorageMetaInfo;
 
     void update();
-
-    QString mDisk;
-    QString mPath;
-    QString mPrevPath;
-    QString mOptions;
-    QString mName;
-    bool mRemovable;
-    bool mApplications;
-    bool mDocuments;
-    bool mContentDatabase;
-    bool mConnected;
-
-    long mBlockSize;
-    long mTotalBlocks;
-    long mAvailBlocks;
+    void update( bool connected, const QString &path );
 };
-
 
 class QTOPIABASE_EXPORT QFileSystemFilter
 {

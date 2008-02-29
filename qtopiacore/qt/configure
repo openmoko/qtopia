@@ -2,7 +2,7 @@
 #
 # Configures to build the Qt library
 #
-# Copyright (C) 1999-2006 TROLLTECH ASA. All rights reserved.
+# Copyright (C) 1999-2007 TROLLTECH ASA. All rights reserved.
 #
 # This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -3904,9 +3904,6 @@ if [ "$PLATFORM_X11" = "yes" ]; then
         fi
     fi
 
-fi # X11
-
-if [ "$PLATFORM_X11" = "yes" -o "$PLATFORM_QWS" = "yes" ]; then
     # auto-detect Glib support
     if [ "$CFG_GLIB" != "no" ]; then
         if "$WHICH" pkg-config >/dev/null 2>&1; then
@@ -3929,7 +3926,7 @@ if [ "$PLATFORM_X11" = "yes" -o "$PLATFORM_QWS" = "yes" ]; then
             fi
         fi
     fi
-fi # X11/QWS
+fi # X11
 
 # QWS
 if [ "$PLATFORM_QWS" = "yes" ]; then

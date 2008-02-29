@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -67,6 +67,8 @@ signals:
     longer any valid video to be played. The QMediaControl related to the
     prepared media content is used to start, stop and perform other operations
     on the video.
+
+    \ingroup multimedia
 */
 
 /*!

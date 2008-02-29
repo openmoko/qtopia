@@ -30,7 +30,6 @@ QTOPIABASE_HEADERS+=\
     qtranslatablesettings.h \
     qdawg.h \
     version.h \
-    qmemoryfile_p.h \
     qglobalpixmapcache.h
 
 QTOPIABASE_PRIVATE_HEADERS+=\
@@ -38,6 +37,7 @@ QTOPIABASE_PRIVATE_HEADERS+=\
     dbusipccommon_p.h \
     qactionconfirm_p.h\
     qcopenvelope_p.h \
+    qmemoryfile_p.h \
     qsharedmemorycache_p.h
 
 QTOPIABASE_SOURCES+=\
@@ -89,8 +89,10 @@ QTOPIABASE_HEADERS+=\
     framework/qsystemlock.h \
     framework/qvaluespace.h \
     framework/qexpressionevaluator.h \
-    framework/qfixedpointnumber_p.h \
     framework/qtopiailglobal.h
+
+QTOPIABASE_PRIVATE_HEADERS+=\
+    framework/qfixedpointnumber_p.h
 
 PREFIX=QTOPIABASE
 resolve_include()

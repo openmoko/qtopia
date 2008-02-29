@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -50,6 +50,8 @@
 #include <qradiobutton.h>
 #include <qlayout.h>
 #include <QDebug>
+#include <QScrollArea>
+#include <QDir>
 
 #include <stdlib.h>
 
@@ -70,7 +72,6 @@ public:
     QLabel *comment;
     QLabel *fileSize;
     QCheckBox *fastLoad;
-    QLabel *licenses;
 };
 
 QString QDocumentPropertiesWidgetPrivate::humanReadable(quint64 size)
@@ -100,7 +101,7 @@ QString QDocumentPropertiesWidgetPrivate::humanReadable(quint64 size)
   Note: The API of this class will change as a result of the new document
   model design.
 
-  \ingroup qtopiaemb
+  \ingroup content
   \sa QDocumentPropertiesDialog
 */
 
@@ -165,7 +166,7 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
         else
             cl = tr("Category");
         grid->addWidget( new QLabel( cl, main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
-        d->categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor);
+        d->categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor | QCategorySelector::DialogView);
         grid->addWidget( d->categoryEdit, row, 1 );
         d->categoryEdit->selectCategories( lnk.categories() );
         row++;
@@ -175,7 +176,12 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
         grid->addWidget( new QLabel( tr("Type"), main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
         d->doctype = new QLabel( main );
         grid->addWidget( d->doctype, row, 1 );
-        d->doctype->setText( lnk.type() );
+        if(lnk.type() == "application/octet-stream")
+            d->doctype->setText( tr("Unknown", "Unknown document type") );
+        else
+            d->doctype->setText( lnk.type().replace("/", " / ") );
+        d->doctype->setWordWrap( true );
+        d->doctype->setFocusPolicy( Qt::TabFocus );
         row++;
     }
 
@@ -185,6 +191,8 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
         d->comment->setWordWrap( true );
         grid->addWidget( d->comment, row, 1 );
         d->comment->setText( "<qt>" + lnk.comment() + "</qt>" );
+        d->comment->setFocusPolicy( Qt::TabFocus );
+        d->comment->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Minimum );
         row++;
     }
 
@@ -192,6 +200,7 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
     d->fileSize = new QLabel( main );
     grid->addWidget( d->fileSize, row, 1 );
     d->fileSize->setText( "<qt>" + d->humanReadable(lnk.size()) + "</qt>" );
+    d->fileSize->setFocusPolicy( Qt::TabFocus );
     row++;
 
 
@@ -213,38 +222,45 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &l, QWidget
 
     if( l.drmState() == QContent::Protected )
     {
-        grid->addWidget( new QLabel( tr( "Licenses" ), main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
-
-        d->licenses = new QLabel( main );
-
-        QList< QDrmRights > rights;
+        bool hasLicense = false;
 
         if( l.permissions() & QDrmRights::Play )
-            rights.append( l.rights( QDrmRights::Play ) );
+        {
+            addRights( l.rights( QDrmRights::Play ), grid, main, &row );
+            hasLicense = true;
+        }
+
         if( l.permissions() & QDrmRights::Display )
-            rights.append( l.rights( QDrmRights::Display ) );
+        {
+            addRights( l.rights( QDrmRights::Display ), grid, main, &row );
+            hasLicense = true;
+        }
+
         if( l.permissions() & QDrmRights::Execute )
-            rights.append( l.rights( QDrmRights::Execute ) );
+        {
+            addRights( l.rights( QDrmRights::Execute ), grid, main, &row );
+            hasLicense = true;
+        }
+
         if( l.permissions() & QDrmRights::Print )
-            rights.append( l.rights( QDrmRights::Print ) );
+        {
+            addRights( l.rights( QDrmRights::Print ), grid, main, &row );
+            hasLicense = true;
+        }
+
         if( l.permissions() & QDrmRights::Export )
-            rights.append( l.rights( QDrmRights::Export ) );
-
-        if( rights.isEmpty() )
         {
-            d->licenses->setText( tr( "<qt>No licenses<br/>" ) );
-        }
-        else
-        {
-            d->licenses->setText( formatRights( rights ) );
+            addRights( l.rights( QDrmRights::Export ), grid, main, &row );
+            hasLicense = true;
         }
 
-        grid->addWidget( d->licenses , row, 1 );
-
-        row++;
+        if( !hasLicense )
+        {
+            QLabel *licenses = new QLabel( tr( "<qt><u>No licenses</u></qt>" ), main );
+            licenses->setFocusPolicy( Qt::TabFocus );
+            grid->addWidget( licenses, row++, 0, Qt::AlignLeft | Qt::AlignTop );
+        }
     }
-    else
-        d->licenses = 0;
 
 #ifndef QTOPIA_PHONE    //XXX confusing due to context buttons.
     if ( isDocument ) {
@@ -376,6 +392,13 @@ QString QDocumentPropertiesWidget::safePath( const QString &name, const QString 
     if ( pos > 0 )
         fileExtn = oldPath.mid( pos );
 
+    QString dir = location + type;
+
+    QDir root;
+
+    if( !root.exists( dir ) )
+        root.mkpath( dir );
+
     QString fn = location + type + "/" + safename;
     if (QFile::exists(fn + fileExtn)) {
         int n=1;
@@ -430,40 +453,37 @@ void QDocumentPropertiesWidget::unlinkLnk()
     }
 }
 
-QString QDocumentPropertiesWidget::formatRights( const QList< QDrmRights > &rights ) const
+void QDocumentPropertiesWidget::addRights( const QDrmRights &rights, QGridLayout *layout, QWidget *parent, int *row )
 {
-    QString rightsString = QLatin1String( "<qt>" );
+    QLabel *permission = new QLabel( QString( "<qt><u>%1</u></qt>" )
+            .arg( QDrmRights::toString( rights.permission(), rights.status() ) ), parent );
+    permission->setFocusPolicy( Qt::TabFocus );
 
-    foreach( QDrmRights r, rights )
+    layout->addWidget( permission,
+            (*row)++, 0, 1, 2, Qt::AlignLeft | Qt::AlignTop );
+
+    foreach( QDrmRights::Constraint c, rights.constraints() )
     {
-        rightsString += QString( "<u>%1</u>\n" ).arg( QDrmRights::toString( r.permission(), r.status() ) );
+        layout->addWidget( new QLabel( c.name(), parent ), *row, 0, Qt::AlignLeft | Qt::AlignTop );
 
-        QDrmRights::ConstraintList constraints = r.constraints();
+        QLabel *constraint = new QLabel( c.value().toString(), parent );
+        constraint->setFocusPolicy( Qt::TabFocus );
+        constraint->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Minimum );
+        constraint->setWordWrap( true );
+        layout->addWidget( constraint, (*row)++, 1, Qt::AlignLeft | Qt::AlignTop );
 
-        if( constraints.count() > 0 )
+        for( int i = 0; i < c.attributeCount(); i++ )
         {
-            rightsString += QLatin1String( "<table>\n" );
+            layout->addWidget( new QLabel( QString( "<qt><em>%1</em></qt>" ).arg( c.attributeName( i ) ), parent ),
+                               *row, 0, Qt::AlignLeft | Qt::AlignTop );
 
-            foreach( QDrmRights::Constraint c, constraints )
-            {
-                rightsString += QString( "<tr><td>%1</td><td>%2</td></tr>\n" )
-                        .arg( c.name() )
-                        .arg( c.value().toString() );
-
-                for( int i = 0; i < c.attributeCount(); i++ )
-                    rightsString += QString( "<tr><td><em>%1</em></td><td>%2</td></tr>\n" )
-                            .arg( c.attributeName( i ) )
-                            .arg( c.attributeValue( i ).toString() );
-            }
-            rightsString += QLatin1String( "</table>\n" );
+            QLabel *attribute = new QLabel( c.attributeValue( i ).toString(), parent );
+            attribute->setWordWrap( true );
+            attribute->setFocusPolicy( Qt::TabFocus );
+            attribute->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Minimum );
+            layout->addWidget( attribute, (*row)++, 1, Qt::AlignLeft | Qt::AlignTop );
         }
-        else
-            rightsString += QLatin1String( "<br/>" );
     }
-
-    rightsString += QLatin1String( "</qt>" );
-
-    return rightsString;
 }
 
 /*!
@@ -484,7 +504,7 @@ QString QDocumentPropertiesWidget::formatRights( const QList< QDrmRights > &righ
   Note: The API of this class will change as a result of the new document
   model design.
 
-  \ingroup qtopiaemb
+  \ingroup content
   \sa QDocumentPropertiesWidget
 */
 
@@ -500,8 +520,14 @@ QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &l, QWidget
 
     QVBoxLayout *vbox = new QVBoxLayout( this );
     vbox->setMargin(0);
+
+    QScrollArea *scrollArea = new QScrollArea( this );
+    scrollArea->setWidgetResizable( true );
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    vbox->addWidget( scrollArea );
     d = new QDocumentPropertiesWidget( l, this );
-    vbox->addWidget( d );
+    scrollArea->setWidget( d );
+    scrollArea->setFocusProxy( d );
     connect( d, SIGNAL(done()), this, SLOT(reject()) );
 }
 

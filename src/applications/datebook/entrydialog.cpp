@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -582,12 +582,30 @@ void EntryDialog::updateCategories()
 
 void EntryDialog::accept()
 {
-    hide();
+    // see if anything changed - if not, just close
     if ( appointment( false ) == mOrigAppointment ) {
+        hide();
         QDialog::reject();
         return;
     }
 
+    // otherwise, see if we now have an empty description
+    if ( entry->comboDescription->currentText().isEmpty() )
+    {
+        if (QMessageBox::warning(this, tr("New Event"),
+                    tr("<qt>An event description is required. Cancel editing?</qt>"),
+                    QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            QDialog::reject();
+            return;
+        } else {
+            entry->comboDescription->setFocus();
+            return;
+        }
+
+    }
+
+    // Otherwise, we're done
+    hide();
     appointment();
     QDialog::accept();
 }

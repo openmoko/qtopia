@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,6 +30,7 @@
 #include <QMenu>
 #include <QTimer>
 #include <QUrl>
+#include <QtopiaApplication>
 
 #ifdef QTOPIA_PHONE
 #include <QKeyEvent>
@@ -46,6 +47,8 @@
 #include "domaininfo.h"
 #endif
 
+#include "packagemanagerservice.h"
+
 #include "ui_packagedetails.h"
 
 class PackageDetails : public QDialog, public Ui::PackageDetails
@@ -59,11 +62,11 @@ public:
     }
 };
 
-
 PackageView *PackageView::latestInstance;
 
 PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     : QDialog( parent, flags )
+    , listsPrepared( false )
 {
     setWindowTitle( tr( "Package Manager" ));
     model = new PackageModel( this );
@@ -133,6 +136,9 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     hb->addWidget( pbInstall );
     vb->addLayout( hb );
 #endif
+
+    new PackageManagerService( this );
+
     QTimer::singleShot( 0, this, SLOT(init()) );
 }
 
@@ -323,10 +329,12 @@ void PackageView::editServers()
 
 void PackageView::showDetails( const QModelIndex &item )
 {
-    QModelIndex ix = item.isValid() ? view->currentIndex() : item;
-    QString name = model->data( ix, Qt::DisplayRole ).toString();
+    if( !item.isValid() || !item.parent().isValid() )
+        return;
+
+    QString name = model->data( item, Qt::DisplayRole ).toString();
     PackageDetails *pd = new PackageDetails( this, true );
-    QString op = model->getOperation( ix );
+    QString op = model->getOperation( item );
     pd->installButton->setText( op );
     pd->setWindowTitle( name );
     QString details;
@@ -345,12 +353,12 @@ void PackageView::showDetails( const QModelIndex &item )
     qLog(Package) << "show details" << ( name.isNull() ? "no valid name" : name );
     pd->showMaximized();
     if ( pd->exec() )
-        model->activateItem( ix );
+        model->activateItem( item );
 }
 
 void PackageView::installSelection()
 {
-    showDetails( QModelIndex() );
+    showDetails( view->currentIndex() );
 }
 
 void PackageView::updateText( const QModelIndex& newCurrent, const QModelIndex& )
@@ -366,11 +374,10 @@ void PackageView::displayMessage( const QString &s )
 #ifdef QTOPIA_PHONE
 void PackageView::keyPressEvent( QKeyEvent *e )
 {
-    qDebug() << "Key event" << e;
     switch ( e->key() )
     {
         case Qt::Key_Right:
-            showDetails( QModelIndex() );
+            showDetails( view->currentIndex() );
             e->accept();
             return;
 
@@ -383,3 +390,12 @@ void PackageView::keyPressEvent( QKeyEvent *e )
 }
 #endif
 
+void PackageView::showEvent( QShowEvent * )
+{
+    if( !listsPrepared )
+    {
+        QTimer::singleShot( 0, model, SLOT(populateLists()) );
+
+        listsPrepared = true;
+    }
+}

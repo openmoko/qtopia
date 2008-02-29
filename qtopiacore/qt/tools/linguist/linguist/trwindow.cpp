@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -888,7 +888,7 @@ void TrWindow::about()
                     "<p>Qt Linguist is a tool for adding translations to Qt "
                     "applications.</p>"
                     "<p>%2</p>"
-                    "<p>Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved."
+                    "<p>Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved."
                     "</p><p>The program is provided AS IS with NO WARRANTY OF ANY KIND,"
                     " INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A"
                     " PARTICULAR PURPOSE.</p>").arg(version).arg(edition));

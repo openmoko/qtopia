@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -131,6 +131,38 @@ void TimeManager::addMark(int minutes)
 int TimeManager::markPosition(int minutes) const
 {
     return d->mMarks.value(minutes, -1);
+}
+
+// Return the minutes of the mark closest to
+// this position.  The optional direction
+// argument restricts it to marks before,
+// after, or both.  We don't assume that the
+// map is in any type of order, so we iterate through
+// the whole lot
+int TimeManager::markMinutes(int position, int direction) const
+{
+    QMutableMapIterator<int, int> it(d->mMarks);
+
+    int minDistance = -1;
+    int minutes = -1;
+    int distance;
+
+    while(it.hasNext()) {
+        it.next();
+        distance = it.value() - position;
+
+        if ((direction < 0 && distance > 0)
+            || (direction > 0 && distance < 0))
+            continue;
+
+        if (distance < 0)
+            distance = -distance;
+        if (minDistance < 0 || distance < minDistance) {
+            minDistance = distance;
+            minutes = it.key();
+        }
+    }
+    return minutes;
 }
 
 QList<int> TimeManager::marks() const
@@ -284,6 +316,7 @@ class CompressedTimeManagerData
 {
 public:
     int mIdealHeight;
+    QList<int> addedMarks;  // Keep track of externally added marks, which are the uncompressible ones
 };
 
 CompressedTimeManager::CompressedTimeManager(QWidget *parent)
@@ -296,7 +329,7 @@ CompressedTimeManager::CompressedTimeManager(QWidget *parent)
 void CompressedTimeManager::setIdealHeight(int ideal)
 {
     d->mIdealHeight = ideal;
-    cacheLayout();
+    updateGeometry();
     populateMarks();
 }
 
@@ -305,8 +338,24 @@ int CompressedTimeManager::idealHeight() const
     return d->mIdealHeight;
 }
 
+void CompressedTimeManager::addMark(int minutes)
+{
+    d->addedMarks.append(minutes);
+    TimeManager::addMark(minutes);
+}
+
+void CompressedTimeManager::clearMarks()
+{
+    d->addedMarks.clear();
+    TimeManager::clearMarks();
+}
+
 void CompressedTimeManager::populateMarks()
 {
+    TimeManager::clearMarks();
+    foreach (int mark, d->addedMarks)
+        TimeManager::addMark(mark);
+
     if (d->mIdealHeight >= 0) {
         QList<int> m = marks();
         int goalLineCount = ( d->mIdealHeight / minimumGapHeight() ) - 1;
@@ -338,7 +387,7 @@ void CompressedTimeManager::populateMarks()
                 ++it;
 
             if (it == m.constEnd() || *it > currentMinute + closeEnough) {
-                addMark(currentMinute);
+                TimeManager::addMark(currentMinute);
                 currentCount++;
             }
 
@@ -402,7 +451,7 @@ void TimedViewData::updateMarks()
     // ensure any changes to the model have updated the cache
     timeManager->clearMarks();
 
-    // iterate trough the model, and for each item that has an end or
+    // iterate through the model, and for each item that has an end or
     // start intersecting with the current date add to the time manager.
 
     int blockBegin = 0;
@@ -490,6 +539,7 @@ void TimedView::reset()
     d->currentIndex = QModelIndex();
     d->updateMarks();
     update();
+    emit selectionChanged(d->currentIndex);
 }
 
 QDate TimedView::date() const
@@ -561,6 +611,18 @@ QModelIndex TimedView::index(const QPoint& point) const
     }
 
     return QModelIndex();
+}
+
+QDateTime TimedView::timeAtPoint(const QPoint& point, int direction) const
+{
+    QPoint mappedPoint = mapFromGlobal(point);
+    if (rect().contains(mappedPoint)) {
+        int minutes = d->timeManager->markMinutes(mappedPoint.y(), direction);
+        if (minutes > 0) {
+            return QDateTime(d->shownDate, QTime( minutes / 60, minutes % 60 ));
+        }
+    }
+    return QDateTime();
 }
 
 void TimedView::paintEvent(QPaintEvent *e)

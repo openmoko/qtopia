@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -419,6 +419,7 @@ void SmsClient::fetched( const QString& id, const QSMSMessage& message )
             account->setUidlList( list );
         }
         mail.setServerUid( identity );
+        
 
         // If the sender is not set, but the recipient is, then this
         // is probably an outgoing message that was reflected back
@@ -496,6 +497,7 @@ void SmsClient::fetched( const QString& id, const QSMSMessage& message )
             // Check again, just in case another new message arrived
             // while we were performing the fetch.
             req->check();
+            return;
         }
 
         // Make sure there are always 5 free slots on the SIM card

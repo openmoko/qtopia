@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,13 @@
 #include <QDebug>
 
 #include "qrecordiomerge_p.h"
+
+/*!
+   \class QAppointmentModel
+   \brief QAppointmentModel represents the appointments in the database.
+
+   This class allows you to view, update and delete appointments.
+*/
 
 class QAppointmentModelData
 {
@@ -165,17 +172,16 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
 /*!
   \class QAppointmentModel
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QAppointmentModel class provides access to the Calendar data.
 
-  The QAppointmentModel is used to access the Calendar data.  It is a descendent of QAbstractItemModel
-  so is suitable for use with the Qt View classes such as QListView and QTableView as well as
-  any developer custom Views.
+  The QAppointmentModel is used to access the Calendar data.  It is a descendant of QAbstractItemModel,
+  so it is suitable for use with the Qt View classes such as QListView and QTableView, as well as
+  any custom developer Views.
 
   QAppointmentModel provides functions for sorting and some filtering of items.
-  For filters or sorting that is not provided by QAppointmentModel it is recommend that
+  For filters or sorting that is not provided by QAppointmentModel it is recommended that
   QSortFilterProxyModel is used to wrap QAppointmentModel.
-
 
   QAppointmentModel will refresh when changes are made in other instances of QAppointmentModel or
   from other applications.
@@ -187,6 +193,7 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
 QAppointmentModel::QAppointmentModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
+    QtopiaSql::openDatabase();
     d = new QAppointmentModelData();
     d->mio = new QBiasedRecordIOMerge(this);
 
@@ -206,6 +213,16 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
 
     d->mio->setPrimaryModel(d->defaultmodel);
 
+    // XXX BiasedRecordIOMerge doesn't emit reset until after a timer event
+    // is dispatched, which leaves us inconsistent for a short while after
+    // a change.  This mostly affects QOccurrenceModel, which has a higher
+    // level cache.  There's no API for querying whether a IOMerge or a
+    // QAppointmentModel is pending a cache rebuild, unfortunately.
+    // Thus we monitor the models directly.
+    foreach(const QAppointmentIO *model, d->models) {
+        connect(model, SIGNAL(recordsUpdated()), this, SLOT(voidCache()));
+    }
+    // This might not be necessary any more
     connect(d->mio, SIGNAL(reset()), this, SLOT(voidCache()));
 }
 
@@ -226,7 +243,7 @@ void QAppointmentModel::voidCache()
   \enum QAppointmentModel::Field
 
   Enumerates the columns when in table mode and columns used for sorting.
-  Is a subset of data retrievable from a QAppointment.
+  This is a subset of data retrievable from a QAppointment.
 
   \omitvalue Invalid
   \omitvalue Description
@@ -480,7 +497,7 @@ QAppointment QAppointmentModel::appointment(int row) const
 }
 
 /*!
-  Returns the appointment with the identefier \a id.  The appointment does
+  Returns the appointment with the identifier \a id.  The appointment does
   not have to be in the current filter mode for it to be returned.
 */
 QAppointment QAppointmentModel::appointment(const QUniqueId & id) const
@@ -545,7 +562,7 @@ bool QAppointmentModel::setAppointmentField(QAppointment &appointment, QAppointm
     switch(k) {
         default:
         case QAppointmentModel::Invalid:
-        case QAppointmentModel::Identifier: // not a setable field
+        case QAppointmentModel::Identifier: // not a settable field
             return false;
         case QAppointmentModel::Categories:
             if (v.canConvert(QVariant::StringList)) {
@@ -656,7 +673,7 @@ bool QAppointmentModel::removeAppointment(const QAppointment& appointment)
 }
 
 /*!
-  Removes the appointment that has the uid \a id from the AppointmentModle;
+  Removes the appointment that has the uid \a id from the QAppointmentModel;
 
   Returns true if the appointment was successfully removed.  Otherwise return false.
 */
@@ -812,7 +829,7 @@ void QAppointmentModel::setDurationType(DurationType type)
 }
 
 /*!
-  Returns the duration type of appointments currnetly included in the model.
+  Returns the duration type of appointments currently included in the model.
 */
 QAppointmentModel::DurationType QAppointmentModel::durationType() const
 {
@@ -943,7 +960,7 @@ const QList<QAppointmentContext*> &QAppointmentModel::contexts() const
 }
 
 /*!
-  Returns the context that contains the appointment with identifer \a id.
+  Returns the context that contains the appointment with identifier \a id.
   If the contact does not exists returns 0.
 */
 QAppointmentContext *QAppointmentModel::context(const QUniqueId &id) const
@@ -956,7 +973,7 @@ QAppointmentContext *QAppointmentModel::context(const QUniqueId &id) const
 }
 
 /*!
-  Returns the source identifier that contains the appointment with identier \a id.
+  Returns the source identifier that contains the appointment with identifier \a id.
   If the appointment does not exist returns a null source.
 */
 QPimSource QAppointmentModel::source(const QUniqueId &id) const
@@ -1052,14 +1069,15 @@ public:
 /*!
   \class QOccurrenceModel
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QOccurrenceModel class provides access to the Calendar data.
 
-  The QOccurrenceModel is used to access the Calendar data.  It is a descendent of QAbstractItemModel
-  so is suitable for use with the Qt View classes such as QListView and QTableView as well as
-  any developer custom Views.
+  The QOccurrenceModel is used to access the Calendar data.  It is a descendant of QAbstractItemModel
+  so is suitable for use with the Qt View classes such as QListView and QTableView, as well as
+  any custom developer Views.
 
-  It differes from the QAppointmentModel in that it will show each occurrence of appointments as a separate item in the model.  Since some appointments have infinite occurrences a date
+  It differs from the QAppointmentModel in that it will show each occurrence of appointments as a
+  separate item in the model.  Since some appointments have infinite occurrences a date
   range must be specified to limit the total set of occurrences included in the model.
 */
 
@@ -1069,7 +1087,7 @@ public:
   Describes the set of occurrences that should be shown by the model
 
   \value TimedDuration Occurrences that have times and dates specified for when they start and end.
-  \value AllDayDuration Occurrences that only have a dates specified for when they start and end.
+  \value AllDayDuration Occurrences that only have a date specified for when they start and end.
   \value AnyDuration Occurrences with either date only or date and time specified for when they start and end.
 */
 
@@ -1087,7 +1105,7 @@ public:
 */
 
 /*!
-  Constructs a QOccurrenceModel contains appointments that occur in the
+  Constructs a QOccurrenceModel that contains appointments that occur in the
   range of \a start to \a end.  The model will have the parent \a parent.
 */
 QOccurrenceModel::QOccurrenceModel(const QDateTime &start, const QDateTime &end, QObject *parent)
@@ -1224,6 +1242,16 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
                                 icons.append( QVariant( QIcon( ":icon/repeatException" ) ) );
                             if( o.appointment().timeZone() != QTimeZone() && o.appointment().timeZone() != QTimeZone::current() )
                                 icons.append( QVariant( QIcon( ":icon/globe" ) ) );
+                            switch( o.alarm() ) {
+                                case QAppointment::Audible:
+                                    icons.append( QVariant( QIcon( ":icon/audible" ) ) );
+                                    break;
+                                case QAppointment::Visible:
+                                    icons.append( QVariant( QIcon( ":icon/silent" ) ) );
+                                    break;
+                                default:
+                                    break;
+                            }
                             return icons;
                         }
                 }
@@ -1250,7 +1278,7 @@ bool QOccurrenceModel::setData(const QModelIndex &index, const QVariant &value, 
     Q_UNUSED(index)
     Q_UNUSED(value)
     Q_UNUSED(role)
-    return false; // not setable in occurrence model.
+    return false; // not settable in occurrence model.
 }
 
 /*!
@@ -1296,7 +1324,8 @@ bool QOccurrenceModel::contains(const QModelIndex &index) const
 }
 
 /*!
-  Returns true if the current filter mode of the model contains an occurrence for the appointment with uid \a id.
+  Returns true if the current filter mode of the model contains an occurrence
+  for the appointment with uid \a id.
   Otherwise returns false.
 */
 bool QOccurrenceModel::contains(const QUniqueId &id) const
@@ -1310,7 +1339,7 @@ bool QOccurrenceModel::contains(const QUniqueId &id) const
 
 /*!
   If the model contains an occurrence representing an appointment with uid \a id returns
-  the index of the first occurrence..
+  the index of the first occurrence.
   Otherwise returns a null QModelIndex
 
   \sa contains()
@@ -1335,7 +1364,7 @@ QUniqueId QOccurrenceModel::id(const QModelIndex &index) const
 }
 
 /*!
-  If the model contains an occurrence \a o returns the index of that occurrence..
+  If the model contains an occurrence \a o returns the index of that occurrence.
   Otherwise returns a null QModelIndex
 */
 QModelIndex QOccurrenceModel::index(const QOccurrence &o) const
@@ -1369,8 +1398,8 @@ QOccurrence QOccurrenceModel::occurrence(int row) const
 
 /*!
    Returns the occurrence that occurs on the \a date specified for the appointment with
-   uid \a id.  If thhe appointment does not exists or does not occur on the \a date,
-   returns a null occurrence
+   uid \a id.  If the appointment does not exists or does not occur on the \a date,
+   returns a null occurrence.
 */
 QOccurrence QOccurrenceModel::occurrence(const QUniqueId &id, const QDate &date) const
 {
@@ -1422,7 +1451,7 @@ void QOccurrenceModel::setDurationType(QAppointmentModel::DurationType type)
 }
 
 /*!
-  Returns the duration type of occurrences currnetly included in the model.
+  Returns the duration type of occurrences currently included in the model.
 */
 QAppointmentModel::DurationType QOccurrenceModel::durationType() const
 {
@@ -1448,7 +1477,7 @@ void QOccurrenceModel::setRange(const QDateTime &start, int count)
 }
 
 /*!
-  Sets the model to only contain ocurrences that occur between the \a start and
+  Sets the model to only contain occurrences that occur between the \a start and
   \a end of the specified range.
 */
 void QOccurrenceModel::setRange(const QDateTime &start, const QDateTime &end)
@@ -1475,7 +1504,7 @@ QDateTime QOccurrenceModel::rangeStart() const
   Returns the end of the range specified that occurrences must start before to be included
   in the model.
 
-  If the range was specified by a start and count will return a null QDateTime.
+  If the range was specified by a start and a count, this will return a null QDateTime.
 */
 QDateTime QOccurrenceModel::rangeEnd() const
 {
@@ -1560,7 +1589,7 @@ void QOccurrenceModel::voidCache()
 
 /*!
   Returns true if the occurrence model has not yet updated the list of occurrence
-  due to a change in storred appointments.
+  due to a change in stored appointments.
 
   \sa fetchCompleted(), completeFetch()
 */
@@ -1573,7 +1602,7 @@ bool QOccurrenceModel::fetching() const
   \fn void QOccurrenceModel::fetchCompleted()
 
   This signal is emitted when the occurrence model finished caching changes
-  resulting to a change to the stored appointments.
+  resulting from a change to the stored appointments.
 
   \sa completeFetch(), fetching()
 */
@@ -1603,7 +1632,7 @@ void QOccurrenceModel::rebuildCache()
 {
     od->rebuildCacheTimer->stop();
     /*
-       for each appointment, build a list of ocurrences.
+       for each appointment, build a list of occurrences.
    */
     if( (!od->end.isNull() || od->requestedCount > 0) && !od->start.isNull()) {
         QMultiMap< QDateTime, QPair<QDate, QUniqueId> > result;
@@ -1653,7 +1682,7 @@ void QOccurrenceModel::refresh()
 }
 
 /*!
-  Contstructs a QAppointmentModelDelegate with parent \a parent.
+  Constructs a QAppointmentModelDelegate with parent \a parent.
 */
 QAppointmentDelegate::QAppointmentDelegate( QObject * parent )
     : QAbstractItemDelegate(parent)
@@ -1735,7 +1764,7 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
         pen.setWidth(2);
     } else {
         painter->setBrush(qvariant_cast<QColor>(index.model()->data(index, Qt::BackgroundColorRole)).light(170));
-        border = option.rect;
+        border = option.rect.adjusted(0, 0, -1, -1);
     }
 
     painter->setPen(pen);
@@ -1745,17 +1774,18 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     QRect contentRect = option.rect.adjusted(2, 2, -2, -2);
     int iconRow = 0;
+    int drawnIconSize = qMin(qMin(contentRect.height(), contentRect.width()), iconSize);
     QList<QVariant> icons = index.model()->data( index, Qt::DecorationRole ).toList();
     for (QList<QVariant>::Iterator it = icons.begin(); it != icons.end(); ++it) {
         QIcon icon = qvariant_cast<QIcon>(*it);
-        icon.paint(painter, contentRect.right() - iconSize, contentRect.top() + iconRow, iconSize, iconSize);
-        if(contentRect.height() > iconRow + iconSize + 2)
-            iconRow += iconSize + 2;
+        icon.paint(painter, contentRect.right() - drawnIconSize, contentRect.top() + iconRow, drawnIconSize, drawnIconSize);
+        if(contentRect.height() > iconRow + drawnIconSize + 2)
+            iconRow += drawnIconSize + 2;
         else
-            contentRect.setRight(contentRect.right() - (iconSize + 2));
+            contentRect.setRight(contentRect.right() - (drawnIconSize + 2));
     }
     if (iconRow > 0)
-        contentRect.setRight(contentRect.right() - (iconSize + 2));
+        contentRect.setRight(contentRect.right() - (drawnIconSize + 2));
 
     //  Prepare pen and draw in text
 
@@ -1772,7 +1802,7 @@ void QAppointmentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 /*!
    \overload
 
-   Returns the size hint for objects drawn with the delgate with style options \a option for item at \a index.
+   Returns the size hint for objects drawn with the delegate with style options \a option for item at \a index.
 */
 QSize QAppointmentDelegate::sizeHint(const QStyleOptionViewItem & option,
         const QModelIndex &index) const

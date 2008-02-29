@@ -19,7 +19,7 @@
 <a name="gsm-modem-integration"></a><a name="gsm-modem-integration"></a>
 <h2>GSM Modem Integration</h2>
 <p>The implementation of the GSM specification varies between GSM modems, with most modems supporting proprietary commands for special features.</p>
-<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="qtopiaphonemodem.html">Qtopia Phone Modem Library</a>. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
+<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the Qtopia Phone Modem Library. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
 <p>Qtopia Phone will load every vendor plug-in that is installed and query each one to see which is capable of handling the GSM modem. The <tt>QTOPIA_PHONE_VENDOR</tt> macro in <tt>custom.h</tt> can be used to force Qtopia Phone to load only that plug-in, ignoring any others that may be present in the system. For example, setting <tt>QTOPIA_PHONE_VENDOR</tt> to <tt>wavecom</tt> will instruct Qtopia Phone to load <tt>libwavecomvendor.so</tt> to provide vendor-specific AT commands.</p>
 <p>The <tt>QTOPIA_PHONE_VENDOR</tt> value can also be set as an environment variable.</p>
 <p>3GPP TS 07.10 multiplexing can also be a source of problems when supporting a new GSM modem. During initial testing it can be disabled by setting the <tt>QTOPIA_PHONE_MUX</tt> environment variable to <tt>no</tt>. Qtopia Phone will still function, but you will be unable to make GPRS calls without multiplexing support.</p>
@@ -118,7 +118,7 @@
 <tr valign="top" class="odd"><td><tt>WavecomPhoneBook</tt></td><td>QModemPhoneBook</td></tr>
 <tr valign="top" class="even"><td><tt>WavecomCallProvider</tt></td><td>QModemCallProvider</td></tr>
 </table></p>
-<p>A complete list of classes for accessing AT-based modems can be found on the <a href="qtopiaphonemodem.html">Modem Classes</a> page.</p>
+<p>A complete list of classes for accessing AT-based modems can be found on the Modem Classes page.</p>
 <a name="gsm-modem-porting-sequence"></a>
 <h2>GSM Modem Porting Sequence</h2>
 <p>To support a GSM modem the following sequence may be used as a guide:</p>
@@ -143,8 +143,8 @@
 <p>If this option is configured, the modem emulator will be launched automatically once the phone server has been initialized. If this option is not configured, then the modem emulator will only be launched when other components in the system request it (for example, Bluetooth hands-free kits).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

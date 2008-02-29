@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,7 @@
 #include <qtopialog.h>
 #include <qtopiaipcadaptor.h>
 #include <qspeakerphoneaccessory.h>
+#include <qbootsourceaccessory.h>
 
 #include <qtopiaserverapplication.h>
 #include <standarddevicefeatures.h>
@@ -68,10 +69,6 @@ GreenphoneHardware::GreenphoneHardware()
         qWarning("Cannot open omega_detect for detect (%s)", strerror(errno));
     }
 
-    readDetectData(1 << CHARGER_DETECT);
-
-    QTimer::singleShot(30*1000, this, SLOT(delayedRead()));
-
     //QObject::connect(QtopiaServerApplication::instance(), SIGNAL(shutdownRequested()), this, SLOT(shutdownRequested()));
 
     adaptor = new QtopiaIpcAdaptor("QPE/GreenphoneModem", this );
@@ -80,6 +77,13 @@ GreenphoneHardware::GreenphoneHardware()
         new QSpeakerPhoneAccessoryProvider( "greenphone", this );
     connect( speakerPhone, SIGNAL(onSpeakerModified()),
              this, SLOT(onSpeakerModified()) );
+
+    bootSource = new QBootSourceAccessoryProvider( "greenphone", this );
+
+    readDetectData(1 << CHARGER_DETECT |
+                   1 << BOOTSRC_DETECT);
+
+    QTimer::singleShot(30*1000, this, SLOT(delayedRead()));
 }
 
 GreenphoneHardware::~GreenphoneHardware()
@@ -185,9 +189,7 @@ void GreenphoneHardware::setLeds()
         // red on
         ::ioctl(ledFd, SET_GPO0_CTRL, 0);
         ::ioctl(ledFd, SET_GPO1_CTRL, 7);
-    }
-
-    if (percent > 75) {
+    } else if (percent > 75) {
         // red flashing slow
         ::ioctl(ledFd, ENABLE_LED1_IN_ACT, 0);
         ::ioctl(ledFd, SET_LED1_BLINK_TIME, 7);
@@ -381,7 +383,25 @@ void GreenphoneHardware::readDetectData(quint32 devices)
                 qLog(Hardware) << "Unknown CAMERA";
                 break;
             case BOOTSRC_DETECT:
-                qLog(Hardware) << "Unknown BOOTSRC";
+                if (device.status == OMEGABOOT_NORM) {
+                    qLog(Hardware) << "Boot source normal";
+                    bootSource->setBootSource(QBootSourceAccessory::PowerKey);
+                } else if (device.status == OMEGABOOT_CHG) {
+                    qLog(Hardware) << "Boot source charger";
+                    bootSource->setBootSource(QBootSourceAccessory::Charger);
+                } else if (device.status == OMEGABOOT_ALRM) {
+                    qLog(Hardware) << "Boot source alarm";
+                    bootSource->setBootSource(QBootSourceAccessory::Alarm);
+                } else if (device.status == OMEGABOOT_WDR) {
+                    qLog(Hardware) << "Boot source watchdog";
+                    bootSource->setBootSource(QBootSourceAccessory::Watchdog);
+                } else if (device.status == OMEGABOOT_REBOOT) {
+                    qLog(Hardware) << "Boot source reboot";
+                    bootSource->setBootSource(QBootSourceAccessory::Software);
+                } else {
+                    qLog(Hardware) << "Boot source unknown";
+                    bootSource->setBootSource(QBootSourceAccessory::Unknown);
+                }
                 break;
             case TV_DETECT:
                 qLog(Hardware) << "Unknown TV";

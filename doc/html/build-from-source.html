@@ -14,6 +14,7 @@
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#installing-the-source-package">Installing the Source Package</a></li>
 <li><a href="#additional-add-on-source-packages">Additional add-on source packages</a></li>
+<li><a href="#dependencies-and-prerequisites">Dependencies and Prerequisites</a></li>
 <li><a href="#how-to-build-qtopia">How to Build Qtopia</a></li>
 <ul><li><a href="#configure-options">Configure options</a></li>
 <li><a href="#use-of-the-qpedir-environment-variable">Use of the QPEDIR environment variable</a></li>
@@ -21,7 +22,6 @@
 <li><a href="#configuring-for-a-device">Configuring for a Device</a></li>
 </ul>
 <li><a href="#now-what">Now What?</a></li>
-<li><a href="#installing-or-removing-an-rpm">Installing or Removing an RPM</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
@@ -31,11 +31,6 @@
 <li>the section on <a href="tools-list.html">Tools </a> available in the package to help build and develop Qtopia and Qtopia-based applications.</li>
 </ul>
 <p>Before continuing, you must ensure that the necessary source packages have been downloaded and you are ready to build Qtopia from the source code.</p>
-<p><b>Note:</b> If you have downloaded an RPM package such as a <tt>qtopia-phone-sdk-suse82.i386.rpm</tt> then you need to:</p>
-<ol type="1">
-<li>read the <a href="#installing-an-rpm">Installing an RPM </a> section</li>
-<li>proceed to <a href="running-qtopia.html">Running Qtopia</a> or to <a href="howtobuild.html">How to Build Qtopia</a> for further information on building and compiling Qtopia applications from RPM packages.</li>
-</ol>
 <a name="installing-the-source-package"></a>
 <h2>Installing the Source Package</h2>
 <p>A Qtopia source package is a combination of Qtopia and Qt sources.</p>
@@ -91,6 +86,9 @@
 </table></p>
 <p>In all cases &lt;version&gt; refers to the Qtopia version number to which the add-on package is applicable. Generally speaking, the version number of the add-on package must match the version number of the installed Qtopia src package.</p>
 <p>For information on how to obtain add-on packages please contact <a href="mailto:sales@trolltech">sales@trolltech</a>.com</p>
+<a name="dependencies-and-prerequisites"></a>
+<h2>Dependencies and Prerequisites</h2>
+<p>Before trying to build Qtopia, please make sure that all <a href="qtopia-dependencies.html">prerequisite requirements</a> have been met.</p>
 <a name="how-to-build-qtopia"></a>
 <h2>How to Build Qtopia</h2>
 <p>It is recommended to build Qtopia in a so called shadow build directory. This is a directory other than &lt;qtopia-depot-dir&gt; that will contain all the intermediate files (such as object files) and the produced binaries. When using a shadow build directory the &lt;qtopia-depot-dir&gt; will remain free of any build specific files and the same Qtopia sources can be used for many different configurations. For the rest of this documentation it is assumed that the build will be performed in</p>
@@ -116,7 +114,7 @@
 <pre>      make loud</pre>
 <a name="configuring-for-a-device"></a>
 <h3>Configuring for a Device</h3>
-<p>The default Qtopia configuration is to build for an x86 target, running from &lt;qtopia-build-dir&gt;/image/Qtopia. If you wish to configure Qtopia for your device at some stage, it is recommended to use a device-specific add-on package. These packages are provided by Trolltech or by the device manufacturer. You will also need to use the -prefix argument to configure to specify the location that Qtopia will run from. This is typically /opt/Qtopia though it may differ from device to device.</p>
+<p>The default Qtopia configuration is to build for an x86 target, running from &lt;qtopia-build-dir&gt;/image. If you wish to configure Qtopia for your device at some stage, it is recommended to use a device-specific add-on package. These packages are provided by Trolltech or by the device manufacturer. You will also need to use the -prefix argument to configure to specify the location that Qtopia will run from. This is typically /opt/Qtopia though it may differ from device to device.</p>
 <p>As a rule, a device also requires a specific tool chain that allows cross-compiling for the specific device. These tool chains are usually provided by the device manufacturer or are freely available on the internet.</p>
 <p>Once the device package is installed a subdirectory for that device will exist in <tt>&lt;qtopia-depot-dir&gt;/devices</tt>. Building for a device is really simple:</p>
 <pre>      ./configure -edition &lt;phone|platform&gt; -device &lt;device-name&gt; -prefix /opt/Qtopia
@@ -125,33 +123,19 @@
 <p>Please refer to the following links for further information:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Link</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><a href="qtopia-dependencies.html">Prerequisites</a></td><td>details the prerequisites for running Qtopia.</td></tr>
-<tr valign="top" class="even"><td><a href="syscust-index.html">System Customization </a></td><td>details how to customize many aspects of Qtopia.</td></tr>
-<tr valign="top" class="odd"><td><a href="buildsystem-user-guide.html">Build System User Guide</a></td><td>User guide for the build system. There is also a <a href="buildsystem-reference.html">Build System Reference</a>.</td></tr>
+<tr valign="top" class="odd"><td><a href="howtobuild.html">How To Build Qtopia</a></td><td>detailed instructions for building Qtopia.</td></tr>
+<tr valign="top" class="even"><td><a href="syscust-index.html">System Customization</a></td><td>details how to customize many aspects of Qtopia.</td></tr>
+<tr valign="top" class="odd"><td><a href="buildsystem-user-guide.html">Build System User Guide</a></td><td>User guide for the build system.</td></tr>
+<tr valign="top" class="even"><td><a href="buildsystem-reference.html">Build System Reference</a></td><td>Detailed description of the build system.</td></tr>
 </table></p>
 <a name="now-what"></a>
 <h2>Now What?</h2>
-<p>Once Qtopia is built you will have a set of Qtopia binaries that are ready to run! The binaries are located in <tt>&lt;qtopia-build-dir&gt;/image/Qtopia</tt>. This directory contains all the files (and <i>only</i> the files) that should be installed onto the device. Note that you should have passed -prefix to specify the location that Qtopia will run from. If you did not do this, Qtopia will be setup to run from &lt;qpedir&gt;/image/Qtopia and will not work when installed into /opt/Qtopia.</p>
-<p><b>Note:</b> Depending on the installation device, the following additional libraries may be required:</p>
-<ul>
-<li>libjpeg</li>
-<li>libc</li>
-<li>helix</li>
-<li>a drmagent</li>
-</ul>
-<p>For backwards compatibility some of these libraries are provided in the <tt>arm/lib</tt> directory of the Qtopia SDK packages. More information about this can be found in the <a href="qtopia-dependencies.html">Prerequisites</a> section of the documentation.</p>
-<p>If an error referring to one of these libraries occurs when running Qtopia, please move the libraries to a different location and ensure that the correct version of the libraries is installed on your device.</p>
+<p>Once Qtopia is built you will have a set of Qtopia binaries that are ready to run! The binaries are located in <tt>&lt;qtopia-build-dir&gt;/image</tt>. This directory contains all the files (and <i>only</i> the files) that should be installed onto the device. Note that you should have passed -prefix to specify the location that Qtopia will run from. If you did not do this, Qtopia will be setup to run from &lt;qpedir&gt;/image and will not work when installed into /opt/Qtopia.</p>
 <p>For further information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.</p>
-<a name="installing-an-rpm"></a><a name="installing-or-removing-an-rpm"></a>
-<h2>Installing or Removing an RPM</h2>
-<p>To install a RPM called <tt>&lt;PACKAGE&gt;</tt> run:</p>
-<pre>      su -c &quot;rpm -ivh &lt;PACKAGE&gt;&quot;</pre>
-<a name="remove-rpm"></a><p>To remove the RPM &lt;NAME&gt; run:</p>
-<pre>      su -c &quot;rpm -e &lt;NAME&gt;&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

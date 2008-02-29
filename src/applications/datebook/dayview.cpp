@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,6 +30,7 @@
 #include <QLabel>
 #include <QKeyEvent>
 #include <QItemDelegate>
+#include <QItemSelectionModel>
 
 DayView::DayView(QWidget *parent)
     : QWidget(parent)
@@ -59,9 +60,8 @@ DayView::DayView(QWidget *parent)
     mTimedView->setModel(timedModel);
     mTimedView->setItemDelegate(id);
 
-    connect(mTimedView, SIGNAL(selectionChanged(const QModelIndex&)), this, SLOT(ensureVisible(const QModelIndex&)));
-
-    mTimedView->setTimeManager(mTimeManager);
+    connect(mTimedView, SIGNAL(selectionChanged(const QModelIndex&)), this, SLOT(timedSelectionChanged(const QModelIndex&)));
+    connect(timedModel, SIGNAL(modelReset()), this, SLOT(modelsReset()));
 
     allDayModel = new QOccurrenceModel(start, end, this);
     allDayModel->setDurationType(QAppointmentModel::AllDayDuration);
@@ -70,6 +70,9 @@ DayView::DayView(QWidget *parent)
     mAllDayList->setItemDelegate(id);
     mAllDayList->setFolded(true);
     connect(mAllDayList, SIGNAL(changeHiddenCount(int)), this, SLOT(updateHiddenIndicator(int)));
+    connect(mAllDayList, SIGNAL(activated(const QModelIndex &)), this, SLOT(allDayOccurrenceActivated(const QModelIndex &)));
+    connect(mAllDayList->selectionModel(), SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(allDayOccurrenceChanged(const QModelIndex &)));
+    connect(allDayModel, SIGNAL(modelReset()), this, SLOT(modelsReset()));
 
     mScrollArea = new QScrollArea();
     mScrollArea->setWidgetResizable(true);
@@ -88,6 +91,7 @@ DayView::DayView(QWidget *parent)
     QWidget *contents = new QWidget();
     QHBoxLayout *hl = new QHBoxLayout(contents);
 
+
     hl->addWidget(mTimeManager);
     hl->addWidget(mTimedView);
     hl->setMargin(0);
@@ -97,6 +101,9 @@ DayView::DayView(QWidget *parent)
 
     mScrollArea->setWidget(contents);
     updateHeaderText();
+
+    mTimedView->setTimeManager(mTimeManager);
+
     firstTimed();
 
     setFocusPolicy(Qt::StrongFocus);
@@ -164,8 +171,23 @@ void DayView::keyPressEvent(QKeyEvent *e)
 
 void DayView::mouseReleaseEvent( QMouseEvent * event )
 {
-    mTimedView->setCurrentIndex( mTimedView->index( event->globalPos() ) );
-    emit showDetails();
+    QModelIndex mi = mTimedView->index ( event->globalPos() );
+    if ( mi.isValid() ) {
+        mTimedView->setCurrentIndex( mi );
+        mAllDayList->selectionModel()->clear();
+        emit showDetails();
+    } else {
+        // create an event at the hour represented by the click
+        // if it is inside the timedview
+        QDateTime startTime = mTimedView->timeAtPoint( event->globalPos(), -1 );
+        if ( ! startTime.isNull() ) {
+            QDateTime endTime = mTimedView->timeAtPoint( event->globalPos(), 1 );
+            if ( ! endTime.isNull() )
+                emit newAppointment(startTime, endTime);
+        }
+        // XXX or expand the appointments if
+        // the "%d more all day appointments" label is clicked?
+    }
 }
 
 QModelIndex DayView::currentIndex() const
@@ -175,6 +197,12 @@ QModelIndex DayView::currentIndex() const
         return index;
 
     return mAllDayList->currentIndex();
+}
+
+void DayView::categorySelected( const QCategoryFilter &c )
+{
+    timedModel->setCategoryFilter( c );
+    allDayModel->setCategoryFilter( c );
 }
 
 QOccurrenceModel *DayView::currentModel() const
@@ -284,6 +312,18 @@ void DayView::lastTimed()
     }
 }
 
+void DayView::firstAllDay()
+{
+    timedModel->completeFetch();
+    allDayModel->completeFetch();
+    if (allDayModel->rowCount()) {
+        mAllDayList->setCurrentIndex(allDayModel->index(0, 0));
+        mTimedView->setCurrentIndex(QModelIndex());
+    } else if ( timedModel->rowCount() > 0 ) {
+        mTimedView->setCurrentIndex(timedModel->index(0,0));
+    }
+}
+
 void DayView::lastAllDay()
 {
     timedModel->completeFetch();
@@ -313,9 +353,9 @@ void DayView::nextOccurrence()
         // Down key activated for multiple meetings/appointments.
         if (mTimedView->currentIndex().row() < timedModel->rowCount() - 1) {
             mTimedView->setCurrentIndex(timedModel->index(mTimedView->currentIndex().row() + 1, 0));
-        } else if (timedModel->rowCount() > 0) {
+        } else {
             // Wrap around.
-            mTimedView->setCurrentIndex(timedModel->index(0,0));
+            firstAllDay();
         }
     }
 }
@@ -335,6 +375,8 @@ void DayView::previousOccurrence()
         if (mAllDayList->currentIndex().row() > 0) {
             mAllDayList->setCurrentIndex(allDayModel->index(mAllDayList->currentIndex().row() - 1,
                                         0));
+        } else {
+            lastTimed();
         }
     }
 }
@@ -374,14 +416,71 @@ void DayView::resizeEvent(QResizeEvent *)
     layout()->activate();
 }
 
-void DayView::ensureVisible(const QModelIndex &index)
+void DayView::timedSelectionChanged(const QModelIndex &index)
 {
     QRect r = mTimedView->occurrenceRect(index);
 
     mScrollArea->ensureVisible( 0, r.bottom(), 10, 10 );
     mScrollArea->ensureVisible( 0, r.top(), 10, 10 );
 
+    // Save the last selected occurrence, too
+    if (index.isValid()) {
+        lastSelectedTimedId = timedModel->id(index);
+        lastSelectedAllDayId = QUniqueId();
+    } else {
+        lastSelectedTimedId = QUniqueId();
+    }
+
     emit selectionChanged();
+}
+
+void DayView::allDayOccurrenceActivated(const QModelIndex &index)
+{
+    if ( index.isValid() )
+        emit showDetails();
+}
+
+void DayView::allDayOccurrenceChanged(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        // Make sure this is cleared
+        mTimedView->setCurrentIndex(QModelIndex());
+
+        // and make sure this is selected
+        mAllDayList->selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
+
+        // And save the id
+        lastSelectedAllDayId = allDayModel->id(index);
+        lastSelectedTimedId = QUniqueId();
+    } else {
+        lastSelectedAllDayId = QUniqueId();
+    }
+
+    emit selectionChanged();
+}
+
+void DayView::modelsReset()
+{
+    bool foundSomething = false;
+    // We lose our selections when the models get reset, so try and restore them
+    if ( ! lastSelectedAllDayId.isNull()) {
+        QModelIndex newsel = allDayModel->index(lastSelectedAllDayId);
+        if ( newsel.isValid() ) {
+            foundSomething = true;
+            mAllDayList->selectionModel()->setCurrentIndex(newsel, QItemSelectionModel::SelectCurrent);
+        }
+    } else if ( !lastSelectedTimedId.isNull()) {
+        QModelIndex newsel = timedModel->index(lastSelectedTimedId);
+        if ( newsel.isValid() ) {
+            foundSomething = true;
+            mTimedView->setCurrentIndex(newsel);
+        }
+    }
+
+    /* Well, didn't select anything, so select the first event */
+    if (!foundSomething) {
+        firstTimed(); // same behaviour as setDate
+    }
 }
 
 void DayView::updateHiddenIndicator(int hidden)
@@ -389,6 +488,12 @@ void DayView::updateHiddenIndicator(int hidden)
     if (hidden) {
         mHiddenIndicator->setText(tr("(%1 more all day appointments)", "%1= number and always > 1").arg(hidden));
         mHiddenIndicator->show();
+
+        // Also have to make sure if the previous selection is now hidden, that we select a different occurrence
+        if (mAllDayList->currentIndex().isValid()
+                && mAllDayList->currentIndex().row() >= mAllDayList->visibleRowCount()) {
+            lastAllDay();
+        }
     } else {
         mHiddenIndicator->hide();
     }

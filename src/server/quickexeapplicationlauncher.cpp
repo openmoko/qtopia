@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -66,10 +66,11 @@ public:
 //
 // ============================================================================
 
-class QuickExeApplicationLauncherPrivate
+class QuickExeApplicationLauncherPrivate : public SystemShutdownHandler
 {
+    Q_OBJECT
 public:
-    QuickExeApplicationLauncherPrivate() : mQlProcesses() {}
+    QuickExeApplicationLauncherPrivate() : isShutdown(false), mQlProcesses() {}
 
     void addProcess( QProcess* process );
     QProcess* removeProcess( const int pid );
@@ -78,9 +79,36 @@ public:
     QProcess* nextProcess();
     bool createProcess() const;
 
+    virtual bool systemRestart();
+    virtual bool systemShutdown();
+
+    bool shutdown() const { return isShutdown; }
 private:
+    void killAll();
+    bool isShutdown;
+
     QList<QlProcessInfo*> mQlProcesses;
 };
+
+bool QuickExeApplicationLauncherPrivate::systemRestart()
+{
+    isShutdown = true;
+    killAll();
+    return true;
+}
+
+bool QuickExeApplicationLauncherPrivate::systemShutdown()
+{
+    isShutdown = true;
+    killAll();
+    return true;
+}
+
+void QuickExeApplicationLauncherPrivate::killAll()
+{
+    for(int ii = 0; ii < mQlProcesses.count(); ++ii)
+        mQlProcesses[ii]->mProcess->kill();
+}
 
 void QuickExeApplicationLauncherPrivate::addProcess( QProcess* process )
 {
@@ -199,6 +227,7 @@ bool QuickExeApplicationLauncherPrivate::createProcess() const
  */
 QTOPIA_TASK(QuickExeApplicationLauncher, QuickExeApplicationLauncher);
 QTOPIA_TASK_PROVIDES(QuickExeApplicationLauncher, ApplicationTypeLauncher);
+QTOPIA_TASK_PROVIDES(QuickExeApplicationLauncher, SystemShutdownHandler);
 
 /*!
   Constructs a new QuickExeApplicationLauncher instance.
@@ -206,6 +235,8 @@ QTOPIA_TASK_PROVIDES(QuickExeApplicationLauncher, ApplicationTypeLauncher);
 QuickExeApplicationLauncher::QuickExeApplicationLauncher()
 : d( new QuickExeApplicationLauncherPrivate )
 {
+    QtopiaServerApplication::addAggregateObject(this, d);
+
     QtopiaChannel *channel = new QtopiaChannel("QPE/QuickLauncher", this);
     connect( channel,
              SIGNAL( received( const QString&, const QByteArray&) ),
@@ -281,6 +312,8 @@ void QuickExeApplicationLauncher::quickLauncherChannel(const QString &message,
 /*! \internal */
 void QuickExeApplicationLauncher::startNewQuicklauncher()
 {
+    if(d->shutdown()) return;
+
     // Create the new quicklauncher process
     QProcess* process = new QProcess( this );
 
@@ -368,3 +401,4 @@ QString QuickExeApplicationLauncher::quicklaunchExecutable()
     return Qtopia::qtopiaDir() + "bin/quicklauncher";
 }
 
+#include "quickexeapplicationlauncher.moc"

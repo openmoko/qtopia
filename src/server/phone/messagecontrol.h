@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@ public:
     bool smsFull() const;
 
 signals:
-    void messageCount(int, bool, bool);
+    void messageCount(int, bool, bool, bool);
     void newMessage(const QString &type, const QString &from,
                     const QString &subject);
     void messageRejected();
@@ -54,7 +54,7 @@ private slots:
 private:
     QValueSpaceObject phoneValueSpace;
     QValueSpaceItem smsMemoryFull;
-    void doNewCount(bool write=true, bool fromSystem=false);
+    void doNewCount(bool write=true, bool fromSystem=false, bool notify=true);
     MessageControl();
     QCommServiceManager *mgr;
     QSMSReader *smsreq;

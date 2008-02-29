@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,7 @@
 #include <QTimer>
 #include <QObject>
 #include <QPhoneProfileManager>
+#include <QTranslatableSettings>
 
 #include <qtopiacomm/qbluetoothaddress.h>
 
@@ -40,6 +41,7 @@ public:
     QBluetoothLocalDevice *m_device;
     QPhoneProfileManager *m_phoneProfileMgr;
     bool upRequest;
+    QTranslatableSettings *m_btsettings;
 };
 
 BtPowerServicePrivate::BtPowerServicePrivate(const QByteArray &devId)
@@ -49,12 +51,14 @@ BtPowerServicePrivate::BtPowerServicePrivate(const QByteArray &devId)
         << devId << m_device->address().toString();
 
     m_phoneProfileMgr = new QPhoneProfileManager;
+    m_btsettings = new QTranslatableSettings("Trolltech", "bluetooth");
 }
 
 BtPowerServicePrivate::~BtPowerServicePrivate()
 {
     delete m_device;
     delete m_phoneProfileMgr;
+    delete m_btsettings;
 }
 
 /*!
@@ -115,7 +119,15 @@ void BtPowerService::initialize()
 */
 void BtPowerService::bringUp()
 {
-    bool res = m_data->m_device->setConnectable();
+    bool res;
+
+    // preserve last known device visibility setting
+    // (or default to discoverable if there is no such setting)
+    QVariant visibility = m_data->m_btsettings->value("LocalDeviceVisible");
+    if (!visibility.isValid() || visibility.toBool())
+        res = m_data->m_device->setDiscoverable();
+    else
+        res = m_data->m_device->setConnectable();
 
     m_data->upRequest = true;
 
@@ -152,6 +164,9 @@ void BtPowerService::stateChanged(QBluetoothLocalDevice::State state)
     if ( (state == QBluetoothLocalDevice::Connectable) ||
          (state == QBluetoothLocalDevice::Discoverable)) {
         emit upStatus(false, QString());
+
+        m_data->m_btsettings->setValue("LocalDeviceVisible",
+            QVariant((state == QBluetoothLocalDevice::Discoverable)) );
     }
     else {
         emit downStatus(false, QString());

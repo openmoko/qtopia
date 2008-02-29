@@ -59,8 +59,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QPimContext class represents a storage context of PIM data.</p>
-<p>The QPimContext class represenets a storage context of PIM data, such as SIM Card contacts or contacts stored on the phone in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
-<p>QPimContext should not be subclassed directly. Instead on of the data type specific contexts should be used. These are <a href="qcontactcontext.html">QContactContext</a>, <a href="qtaskcontext.html">QTaskContext</a> and <a href="qappointmentcontext.html">QAppointmentContext</a>.</p>
+<p>The QPimContext class represents a storage context of PIM data, such as SIM Card contacts or contacts stored on the device in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
+<p>QPimContext should not be subclassed directly. Instead, one of the data type specific contexts should be used. These are <a href="qcontactcontext.html">QContactContext</a>, <a href="qtaskcontext.html">QTaskContext</a> and <a href="qappointmentcontext.html">QAppointmentContext</a>.</p>
 <p>Currently there is no way for applications to implement their own contexts. This feature is being considered for future versions of Qtopia.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -83,7 +83,7 @@
 <h3 class="fn"><a name="id"></a><a href="quuid.html">QUuid</a> QPimContext::id () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a unique identifier for this context.</p>
 <h3 class="fn"><a name="setVisibleSources"></a>void QPimContext::setVisibleSources ( const <a href="qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; &amp; <i>visible</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Fitlers the model that created this context to only show pim for this source that is contained in <i>visible</i>. Does not affect data from other contexts.</p>
+<p>Filters the model that created this context to only show records for the source that is contained in <i>visible</i>. Does not affect data from other contexts.</p>
 <p>See also <a href="qpimcontext.html#visibleSources">visibleSources</a>().</p>
 <h3 class="fn"><a name="source"></a><a href="qpimsource.html">QPimSource</a> QPimContext::source ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Provided that the PIM record identified by <i>id</i> exists for this context, returns the PIM data source where the record is stored. Otherwise returns a null PIM data source.</p>
@@ -95,12 +95,12 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the title of the PIM data <i>source</i> suitable for displaying to the user. By default returns the title for the context.</p>
 <h3 class="fn"><a name="visibleSources"></a><a href="qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; QPimContext::visibleSources () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the set of PIM data source that are controlled by this context and are visible in the model that created the context.</p>
+<p>Returns the set of PIM data sources that are controlled by this context and are visible in the model that created the context.</p>
 <p>See also <a href="qpimcontext.html#setVisibleSources">setVisibleSources</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

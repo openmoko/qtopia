@@ -4,26 +4,26 @@
 	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
 	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
 ]>
-<svg  version="1.1" id="Layer_1" xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" width="29.125" height="29.146"
-	 viewBox="0 0 29.125 29.146" style="overflow:visible;enable-background:new 0 0 29.125 29.146;" xml:space="preserve">
-<rect style="fill:none;" width="29.125" height="29.125"/>
+<svg  version="1.1" id="Layer_1" xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" width="29.125" height="31" viewBox="0 0 29.125 31"
+	 style="overflow:visible;enable-background:new 0 0 29.125 31;" xml:space="preserve">
+<rect style="fill:none;" width="29.125" height="31"/>
 <g>
-	<polygon style="fill:#99A2B3;stroke:#000000;" points="18.311,0.603 6.323,0.603 6.323,28.646 23.177,28.646 23.177,7.139 	"/>
+	<linearGradient id="XMLID_3_" gradientUnits="userSpaceOnUse" x1="20.7373" y1="31.2305" x2="4.7324" y2="3.5092">
+		<stop  offset="0" style="stop-color:#F2F2F2"/>
+		<stop  offset="1" style="stop-color:#939393"/>
+	</linearGradient>
+	<polygon style="fill:url(#XMLID_3_);stroke:#000000;stroke-width:0.75;" points="17.748,2.916 5.761,2.916 5.761,30.146 
+		22.614,30.146 22.614,9.625 	"/>
 	
-		<radialGradient id="XMLID_2_" cx="24.7842" cy="-35.1836" r="6.3365" gradientTransform="matrix(0.8949 0 0 -0.895 -8.2684 -14.2341)" gradientUnits="userSpaceOnUse">
+		<linearGradient id="XMLID_4_" gradientUnits="userSpaceOnUse" x1="18.3535" y1="-35.2021" x2="31.8535" y2="-35.2021" gradientTransform="matrix(0.8949 0 0 -0.895 -8.2684 -10.681)">
 		<stop  offset="0.0169" style="stop-color:#E3B92C"/>
 		<stop  offset="1" style="stop-color:#FFF9B1"/>
-	</radialGradient>
-	<polygon style="fill:url(#XMLID_2_);stroke:#000000;stroke-width:0.75;" points="20.12,13.06 20.175,25.926 18.831,26.652 
-		8.878,26.652 8.094,25.704 8.094,12.949 9.1,11.998 19.114,11.998 	"/>
-	<path style="opacity:0.67;fill:none;stroke:#000000;stroke-width:0.75;enable-background:new    ;" d="M9.958,26.223h3.098v-5.222
-		H9.958V26.223z M13.401,26.223h3.096v-5.222h-3.096V26.223z M16.63,21.001v5.222h3.062v-5.222H16.63z"/>
-	<path style="opacity:0.67;fill:none;stroke:#000000;stroke-width:0.75;enable-background:new    ;" d="M9.661,17.943h3.096v-5.294
-		H9.661V17.943z M13.102,17.943H16.2v-5.294h-3.099V17.943z M16.405,12.649v5.294h3.1v-5.294H16.405z"/>
-	<rect x="6.678" y="1.089" style="fill:#DBE8EF;" width="0.97" height="27.075"/>
-	<polygon style="fill:#828B92;" points="22.786,28.163 21.817,28.163 21.901,6.235 22.712,7.205 	"/>
-	<rect x="20.387" y="6.235" style="fill:#A5B0B7;" width="1.515" height="21.853"/>
-	<polygon style="fill:#DBE8EF;" points="18.61,1.686 7.61,1.759 6.678,1.089 18.012,1.089 	"/>
-	<polygon style="fill:#798288;" points="22.786,28.238 6.677,28.238 7.721,27.418 21.966,27.493 	"/>
+	</linearGradient>
+	<polygon style="fill:url(#XMLID_4_);stroke:#000000;stroke-width:0.5;" points="20.183,14.56 20.237,27.426 18.894,28.152 
+		8.94,28.152 8.156,27.204 8.156,14.449 9.162,13.498 19.177,13.498 	"/>
+	<path style="opacity:0.67;fill:none;stroke:#000000;stroke-width:0.5;enable-background:new    ;" d="M10.083,27.723h3.285v-5.222
+		h-3.285V27.723z M13.401,27.723h3.158v-5.222h-3.158V27.723z M16.692,22.501v5.222h2.874v-5.222H16.692z"/>
+	<path style="opacity:0.67;fill:none;stroke:#000000;stroke-width:0.5;enable-background:new    ;" d="M10.036,19.443h3.096v-5.294
+		h-3.096V19.443z M13.164,19.443h3.224v-5.294h-3.224V19.443z M16.468,14.149v5.294h3.1v-5.294H16.468z"/>
 </g>
 </svg>

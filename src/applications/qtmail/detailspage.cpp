@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -85,7 +85,7 @@ DetailsPage::DetailsPage( QWidget *parent, const char *name )
 
     m_toFieldLabel = new QLabel( this );
     m_toFieldLabel->setText( tr( "To" ) );
-    m_toBox = new QHBoxLayout( this );
+    m_toBox = new QHBoxLayout( );
     m_toField = new QLineEdit( this );
     m_toBox->addWidget( m_toField );
     connect( m_toField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );
@@ -109,7 +109,7 @@ DetailsPage::DetailsPage( QWidget *parent, const char *name )
 
     m_ccFieldLabel = new QLabel( this );
     m_ccFieldLabel->setText( tr( "CC" ) );
-    m_ccBox = new QHBoxLayout( this );
+    m_ccBox = new QHBoxLayout( );
     m_ccField = new QLineEdit( this );
     m_ccBox->addWidget( m_ccField );
     connect( m_ccField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );
@@ -133,7 +133,7 @@ DetailsPage::DetailsPage( QWidget *parent, const char *name )
 
     m_bccFieldLabel = new QLabel( this );
     m_bccFieldLabel->setText( tr( "BCC" ) );
-    m_bccBox = new QHBoxLayout( this );
+    m_bccBox = new QHBoxLayout( );
     m_bccField = new QLineEdit( this );
     m_bccBox->addWidget( m_bccField );
     connect( m_bccField, SIGNAL(textChanged(const QString&)), this, SIGNAL(recipientsChanged()) );

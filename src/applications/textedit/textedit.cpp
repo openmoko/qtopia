@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -121,8 +121,6 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     editorStack->addWidget(fileSelector);
 
     setupFontSizes();
-
-    setBackgroundRole( QPalette::Button );
 
     QAction *newAction = new QAction(QIcon( ":icon/new" ), tr( "New" ), this);
     connect( newAction, SIGNAL( triggered() ), this, SLOT( fileNew() ) );

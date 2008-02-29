@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -278,15 +278,15 @@ public:
 /*!
   \class QContactModel
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactModel class provides access to the the Contacts data.
 
-  The QContactModel is used to access the Contact data.  It is a descendent of QAbstractItemModel
-  so is suitable for use with the Qt View classes such as QListView and QTableView as well as
-  any developer custom Views.
+  The QContactModel is used to access the Contact data.  It is a descendant of QAbstractItemModel,
+  so it is suitable for use with the Qt View classes such as QListView and QTableView, as well as
+  any custom developer Views.
 
   QContactModel provides functions for sorting and some filtering of items.
-  For filters or sorting that is not provided by QContactModel it is recommend that
+  For filters or sorting that is not provided by QContactModel it is recommended that
   QSortFilterProxyModel is used to wrap QContactModel.
 
   QContactModel may merge data from multiple sources such as sql files, xml files, or
@@ -304,12 +304,12 @@ public:
   \value LabelRole
     A short formatted text label of the contacts name.
   \value SubLabelRole
-    An alternative formated text label of the contacts name.
+    An alternative formatted text label of the contacts name.
   \value PortraitRole
     A Pixmap of the contacts image, or a default image if
     none is specifically set.
   \value StatusIconRole
-    An icon providing addional information about the contact.
+    An icon providing additional information about the contact.
     For instance marking as a business contact or marking the contact
     as recently called.
 */
@@ -388,6 +388,7 @@ public:
 QContactModel::QContactModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
+    QtopiaSql::openDatabase();
     d = new QContactModelData();
     d->mio = new QBiasedRecordIOMerge(this);
 
@@ -738,7 +739,7 @@ QContact QContactModel::contact(int row) const
 }
 
 /*!
-  Returns the contact with the identefier \a id.  The contact does
+  Returns the contact with the identifier \a id.  The contact does
   not have to be in the current filter mode for it to be returned.
 */
 QContact QContactModel::contact(const QUniqueId & id) const
@@ -882,7 +883,7 @@ bool QContactModel::setContactField(QContact &contact, QContactModel::Field f,  
     switch(f) {
         default:
         case QContactModel::Invalid:
-        case QContactModel::Identifier: // not a setable field
+        case QContactModel::Identifier: // not a settable field
         case QContactModel::Label:
             return false;
         case QContactModel::Categories:
@@ -1219,7 +1220,7 @@ bool QContactModel::removeContact(const QContact& contact)
 }
 
 /*!
-  Removes the contact that has the uid \a id from the ContactModel;
+  Removes the contact that has the uid \a id from the QContactModel;
 
   Returns true if the contact was successfully removed.  Otherwise return false.
 */
@@ -1279,7 +1280,7 @@ bool QContactModel::removeList(const QList<QUniqueId> &ids)
 /*!
   Returns the uid for the contact representing the personal details of the device owner.
 
-  If no contact is specified as the personal details of the device owner will return a
+  If no contact is specified as the personal details of the device owner, will return a
   null id.
 */
 QUniqueId QContactModel::personalID() const
@@ -1294,7 +1295,7 @@ QUniqueId QContactModel::personalID() const
 /*!
   Returns the contact representing the personal details of the device owner.
 
-  If no contact is spefied as the personal details of the device owner will return a null
+  If no contact is specified as the personal details of the device owner, will return a null
   contact.
 */
 QContact QContactModel::personalDetails() const
@@ -1316,7 +1317,7 @@ bool QContactModel::hasPersonalDetails() const
   Returns true if a contact with the uid \a id is stored in the contact model.  Otherwise
   return false.
 
-  The contact with uid id does not need to be in the current filter mode.
+  The contact with uid \a id does not need to be in the current filter mode.
 
   \sa contains()
 */
@@ -1351,8 +1352,8 @@ void QContactModel::clearPersonalDetails()
 
 /*!
   Sets the contact representing the personal details of the device owner to the contact
-  identified by the uid \a i.  If there is no contact with the uid \a i the QContactModel
-  or \a i is null will clear the personal details.
+  identified by the uid \a i.  If there is no contact with the uid \a i in the QContactModel
+  or \a i is null, this will clear the personal details.
 
   \sa clearPersonalDetails()
 */
@@ -1413,7 +1414,7 @@ void QContactModel::removeBusinessCard()
 #ifdef QTOPIA_PHONE
 /*!
   Returns the best match for the phone number \a text.  If no contact
-  in the model has a phone number matching \a text returns a
+  in the model has a phone number matching \a text, returns a
   null contact.
 */
 QContact QContactModel::matchPhoneNumber(const QString &text)
@@ -1440,7 +1441,7 @@ QContact QContactModel::matchPhoneNumber(const QString &text)
   These flags describe what kind of contact information to filter contacts on.
 
   \value ContainsPhoneNumber
-      The contact must provide one or more phone number.
+      The contact must provide one or more phone numbers.
   \value ContainsEmail
       The contact must provide one or more email addresses.
   \value ContainsMailing
@@ -1452,7 +1453,7 @@ QContact QContactModel::matchPhoneNumber(const QString &text)
 /*!
   Sets the model to filter contacts by labels that start with \a text
   and contact type information specified \a flags.  By default flags
-  is 0 which means filtering will only occur based of label text.
+  is 0 which means filtering will only occur based on label text.
 
   \sa filterFlags(), filterText()
 */
@@ -1491,7 +1492,7 @@ int QContactModel::filterFlags() const
 }
 
 /*!
-  Clear Contact name and type filterng for the model.
+  Clear Contact name and type filtering for the model.
   Does not affect category filtering.
 */
 void QContactModel::clearFilter()
@@ -1517,7 +1518,7 @@ bool QContactModel::isSIMCardContact(const QModelIndex &index) const
 }
 
 /*!
-  Returns true fi the contact identified by \a id is on the SIM card.
+  Returns true if the contact identified by \a id is on the SIM card.
   Otherwise returns false.
 */
 bool QContactModel::isSIMCardContact(const QUniqueId & id) const
@@ -1592,7 +1593,7 @@ QModelIndex QContactModel::index(int row, int column, const QModelIndex &parent)
 }
 
 /*!
-  If the model contains a contact with uid \a id returns the index of the contact.
+  If the model contains a contact with uid \a id, returns the index of the contact.
   Otherwise returns a null QModelIndex
 
   \sa contains(), exists()
@@ -1607,7 +1608,7 @@ QModelIndex QContactModel::index(const QUniqueId & id) const
 
 /*!
   Return the id for the contact at the row specified by \a index.
-  If index is null or out of the range of the model will return a null id.
+  If index is null or out of the range of the model, will return a null id.
 */
 QUniqueId QContactModel::id(const QModelIndex &index) const
 {
@@ -1654,7 +1655,7 @@ const QList<QContactContext*> &QContactModel::contexts() const
 }
 
 /*!
-  Returns the context that contains the contact with identifer \a id.
+  Returns the context that contains the contact with identifier \a id.
   If the contact does not exists returns 0.
 */
 QContactContext *QContactModel::context(const QUniqueId &id) const
@@ -1667,7 +1668,7 @@ QContactContext *QContactModel::context(const QUniqueId &id) const
 }
 
 /*!
-  Returns the source identifier that contains the contact with identier \a id.
+  Returns the source identifier that contains the contact with identifier \a id.
   If the contact does not exist returns a null source.
 */
 QPimSource QContactModel::source(const QUniqueId &id) const
@@ -1748,7 +1749,7 @@ QPimSource QContactModel::phoneSource() const
 }
 
 /*!
-  Exports the contact with identifer \a id and imports it into \a dest.
+  Exports the contact with identifier \a id and imports it into \a dest.
   The contact is modified by the source and destination storage contexts
   to account for storage restrictions.  For instance a contact may be split into
   multiple contacts when mirrored to the active SIM card and contacts from the
@@ -1784,7 +1785,7 @@ bool QContactModel::mirrorToSource(const QPimSource &dest, const QUniqueId &id)
 }
 
 /*!
-  Exports the contacts stored in \a source and imports tem into \a dest.
+  Exports the contacts stored in \a source and imports them into \a dest.
   The contacts are modified by the source and destination storage contexts
   to account for storage restrictions.
 
@@ -1816,7 +1817,7 @@ bool QContactModel::mirrorAll(const QPimSource &source, const QPimSource &dest)
    Write vcards for all visible contacts in the model to the file
    specified by \a filename.
 
-   Returns true when the write was successful, or false on failure.
+   Returns true if the write was successful, or false on failure.
 */
 bool QContactModel::writeVCard( const QString &filename )
 {
@@ -1873,3 +1874,4 @@ QModelIndexList QContactModel::match(const QModelIndex &start, int role, const Q
     }
     return l;
 }
+

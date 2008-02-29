@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,8 @@
 #include <unistd.h>
 
 #include <QTimer>
+#include <QDebug>
+#include <qcontent.h>
 
 #include "qipkg-simple.h"
 #include <qpushbutton.h>
@@ -39,15 +41,9 @@ QipkgBase::~QipkgBase()
 Qipkg::Qipkg( QWidget *parent, Qt::WFlags f )
     : QipkgBase( parent, f )
 {
-    QString cmd;
-
-    cmd = qApp->argv()[1];
-    if(cmd.right(3) != "ipk" ) {
-      TextLabel1->setText("Please select ipk package from Documents tab to install it.");
-    } else {
-        QTimer::singleShot(0, this, SLOT(start()));
-        done->setEnabled(false);
-    }
+    TextLabel1->setText("Please wait...");
+    done->setEnabled(false);
+    showMaximized();
     connect(done, SIGNAL(clicked()), this, SLOT(finished()));
 }
 
@@ -59,11 +55,10 @@ void Qipkg::start()
 {
     QString cmd,package;
 
-    cmd = qApp->argv()[1];
-
+    QContent nf(filename);
+    cmd = filename;
     package = "Installing Package ";
-    cmd = qApp->argv()[1]; 
-    package = package + cmd;
+    package = package + nf.name();
     TextLabel1->setText(package);
 
     package = "pkg.sh ";
@@ -83,4 +78,19 @@ void Qipkg::start()
 void Qipkg::finished()
 { 
     exit(0);
+}
+
+void Qipkg::setDocument( const QString& ipkg )
+{
+    filename = ipkg; 
+    start();
+}
+
+QipkgService::~QipkgService()
+{
+}
+
+void QipkgService::setDocument( const QString& ipkg )
+{
+    parent->setDocument( ipkg );
 }

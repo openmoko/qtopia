@@ -99,11 +99,11 @@
 <h3 class="fn"><a name="errorMessage"></a><a href="qstring.html">QString</a> QDSAction::errorMessage () const</h3>
 <p>Returns any error message that was generated during the request. Errors are reported from either <a href="qdsaction.html">QDSAction</a> or the provider application, and are reported through QDSData::error() or the return value of QDSData::exec(). If no error has been reported <a href="porting4.html#qstring">QString</a>() will be returned.</p>
 <h3 class="fn"><a name="exec"></a>int QDSAction::exec ()</h3>
-<p>Performs the QDS service request synchronously. The return value provides the result of the request, see QDSAction::ReturnCode. Beware, this call will block until the response has been received from the QDS service or the request times out.</p>
+<p>Performs the QDS service request synchronously. The return value provides the result of the request, see <a href="qdsaction.html#ResponseCode-enum">QDSAction::ResponseCode</a>. Beware, this call will block until the response has been received from the QDS service or the request times out.</p>
 <p>This method should only be used for QDS services which don't have request data, as discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>, otherwise an error will be generated.</p>
 <h3 class="fn"><a name="exec-2"></a>int QDSAction::exec ( const <a href="qdsdata.html">QDSData</a> &amp; <i>requestData</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>auxiliary</i> = QByteArray() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
-<p>Performs the QDS service request with <i>requestData</i> synchronously. The return value provides the result of the request, see QDSAction::ReturnCode. Beware, this call will block until the response has been received from the QDS service or the request times out.</p>
+<p>Performs the QDS service request with <i>requestData</i> synchronously. The return value provides the result of the request, see <a href="qdsaction.html#ResponseCode-enum">QDSAction::ResponseCode</a>. Beware, this call will block until the response has been received from the QDS service or the request times out.</p>
 <p>The request may also contain <i>auxiliary</i> data for supplementary information which may be required for the request but does not conceptionally belong to <i>requestData</i>.</p>
 <p>This method should only be used for QDS services which have request data, as discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>, otherwise an error will be generated.</p>
 <h3 class="fn"><a name="id"></a><a href="qlocaluniqueid.html">QLocalUniqueId</a> QDSAction::id () const</h3>
@@ -135,8 +135,8 @@
 <p>Assignment operator which deep copies <i>other</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

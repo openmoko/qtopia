@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -25,8 +25,7 @@
 #include <QHeaderView>
 #include <QDebug>
 #include <QKeyEvent>
-
-
+#include "qsoftmenubar.h"
 
 class TodoTableHeader : public QHeaderView
 {
@@ -95,9 +94,10 @@ TodoTable::TodoTable(QWidget *parent)
     TaskTableDelegate* delegate = new TaskTableDelegate(this);
     setItemDelegate(delegate);
     setSelectionBehavior(SelectRows);
-    connect(this, SIGNAL(activated(const QModelIndex &)),
+    connect(delegate, SIGNAL(showItem(const QModelIndex &)),
             this, SLOT(showTask(const QModelIndex &)));
-
+    connect(delegate, SIGNAL(toggleItemCompleted(const QModelIndex &)),
+            this, SLOT(toggleTaskCompleted(const QModelIndex &)));
     /*
     connect(this, SIGNAL(clicked(const QModelIndex &, Qt::MouseButton, Qt::KeyboardModifiers)),
             this, SLOT( activateItemClick(const QModelIndex &, Qt::MouseButton, Qt::KeyboardModifiers)));
@@ -118,7 +118,47 @@ TodoTable::~TodoTable() {}
 void TodoTable::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     QTableView::currentChanged(current, previous);
+    selectionModel()->select(current, QItemSelectionModel::Select);
+    /* and save the uid, so we can reselect this if we change things */
+    if ( current.isValid() ) {
+        lastSelectedTaskId = taskModel()->id(current);
+    } else {
+        lastSelectedTaskId = QUniqueId();
+    }
+    switch(current.column()) {
+        case QTaskModel::Priority:
+        case QTaskModel::Completed:
+            /* Make it clear Select does something */
+            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select);
+            break;
+
+        default:
+            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::View);
+            break;
+    }
     emit currentItemChanged(current);
+}
+
+void TodoTable::reset()
+{
+    /* base class stuff */
+    QTableView::reset();
+
+    /* Make sure we're back in row mode */
+    setSelectionBehavior(SelectRows);
+
+    /* Select the last selected task, if any, otherwise the first task, if any  */
+    if ( !currentIndex().isValid() ) {
+        QModelIndex newSel = taskModel()->index(lastSelectedTaskId);
+        if ( !newSel.isValid() ) {
+            newSel = taskModel()->index(0,0);
+        }
+        if( newSel.isValid() )
+            selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+    } else {
+        /* Make sure it is a whole row */
+        selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    }
 }
 
 void TodoTable::showTask(const QModelIndex &i)
@@ -162,6 +202,10 @@ void TodoTable::setModel( QAbstractItemModel * model )
 
 void TodoTable::toggleTaskCompleted(const QModelIndex &i)
 {
+    // Make sure this task is the current one.
+    setCurrentIndex(i);
+
+    // And toggle it
     bool current = model()->data(i, Qt::EditRole).toBool();
     model()->setData(i, QVariant(!current), Qt::EditRole);
 }
@@ -207,61 +251,61 @@ void TodoTable::keyPressEvent(QKeyEvent *e)
 
     QItemSelectionModel * smodel = selectionModel();
     QModelIndex ci = smodel->currentIndex();
-    if(!ci.isValid())  {
-        // Nothing is yet selected. ***HACK*** (or part of it) to get selection working properly.
-        QTableView::keyPressEvent(e);
-        if ( (e->key() == Qt::Key_Down) && (model()->rowCount() > 0) ) {
-            // Select first in the list.
-            setCurrentIndex(model()->sibling(0,QTaskModel::Description,currentIndex()));
-            selectionModel()->select(currentIndex(),QItemSelectionModel::SelectCurrent);
-        } else if ( (e->key() == Qt::Key_Up) && (model()->rowCount() > 0) ) {
-            // Select last in the list.
-            setCurrentIndex(model()->sibling(model()->rowCount()-1,QTaskModel::Description,currentIndex()));
-            selectionModel()->select(currentIndex(),QItemSelectionModel::SelectCurrent);
-        }
-        return;
-    }
 
-    if(Qt::Key_Left == e->key()) {
-        setSelectionBehavior(SelectItems);
-        QModelIndex newmi = ci.sibling(ci.row(), QTaskModel::Completed);
-        setCurrentIndex(newmi);
-        smodel->select(newmi, QItemSelectionModel::ClearAndSelect);
-        return;
-    } else if(Qt::Key_Select == e->key() &&
-              QTaskModel::Completed == ci.column()) {
-        toggleTaskCompleted(ci);
-        setCurrentIndex(ci);
-        smodel->select(ci, QItemSelectionModel::Select);
-        return;
-    } else if(Qt::Key_Down == e->key() ||
-              Qt::Key_Up == e->key()) {
-        // I think they just forgot to put anything here. Well, never mind, I've sorted it out
-        // below...
-    } else {
-        setSelectionBehavior(SelectRows);
+    switch ( e->key() ) {
+        case Qt::Key_Left:
+            if (selectionBehavior() != SelectItems) {
+                setSelectionBehavior(SelectItems);
+                QModelIndex newmi = ci.sibling(ci.row(), QTaskModel::Priority);
+                setCurrentIndex(newmi);
+                smodel->select(newmi, QItemSelectionModel::ClearAndSelect);
+                return;
+            }
+            break;
+
+        case Qt::Key_Right:
+            if (selectionBehavior() == SelectItems && QTaskModel::Priority== ci.column()) {
+                setSelectionBehavior(SelectRows);
+                QModelIndex newmi = ci.sibling(ci.row(), QTaskModel::Description);
+                setCurrentIndex(newmi);
+                smodel->select(newmi, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+                return;
+            }
+            break;
+
+        case Qt::Key_Select:
+            if(QTaskModel::Completed == ci.column()) {
+                toggleTaskCompleted(ci);
+                return;
+            } else if (QTaskModel::Description == ci.column()) {
+                showTask(ci);
+                return;
+            }
+            break;
+
+        case Qt::Key_Up:
+        case Qt::Key_Down:
+            /* Ignore these here, they get handled in the base class */
+            break;
+
+        default:
+            setSelectionBehavior(SelectRows);
+            QModelIndex newmi = ci.sibling(ci.row(), QTaskModel::Description);
+            setCurrentIndex(newmi);
+            smodel->select(newmi, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }
 
     QTableView::keyPressEvent(e);
 
-    // ***HACK*** to ensure that we have wrap-around
-    if ( (oldCurrent.row() == 0) && (e->key() == Qt::Key_Up) && (model()->rowCount() > 1) ) {
-        // At the beginning of the list, keying down.
-        setCurrentIndex(model()->sibling(model()->rowCount()-1,currentIndex().column(),currentIndex()));
-    } else if ( (oldCurrent.row() == model()->rowCount()-1) && (e->key() == Qt::Key_Down) && (model()->rowCount() > 1) ) {
-        // At the end of the list, keying up.
-        setCurrentIndex(model()->sibling(0,currentIndex().column(),currentIndex()));
-    }
-
-    // ***HACK*** to ensure that the current item is actually selected.
-    switch ( e->key() ) {
-    case Qt::Key_Up:
-    case Qt::Key_Down:
-        // The keyPressEvent in QAbstractItemView only sets the 'current' index, not the selection.
-        if ( (oldCurrent != currentIndex()) && (currentIndex().isValid()) ) {
-            selectionModel()->select(currentIndex(),QItemSelectionModel::SelectCurrent);
+    // work around to ensure that we have wrap-around (since QTableView doesn't wrap)
+    if (model()->rowCount() > 1) {
+        if ( (oldCurrent.row() == 0) && (e->key() == Qt::Key_Up) ) {
+            // At the beginning of the list, keying down.
+            setCurrentIndex(model()->sibling(model()->rowCount()-1,currentIndex().column(),currentIndex()));
+        } else if ( (oldCurrent.row() == model()->rowCount()-1) && (e->key() == Qt::Key_Down) ) {
+            // At the end of the list, keying up.
+            setCurrentIndex(model()->sibling(0,currentIndex().column(),currentIndex()));
         }
-        break;
     }
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -79,10 +79,14 @@ ServiceRequest* CustomPropertyBrowser::action( const QModelIndex& index, ActionC
         }
     case Hold:
         {
-        QContentList items = QContentSet( filter() & QContentFilter( QContentFilter::Synthetic, filterString( index ) ) ).items();
+        QContentSet set( filter() & QContentFilter( QContentFilter::Synthetic, filterString( index ) ) );
+        set.setSortOrder( QStringList()
+            << "synthetic/none/Artist"
+            << "synthetic/none/Album"
+            << "synthetic/none/Track" );
 
         QStringList urls;
-        foreach( QContent content, items ) {
+        foreach( QContent content, set.items() ) {
             urls.append( content.file() );
         }
 

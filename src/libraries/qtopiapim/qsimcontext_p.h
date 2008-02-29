@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,7 @@
 
 class ContactSqlIO;
 class QSimInfo;
+class QContactSimSyncer;
 class QContactSimContext : public QContactContext
 {
     Q_OBJECT
@@ -65,17 +66,15 @@ public:
     bool waitingOnSim() const;
 signals:
     void simResponded();
+    void simIdentityUpdated(const QString &, const QDateTime &);
 
 private slots:
-    void simIdentityChanged();
-    void updatePhoneBook( const QString &store, const QList<QPhoneBookEntry> &list );
-    void updatePhoneBookLimits( const QString &store, const QPhoneBookLimits &value );
-    void updateSqlEntries();
+    void notifyUpdate(int context);
+    void readSimIdentity();
+
 private:
-    QContact simContact(const QUniqueId &u) const;
     QString card(const QUniqueId &) const;
     int cardIndex(const QUniqueId &) const;
-    QUniqueId id(const QString &card, int index) const;
     QUniqueId findLabel(const QString &) const;
 
     int nextFreeIndex() const;
@@ -87,29 +86,9 @@ private:
     static QContactModel::Field SIMExtensionToType(QString &label);
     QString createSIMLabel(const QContact &c);
 
-
-    QList<QUuid> mCards;
-    QString mActiveCard;
-
-    enum ReadState {
-        PhoneBookIdRead = 0x1,
-        PhoneBookLimitsRead = 0x2,
-        PhoneBookEntriesRead = 0x4,
-        PhoneBookRead = PhoneBookIdRead | PhoneBookLimitsRead | PhoneBookEntriesRead
-    };
-    int readState;
-
-    int SIMLabelLimit;
-    int SIMNumberLimit;
-    int SIMListStart;
-    int SIMListEnd;
-
-    bool readingSim;
-
+    ContactSqlIO *mAccess;
+    QContactSimSyncer *mSync;
     QPhoneBook *mPhoneBook;
     QSimInfo *mSimInfo;
-
-    QList<QPhoneBookEntry> phoneData;
-    ContactSqlIO *mAccess;
 };
 #endif // _QSIMCONTEXT_P_H_

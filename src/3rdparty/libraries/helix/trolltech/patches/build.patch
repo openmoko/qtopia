@@ -2,51 +2,6 @@ This patch includes the changes to Helix for including the Qtopia filesystem
 access type. Change helix config file to generate 32bit binaries and use rpath
 if applicable.
 
---- helix/src/build/BIF/build.bif 	Fri Mar 17 18:12:22 EST 2006
-+++ helix/src/build/BIF/build.bif 	Fri Mar 17 18:12:22 EST 2006
-@@ -1643,6 +1643,31 @@
-       </dependlist>
-     </module>
- 
-+    <!-- FILESYSTEM/QTOPIA -->
-+    <module id="filesystem_qtopia" name="filesystem/qtopia" group="core">
-+      <cvs root="helix"/>
-+      <includeplatforms>
-+        unix
-+      </includeplatforms>
-+
-+      <excludeprofiles>
-+        helix-client-net-ra
-+      </excludeprofiles>
-+
-+      <source_dependlist>
-+          common_include
-+      </source_dependlist>
-+
-+      <dependlist>
-+          common_container
-+          common_util
-+          common_system
-+          common_fileio
-+          common_dbgtool
-+          common_runtime
-+      </dependlist>
-+    </module>
-+
-     <!-- FILESYSTEM/MEMORY -->
-     <module id="filesystem_memory" name="filesystem/memory" group="core">
-       <cvs root="helix"/>
-@@ -6603,6 +6628,7 @@
-           client_resource
- 		  client_xres
-           filesystem_local
-+          filesystem_qtopia
-           filesystem_http
-           protocol_sdp
-           video_site
-
-
-
 --- helix/src/build/umakecf/linux-2.2-libc6-gcc32-i586.cf	Fri Jul 21 03:38:12 2006
 +++ helix/src/build/umakecf/linux-2.2-libc6-gcc32-i586.cf	Fri Jul 21 03:38:12 2006
 @@ -56,6 +56,9 @@

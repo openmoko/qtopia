@@ -1,10 +1,64 @@
 #!/bin/sh
-insmod /lib/modules/omega_rtcalarm.o >/dev/null 2>&1
-insmod /lib/modules/omega_bcm2121.o >/dev/null 2>&1
-insmod /lib/modules/usbdcore.o >/dev/null 2>&1
-insmod /lib/modules/omega_bt.o >/dev/null 2>&1
+
+# redirect all output to /dev/null
+exec 1>/dev/null
+exec 2>/dev/null
+
+# Loopback block device
+insmod loop
+
+# Networking and PPP
+insmod af_packet
+insmod unix
+insmod slhc
+insmod ppp_generic
+insmod ppp_async
+
+# USB
+insmod usbdcore
+insmod net_fd if_name=eth
+insmod bvd_bi
+
+# Multimedia interfaces
+insmod omega_i2c
+insmod videodev
+insmod omega_camera
+insmod soundcore
+insmod greenphone-sound
+insmod wm9713-ts
+insmod s1d19120
+
+# Misc Hardware
+insmod docparatable
+insmod hsav_detect
+insmod omega_alarm
+insmod omega_rtcalarm
+insmod omega_bcm2121
+insmod omega_chgled
+insmod omega_spi
+insmod omega_vibrator
+insmod omega_kpbl
+insmod pseudo_serial
+
+# Power Management
+insmod omega_pmu
+insmod omega_power
+insmod omega_poweroff
+
+# miniSD Card
+insmod mmc_base
+insmod mmc_omega
+
+# Bluetooth
+insmod omega_bt
+insmod bluez
+insmod l2cap
+insmod sco
+insmod hci_uart
+insmod rfcomm
 
 # NFS Support
-insmod /lib/modules/sunrpc.o >/dev/null 2>&1
-insmod /lib/modules/lockd.o >/dev/null 2>&1
-insmod /lib/modules/nfs.o >/dev/null 2>&1
+insmod sunrpc
+insmod lockd
+insmod nfs
+

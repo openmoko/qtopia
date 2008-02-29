@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -95,7 +95,7 @@ class NetworkWidgetItem : public QTableWidgetItem
 public:
     NetworkWidgetItem(QTableWidgetItem* name) :
         QTableWidgetItem(), state(QtopiaNetworkInterface::Unknown),
-        monitor(0), nameItem( name ), defaultGateway( false )
+        monitor(0), nameItem( name ), defaultGateway( false ), lifeExtention( false )
     {
         monitor = new NetworkMonitor( this );
         setStatus( state );
@@ -169,6 +169,16 @@ public:
         return defaultGateway;
     }
 
+    void setExtendedLifeTime( bool isExtended )
+    {
+        lifeExtention = isExtended;
+    }
+    
+    bool extendedLifeTime( )
+    {
+        return lifeExtention;
+    }
+
 private:
     void setDefaultGateway( bool isGateway )
     {
@@ -189,6 +199,7 @@ private:
     QTableWidgetItem* nameItem;
     bool defaultGateway;
     bool onlinePicShown;
+    bool lifeExtention;
 
     friend class NetworkMonitor;
 };
@@ -215,6 +226,7 @@ NetworkMonitor::NetworkMonitor(  NetworkWidgetItem* item )
             this, SLOT(deviceStateChanged(QtopiaNetworkInterface::Status,bool)) );
 
 }
+
 void NetworkMonitor::updateStatus( int state )
 {
     QtopiaNetworkInterface::Status s = (QtopiaNetworkInterface::Status) state;
@@ -224,8 +236,23 @@ void NetworkMonitor::updateStatus( int state )
 
     if ( (s == QtopiaNetworkInterface::Pending || s== QtopiaNetworkInterface::Demand )
             && (netItem->status() == QtopiaNetworkInterface::Down) ) {
-        // when netsetup starts an interface it always sets the extended life time flag for the session
-        QtopiaNetwork::extendInterfaceLifetime( netItem->config(), true );
+        /*
+            The current limitation is that a device must be in the Pending, Demand or Up state in order to extend 
+            its life time. Hence we just set the life time flag whenever we discover a state transition from Down state
+            to any of the other states mentioned above. Consequently we have to ensure that the current device
+            was actually started by netsetup and not any other application.
+        
+            All NetworkWidgetItems with the extendedLifeTime flag were started by NetworkUI.
+            This way we can keep track of who started the network device as only NetworkUI can set the extended 
+            life time flag. It prevents that devices gain the extention just because the netsetup application 
+            happens to be running in the background when another application starts a new device/interface.
+        */
+        if ( netItem->extendedLifeTime() ) {
+            // when netsetup starts an interface it always sets the extended life time flag for the session
+            QtopiaNetwork::extendInterfaceLifetime( netItem->config(), true );
+            // reset the flag
+            netItem->setExtendedLifeTime( false );
+        }
     }
 
     netItem->setStatus( s );
@@ -754,6 +781,9 @@ void NetworkUI::serviceSelected()
     switch (netItem->status())
     {
         case QtopiaNetworkInterface::Down:
+            //the extended life time flag will extend configs life time
+            //as soon as we change from Down to another state
+            netItem->setExtendedLifeTime( true );
             QtopiaNetwork::startInterface( config );
             break;
         case QtopiaNetworkInterface::Up:

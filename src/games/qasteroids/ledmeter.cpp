@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -25,7 +25,7 @@ KALedMeter::KALedMeter(QWidget* parent) : QFrame(parent)
 {
     maxRawValue_ = 100;
     currentMeterLevel_ = 0;
-    rawValue_ = 0;
+    rawValue_ = 100;
     meterLevels_ = 20;
     setMinimumWidth(meterLevels_ * 2 + frameWidth());
 }

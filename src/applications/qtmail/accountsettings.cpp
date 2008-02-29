@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -109,7 +109,7 @@ void AccountSettings::removeAccount()
     int idx = listToAccountIdx[ accountListBox->currentRow() ];
     MailAccount *account = accountList->at(idx);
 
-    QString message = tr("<qt>Delete account: %1</qt>").arg(account->accountName());
+    QString message = tr("<qt>Delete account: %1</qt>").arg(Qt::escape(account->accountName()));
     if (QMessageBox::warning( this, tr("Email"), message, tr("Yes"), tr("No"), 0, 0, 1 ) == 0) {
         emit deleteAccount(account);
         populateAccountList();

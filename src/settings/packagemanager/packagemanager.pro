@@ -12,7 +12,8 @@ HEADERS         = packageview.h \
                     httpfetcher.h \
                     installedpackagescanner.h\
                     targz.h \
-                    sandboxinstall.h
+                    sandboxinstall.h \
+                    packagemanagerservice.h
 
 SOURCES         = main.cpp \
                     packageview.cpp \
@@ -24,7 +25,8 @@ SOURCES         = main.cpp \
                     httpfetcher.cpp \
                     installedpackagescanner.cpp\
                     targz.cpp \
-                    sandboxinstall.cpp
+                    sandboxinstall.cpp \
+                    packagemanagerservice.cpp
 
 depends(3rdparty/libraries/tar)
 enable_sxe:depends(libraries/qtopiasecurity)
@@ -41,7 +43,11 @@ pics.hint=pics
 secsettings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageServers.conf
 secsettings.path=/etc/default/Trolltech
 secsettings.hint=secsettings
-INSTALLS+=content_installer
+packagemanagerservice.files=$$QTOPIA_DEPOT_PATH/services/PackageManager/packagemanager
+packagemanagerservice.path=/services/PackageManager
+qdspackagemanagerservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/PackageManager
+qdspackagemanagerservice.path=/etc/qds
+INSTALLS+=content_installer packagemanagerservice qdspackagemanagerservice
 INSTALLS+=help desktop pics secsettings
 
 enable_sxe {

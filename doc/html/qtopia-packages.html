@@ -13,7 +13,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Packages and Editions<br /><small></small></h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#commercial-packages">Commercial Packages</a></li>
-<ul><li><a href="#qtopia-source-packages">Qtopia Source Packages</a></li>
+<ul><li><a href="#qtopia-oem-kit">Qtopia OEM Kit</a></li>
 <li><a href="#qtopia-software-development-kit-sdk-packages">Qtopia Software Development Kit (SDK) Packages</a></li>
 <ul><li><a href="#qtopia-sdk-light">Qtopia SDK Light</a></li>
 <li><a href="#qtopia-sdk-professional">Qtopia SDK Professional</a></li>
@@ -26,32 +26,31 @@
 <p>Qtopia is available in a number of different editions and packages. The available editions include:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Edition</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>Qtopia Platform Edition</td><td>Includes all functionality forming the platform upon which Qtopia applications are built.<p>Provides a base for target devices that are different to those specifically targeted by the other editions.</p>
-</td></tr>
+<tr valign="top" class="odd"><td>Qtopia Platform Edition</td><td>Includes all functionality forming the platform upon which Qtopia applications are built and provides a base for target devices that are different to those specifically targeted by the other editions.</td></tr>
 <tr valign="top" class="even"><td>Qtopia Phone Edition</td><td>Includes Qtopia Platform functionality together with many phone-specific applications.</td></tr>
 </table></p>
 <p><b>Note:</b> For a complete list of applications please refer to <a href="qtopia-components.html">Qtopia Components</a>.</p>
 <p>A Qtopia package is a combination of a Qtopia edition plus other products such as Qtopia Core. Each package targets a different user group and depending on the package type the deliverable may be a full source code product or a subset of the source code plus pre-built Qtopia binaries.</p>
 <a name="commercial-packages"></a>
 <h2>Commercial Packages</h2>
-<p>The two types of commercial package available for Qtopia:</p>
+<p>The two types of commercial packages available for Qtopia:</p>
 <ol type="1">
-<li>Source package</li>
-<li>SDK package</li>
+<li>OEM Kit</li>
+<li>Software Development Kit (SDK)</li>
 </ol>
 <p>are described in the following sections.</p>
-<a name="qtopia-source-packages"></a>
-<h3>Qtopia Source Packages</h3>
-<p>Qtopia Source Packages target OEM companies developing mobile devices running Qtopia. It is required for installation and distribution of Qtopia on consumer electronic devices and allows the customer to develop Qtopia applications as well as to adapt Qtopia to fit on a device. The Qtopia OEM Kit comprises a number of Qtopia developer licenses and the full Qtopia source code.</p>
+<a name="qtopia-oem-kit"></a>
+<h3>Qtopia OEM Kit</h3>
+<p>Qtopia OEM Kits are source packages that are targeted at OEM companies developing mobile devices running Qtopia. It is required for installation and distribution of Qtopia on devices and allows the customer to develop Qtopia applications as well as to adapt Qtopia to fit on a device. The Qtopia OEM Kit comprises a number of Qtopia developer licenses and the full Qtopia source code.</p>
 <p>To install and distribute Qtopia on commercial devices both the Qtopia OEM Kit and <a href="qtopia-licensing.html">Qtopia Runtime</a> licenses are required.</p>
 <a name="qtopia-software-development-kit-sdk-packages"></a>
 <h3>Qtopia Software Development Kit (SDK) Packages</h3>
 <p>There are two package options for developing commercial Qtopia applications:</p>
 <ol type="1">
-<li>Qtopia SDK Light</li>
+<li>Qtopia SDK Light.</li>
 <li>Qtopia SDK Professional.</li>
 </ol>
-<p>Both packages provide header files and pre-built binaries of the Qtopia product with the professional product also including parts of the source code and a support contract. The Qtopia binaries cannot be re-built with these packages.</p>
+<p>These SDKs contain a complete Software Development environment that can be installed and executed on both Linux and Windows. Within the environment Qtopia based applications can be developed, compiled, and debugged and then installed onto a device such as the Greenphone. To simplify debugging of Qtopia itself each SDK comes with an additional Qtopia source package. The exact contents of the source package and the rights to modify Qtopia depend on the type of SDK license.</p>
 <a name="qtopia-sdk-light"></a>
 <h4>Qtopia SDK Light</h4>
 <p>Qtopia SDK Light targets small companies involved in commercial Qtopia application development not requiring support or maintenance. It allows customers to develop Qtopia based applications using the Qtopia API.</p>
@@ -82,21 +81,21 @@
 <tr valign="top" class="even"><td>Qt/X11 header/source files</td><td>YES</td><td>YES</td><td>NO</td></tr>
 <tr valign="top" class="odd"><td>Qtopia library header files</td><td>YES</td><td>YES</td><td>YES</td></tr>
 <tr valign="top" class="even"><td>Qtopia library source code</td><td>YES</td><td>YES</td><td>NO</td></tr>
-<tr valign="top" class="odd"><td>Qtopia Desktop header/source files</td><td>YES</td><td>NO</td><td>NO</td></tr>
-<tr valign="top" class="even"><td>Qtopia application header/source files</td><td>YES</td><td>NO</td><td>NO</td></tr>
-<tr valign="top" class="odd"><td>Qtopia and Qtopia Core ARM binary libraries</td><td>YES (see 1)</td><td>YES</td><td>YES</td></tr>
-<tr valign="top" class="even"><td>Qtopia ARM binary applications</td><td>YES (see 1)</td><td>YES</td><td>YES</td></tr>
-<tr valign="top" class="odd"><td>Qtopia Tools (uic, moc, Qt Designer, etc)</td><td>YES (see 2)</td><td>YES</td><td>YES</td></tr>
-<tr valign="top" class="even"><td>Support and Maintenance</td><td>YES</td><td>YES</td><td>NO</td></tr>
+<tr valign="top" class="odd"><td>Qtopia application header/source files</td><td>YES</td><td>NO</td><td>NO</td></tr>
+<tr valign="top" class="even"><td>Qtopia and Qtopia Core ARM binary libraries</td><td>YES (see 1)</td><td>YES (see 3)</td><td>YES (see 3)</td></tr>
+<tr valign="top" class="odd"><td>Qtopia ARM binary applications</td><td>YES (see 1)</td><td>YES (see 3)</td><td>YES (see 3)</td></tr>
+<tr valign="top" class="even"><td>Qtopia Tools (uic, moc, Qt Designer, etc)</td><td>YES (see 2)</td><td>YES</td><td>YES</td></tr>
+<tr valign="top" class="odd"><td>Support and Maintenance</td><td>YES</td><td>YES</td><td>NO</td></tr>
 </table></p>
 <ol type="1">
 <li>The package contains all source code, hence ARM binaries and any other supported architecture can be easily compiled.</li>
 <li>The package contains all relevant source code for the required tools and can be easily compiled for the desktop machine.</li>
+<li>Binaries are pre-build for a specific device (such as the Greenphone).</li>
 </ol>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

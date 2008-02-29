@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -22,8 +22,6 @@
 #ifndef __BTHEADSETSERVICE_H__
 #define __BTHEADSETSERVICE_H__
 
-#ifdef HAVE_ALSA
-
 #include <QObject>
 
 class QBluetoothHeadsetService;
@@ -38,7 +36,5 @@ public:
 private:
     QBluetoothHeadsetService *m_hsService;
 };
-
-#endif
 
 #endif

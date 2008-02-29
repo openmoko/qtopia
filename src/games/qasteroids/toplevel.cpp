@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -157,9 +157,22 @@ void RowWidget::paintEvent(QPaintEvent* event)
  */
 KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     : QMainWindow(parent,fl),
-    shipDestroyed(":sound/qasteroids/shipdestroyed"),
-    rockDestroyed(":sound/qasteroids/rockdestroyed"),
-    missileFired(":sound/qasteroids/missilefired")
+      view_(0),
+      scoreLCD_(0),
+      levelLCD_(0),
+      shipsLCD_(0),
+      teleportsLCD_(0),
+      brakesLCD_(0),
+      shieldLCD_(0),
+      shootLCD_(0),
+      powerMeter_(0),
+      shipDestroyed(":sound/qasteroids/shipdestroyed"),
+      rockDestroyed(":sound/qasteroids/rockdestroyed"),
+      missileFired(":sound/qasteroids/missilefired"),
+      gameEnded_(false),
+      shipCount_(0),
+      score_(0),
+      currentLevel_(0)
 {
     QtopiaApplication::grabKeyboard();
 
@@ -190,7 +203,8 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     vb->addWidget(view_,10);
     vb->addWidget(buildBottomRow(mainWin));
 
-    shipCount_ = 3;
+    actions_.insert(Qt::Key_4,Populate_Rocks);
+    actions_.insert(Qt::Key_6,Populate_Powerups);
 
     actions_.insert(Qt::Key_0,Launch);
     actions_.insert(Qt::Key_Up,Thrust);
@@ -207,7 +221,7 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     actions_.insert(Qt::Key_NumberSign,Teleport);
     actions_.insert(Qt::Key_Asterisk,Pause);
     actions_.insert(Qt::Key_Select,Shoot);
-    actions_.insert(Qt::Key_Context1,Shield);
+    //actions_.insert(Qt::Key_Context1,Shield);
     QSoftMenuBar::setLabel(this,
                            Qt::Key_0,
                            "qasteroids/ship/ship0000",
@@ -220,11 +234,9 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
         QDeviceButtonManager::instance().buttons();
     actions_.insert(buttons[0].keycode(),Launch);
     actions_.insert(buttons[1].keycode(),Shield);
-    QString s = buttons[0].userText();
-#else
-    QString s = tr("zero (0)");
 #endif
 
+    QString s = tr("Select (OK)");
     view_->constructMessages(s);
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -243,12 +255,6 @@ KAstTopLevel::~KAstTopLevel()
  */
 QPalette KAstTopLevel::buildPalette()
 {
-    //    QColorGroup grp(Qt::darkGreen, Qt::black, QColor(128, 128, 128),
-    //            QColor(64, 64, 64), Qt::black, Qt::darkGreen, Qt::black);
-    //    QPalette pal(grp, grp, grp);
-
-    // The stuff below is meant to replace the commented stuff above.
-    // I don't know if it is right. (mws)
     QBrush foreground(Qt::darkGreen);
     QBrush background(Qt::black);
     QBrush light(QColor(128,128,128));
@@ -256,7 +262,15 @@ QPalette KAstTopLevel::buildPalette()
     QBrush mid(Qt::black);
     QBrush text(Qt::darkGreen);
     QBrush base(Qt::black);
-    QPalette p(foreground,background,light,dark,mid,text,text,base,background);
+    QPalette p(foreground,
+	       background,
+	       light,
+	       dark,
+	       mid,
+	       text,
+	       text,
+	       base,
+	       background);
     return p;
 }
 
@@ -377,8 +391,8 @@ KAsteroidsView* KAstTopLevel::buildAsteroidsView(QWidget* parent)
     KAsteroidsView* v = new KAsteroidsView(parent);
     connect(v,SIGNAL(shipKilled()),SLOT(slotShipKilled()));
     connect(v,SIGNAL(missileFired()),SLOT(slotMissileFired()));
-    connect(v,SIGNAL(rockHit(int)),SLOT(slotRockHit(int)));
-    connect(v,SIGNAL(rocksRemoved()),SLOT(slotRocksRemoved()));
+    connect(v,SIGNAL(updateScore(int)),SLOT(slotUpdateScore(int)));
+    connect(v,SIGNAL(allRocksDestroyed()),SLOT(slotNewGameLevel()));
     connect(v,SIGNAL(updateVitals()),SLOT(slotUpdateVitals()));
     return v;
 }
@@ -450,13 +464,6 @@ KAstTopLevel::buildBottomRow(QWidget* parent)
     layout->addWidget(shootLCD_);
     layout->addStretch(1);
 
-    /*
-    label = new QLabel(tr("Fuel"),parent);
-    label->setFont(labelFont);
-    label->setFixedWidth(label->sizeHint().width() + 5);
-    label->setPalette(palette);
-    layout->addWidget(label);
-    */
     powerMeter_ = new KALedMeter(parent);
     powerMeter_->setFrameStyle(QFrame::Box | QFrame::Plain);
     powerMeter_->setMaxRawValue(MAX_SHIP_POWER_LEVEL);
@@ -503,37 +510,42 @@ KAstTopLevel::keyPressEvent(QKeyEvent* event)
     if (eventConsumed(event))
         return;
 
-    keyIsPressed_ = true;
-
     Action a = actions_[ event->key() ];
 
     switch (a) {
         case RotateLeft:
-            view_->rotateShipLeft(true);
+	    if (KSprite::ship())
+		KSprite::ship()->rotateLeft(true);
             break;
 
         case RotateRight:
-            view_->rotateShipRight(true);
+	    if (KSprite::ship())
+		KSprite::ship()->rotateRight(true);
             break;
 
         case Thrust:
-            view_->startEngine();
+	    if (KSprite::ship())
+		KSprite::ship()->startEngine();
             break;
 
         case Shoot:
-            view_->startShooting();
+	    if (KSprite::ship())
+		KSprite::ship()->startShooting();
             break;
 
         case Shield:
-            view_->raiseShield();
+	    if (KSprite::ship()) 
+		view_->raiseShield();
             break;
 
         case Teleport:
-            view_->teleport();
+	    if (KSprite::ship())
+		KSprite::ship()->teleport();
             break;
 
         case Brake:
-            view_->startBraking();
+	    if (KSprite::ship())
+		KSprite::ship()->startBraking();
             break;
 
         default:
@@ -557,19 +569,23 @@ KAstTopLevel::keyReleaseEvent(QKeyEvent* event)
 
     switch (a) {
         case RotateLeft:
-            view_->rotateShipLeft(false);
+	    if (KSprite::ship())
+		KSprite::ship()->rotateLeft(false);
             break;
 
         case RotateRight:
-            view_->rotateShipRight(false);
+	    if (KSprite::ship())
+		KSprite::ship()->rotateRight(false);
             break;
 
         case Thrust:
-            view_->stopEngine();
+	    if (KSprite::ship())
+		KSprite::ship()->stopEngine();
             break;
 
         case Brake:
-            view_->stopBraking();
+	    if (KSprite::ship())
+		KSprite::ship()->stopBraking();
             break;
 
         case Shield:
@@ -579,43 +595,32 @@ KAstTopLevel::keyReleaseEvent(QKeyEvent* event)
             break;
 
         case Shoot:
-#ifndef QTOPIA_PHONE
-            view_->stopShooting();
-            break;
-#else
-            if (!view_->gameOver() && !waitForNewShip_) {
-                view_->stopShooting();
-                break;
-            }
-            break;
-            // fall through intended
-#endif
+	    if (KSprite::ship()) {
+		KSprite::ship()->stopShooting();
+		break;
+	    }
         case Launch:
-            if (keyIsPressed_ && view_->gameOver()) {
-                slotNewGame();
-            }
-            else if (keyIsPressed_ && waitForNewShip_) {
+            if (!shipCount_ && !KFragment::exploding())
+                startNewGame();
+	    else if (!KSprite::ship() && !KFragment::exploding()) {
                 view_->newShip();
-                waitForNewShip_ = false;
                 view_->hideText();
-#ifdef QTOPIA_PHONE
-                QSoftMenuBar::setLabel(this,
-                                       Qt::Key_Select,
-                                       "qasteroids/powerups/shoot",
-                                       tr("Shoot"));
-                updateContext1();
-#endif
             }
             else {
                 event->ignore();
-                keyIsPressed_ = false;
                 return;
             }
             break;
 
         case NewGame:
-            slotNewGame();
+            startNewGame();
             break;
+        case Populate_Powerups:
+	    //populatePowerups();
+	    break;
+        case Populate_Rocks:
+	    //populateRocks();
+	    break;
         case Pause:
             {
                 view_->pause(true);
@@ -627,12 +632,76 @@ KAstTopLevel::keyReleaseEvent(QKeyEvent* event)
             break;
         default:
             event->ignore();
-            keyIsPressed_ = false;
             return;
     }
 
-    keyIsPressed_ = false;
     event->accept();
+}
+
+void KAstTopLevel::populatePowerups()
+{
+    if (!KSprite::ship())
+	return;
+    qreal x = KSprite::ship()->x();
+    qreal y = KSprite::ship()->y();
+    qreal vx = KSprite::ship()->velocityX();
+    qreal vy = KSprite::ship()->velocityY();
+    for (int i=0; i<5; ++i) {
+	KPowerup* new_pup = new KEnergyPowerup();
+	double r = (0.5 - KSprite::randDouble()) * 4.0;
+	new_pup->setPos(x+(i*r+r),y+(i*r+r));
+	new_pup->setVelocity(vx+(i*r+r),vy+(i*r+r));
+	new_pup->show();
+	new_pup->wrap();
+	new_pup = new KTeleportPowerup();
+	r = (0.5 - KSprite::randDouble()) * 4.0;
+	new_pup->setPos(x+(i*r+r),y+(i*r+r));
+	new_pup->setVelocity(vx+(i*r+r),vy+(i*r+r));
+	new_pup->show();
+	new_pup->wrap();
+	new_pup = new KBrakePowerup();
+	r = (0.5 - KSprite::randDouble()) * 4.0;
+	new_pup->setPos(x+(i*r+r),y+(i*r+r));
+	new_pup->setVelocity(vx+(i*r+r),vy+(i*r+r));
+	new_pup->show();
+	new_pup->wrap();
+	new_pup = new KShieldPowerup();
+	r = (0.5 - KSprite::randDouble()) * 4.0;
+	new_pup->setPos(x+(i*r+r),y+(i*r+r));
+	new_pup->setVelocity(vx+(i*r+r),vy+(i*r+r));
+	new_pup->show();
+	new_pup->wrap();
+	new_pup = new KShootPowerup();
+	r = (0.5 - KSprite::randDouble()) * 4.0;
+	new_pup->setPos(x+(i*r+r),y+(i*r+r));
+	new_pup->setVelocity(vx+(i*r+r),vy+r);
+	new_pup->show();
+	new_pup->wrap();
+    }
+}
+
+void KAstTopLevel::populateRocks()
+{
+    if (!KSprite::ship())
+	return;
+    static double x_multiplier[4] = { 1.0, 1.0, -1.0, -1.0 };
+    static double y_multiplier[4] = { -1.0, 1.0, -1.0, 1.0 };
+
+    double dx = 0.25;
+    double dy = 0.25;
+    for (int i = 0; i < 20; i++) {
+	double r = 0.25/2 - (KSprite::randDouble() * 0.25);
+	KRock* newRock = new KSmallRock();
+	qreal x = KSprite::ship()->x();
+	qreal y = KSprite::ship()->y();
+	newRock->setPos(x + (x_multiplier[i%4] * 10 * KSprite::randInt(10)),
+			y + (y_multiplier[i%4] * 10 * KSprite::randInt(10)));
+	newRock->setVelocity(dx + (x_multiplier[i%4] * 0.25) + r,
+			     dy + (y_multiplier[i%4] * 0.25) + r);
+	newRock->setImage(KSprite::randInt(32));
+	newRock->show();
+	newRock->wrap();
+    }
 }
 
 /*!
@@ -678,12 +747,12 @@ void KAstTopLevel::focusOutEvent(QFocusEvent* )
 }
 
 /*!
-  This slot function is called to start a new game. It isn't
-  connected to any signals, however. I don't know why.
+  This function is called to start a new game.
  */
-void KAstTopLevel::slotNewGame()
+void KAstTopLevel::startNewGame()
 {
-#ifdef QTOPIA_PHONE
+#if 0
+    //QTOPIA_PHONE
     delete contextMenu_;
     contextMenu_ = 0;
     QSoftMenuBar::setLabel(this,
@@ -691,6 +760,7 @@ void KAstTopLevel::slotNewGame()
                            "qasteroids/powerups/shoot",
                            tr("Shoot"));
 #endif
+    gameEnded_ = false;
     shipCount_ = 3;
     score_ = 0;
     scoreLCD_->display(0);
@@ -698,11 +768,32 @@ void KAstTopLevel::slotNewGame()
     levelLCD_->display(currentLevel_+1);
     shipsLCD_->display(shipCount_);
     view_->newGame();
-    view_->setRockSpeed(gameLevels[0].rockSpeed_);
-    view_->addRocks(gameLevels[0].nrocks_);
+    KRock::setRockSpeed(gameLevels[0].rockSpeed_);
+    KRock::createRocks(gameLevels[0].nrocks_);
     view_->newShip();
-    waitForNewShip_ = false;
     view_->hideText();
+}
+
+/*!
+  This slot is called to advance to the next game level, once
+  all the rocks at the current level have been destroyed. The
+  game level count is incremented if we haven't already reached
+  the maximum. The new rock speed is set, and then the required
+  number of rocks for the new level are created. The game level
+  LCD is updated to show the new level.
+ */
+void KAstTopLevel::slotNewGameLevel()
+{
+    currentLevel_++;
+
+    if (currentLevel_ >= MAX_GAME_LEVELS)
+        currentLevel_ = MAX_GAME_LEVELS - 1;
+
+    KRock::reset();
+    KRock::setRockSpeed(gameLevels[currentLevel_-1].rockSpeed_);
+    KRock::createRocks(gameLevels[currentLevel_-1].nrocks_);
+
+    levelLCD_->display(currentLevel_+1);
 }
 
 /*!
@@ -717,10 +808,9 @@ void KAstTopLevel::slotMissileFired()
   Decrements the ships remaining count and displays the new
   count. Plays a sound indicating a ship was destroyed.
 
-  If any ships remain, the ship killed message is reported,
-  and the flag to wait for a new ship is set. Otherwise, the
-  game over message is reported, and the left button of the
-  context menu is cleared.
+  If any ships remain, the ship killed message is reported.
+  Otherwise, the game over message is reported, and the left
+  button of the context menu is cleared.
  */
 void KAstTopLevel::slotShipKilled()
 {
@@ -729,72 +819,57 @@ void KAstTopLevel::slotShipKilled()
 
     shipDestroyed.play();
 
-    if (shipCount_ > 0) {
-        waitForNewShip_ = true;
-        view_->reportShipKilled();
-    }
+    if (shipCount_ > 0)
+	view_->reportShipKilled();
     else {
-        view_->endGame();
-        doStats();
+        endGame();
+        reportStatistics();
     }
 #ifdef QTOPIA_PHONE
     QSoftMenuBar::setLabel(this,
                            Qt::Key_0,
                            "qasteroids/ship/ship0000",
                            tr("Launch"));
-    QSoftMenuBar::clearLabel(this,Qt::Key_Context1);
+    //QSoftMenuBar::clearLabel(this,Qt::Key_Context1);
     if (!contextMenu_)
         contextMenu_ = QSoftMenuBar::menuFor(this);
 #endif
 }
 
 /*!
-  This slot is called whenever the rockHit signal is emitted because
-  a missile has struck a rock. \a size specifies the size of the rock
-  that was hit by the missile.
-
-  This slot increments the score by the appropriate amount, displays
-  the score, and plays the rock destroyed sound.
+  A private function that returns true if a game that started
+  has now ended.
+  \internal.
  */
-void KAstTopLevel::slotRockHit(int size)
+bool KAstTopLevel::gameEnded() const
 {
-    switch (size) {
-        case 0:
-            score_ += 10;
-            break;
-
-        case 1:
-            score_ += 20;
-            break;
-
-        default:
-            score_ += 40;
-      }
-
-    rockDestroyed.play();
-
-    scoreLCD_->display(score_);
+    return gameEnded_;
 }
 
 /*!
-  This slot is called to advance to the next game level, once
-  all the rocks at the current level have been destroyed. The
-  game level count is incremented if we haven't already reached
-  the maximum. The new rock speed is set, and then the required
-  number of rocks for the new level are created. The game level
-  LCD is updated to show the new level.
+  A private function that tells the game to end.
+  \internal
  */
-void KAstTopLevel::slotRocksRemoved()
+void KAstTopLevel::endGame()
 {
-    currentLevel_++;
+    KSprite::markDying(true);
+}
 
-    if (currentLevel_ >= MAX_GAME_LEVELS)
-        currentLevel_ = MAX_GAME_LEVELS - 1;
+/*!
+  This slot is called whenever the updateScore signal is
+  emitted. At the moment, the only time an updateScore signal
+  is emitted is when a missile destroys an asteroid. \a key
+  specifies the size of the rock that was hit by the missile.
 
-    view_->setRockSpeed(gameLevels[currentLevel_-1].rockSpeed_);
-    view_->addRocks(gameLevels[currentLevel_-1].nrocks_);
-
-    levelLCD_->display(currentLevel_+1);
+  This slot increments the score by an appropriate amount
+  and displays the updated score. It also plays the rock
+  destroyed sound.
+ */ 
+void KAstTopLevel::slotUpdateScore(int key)
+{
+    score_ += 10 * key;
+    rockDestroyed.play();
+    scoreLCD_->display(score_);
 }
 
 /*!
@@ -802,12 +877,13 @@ void KAstTopLevel::slotRocksRemoved()
   a rock shooting efficiency number but does nothing with it.
   It reports the game over message.
  */
-void KAstTopLevel::doStats()
+void KAstTopLevel::reportStatistics()
 {
     QString r("0.00");
-    if (view_->shotsFired()) {
-        double d = (double)view_->rocksHit() / view_->shotsFired() * 100.0;
-        r = QString::number(d,'g',2);
+    if (KMissile::shotsFired()) {
+	double d =
+	    (double)KRock::rocksDestroyed() / KMissile::shotsFired() * 100.0;
+	r = QString::number(d,'g',2);
     }
 
     view_->reportGameOver();
@@ -819,60 +895,20 @@ void KAstTopLevel::doStats()
  */
 void KAstTopLevel::slotUpdateVitals()
 {
-    brakesLCD_->display(view_->brakeForce());
-    shieldLCD_->display(view_->shieldStrength());
-    shootLCD_->display(view_->firePower());
-    teleportsLCD_->display(view_->teleportCount());
-    powerMeter_->setValue(view_->shipPowerLevel());
-
-#ifdef QTOPIA_PHONE
-    updateContext1();
-#endif
-}
-
-#ifdef QTOPIA_PHONE
-/*!
-  This function only exists in the Qtopis Phone Edition. It
-  is called by the slot function slotUpdateVitals() to set
-  or clear the label for the leftmost button of the three
-  button bar at the bottom of the phone screen.
-
-  If it sets a label for the leftmost button, the label it
-  sets is a png for the ship's shield.
- */
-void KAstTopLevel::updateContext1()
-{
-    static int lastChecksum = -1;
-
-    int checksum = view_->checksum();
-
-    if (checksum != lastChecksum) {
-        if (checksum) {
-            if(contextMenu_) {
-                delete contextMenu_;
-                contextMenu_ = 0;
-            }
-            QSoftMenuBar::setLabel(this,
-                                   Qt::Key_Context1,
-                                   "qasteroids/powerups/shield",
-                                   tr("Shield"));
-        }
-        else {
-            QSoftMenuBar::clearLabel(this,Qt::Key_Context1);
-            if(waitForNewShip_) {
-                if(!contextMenu_)
-                    contextMenu_ = QSoftMenuBar::menuFor(this);
-            }
-            else {
-                if(contextMenu_) {
-                    delete contextMenu_;
-                    contextMenu_ = 0;
-                }
-            }
-        }
-        lastChecksum = checksum;
+    if (KSprite::ship()) {
+	brakesLCD_->display(KSprite::ship()->brakeForce());
+	shieldLCD_->display(KSprite::shield()->strength());
+	shootLCD_->display(KSprite::ship()->firePower());
+	teleportsLCD_->display(KSprite::ship()->teleportCount());
+	powerMeter_->setValue(KSprite::ship()->powerLevel());
+    }
+    else {
+	brakesLCD_->display(0);
+	shieldLCD_->display(0);
+	shootLCD_->display(0);
+	teleportsLCD_->display(0);
+	powerMeter_->setValue(MAX_SHIP_POWER_LEVEL);
     }
 }
-#endif
 
 #include <toplevel.moc>

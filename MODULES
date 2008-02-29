@@ -1,14 +1,7 @@
 The following modules can be found in this Qtopia source package
 
 devices: 
-    example
-    gcc411
     greenphone
-    omap730
-    pxa27x
-    s3c24a0
-    x86_gcc4
-    zylonite
 etc: 
     themes: crisp, portal, qtopia
 3rdparty: 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -18,6 +18,12 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+// We need linux-specific extensions to fcntl and the way to get these
+// is to add this define
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
 
 #include "qfilemonitor.h"
 

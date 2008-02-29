@@ -5,17 +5,16 @@
 	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
 ]>
 <svg  version="1.1" id="&#xCD;_xBC__xB2_&#xE3;_x5F_1" xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" width="14.846" height="14.098"
-	 viewBox="0 0 14.846 14.098" overflow="visible" enable-background="new 0 0 14.846 14.098" xml:space="preserve">
-<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="3.0913" y1="7.3652" x2="8.5776" y2="6.1843" gradientTransform="matrix(-1 0 0 1 14.8438 0)">
-	<stop  offset="0.0056" style="stop-color:#F8D63D"/>
-	<stop  offset="0.1941" style="stop-color:#F8D43D"/>
-	<stop  offset="0.3943" style="stop-color:#F7CB3D"/>
-	<stop  offset="0.5999" style="stop-color:#F6BC3D"/>
-	<stop  offset="0.8079" style="stop-color:#F3A73C"/>
-	<stop  offset="1" style="stop-color:#F18F3A"/>
+	 viewBox="0 0 14.846 14.098" style="overflow:visible;enable-background:new 0 0 14.846 14.098;" xml:space="preserve">
+<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="0.2495" y1="6.8765" x2="14.5938" y2="6.8765" gradientTransform="matrix(-1 0 0 1 14.8438 0)">
+	<stop  offset="0" style="stop-color:#34CE19"/>
+	<stop  offset="0.2367" style="stop-color:#33C719"/>
+	<stop  offset="0.5829" style="stop-color:#32B31A"/>
+	<stop  offset="0.9945" style="stop-color:#2F931B"/>
+	<stop  offset="1" style="stop-color:#2F931B"/>
 </linearGradient>
-<path fill="url(#XMLID_2_)" stroke="#261F20" stroke-width="0.5" d="M9.524,0.25c0,0-5.846,0.912-5.625,2.938s6,1.5,5.703,1.545
+<path style="fill:url(#XMLID_2_);stroke:#231F20;stroke-width:0.5;" d="M9.524,0.25c0,0-5.846,0.912-5.625,2.938s6,1.5,5.703,1.545
 	l0.105-2.375l4.873,5.25l0.014,0.844l-5.16,5.053v-2.105C1.946,11.628-6.851,1.437,9.524,0.25z"/>
-<polyline fill="#FFFFFF" points="11.937,4.986 10.003,2.896 9.925,4.88 14.066,7.662 14.443,7.693 11.937,4.986 "/>
-<polygon fill="#F5BE22" points="13.733,8.714 14.079,8.73 9.44,13.539 9.467,11.589 "/>
+<polyline style="fill:#9AFF5F;" points="11.875,5.017 9.941,2.927 9.863,4.912 14.003,7.693 14.38,7.724 11.875,5.017 "/>
+<polygon style="fill:#1F8E03;" points="13.92,8.464 14.266,8.48 9.627,13.289 9.655,11.339 "/>
 </svg>

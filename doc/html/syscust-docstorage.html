@@ -25,8 +25,8 @@
 <pre>    [/dev/hda1]
     Name = Internal Storage
     Removable = 0</pre>
-<p>The device can be anything that appears in the first column of <tt>/etc/mtab</tt>, for example, <tt><span class="comment">//server/path/to/nfsmount</span></tt> is a valid device.</p>
-<p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>mtab</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. By removing the <i>special case</i> status of <tt>$HOME</tt> the requirement to have only one non-removable location is removed.</p>
+<p>The device can be anything that appears in the first column of <tt>/proc/mounts</tt>, for example, <tt><span class="comment">//server/path/to/nfsmount</span></tt> is a valid device.</p>
+<p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>/proc/mounts</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. By removing the <i>special case</i> status of <tt>$HOME</tt> the requirement to have only one non-removable location is removed.</p>
 <a name="what-do-we-want-to-do"></a>
 <h2>What do we want <tt>Storage.conf</tt> to do?</h2>
 <p><tt>Storage.conf</tt> must:</p>
@@ -83,7 +83,7 @@
 <li><tt>Removable</tt> - indicates if the location is removable</li>
 <li><tt>Applications</tt> - indicates if the location hold applications</li>
 <li><tt>Documents</tt> - indicates if the location hold documents</li>
-<li><tt>Options</tt> - values override the mount options in <tt>/etc/mtab</tt>.</li>
+<li><tt>Options</tt> - values override the mount options in <tt>/proc/mounts</tt>.</li>
 </ul>
 <p>The <tt>HOME</tt> location defaults to <tt>rw</tt> for its Options value. Qtopia assumes a location is writable only if <tt>Options</tt> contains <tt>rw</tt>. A location's <tt>Options</tt> might need to be overwritten if they don't include <tt>rw</tt> but are writable. For example, SMB mounts on a machine have Options of 0 or if they are overly complex <tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> encode the Options as part of a <tt>;</tt> delimited string.</p>
 <a name="filtering"></a>
@@ -136,8 +136,8 @@
 </ul>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

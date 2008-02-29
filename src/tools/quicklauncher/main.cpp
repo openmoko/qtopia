@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,8 @@
 #include <perftest.h>
 #include <QSocketNotifier>
 #include <qtopialog.h>
+#include <QImageReader>
+#include <QtopiaSql>
 #ifdef QTOPIA_PHONE
 # include <qtopia/qsoftmenubar.h>
 #endif
@@ -128,6 +130,9 @@ int MAIN_FUNC( int argc, char** argv )
         QTimeZone::current().isValid(); // populate timezone cache
         QTimeString::currentAMPM(); // create internal structures
         QIcon(":icon/new"); // do internal init
+        QImageReader::supportedImageFormats(); // Load image plugins
+        QtopiaSql::openDatabase(); QtopiaSql::systemDatabase();
+
 #ifdef QTOPIA_PHONE
         QSoftMenuBar::menuKey(); // read config.
 #endif

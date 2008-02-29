@@ -84,13 +84,12 @@ ln -s /usr/share/zoneinfo ${WORK}/Qtopia.default/etc/zoneinfo
 
 # create qtopia_default.tgz
 cd ${WORK}/Qtopia.default
-tar -czf "${OUTDIR}/qtopia_default.tgz" *
-echo "Qtopia.default image created as qtopia_default.tgz"
+tar --owner=0 --group=0 -czf "${WORK}/Qtopia.rom/qtopia_default.tgz" *
 
 # create qtopia.cramfs
 cd ${WORK}
 /sbin/mkfs.cramfs ${WORK}/Qtopia.rom "${OUTDIR}/qtopia.cramfs"
-echo "Qtopia.rom image created as qtopia.cramfs"
+echo "Qtopia.rom image created as ${OUTDIR}/qtopia.cramfs"
 
 cd "$OUTDIR"
 rm -rf $WORK

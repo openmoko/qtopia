@@ -68,7 +68,10 @@ qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Contacts
 qdsservice.path=/etc/qds
 qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
 qdsphoneservice.path=/etc/qds
-INSTALLS+=service receiveservice desktop help pics im phoneservice qdlservice qdsservice qdsphoneservice
+INSTALLS+=service receiveservice desktop help pics im qdlservice qdsservice
+phone {
+    INSTALLS+=phoneservice qdsphoneservice
+}
 
 pkg.desc=Contacts for Qtopia.
 pkg.domain=pim,window,qdl,qds,beaming,phonecomm,pictures,msg,docapi,cardreader,camera,pictures,mediarecorder

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -98,6 +98,8 @@ private:
   \class QNetworkState
   \brief
   The QNetworkState class provides information about the connectivity state of the Qtopia device.
+
+  \ingroup io
 */
 
 /*!
@@ -177,7 +179,7 @@ QString QNetworkState::defaultWapAccount() const
   \fn void QNetworkState::connected()
 
   This signal is send when Qtopia changes from offline to online.
-  If the connectivity state of a particular device is required QNetworkDevice::state
+  If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 
   \sa QtopiaNetwork::online()
@@ -187,7 +189,7 @@ QString QNetworkState::defaultWapAccount() const
   \fn void QNetworkState::disconnected()
 
   This signal is send when Qtopia changes from online to offline.
-  If the connectivity state of a particular device is required QNetworkDevice::state
+  If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 
   \sa QtopiaNetwork::online()

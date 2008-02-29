@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,7 +24,7 @@
 /*!
     \class QPhoneNumber
     \module qpepim
-    \ingroup qpepim
+    \ingroup pim
     \brief The QPhoneNumber class provides utilities of interest to phone applications that manipulate numeric telephony numbers.
 
     The QPhoneNumber class provides utilities that may be of interest to

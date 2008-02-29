@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,8 @@
 #endif
 #include <QDLBrowserClient>
 
+class QTextCharFormat;
+
 class AbLabel : public QDLBrowserClient
 {
     Q_OBJECT
@@ -45,7 +47,7 @@ public:
 public slots:
     void init( const QContact &entry );
     void linkClicked(const QString& link);
-    void linkSelected(const QString& link);
+    void linkHighlighted(const QString& link);
 
 signals:
     void okPressed();
@@ -59,14 +61,32 @@ protected:
 
     void setSource(const QUrl & name);
 
-    QString contactToRichText( const QContact & contact, bool dialer );
-    QString businessRichText( const QContact &contact, bool dialer );
-    QString personalRichText( const QContact &contact, bool dialer );
-    QString busPhoneRichText( const QContact &contact, bool dialer );
-    QString homePhoneRichText( const QContact &contact, bool dialer );
-    QString emailRichText( const QContact &contact );
+    QTextDocument* createContactDocument(const QContact &contact, bool dialer);
+
+    typedef enum {NoLink = 0, Dialer, Messaging, Email} LinkType;
+    void addPhoneFragment( QTextCursor& outCurs, const QString& img, const QString& num, LinkType link, int phoneType = -1 );
+    void addNameFragment( QTextCursor &curs, const QContact &contact);
+
+    QTextCharFormat cfNormal;
+    QTextCharFormat cfItalic;
+    QTextCharFormat cfBold;
+    QTextCharFormat cfBoldUnderline;
+    QTextCharFormat cfSmall;
+    QTextCharFormat cfSmallBold;
+    QTextCharFormat cfAnchor;
+
+    QTextBlockFormat bfNormal;
+    QTextBlockFormat bfCenter;
+
+    QTextTableFormat tfNoBorder;
+
+    void addBusinessFragment( QTextCursor &outCurs, const QContact &contact, bool dialer );
+    void addPersonalFragment( QTextCursor &outCurs, const QContact &contact, bool dialer );
+    void addBusinessPhoneFragment( QTextCursor &outCurs, const QContact &contact, bool dialer );
+    void addHomePhoneFragment( QTextCursor &outCurs, const QContact &contact, bool dialer );
+    void addEmailFragment( QTextCursor &outCurs, const QContact &contact );
 #ifdef QTOPIA_VOIP
-    QString voipIdRichText( const QContact &contact );
+    void addVoipFragment( QTextCursor &outCurs, const QContact &contact );
 #endif
 
 private slots:

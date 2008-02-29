@@ -166,6 +166,7 @@
         <keyword ref="cellmodemmanager.html#emergencyNumbers">emergencyNumbers</keyword>
         <keyword ref="cellmodemmanager.html#networkOperator">networkOperator</keyword>
         <keyword ref="cellmodemmanager.html#networkOperatorChanged">networkOperatorChanged</keyword>
+        <keyword ref="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</keyword>
         <keyword ref="cellmodemmanager.html#networkRegistered">networkRegistered</keyword>
         <keyword ref="cellmodemmanager.html#planeModeEnabled">planeModeEnabled</keyword>
         <keyword ref="cellmodemmanager.html#planeModeEnabledChanged">planeModeEnabledChanged</keyword>
@@ -256,6 +257,7 @@
     <section ref="dialercontrol.html" title="DialerControl Class Reference">
         <keyword ref="dialercontrol.html">DialerControl</keyword>
         <keyword ref="dialercontrol.html#accept">accept</keyword>
+        <keyword ref="dialercontrol.html#activateCall">activateCall</keyword>
         <keyword ref="dialercontrol.html#activeCalls">activeCalls</keyword>
         <keyword ref="dialercontrol.html#activeCallsCount">activeCallsCount</keyword>
         <keyword ref="dialercontrol.html#activeCount">activeCount</keyword>
@@ -272,9 +274,11 @@
         <keyword ref="dialercontrol.html#callerIdNeeded">callerIdNeeded</keyword>
         <keyword ref="dialercontrol.html#callsOnHold">callsOnHold</keyword>
         <keyword ref="dialercontrol.html#callsOnHoldCount">callsOnHoldCount</keyword>
+        <keyword ref="dialercontrol.html#deflect">deflect</keyword>
         <keyword ref="dialercontrol.html#dial">dial</keyword>
         <keyword ref="dialercontrol.html#endAllCalls">endAllCalls</keyword>
         <keyword ref="dialercontrol.html#endCall">endCall</keyword>
+        <keyword ref="dialercontrol.html#endHeldCalls">endHeldCalls</keyword>
         <keyword ref="dialercontrol.html#hasActiveCalls">hasActiveCalls</keyword>
         <keyword ref="dialercontrol.html#hasCallsOnHold">hasCallsOnHold</keyword>
         <keyword ref="dialercontrol.html#hasIncomingCall">hasIncomingCall</keyword>
@@ -286,6 +290,7 @@
         <keyword ref="dialercontrol.html#join">join</keyword>
         <keyword ref="dialercontrol.html#missedCallCount">missedCallCount</keyword>
         <keyword ref="dialercontrol.html#missedCount">missedCount</keyword>
+        <keyword ref="dialercontrol.html#modifyDial">modifyDial</keyword>
         <keyword ref="dialercontrol.html#pendingTonesChanged">pendingTonesChanged</keyword>
         <keyword ref="dialercontrol.html#recordCall">recordCall</keyword>
         <keyword ref="dialercontrol.html#requestFailed">requestFailed</keyword>
@@ -333,6 +338,36 @@
     <section ref="genericmemorymonitortask.html" title="GenericMemoryMonitorTask Class Reference">
         <keyword ref="genericmemorymonitortask.html">GenericMemoryMonitorTask</keyword>
         <section ref="genericmemorymonitortask-members.html" title="List of all members"/>
+    </section>
+    <section ref="gsmkeyactions.html" title="GsmKeyActions Class Reference">
+        <keyword ref="gsmkeyactions.html">GsmKeyActions</keyword>
+        <keyword ref="gsmkeyactions.html#isGsmNumber">isGsmNumber</keyword>
+        <keyword ref="gsmkeyactions.html#setDialer">setDialer</keyword>
+        <section ref="gsmkeyactions-members.html" title="List of all members"/>
+    </section>
+    <section ref="gsmkeyfilter.html" title="GsmKeyFilter Class Reference">
+        <keyword ref="gsmkeyfilter.html">GsmKeyFilter</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">Flag</keyword>
+        <keyword ref="gsmkeyfilter.html#Flag-enum">Flags</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">ServiceAction</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Erasure</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Interrogate</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Activate</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Registration</keyword>
+        <keyword ref="gsmkeyfilter.html#ServiceAction-enum">GsmKeyFilter::Deactivate</keyword>
+        <keyword ref="gsmkeyfilter.html#activate">activate</keyword>
+        <keyword ref="gsmkeyfilter.html#addAction">addAction</keyword>
+        <keyword ref="gsmkeyfilter.html#addService">addService</keyword>
+        <keyword ref="gsmkeyfilter.html#deflect">deflect</keyword>
+        <keyword ref="gsmkeyfilter.html#filter">filter</keyword>
+        <keyword ref="gsmkeyfilter.html#join">join</keyword>
+        <keyword ref="gsmkeyfilter.html#release">release</keyword>
+        <keyword ref="gsmkeyfilter.html#releaseActive">releaseActive</keyword>
+        <keyword ref="gsmkeyfilter.html#releaseHeld">releaseHeld</keyword>
+        <keyword ref="gsmkeyfilter.html#setBusy">setBusy</keyword>
+        <keyword ref="gsmkeyfilter.html#swap">swap</keyword>
+        <keyword ref="gsmkeyfilter.html#transfer">transfer</keyword>
+        <section ref="gsmkeyfilter-members.html" title="List of all members"/>
     </section>
     <section ref="gsmlegal.html" title="GSMLegal Class Reference">
         <keyword ref="gsmlegal.html">GSMLegal</keyword>
@@ -452,6 +487,12 @@
         <keyword ref="openssl.html">OpenSSL</keyword>
         <section ref="openssl-members.html" title="List of all members"/>
     </section>
+    <section ref="packagemanagerservice.html" title="PackageManagerService Class Reference">
+        <keyword ref="packagemanagerservice.html">PackageManagerService</keyword>
+        <keyword ref="packagemanagerservice.html#installPackage">installPackage</keyword>
+        <keyword ref="packagemanagerservice.html#installPackageConfirm">installPackageConfirm</keyword>
+        <section ref="packagemanagerservice-members.html" title="List of all members"/>
+    </section>
     <section ref="phoneheader.html" title="PhoneHeader Class Reference">
         <keyword ref="phoneheader.html">PhoneHeader</keyword>
         <section ref="phoneheader-members.html" title="List of all members"/>
@@ -473,6 +514,7 @@
     </section>
     <section ref="phonetouchdialerscreen.html" title="PhoneTouchDialerScreen Class Reference">
         <keyword ref="phonetouchdialerscreen.html">PhoneTouchDialerScreen</keyword>
+        <keyword ref="phonetouchdialerscreen.html#keyEntered">keyEntered</keyword>
         <section ref="phonetouchdialerscreen-members.html" title="List of all members"/>
     </section>
     <section ref="photoeditservice.html" title="PhotoEditService Class Reference">
@@ -494,6 +536,7 @@
         <keyword ref="pkim.html#setRestrictToHint">setRestrictToHint</keyword>
         <keyword ref="pkim.html#setStatusWidget">setStatusWidget</keyword>
         <keyword ref="pkim.html#stateChanged">stateChanged</keyword>
+        <keyword ref="pkim.html#updateHandler">updateHandler</keyword>
         <section ref="pkim-members.html" title="List of all members"/>
     </section>
     <section ref="powermanagertask.html" title="PowerManagerTask Class Reference">
@@ -539,6 +582,8 @@
         <keyword ref="qabstractdialerscreen.html">QAbstractDialerScreen</keyword>
         <keyword ref="qabstractdialerscreen.html#appendDigits">appendDigits</keyword>
         <keyword ref="qabstractdialerscreen.html#digits">digits</keyword>
+        <keyword ref="qabstractdialerscreen.html#filterKeys">filterKeys</keyword>
+        <keyword ref="qabstractdialerscreen.html#filterSelect">filterSelect</keyword>
         <keyword ref="qabstractdialerscreen.html#requestDial">requestDial</keyword>
         <keyword ref="qabstractdialerscreen.html#reset">reset</keyword>
         <keyword ref="qabstractdialerscreen.html#setDigits">setDigits</keyword>
@@ -943,8 +988,10 @@
         <keyword ref="qatutils.html#encodeNumber">encodeNumber</keyword>
         <keyword ref="qatutils.html#fromHex">fromHex</keyword>
         <keyword ref="qatutils.html#nextString">nextString</keyword>
+        <keyword ref="qatutils.html#octalEscapes">octalEscapes</keyword>
         <keyword ref="qatutils.html#parseNumber">parseNumber</keyword>
         <keyword ref="qatutils.html#quote">quote</keyword>
+        <keyword ref="qatutils.html#setOctalEscapes">setOctalEscapes</keyword>
         <keyword ref="qatutils.html#skipField">skipField</keyword>
         <keyword ref="qatutils.html#stripNumber">stripNumber</keyword>
         <keyword ref="qatutils.html#toHex">toHex</keyword>
@@ -1281,6 +1328,7 @@
         <keyword ref="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</keyword>
         <keyword ref="qbluetoothrfcommserialport.html#boundDevice">boundDevice</keyword>
         <keyword ref="qbluetoothrfcommserialport.html#createTty">createTty</keyword>
+        <keyword ref="qbluetoothrfcommserialport.html#id">id</keyword>
         <keyword ref="qbluetoothrfcommserialport.html#listBindings">listBindings</keyword>
         <keyword ref="qbluetoothrfcommserialport.html#releaseTty">releaseTty</keyword>
         <section ref="qbluetoothrfcommserialport-members.html" title="List of all members"/>
@@ -1341,12 +1389,17 @@
         <keyword ref="qbluetoothservicecontroller.html#translatableDisplayName">translatableDisplayName</keyword>
         <section ref="qbluetoothservicecontroller-members.html" title="List of all members"/>
     </section>
-    <section ref="qbluetoothservicecontrolserver.html" title="QBluetoothServiceControlServer Class Reference">
-        <keyword ref="qbluetoothservicecontrolserver.html">QBluetoothServiceControlServer</keyword>
-        <keyword ref="qbluetoothservicecontrolserver.html#setSecurityOptions">setSecurityOptions</keyword>
-        <keyword ref="qbluetoothservicecontrolserver.html#start">start</keyword>
-        <keyword ref="qbluetoothservicecontrolserver.html#stop">stop</keyword>
-        <section ref="qbluetoothservicecontrolserver-members.html" title="List of all members"/>
+    <section ref="qbootsourceaccessory.html" title="QBootSourceAccessory Class Reference">
+        <keyword ref="qbootsourceaccessory.html">QBootSourceAccessory</keyword>
+        <keyword ref="qbootsourceaccessory.html#Source-enum">Source</keyword>
+        <keyword ref="qbootsourceaccessory.html#bootSource">bootSource</keyword>
+        <keyword ref="qbootsourceaccessory.html#bootSourceModified">bootSourceModified</keyword>
+        <section ref="qbootsourceaccessory-members.html" title="List of all members"/>
+    </section>
+    <section ref="qbootsourceaccessoryprovider.html" title="QBootSourceAccessoryProvider Class Reference">
+        <keyword ref="qbootsourceaccessoryprovider.html">QBootSourceAccessoryProvider</keyword>
+        <keyword ref="qbootsourceaccessoryprovider.html#setBootSource">setBootSource</keyword>
+        <section ref="qbootsourceaccessoryprovider-members.html" title="List of all members"/>
     </section>
     <section ref="qcategorydialog.html" title="QCategoryDialog Class Reference">
         <keyword ref="qcategorydialog.html">QCategoryDialog</keyword>
@@ -1418,6 +1471,8 @@
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::Filter</keyword>
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::IncludeAll</keyword>
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::ListView</keyword>
+        <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::DialogView</keyword>
+        <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::ViewMask</keyword>
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::ComboView</keyword>
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::Editor</keyword>
         <keyword ref="qcategoryselector.html#ContentFlag-enum">QCategorySelector::IncludeUnfiled</keyword>
@@ -2421,12 +2476,18 @@
     <section ref="qfilesystem.html" title="QFileSystem Class Reference">
         <keyword ref="qfilesystem.html">QFileSystem</keyword>
         <keyword ref="qfilesystem.html#applications">applications</keyword>
+        <keyword ref="qfilesystem.html#applicationsFileSystem">applicationsFileSystem</keyword>
+        <keyword ref="qfilesystem.html#applicationsPath">applicationsPath</keyword>
         <keyword ref="qfilesystem.html#availBlocks">availBlocks</keyword>
         <keyword ref="qfilesystem.html#blockSize">blockSize</keyword>
         <keyword ref="qfilesystem.html#contentDatabase">contentDatabase</keyword>
         <keyword ref="qfilesystem.html#disk">disk</keyword>
         <keyword ref="qfilesystem.html#documents">documents</keyword>
+        <keyword ref="qfilesystem.html#documentsFileSystem">documentsFileSystem</keyword>
+        <keyword ref="qfilesystem.html#documentsPath">documentsPath</keyword>
+        <keyword ref="qfilesystem.html#fromFileName">fromFileName</keyword>
         <keyword ref="qfilesystem.html#isConnected">isConnected</keyword>
+        <keyword ref="qfilesystem.html#isNull">isNull</keyword>
         <keyword ref="qfilesystem.html#isRemovable">isRemovable</keyword>
         <keyword ref="qfilesystem.html#isWritable">isWritable</keyword>
         <keyword ref="qfilesystem.html#name">name</keyword>
@@ -2434,6 +2495,7 @@
         <keyword ref="qfilesystem.html#path">path</keyword>
         <keyword ref="qfilesystem.html#prevPath">prevPath</keyword>
         <keyword ref="qfilesystem.html#totalBlocks">totalBlocks</keyword>
+        <keyword ref="qfilesystem.html#operator-eq">operator=</keyword>
         <section ref="qfilesystem-members.html" title="List of all members"/>
     </section>
     <section ref="qfilesystemfilter.html" title="QFileSystemFilter Class Reference">
@@ -2726,6 +2788,7 @@
     <section ref="qmediacontrol.html" title="QMediaControl Class Reference">
         <keyword ref="qmediacontrol.html">QMediaControl</keyword>
         <keyword ref="qmediacontrol.html#controlAvailable">controlAvailable</keyword>
+        <keyword ref="qmediacontrol.html#controlUnavailable">controlUnavailable</keyword>
         <keyword ref="qmediacontrol.html#controls">controls</keyword>
         <keyword ref="qmediacontrol.html#errorString">errorString</keyword>
         <keyword ref="qmediacontrol.html#handle">handle</keyword>
@@ -3574,12 +3637,15 @@
     </section>
     <section ref="qstoragemetainfo.html" title="QStorageMetaInfo Class Reference">
         <keyword ref="qstoragemetainfo.html">QStorageMetaInfo</keyword>
+        <keyword ref="qstoragemetainfo.html#applicationsFileSystem">applicationsFileSystem</keyword>
         <keyword ref="qstoragemetainfo.html#cardInfoString">cardInfoString</keyword>
         <keyword ref="qstoragemetainfo.html#disksChanged">disksChanged</keyword>
+        <keyword ref="qstoragemetainfo.html#documentsFileSystem">documentsFileSystem</keyword>
         <keyword ref="qstoragemetainfo.html#fileSystemNames">fileSystemNames</keyword>
         <keyword ref="qstoragemetainfo.html#fileSystemOf">fileSystemOf</keyword>
         <keyword ref="qstoragemetainfo.html#fileSystems">fileSystems</keyword>
         <keyword ref="qstoragemetainfo.html#installLocationsString">installLocationsString</keyword>
+        <keyword ref="qstoragemetainfo.html#instance">instance</keyword>
         <keyword ref="qstoragemetainfo.html#update">update</keyword>
         <section ref="qstoragemetainfo-members.html" title="List of all members"/>
     </section>
@@ -3945,7 +4011,6 @@
         <keyword ref="qtopianetwork.html#shutdown">shutdown</keyword>
         <keyword ref="qtopianetwork.html#startInterface">startInterface</keyword>
         <keyword ref="qtopianetwork.html#stopInterface">stopInterface</keyword>
-        <keyword ref="qtopianetwork.html#toType">toType</keyword>
         <keyword ref="qtopianetwork.html#unsetDefaultGateway">unsetDefaultGateway</keyword>
         <section ref="qtopianetwork-members.html" title="List of all members"/>
     </section>
@@ -4343,6 +4408,7 @@
         <keyword ref="ringcontrol.html#setMsgRingTime">setMsgRingTime</keyword>
         <keyword ref="ringcontrol.html#setVibrateDuration">setVibrateDuration</keyword>
         <keyword ref="ringcontrol.html#setVolume">setVolume</keyword>
+        <keyword ref="ringcontrol.html#stopMessageAlert">stopMessageAlert</keyword>
         <keyword ref="ringcontrol.html#stopRing">stopRing</keyword>
         <keyword ref="ringcontrol.html#vibrateDuration">vibrateDuration</keyword>
         <section ref="ringcontrol-members.html" title="List of all members"/>
@@ -4764,8 +4830,20 @@
     </section>
 </section>
 <section ref="overviews.html" title="Overviews">
+    <section ref="abstractwidgets.html" title="Abstract Widget Classes">
+        <keyword ref="abstractwidgets.html">Abstract Widget Classes</keyword>
+    </section>
+    <section ref="accessibility.html" title="Accessibility Classes">
+        <keyword ref="accessibility.html">Accessibility Classes</keyword>
+    </section>
+    <section ref="advanced.html" title="Advanced Widgets">
+        <keyword ref="advanced.html">Advanced Widgets</keyword>
+    </section>
     <section ref="annotated.html" title="Annotated Class List">
         <keyword ref="annotated.html">Annotated Class List</keyword>
+    </section>
+    <section ref="application.html" title="Application Classes">
+        <keyword ref="application.html">Application Classes</keyword>
     </section>
     <section ref="qtopiaserver-applaunch.html" title="Application Control Subsystem">
         <keyword ref="qtopiaserver-applaunch.html">Application Control Subsystem</keyword>
@@ -4773,8 +4851,14 @@
     <section ref="atcommands.html" title="AT Commands">
         <keyword ref="atcommands.html">AT Commands</keyword>
     </section>
-    <section ref="qtopiabluetooth.html" title="Bluetooth Classes">
-        <keyword ref="qtopiabluetooth.html">Bluetooth Classes</keyword>
+    <section ref="basic.html" title="Basic Widgets">
+        <keyword ref="basic.html">Basic Widgets</keyword>
+    </section>
+    <section ref="qtopiabluetooth.html" title="Bluetooth">
+        <keyword ref="qtopiabluetooth.html">Bluetooth</keyword>
+    </section>
+    <section ref="bluetooth-servicemanager.html" title="Bluetooth Service Management Framework">
+        <keyword ref="bluetooth-servicemanager.html">Bluetooth Service Management Framework</keyword>
     </section>
     <section ref="bluetooth.html" title="Bluetooth Support">
         <keyword ref="bluetooth.html">Bluetooth Support</keyword>
@@ -4791,14 +4875,11 @@
     <section ref="build-from-source.html" title="Building Qtopia from Source">
         <keyword ref="build-from-source.html">Building Qtopia from Source</keyword>
     </section>
+    <section ref="categories.html" title="Categories">
+        <keyword ref="categories.html">Categories</keyword>
+    </section>
     <section ref="classes.html" title="Class Index">
         <keyword ref="classes.html">Class Index</keyword>
-    </section>
-    <section ref="qtopiaemb.html" title="Classes">
-        <keyword ref="qtopiaemb.html">Classes</keyword>
-    </section>
-    <section ref="communication.html" title="Communication Classes">
-        <keyword ref="communication.html">Communication Classes</keyword>
     </section>
     <section ref="compile-run-examples.html" title="Compile and Run Example Application">
         <keyword ref="compile-run-examples.html">Compile and Run Example Application</keyword>
@@ -4808,6 +4889,9 @@
     </section>
     <section ref="configopts.html" title="Configure Options">
         <keyword ref="configopts.html">Configure Options</keyword>
+    </section>
+    <section ref="content.html" title="Content">
+        <keyword ref="content.html">Content</keyword>
     </section>
     <section ref="qtopiaserver-control.html" title="Control Classes">
         <keyword ref="qtopiaserver-control.html">Control Classes</keyword>
@@ -4821,6 +4905,12 @@
     <section ref="syscust-launcher.html" title="Customizing the Qtopia Launcher">
         <keyword ref="syscust-launcher.html">Customizing the Qtopia Launcher</keyword>
     </section>
+    <section ref="database.html" title="Database Classes">
+        <keyword ref="database.html">Database Classes</keyword>
+    </section>
+    <section ref="time.html" title="Date and Time Classes">
+        <keyword ref="time.html">Date and Time Classes</keyword>
+    </section>
     <section ref="debug-qtopia.html" title="Debugging Qtopia Applications">
         <keyword ref="debug-qtopia.html">Debugging Qtopia Applications</keyword>
     </section>
@@ -4832,6 +4922,9 @@
     </section>
     <section ref="sycust-distrib.html" title="Distribution Packaging">
         <keyword ref="sycust-distrib.html">Distribution Packaging</keyword>
+    </section>
+    <section ref="documentselection.html" title="Document Selection">
+        <keyword ref="documentselection.html">Document Selection</keyword>
     </section>
     <section ref="syscust-docstorage.html" title="Document Storage">
         <keyword ref="syscust-docstorage.html">Document Storage</keyword>
@@ -4848,14 +4941,26 @@
     <section ref="docsys-drmintegr.html" title="Document System: DRM Integration">
         <keyword ref="docsys-drmintegr.html">Document System: DRM Integration</keyword>
     </section>
+    <section ref="drm.html" title="DRM">
+        <keyword ref="drm.html">DRM</keyword>
+    </section>
     <section ref="syscust-drm.html" title="DRM Agent Integration">
         <keyword ref="syscust-drm.html">DRM Agent Integration</keyword>
+    </section>
+    <section ref="environment.html" title="Environment Classes">
+        <keyword ref="environment.html">Environment Classes</keyword>
+    </section>
+    <section ref="events.html" title="Event Classes">
+        <keyword ref="events.html">Event Classes</keyword>
     </section>
     <section ref="extendingqtopia.html" title="Extending Qtopia">
         <keyword ref="extendingqtopia.html">Extending Qtopia</keyword>
     </section>
     <section ref="qtopiaserver-phoneui-ezx.html" title="EzX Lookalike UI">
         <keyword ref="qtopiaserver-phoneui-ezx.html">EzX Lookalike UI</keyword>
+    </section>
+    <section ref="io.html" title="File I/O and Networking">
+        <keyword ref="io.html">File I/O and Networking</keyword>
     </section>
     <section ref="files.html" title="File System Standards">
         <keyword ref="files.html">File System Standards</keyword>
@@ -4872,14 +4977,23 @@
     <section ref="theme-graphdes.html" title="Graphic Designer's Reference">
         <keyword ref="theme-graphdes.html">Graphic Designer's Reference</keyword>
     </section>
+    <section ref="groups.html" title="Grouped Classes">
+        <keyword ref="groups.html">Grouped Classes</keyword>
+    </section>
     <section ref="syscust-gsm.html" title="GSM Modem Integration">
         <keyword ref="syscust-gsm.html">GSM Modem Integration</keyword>
+    </section>
+    <section ref="hardware.html" title="Hardware">
+        <keyword ref="hardware.html">Hardware</keyword>
     </section>
     <section ref="syscust-hardware.html" title="Hardware Configuration">
         <keyword ref="syscust-hardware.html">Hardware Configuration</keyword>
     </section>
     <section ref="help-preprocessor.html" title="Help Browser Preprocessor">
         <keyword ref="help-preprocessor.html">Help Browser Preprocessor</keyword>
+    </section>
+    <section ref="helpsystem.html" title="Help System">
+        <keyword ref="helpsystem.html">Help System</keyword>
     </section>
     <section ref="howtobuild.html" title="How To Build Qtopia">
         <keyword ref="howtobuild.html">How To Build Qtopia</keyword>
@@ -4896,6 +5010,9 @@
     <section ref="inputmethods.html" title="Input Methods">
         <keyword ref="inputmethods.html">Input Methods</keyword>
     </section>
+    <section ref="installing-an-sdk.html" title="Installing a Qtopia SDK">
+        <keyword ref="installing-an-sdk.html">Installing a Qtopia SDK</keyword>
+    </section>
     <section ref="syscust-intprovcomp.html" title="Integrator Provided Components">
         <keyword ref="syscust-intprovcomp.html">Integrator Provided Components</keyword>
     </section>
@@ -4905,8 +5022,11 @@
     <section ref="internet.html" title="Internet">
         <keyword ref="internet.html">Internet</keyword>
     </section>
-    <section ref="qtopiair.html" title="IrDA Classes">
-        <keyword ref="qtopiair.html">IrDA Classes</keyword>
+    <section ref="ipc.html" title="Interprocess Communication (IPC)">
+        <keyword ref="ipc.html">Interprocess Communication (IPC)</keyword>
+    </section>
+    <section ref="qtopiair.html" title="IrDA">
+        <keyword ref="qtopiair.html">IrDA</keyword>
     </section>
     <section ref="syscust-keypadarch.html" title="Keypad Architecture">
         <keyword ref="syscust-keypadarch.html">Keypad Architecture</keyword>
@@ -4914,14 +5034,20 @@
     <section ref="syscust-keypadbutt.html" title="Keypad Button Behavior">
         <keyword ref="syscust-keypadbutt.html">Keypad Button Behavior</keyword>
     </section>
+    <section ref="geomanagement.html" title="Layout Management">
+        <keyword ref="geomanagement.html">Layout Management</keyword>
+    </section>
     <section ref="syscust-memusage.html" title="Managing Memory Usage">
         <keyword ref="syscust-memusage.html">Managing Memory Usage</keyword>
     </section>
     <section ref="messaging.html" title="Messaging">
         <keyword ref="messaging.html">Messaging</keyword>
     </section>
-    <section ref="qtopiaphonemodem.html" title="Modem Classes">
-        <keyword ref="qtopiaphonemodem.html">Modem Classes</keyword>
+    <section ref="misc.html" title="Miscellaneous Classes">
+        <keyword ref="misc.html">Miscellaneous Classes</keyword>
+    </section>
+    <section ref="model-view.html" title="Model/View Classes">
+        <keyword ref="model-view.html">Model/View Classes</keyword>
     </section>
     <section ref="modem-simulator.html" title="Modem Simulator">
         <keyword ref="modem-simulator.html">Modem Simulator</keyword>
@@ -4929,14 +5055,23 @@
     <section ref="syscust-pointer.html" title="Mouse Pointer Handling">
         <keyword ref="syscust-pointer.html">Mouse Pointer Handling</keyword>
     </section>
+    <section ref="multimedia.html" title="Multimedia, Graphics, and Printing">
+        <keyword ref="multimedia.html">Multimedia, Graphics, and Printing</keyword>
+    </section>
     <section ref="networkservices.html" title="Network Services">
         <keyword ref="networkservices.html">Network Services</keyword>
     </section>
-    <section ref="qtopiaobex.html" title="OBEX Classes">
-        <keyword ref="qtopiaobex.html">OBEX Classes</keyword>
+    <section ref="qtopiaobex.html" title="OBEX">
+        <keyword ref="qtopiaobex.html">OBEX</keyword>
+    </section>
+    <section ref="objectmodel.html" title="Object Model">
+        <keyword ref="objectmodel.html">Object Model</keyword>
     </section>
     <section ref="syscust-mainwidget.html" title="Optimization Using main()">
         <keyword ref="syscust-mainwidget.html">Optimization Using main()</keyword>
+    </section>
+    <section ref="organizers.html" title="Organizers">
+        <keyword ref="organizers.html">Organizers</keyword>
     </section>
     <section ref="ota.html" title="OTA Support">
         <keyword ref="ota.html">OTA Support</keyword>
@@ -4944,14 +5079,11 @@
     <section ref="qtopia-packages.html" title="Packages and Editions">
         <keyword ref="qtopia-packages.html">Packages and Editions</keyword>
     </section>
-    <section ref="qtopiaphone.html" title="Phone Classes">
-        <keyword ref="qtopiaphone.html">Phone Classes</keyword>
+    <section ref="pim.html" title="Personal Information Management (PIM)">
+        <keyword ref="pim.html">Personal Information Management (PIM)</keyword>
     </section>
     <section ref="qtopiaserver-phoneui.html" title="Phone UI classes">
         <keyword ref="qtopiaserver-phoneui.html">Phone UI classes</keyword>
-    </section>
-    <section ref="qpepim.html" title="PIM Classes">
-        <keyword ref="qpepim.html">PIM Classes</keyword>
     </section>
     <section ref="qpim-library.html" title="PIM Library">
         <keyword ref="qpim-library.html">PIM Library</keyword>
@@ -4959,17 +5091,23 @@
     <section ref="qpepim-class-overview.html" title="PIM Library: Class Overview">
         <keyword ref="qpepim-class-overview.html">PIM Library: Class Overview</keyword>
     </section>
-    <section ref="porting.html" title="Porting - Qtopia 2 to Qtopia 4">
-        <keyword ref="porting.html">Porting - Qtopia 2 to Qtopia 4</keyword>
+    <section ref="plugins.html" title="Plugin Classes">
+        <keyword ref="plugins.html">Plugin Classes</keyword>
     </section>
-    <section ref="qcop.html" title="QCop Messages">
-        <keyword ref="qcop.html">QCop Messages</keyword>
+    <section ref="porting.html" title="Porting Between Qtopia Versions">
+        <keyword ref="porting.html">Porting Between Qtopia Versions</keyword>
+    </section>
+    <section ref="porting2to4.html" title="Porting to Qtopia 4">
+        <keyword ref="porting2to4.html">Porting to Qtopia 4</keyword>
     </section>
     <section ref="qdawg-node.html" title="QDawgNode Class Reference">
         <keyword ref="qdawg-node.html">QDawgNode Class Reference</keyword>
     </section>
     <section ref="release-4-2-0.html" title="Qtopia - 4.2.0 Release Notes">
         <keyword ref="release-4-2-0.html">Qtopia - 4.2.0 Release Notes</keyword>
+    </section>
+    <section ref="release-4-2-1.html" title="Qtopia - 4.2.1 Release Notes">
+        <keyword ref="release-4-2-1.html">Qtopia - 4.2.1 Release Notes</keyword>
     </section>
     <section ref="docwidget.html" title="Qtopia - Main Document Widget">
         <keyword ref="docwidget.html">Qtopia - Main Document Widget</keyword>
@@ -5003,9 +5141,6 @@
     </section>
     <section ref="qtopia-licensing.html" title="Qtopia Licensing">
         <keyword ref="qtopia-licensing.html">Qtopia Licensing</keyword>
-    </section>
-    <section ref="qtopiamedia.html" title="Qtopia Media Classes">
-        <keyword ref="qtopiamedia.html">Qtopia Media Classes</keyword>
     </section>
     <section ref="phonelibrary.html" title="Qtopia Phone Library">
         <keyword ref="phonelibrary.html">Qtopia Phone Library</keyword>
@@ -5049,6 +5184,9 @@
     <section ref="sxe.html" title="Safe Execution Environment (SXE)">
         <keyword ref="sxe.html">Safe Execution Environment (SXE)</keyword>
     </section>
+    <section ref="script.html" title="Script Classes">
+        <keyword ref="script.html">Script Classes</keyword>
+    </section>
     <section ref="sdk.html" title="SDK">
         <keyword ref="sdk.html">SDK</keyword>
     </section>
@@ -5072,6 +5210,9 @@
     </section>
     <section ref="sycust-sql.html" title="SQL Integration">
         <keyword ref="sycust-sql.html">SQL Integration</keyword>
+    </section>
+    <section ref="dialogs.html" title="Standard Dialog Classes">
+        <keyword ref="dialogs.html">Standard Dialog Classes</keyword>
     </section>
     <section ref="syscust-stdfonts.html" title="Standard Fonts">
         <keyword ref="syscust-stdfonts.html">Standard Fonts</keyword>
@@ -5127,6 +5268,12 @@
     <section ref="telephony.html" title="Telephony">
         <keyword ref="telephony.html">Telephony</keyword>
     </section>
+    <section ref="telephony.html" title="Telephony">
+        <keyword ref="telephony.html">Telephony</keyword>
+    </section>
+    <section ref="text.html" title="Text Related Classes">
+        <keyword ref="text.html">Text Related Classes</keyword>
+    </section>
     <section ref="new-user-guide.html" title="The New User's Guide to Configuring and Building Qtopia">
         <keyword ref="new-user-guide.html">The New User's Guide to Configuring and Building Qtopia</keyword>
     </section>
@@ -5145,8 +5292,14 @@
     <section ref="qtopia-3rdparty-licensing.html" title="Third-Party Licenses Used in Qtopia">
         <keyword ref="qtopia-3rdparty-licensing.html">Third-Party Licenses Used in Qtopia</keyword>
     </section>
+    <section ref="thread.html" title="Threading Classes">
+        <keyword ref="thread.html">Threading Classes</keyword>
+    </section>
     <section ref="syscust-time.html" title="Time on an Embedded Device">
         <keyword ref="syscust-time.html">Time on an Embedded Device</keyword>
+    </section>
+    <section ref="tools.html" title="Tool Classes">
+        <keyword ref="tools.html">Tool Classes</keyword>
     </section>
     <section ref="tools-list.html" title="Tools">
         <keyword ref="tools-list.html">Tools</keyword>
@@ -5208,6 +5361,9 @@
     <section ref="tut-index.html" title="Tutorials">
         <keyword ref="tut-index.html">Tutorials</keyword>
     </section>
+    <section ref="userinput.html" title="User Input Processing">
+        <keyword ref="userinput.html">User Input Processing</keyword>
+    </section>
     <section ref="userinterface.html" title="User Interface">
         <keyword ref="userinterface.html">User Interface</keyword>
     </section>
@@ -5217,8 +5373,17 @@
     <section ref="voip-overview.html" title="VoIP Overview">
         <keyword ref="voip-overview.html">VoIP Overview</keyword>
     </section>
+    <section ref="appearance.html" title="Widget Appearance and Style">
+        <keyword ref="appearance.html">Widget Appearance and Style</keyword>
+    </section>
+    <section ref="qws.html" title="Window System Classes">
+        <keyword ref="qws.html">Window System Classes</keyword>
+    </section>
     <section ref="quicklaunch.html" title="Writing Applications that Startup Quickly">
         <keyword ref="quicklaunch.html">Writing Applications that Startup Quickly</keyword>
+    </section>
+    <section ref="xml-tools.html" title="XML Classes">
+        <keyword ref="xml-tools.html">XML Classes</keyword>
     </section>
 </section>
 <section ref="examples.html" title="Tutorial &amp; Examples"/>

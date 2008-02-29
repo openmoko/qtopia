@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -120,7 +120,6 @@ TodoWindow::TodoWindow( QWidget *parent, Qt::WFlags f) :
     beamfile += "/todo.vcs";
 
     setWindowTitle( tr("Tasks") );
-    setBackgroundRole( QPalette::Button );
 
     tView = 0;
 
@@ -135,6 +134,8 @@ TodoWindow::TodoWindow( QWidget *parent, Qt::WFlags f) :
     closeAfterDetailView = false;
 #ifdef QTOPIA_PHONE
    // table->setContentsMargins(0,0,0,0);
+    table->installEventFilter(this);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
 #endif
     table->setWhatsThis( tr("List of tasks matching the completion and category filters.") );
 
@@ -150,6 +151,7 @@ TodoWindow::TodoWindow( QWidget *parent, Qt::WFlags f) :
     connect( table, SIGNAL( currentItemChanged(const QModelIndex &) ),
             this, SLOT( currentEntryChanged() ) );
 
+    connect( model, SIGNAL(modelReset()), this, SLOT( taskModelReset()));
     connect(qApp, SIGNAL( appMessage(const QString&,const QByteArray&) ),
             this, SLOT( appMessage(const QString&,const QByteArray&) ) );
     connect(qApp, SIGNAL(reload()), this, SLOT(reload()));
@@ -311,6 +313,11 @@ void TodoWindow::createUI()
         setWindowTitle(tr("Tasks") + " - " + f.label());
 #else
     setWindowTitle(tr("Tasks"));
+    QSettings config("Trolltech","todo");
+    config.beginGroup( "View" );
+    QCategoryFilter f;
+    f.readConfig(config, "Category");
+    catSelected(f);
 #endif
     listView->setLayout(grid);
 }
@@ -371,6 +378,14 @@ void TodoWindow::showDetailView(const QTask &t)
         centralView->setCurrentIndex(1);
         // ?? todoView()->setFocus();  //To avoid events being passed to QTable
         setWindowTitle( tr("Task Details") );
+
+        /* make this the current list item too */
+        QModelIndex newSel = model->index(t.uid());
+        if ( newSel.isValid() ) {
+            table->setCurrentIndex(newSel);
+            table->selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        }
+
 #ifdef QTOPIA_PHONE
         newAction->setVisible(false);
         actionCategory->setVisible(false);
@@ -450,7 +465,10 @@ void TodoWindow::deleteCurrentEntry()
 
        We should really fix the model so that updates don't break the selection
        model.
+
+       [this may no longer be necessary with the taskModelReset/currentEntryChanged code]
      */
+
     QTask task;
     bool viewSelected = false;
     if(centralView->currentIndex() == 1) {
@@ -464,6 +482,7 @@ void TodoWindow::deleteCurrentEntry()
 
     QString strName = Qt::escape(task.description().left(30));
 
+    /* NOTE: we're currently doing single selection only.. */
     if ( viewSelected &&
          table->selectionMode() == TodoTable::ExtendedSelection ) {
         QList<QUniqueId> t = table->selectedTaskIds();
@@ -535,6 +554,17 @@ void TodoWindow::viewNext()
 {
 }
 
+void TodoWindow::taskModelReset()
+{
+    /* Basically, we know that the current index will never be valid, so base our decisions
+       on the number of tasks in the model */
+    if ( model->count() <= 0 ) {
+        QSoftMenuBar::setLabel( table, Qt::Key_Select, "new", tr("New") );
+    } else {
+        QSoftMenuBar::setLabel( table, Qt::Key_Select, QSoftMenuBar::View);
+    }
+}
+
 void TodoWindow::currentEntryChanged( )
 {
     bool entrySelected = table->currentIndex().isValid();
@@ -595,6 +625,26 @@ void TodoWindow::keyPressEvent(QKeyEvent *e)
             close();
     } else
         QMainWindow::keyPressEvent(e);
+}
+
+bool TodoWindow::eventFilter( QObject *o, QEvent *e )
+{
+    if(o == table)
+    {
+        if(e->type() == QEvent::KeyPress)
+        {
+            QKeyEvent *ke = (QKeyEvent *)e;
+            if ( ke->key() == Qt::Key_Select) {
+                if(table->currentIndex().isValid())
+                    return false;
+                else {
+                    createNewEntry();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 #endif
 

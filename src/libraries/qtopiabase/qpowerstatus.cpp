@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,6 +43,8 @@
   at a given time.
 
   An updated status can be obtained by calling \c{QPowerStatusManager::readStatus()}.
+
+  \ingroup hardware
 */
 
 /*!
@@ -127,6 +129,7 @@
   \class QPowerStatusManager
   \brief The QPowerStatusManager class provides easy access to the
   power status of the Qtopia device.
+  \ingroup hardware
 */
 
 /*!

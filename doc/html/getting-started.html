@@ -16,9 +16,9 @@
 <li><a href="#licensed-editions">Licensed Editions</a></li>
 </ul>
 <li><a href="#package-naming-conventions">Package Naming Conventions</a></li>
-<ul><li><a href="#naming-convention-tags">Naming Convention Tags</a></li>
-</ul>
 <li><a href="#installing-and-building-qtopia">Installing and Building Qtopia</a></li>
+<li><a href="#installing-qtopia-add-on-packages">Installing Qtopia add-on packages</a></li>
+<li><a href="#more-information">More information</a></li>
 </ul>
 <p>Welcome to Qtopia! This document provides information about how to download and install Qtopia products. If you are uncertain about which package is required please refer to:</p>
 <ul>
@@ -31,7 +31,7 @@
 <p>Trolltech provides both licensed and free editions of Qtopia. Details of how to obtain these editions is provided below. For specific licensing information please refer to: <a href="qtopia-licensing.html">Qtopia Licensing</a>.</p>
 <a name="free-editions"></a>
 <h3>Free Editions</h3>
-<p>Qtopia packages for the OpenSource, GPL License community, can be downloaded from: <a href="ftp://ftp.trolltech.com/pub/qtopia/source">Trolltech's FTP site</a>.</p>
+<p>Qtopia packages for the Open Source community can be downloaded from: <a href="ftp://ftp.trolltech.com/pub/qtopia/source">Trolltech's FTP site</a>.</p>
 <a name="licensed-editions"></a>
 <h3>Licensed Editions</h3>
 <p>After becoming a Qtopia customer an email will be sent from <a href="mailto:sales@trolltech.com">sales@trolltech.com </a> confirming your license details. The details include:</p>
@@ -42,8 +42,8 @@
 </ul>
 <p>Once you have received these details login to the FTP site using any browser and download the packages. Depending on your license the FTP site provides either a:</p>
 <ul>
-<li><i>qtopia</i> source package</li>
-<li><i>qtopia</i> sdk package</li>
+<li><i>Qtopia</i> source package</li>
+<li><i>Qtopia</i> SDK package</li>
 </ul>
 <p>The FTP directory is available for the full duration of the contract, and will be updated regularly with new releases. Customers are notified via email about each new release that is relevant to their account.</p>
 <p><b>Note:</b> The FTP site may also provide access to other files such as various Qt versions, snapshots of packages, language packages and much more, however, this document refers only to the Qtopia specific-files available on the FTP site.</p>
@@ -52,65 +52,35 @@
 <p>The FTP download directory contains multiple packages and at first it may be unclear which packages are required. Depending on the type of license you have, one or more of the following packages is needed:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Package</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>qtopia-[edition]-[commercial|opensource]-src-[x.y.z].[zip]</td><td><b>Full source package</b>: this package contains all sources to build Qtopia, including the prerequisite source for Qt.</td></tr>
-<tr valign="top" class="even"><td>qtopia-device-[devicename]-src-[x.y.z].[zip]</td><td><b>Device source package</b>: this package contains additional sources that are required to build Qtopia for a specific device. A device package is installed 'on top' of the Qtopia source package. Multiple device packages can be installed.</td></tr>
-<tr valign="top" class="odd"><td>qtopia-language-[languagename]-[x.y.z].[zip]</td><td><b>Language package</b>: this package contains translations for a specific language. A language package is installed 'on top' of the Qtopia source package. Multiple language packages can be installed.</td></tr>
-<tr valign="top" class="even"><td>qtopia-[thirdparty-addon]-[commercial|opensource]-src-[x.y.z].[zip]</td><td><b>Thirdparty add-on source package</b>: this package contains sources for a thirdparty add-on module that can be used to enhance Qtopia. A thirdparty add-on package is installed 'on top' of the Qtopia source package. Multiple add-on packages can be installed.</td></tr>
-<tr valign="top" class="odd"><td>qtopia-[edition]-sdk-[x.y.z]-[distro].i386.rpm</td><td><b> Software Development Kit (SDK) package</b>: this package contains a combination of pre-built binaries and library header files. SDK packages are typically built for a specific distribution, for example, RedHat, SuSE, etc.</td></tr>
-<tr valign="top" class="even"><td>qtopia-[edition]-sdk-devel-[x.y.z]-[distro].i386.rpm</td><td><b>SDK extension package</b>: containing Qtopia library source files. The development package is installed 'on top' of the SDK package.</td></tr>
-</table></p>
-<a name="naming-convention-tags"></a>
-<h3>Naming Convention Tags</h3>
-<p>In the above list the following tags have been used:</p>
-<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Tag</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>[edition]</td><td>Qtopia product name, one of:<ul>
-<li>core</li>
-<li>platform</li>
-<li>phone</li>
-<li>refboard.</li>
-</ul>
-</td></tr>
-<tr valign="top" class="even"><td>[x.y.z]</td><td>Product version number, for example 4.1.3</td></tr>
-<tr valign="top" class="odd"><td>[zip]</td><td>Indicates that a package is made available as <b>a</b> compressed package such as:<ul>
-<li>tar.gz</li>
-<li>tar.bz2.</li>
-</ul>
-</td></tr>
-<tr valign="top" class="even"><td>[distro]</td><td>Operating system or distribution on which the package can be used, for example:<ul>
-<li>redhat9</li>
-<li>suse82</li>
-<li>suse9</li>
-<li>macosx</li>
-<li>win etc...</li>
-</ul>
-</td></tr>
-<tr valign="top" class="odd"><td>[exe]</td><td>Package type, one of:<ul>
-<li>.rpm</li>
-<li>.dmg</li>
-<li>.tar.gz</li>
-<li>.exe.</li>
-</ul>
-</td></tr>
+<tr valign="top" class="odd"><td>qtopia-[edition]-[commercial|opensource]-src-[x.y.z].tar.gz</td><td><b>Full source package</b>: this package contains all sources to build Qtopia, including the prerequisite source for Qt.</td></tr>
+<tr valign="top" class="even"><td>qtopia-device-[devicename]-src-[x.y.z].tar.gz</td><td><b>Device source package</b>: this package contains additional sources that are required to build Qtopia for a specific device. A device package is installed 'on top' of the Qtopia source package. Multiple device packages can be installed.</td></tr>
+<tr valign="top" class="odd"><td>qtopia-language-[languagename]-[x.y.z].tar.gz</td><td><b>Language package</b>: this package contains translations for a specific language. A language package is installed 'on top' of the Qtopia source package. Multiple language packages can be installed.</td></tr>
+<tr valign="top" class="even"><td>qtopia-[thirdparty-addon]-[commercial|opensource]-src-[x.y.z].tar.gz</td><td><b>Thirdparty add-on source package</b>: this package contains sources for a thirdparty add-on module that can be used to enhance Qtopia. A thirdparty add-on package is installed 'on top' of the Qtopia source package. Multiple add-on packages can be installed.</td></tr>
+<tr valign="top" class="odd"><td>qtopia-[devicename]-sdk-[x.y.z].iso</td><td><b> Software Development Kit (SDK) package</b>: this package contains a combination of pre-built binaries and library header files. The iso package can be burned onto a CD and can then be installed on Windows and/or Linux operating systems. The SDK runs inside a VmPlayer environment.</td></tr>
 </table></p>
 <a name="installing-and-building-qtopia"></a>
 <h2>Installing and Building Qtopia</h2>
-<p>Once the required source package has been downloaded some additional tools are required to build Qtopia or develop applications for Qtopia. These tools are provided in the packages as either pre-built binaries or as source code. The following links provide all the information required to install, build and run Qtopia:</p>
+<p>Once the required package has been downloaded the package can be installed. The following links provide all the information required to install, build and run Qtopia:</p>
 <ol type="1">
-<li><a href="build-from-source.html">Build From Source</a> - Build Source Package</li>
-<li><a href="build-from-source.html#installing-an-rpm">Installing an RPM</a> - Build RPM Package</li>
-<li><a href="tools-list.html">Tools</a> - Additional Tools</li>
-<li><a href="running-qtopia.html">Running Qtopia</a> - Run Qtopia.</li>
+<li><a href="build-from-source.html">Building Qtopia From Source</a></li>
+<li><a href="installing-an-sdk.html">Installing a Qtopia SDK</a></li>
+<li><a href="tools-list.html">Additional Tools</a></li>
+<li><a href="running-qtopia.html">Running Qtopia</a></li>
 </ol>
+<a name="installing-qtopia-add-on-packages"></a>
+<h2>Installing Qtopia add-on packages</h2>
+<p>Additional packages such as Language and Device packages are installed 'on top' of Qtopia. Installation of add-on packages is described in the <a href="build-from-source.html">Build From Source</a> instructions.</p>
+<a name="more-information"></a>
+<h2>More information</h2>
 <p>For further Qtopia information refer to:</p>
 <ol type="1">
-<li><a href="http://www.doc.trolltech.com/qtopia">Latest Qtopia Reference Documentation</a></li>
+<li><a href="http://doc.trolltech.com/qtopia">Latest Qtopia Reference Documentation</a></li>
 <li><a href="http://www.trolltech.com/developer/faqs">FAQs</a>.</li>
 </ol>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

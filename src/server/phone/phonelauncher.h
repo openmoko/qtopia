@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -72,6 +72,7 @@ class TouchscreenDialer;
 class QAbstractBrowserScreen;
 class QAbstractSecondaryDisplay;
 class QtopiaServiceDescription;
+class GsmKeyActions;
 
 class QSpeedDialFeedback : public QFrame {
     Q_OBJECT
@@ -139,7 +140,7 @@ protected slots:
     void showPhoneLauncher();
 #ifdef QTOPIA_PHONEUI
     void missedCount(int);
-    void messageCountChanged(int, bool, bool);
+    void messageCountChanged(int, bool, bool, bool);
     void messageRejected();
     void activeCallCount(int);
     void registrationChanged();
@@ -263,6 +264,7 @@ private:
 #endif
 #ifdef QTOPIA_CELL
     CellModemManager *cellModem;
+    GsmKeyActions *gsmKeyActions;
 #endif
 };
 

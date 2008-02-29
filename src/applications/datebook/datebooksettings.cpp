@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -36,7 +36,7 @@ DateBookSettings::DateBookSettings( bool whichClock, QWidget *parent, Qt::WFlags
     // TODO make this check based on the screensize, not QTOPIA_PHONE
     // Need to change use of compressed day to do the same first
 #ifdef QTOPIA_PHONE
-    fraDayView->hide();
+    widCompress->hide();
 #endif
     init();
     QObject::connect( qApp, SIGNAL( clockChanged(bool) ),
@@ -156,3 +156,16 @@ void DateBookSettings::enablePresetDetails(int state)
 {
     spinPreset->setEnabled(state != Qt::Unchecked);
 }
+
+DateBookSettings::ViewType DateBookSettings::defaultView() const
+{
+    return (DateBookSettings::ViewType) cmbDefaultView->currentIndex();
+}
+
+void DateBookSettings::setDefaultView(DateBookSettings::ViewType type)
+{
+    // If we had holes in the range we'd need to translate
+    if (type >= 0 && type < cmbDefaultView->count())
+        cmbDefaultView->setCurrentIndex(type);
+}
+

@@ -13,6 +13,7 @@ mail::12:mail
 news::13:news
 uucp::14:uucp
 man::15:
+messagebus::16:
 games::20:
 gopher::30:
 dip::40:

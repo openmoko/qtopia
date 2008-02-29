@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #ifndef QIPKG_H
 #define QIPKG_H
+#include <qtopiaabstractservice.h>
 #include "ui_qipkgbase.h"
 
 class QipkgBase : public QWidget, public Ui_QipkgBase
@@ -37,9 +38,35 @@ public:
     Qipkg( QWidget *parent = 0, Qt::WFlags f = 0 );
     virtual ~Qipkg();
 
+public slots:
+    void setDocument( const QString& ipkg );
+
 private slots:
     void start();
     void finished();
+
+private:
+    QString filename;
 };
+
+class QipkgService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class Qipkg;
+private:
+    QipkgService( Qipkg *parent )
+        : QtopiaAbstractService( "Qipkg", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~QipkgService();
+
+public slots:
+    void setDocument( const QString& ipkg );
+
+private:
+    Qipkg *parent;
+};
+
 
 #endif // QIPKG_H

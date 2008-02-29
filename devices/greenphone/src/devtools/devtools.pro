@@ -29,7 +29,12 @@ script.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/scripts/*
 script.path=/bin
 script.hint=script
 
-desktop.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/*.desktop 
+desktop.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/docapi-rescan.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/network-services-start.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/network-services-stop.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdcard-umount.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-ether.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-stop.desktop
 desktop.path=/apps/Devtools
 desktop.hint=desktop
 
@@ -44,9 +49,6 @@ help.hint=help
 
 motd.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/motd.html
 motd.path=/etc
-
-conf.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/etc/*
-conf.path=/etc
 
 # files required to flash Greenphone via miniSD or USB
 greenphone_flash.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/flash-files/flash-status-*.gif

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -666,9 +666,9 @@ bool QDSLockedFile::remove( const QString& name )
 // ============================================================================
 
 // Created with uuidgen
-QUniqueIdGenerator QDSDataPrivate::mIdGen(
-    "b9055662-d3bc-4c6d-8dea-f89bbb5f4752" ); // No tr
-QDSDataThreshold   QDSDataPrivate::mThreshold;
+Q_GLOBAL_STATIC_WITH_ARGS( QUniqueIdGenerator, mIdGen, 
+        ("b9055662-d3bc-4c6d-8dea-f89bbb5f4752") ); //no tr
+Q_GLOBAL_STATIC( QDSDataThreshold, mThreshold );
 
 QDSDataPrivate::QDSDataPrivate()
 :   mUsingLocalStore( false ),
@@ -694,10 +694,10 @@ QDSDataPrivate::QDSDataPrivate( const QByteArray& data, const QMimeType& type )
     mLocalStore( 0 ),
     mType( 0 )
 {
-    mId = mIdGen.createUniqueId();
+    mId = mIdGen()->createUniqueId();
 
-    if ( ( mThreshold.mValue == -1 ) ||
-         ( data.size() < mThreshold.mValue ) ) {
+    if ( ( mThreshold()->mValue == -1 ) ||
+         ( data.size() < mThreshold()->mValue ) ) {
         mUsingLocalStore = true;
         mLocalStore = new QByteArray( data );
         mType = new QMimeType( type );
@@ -713,10 +713,10 @@ QDSDataPrivate::QDSDataPrivate( QFile& data, const QMimeType& type )
     mLocalStore( 0 ),
     mType( 0 )
 {
-    mId = mIdGen.createUniqueId();
+    mId = mIdGen()->createUniqueId();
 
-    if ( ( mThreshold.mValue == -1 ) ||
-         ( data.size() < mThreshold.mValue ) ) {
+    if ( ( mThreshold()->mValue == -1 ) ||
+         ( data.size() < mThreshold()->mValue ) ) {
         mUsingLocalStore = true;
         if ( !data.isOpen() ) {
             if ( !data.open( QIODevice::ReadOnly ) ) {
@@ -741,8 +741,8 @@ QDSDataPrivate::QDSDataPrivate( const QLocalUniqueId& dataId,
     mLocalStore( 0 ),
     mType( 0 )
 {
-    if ( ( mThreshold.mValue == -1 ) ||
-         ( data.size() < mThreshold.mValue ) ) {
+    if ( ( mThreshold()->mValue == -1 ) ||
+         ( data.size() < mThreshold()->mValue ) ) {
         mUsingLocalStore = true;
         mLocalStore = new QByteArray( data );
         mType = new QMimeType( type );
@@ -766,7 +766,7 @@ QDSDataPrivate::~QDSDataPrivate()
 
 void QDSDataPrivate::shiftToStore()
 {
-    if ( mThreshold.mValue == -1 ) {
+    if ( mThreshold()->mValue == -1 ) {
         qLog(DataSharing) << "QDSDataPrivate::shiftToStore - "
                           << "can't write file on read-only filesystem";
         return;
@@ -800,6 +800,8 @@ void QDSDataPrivate::shiftToStore()
     For larger data sizes methods which use QFile and QIODevice are recommended.
 
     \sa QDSAction, QDSActionRequest
+
+    \ingroup ipc
 */
 
 /*!
@@ -1065,8 +1067,8 @@ bool QDSData::modify( const QByteArray& data )
     if ( d->mUsingLocalStore ) {
         delete d->mLocalStore;
         d->mLocalStore = 0;
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             d->mLocalStore = new QByteArray( data );
             ret = true;
         } else {
@@ -1092,8 +1094,8 @@ bool QDSData::modify( const QString& data )
     if ( d->mUsingLocalStore ) {
         delete d->mLocalStore;
         d->mLocalStore = 0;
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             d->mLocalStore = new QByteArray( data.toLatin1() );
             ret = true;
         } else {
@@ -1120,8 +1122,8 @@ bool QDSData::modify( QFile& data )
         delete d->mLocalStore;
         d->mLocalStore = 0;
 
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             if ( !data.isOpen() ) {
                 if ( !data.open( QIODevice::ReadOnly ) ) {
                     qLog(DataSharing) << "QDSDataPrivate::QDSDataPrivate - "
@@ -1155,8 +1157,8 @@ bool QDSData::modify( const QByteArray& data, const QMimeType& type )
         d->mLocalStore = 0;
         delete d->mType;
         d->mType = 0;
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             d->mLocalStore = new QByteArray( data );
             d->mType = new QMimeType( type );
             ret = true;
@@ -1182,8 +1184,8 @@ bool QDSData::modify( const QString& data, const QMimeType& type )
         d->mLocalStore = 0;
         delete d->mType;
         d->mType = 0;
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             d->mLocalStore = new QByteArray( data.toLatin1() );
             d->mType = new QMimeType( type );
             ret = true;
@@ -1209,8 +1211,8 @@ bool QDSData::modify( QFile& data, const QMimeType& type )
         d->mLocalStore = 0;
         delete d->mType;
         d->mType = 0;
-        if ( ( d->mThreshold.mValue == -1 ) ||
-             ( data.size() < d->mThreshold.mValue ) ) {
+        if ( ( mThreshold()->mValue == -1 ) ||
+             ( data.size() < mThreshold()->mValue ) ) {
             if ( !data.isOpen() ) {
                 if ( !data.open( QIODevice::ReadOnly ) ) {
                     qLog(DataSharing) << "QDSDataPrivate::QDSDataPrivate - "

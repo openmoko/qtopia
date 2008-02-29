@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -96,6 +96,10 @@
 #include "callhistory.h"
 #include "dialercontrol.h"
 #include "messagecontrol.h"
+#endif
+
+#ifdef QTOPIA_CELL
+#include "gsmkeyactions.h"
 #endif
 
 #define QTOPIA_ENABLE_EXPORTED_BACKGROUNDS      // experimental
@@ -241,7 +245,7 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     speeddialfeedback(0),
     m_exportedBackground(0)
 #ifdef QTOPIA_CELL
-    , cellModem(0)
+    , cellModem(0), gsmKeyActions(0)
 #endif
 {
     configuration = Qtopia::defaultButtonsFile();
@@ -344,8 +348,8 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #ifdef QTOPIA_PHONEUI
     connect(DialerControl::instance(), SIGNAL(missedCount(int)),
             this, SLOT(missedCount(int)));
-    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool)),
-            this, SLOT(messageCountChanged(int,bool,bool)));
+    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool,bool)),
+            this, SLOT(messageCountChanged(int,bool,bool,bool)));
     connect(MessageControl::instance(), SIGNAL(messageRejected()),
             this, SLOT(messageRejected()));
     connect(DialerControl::instance(), SIGNAL(activeCount(int)),
@@ -364,6 +368,7 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
             SLOT(registrationChanged()));
     connect(cellModem, SIGNAL(planeModeEnabledChanged(bool)),
             this, SLOT(registrationChanged()));
+    gsmKeyActions = new GsmKeyActions(this);
 #endif
 #ifdef QTOPIA_VOIP
     connect(VoIPManager::instance(),
@@ -439,10 +444,22 @@ void PhoneLauncher::callPressed()
 void PhoneLauncher::hangupPressed()
 {
     // Called if server windows are not on top
-    topLevelWidget()->raise();
-    QtopiaIpcEnvelope e("QPE/System","close()");
-    hideAll();
-    showHomeScreen(0);
+#ifdef QTOPIA_PHONEUI
+    DialerControl *control = DialerControl::instance();
+    if (control->isConnected() || control->isDialing() ||
+        control->hasIncomingCall()) {
+        // We have an in-progress call, so hang it up rather than
+        // close all running applications.
+        showCallScreen();
+        control->endCall();
+    } else
+#endif
+    {
+        topLevelWidget()->raise();
+        QtopiaIpcEnvelope e("QPE/System","close()");
+        hideAll();
+        showHomeScreen(0);
+    }
 }
 
 void PhoneLauncher::multitaskPressed()
@@ -627,7 +644,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         ThemeControl::instance()->refresh();
         polishWindows();
         updateLauncherIconSize();
-        QtopiaChannel::send( "QPE/Application/appearance", "Settings::themeLoaded()" );
     } else if ( message == "applyBackgroundImage()" ) {
         homeScreen->applyBackgroundImage();
         updateBackground();
@@ -761,7 +777,7 @@ void PhoneLauncher::missedCount(int count)
     }
 }
 
-void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem)
+void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem, bool notify)
 {
     alertedMessageCount = 0;
     messageBoxFull = full;
@@ -769,7 +785,8 @@ void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem)
     if (count != messageCount) {
         messageCount = count;
         homeScreen->setNewMessages(count);
-        showAlertDialogs();
+        if(notify)
+            showAlertDialogs();
     }
 }
 
@@ -977,8 +994,11 @@ void PhoneLauncher::updateBackground()
         if (item) {
             QDesktopWidget *desktop = QApplication::desktop();
             QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-            QPixmap pm(desktopRect.width(),
-                       desktopRect.height());
+            // Create a 16bpp pixmap is possible
+            QImage::Format fmt = desktop->depth() <= 16 ? QImage::Format_RGB16 : QImage::Format_ARGB32_Premultiplied;
+            QImage img(desktopRect.width(),
+                       desktopRect.height(), fmt);
+            QPixmap pm = QPixmap::fromImage(img);
             QPainter p(&pm);
             QRect rect(QPoint(0,0), desktopRect.size());
             homeScreen->paint(&p, rect, item);
@@ -1501,6 +1521,9 @@ void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
         // Emergency numbers should always be dialed with GSM,
         // as the VoIP provider probably doesn't have support for it.
         queuedCallType = "Voice";     // No tr
+    } else if (gsmKeyActions && gsmKeyActions->isGsmNumber(n)) {
+        // The number is definitely intended for a GSM network.
+        queuedCallType = "Voice";     // No tr
     } else if (anyType) {
         if (gsmReg && !voipReg) { // only gsm network available
             queuedCallType = "Voice";
@@ -1580,6 +1603,11 @@ QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
                 SLOT(requestDial(const QString&, const QUniqueId&)));
         connect(m_dialer, SIGNAL(speedDial(const QString&)),
                 this, SLOT(speedDial(const QString&)) );
+
+    #ifdef QTOPIA_CELL
+        if(gsmKeyActions)
+            gsmKeyActions->setDialer(m_dialer);
+    #endif
     }
 
     return m_dialer;
@@ -1603,6 +1631,17 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
         QObject::connect(mCallScreen, SIGNAL(acceptIncoming()),
                          this, SLOT(acceptIncoming()));
         ThemeControl::instance()->registerThemedView(mCallScreen, "CallScreen");
+
+#ifdef QTOPIA_CELL
+        if (gsmKeyActions) {
+            QObject::connect( mCallScreen, SIGNAL(filterKeys(QString,bool&)),
+                    gsmKeyActions, SLOT(filterKeys(QString,bool&)) );
+            QObject::connect( mCallScreen, SIGNAL(filterSelect(QString,bool&)),
+                    gsmKeyActions, SLOT(filterSelect(QString,bool&)) );
+            QObject::connect( mCallScreen, SIGNAL(testKeys(QString,bool&)),
+                    gsmKeyActions, SLOT(testKeys(QString,bool&)) );
+        }
+#endif
     }
     return mCallScreen;
 
@@ -1699,6 +1738,7 @@ EarpieceVolume::EarpieceVolume(QWidget *parent, Qt::WFlags f)
     slider->setTickPosition(QSlider::TicksBelow);
     slider->installEventFilter(this);
     QSoftMenuBar::setLabel(slider, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    QSoftMenuBar::setLabel(slider, Qt::Key_Back, QSoftMenuBar::Back);
     connect(slider, SIGNAL(valueChanged(int)), this, SLOT(levelChanged(int)));
     gl->addWidget(slider, 2, 0, 1, 2);
     QLabel *l = new QLabel(QString::number(minLevel), this);

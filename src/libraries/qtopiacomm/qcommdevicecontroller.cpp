@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -208,6 +208,9 @@ void QCommDeviceController_Private::bringUpOneItem()
     The device can be in four power states: on, off, on for one item, and on for a period of time.
 
     \sa QCommDeviceSession
+
+    \ingroup hardware
+    \ingroup telephony
  */
 
 /*!

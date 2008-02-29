@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -52,57 +52,57 @@ protected:
 
 class LauncherView : public QWidget
 {
-    Q_OBJECT
-    public:
-        LauncherView( QWidget* parent = 0, Qt::WFlags fl = 0 );
-        virtual ~LauncherView();
+Q_OBJECT
+public:
+    LauncherView( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    virtual ~LauncherView();
 
-        void resetSelection();
-        void setBusy(bool);
-        void setBusy(const QModelIndex &, bool);
-        void setViewMode( QListView::ViewMode m );
-        QListView::ViewMode viewMode() const;
+    void resetSelection();
+    void setBusy(bool);
+    void setBusy(const QModelIndex &, bool);
+    void setViewMode( QListView::ViewMode m );
+    QListView::ViewMode viewMode() const;
 
-        void removeAllItems();
-        void addItem(QContent* app, bool resort=true);
-        void removeItem(const QContent &);
+    void removeAllItems();
+    void addItem(QContent* app, bool resort=true);
+    void removeItem(const QContent &);
 
-        void setColumns(int);
-        virtual void setFilter(const QContentFilter &filter);
-        const QContent currentItem() const;
+    void setColumns(int);
+    virtual void setFilter(const QContentFilter &filter);
+    const QContent currentItem() const;
 
-        enum SortingStyle { NoSorting, LanguageAwareSorting };
+    enum SortingStyle { NoSorting, LanguageAwareSorting };
 
-        void setSorting(SortingStyle style);
-    protected:
-        friend class QLauncherProxyModel;
-        LauncherViewListView *icons;
-        QContentSet *contentSet;
-        QContentSetModel *model;
-        QContentFilter mainFilter;
-        QContentFilter categoryFilter;
-        QContentFilter typeFilter;
-        int nColumns;
-        int busyTimer;
-        QLauncherProxyModel *bpModel;
+    void setSorting(SortingStyle style);
+protected:
+    friend class QLauncherProxyModel;
+    LauncherViewListView *icons;
+    QContentSet *contentSet;
+    QContentSetModel *model;
+    QContentFilter mainFilter;
+    QContentFilter categoryFilter;
+    QContentFilter typeFilter;
+    int nColumns;
+    int busyTimer;
+    QLauncherProxyModel *bpModel;
 
-        virtual void changeEvent(QEvent *e);
-        virtual void showEvent(QShowEvent *e);
-        virtual void calculateGridSize();
-        virtual void timerEvent( QTimerEvent * event );
+    virtual void changeEvent(QEvent *e);
+    virtual void showEvent(QShowEvent *e);
+    virtual void calculateGridSize();
+    virtual void timerEvent( QTimerEvent * event );
 
-    signals:
-        void clicked( QContent );
-        void rightPressed( QContent );
+signals:
+    void clicked( QContent );
+    void rightPressed( QContent );
 
-    protected slots:
-        void returnPressed(const QModelIndex &item);
-        void itemClicked(const QModelIndex & index);
-        void itemPressed(const QModelIndex &);
-        void resizeEvent(QResizeEvent *);
-    public slots:
-        void showType( const QContentFilter & );
-        void showCategory( const QContentFilter & );
+protected slots:
+    void returnPressed(const QModelIndex &item);
+    void itemClicked(const QModelIndex & index);
+    void itemPressed(const QModelIndex &);
+    void resizeEvent(QResizeEvent *);
+public slots:
+    void showType( const QContentFilter & );
+    void showCategory( const QContentFilter & );
 };
 
 class ApplicationLauncherView : public LauncherView

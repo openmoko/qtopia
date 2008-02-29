@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -480,7 +480,7 @@ private:
 
   \image qdawg.png
 
-  \ingroup qtopiaemb
+  \ingroup userinput
 */
 
 /*!
@@ -640,8 +640,6 @@ void QDawg::dump() const
 /*!
   \class QDawg::Node
   \brief The Node class of the QDawg class is one node of a QDawg.
-
-  \ingroup qtopiaemb
 */
 
 /*!

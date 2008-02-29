@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -96,6 +96,7 @@ protected slots:
     void viewNext();
     void setShowCompleted( int );
     void currentEntryChanged( );
+    void taskModelReset( );
 
     void showFindWidget( bool s );
     void startNewSearch(const QString &);
@@ -118,6 +119,7 @@ protected:
     void closeEvent( QCloseEvent *e );
 #ifdef QTOPIA_PHONE
     void keyPressEvent(QKeyEvent *);
+    bool eventFilter(QObject *o, QEvent *e);
 #endif
     void createUI();
 

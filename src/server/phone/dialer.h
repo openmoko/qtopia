@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -42,6 +42,9 @@ public:
     virtual void reset();
     virtual void appendDigits(const QString &digits);
     virtual void setDigits(const QString &digits);
+
+protected slots:
+    void keyEntered(const QString &key);
 
 private:
     Dialer *m_dialer;

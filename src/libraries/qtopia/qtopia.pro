@@ -96,6 +96,7 @@ QTOPIA_HEADERS+=\
     qhardwareinterface.h\
     qhardwaremanager.h\
     qbatteryaccessory.h\
+    qbootsourceaccessory.h\
     qhandsfreeaccessory.h\
     qhandsetaccessory.h\
     qheadsetaccessory.h\
@@ -222,6 +223,7 @@ QTOPIA_SOURCES+=\
     qhardwareinterface.cpp\
     qhardwaremanager.cpp\
     qbatteryaccessory.cpp\
+    qbootsourceaccessory.cpp\
     qhandsfreeaccessory.cpp\
     qhandsetaccessory.cpp\
     qheadsetaccessory.cpp\

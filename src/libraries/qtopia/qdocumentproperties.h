@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -30,7 +30,7 @@
 #include <QDialog>
 
 class QContent;
-
+class QGridLayout;
 class QDocumentPropertiesWidgetPrivate;
 
 class QTOPIA_EXPORT QDocumentPropertiesWidget : public QWidget
@@ -53,8 +53,7 @@ protected slots:
 
 private:
     bool moveLnk();
-    QString formatRights( const QList< QDrmRights > &rights ) const;
-
+    void addRights( const QDrmRights &rights, QGridLayout *layout, QWidget *parent, int *row );
     QContent lnk;
     int fileSize;
 

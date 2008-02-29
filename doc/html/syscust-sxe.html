@@ -21,6 +21,7 @@
 <li><a href="#qtopia-sxe-and-lids-mac-integration-points">Qtopia SXE and LIDS MAC integration points</a></li>
 <ul><li><a href="#qtopia-sxe-domain-scripts">Qtopia SXE domain scripts</a></li>
 </ul>
+<li><a href="#development-with-qvfb">Development with qvfb</a></li>
 <li><a href="#qtopia-4-1-release-pending-functionality">Qtopia 4.1 Release Pending Functionality</a></li>
 </ul>
 <a name="introduction"></a>
@@ -260,6 +261,15 @@
 <p>For each of these domains, the sxe_installer processes the scripts described above, just as the packagemanager would during normal operation, and adds to the scripts listed in the <tt>/opt/Qtopia/etc/sxe_qtopia</tt> directory.</p>
 <p>When the Qtopia SXE device boots up, during the initialization process the sxe_boot.sh script is run. See the previous section for more details of how this script is called.</p>
 <p>One of the actions of this script is to call the <tt>run-parts</tt> command (provided by BusyBox on devices) on the <tt>/opt/Qtopia/etc/sxe_qtopia</tt> directory if the sxe system requires initialization.</p>
+<a name="development-with-qvfb"></a>
+<h2>Development with qvfb</h2>
+<p>When developing with an sxe-enabled build of Qtopia on a desktop with qvfb, some steps need to be taken. The SxeMonitor process requires access to a security log file, by default this is /var/log/messages. To grant access simply give read permissions to others via</p>
+<pre>    chmod o+r /var/log/messages</pre>
+<p>If you do not wish to grant read permissions to /var/log/messages, a different log file can be specified by creating the configuration file SxeMonitor.conf in $QPEDIR/etc/default/Trolltech with the following format:</p>
+<pre>    [log]
+    logPath=/path/to/sxe.log</pre>
+<p>Ensure that log messages of priority local6.err are redirected to the specified log file and that read permissions on the file are granted. The steps for redirection will vary according to which logging facility your computer is running.</p>
+<p><b>Note:</b> These steps do not need to be taken when developing with a device or device emulator.</p>
 <a name="qtopia-4-1-release-pending-functionality"></a>
 <h2>Qtopia 4.1 Release Pending Functionality</h2>
 <p><b>Items not completed for the 4.1 Release</b> include the *.template script files mentioned in the previous section.</p>
@@ -268,8 +278,8 @@
 <p>The <tt>sxe_qtopia</tt> scripts covered in the previous section, and the make install and packagemanager functionality which implements it has also not yet been completed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

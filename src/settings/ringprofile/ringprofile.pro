@@ -1,6 +1,6 @@
 qtopia_project(qtopia app)
 TARGET=profileedit
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
 
 HEADERS		= ringprofile.h ringtoneeditor.h 
 SOURCES		= main.cpp ringprofile.cpp ringtoneeditor.cpp 

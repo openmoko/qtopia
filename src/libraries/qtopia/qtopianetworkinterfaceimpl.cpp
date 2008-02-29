@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,8 @@
     a network plug-in must provide.
 
     There is no default implementation available for this interface.
+
+  \ingroup io
 */
 
 /*!
@@ -177,6 +179,8 @@
   or by calling configure() which returns a user dialog.
 
   There is no default implementation available for this interface.
+
+  \ingroup io
  */
 
 /*!
@@ -248,6 +252,8 @@ QtopiaNetworkConfiguration::~QtopiaNetworkConfiguration()
 
   It is used as a generic way to access settingsfiles by mapping keys to
   values.
+
+  \ingroup io
 */
 
 /*!

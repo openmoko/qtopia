@@ -182,7 +182,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QContact class holds the data of an address book entry.</p>
-<p>This data includes information the name of the person, contact information, and business information such as deparment and job title.</p>
+<p>This data includes information the name of the person, contact information, and business information such as department and job title.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="GenderType-enum"></a>enum QContact::GenderType</h3>
@@ -358,7 +358,7 @@
 <p>Returns the string identifiers suitable for describing the format for the contact label.</p>
 <h3 class="fn"><a name="labelFormat"></a><a href="qstring.html">QString</a> QContact::labelFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the format for contact labels.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="fd-WorldTime.html">_</a> for a space, an identifier as from indentifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="fd-WorldTime.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
 <p>For example:</p>
 <p>LastName , <a href="fd-WorldTime.html">_</a> FirstName | LastName | FirstName | Company</p>
 <p>See also <a href="qcontact.html#setLabelFormat">setLabelFormat</a>().</p>
@@ -537,7 +537,7 @@
 <p>See also <a href="qcontact.html#jobTitle">jobTitle</a>().</p>
 <h3 class="fn"><a name="setLabelFormat"></a>void QContact::setLabelFormat ( const <a href="qstring.html">QString</a> &amp; <i>f</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the format for contact labels to that described by <i>f</i>.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="fd-WorldTime.html">_</a> for a space, an identifier as from indentifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="fd-WorldTime.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
 <p>For example:</p>
 <p>LastName , <a href="fd-WorldTime.html">_</a> FirstName | LastName | FirstName | Company</p>
 <p>See also <a href="qcontact.html#labelFormat">labelFormat</a>().</p>
@@ -623,11 +623,11 @@
 <h3 class="fn"><a name="operator-eq"></a>QContact &amp; QContact::operator= ( const QContact &amp; <i>contact</i> )</h3>
 <p>Makes a copy of <i>contact</i> and assigns it to this <a href="qcontact.html">QContact</a>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QContact::operator== ( const QContact &amp; <i>other</i> ) const</h3>
-<p>Compares to <i>other</i> contacts and returns true if it is equivilent. Otherwise returns false</p>
+<p>Compares to <i>other</i> contacts and returns true if it is equivalent. Otherwise returns false</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

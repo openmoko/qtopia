@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -522,8 +522,6 @@ void EmailClient::init()
     vboxLayout = new QVBoxLayout(vbox);
     vboxLayout->setMargin( 0 );
     vboxLayout->setSpacing( 0 );
-
-    setBackgroundRole( QPalette::Button );
 
 #ifndef QTOPIA_PHONE
     bar = new QToolBar( this );
@@ -1098,6 +1096,9 @@ void EmailClient::mailSent(int count)
 //      sendMailButton->setVisible(true);
         cancelButton->setVisible(false);
         isSending(false);
+        QString temp = tr("<qt>Failed to send message</qt>");
+        QMessageBox::warning(qApp->activeWindow(),tr("Sending error"),
+                             temp, tr("OK"));
         return;
     }
 

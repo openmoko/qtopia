@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include <qatresultparser.h>
 #include <qatresult.h>
+#include <qatutils.h>
 
 /*!
     \class QAtResultParser
@@ -182,61 +183,11 @@ uint QAtResultParser::readNumeric()
     return value;
 }
 
-static int fromHexDigit( uint ch )
-{
-    if ( ch >= '0' && ch <= '9' ) {
-        return (int)( ch - '0' );
-    } else if ( ch >= 'A' && ch <= 'F' ) {
-        return (int)( ch - 'A' + 10 );
-    } else if ( ch >= 'a' && ch <= 'f' ) {
-        return (int)( ch - 'a' + 10 );
-    } else {
-        return -1;
-    }
-}
-
 static QString nextString( const QString& buf, int& posn )
 {
-    QString result = "";
-    uint ch;
-    int digit, digit2;
-    while ( posn < buf.length() && buf[posn] != '"' ) {
-        ++posn;
-    }
-    if ( posn >= buf.length() ) {
-        return result;
-    }
-    ++posn;
-    while ( posn < buf.length() && ( ch = buf[posn].unicode() ) != '"' ) {
-        ++posn;
-        if ( ch == '\\' ) {
-            // Hex-quoted character.
-            if ( posn >= buf.length() )
-                break;
-            digit = fromHexDigit( buf[posn].unicode() );
-            if ( digit == -1 ) {
-                result += (QChar)'\\';
-                continue;
-            }
-            if ( ( posn + 1 ) >= buf.length() ) {
-                ch = (uint)digit;
-                ++posn;
-            } else {
-                digit2 = fromHexDigit( buf[posn + 1].unicode() );
-                if ( digit2 == -1 ) {
-                    ch = (uint)digit;
-                    ++posn;
-                } else {
-                    ch = (uint)(digit * 16 + digit2);
-                    posn += 2;
-                }
-            }
-        }
-        result += (QChar)ch;
-    }
-    if ( posn < buf.length() ) {
-        ++posn;
-    }
+    uint posn2 = (uint)posn;
+    QString result = QAtUtils::nextString( buf, posn2 );
+    posn = (int)posn2;
     return result;
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -209,13 +209,15 @@ LocalPackageController::~LocalPackageController()
 void LocalPackageController::initialiseLocalPackageInfo()
 {
     pkgList.clear();
+    pkgLoc.clear();
     QStringList paths = Qtopia::installPaths();
     QString tempPackageInfoPath = Qtopia::tempDir() + "packages";
     connect( reader, SIGNAL(packageComplete()),
             this, SLOT(packageComplete()));
     for ( int i = 0; i < paths.count(); ++i )
     {
-        QDir packageDirectory( paths[i] + LOCAL_PACKAGE_DIRECTORY);
+        currentPackageDirectory = paths[i] + LOCAL_PACKAGE_DIRECTORY;
+        QDir packageDirectory( currentPackageDirectory );
 
         if ( !packageDirectory.exists() )
             continue;
@@ -233,7 +235,7 @@ void LocalPackageController::initialiseLocalPackageInfo()
                     qPrintable( summaryFile.fileName() ));
             continue;
         }
-        while ( summaryFile.atEnd() )
+        while ( !summaryFile.atEnd() )
         {
             QString line = summaryFile.readLine();
             reader->readLine( line );
@@ -244,12 +246,18 @@ void LocalPackageController::initialiseLocalPackageInfo()
 void LocalPackageController::packageComplete()
 {
     pkgList.append( reader->package() );
+    pkgLoc.insert( reader->package(), currentPackageDirectory );
     reader->reset();
 }
 
 void LocalPackageController::install( int pkgId )
 {
+    QString pkgFile = pkgLoc[pkgList[pkgId]] + "/" + pkgList[pkgId].packageFile;
+    QString lnkFile = Qtopia::tempDir() + pkgList[pkgId].packageFile;
+
+    QFile::link(pkgFile, lnkFile);
     installControl->installPackage( pkgList[pkgId] );
+    QFile::remove(lnkFile);
     emit updated();
     emit packageInstalled( pkgList[pkgId] );
 }
@@ -295,7 +303,7 @@ void NetworkPackageController::insertNetworkPackageItems()
             hf, SLOT(cancel()) );
     connect( hf, SIGNAL(progressValue(int)), progressDisplay, SLOT(setValue(int)));
     connect( hf, SIGNAL(finished()), this, SLOT(listFetchComplete()));
-    progressDisplay->show();
+    QtopiaApplication::showDialog( progressDisplay );
     hf->start();
 }
 
@@ -379,7 +387,7 @@ void InstalledPackageController::initialize()
     reloadInstalledLocations( QStringList( Qtopia::packagePath() ));
 }
 
-void InstalledPackageController::install(int /*packageI*/)
+void InstalledPackageController::install(int packageI)
 {
 }
 

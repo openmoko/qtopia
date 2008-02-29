@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,6 +38,7 @@
 
 /*!
   \class QtopiaIpcEnvelope
+    \ingroup ipc
   \brief The QtopiaIpcEnvelope class encapsulates and sends QCop messages
   over QtopiaChannels.
 
@@ -76,7 +77,7 @@
                this, SLOT(fooBarMessage(const QString&,const QByteArray&)) );
   \endcode
   \endlist
-  See also: \l {QCop Messages}{QCop Messages} and \l {Services}{Services}.
+  See also: \l {Qtopia IPC Layer}{Qtopia IPC} and \l {Services}{Services}.
 
   \ingroup qtopiaemb
 */

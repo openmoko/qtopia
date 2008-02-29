@@ -72,6 +72,8 @@ private slots:
     void removeStroke();
 //    void guessTimedOut();
 
+protected:
+    virtual void updateHandler ( int type );
 private:
     QIMPenStroke *inputStroke;
     bool protectInputStroke;
@@ -151,7 +153,7 @@ private:
     void timerEvent(QTimerEvent*);
 
     void applyFunction(InputMatcherFunc);
-    void sendAndEnd();
+    void sendAndEnd(bool forceCommit = false);
 
     void endWord(); // implies space.
     void toggleShift();

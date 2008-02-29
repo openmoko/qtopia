@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -130,6 +130,7 @@ void AppointmentPicker::initMonth()
 {
     if ( !monthView ) {
         monthView = new MonthView;
+        monthView->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
         // TODO monthView->setMargin(0);
         views->addWidget( monthView );
         connect( monthView, SIGNAL( activated(const QDate&) ),

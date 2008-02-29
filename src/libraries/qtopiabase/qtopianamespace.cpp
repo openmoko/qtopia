@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -277,14 +277,7 @@ QString Qtopia::qtopiaDir()
 */
 QString Qtopia::documentDir()
 {
-    QString r = homePath();
-
-    QString base = r;
-    if (base.length() > 0){
-        return base + "/Documents/";
-    }
-
-    return QString( "../Documents/" );
+    return QFileSystem::documentsFileSystem().documentsPath() + '/';
 }
 
 /*!
@@ -1241,23 +1234,30 @@ const QDawg& Qtopia::addedDawg()
 */
 const QDawg& Qtopia::dawg(const QString& name, const QString& language)
 {
+    QString augmentedName;
+    if ( name[0] == '_' ) {
+        augmentedName=name+QChar('.')+language;
+    } else {
+        augmentedName = name;
+    };
+
     if ( !named_dawg ) {
         named_dawg = new QMap<QString,QDawg*>;
         qAddPostRoutine( clean_named_dawg );
     }
-    QDawg* r = named_dawg->value(name);
+    QDawg* r = named_dawg->value(augmentedName);
 
     if ( !r ) {
         qtopia_createDocDir();
         r = new QDawg;
-        (*named_dawg)[name] = r;
+        (*named_dawg)[augmentedName] = r;
 
         if ( !r->root() ) {
-            if ( name[0] == '_' ) {
+            if ( augmentedName[0] == '_' ) {
                 QString n = name.mid(1);
                 qtopia_load_fixedwords(r, n, language);
             } else {
-                Qtopia::qtopiaReloadWords(name);
+                Qtopia::qtopiaReloadWords(augmentedName);
             }
         }
     }

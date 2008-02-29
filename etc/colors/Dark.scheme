@@ -1,0 +1,24 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name=Dark Qtopia
+[Colors]
+Background=#000001
+Button=#333333
+Highlight=#5D7320
+HighlightedText=#FFFFFF
+Text=#FFFFFF
+AlternateBase=#333333
+Foreground=#FFFFFF
+WindowText=#FFFFFF
+ButtonText=#FFFFFF
+Light=#FFFFFF
+Midlight=#FFFFFF
+Dark=#FFFFFF
+Mid=#FFFFFF
+Shadow=#333333
+Base=#000000
+Link=#2AD1FF
+LinkVisited=#d027ff
+

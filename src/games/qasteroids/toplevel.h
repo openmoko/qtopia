@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,17 +43,20 @@ class KAstTopLevel : public QMainWindow
     virtual ~KAstTopLevel();
 
  private:
+    void startNewGame();
+    bool gameEnded() const;
+    void endGame();
     void playSound(const char* snd);
     void readSoundMapping();
-    void doStats();
-#ifdef QTOPIA_PHONE
-    void updateContext1();
-#endif
+    void reportStatistics();
+
     QWidget* buildTopRow(QWidget* parent);
     QWidget* buildBottomRow(QWidget* parent);
     KAsteroidsView* buildAsteroidsView(QWidget* parent);
     QPalette buildPalette();
-    bool eventConsumed(QKeyEvent* e) const;
+    bool eventConsumed(QKeyEvent* e) const; 
+    void populateRocks();
+    void populatePowerups();
 
  protected:
     virtual void showEvent(QShowEvent* );
@@ -64,11 +67,10 @@ class KAstTopLevel : public QMainWindow
     virtual void focusOutEvent(QFocusEvent* event);
 
  private slots:
-    void slotNewGame();
+    void slotNewGameLevel();
     void slotMissileFired();
     void slotShipKilled();
-    void slotRockHit(int size);
-    void slotRocksRemoved();
+    void slotUpdateScore(int key);
     void slotUpdateVitals();
 
  private:
@@ -78,7 +80,6 @@ class KAstTopLevel : public QMainWindow
     QLCDNumber* shipsLCD_;
 
     QLCDNumber* teleportsLCD_;
-    // QLCDNumber* bombsLCD_;
     QLCDNumber* brakesLCD_;
     QLCDNumber* shieldLCD_;
     QLCDNumber* shootLCD_;
@@ -88,24 +89,24 @@ class KAstTopLevel : public QMainWindow
     QSound rockDestroyed;
     QSound missileFired;
 
-    bool waitForNewShip_; // Wait for user to launch new ship.
-    bool keyIsPressed_; // true means a key is currently pressed.
+    bool	gameEnded_;
+    int 	shipCount_;
+    int 	score_;
+    int 	currentLevel_;
 
-    int shipCount_;
-    int score_;
-    int currentLevel_;
-
-    enum Action {
-        Launch,
-        Thrust,
-        RotateLeft,
-        RotateRight,
-        Shoot,
-        Teleport,
-        Brake,
-        Shield,
-        Pause,
-        NewGame
+    enum Action { 
+	Launch, 
+	Thrust, 
+	RotateLeft, 
+	RotateRight, 
+	Shoot, 
+	Teleport,
+	Brake, 
+	Shield, 
+	Pause, 
+	NewGame,
+	Populate_Powerups,
+	Populate_Rocks
     };
 
     QMap<int,Action>    actions_;

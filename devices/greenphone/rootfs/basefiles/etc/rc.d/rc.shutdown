@@ -7,6 +7,16 @@ for file in /etc/rc.d/*.sh; do
     fi
 done
 
+# send all processes the TERM signal
+kill -SIGTERM -1
+
+sleep 1
+
+# send all processes the KILL signal
+kill -SIGKILL -1
+
+sleep 1
+
 # unmount all file systems
 /bin/umount -a -r
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -610,13 +610,13 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
 /*!
   \group ValueSpace
   \title Qtopia Value Space
-  \brief The Qtopia Value Space allows inter-process publication of hierarchal
+  \brief The Qtopia Value Space allows inter-process publication of hierarchical
   data.
 
   \section1 Overview
 
-  The Qtopia Value Space unifies various sources of hierarchal data into a
-  single consistent model.  Conceptually the Value Space is a hierarchal tree
+  The Qtopia Value Space unifies various sources of hierarchical data into a
+  single consistent model.  Conceptually the Value Space is a hierarchical tree
   of which each node or leaf can optionally contain a QVariant value.  A
   serialized version of a simple example Value Space might look like this.
 
@@ -636,14 +636,14 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
 
   Nodes in the Value Space can be thought of as representing schema objects.
   Obviously this is a conceptual differentiation and not a physical one, as
-  internall the Value Space is treated as one large tree.  By applying
+  internally the Value Space is treated as one large tree.  By applying
   structured schema to the space "explorability" is increased.  For example,
   the \c {/Device/Buttons} schema can be defined as containing a value
   representing the number of mappable buttons on a device, and a sub-item for
-  each adhearing to the \c {MappableButton} schema.  The \c {MappableButton}
+  each adhering to the \c {MappableButton} schema.  The \c {MappableButton}
   schema itself may be defined as containing two attributes \c {Name} and
   \c {Usable}.  Change notification is modeled in this fashion also.  Where the
-  \c {/Device/Buttons/1/Name} item to change, the \c {/Device/Buttons/1} item
+  \c {/Device/Buttons/1/Name} item is to change, the \c {/Device/Buttons/1} item
   would be marked as changed, and so on up the tree.  This allows, for example,
   subscription to just \c {/Device/Buttons} to be notified when anything
   "button" related changes.
@@ -654,13 +654,13 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
   items in the layers below it.  The two most important Value Space layers are:
 
   \list 1
-  \i The Application Object layer
+  \i {The Application Object layer}
 
      The Application Object layer allows applications to add and remove
      "transient" data from the Value Space.  Applications access the Application
      Object layer through the QValueSpaceObject class.
 
-  \i The INI layer
+  \i {The INI layer}
 
      The INI layer maps regular INI files into the Value Space.  This mapping
      allows values stored in configuration files to be used interchangably with

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -69,6 +69,7 @@ public:
     QContact exportContact(const QUniqueId &id, bool &) const;
 private:
     ContactSqlIO *mAccess;
+    QPreparedSqlQuery importQuery;
 };
 
 class QSqlPimTableModel;
@@ -77,7 +78,7 @@ class ContactSqlIO : public QContactIO, public QPimSqlIO {
     Q_OBJECT
 
 public:
-    explicit ContactSqlIO( QObject *parent, const QString &name = QString());
+    explicit ContactSqlIO( QObject *parent = 0, const QString &name = QString());
 
     ~ContactSqlIO();
 
@@ -120,7 +121,7 @@ public:
     QUniqueId addContact(const QContact &contact, const QPimSource &, bool);
 
     bool exists(const QUniqueId & id) const { return !contact(id).uid().isNull(); }
-    bool contains(const QUniqueId & id) const { return row(id) != -1; }
+    bool contains(const QUniqueId & id) const { return QPimSqlIO::contains(id); }
 
 #ifdef SUPPORT_SYNCML
     bool canProvideDiff() const { return false; }
@@ -136,9 +137,9 @@ public:
 #ifdef QTOPIA_PHONE
     QUniqueId matchPhoneNumber(const QString &, int &) const;
 #endif
+    void invalidateCache();
 protected:
     void bindFields(const QPimRecord &, QSqlQuery &) const;
-    void invalidateCache();
     QStringList sortColumns() const;
     QString sqlColumn(QContactModel::Field k) const;
 
@@ -170,6 +171,20 @@ private:
 
     static QMap<QContactModel::Field, QString> mFields;
     static QMap<QContactModel::Field, bool> mUpdateable;
+
+    // Saved queries
+    mutable QPreparedSqlQuery contactQuery;
+    mutable QPreparedSqlQuery categoryQuery;
+    mutable QPreparedSqlQuery emailsQuery;
+    mutable QPreparedSqlQuery addressesQuery;
+    mutable QPreparedSqlQuery phoneQuery;
+    mutable QPreparedSqlQuery customQuery;
+    mutable QPreparedSqlQuery insertEmailsQuery;
+    mutable QPreparedSqlQuery insertAddressesQuery;
+    mutable QPreparedSqlQuery insertPhoneQuery;
+    mutable QPreparedSqlQuery removeEmailsQuery;
+    mutable QPreparedSqlQuery removeAddressesQuery;
+    mutable QPreparedSqlQuery removePhoneQuery;
 };
 
 #endif

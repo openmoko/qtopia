@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -23,11 +23,12 @@
 #include <QString>
 #include <QSettings>
 
+Q_GLOBAL_STATIC_WITH_ARGS(QSettings, logSettings, ("Trolltech", "Log"));
+
 bool qtopiaLogRequested( const char* category )
 {
-    return QSettings("Trolltech","Log").value(QString(category)+"/Enabled",0).toBool();
+    return logSettings()->value(QLatin1String(category)+"/Enabled",0).toBool();
 }
-
 
 bool qtopiaLogEnabled( const char* category )
 {

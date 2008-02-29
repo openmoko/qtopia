@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 #include <QList>
 #include <QModelIndex>
 #include <QSize>
+#include <QMap>
 
 #include "installcontrol.h"
 
@@ -114,6 +115,9 @@ private slots:
     void packageComplete();
 private:
     static const QString LOCAL_PACKAGE_DIRECTORY;
+
+    QString currentPackageDirectory;
+    QMap<InstallControl::PackageInfo, QString> pkgLoc;
 
     void initialiseLocalPackageInfo();
 

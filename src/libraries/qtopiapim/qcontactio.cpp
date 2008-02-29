@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -41,7 +41,7 @@
 /*!
   \class QContactIO
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContactIO class provides an interface for accessing contact data stores such
   as xml, sql and sim.
 
@@ -81,7 +81,7 @@
 /*!
   \fn bool QContactIO::canProvideDiff() const
 
-  Should return true if possible to provide a diff for this io object suitable for syncing via SyncML.
+  Should return true if possible to provide a diff for this IO object suitable for syncing via SyncML.
 
   By default returns false.
 
@@ -132,7 +132,7 @@ QList<QContactIO *> QContactIO::activeContacts;
 
 /*!
   \internal
-  Contstructs a QContactIO with parent \a parent.
+  Constructs a QContactIO with parent \a parent.
   access mode is set to \a m but otherwise is not used.
 */
 QContactIO::QContactIO(QObject *parent)
@@ -258,7 +258,7 @@ void QContactIO::checkRemoved(const QList<QUniqueId> &) { emit recordsUpdated();
 
 /*!
   \internal
-  Checks store for upates to \a contact.
+  Checks store for updates to \a contact.
 
   By default only calls the recordsUpdated() signal.
 
@@ -274,8 +274,8 @@ void QContactIO::checkUpdated(const QContact &contact)
 /*!
   \internal
 
-  Ensures state of store is consistent with what is on perminant storage.  if \a force is true
-  forces a reaload of cache even if checks indicates is up to date.
+  Ensures state of store is consistent with what is on permanent storage.  if \a force is true
+  forces a reload of cache even if checks indicates is up to date.
 */
 void QContactIO::ensureDataCurrent(bool force)
 {
@@ -381,7 +381,7 @@ QVariant QContactIO::contactField(int row, QContactModel::Field k) const
   \internal
 
   Sets the value for field \a k of contact at \a row for the current filter and sort settings
-  to \a v.  Returns true if sucessfully updated, otherwise returns false.
+  to \a v.  Returns true if successfully updated, otherwise returns false.
 */
 bool QContactIO::setContactField(int row, QContactModel::Field k,  const QVariant &v)
 {
@@ -441,7 +441,7 @@ QString QContactIO::formattedLabel(const QContact &contact)
 
   The format is a set of pattern separated by '|'s.  Each pattern is
   a set of space separated tokens.  A token can either be _ for a space,
-  an identifier as from indentifierKey(), or any string.  The format for label
+  an identifier as from identifierKey(), or any string.  The format for label
   will the first pattern for which all fields specified are non null for the contact.
 
   For example:

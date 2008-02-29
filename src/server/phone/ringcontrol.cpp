@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,8 @@
 #else
 #include <qsoundqss_qws.h>
 #endif
+
+#include "systemsuspend.h"
 
 // declare RingControlPrivate
 class RingControlPrivate
@@ -206,13 +208,16 @@ RingControl::RingControl(QObject *parent)
 
     connect(DialerControl::instance(), SIGNAL(stateChanged()),
             this, SLOT(stateChanged()));
-    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool)),
+    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool,bool)),
             this, SLOT(messageCountChanged(int)));
 
     QObject::connect(d->profileManager,
                      SIGNAL(activeProfileChanged(QPhoneProfile)),
                      this,
                      SLOT(profileChanged()));
+
+    QObject::connect(qtopiaTask<SystemSuspend>(), SIGNAL(systemSuspending()),
+            this, SLOT(stopMessageAlert()));
 
     //initSound();
 }
@@ -404,7 +409,7 @@ void RingControl::stopRing( )
     if(d->msgTid) {
         killTimer(d->msgTid);
         d->msgTid = 0;
-   }
+    }
     if(d->vrbTid) {
         killTimer(d->vrbTid);
         d->vrbTid = 0;
@@ -420,6 +425,14 @@ void RingControl::stopRing( )
     if(d->currentRingSource != NotRinging) {
         d->currentRingSource = NotRinging;
         emit ringTypeChanged(NotRinging);
+    }
+}
+
+void RingControl::stopMessageAlert()
+{
+    if (d->currentRingSource == Msg) {
+        qLog(PowerManagement) << "system suspended, stop message alert";
+        stopRing();
     }
 }
 

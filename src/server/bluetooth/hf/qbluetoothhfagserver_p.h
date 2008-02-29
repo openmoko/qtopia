@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -21,8 +21,6 @@
 
 #ifndef __QBLUETOOTHHFAGSERVER_P_H__
 #define __QBLUETOOTHHFAGSERVER_P_H__
-
-#ifdef HAVE_ALSA
 
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include <qtopiaglobal.h>
@@ -52,7 +50,5 @@ public slots:
 private:
     QBluetoothHandsfreeService *m_parent;
 };
-
-#endif
 
 #endif

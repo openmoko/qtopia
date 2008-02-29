@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -116,6 +116,7 @@ signals:
     void volumeChanged(int volume);
     void volumeMuted(bool muted);
     void controlAvailable(const QString& control);
+    void controlUnavailable(const QString& control);
 
 public:
     QUuid id;
@@ -128,8 +129,7 @@ public:
     \brief The QMediaControl class is used to manipulate a media resource in the
     Qtopia media system.
 
-
-
+    \ingroup multimedia
 */
 
 
@@ -170,6 +170,9 @@ QMediaControl::QMediaControl(QMediaHandle const& mediaHandle, QObject* parent):
 
     connect(d, SIGNAL(controlAvailable(const QString&)),
             this, SIGNAL(controlAvailable(const QString&)));
+
+    connect(d, SIGNAL(controlUnavailable(const QString&)),
+            this, SIGNAL(controlUnavailable(const QString&)));
 }
 
 /*!
@@ -370,7 +373,13 @@ void QMediaControl::seek(quint32 ms)
 /*!
     \fn QMediaControl::controlAvailable(const QString& control);
 
-    Signals that a control with idenity \a control is available in the system.
+    Signals that a control with identity \a control is available in the system.
+*/
+
+/*!
+    \fn QMediaControl::controlUnavailable(const QString& control);
+
+    Signals that a control with identity \a control is no longer available in the system.
 */
 
 // }}}

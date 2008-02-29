@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -164,8 +164,11 @@ void MMSSlideImage::setImage( const QPixmap &image )
 {
     m_image = image;
     setPixmap( scale( m_image ) );
-    if( image.isNull() )
+    if( image.isNull() ) {
         setText( tr("Slide Image") );
+	// Work around change 244985 to Qt see hooligan issue 148428
+	setFocusPolicy( Qt::StrongFocus );
+    }
     emit changed();
 }
 

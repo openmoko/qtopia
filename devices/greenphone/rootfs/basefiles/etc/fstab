@@ -1,4 +1,5 @@
-/dev/tffsa      /		ext2    noatime,ro		0 0
+/dev/tffsa1     /		cramfs  noatime,ro		0 0
+/dev/tffsa2     /opt/Qtopia.rom cramfs  noatime,ro		0 0
 /dev/tffsb      /mnt/disk2	ext2    noatime,defaults	0 0
 /dev/tffsc      /mnt/user	ext2    noatime,defaults        0 0
 /dev/tffsd      /mnt/user_local	vfat    noatime,defaults        0 0
@@ -7,3 +8,4 @@ none		/proc		proc	defaults		0 0
 tmpfs		/var		tmpfs	defaults,size=2097152	0 0
 tmpfs		/dev		tmpfs	defaults,size=4096	0 0
 none		/dev/pts	devpts	gid=5,mode=620		0 0
+

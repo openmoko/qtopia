@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -96,8 +96,11 @@ class QPhoneStylePrivate : public QObject
 {
     Q_OBJECT
 public:
-    QPhoneStylePrivate() : QObject(0), useExported(false) {
+    QPhoneStylePrivate(QPhoneStyle *style) : QObject(0), useExported(false) {
+        q = style;
         bgExport = bgForScreen(QApplication::desktop()->primaryScreen());
+        connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
+                SLOT(focusChangedSlot(QWidget*, QWidget*)));
     }
 
     void updateDecoration() {
@@ -121,6 +124,16 @@ public:
 
         return bgExportMap.value(screen);
     }
+    
+    void toggleTextColor(QWidget *w) {
+        if (w) {
+            QPalette pal = w->palette();
+            QColor temptext = pal.color(QPalette::Text);
+            pal.setColor(QPalette::Text, pal.color(QPalette::HighlightedText));
+            pal.setColor(QPalette::HighlightedText, temptext);
+            w->setPalette(pal);
+        }
+    }
 
     bool eventFilter(QObject *, QEvent *);
     QExportedBackground *bgExport;
@@ -129,60 +142,113 @@ public:
     QPalette origPal;
     bool useExported;
     QMap<QWidget*,int> bgManaged;
+    
+private:
+    QPhoneStyle *q;
 
 private slots:
     void bgUpdated();
+    void focusChangedSlot(QWidget *, QWidget *);
 };
 
 bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
 {
+    QWidget *wgt = qobject_cast<QWidget*>(o);
 #ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
-    if (e->type() == QEvent::Paint) {
-        QWidget *w = qobject_cast<QWidget*>(o);
-        if (w && w->isWindow()) {
-            QPaintEvent *pe = (QPaintEvent*)e;
-            QBrush b = w->palette().brush(QPalette::Window);
-            QPainter p(w);
-            p.setBrushOrigin(-w->geometry().topLeft());
-            // We know we have a solid brush, so we can gain a little speed
-            // using QPainter::CompositionMode_Source
-            if (p.paintEngine()->hasFeature(QPaintEngine::PorterDuff))
-                p.setCompositionMode(QPainter::CompositionMode_Source);
-            p.fillRect(pe->rect(), b);
-        }
-    } else if (e->type() == QEvent::ParentChange) {
-        QWidget *widget = qobject_cast<QWidget*>(o);
-        if (!widget->isWindow()) {
-            widget->setPalette(bgPal);
-            widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
-            widget->removeEventFilter(this);
-            bgManaged.remove(widget);
-        }
-    } else if (e->type() == QEvent::ApplicationPaletteChange) {
-        foreach (QWidget *w, QApplication::topLevelWidgets()) {
-            QApplication::style()->polish(w);
-            foreach (QObject *o, w->children()) {
-                QWidget *sw = qobject_cast<QWidget*>(o);
-                if (sw) {
-                    QApplication::style()->polish(sw);
+    if (wgt && bgManaged.contains(wgt)) {
+        if (e->type() == QEvent::Paint) {
+            QWidget *w = qobject_cast<QWidget*>(o);
+            if (w && w->isWindow()) {
+                QPaintEvent *pe = (QPaintEvent*)e;
+                QBrush b = w->palette().brush(QPalette::Window);
+                QPainter p(w);
+                p.setBrushOrigin(-w->geometry().topLeft());
+                // We know we have a solid brush, so we can gain a little speed
+                // using QPainter::CompositionMode_Source
+                if (p.paintEngine()->hasFeature(QPaintEngine::PorterDuff))
+                    p.setCompositionMode(QPainter::CompositionMode_Source);
+                p.fillRect(pe->rect(), b);
+            }
+        } else if (e->type() == QEvent::ParentChange) {
+            QWidget *widget = qobject_cast<QWidget*>(o);
+            if (!widget->isWindow()) {
+                widget->setPalette(bgPal);
+                widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
+                widget->removeEventFilter(this);
+                bgManaged.remove(widget);
+            }
+        } else if (e->type() == QEvent::ApplicationPaletteChange) {
+            foreach (QWidget *w, QApplication::topLevelWidgets()) {
+                QApplication::style()->polish(w);
+                foreach (QObject *o, w->children()) {
+                    QWidget *sw = qobject_cast<QWidget*>(o);
+                    if (sw) {
+                        QApplication::style()->polish(sw);
+                    }
                 }
             }
+        } else if (e->type() == QEvent::Move) {
+            QWidget *w = qobject_cast<QWidget*>(o);
+            int screen = QApplication::desktop()->screenNumber(w);
+            if (screen >= 0 && bgManaged.contains(w) && bgManaged[w] != screen) {
+                bgManaged[w] = screen;
+                QExportedBackground *bge = bgForScreen(screen);
+                QPalette pal = bgPal;
+                QColor windowCol = pal.color(QPalette::Window);
+                windowCol.setAlpha(255);
+                pal.setBrush(QPalette::Window, QBrush(windowCol, bge->background()));
+                w->setPalette(pal);
+            }
+    //        w->repaint();  //XXX maybe nice if we allow windows to be moved by user
+        } else if (e->type() == QEvent::Destroy) {
+            QWidget *widget = qobject_cast<QWidget*>(o);
+            if (widget)
+                bgManaged.remove(widget);
+        } else if (e->type() == QEvent::PaletteChange) {
+            // XXX hackery to fix a problem with category selectors created
+            // from .ui files ending up with transparent popup combo boxes...
+            QWidget *widget = qobject_cast<QWidget*>(o);
+            if (bgExport->isAvailable() ) {
+                QPalette pal = bgPal;
+                QColor windowCol = pal.color(QPalette::Window);
+                windowCol.setAlpha(255);
+                pal.setBrush(QPalette::Window, QBrush(windowCol, bgExport->background()));
+                widget->setPalette(pal);
+                return true;
+            }
         }
-    } else if (e->type() == QEvent::Move) {
-        QWidget *w = qobject_cast<QWidget*>(o);
-        int screen = QApplication::desktop()->screenNumber(w);
-        if (screen >= 0 && bgManaged.contains(w) && bgManaged[w] != screen) {
-            bgManaged[w] = screen;
-            QExportedBackground *bge = bgForScreen(screen);
-            QPalette pal = bgPal;
-            pal.setBrush(QPalette::Window, QBrush(pal.color(QPalette::Window), bge->background()));
-            w->setPalette(pal);
+    }
+#endif
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    if (wgt && QApplication::keypadNavigationEnabled()) {
+        if (e->type() == QEvent::Paint) {   //handle background of textedit
+            QTextEdit *te = qobject_cast<QTextEdit*>(wgt);
+            if (te) {
+                if (te->hasFocus() && !te->hasEditFocus()) {
+                    QPainter p(te);
+                    QRect r = te->rect();
+                    p.fillRect(r.x()+4, r.y()+4, r.width()-8, r.height()-8,
+                               te->palette().brush(QPalette::Highlight));
+        
+                    QPen oldPen = p.pen();
+                    QColor color = te->palette().highlight().color();
+                    p.setPen(color);
+                    p.drawRect(r.x()+3, r.y()+3, r.width()-7, r.height()-7);
+                    color.setAlpha(color.alpha()/2);
+                    p.setPen(color);
+                    p.drawRect(r.x()+4, r.y()+4, r.width()-9, r.height()-9);
+                    p.setPen(oldPen);
+                }   
+            }
+        } else if (e->type() == QEvent::EnterEditFocus || e->type() == QEvent::LeaveEditFocus) {
+            if (wgt->inherits("QLineEdit") || wgt->inherits("QAbstractSpinBox")) {
+                toggleTextColor(wgt);
+            } else if (QTextEdit *te = qobject_cast<QTextEdit*>(wgt)) {
+                te->viewport()->setBackgroundRole(e->type() == QEvent::EnterEditFocus
+                                                   ? QPalette::Base : QPalette::Background);
+                toggleTextColor(te);
+            }
         }
-//        w->repaint();  //XXX maybe nice if we allow windows to be moved by user
-    } else if (e->type() == QEvent::Destroy) {
-        QWidget *widget = qobject_cast<QWidget*>(o);
-        if (widget)
-            bgManaged.remove(widget);
     }
 #endif
     return false;
@@ -198,6 +264,42 @@ void QPhoneStylePrivate::bgUpdated()
             w->update();
     }
 #endif
+}
+
+void QPhoneStylePrivate::focusChangedSlot(QWidget *old, QWidget *now)
+{
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    if (q != qApp->style()) {
+        disconnect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)), this,
+                SLOT(focusChangedSlot(QWidget*, QWidget*)));
+        return;
+    }
+
+    QTextEdit *te = qobject_cast<QTextEdit*>(old);
+    if (te) {
+        te->viewport()->setBackgroundRole(QPalette::Background);
+        toggleTextColor(te);
+        te->removeEventFilter(this);
+    }
+    
+    te = qobject_cast<QTextEdit*>(now);
+    if (te) {
+        te->viewport()->setBackgroundRole(QPalette::Background);
+        if (!te->hasEditFocus())    //HACK: there are a few strange cases where we can get edit focus before we get focus
+            toggleTextColor(te);
+        te->installEventFilter(this);
+    }
+    
+    if (old && (old->inherits("QLineEdit") || old->inherits("QAbstractSpinBox"))) {
+        toggleTextColor(old);
+        old->removeEventFilter(this);
+    }
+    
+    if (now && (now->inherits("QLineEdit") || now->inherits("QAbstractSpinBox"))) {
+        toggleTextColor(now);
+        now->installEventFilter(this);
+    }
+#endif   
 }
 
 void drawShadePanel(QPainter *p, const QRect &r,
@@ -272,7 +374,7 @@ void drawShadePanel(QPainter *p, int x, int y, int w, int h,
 
 QPhoneStyle::QPhoneStyle() : QtopiaStyle()
 {
-    d = new QPhoneStylePrivate;
+    d = new QPhoneStylePrivate(this);
 }
 
 QPhoneStyle::~QPhoneStyle()
@@ -370,7 +472,9 @@ void QPhoneStyle::polish(QWidget *widget)
                 && !widget->testAttribute(Qt::WA_NoSystemBackground)
                 && !isTransparent) {
                 QPalette pal = d->bgPal;
-                pal.setBrush(QPalette::Window, QBrush(pal.color(QPalette::Window), d->bgExport->background()));
+                QColor windowCol = pal.color(QPalette::Window);
+                windowCol.setAlpha(255);
+                pal.setBrush(QPalette::Window, QBrush(windowCol, d->bgExport->background()));
                 widget->setPalette(pal);
                 widget->setAttribute(Qt::WA_OpaquePaintEvent, true);
                 if (!isManaged) {
@@ -739,6 +843,20 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
 
             if (panel->lineWidth > 0)
                 drawPrimitive(PE_FrameLineEdit, panel, p, widget);
+                        
+            if (opt->state & State_HasFocus && !(panel->state & State_HasEditFocus)) {
+                
+                const QRect &r = opt->rect;
+                p->fillRect(r.x()+4, r.y()+4, r.width()-8, r.height()-8,
+                            panel->palette.brush(QPalette::Highlight));
+
+                QStyleOptionFocusRect focus;
+                focus.QStyleOption::operator=(*panel);
+                focus.rect = QRect(r.x()+3, r.y()+3, r.width()-6, r.height()-6);
+                focus.state |= State_FocusAtBorder;
+                focus.backgroundColor = panel->palette.highlight().color();
+                drawPrimitive(PE_FrameFocusRect, &focus, p, widget);
+            }
         }
         break;
     case PE_IndicatorCheckBox: {
@@ -776,7 +894,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
                 pixelMetric(PM_IndicatorWidth, opt, widget),
                 pixelMetric(PM_IndicatorHeight, opt, widget));
         }
-        if (!(opt->state & State_Off)) {
+        if (!(opt->state & State_Off) && (opt->rect.height() > 6)) {
             int hh = opt->rect.height()-6;
             QLineF *lines = new QLineF [hh];
             int i, xx, yy;
@@ -835,22 +953,42 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         }
         break;
     case PE_IndicatorSpinUp:
-        if (widget->hasEditFocus())
-            drawPrimitive(PE_IndicatorArrowUp, opt, p, widget);
-        else
-            drawPrimitive(PE_IndicatorArrowRight, opt, p, widget);
+        drawPrimitive(PE_IndicatorArrowRight, opt, p, widget);
         break;
     case PE_IndicatorSpinDown:
-        if (widget->hasEditFocus())
-            drawPrimitive(PE_IndicatorArrowDown, opt, p, widget);
-        else
-            drawPrimitive(PE_IndicatorArrowLeft, opt, p, widget);
+        drawPrimitive(PE_IndicatorArrowLeft, opt, p, widget);
         break;
     default:
         QWindowsStyle::drawPrimitive(pe, opt, p, widget);
     }
 }
 
+static void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
+                      const QRect &rect, QPainter *painter, const QWidget *widget = 0)
+{
+    QStyle::PrimitiveElement pe;
+    switch (toolbutton->arrowType) {
+        case Qt::LeftArrow:
+            pe = QStyle::PE_IndicatorArrowLeft;
+            break;
+        case Qt::RightArrow:
+            pe = QStyle::PE_IndicatorArrowRight;
+            break;
+        case Qt::UpArrow:
+            pe = QStyle::PE_IndicatorArrowUp;
+            break;
+        case Qt::DownArrow:
+            pe = QStyle::PE_IndicatorArrowDown;
+            break;
+        default:
+            return;
+    }
+    QStyleOption arrowOpt;
+    arrowOpt.rect = rect;
+    arrowOpt.palette = toolbutton->palette;
+    arrowOpt.state = toolbutton->state;
+    style->drawPrimitive(pe, &arrowOpt, painter, widget);
+}
 
 void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPainter *p,
                                 const QWidget *widget) const
@@ -1003,14 +1141,301 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
             }
             p->drawRect(opt->rect);
             break; }
+    case CE_RadioButton:
+    case CE_CheckBox:
+        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(opt)) {
+            bool isRadio = (ce == CE_RadioButton);
+            if (btn->state & State_HasFocus) {
+                QStyleOptionFocusRect fropt;
+                fropt.QStyleOption::operator=(*btn);
+                fropt.rect = subElementRect(isRadio ? SE_RadioButtonFocusRect
+                    : SE_CheckBoxFocusRect, btn, widget);
+                p->fillRect(fropt.rect.x(), fropt.rect.y(), fropt.rect.width(), fropt.rect.height(), opt->palette.brush(QPalette::Highlight));
+                drawPrimitive(PE_FrameFocusRect, &fropt, p, widget);
+            }
+            QStyleOptionButton subopt = *btn;
+            subopt.rect = subElementRect(isRadio ? SE_RadioButtonIndicator
+                : SE_CheckBoxIndicator, btn, widget);
+            drawPrimitive(isRadio ? PE_IndicatorRadioButton : PE_IndicatorCheckBox,
+                          &subopt, p, widget);
+            subopt.rect = subElementRect(isRadio ? SE_RadioButtonContents
+                : SE_CheckBoxContents, btn, widget);
+            drawControl(isRadio ? CE_RadioButtonLabel : CE_CheckBoxLabel, &subopt, p, widget);
+        }
+        break;
+    case CE_RadioButtonLabel:
+    case CE_CheckBoxLabel:
+        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(opt)) {
+            uint alignment = visualAlignment(btn->direction, Qt::AlignLeft | Qt::AlignVCenter);
+
+            if (!styleHint(SH_UnderlineShortcut, btn, widget))
+                alignment |= Qt::TextHideMnemonic;
+            QPixmap pix;
+            QRect textRect = btn->rect;
+            if (!btn->icon.isNull()) {
+                pix = btn->icon.pixmap(btn->iconSize, btn->state & State_Enabled ? QIcon::Normal : QIcon::Disabled);
+                drawItemPixmap(p, btn->rect, alignment, pix);
+                if (btn->direction == Qt::RightToLeft)
+                    textRect.setRight(textRect.right() - btn->iconSize.width() - 4);
+                else
+                    textRect.setLeft(textRect.left() + btn->iconSize.width() + 4);
+            }
+            if (!btn->text.isEmpty()){
+                drawItemText(p, textRect, alignment | Qt::TextShowMnemonic,
+                             btn->palette, btn->state & State_Enabled, btn->text, 
+                             btn->state & State_HasFocus ? QPalette::HighlightedText : QPalette::WindowText);
+            }
+        }
+        break;
+    case CE_PushButton:
+        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(opt)) {
+            drawControl(CE_PushButtonBevel, btn, p, widget);
+            if (btn->state & State_HasFocus) {
+                QRect r = subElementRect(SE_PushButtonFocusRect, btn, widget);
+                p->fillRect(r.x()+1, r.y()+1, r.width()-2, r.height()-2,
+                            btn->palette.brush(QPalette::Highlight));
+                QStyleOptionFocusRect fropt;
+                fropt.QStyleOption::operator=(*btn);
+                fropt.rect = subElementRect(SE_PushButtonFocusRect, btn, widget);
+                drawPrimitive(PE_FrameFocusRect, &fropt, p, widget);
+            }
+            QStyleOptionButton subopt = *btn;
+            subopt.rect = subElementRect(SE_PushButtonContents, btn, widget);
+            drawControl(CE_PushButtonLabel, &subopt, p, widget);
+        }
+        break;
+    case CE_PushButtonLabel:
+        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(opt)) {
+            QRect ir = btn->rect;
+            uint tf = Qt::AlignVCenter | Qt::TextShowMnemonic;
+            if (!styleHint(SH_UnderlineShortcut, btn, widget))
+                tf |= Qt::TextHideMnemonic;
+
+            if (btn->state & (State_On | State_Sunken))
+                ir.translate(pixelMetric(PM_ButtonShiftHorizontal, opt, widget),
+                                pixelMetric(PM_ButtonShiftVertical, opt, widget));
+            if (!btn->icon.isNull()) {
+                QIcon::Mode mode = btn->state & State_Enabled ? QIcon::Normal
+                    : QIcon::Disabled;
+                if (mode == QIcon::Normal && btn->state & State_HasFocus)
+                    mode = QIcon::Active;
+                QIcon::State state = QIcon::Off;
+                if (btn->state & State_On)
+                    state = QIcon::On;
+                QPixmap pixmap = btn->icon.pixmap(btn->iconSize, mode, state);
+                int pixw = pixmap.width();
+                int pixh = pixmap.height();
+                //Center the icon if there is no text
+
+                QPoint point;
+                if (btn->text.isEmpty()) {
+                    point = QPoint(ir.x() + ir.width() / 2 - pixw / 2,
+                                    ir.y() + ir.height() / 2 - pixh / 2);
+                } else {
+                    point = QPoint(ir.x() + 2, ir.y() + ir.height() / 2 - pixh / 2);
+                }
+                if (btn->direction == Qt::RightToLeft)
+                    point.rx() += pixw;
+
+                if ((btn->state & (State_On | State_Sunken)) && btn->direction == Qt::RightToLeft)
+                    point.rx() -= pixelMetric(PM_ButtonShiftHorizontal, opt, widget) * 2;
+
+                p->drawPixmap(visualPos(btn->direction, btn->rect, point), pixmap);
+
+                if (btn->direction == Qt::RightToLeft)
+                    ir.translate(-4, 0);
+                else
+                    ir.translate(pixw + 4, 0);
+                ir.setWidth(ir.width() - (pixw + 4));
+                // left-align text if there is
+                if (!btn->text.isEmpty())
+                    tf |= Qt::AlignLeft;
+            } else {
+                tf |= Qt::AlignHCenter;
+            }
+            drawItemText(p, ir, tf, btn->palette, (btn->state & State_Enabled),
+                         btn->text, btn->state & State_HasFocus ? QPalette::HighlightedText : QPalette::ButtonText);
+        }
+        break;
+    case CE_ToolButtonLabel:
+        if (const QStyleOptionToolButton *toolbutton
+            = qstyleoption_cast<const QStyleOptionToolButton *>(opt)) {
+            QRect rect = toolbutton->rect;
+            int shiftX = 0;
+            int shiftY = 0;
+            if (toolbutton->state & (State_Sunken | State_On)) {
+                shiftX = pixelMetric(PM_ButtonShiftHorizontal, toolbutton, widget);
+                shiftY = pixelMetric(PM_ButtonShiftVertical, toolbutton, widget);
+            }
+            // Arrow type always overrules and is always shown
+            bool hasArrow = toolbutton->features & QStyleOptionToolButton::Arrow;
+            if ((!hasArrow && toolbutton->icon.isNull()) && !toolbutton->text.isEmpty()
+                    || toolbutton->toolButtonStyle == Qt::ToolButtonTextOnly) {
+                int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
+                if (!styleHint(SH_UnderlineShortcut, opt, widget))
+                    alignment |= Qt::TextHideMnemonic;
+                rect.translate(shiftX, shiftY);
+                drawItemText(p, rect, alignment, toolbutton->palette,
+                                opt->state & State_Enabled, toolbutton->text,
+                                QPalette::ButtonText);
+                } else {
+                    QPixmap pm;
+                    QSize pmSize = toolbutton->iconSize;
+                    if (!toolbutton->icon.isNull()) {
+                        QIcon::State state = toolbutton->state & State_On ? QIcon::On : QIcon::Off;
+                        QIcon::Mode mode;
+                        if (!(toolbutton->state & State_Enabled))
+                            mode = QIcon::Disabled;
+                        else if ((opt->state & State_MouseOver) && (opt->state & State_AutoRaise))
+                            mode = QIcon::Active;
+                        else
+                            mode = QIcon::Normal;
+                        pm = toolbutton->icon.pixmap(toolbutton->rect.size().boundedTo(toolbutton->iconSize),
+                                mode, state);
+                        pmSize = pm.size();
+                }
+
+                if (toolbutton->toolButtonStyle != Qt::ToolButtonIconOnly) {
+                    p->setFont(toolbutton->font);
+                    QRect pr = rect,
+                    tr = rect;
+                    int alignment = Qt::TextShowMnemonic;
+                    if (!styleHint(SH_UnderlineShortcut, opt, widget))
+                        alignment |= Qt::TextHideMnemonic;
+
+                    if (toolbutton->toolButtonStyle == Qt::ToolButtonTextUnderIcon) {
+                        pr.setHeight(pmSize.height() + 6);
+
+                        tr.adjust(0, pr.bottom(), 0, -3);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            drawItemPixmap(p, pr, Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(this, toolbutton, pr, p, widget);
+                        }
+                        alignment |= Qt::AlignCenter;
+                    } else {
+                        pr.setWidth(pmSize.width() + 8);
+                        tr.adjust(pr.right(), 0, 0, 0);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            drawItemPixmap(p, pr, Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(this, toolbutton, pr, p, widget);
+                        }
+                        alignment |= Qt::AlignLeft | Qt::AlignVCenter;
+                    }
+                    tr.translate(shiftX, shiftY);
+                    drawItemText(p, tr, alignment, toolbutton->palette,
+                                toolbutton->state & State_Enabled, toolbutton->text,
+                                toolbutton->state & State_HasFocus ? QPalette::HighlightedText : QPalette::ButtonText);
+                } else {
+                    rect.translate(shiftX, shiftY);
+                    if (hasArrow) {
+                        drawArrow(this, toolbutton, rect, p, widget);
+                    } else {
+                        drawItemPixmap(p, rect, Qt::AlignCenter, pm);
+                    }
+                }
+            }
+        }
+        break;
     case CE_TabBarTabShape:
         if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
             if (!(tab->state & State_Selected)) {
                 QRect rect = opt->rect.adjusted(0, 4, 0, -1);
                 p->fillRect(rect, opt->palette.brush(QPalette::Button));
             }
+            if ((tab->state & State_HasFocus)) {
+                QRect r;
+                QStyleOptionTabV2 tabV2(*tab);
+                const int OFFSET = 1 + pixelMetric(PM_DefaultFrameWidth);
+
+                int x1, x2;
+                x1 = tabV2.rect.left();
+                x2 = tabV2.rect.right() - 1;
+                r.setRect(x1 + 1 + OFFSET, tabV2.rect.y() + OFFSET,
+                    x2 - x1 - 2*OFFSET, tabV2.rect.height() - 2*OFFSET);                
+                
+                p->fillRect(r.x(), r.y(), r.width(), r.height(), opt->palette.brush(QPalette::Highlight));
+            }
         }
-        // fall through
+        QWindowsStyle::drawControl(ce, opt, p, widget);
+        break;
+    case CE_TabBarTabLabel:
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
+            QStyleOptionTabV2 tabV2(*tab);
+            QRect tr = tabV2.rect;
+            bool verticalTabs = tabV2.shape == QTabBar::RoundedEast
+                                || tabV2.shape == QTabBar::RoundedWest
+                                || tabV2.shape == QTabBar::TriangularEast
+                                || tabV2.shape == QTabBar::TriangularWest;
+            bool selected = tabV2.state & State_Selected;
+            if (verticalTabs) {
+                p->save();
+                int newX, newY, newRot;
+                if (tabV2.shape == QTabBar::RoundedEast || tabV2.shape == QTabBar::TriangularEast) {
+                    newX = tr.width();
+                    newY = tr.y();
+                    newRot = 90;
+                } else {
+                    newX = 0;
+                    newY = tr.y() + tr.height();
+                    newRot = -90;
+                }
+                tr.setRect(0, 0, tr.height(), tr.width());
+                QMatrix m;
+                m.translate(newX, newY);
+                m.rotate(newRot);
+                p->setMatrix(m, true);
+            }
+            tr.adjust(0, 0, pixelMetric(QStyle::PM_TabBarTabShiftHorizontal, tab, widget),
+                            pixelMetric(QStyle::PM_TabBarTabShiftVertical, tab, widget));
+
+            if (selected)
+            {
+                tr.setBottom(tr.bottom() - pixelMetric(QStyle::PM_TabBarTabShiftVertical, tab,
+                                                    widget));
+                tr.setRight(tr.right() - pixelMetric(QStyle::PM_TabBarTabShiftHorizontal, tab,
+                                                    widget));
+            }
+
+            int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
+            if (!styleHint(SH_UnderlineShortcut, opt, widget))
+                alignment |= Qt::TextHideMnemonic;
+            if (!tabV2.icon.isNull()) {
+                QSize iconSize = tabV2.iconSize;
+                if (!iconSize.isValid()) {
+                    int iconExtent = pixelMetric(PM_SmallIconSize);
+                    iconSize = QSize(iconExtent, iconExtent);
+                }
+                QPixmap tabIcon = tabV2.icon.pixmap(iconSize,
+                                                    (tabV2.state & State_Enabled) ? QIcon::Normal
+                                                                                  : QIcon::Disabled);
+                p->drawPixmap(tr.left() + 6, tr.center().y() - tabIcon.height() / 2, tabIcon);
+                tr.setLeft(tr.left() + iconSize.width() + 4);
+            }
+
+            drawItemText(p, tr, alignment, tab->palette, tab->state & State_Enabled, tab->text,
+                         tab->state & State_HasFocus ? QPalette::HighlightedText : QPalette::WindowText);
+            if (verticalTabs)
+                p->restore();
+
+            if (tabV2.state & State_HasFocus) {
+                const int OFFSET = 1 + pixelMetric(PM_DefaultFrameWidth);
+
+                int x1, x2;
+                x1 = tabV2.rect.left();
+                x2 = tabV2.rect.right() - 1;
+
+                QStyleOptionFocusRect fropt;
+                fropt.QStyleOption::operator=(*tab);
+                fropt.rect.setRect(x1 + 1 + OFFSET, tabV2.rect.y() + OFFSET,
+                                   x2 - x1 - 2*OFFSET, tabV2.rect.height() - 2*OFFSET);
+                drawPrimitive(PE_FrameFocusRect, &fropt, p, widget);
+            }
+        }
+        break;
     default:
         QWindowsStyle::drawControl(ce, opt, p, widget);
         break;
@@ -1114,7 +1539,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 }
             }
 
-            if (sb->subControls & SC_SpinBoxUp) {
+            if (sb->subControls & SC_SpinBoxUp && !(sb->state & State_HasEditFocus)) {
                 copy.subControls = SC_SpinBoxUp;
                 QPalette pal2 = sb->palette;
                 if (!(sb->stepEnabled & QAbstractSpinBox::StepUpEnabled)) {
@@ -1140,7 +1565,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 drawPrimitive(pe, &copy, p, widget);
             }
 
-            if (sb->subControls & SC_SpinBoxDown) {
+            if (sb->subControls & SC_SpinBoxDown && !(sb->state & State_HasEditFocus)) {
                 copy.subControls = SC_SpinBoxDown;
                 copy.state = sb->state;
                 QPalette pal2 = sb->palette;
@@ -1167,8 +1592,74 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
             }
         }
         break;
-        default:
-            QWindowsStyle::drawComplexControl(cc, opt, p, widget);
+    case CC_Slider:
+        if (const QStyleOptionSlider *slider = qstyleoption_cast<const QStyleOptionSlider *>(opt)) {
+            if (slider->state & State_HasFocus) {
+                QRect r = subElementRect(SE_SliderFocusRect, slider, widget);
+                p->fillRect(r.x()+1, r.y()+1, r.width()-2, r.height()-2,
+                    slider->palette.highlight().color());
+            }
+        }
+        QWindowsStyle::drawComplexControl(cc, opt, p, widget);
+        break;
+    case CC_ToolButton:
+        if (const QStyleOptionToolButton *toolbutton
+            = qstyleoption_cast<const QStyleOptionToolButton *>(opt)) {
+            QRect button, menuarea;
+            button = subControlRect(cc, toolbutton, SC_ToolButton, widget);
+            menuarea = subControlRect(cc, toolbutton, SC_ToolButtonMenu, widget);
+
+            State bflags = toolbutton->state;
+
+            if (bflags & State_AutoRaise) {
+                if (!(bflags & State_MouseOver)) {
+                    bflags &= ~State_Raised;
+                }
+            }
+            State mflags = bflags;
+
+            if (toolbutton->activeSubControls & SC_ToolButton)
+                bflags |= State_Sunken;
+            if (toolbutton->activeSubControls & SC_ToolButtonMenu)
+                mflags |= State_Sunken;
+
+            QStyleOption tool(0);
+            tool.palette = toolbutton->palette;
+            if (toolbutton->subControls & SC_ToolButton) {
+                if (bflags & (State_Sunken | State_On | State_Raised)) {
+                    tool.rect = button;
+                    tool.state = bflags;
+                    drawPrimitive(PE_PanelButtonTool, &tool, p, widget);
+                }
+            }
+
+            if (toolbutton->subControls & SC_ToolButtonMenu) {
+                tool.rect = menuarea;
+                tool.state = mflags;
+                if (mflags & (State_Sunken | State_On | State_Raised))
+                    drawPrimitive(PE_IndicatorButtonDropDown, &tool, p, widget);
+                drawPrimitive(PE_IndicatorArrowDown, &tool, p, widget);
+            }
+
+            if (toolbutton->state & State_HasFocus) {
+                QStyleOptionFocusRect fr;
+                fr.QStyleOption::operator=(*toolbutton);
+                fr.rect.adjust(3, 3, -3, -3);
+                if (toolbutton->features & QStyleOptionToolButton::Menu)
+                    fr.rect.adjust(0, 0, -pixelMetric(QStyle::PM_MenuButtonIndicator,
+                                    toolbutton, widget), 0);
+                p->fillRect(fr.rect.x()+1, fr.rect.y()+1, fr.rect.width()-2, fr.rect.height()-2,
+                    toolbutton->palette.brush(QPalette::Highlight));
+                drawPrimitive(PE_FrameFocusRect, &fr, p, widget);
+            }
+            QStyleOptionToolButton label = *toolbutton;
+            int fw = pixelMetric(PM_DefaultFrameWidth, opt, widget);
+            label.rect = button.adjusted(fw, fw, -fw, -fw);
+            drawControl(CE_ToolButtonLabel, &label, p, widget);
+        }
+        break;
+    default:
+        QWindowsStyle::drawComplexControl(cc, opt, p, widget);
     }
 }
 
@@ -1191,12 +1682,17 @@ bool QPhoneStyle::event(QEvent *e)
                         aiv->viewport()->setBackgroundRole(QPalette::Window);
                 }
             }
+            if (QLineEdit *le = qobject_cast<QLineEdit*>(focusWidget)) {
+                le->update();
+            }
+            if (focusWidget->inherits("QAbstractSpinBox")) {
+                focusWidget->update();
+            }
             QPoint pos = focusWidget->mapTo(focusWidget->window(), QPoint(0,0));
             if (pos.y() == 0 && pos.x() < 20)
                 d->updateDecoration();
         }
     }
-
     return QWindowsStyle::event(e);
 }
 

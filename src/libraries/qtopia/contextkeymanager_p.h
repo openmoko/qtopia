@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,7 @@ public:
     void updateContextLabels();
     QWidget *findTargetWidget(QWidget *w, int key, bool modal);
     bool haveLabelForWidget(QWidget *w, int key, bool modal);
+    bool haveCustomLabelForWidget(QWidget *w, int key, bool modal);
 
     void setContextText(QWidget *w, int id, const QString &t, QSoftMenuBar::FocusState state);
     void setContextPixmap(QWidget *w, int id, const QString &p, QSoftMenuBar::FocusState state);

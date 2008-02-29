@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -138,7 +138,7 @@ QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList
 
     /*
        Exclusion filter.  e.g. if its in the list, don't show it
-       makes it easier for different contexts to exlude or include themselves,
+       makes it easier for different contexts to exclude or include themselves,
        don't have to know what the entire set of numbers is.
      */
     if (!mContextFilter.isEmpty()) {
@@ -256,7 +256,7 @@ QSet<int> QSqlPimTableModel::contextFilter() const
 
 /*!
   \internal
-  Returns whether the context filter excludes or restructs to set
+  Returns whether the context filter excludes or restricts to set
 */
 bool QSqlPimTableModel::contextFilterExcludes() const
 {
@@ -343,7 +343,7 @@ QUniqueId QSqlPimTableModel::recordId(int row) const
         }
     }
 
-    qLog(Sql) << "QSqlPimTableModel::recordId() - statment: " << idByRowQuery.lastQuery();
+    qLog(Sql) << "QSqlPimTableModel::recordId() - statement: " << idByRowQuery.lastQuery();
 
     QtopiaSql::logQuery(idByRowQuery);
     if (!idByRowQuery.exec()) {
@@ -357,7 +357,7 @@ QUniqueId QSqlPimTableModel::recordId(int row) const
     while (idByRowQuery.next()) {
         qLog(Sql) << "QSqlPimTableModel::recordId() - check if should cache" << jumpedRow << rowEnd << rowStep;
 
-        /* cach any block keys we come accross */
+        /* cache any block keys we come across */
         if (!(jumpedRow % rowStep) && !cachedKeys.contains(jumpedRow/rowStep)) {
             qLog(Sql) << "QSqlPimTableModel::recordId() - cache set point" << jumpedRow;
             cachedKeys.insert(jumpedRow/rowStep, new QUniqueId(idByRowQuery.value(0).toByteArray()));
@@ -403,6 +403,19 @@ int QSqlPimTableModel::row(const QUniqueId & tid) const
     if (recordId(r) == tid)
         return r;
     return -1;
+}
+
+bool QSqlPimTableModel::contains(const QUniqueId &id) const
+{
+    const QLocalUniqueId &lid = (const QLocalUniqueId &)id;
+    QStringList filter;
+    filter << "t1.recid = :id";
+    QSqlQuery q;
+    q.prepare(selectText(filter));
+    q.bindValue(":id", lid.toByteArray());
+    QtopiaSql::logQuery(q);
+    q.exec();
+    return q.next();
 }
 
 int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const

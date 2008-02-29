@@ -23,16 +23,20 @@ case $1 in
         MODE=static
         IPADDR=10.10.10.20
         NETMASK=255.255.255.255
-        BROADCAST=10.255.255.255
+        BROADCAST=255.255.255.255
         GATEWAY=10.10.10.20
 
         # if it exists use the users network settings
         if [ -r $HOME/Settings/Network/eth0 ]; then
             . $HOME/Settings/Network/eth0
-        elif [ -r /mnt/user/home/Settings/Network/eth0 ]; then
-            . /mnt/user/home/Settings/Network/eth0
-	elif [ -r /mnt/user/sd_home/Settings/Network/eth0 ]; then
-            . /mnt/user/sd_home/Settings/Network/eth0
+        else
+            homes=`ls -1 /mnt/disk2/home | sort -nr`
+            for i in $homes; do
+                if [ -r /mnt/disk2/home/$i/Settings/Network/eth0 ]; then
+                    . /mnt/disk2/home/$i/Settings/Network/eth0
+                    break
+                fi
+            done
         fi
 
         # bring up network interface
@@ -41,7 +45,8 @@ case $1 in
                 /sbin/udhcpc -i eth0
                 ;;
             static)
-                /sbin/ifconfig eth0 netmask $NETMASK broadcast $BROADCAST $IPADDR up
+                /sbin/ifconfig eth0 $IPADDR up
+                /sbin/ifconfig eth0 netmask $NETMASK broadcast $BROADCAST
                 /sbin/route del default
                 /sbin/route add default gw $GATEWAY
                 ;;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -34,6 +34,7 @@
 */
 
 static const char hexchars[] = "0123456789ABCDEF";
+static bool octalEscapesFlag = false;
 
 /*!
     Quote \a str so that it is suitable to be sent as an AT
@@ -175,6 +176,16 @@ static int FromHexDigit( uint ch )
         return -1;
     }
 }
+
+static int FromOctalDigit( uint ch )
+{
+    if ( ch >= '0' && ch <= '7' ) {
+        return (int)( ch - '0' );
+    } else {
+        return -1;
+    }
+}
+
 /*!
     Extract the next quoted string from \a buf, starting at
     \a posn.
@@ -183,7 +194,7 @@ QString QAtUtils::nextString( const QString& buf, uint& posn )
 {
     QString result = "";
     uint ch;
-    int digit, digit2;
+    int digit, digit2, digit3;
     while ( posn < (uint)(buf.length()) && buf[posn] != '"' ) {
         ++posn;
     }
@@ -194,25 +205,60 @@ QString QAtUtils::nextString( const QString& buf, uint& posn )
     while ( posn < (uint)(buf.length()) && ( ch = buf[posn].unicode() ) != '"' ) {
         ++posn;
         if ( ch == '\\' ) {
-            // Hex-quoted character.
-            if ( posn >= (uint)buf.length() )
-                break;
-            digit = FromHexDigit( buf[posn].unicode() );
-            if ( digit == -1 ) {
-                result += (QChar)'\\';
-                continue;
-            }
-            if ( ( posn + 1 ) >= (uint)buf.length() ) {
-                ch = (uint)digit;
-                ++posn;
-            } else {
-                digit2 = FromHexDigit( buf[posn + 1].unicode() );
-                if ( digit2 == -1 ) {
+            if ( !octalEscapesFlag ) {
+                // Hex-quoted character.
+                if ( posn >= (uint)buf.length() )
+                    break;
+                digit = FromHexDigit( buf[posn].unicode() );
+                if ( digit == -1 ) {
+                    result += (QChar)'\\';
+                    continue;
+                }
+                if ( ( posn + 1 ) >= (uint)buf.length() ) {
                     ch = (uint)digit;
                     ++posn;
                 } else {
-                    ch = (uint)(digit * 16 + digit2);
-                    posn += 2;
+                    digit2 = FromHexDigit( buf[posn + 1].unicode() );
+                    if ( digit2 == -1 ) {
+                        ch = (uint)digit;
+                        ++posn;
+                    } else {
+                        ch = (uint)(digit * 16 + digit2);
+                        posn += 2;
+                    }
+                }
+            } else {
+                // Octal-quoted character.
+                if ( posn >= (uint)buf.length() )
+                    break;
+                digit = FromOctalDigit( buf[posn].unicode() );
+                if ( digit == -1 ) {
+                    result += (QChar)'\\';
+                    continue;
+                }
+                if ( ( posn + 1 ) >= (uint)buf.length() ) {
+                    ch = (uint)digit;
+                    ++posn;
+                } else {
+                    digit2 = FromOctalDigit( buf[posn + 1].unicode() );
+                    if ( digit2 == -1 ) {
+                        ch = (uint)digit;
+                        ++posn;
+                    } else {
+                        if ( ( posn + 2 ) >= (uint)buf.length() ) {
+                            ch = (uint)(digit * 8 + digit2);
+                            posn += 2;
+                        } else {
+                            digit3 = FromOctalDigit( buf[posn + 2].unicode() );
+                            if ( digit3 == -1 ) {
+                                ch = (uint)(digit * 8 + digit2);
+                                posn += 2;
+                            } else {
+                                ch = (uint)(digit * 64 + digit2 * 8 + digit3);
+                                posn += 3;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -515,8 +561,9 @@ QString QCodePage437Codec::convertToUnicode(const char *in, int length, Converte
             ch = (unsigned char)(*in++);
             if ( ch < 0x80 )
                 str += QChar((unsigned int)ch);
-            else
+            else {
                 str += QChar((unsigned int)cp437ToUnicode[ch - 0x80]);
+            }
         }
 
     }
@@ -743,4 +790,23 @@ QString QAtUtils::stripNumber( const QString& number )
         }
     }
     return n;
+}
+
+/*!
+    Determine if nextString() should parse backslash escape
+    sequences in octal rather than the default of hexadecimal.
+*/
+bool QAtUtils::octalEscapes()
+{
+    return octalEscapesFlag;
+}
+
+/*!
+    Indicate that nextString() should parse backslash escape
+    sequences in octal if \a value is true, rather than the
+    default of hexadecimal (\value is false).
+*/
+void QAtUtils::setOctalEscapes( bool value )
+{
+    octalEscapesFlag = value;
 }

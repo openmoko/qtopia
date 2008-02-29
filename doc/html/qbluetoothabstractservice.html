@@ -73,8 +73,60 @@
 <li>emit <a href="qbluetoothabstractservice.html#stopped">stopped</a>() when the service has stopped, or an error has occured while starting the service</li>
 <li>emit <a href="qbluetoothabstractservice.html#error">error</a>() when a fatal error has occured while running the service</li>
 </ul>
-<p>Note that a <tt>QBluetoothAbstractService</tt> is very different from a Bluetooth SDP service that is registered through the <a href="qsdp.html">QSDP</a> class. For example, <tt>QBluetoothAbstractService</tt> could be subclassed to create a <tt>ObjectPushService</tt> class, and when <a href="qbluetoothabstractservice.html#start">start</a>() is called, this subclass could advertise an Object Push SDP service (using the <a href="qbluetoothabstractservice.html#sdpRegister">sdpRegister</a>() function) and then start an Object Push server.</p>
-<p>It is not strictly necessary to subclass QBluetoothAbstractService to create a system Bluetooth service, but it provides a convenient way to do so. If one prefers, it is possible to directly use <a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a> and <a href="qbluetoothservicecontrolserver.html">QBluetoothServiceControlServer</a> instead. See the <a href="qbluetoothservicecontrolserver.html">QBluetoothServiceControlServer</a> documentation for more information.</p>
+<p>(Note that a <tt>QBluetoothAbstractService</tt> is very different from a Bluetooth SDP service that is registered through the <a href="qsdp.html">QSDP</a> class. For example, <tt>QBluetoothAbstractService</tt> could be subclassed to create a <tt>ObjectPushService</tt> class, and when <a href="qbluetoothabstractservice.html#start">start</a>() is called, this subclass could advertise an Object Push SDP service (using the <a href="qbluetoothabstractservice.html#sdpRegister">sdpRegister</a>() function) and then start an Object Push server.)</p>
+<p>Here is an example of creating a custom Bluetooth service using a class named <tt>MyBluetoothService</tt>. The service will advertise the Serial Port Profile, and we'll call the service &quot;MySerialPortService&quot;.</p>
+<p>Firstly, the constructor:</p>
+<pre>    MyBluetoothService::MyBluetoothService(QObject *parent = 0)
+        : QBluetoothAbstractService(&quot;MySerialPortService&quot;, parent)
+    {
+        initialize();
+    }</pre>
+<p>This creates a service named &quot;MySerialPortService&quot;. This name must be unique among Qtopia Bluetooth services, as it is used internally to uniquely identify the service (for example, for storing information in the value space). The code above also calls <a href="qbluetoothabstractservice.html#initialize">initialize</a>() to perform the necessary set-up for internal components.</p>
+<p>Then, we implement the <a href="qbluetoothabstractservice.html#start">start</a>() method:</p>
+<pre>    void MyBluetoothService::start(int channel)
+    {
+        if (!startMyService()) {    <span class="comment">// call some method to start the service</span>
+            emit started(QBluetooth::UnknownError,
+                      tr(&quot;Unable to start MySerialPortService&quot;));
+            return;
+        }
+
+        QBluetoothLocalDevice local;
+        if (!sdpRegister(local.address(), QBluetooth::SerialPortProfile, channel)) {
+            <span class="comment">// call some method to shut down the service</span>
+            close();
+            emit started(QBluetooth::SDPServerError,
+                         tr(&quot;Error registering with SDP server&quot;));
+            return;
+        }
+
+        <span class="comment">// service was successfully started</span>
+        emit started(QBluetooth::NoError, QString());
+    }</pre>
+<p>The <a href="qbluetoothabstractservice.html#start">start</a>() method is called by Qtopia when the service should be started. Note how the example emits the <a href="qbluetoothabstractservice.html#started">started</a>() signal when the service fails to start, and also when it does start successfully. Also, it calls <a href="qbluetoothabstractservice.html#sdpRegister">sdpRegister</a>() to advertise the appropriate SDP service.</p>
+<p>The class also needs to have a <a href="qbluetoothabstractservice.html#stop">stop</a>() method:</p>
+<pre>    void MyBluetoothService::stop()
+    {
+        <span class="comment">// call some method to shut down the service</span>
+        close();
+
+        if (!sdpUnregister()) {
+            emit stopped(QBluetooth::SDPServerError,
+                         tr(&quot;Error unregistering from SDP server&quot;));
+            return;
+        }
+
+        <span class="comment">// service was successfully stopped</span>
+        emit stopped(QBluetooth::NoError, QString());
+    }</pre>
+<p>As with <a href="qbluetoothabstractservice.html#start">start</a>(), the <a href="qbluetoothabstractservice.html#stopped">stopped</a>() signal is emitted when the service is stopped successfully and also when it fails to stop.</p>
+<p>To set the display name for the service, implement <a href="qbluetoothabstractservice.html#translatableDisplayName">translatableDisplayName</a>():</p>
+<pre>    QString MyBluetoothService::translatableDisplayName() const
+    {
+        return tr(&quot;My Serial Port Service&quot;);
+    }</pre>
+<p>This string will be used, for example, to describe the service in the list of Bluetooth services in Qtopia's Bluetooth settings application.</p>
+<p>Finally, the class will need to implement the <a href="qbluetoothabstractservice.html#setSecurityOptions">setSecurityOptions</a>() method to provide the ability to modify the security settings for the service.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QBluetoothAbstractService"></a>QBluetoothAbstractService::QBluetoothAbstractService ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
@@ -84,7 +136,7 @@
 <h3 class="fn"><a name="error"></a>void QBluetoothAbstractService::error ( <a href="qbluetooth.html#ServiceError-enum">QBluetooth::ServiceError</a> <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>errorDesc</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This should must be emitted when the service has encountered a fatal error while running. The error details should be provided with an <i>error</i> identifier and <i>errorDesc</i> description.</p>
 <h3 class="fn"><a name="initialize"></a>void QBluetoothAbstractService::initialize ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Initialize the service. This must be called complete the initialization process.</p>
+<p>Initialize the service. This must be called to complete the initialization process.</p>
 <p>If the service is being created for the first time, when this method is called, the service will automatically be told to start (i.e. <a href="qbluetoothabstractservice.html#start">start</a>() will be called). Otherwise, the service will only be started if it was still running when the system was last shut down.</p>
 <p>Reimplemented from <a href="qabstractipcinterfacegroup.html#initialize">QAbstractIpcInterfaceGroup</a>.</p>
 <h3 class="fn"><a name="sdpError"></a><a href="qstring.html">QString</a> QBluetoothAbstractService::sdpError ()&nbsp;&nbsp;<tt> [protected]</tt></h3>
@@ -101,6 +153,7 @@
 <p>Subclasses must override this to start the service appropriately.</p>
 <p>A subclass must emit <a href="qbluetoothabstractservice.html#started">started</a>() when the service has started (i.e. at the end of this method), or failed while trying to start.</p>
 <p>If the <a href="qbluetoothabstractservice.html#started">started</a>() signal is emitted with <a href="qbluetooth.html#ServiceError-enum">QBluetooth::SDPServerError</a>, the system will attempt to restart the service on a different channel.</p>
+<p><b>Warning:</b> This function must be implementated in such a way that any intermediate objects (which have be created up to the point where the error occured) are cleaned up before the error signal is emitted.</p>
 <p>See also <a href="qbluetoothabstractservice.html#started">started</a>().</p>
 <h3 class="fn"><a name="started"></a>void QBluetoothAbstractService::started ( <a href="qbluetooth.html#ServiceError-enum">QBluetooth::ServiceError</a> <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>errorDesc</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal should be emitted when the service has started or failed while attempting to start. If there was a failure, the error details should be provided with the <i>error</i> identifier and <i>errorDesc</i> description. Otherwise, <i>error</i> should be <a href="qbluetooth.html#ServiceError-enum">QBluetooth::NoError</a> and <i>errorDesc</i> should be a null <a href="qstring.html">QString</a>.</p>
@@ -108,6 +161,7 @@
 <p>Stops this service.</p>
 <p>Subclasses must override this to stop the service appropriately.</p>
 <p>A subclass must emit <a href="qbluetoothabstractservice.html#stopped">stopped</a>() when the service has stopped (i.e. at the end of this method), or failed while trying to stop.</p>
+<p><b>Warning:</b> An SDP error is not considered to be a critical error. The Bluetooth service manager will still assume that the service is stopped despite the fact that the sdp server couldn't unregister the service. This means the sdp unregistration must be the last step of this function.</p>
 <p>See also <a href="qbluetoothabstractservice.html#stopped">stopped</a>().</p>
 <h3 class="fn"><a name="stopped"></a>void QBluetoothAbstractService::stopped ( <a href="qbluetooth.html#ServiceError-enum">QBluetooth::ServiceError</a> <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>errorDesc</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This should must be emitted when the service has stopped or failed while attempting to stop. If there was a failure, the error details should be provided with the <i>error</i> identifier and <i>errorDesc</i> description. Otherwise, <i>error</i> should be <a href="qbluetooth.html#ServiceError-enum">QBluetooth::NoError</a> and <i>errorDesc</i> should be a null <a href="qstring.html">QString</a>.</p>
@@ -116,8 +170,8 @@
 <p>Subclasses must override this and return an appropriate name.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

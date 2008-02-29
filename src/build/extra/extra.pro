@@ -26,7 +26,7 @@ unix {
         $$QPEDIR/bin/phonesim\
         $$QPEDIR/bin/pngscale\
         $$QPEDIR/bin/qdawggen\
-        $$QPEDIR/bin/sxe_installer\
+        $$QPEDIR/bin/content_installer\
         $$QTOPIA_DEPOT_PATH/bin/Qtopia\
         $$QTOPIA_DEPOT_PATH/bin/Hash\
         $$QTOPIA_DEPOT_PATH/bin/installhelp\
@@ -53,7 +53,9 @@ unix {
 
     scripts.files=\
         $$QTOPIA_DEPOT_PATH/scripts/runqvfb\
-        $$QTOPIA_DEPOT_PATH/scripts/runqpe
+        $$QTOPIA_DEPOT_PATH/scripts/runqpe\
+        $$QTOPIA_DEPOT_PATH/scripts/runqtopia\
+        $$QTOPIA_DEPOT_PATH/scripts/getpaths.sh
     scripts.path=/scripts
     scripts.hint=sdk
     INSTALLS+=scripts

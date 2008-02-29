@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -172,6 +172,14 @@ void RingToneSelect::showEvent( QShowEvent *e )
 {
     QListWidget::showEvent( e );
     update();
+}
+
+bool RingToneSelect::event( QEvent *e )
+{
+    if ( e->type() == QEvent::WindowDeactivate ) {
+        stopSound();
+    }
+    return QListWidget::event( e );
 }
 
 void RingToneSelect::setAllowNone(bool a)
@@ -369,7 +377,8 @@ void RingToneSelect::playCurrentSound()
         {
             scontrol = new QSoundControl( new QSound( currentLinkItem()->link().file() ) );
 
-            connect(scontrol, SIGNAL(done()), this, SLOT(playDone()));
+            // uncomment this to play a tone more than once
+            //connect(scontrol, SIGNAL(done()), this, SLOT(playDone()));
         }
 
         scontrol->setPriority( QSoundControl::RingTone );

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -32,7 +32,7 @@ class QTOPIA_EXPORT QPasswordDialog : public QDialog
 {
     Q_OBJECT
 public:
-    enum InputMode { Crypted, Plain };
+    enum InputMode { Crypted, Plain, Pin };
 
     explicit QPasswordDialog( QWidget* parent = 0, Qt::WFlags flags = 0 );
     ~QPasswordDialog();

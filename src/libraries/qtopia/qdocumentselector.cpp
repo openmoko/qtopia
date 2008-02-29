@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -852,11 +852,11 @@ public:
     \code
     QDocumentSelector *selector = new QDocumentSelector( this );
     selector->setSortMode( QDocumentSelector::Chronological );
-    selector->enableOption( QDocumentSelector::NewDocument );
+    selector->enableOptions( QDocumentSelector::NewDocument );
 
     connect( selector, SIGNAL(newSelected()), this, SLOT(newDocument()) );
     connect( selector, SIGNAL(documentSelected(const QContent&)),
-    this, SLOT(openDocument(const QContent&)) );
+             this, SLOT(openDocument(const QContent&)) );
     \endcode
 
     QDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. Used in combination with
@@ -864,7 +864,7 @@ public:
     selecton of a document using the selector before revealing the document
     viewer or editor.
 
-    \ingroup qtopiaemb
+    \ingroup documentselection
     \sa QImageDocumentSelector
 */
 /*!
@@ -1200,6 +1200,8 @@ public:
 
     A QDocumentSelectorDialog is internally based on a QContentSet
     The QContent selected in the dialog is retrieved using the \c selectedDocument() method.
+
+    \ingroup documentselection
  */
 
 /*!

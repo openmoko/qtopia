@@ -4,21 +4,15 @@
  <exportmacro></exportmacro>
  <class>ShutdownDialog</class>
  <widget class="QWidget" name="ShutdownDialog" >
-  <property name="objectName" >
-   <string notr="true" >ShutdownDialog</string>
-  </property>
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>924</width>
+    <height>265</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="objectName" >
-    <string notr="true" />
-   </property>
    <property name="margin" >
     <number>9</number>
    </property>
@@ -27,24 +21,10 @@
    </property>
    <item>
     <widget class="QGroupBox" name="GroupBox" >
-     <property name="objectName" >
-      <string notr="true" >GroupBox</string>
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>9</x>
-       <y>9</y>
-       <width>382</width>
-       <height>81</height>
-      </rect>
-     </property>
      <property name="title" >
-      <string>Terminate</string>
+      <string>Termination Options</string>
      </property>
      <layout class="QGridLayout" >
-      <property name="objectName" >
-       <string notr="true" />
-      </property>
       <property name="margin" >
        <number>7</number>
       </property>
@@ -53,17 +33,6 @@
       </property>
       <item row="1" column="1" >
        <widget class="QPushButton" name="quit" >
-        <property name="objectName" >
-         <string notr="true" >quit</string>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>193</x>
-          <y>47</y>
-          <width>180</width>
-          <height>25</height>
-         </rect>
-        </property>
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>3</hsizetype>
@@ -155,6 +124,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </active>
           <inactive>
            <color>
@@ -237,6 +211,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </inactive>
           <disabled>
            <color>
@@ -318,28 +297,22 @@
             <red>255</red>
             <green>0</green>
             <blue>255</blue>
+           </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
            </color>
           </disabled>
          </palette>
         </property>
         <property name="text" >
-         <string>Terminate Server</string>
+         <string>Terminate</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0" >
        <widget class="QPushButton" name="reboot" >
-        <property name="objectName" >
-         <string notr="true" >reboot</string>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>9</x>
-          <y>47</y>
-          <width>181</width>
-          <height>25</height>
-         </rect>
-        </property>
         <property name="sizePolicy" >
          <sizepolicy>
           <hsizetype>3</hsizetype>
@@ -431,6 +404,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </active>
           <inactive>
            <color>
@@ -513,6 +491,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </inactive>
           <disabled>
            <color>
@@ -594,6 +577,11 @@
             <red>255</red>
             <green>0</green>
             <blue>255</blue>
+           </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
            </color>
           </disabled>
          </palette>
@@ -605,17 +593,6 @@
       </item>
       <item row="0" column="1" >
        <widget class="QPushButton" name="restart" >
-        <property name="objectName" >
-         <string notr="true" >restart</string>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>193</x>
-          <y>19</y>
-          <width>180</width>
-          <height>25</height>
-         </rect>
-        </property>
         <property name="palette" >
          <palette>
           <active>
@@ -699,6 +676,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </active>
           <inactive>
            <color>
@@ -781,6 +763,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </inactive>
           <disabled>
            <color>
@@ -862,28 +849,22 @@
             <red>255</red>
             <green>0</green>
             <blue>255</blue>
+           </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
            </color>
           </disabled>
          </palette>
         </property>
         <property name="text" >
-         <string>Restart Server</string>
+         <string>Restart</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0" >
        <widget class="QPushButton" name="shut" >
-        <property name="objectName" >
-         <string notr="true" >shut</string>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>9</x>
-          <y>19</y>
-          <width>181</width>
-          <height>25</height>
-         </rect>
-        </property>
         <property name="palette" >
          <palette>
           <active>
@@ -967,6 +948,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </active>
           <inactive>
            <color>
@@ -1049,6 +1035,11 @@
             <green>0</green>
             <blue>255</blue>
            </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
+           </color>
           </inactive>
           <disabled>
            <color>
@@ -1130,12 +1121,23 @@
             <red>255</red>
             <green>0</green>
             <blue>255</blue>
+           </color>
+           <color>
+            <red>232</red>
+            <green>232</green>
+            <blue>232</blue>
            </color>
           </disabled>
          </palette>
         </property>
         <property name="text" >
          <string>Shutdown</string>
+        </property>
+        <property name="iconSize" >
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -1144,75 +1146,42 @@
    </item>
    <item>
     <widget class="QLabel" name="info" >
-     <property name="objectName" >
-      <string notr="true" >info</string>
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>9</x>
-       <y>96</y>
-       <width>382</width>
-       <height>40</height>
-      </rect>
-     </property>
      <property name="text" >
-      <string>&lt;p>
-These termination options are provided primarily for use while developing and testing the Qtopia system. In a normal environment, these concepts are unnecessary.</string>
+      <string/>
+     </property>
+     <property name="wordWrap" >
+      <bool>false</bool>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QProgressBar" name="progressBar" >
-     <property name="objectName" >
-      <string notr="true" >progressBar</string>
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>9</x>
-       <y>142</y>
-       <width>382</width>
-       <height>24</height>
-      </rect>
-     </property>
      <property name="maximum" >
       <number>20</number>
      </property>
      <property name="value" >
       <number>-1</number>
      </property>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
     </widget>
    </item>
    <item>
     <spacer>
-     <property name="objectName" >
-      <string notr="true" />
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>9</x>
-       <y>172</y>
-       <width>382</width>
-       <height>57</height>
-      </rect>
-     </property>
      <property name="orientation" >
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
      </property>
     </spacer>
    </item>
    <item>
     <widget class="QPushButton" name="cancel" >
-     <property name="objectName" >
-      <string notr="true" >cancel</string>
-     </property>
-     <property name="geometry" >
-      <rect>
-       <x>9</x>
-       <y>235</y>
-       <width>382</width>
-       <height>56</height>
-      </rect>
-     </property>
      <property name="sizePolicy" >
       <sizepolicy>
        <hsizetype>1</hsizetype>
@@ -1304,6 +1273,11 @@ These termination options are provided primarily for use while developing and te
          <green>0</green>
          <blue>255</blue>
         </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
+        </color>
        </active>
        <inactive>
         <color>
@@ -1385,6 +1359,11 @@ These termination options are provided primarily for use while developing and te
          <red>255</red>
          <green>0</green>
          <blue>255</blue>
+        </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
         </color>
        </inactive>
        <disabled>
@@ -1468,6 +1447,11 @@ These termination options are provided primarily for use while developing and te
          <green>0</green>
          <blue>255</blue>
         </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
+        </color>
        </disabled>
       </palette>
      </property>
@@ -1481,6 +1465,13 @@ These termination options are provided primarily for use while developing and te
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>shut</tabstop>
+  <tabstop>restart</tabstop>
+  <tabstop>reboot</tabstop>
+  <tabstop>quit</tabstop>
+  <tabstop>cancel</tabstop>
+ </tabstops>
+ <resources/>
  <connections/>
 </ui>

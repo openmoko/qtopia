@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -217,6 +217,15 @@ void HelixSession::update(Subject* subject)
 
             d->interfaces.append(QMediaVideoControl::name());
             emit interfaceAvailable(QMediaVideoControl::name());
+        } else {
+            d->interfaces.removeAll(QMediaVideoControl::name());
+            emit interfaceUnavailable(QMediaVideoControl::name());
+
+            delete d->videoWidget;
+            d->videoWidget = 0;
+
+            delete d->videoControlServer;
+            d->videoControlServer = 0;
         }
     }
     else

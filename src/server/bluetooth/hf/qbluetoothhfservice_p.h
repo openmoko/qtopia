@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -22,8 +22,6 @@
 #ifndef __QBLUETOOTHHFSERVICE_H__
 #define __QBLUETOOTHHFSERVICE_H__
 
-#ifdef HAVE_ALSA
-
 #include <qabstractipcinterfacegroup.h>
 #include <qtopia/comm/qbluetoothnamespace.h>
 #include <qtopia/comm/qbluetoothabstractservice.h>
@@ -38,8 +36,6 @@ class QBluetoothHandsfreeService : public QBluetoothAbstractService
 public:
     QBluetoothHandsfreeService(const QString &service, QObject *parent = 0);
     ~QBluetoothHandsfreeService();
-
-    void initialize();
 
     // Methods from the Control Interface
     void start(int channel);
@@ -106,11 +102,10 @@ private:
     void hookupSocket(QBluetoothRfcommSocket *socket);
     bool setupTty(QBluetoothRfcommSocket *socket, bool incoming);
     void doDisconnect();
+    bool audioGatewayInitialized();
 
     QBluetoothHandsfreeServicePrivate *m_data;
 };
-
-#endif
 
 #endif
 

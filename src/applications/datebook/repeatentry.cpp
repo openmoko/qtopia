@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -44,7 +44,7 @@ static const QTimeString::Length TIMESTRING_LENGTH = QTimeString::Long;
 RepeatEntry::RepeatEntry( QWidget *parent )
     : QDialog(parent), startMonday(Qtopia::weekStartsOnMonday())
 {
-    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 7;
+    int approxSize = QFontMetrics(QFont()).width(" Wed ") * 3;
     QDesktopWidget *desktop = QApplication::desktop();
     if ( desktop->availableGeometry(desktop->screenNumber(this)).width() > approxSize )
         weekLabelLen = QTimeString::Medium;
@@ -168,7 +168,7 @@ void RepeatEntry::setAppointmentWeekFlags()
     int i;
     Qt::DayOfWeek day = startMonday ? Qt::Monday: Qt::Sunday;
     for (i = 0; i < 7; i++) {
-        QToolButton *tb = weekDayToggle[day];
+        QAbstractButton *tb = weekDayToggle[day];
         mAppointment.setRepeatOnWeekDay(day, tb->isChecked());
 
         increment(day);
@@ -186,7 +186,7 @@ void RepeatEntry::setWeekDayToggles()
     int i;
     Qt::DayOfWeek day = startMonday ? Qt::Monday: Qt::Sunday;
     for (i = 0; i < 7; i++) {
-        QToolButton *tb = weekDayToggle[day];
+        QAbstractButton *tb = weekDayToggle[day];
 
         if (mAppointment.start().date().dayOfWeek() == day) {
             tb->setEnabled(false);

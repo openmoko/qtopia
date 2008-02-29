@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -48,14 +48,14 @@ public:
     virtual int maxError() const = 0;
     virtual int weight() const = 0;
 
-    virtual int calcError(const QIMPenSignature &other) const;
+    virtual int calcError(const QIMPenSignature &other, const QVector<int> &weight = QVector<int>()) const;
 
 protected:
     virtual void calcSignature(const QIMPenStroke &links) = 0;
     // assist if using normal calc error.
     void scale(unsigned int, bool);
     static QVector<int> createBase(const QVector<int>&, int e);
-    static int calcError(const QVector<int> &, const QVector<int> &, int offset, bool t);
+    static int calcError(const QVector<int> &, const QVector<int> &, int offset, bool t, const QVector<int> &weight = QVector<int>());
     virtual bool loops() const { return true; }
     virtual bool slides() const { return true; }
 };
@@ -84,7 +84,7 @@ public:
 
     QByteArray name() const { return "tan"; }
     int maxError() const { return 60; }
-    int weight() const { return 20; }
+    int weight() const { return 40; }
 
 protected:
     void calcSignature(const QIMPenStroke &links);

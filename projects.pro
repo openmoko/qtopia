@@ -22,3 +22,32 @@ enable_singleexec:SUBDIRS+=src/server
     qtopia_install.depends+=sdk_inst
 }
 
+# Since people expect 'make install' to do the right thing and since it
+# doesn't always do the right thing (it's additive, not replacing), force
+# 'make install' to remove the image, making it work like 'make cleaninstall'
+win32:RMRF=rmdir /s /q
+else:RMRF=rm -rf
+cleanimage.commands=$$COMMAND_HEADER
+PREFIXES=$(IMAGE) $(DIMAGE)
+for(prefix,PREFIXES) {
+    win32:cleanimage.commands+=if exist $$prefix
+    cleanimage.commands+=$$RMRF $$prefix $$LINE_SEP
+}
+cleanimage.commands+=$$DUMMY_COMMAND
+QMAKE_EXTRA_TARGETS+=cleanimage
+qtopia_install.depends+=cleanimage
+
+# I'm sure at least one person will need to force an additive install so
+# give them a way to do it
+runlast(append_install.commands=\$$qtopia_install.commands)
+QMAKE_EXTRA_TARGETS+=append_install
+
+# Don't let common.prf put in the cleaninstall rule. Just make it call our install rule.
+CONFIG+=no_cleaninstall
+cleaninstall.commands=
+cleaninstall.depends=qtopia_install
+QMAKE_EXTRA_TARGETS+=cleaninstall
+cinstall.commands=
+cinstall.depends=qtopia_install
+QMAKE_EXTRA_TARGETS+=cinstall
+

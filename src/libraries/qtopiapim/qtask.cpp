@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -55,7 +55,7 @@ public:
 /*!
   \class QTask
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QTask class holds the data of a todo entry.
 
   This data includes the priority of the task, a description, an optional due
@@ -655,6 +655,7 @@ void QTask::writeVCalendar( const QString &filename, const QList<QTask> &tasks)
     }
 
     cleanStrTbl();
+    fclose(f);
 }
 
 /*!
@@ -675,6 +676,7 @@ void QTask::writeVCalendar( const QString &filename, const QTask &task)
     cleanVObject( obj );
 
     cleanStrTbl();
+    fclose(f);
 }
 
 /*!

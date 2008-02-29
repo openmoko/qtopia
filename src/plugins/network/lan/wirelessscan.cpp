@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -853,6 +853,14 @@ void WSearchPage::stateChanged(QtopiaNetworkInterface::Status newState, bool /*e
 {
     if ( !scanEngine )
         return;
+    if ( state != newState 
+            && state == QtopiaNetworkInterface::Down 
+            && (newState == QtopiaNetworkInterface::Demand || newState == QtopiaNetworkInterface::Pending
+                || newState == QtopiaNetworkInterface::Up) )
+    {
+        QtopiaNetwork::extendInterfaceLifetime( config, true );
+    }
+    
     state = newState;
     switch (newState) {
         case QtopiaNetworkInterface::Pending:
@@ -1090,7 +1098,10 @@ void WSearchPage::connectToNetwork()
                 QString currentESSID = scanEngine->currentESSID();
                 qLog(Network) << "Connecting from" << currentESSID << "to"
                     << newESSID;
-                QtopiaNetwork::stopInterface( config );
+
+                //force shutdown. This means the app that loads this plugin
+                //needs SXE netsetup privileges
+                QtopiaNetwork::privilegedInterfaceStop( config );
                 //stopping will take some time. we have to wait till the plugin
                 //signals no connection;
                 isRestart = true;

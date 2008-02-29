@@ -91,100 +91,82 @@
          </property>
          <layout class="QVBoxLayout" >
           <property name="margin" >
-           <number>0</number>
-          </property>
-          <property name="spacing" >
            <number>5</number>
           </property>
+          <property name="spacing" >
+           <number>2</number>
+          </property>
           <item>
-           <layout class="QHBoxLayout" >
+           <layout class="QGridLayout" >
             <property name="margin" >
-             <number>0</number>
+             <number>5</number>
             </property>
             <property name="spacing" >
-             <number>6</number>
+             <number>2</number>
             </property>
-            <item>
-             <widget class="QToolButton" name="weekDay1Toggle" >
+            <item row="0" column="0" >
+             <widget class="QCheckBox" name="weekDay1Toggle" >
               <property name="text" >
                <string comment="One letter for Monday" >M</string>
               </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="weekDay2Toggle" >
+            <item row="0" column="1" >
+             <widget class="QCheckBox" name="weekDay2Toggle" >
               <property name="text" >
                <string comment="One letter for Tuesday" >T</string>
               </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="weekDay3Toggle" >
+            <item row="1" column="0" >
+             <widget class="QCheckBox" name="weekDay3Toggle" >
               <property name="text" >
                <string comment="One letter for Wednesday" >W</string>
               </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="weekDay4Toggle" >
+            <item row="1" column="1" >
+             <widget class="QCheckBox" name="weekDay4Toggle" >
               <property name="text" >
                <string comment="One letter for Thursday" >T</string>
               </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="weekDay5Toggle" >
+            <item row="2" column="0" >
+             <widget class="QCheckBox" name="weekDay5Toggle" >
               <property name="text" >
                <string comment="One letter for Friday" >F</string>
               </property>
-              <property name="checkable" >
-               <bool>true</bool>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QCheckBox" name="weekDay6Toggle" >
+              <property name="text" >
+               <string comment="One letter for Saturday" >S</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
+             <widget class="QCheckBox" name="weekDay7Toggle" >
+              <property name="text" >
+               <string comment="One letter for Sunday" >S</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" >
-            <property name="margin" >
-             <number>0</number>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
             </property>
-            <property name="spacing" >
-             <number>6</number>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
             </property>
-            <item>
-             <widget class="QToolButton" name="weekDay6Toggle" >
-              <property name="text" >
-               <string comment="One letter for Saturday" >S</string>
-              </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="weekDay7Toggle" >
-              <property name="text" >
-               <string comment="One letter for Sunday" >S</string>
-              </property>
-              <property name="checkable" >
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           </spacer>
           </item>
          </layout>
         </widget>

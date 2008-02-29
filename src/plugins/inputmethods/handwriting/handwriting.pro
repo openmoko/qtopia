@@ -26,9 +26,9 @@ desktop.path=/plugins/inputmethods/
 desktop.hint=desktop
 INSTALLS+=etc desktop
 
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/hw/*.png
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/hw/*
 pics.path=/pics/hw
-
+pics.hint=pics
 INSTALLS += pics
 
 pkg.name=qpe-handwriting

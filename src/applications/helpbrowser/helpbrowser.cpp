@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -260,8 +260,6 @@ HelpBrowser::HelpBrowser( QWidget* parent, Qt::WFlags f )
 
 void HelpBrowser::init()
 {
-    setBackgroundRole( QPalette::Button );
-
     QWidget *box = new QWidget(this);
     QBoxLayout *boxLayout = new QVBoxLayout( box );
     boxLayout->setMargin(0);

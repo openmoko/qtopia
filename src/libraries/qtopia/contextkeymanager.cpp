@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -33,6 +33,7 @@
 #include <QtGui/qtextcursor.h>
 #include <QTextBlock>
 #include <QTextLayout>
+#include <QTextBrowser>
 
 #include "qtopiaipcenvelope.h"
 #include "qsoftmenubar.h"
@@ -67,23 +68,32 @@ ContextKeyManager::ContextKeyManager()
         QSoftMenuBar::StandardLabel lbl = QSoftMenuBar::NoLabel;
 #ifdef QTOPIA_PHONE
         if( !mousePreferred )
-            lbl = QSoftMenuBar::Ok;
+            lbl = QSoftMenuBar::EndEdit;
 #endif
 
+        setClassStandardLabel("QTimeEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QLineEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QTextEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QSlider", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QSpinBox", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QComboBox", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
+        
         setClassStandardLabel("QButton", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
         setClassStandardLabel("QMenu", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
         setClassStandardLabel("QTextBrowser", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QComboBoxPrivateContainer", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
+        
+        setClassStandardLabel("QLineEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QTextEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QSpinBox", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QTabBar", Qt::Key_Select, QSoftMenuBar::NoLabel, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QSlider", Qt::Key_Select, QSoftMenuBar::NoLabel, QSoftMenuBar::NavigationFocus);
 
-        setClassStandardLabel("QMenu", Qt::Key_Back, QSoftMenuBar::Cancel, QSoftMenuBar::AnyFocus);
+        setClassStandardLabel("QMenu", Qt::Key_Back, QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
 
 #ifdef QTOPIA_PHONE
         if( !mousePreferred ) {
+            setClassStandardLabel("QTimeEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QLineEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QTextEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QSlider", Qt::Key_Back, QSoftMenuBar::Cancel, QSoftMenuBar::EditFocus);
@@ -136,7 +146,9 @@ void ContextKeyManager::updateLabelsForFocused()
     int menuKey = QSoftMenuBar::menuKey();
     bool editMenu = false;
     QSoftMenuBar::StandardLabel backLabel = QSoftMenuBar::Back;
+    QSoftMenuBar::StandardLabel selectLabel = QSoftMenuBar::Select;
     bool overrideBack = false;
+    bool overrideSelect = false;
 #ifdef QTOPIA_PHONE
     if( !mousePreferred ) {
         if (modal) {
@@ -148,24 +160,52 @@ void ContextKeyManager::updateLabelsForFocused()
             if (l) {
                 editMenu = !haveLabelForWidget(w, menuKey, modal);
                 if (l->text().length() == 0 || l->isReadOnly())
-                    backLabel = QSoftMenuBar::Cancel;
+                    backLabel = QSoftMenuBar::RevertEdit;
                 else if (l->cursorPosition() == 0)
                     backLabel = QSoftMenuBar::NoLabel;
                 else
                     backLabel = QSoftMenuBar::BackSpace;
                 overrideBack = true;
-            } else if (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")) {
-                QTextEdit *e = qobject_cast<QTextEdit*>(w);
-                editMenu = !haveLabelForWidget(w, menuKey, modal);
-                if ((e->document()->isEmpty() && e->textCursor().block().layout()->preeditAreaText().isEmpty()) || e->isReadOnly()) {
-                    backLabel = QSoftMenuBar::Cancel;
-                    overrideBack = true;
+            } else if (w->inherits("QTextEdit")) {
+                if (w->inherits("QTextBrowser")) {
+                    QTextBrowser *tb = qobject_cast<QTextBrowser*>(w);
+                    editMenu = !haveLabelForWidget(w, menuKey, modal);
+                    if (!haveCustomLabelForWidget(w, Qt::Key_Select, modal)) {
+                        if (tb->textCursor().hasSelection() &&
+                            !tb->textCursor().charFormat().anchorHref().isEmpty()) {
+                            selectLabel = QSoftMenuBar::Select;
+                            overrideSelect = true;
+                        } else {
+                            selectLabel = QSoftMenuBar::NoLabel;
+                            overrideSelect = true;
+                        }
+                    }
+                } else {
+                    QTextEdit *e = qobject_cast<QTextEdit*>(w);
+                    editMenu = !haveLabelForWidget(w, menuKey, modal);
+                    if (e->document()->isEmpty() && e->textCursor().block().layout()->preeditAreaText().isEmpty()) {
+                        backLabel = QSoftMenuBar::RevertEdit;
+                        overrideBack = true;
+                    } else if (e->isReadOnly()) {
+                        backLabel = QSoftMenuBar::Cancel;
+                        overrideBack = true;
+                    }
                 }
             } else if ( (w->windowFlags() & Qt::Popup) ) {
                 if (!haveLabelForWidget(w, Qt::Key_Back, modal)) {
                     backLabel = QSoftMenuBar::Cancel;
                     overrideBack = true;
                 }
+            }
+        }
+        QAbstractButton *b = qobject_cast<QAbstractButton*>(w);
+        if (b && b->isCheckable()) {
+            if (w->inherits("QCheckBox")) {
+                if (b->isChecked())
+                    selectLabel = QSoftMenuBar::Deselect;
+                else
+                    selectLabel = QSoftMenuBar::Select;
+                overrideSelect = true;
             }
         }
     }
@@ -181,6 +221,11 @@ void ContextKeyManager::updateLabelsForFocused()
         } else {
             switch (buttons[i]) {
                 case Qt::Key_Select:
+#ifdef QTOPIA_PHONE
+                    if (!mousePreferred && overrideSelect)
+                        setStandard(w, Qt::Key_Select, selectLabel);
+                    else
+#endif
                     if (!updateContextLabel(w, modal, Qt::Key_Select)) {
                         if (w->focusPolicy() != Qt::NoFocus)
                             setStandard(w, Qt::Key_Select, QSoftMenuBar::Select);
@@ -310,6 +355,22 @@ bool ContextKeyManager::haveLabelForWidget(QWidget *w, int key, bool modal)
             KeyMap::Iterator it = (*wit).find(key);
             if (it != (*wit).end()) {
                 if ((*it).type(modal) != ModalState::NoLabel)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ContextKeyManager::haveCustomLabelForWidget(QWidget *w, int key, bool modal)
+{
+    if (buttons.count()) {
+        QMap<QWidget*,KeyMap>::Iterator wit = contextWidget.find(w);
+        if (wit != contextWidget.end()) {
+            KeyMap::Iterator it = (*wit).find(key);
+            if (it != (*wit).end()) {
+                if ((*it).type(modal) == ModalState::Custom)
                     return true;
             }
         }
@@ -540,6 +601,12 @@ QString ContextKeyManager::standardText(QSoftMenuBar::StandardLabel l)
             return tr("Next");
         case QSoftMenuBar::Previous:
             return tr("Prev");
+        case QSoftMenuBar::EndEdit:
+            return tr("Accept");
+        case QSoftMenuBar::RevertEdit:
+            return tr("Cancel");
+        case QSoftMenuBar::Deselect:
+            return tr("Deselect");
         default:
             return QString();
     }
@@ -570,6 +637,12 @@ QString ContextKeyManager::standardPixmap(QSoftMenuBar::StandardLabel l)
             return "i18n/next";
         case QSoftMenuBar::Previous:
             return "i18n/previous";
+        case QSoftMenuBar::EndEdit:
+            return "edit-end";
+        case QSoftMenuBar::RevertEdit:
+            return "edit-revert";
+        case QSoftMenuBar::Deselect:
+            return "select";
         default:
             return QString();
     }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,11 +38,13 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QRegExp>
+#include <QTextDocument>
+#include <QTextDocumentFragment>
 #include <QTextCursor>
 #include <QTextTable>
 #include <QTextTableCell>
 #include <QTextCharFormat>
-#include <QTextCharFormat>
+#include <QTextBlockFormat>
 #include <QFont>
 #include <QScrollBar>
 #include <QKeyEvent>
@@ -51,6 +53,51 @@
 #include <QMouseEvent>
 #include <QImageReader>
 
+
+enum {ContactLinkType = QTextCharFormat::UserProperty, ContactPhoneNumber, ContactPhoneType};
+
+/* Helper functions - not universally useful */
+static void addTextBreak( QTextCursor &curs)
+{
+    curs.insertBlock();
+    curs.movePosition(QTextCursor::NextBlock);
+}
+
+static void addTextLine( QTextCursor& curs, const QString& text, const QTextCharFormat& cf,
+        const QTextBlockFormat &bf, const QTextCharFormat& bcf)
+{
+    if (! text.isEmpty() ) {
+        curs.insertBlock(bf, bcf);
+        curs.insertText(text, cf);
+        curs.movePosition(QTextCursor::NextBlock);
+    }
+}
+
+static void addImageAndTextLine ( QTextCursor& curs, const QTextImageFormat& imf,
+        const QString& text, const QTextCharFormat& cf, const QTextBlockFormat& bf,
+        const QTextCharFormat& bcf)
+{
+    if (! text.isEmpty() ) {
+        curs.insertBlock(bf, bcf);
+        curs.insertImage(imf);
+        curs.insertText(text, cf);
+        curs.movePosition(QTextCursor::NextBlock);
+    }
+}
+
+static void addTextNameValue( QTextCursor& curs, const QString& name,
+        const QTextCharFormat &ncf, const QString& value, const QTextCharFormat &vcf,
+        const QTextBlockFormat& bf, const QTextCharFormat& bcf)
+{
+    if (! value.isEmpty() ) {
+        curs.insertBlock(bf, bcf);
+        curs.insertText(name, ncf);
+        curs.insertText(value, vcf);
+        curs.movePosition(QTextCursor::NextBlock);
+    }
+}
+
+/* AbLabel */
 AbLabel::AbLabel( QWidget *parent, const char *name )
   : QDLBrowserClient( parent, "contactnotes" )
 {
@@ -62,11 +109,11 @@ AbLabel::AbLabel( QWidget *parent, const char *name )
     QSoftMenuBar::setLabel(this, Qt::Key_Back,
         QSoftMenuBar::Back, QSoftMenuBar::AnyFocus);
     QSoftMenuBar::setLabel(this, Qt::Key_Select,
-        QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
+        QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
 #endif
 
     connect(this, SIGNAL(highlighted(const QString&)),
-            this, SLOT(linkSelected(const QString&)));
+            this, SLOT(linkHighlighted(const QString&)));
 
 #ifdef QTOPIA_VOIP
     presence = new QPresence(QString(), this);
@@ -90,9 +137,29 @@ AbLabel::~AbLabel()
 #endif
 }
 
-void AbLabel::linkSelected(const QString& link)
+void AbLabel::linkHighlighted(const QString& link)
 {
     mLink = link;
+
+    if (link.isEmpty()) {
+        QSoftMenuBar::setLabel(this, Qt::Key_Select,
+            QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
+    } else {
+        // XXX annoyingly, QTextBrowser doesn't expose the QTextCharFormat
+        // of the highlighted link, so we can't use our custom properties.
+        if (link.startsWith("dialer:"))
+            QSoftMenuBar::setLabel(this, Qt::Key_Select,
+                "phone/calls", tr("Dial"), QSoftMenuBar::AnyFocus); 
+        else if (link.startsWith("email:"))
+            QSoftMenuBar::setLabel(this, Qt::Key_Select,
+                "email", tr("Email"), QSoftMenuBar::AnyFocus);
+        else if (link.startsWith("sms:"))
+            QSoftMenuBar::setLabel(this, Qt::Key_Select,
+                "email", tr("Text"), QSoftMenuBar::AnyFocus); // email icon looks better
+        else // QDL etc
+            QSoftMenuBar::setLabel(this, Qt::Key_Select,
+                QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
+    }
 }
 
 void AbLabel::setSource(const QUrl & name)
@@ -158,13 +225,47 @@ inline static bool dialerPresent()
 
 void AbLabel::init( const QContact &entry )
 {
-    // TODO: Replace the code that generates the display as HTML with
-    // code that generates the display as a QTextDocument for speed.
+    QPalette thisPalette = qApp->palette(this);
+    QFont defaultFont = QApplication::font(this);
+    cfNormal.setFont(defaultFont);
+
+    cfBold = cfNormal;
+    cfItalic = cfNormal;
+    cfSmall = cfNormal;
+    cfSmallBold = cfNormal;
+    cfAnchor = cfNormal;
+    cfBoldUnderline = cfNormal;
+
+    cfItalic.setFontItalic(true);
+
+    cfBold.setFontWeight(80);
+
+    cfBoldUnderline.setFontWeight(80);
+    cfBoldUnderline.setFontUnderline(true);
+    cfBoldUnderline.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+    cfSmall.setFontPointSize(cfNormal.fontPointSize() * 0.8);
+
+    cfSmallBold.setFontWeight(80);
+    cfSmallBold.setFontPointSize(cfNormal.fontPointSize() * 0.8);
+
+    cfAnchor.setFontUnderline(true);
+    cfAnchor.setUnderlineStyle(QTextCharFormat::DashUnderline);
+    cfAnchor.setProperty(QTextFormat::IsAnchor, true);
+    cfAnchor.setForeground(thisPalette.color(QPalette::Link));
+
+    bfCenter.setAlignment(Qt::AlignHCenter);
+
+    tfNoBorder.setCellPadding(4);
+    tfNoBorder.setCellSpacing(0);
+    tfNoBorder.setBorder(0);
+    tfNoBorder.setAlignment(Qt::AlignHCenter);
 
     ent = entry;
     mLink = QString();
-    setHtml(contactToRichText(ent, dialerPresent()));
+    setDocument(createContactDocument(ent, dialerPresent()));
     verifyLinks();
+
     // moves focus to first link in document
     focusNextChild();
 }
@@ -196,6 +297,7 @@ void AbLabel::keyPressEvent( QKeyEvent *e )
     }
 
     QTextBrowser::keyPressEvent(e);
+
     if( oldEvent )
     {
         if( e->isAccepted() )
@@ -226,32 +328,47 @@ void AbLabel::keyPressEvent( QKeyEvent *e )
 #endif
 }
 
-typedef enum {NoLink = 0, Dialer, Messaging} LinkType;
+void AbLabel::addPhoneFragment( QTextCursor &curs, const QString& img, const QString& num, LinkType link, int phoneType)
+{
+    if ( ! num.isEmpty() ) {
+        QString escnum = num;
+        escnum = Qt::escape( escnum.replace( QRegExp(" "), "-" ) );
 
-static QString phoneToRichText( const QString& pm, const QString& num, LinkType link, int phoneType = -1 )
-{
-    if( num.isEmpty() )
-        return num;
-    QString img = "<img src=\"" + pm + "\"> ";
-    QString name = Qt::escape(num);
-    QString r = img + name;
-    QString escnum = num;
-    escnum = Qt::escape( escnum.replace( QRegExp(" "), "-" ) );
-    if ( link == Dialer )
-        r = "<a href=\"dialer:" +
-        (phoneType != -1 ? "phoneType:" + QString::number( phoneType ) + ":" : QString()) + escnum + "\">" + r + "</a>";
+        QTextCharFormat cfMyAnchor(cfAnchor);
+        QTextImageFormat cfMyAnchorImage;
+
+        switch (link)
+        {
+            case Dialer:
+                {
+                    QString urlStr = "dialer:";
+                    if (phoneType != -1)
+                        urlStr += "phoneType:" + QString::number(phoneType) + ":";
+                    urlStr += escnum;
+                    cfMyAnchor.setProperty(QTextFormat::AnchorHref, urlStr);
+                }
+                cfMyAnchor.setProperty(ContactLinkType, Dialer);
+                cfMyAnchor.setProperty(ContactPhoneNumber, escnum);
+                cfMyAnchor.setProperty(ContactPhoneType, phoneType);
+                break;
+
 #ifdef QTOPIA_PHONE
-    // sms only available on phone
-    else if ( link == Messaging )
-        r = "<a href=\"sms:" + escnum + "\">" + r + "</a>";
+            case Messaging:
+                cfMyAnchor.setProperty(QTextFormat::AnchorHref, QString("sms:") + escnum);
+                cfMyAnchor.setProperty(ContactLinkType, Messaging);
+                cfMyAnchor.setProperty(ContactPhoneNumber, escnum);
+                break;
 #endif
-    if( !Qtopia::mousePreferred() )
-        r = "<small>"+r+"</small>";
-    return r + "<br>";
-}
-static QString phoneToRichText( const QString& pm, const QString& num, bool dialer, int phoneType = -1 )
-{
-    return phoneToRichText(pm,num,dialer ? Dialer : NoLink, phoneType);
+            default:
+                cfMyAnchor = cfNormal;
+                break;
+        }
+        cfMyAnchorImage.merge(cfMyAnchor);
+        cfMyAnchorImage.setName(img);
+
+        addImageAndTextLine(curs, cfMyAnchorImage, num,
+                cfMyAnchor, bfCenter, Qtopia::mousePreferred() ? cfSmall : cfNormal);
+    }
 }
 
 bool AbLabel::decodeHref(const QString& href, QtopiaServiceRequest* req, QString* pm) const
@@ -373,396 +490,202 @@ QString AbLabel::encodeHref() const
     return href;
 }
 
-QString AbLabel::contactToRichText(const QContact & contact, bool dialer)
+void AbLabel::addNameFragment( QTextCursor &curs, const QContact &contact)
 {
-    QString text;
-    QString value, comp, state;
-    QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-    loadLinks( contact.customField( QDL::CLIENT_DATA_KEY ) );
+    QString value;
 
-    //
-    //  Thumbnail image
-    //
-
-    QString thumb = contact.portraitFile();
-    QString thumbtxt;
-    if( !thumb.isEmpty() )
-    {
-        thumb = baseDirStr + thumb;
-        QFontMetrics fm(font());
-        int thh = 3*fm.height();
-        QThumbnail thumbnail( thumb );
-        QSize dims = thumbnail.actualSize( QSize( thh*3/2, thh ) );
-        QString iml = "<img src=\"%1\" width=\"%2\" height=\"%3\">&nbsp;";
-        iml = iml.arg(Qt::escape(thumb)).arg(dims.width()).arg(dims.height());
-        thumbtxt = iml;
+    //  Name
+    if ( !(value = contact.label()).isEmpty() ) {
+        curs.insertText(value, cfBold);
     }
 
-    //
-    //  Name
-    //
-
-    QString nametxt;
-    if ( !(value = contact.label()).isEmpty() )
-        nametxt = "<b>" + Qt::escape(value) + "</b>";
-
-    //
     //  Also, name pronunciation
-    //
-
     if ( !(value = contact.firstNamePronunciation()).isEmpty() )
     {
-        nametxt += " <i>\"" + Qt::escape(value);
+        curs.insertText(" \"" + value, cfItalic);
         if( contact.lastNamePronunciation().isEmpty() )
-            nametxt += "\"";
-        nametxt += "</i>";
+            curs.insertText("\"", cfItalic);
     }
-
 
     if ( !(value = contact.lastNamePronunciation()).isEmpty() )
     {
-        nametxt += " <i>";
-        if( contact.firstNamePronunciation().isEmpty() )
-            nametxt += "\"";
-        nametxt +=  Qt::escape(value) + "\"</i>";
+        curs.insertText(" ");
+        if( contact.lastNamePronunciation().isEmpty() )
+            curs.insertText("\"", cfItalic);
+        curs.insertText(value + "\"", cfItalic);
     }
+    curs.insertText(" ", cfNormal);
+}
 
-    if ( thumbtxt.isEmpty() ) {
-        text += "<center>"+nametxt+"</center>";
+QTextDocument * AbLabel::createContactDocument(const QContact &contact, bool dialer)
+{
+    QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+    loadLinks( contact.customField( QDL::CLIENT_DATA_KEY ) );
+
+    QTextDocument *doc = new QTextDocument(this);
+    QTextCursor curs(doc);
+
+    QString value;
+    QTextBlockFormat bfHVCenter;
+    bfHVCenter.setAlignment(Qt::AlignCenter);
+    bfHVCenter.setNonBreakableLines(false);
+
+    /* add thumbnail and name */
+    curs.setBlockFormat(bfCenter);
+
+    /* check if we need to have a thumbnail */
+    QPixmap thumb = contact.thumbnail();
+    if( !thumb.isNull() )
+    {
+        QVariant thumbV = thumb;
+        QTextImageFormat img;
+        doc->addResource(QTextDocument::ImageResource, QUrl("addressbookdetailthumbnail"), thumbV);
+        img.setName("addressbookdetailthumbnail"); // No tr
+
+        QTextTable *tt = curs.insertTable(1, 2, tfNoBorder);
+
+        QTextCursor tCursor = tt->cellAt(0,0).firstCursorPosition();
+        tCursor.setBlockFormat(bfHVCenter);
+        tCursor.insertImage(img);
+
+        tCursor = tt->cellAt(0, 1).firstCursorPosition();
+        tCursor.setBlockFormat(bfHVCenter);
+        addNameFragment(tCursor, contact);
     } else {
-        text += "<table cellspacing=0 cellpadding=0>";
-        text += "<tr><td>"+thumbtxt+"<td>"+nametxt;
-        text += "</table>";
+        addNameFragment(curs, contact);
     }
+    curs.movePosition(QTextCursor::NextBlock);
 
-    //
+    addTextBreak(curs);
+
     //  Job (if this is a business contact)
-    //
-
     QCategoryManager c("addressbook", 0);
     QString bcatid  = "Business"; // no tr
     bool isBus = contact.categories().contains( bcatid );
 
-    QString job;
     if( isBus )
     {
-        QStringList lines;
-        QString str;
-        str = contact.jobTitle();
-        if ( !str.isEmpty() )
-            lines += Qt::escape(str);
-        str = contact.company();
-        if( !str.isEmpty() )
-            lines += "<b>" + Qt::escape(str) + "</b>";
-        if ( lines.count() ) {
-            if ( !nametxt.isEmpty() )
-                job += " ";
-            job += "<small>"+lines.join(" ")+"</small>";
+        curs.insertBlock(bfCenter);
+        value = contact.jobTitle();
+        if ( !value.isEmpty() )
+            curs.insertText(value + " ", cfSmall);
+
+        value = contact.company();
+        if( !value.isEmpty() ) {
+            curs.insertText(value, cfSmallBold);
         }
-        if ( !job.isEmpty() )
-            job += "<br>";
+        curs.movePosition(QTextCursor::NextBlock);
     }
-    text += "<center>"+job+"</center>";
 
     //
     //  Voice and messaging...
     //
-
     if( isBus )
     {
-        text += busPhoneRichText( contact, dialer );
-        text += homePhoneRichText( contact, dialer );
-        text += phoneToRichText( ":icon/businessmessage",
-            contact.businessMobile(),
-            Messaging, QContactModel::BusinessMobile );
-        text += phoneToRichText( ":icon/homemessage",
+        addBusinessPhoneFragment( curs, contact, dialer );
+        addHomePhoneFragment( curs, contact, dialer );
+        addPhoneFragment( curs, ":icon/businessmessage",
+            contact.businessMobile(), Messaging, QContactModel::BusinessMobile );
+
+        addPhoneFragment( curs, ":icon/homemessage",
             contact.homeMobile(), Messaging, QContactModel::HomeMobile );
     }
     else
     {
-        text += homePhoneRichText( contact, dialer );
-        text += busPhoneRichText( contact, dialer );
-        text += phoneToRichText( ":icon/homemessage",
+        addHomePhoneFragment( curs, contact, dialer );
+        addBusinessPhoneFragment( curs, contact, dialer );
+
+        addPhoneFragment( curs, ":icon/homemessage",
             contact.homeMobile(), Messaging, QContactModel::HomeMobile );
-        text += phoneToRichText( ":icon/businessmessage",
+        addPhoneFragment( curs, ":icon/businessmessage",
             contact.businessMobile(), Messaging, QContactModel::BusinessMobile );
     }
 
-    text += emailRichText( contact );
+    addEmailFragment( curs, contact );
 
 #ifdef QTOPIA_VOIP
     // If we have VoIP presence capabilities within the system,
     // then set up monitoring and convert the URI into a dialer link.
     if ( presence )
-        text += voipIdRichText( contact );
+        addVoipFragment( curs, contact );
 #endif
 
     // XXX For now, no 'Messaging' support for faxes,
     // XXX but it's completely feasible to add.
-    text += phoneToRichText( ":icon/businessfax", contact.businessFax(),
-        false, QContactModel::BusinessFax );
-    text += phoneToRichText( ":icon/homefax", contact.homeFax(),
-        false, QContactModel::HomeFax );
+    addPhoneFragment(curs, ":icon/businessfax", contact.businessFax(),
+        dialer ? Dialer : NoLink, QContactModel::BusinessFax );
+    addPhoneFragment( curs,  ":icon/homefax", contact.homeFax(),
+        dialer ? Dialer : NoLink, QContactModel::HomeFax );
 
-    if( isBus )
-    {
-        text += businessRichText( contact, dialer );
-        text += personalRichText( contact, dialer );
-    }
-    else
-    {
-        text += personalRichText( contact, dialer );
-        text += businessRichText( contact, dialer );
+    if( isBus ) {
+        addBusinessFragment( curs, contact, dialer );
+        addPersonalFragment( curs, contact, dialer );
+    } else {
+        addPersonalFragment( curs, contact, dialer );
+        addBusinessFragment( curs, contact, dialer );
     }
 
     value = contact.notes();
     if ( !value.isEmpty() )
     {
-        text += value;
+        // XXX add a Notes: header
+        addTextBreak(curs);
+        curs.insertBlock();
+        curs.insertHtml(value);
+        curs.movePosition(QTextCursor::NextBlock);
     }
 
-    /*// photo last
-    QString pho = contact.customField( "photofile" );
-    if( !pho.isEmpty() )
-    {
-        pho = baseDirStr + pho;
-
-        //  Cannot use widget size, since it doesn't have the
-        //  right geometry at this point.
-        int dw = QApplication::desktop()->width()*7/8;
-        QSize sh(dw,dw);
-        QImageReader reader( pho );
-        QSize dims = reader.size() * 2;
-        if( dims.width() > sh.width() || dims.height() > sh.height() ) {
-            dims.scale( sh, Qt::KeepAspectRatio );
-        }
-        QString img = "<img width=%1 height=%2 src=\"" // No tr
-            + Qt::escape( pho ) + "\">" + "<br>";
-        img = img.arg(dims.width()).arg(dims.height());
-        text += img;
-    }*/
-
-    return text;
+    return doc;
 }
 
-QString AbLabel::busPhoneRichText( const QContact &contact, bool dialer )
+void AbLabel::addBusinessPhoneFragment( QTextCursor &curs, const QContact &contact, bool dialer )
 {
-    QString text;
-
-    text += phoneToRichText( ":icon/businessphone",
-        contact.businessPhone(), dialer, QContactModel::BusinessPhone );
-    text += phoneToRichText( ":icon/businessmobile",
-        contact.businessMobile(), dialer, QContactModel::BusinessMobile );
-    text += phoneToRichText( ":icon/businesspager",
-        contact.businessPager(), false, QContactModel::BusinessPager );
-
-    return text;
+    addPhoneFragment( curs, ":icon/businessphone",
+        contact.businessPhone(), dialer ? Dialer:NoLink, QContactModel::BusinessPhone );
+    addPhoneFragment( curs, ":icon/businessmobile",
+        contact.businessMobile(), dialer ? Dialer:NoLink, QContactModel::BusinessMobile );
+    addPhoneFragment( curs, ":icon/businesspager",
+        contact.businessPager(), NoLink, QContactModel::BusinessPager );
 }
 
-QString AbLabel::homePhoneRichText( const QContact &contact, bool dialer )
+void AbLabel::addHomePhoneFragment( QTextCursor &curs, const QContact &contact, bool dialer )
 {
-    QString text;
-
-    text += phoneToRichText( ":icon/homephone",
-        contact.homePhone(), dialer, QContactModel::HomePhone );
-    text += phoneToRichText( ":icon/homemobile",
-        contact.homeMobile(), dialer, QContactModel::HomeMobile );
-
-    return text;
+    addPhoneFragment( curs, ":icon/homephone",
+        contact.homePhone(), dialer ? Dialer:NoLink, QContactModel::HomePhone );
+    addPhoneFragment( curs, ":icon/homemobile",
+        contact.homeMobile(), dialer ? Dialer:NoLink, QContactModel::HomeMobile );
 }
 
-QString AbLabel::businessRichText( const QContact &contact, bool /* dialer */ )
+void AbLabel::addEmailFragment( QTextCursor &curs, const QContact &contact )
 {
-    QString text;
-    QString value, comp, state;
-    QString str;
-    QString title;
-
-    if ( !(value = contact.jobTitle()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-
-    if ( !(value = contact.department()).isEmpty() ) {
-        text += "<i>" + Qt::escape(value) + "</i>";
-        text += "<br>";
-    }
-    comp = contact.company();
-    if ( !comp.isEmpty() )
-        text += "<b>" + Qt::escape(comp) + "</b> ";
-    if ( !(value = contact.companyPronunciation()).isEmpty() )
-        text += "<i>\"" + Qt::escape(value) + "\"</i>";
-    if( !comp.isEmpty() || !value.isEmpty() )
-        text += "<br>";
-
-
-
-    if ( !contact.businessStreet().isEmpty() || !contact.businessCity().isEmpty() ||
-         !contact.businessZip().isEmpty() || !contact.businessCountry().isEmpty() ) {
-        text += "<br><b>" + qApp->translate( "QtopiaPim",  "Address: " ) + "</b><br>";
-    }
-
-    if ( !(value = contact.businessStreet()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-    state =  contact.businessState();
-    if ( !(value = contact.businessCity()).isEmpty() ) {
-        text += Qt::escape(value);
-        if ( !state.isEmpty() )
-            text += ", " + Qt::escape(state);
-        text += "<br>";
-    } else if ( !state.isEmpty() )
-        text += Qt::escape(state) + "<br>";
-    if ( !(value = contact.businessZip()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-    if ( !(value = contact.businessCountry()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-
-    str = contact.businessWebpage();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Web Page: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    str = contact.office();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Office: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    str = contact.profession();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Profession: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    str = contact.assistant();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Assistant: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    str = contact.manager();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Manager: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    if( !text.isEmpty() )
-    {
-        QString pp = ":icon/addressbook/business";
-        QString title;
-        title = "<p align=\"center\"><img src=\"" + pp + "\"><b><u>" + qApp->translate( "QtopiaPim", "Business Details" ) + "</u></b></p>";
-        text =  title + "<br>" + text;
-    }
-    return text;
-}
-
-QString AbLabel::personalRichText( const QContact &contact, bool /* dialer */ )
-{
-    QString text;
-    QString value, state;
-    QString str;
-
-    // home address
-    if ( !contact.homeStreet().isEmpty() || !contact.homeCity().isEmpty() ||
-         !contact.homeZip().isEmpty() || !contact.homeCountry().isEmpty() ) {
-        text += "<b>" + qApp->translate( "QtopiaPim",  "Address: " ) + "</b>";
-        text +=  "<br>";
-    }
-    if ( !(value = contact.homeStreet()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-    state =  contact.homeState();
-    if ( !(value = contact.homeCity()).isEmpty() ) {
-        text += Qt::escape(value);
-        if ( !state.isEmpty() )
-            text += ", " + Qt::escape(state);
-        text += "<br>";
-    } else if (!state.isEmpty())
-        text += Qt::escape(state) + "<br>";
-    if ( !(value = contact.homeZip()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-    if ( !(value = contact.homeCountry()).isEmpty() )
-        text += Qt::escape(value) + "<br>";
-
-    str = contact.homeWebpage();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Web Page: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-
-
-    str = contact.gender();
-    if ( !str.isEmpty() && str.toInt() != 0 ) {
-        if ( str.toInt() == 1 )
-            str = qApp->translate( "QtopiaPim", "Male" );
-        else if ( str.toInt() == 2 )
-            str = qApp->translate( "QtopiaPim", "Female" );
-        text += "<b>" + qApp->translate( "QtopiaPim","Gender: ") + "</b>" + str + "<br>";
-    }
-    str = contact.spouse();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim","Spouse: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-
-    str = contact.children();
-    if ( !str.isEmpty() )
-        text += "<b>" + qApp->translate( "QtopiaPim", "Children:") +QLatin1String(" ")+ "</b>"
-                + Qt::escape(str) + "<br>";
-
-    if ( contact.birthday().isValid() ) {
-        str = QTimeString::localYMD( contact.birthday() );
-        if ( !str.isEmpty() )
-            text += "<b>" + qApp->translate( "QtopiaPim","Birthday: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    }
-    if ( contact.anniversary().isValid() ) {
-        str = QTimeString::localYMD( contact.anniversary() );
-        if ( !str.isEmpty() )
-            text += "<b>" + qApp->translate( "QtopiaPim","Anniversary: ") + "</b>"
-                + Qt::escape(str) + "<br>";
-    }
-
-    if( !text.isEmpty() )
-    {
-        QString pp = ":icon/home";
-        QString title = "<p align=\"center\"><img src=\"" + pp + "\"><b><u>" +
-            qApp->translate( "QtopiaPim", "Personal Details" ) + "</b></u></p>";
-        text = title + "<br>" + text;
-    }
-    return text;
-}
-
-QString AbLabel::emailRichText( const QContact &contact )
-{
-    QString text;
     QStringList emails = contact.emailList();
     QStringList::Iterator it;
-    QString e;
-    bool notFirst = false;
     for( it = emails.begin() ; it != emails.end() ; ++it )
     {
         QString trimmed = (*it).trimmed();
         if(!trimmed.isEmpty())
         {
-            QString smallopen, smallclose;
-            if( !Qtopia::mousePreferred() ) {
-                smallopen = "<small>";
-                smallclose = "</small>";
-            }
-            notFirst = true;
-            text += "<a href=\"email:" + Qt::escape(trimmed) + "\">";
-            text += "<img src=\":icon/email\">" + smallopen;
-            text += Qt::escape(trimmed);
-            text += smallclose + "</a>";
-            text += "<br>";
+            QTextCharFormat cfMyAnchor(cfAnchor);
+            QTextImageFormat cfMyImageAnchor;
+
+            cfMyAnchor.setProperty(QTextFormat::AnchorHref, QString("email:") + Qt::escape(trimmed));
+            cfMyAnchor.setProperty(ContactLinkType, Email);
+
+            cfMyImageAnchor.merge(cfMyAnchor);
+            cfMyImageAnchor.setName(":icon/email");
+
+            addImageAndTextLine(curs, cfMyImageAnchor, trimmed,
+                    cfMyAnchor, bfCenter, Qtopia::mousePreferred() ? cfNormal : cfSmall);
         }
     }
-    return text;
 }
 
 #ifdef QTOPIA_VOIP
-QString AbLabel::voipIdRichText( const QContact &contact )
+void AbLabel::addVoipFragment( QTextCursor &curs, const QContact &contact )
 {
-    QString text;
     QString voipId = contact.customField("VOIP_ID");
-    QString e;
-    QString hrefStr;
-    QString imageStr;
 
-    hrefStr = "<a href=\"dialer:";
-    QString smallopen, smallclose;
     if ( !voipId.isEmpty() ) {
-        if ( !Qtopia::mousePreferred() ) {
-            smallopen = "<small>";
-            smallclose = "</small>";
-        }
         if ( presence && monitoredVoipId != voipId ) {
             if ( !monitoredVoipId.isEmpty() ) {
                 presence->stopMonitoring( monitoredVoipId );
@@ -771,23 +694,179 @@ QString AbLabel::voipIdRichText( const QContact &contact )
             presence->startMonitoring( monitoredVoipId );
             monitoredVoipIdStatus = presence->monitoredUriStatus( voipId );
         }
-        if ( monitoredVoipIdStatus == QPresence::Available ) {
-            text += hrefStr + Qt::escape((voipId).simplified()) + "\">"
-            + "<img src=\":icon/online\">" + smallopen
-            + Qt::escape((voipId).simplified())
-            + smallclose + "</a>";
-            text += "<br>";
-        } else {
-            text += hrefStr + Qt::escape((voipId).simplified()) + "\">"
-            + "<img src=\":icon/offline\">" + smallopen
-            + Qt::escape((voipId).simplified())
-            + smallclose + "</a>";
-            text += "<br>";
-        }
+
+        QTextCharFormat cfMyAnchor(cfAnchor);
+        QTextImageFormat cfMyImageAnchor;
+
+        cfMyAnchor.setProperty(QTextFormat::AnchorHref,
+                QString("dialer:") + Qt::escape(voipId.simplified()));
+        cfMyAnchor.setProperty(ContactLinkType, Dialer);
+        cfMyAnchor.setProperty(ContactPhoneNumber, voipId.simplified());
+
+        cfMyImageAnchor.merge(cfMyAnchor);
+
+        if ( monitoredVoipIdStatus == QPresence::Available )
+            cfMyImageAnchor.setName(":icon/online");
+        else
+            cfMyImageAnchor.setName(":icon/offline");
+
+        addImageAndTextLine(curs, cfMyImageAnchor, voipId.simplified(),
+                cfMyAnchor, bfCenter, Qtopia::mousePreferred() ? cfNormal : cfSmall);
     }
-    return text;
+}
+#endif
+
+void AbLabel::addBusinessFragment( QTextCursor &curs, const QContact &contact, bool /* dialer */ )
+{
+    QString value, value2;
+    QString str;
+
+    /* Save our position before we add the header, in case we need to remove it afterwards */
+    int posBefore = curs.position();
+
+    /* Add a header */
+    curs.insertBlock(bfCenter);
+    curs.insertImage(":icon/addressbook/business");
+    curs.insertText(qApp->translate( "QtopiaPim", "Business Details"), cfBoldUnderline);
+    curs.movePosition(QTextCursor::NextBlock);
+
+    /* and save the new position, so we can tell if we added anything */
+    int posAfter = curs.position();
+
+    /* And add stuff */
+    addTextLine(curs, contact.jobTitle(), cfNormal, bfCenter, cfNormal);
+    addTextLine(curs, contact.department(), cfItalic, bfCenter, cfNormal);
+
+    value = contact.company();
+    value2 = contact.companyPronunciation();
+
+    if ( !value.isEmpty() || !value2.isEmpty()) {
+        curs.insertBlock(bfCenter);
+        if ( !value.isEmpty()) {
+            curs.insertText(value, cfBold);
+            curs.insertText(" ", cfNormal);
+        }
+        if ( !value2.isEmpty() )
+            curs.insertText("\"" + value2 + "\"", cfItalic);
+        curs.movePosition(QTextCursor::NextBlock);
+    }
+
+    if ( !contact.businessStreet().isEmpty() || !contact.businessCity().isEmpty() ||
+         !contact.businessZip().isEmpty() || !contact.businessCountry().isEmpty() ) {
+
+        // glom the city/state together
+        value = contact.businessCity();
+        value2 = contact.businessState();
+        str = value;
+        if ( !value2.isEmpty() && !str.isEmpty())
+            str += ", ";
+        str += value2;
+
+        addTextBreak(curs);
+        addTextLine(curs, qApp->translate( "QtopiaPim",  "Address: " ), cfBold, bfNormal, cfNormal);
+        addTextLine(curs, contact.businessStreet(), cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, str, cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, contact.businessZip(), cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, contact.businessCountry(), cfNormal, bfNormal, cfNormal);
+        addTextBreak(curs);
+    }
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Web Page: "), cfBold,
+        contact.businessWebpage(), cfNormal, bfNormal, cfNormal);
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Office: "), cfBold,
+        contact.office(), cfNormal, bfNormal, cfNormal);
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Profession: "), cfBold,
+        contact.profession(), cfNormal, bfNormal, cfNormal);
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Assistant: "), cfBold,
+        contact.assistant(), cfNormal, bfNormal, cfNormal);
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Manager: "), cfBold,
+        contact.manager(), cfNormal, bfNormal, cfNormal);
+
+    /* Finally, see if we need to remove our header */
+    if (curs.position() == posAfter) {
+        curs.setPosition(posBefore, QTextCursor::KeepAnchor);
+        curs.removeSelectedText();
+    }
 }
 
+void AbLabel::addPersonalFragment( QTextCursor& curs, const QContact &contact, bool /* dialer */ )
+{
+    QString value, value2;
+    QString str;
+
+    /* Save our position before we add the header, in case we need to remove it afterwards */
+    int posBefore = curs.position();
+
+    /* Add a header */
+    curs.insertBlock(bfCenter);
+    curs.insertImage(":icon/home");
+    curs.insertText(qApp->translate( "QtopiaPim", "Personal Details"), cfBoldUnderline);
+    curs.movePosition(QTextCursor::NextBlock);
+
+    /* and save the new position, so we can tell if we added anything */
+    int posAfter = curs.position();
+
+    // home address
+    if ( !contact.homeStreet().isEmpty() || !contact.homeCity().isEmpty() ||
+         !contact.homeZip().isEmpty() || !contact.homeCountry().isEmpty() ) {
+        // glom the city/state together
+        value = contact.homeCity();
+        value2 = contact.homeState();
+        str = value;
+        if ( !value2.isEmpty() && !str.isEmpty())
+            str += ", ";
+        str += value2;
+
+        addTextLine(curs, qApp->translate( "QtopiaPim",  "Address: " ), cfBold, bfNormal, cfNormal);
+        addTextLine(curs, contact.homeStreet(), cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, str, cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, contact.homeZip(), cfNormal, bfNormal, cfNormal);
+        addTextLine(curs, contact.homeCountry(), cfNormal, bfNormal, cfNormal);
+        addTextBreak(curs);
+    }
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Web Page: "), cfBold,
+            contact.homeWebpage(), cfNormal, bfNormal, cfNormal);
+
+    str = contact.gender();
+    if ( !str.isEmpty() && str.toInt() != 0 ) {
+        if ( str.toInt() == 1 )
+            str = qApp->translate( "QtopiaPim", "Male" );
+        else if ( str.toInt() == 2 )
+            str = qApp->translate( "QtopiaPim", "Female" );
+        else
+            str = QString();
+        addTextNameValue(curs, qApp->translate( "QtopiaPim","Gender: "), cfBold,
+                str, cfNormal, bfNormal, cfNormal);
+    }
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Spouse: "), cfBold,
+            contact.spouse(), cfNormal, bfNormal, cfNormal);
+
+    addTextNameValue(curs, qApp->translate( "QtopiaPim","Children:") + " ", cfBold,
+            contact.children(), cfNormal, bfNormal, cfNormal);
+
+    if ( contact.birthday().isValid() ) {
+        addTextNameValue(curs, qApp->translate( "QtopiaPim","Birthday: "), cfBold,
+            QTimeString::localYMD( contact.birthday() ), cfNormal, bfNormal, cfNormal);
+    }
+    if ( contact.anniversary().isValid() ) {
+        addTextNameValue(curs, qApp->translate( "QtopiaPim","Anniversary: "), cfBold,
+            QTimeString::localYMD( contact.anniversary()), cfNormal, bfNormal, cfNormal);
+    }
+
+    /* Finally, see if we need to remove our header */
+    if (curs.position() == posAfter) {
+        curs.setPosition(posBefore, QTextCursor::KeepAnchor);
+        curs.removeSelectedText();
+    }
+}
+
+#ifdef QTOPIA_VOIP
 void AbLabel::monitoredPresence( const QString& uri, QPresence::Status status )
 {
     // monitoring information received from the phone server
@@ -808,11 +887,9 @@ void AbLabel::monitoredPresence( const QString& uri, QPresence::Status status )
     // presence icon without rebuilding the enitre contact HTML.
 
     // reload the current contact
-    setHtml(contactToRichText(ent, dialerPresent()));
+    setDocument(createContactDocument(ent, dialerPresent()));
     // moves focus to first link in document
     focusNextChild();
 }
-
-
 #endif
 

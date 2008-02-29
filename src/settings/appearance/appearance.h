@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -18,25 +18,26 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #ifndef APPEARANCESETTINGS_H
 #define APPEARANCESETTINGS_H
 
+#include <QDialog>
+#include <QMap>
 
 #ifdef QTOPIA_PHONE
 #include "ui_appearancesettingsbasephone.h"
 #else
 #include "ui_appearancesettingsbase.h"
 #endif
-#include <QDialog>
-#include <QStringList>
-#include <QSoftMenuBar>
 
-class QWindowDecorationInterface;
-class QPluginManager;
+#include "itemcontrol.h"
+
+#ifndef QTOPIA_PHONE
 class SampleWindow;
-class QListWidgetItem;
-class QHBoxLayout;
+#else
 class QWaitWidget;
+#endif
 
 class AppearanceSettings : public QDialog, Ui::AppearanceSettingsBase
 {
@@ -49,81 +50,36 @@ public:
 protected:
     void accept();
     void reject();
-    void done(int r);
     void resizeEvent( QResizeEvent * );
-    void showEvent( QShowEvent * );
-#ifdef QTOPIA_PHONE
     bool eventFilter(QObject *o, QEvent *e);
-#endif
-    QPalette readColorScheme(int id);
 
 protected slots:
-    void applyStyle();
-    void colorSelected( QListWidgetItem * );
-    void styleSelected( QListWidgetItem * );
-    void decorationSelected( QListWidgetItem * );
-    QFont fontSelected( const QString &name );
-    void fontSizeSelected( const QString &sz );
-    void fixSampleGeometry();
-    void selectImage();
-    void selectWallpaper();
-    void updateBackground();
-    void clearBackground();
+    void populate();
+    void applyStyle(AppearanceItemControl::ApplyItemType itemType = AppearanceItemControl::CurrentItem);
 #ifdef QTOPIA_PHONE
     void pushSettingStatus();
     void receive( const QString& msg, const QByteArray& data );
     void tabChanged( int curIndex );
-    void updateContextLabels();
 #endif
 
 private:
-    void populateColorList();
-#ifndef QTOPIA_PHONE
-    void populateStyleList();
-    void populateDecorationList();
-#endif
-    void populateFontList(const QString& cur, int cursz);
-    void populate(const QString&, int);
 #ifdef QTOPIA_PHONE
-    void selectBackground(bool src_wallpaper);
-    void populateThemeList( QString current );
-    void populateLabelTypeList(const QSoftMenuBar::LabelType type);
     QString status();
     void setStatus( const QString details );
     void pullSettingStatus();
-#endif
-    void setStyle( QWidget *w, QStyle *s );
+#else
+    void fixSampleGeometry();
     bool isWide();
-    bool displayMode();
+#endif
 
 private:
-    QWindowDecorationInterface *wdiface;
-    QPluginManager *wdLoader;
-    bool wdIsPlugin;
-    SampleWindow *sample;
-    int prefFontSize;
-    int maxFontSize;
-    QStringList colorListIDs;
-    QHBoxLayout *hBoxLayout;
-    bool isClosing, rtl;
-    QListWidgetItem *defaultColor;
-    QString initColor;
+    QMap<QWidget*,AppearanceItemControl*> itemControls;
 #ifdef QTOPIA_PHONE
-    QMenu *contextMenu;
-    QString bgImgName;
-    int bgDisplayMode;
-    QString initStatus;
-    QAction *actionShowText;
-    QString activeDetails;
-    bool isThemeLoaded, isShowPreview, isStatusView, isFromActiveProfile;
-    QListWidgetItem *defaultTheme;
-    QWaitWidget *waitWidget;
+    BackgroundAppearanceItemControl *bgControl;
+    bool isStatusView, isFromActiveProfile;
+#else
+    SampleWindow *sample;
 #endif
-    int currColor;
-    int currTheme;
-    bool bgChanged;
 };
 
-
 #endif // APPEARANCESETTINGS_H
-

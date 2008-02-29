@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -102,7 +102,14 @@ bool PhonePowerManager::save(int level)
             if (m_powerConstraint > QtopiaApplication::DisableReturnToHomeScreen
                     && showhomescreen_on) {
                 qLog(PowerManagement) << "show HomeScreen";
-                QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreen()" );
+
+                QSettings c("Trolltech","qpe");
+                c.beginGroup("HomeScreen");
+                if (c.value( "AutoKeyLock", "Disabled" ).toString() == "Enabled")
+                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreenAndToggleKeylock()" );
+                else
+                    QtopiaIpcEnvelope showHome( "QPE/System", "showHomeScreen()" );
+
                 QWSServer::processKeyEvent( 0xffff, Qt::Key_F34, false, true, false );
             }
             return true;

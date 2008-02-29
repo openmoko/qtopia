@@ -50,6 +50,7 @@
 <h3>Signals</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#controlAvailable">controlAvailable</a></b> ( const QString &amp; <i>control</i> )</li>
+<li><div class="fn"/>void <b><a href="qmediacontrol.html#controlUnavailable">controlUnavailable</a></b> ( const QString &amp; <i>control</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#lengthChanged">lengthChanged</a></b> ( quint32 <i>ms</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#playerStateChanged">playerStateChanged</a></b> ( QtopiaMedia::State <i>state</i> )</li>
 <li><div class="fn"/>void <b><a href="qmediacontrol.html#positionChanged">positionChanged</a></b> ( quint32 <i>ms</i> )</li>
@@ -88,7 +89,9 @@
 <h3 class="fn"><a name="dtor.QMediaControl"></a>QMediaControl::~QMediaControl ()</h3>
 <p>Destroy the <a href="qmediacontrol.html">QMediaControl</a> object.</p>
 <h3 class="fn"><a name="controlAvailable"></a>void QMediaControl::controlAvailable ( const <a href="qstring.html">QString</a> &amp; <i>control</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Signals that a control with idenity <i>control</i> is available in the system.</p>
+<p>Signals that a control with identity <i>control</i> is available in the system.</p>
+<h3 class="fn"><a name="controlUnavailable"></a>void QMediaControl::controlUnavailable ( const <a href="qstring.html">QString</a> &amp; <i>control</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signals that a control with identity <i>control</i> is no longer available in the system.</p>
 <h3 class="fn"><a name="controls"></a><a href="qstringlist.html">QStringList</a> QMediaControl::controls () const</h3>
 <p>Return a list of Controls that this Media supports.</p>
 <h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QMediaControl::errorString () const</h3>
@@ -105,9 +108,9 @@
 <p>Returns the name of this control.</p>
 <h3 class="fn"><a name="pause"></a>void QMediaControl::pause ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Pause the media content.</p>
-<h3 class="fn"><a name="playerState"></a>QtopiaMedia::State QMediaControl::playerState () const</h3>
+<h3 class="fn"><a name="playerState"></a><a href="qtopiamedia.html#State-enum">QtopiaMedia::State</a> QMediaControl::playerState () const</h3>
 <p>Return the current state of the media content</p>
-<h3 class="fn"><a name="playerStateChanged"></a>void QMediaControl::playerStateChanged ( QtopiaMedia::State <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="playerStateChanged"></a>void QMediaControl::playerStateChanged ( <a href="qtopiamedia.html#State-enum">QtopiaMedia::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signals a change in the state of the media content. The new state is represented by the <i>state</i> parameter.</p>
 <h3 class="fn"><a name="position"></a>quint32 QMediaControl::position () const</h3>
 <p>Return the current position in the media content.</p>
@@ -136,8 +139,8 @@
 <p>Signals if the media content has been muted or not. The <i>muted</i> paramter is true when muted, false when not.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

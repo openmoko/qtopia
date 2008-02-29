@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/porting4.qdoc -->
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/porting4.qdoc -->
 <head>
   <title>Qt 4.2: Porting to Qt 4</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -250,8 +250,8 @@
 <tr valign="top" class="odd"><td><a href="qiodevice-qt3.html#Offset-typedef">QIODevice::Offset</a></td><td>qlonglong</td></tr>
 <tr valign="top" class="even"><td>QImage::ScaleMode</td><td><a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a></td></tr>
 <tr valign="top" class="odd"><td>QSize::ScaleMode</td><td><a href="qt.html#AspectRatioMode-enum">Qt::AspectRatioMode</a></td></tr>
-<tr valign="top" class="even"><td>QSocket::Error</td><td><a href="q3socket.html#Error-enum">Q3Socket::Error</a></td></tr>
-<tr valign="top" class="odd"><td>QSocket::State</td><td><a href="q3socket.html#State-enum">Q3Socket::State</a></td></tr>
+<tr valign="top" class="even"><td>QSocket::Error</td><td>Q3Socket::Error</td></tr>
+<tr valign="top" class="odd"><td>QSocket::State</td><td>Q3Socket::State</td></tr>
 <tr valign="top" class="even"><td>QStyle::SCFlags</td><td><a href="qstyle.html#SubControl-enum">QStyle::SubControls</a></td></tr>
 <tr valign="top" class="odd"><td>QStyle::SFlags</td><td><a href="qstyle.html#StateFlag-enum">QStyle::State</a></td></tr>
 <tr valign="top" class="even"><td>QTS</td><td><a href="qtextstream.html">QTextStream</a></td></tr>
@@ -349,13 +349,13 @@
 <tr valign="top" class="odd"><td><a href="qslider.html#TickPosition-enum">QSlider::Left</a></td><td><a href="qslider.html#TickPosition-enum">QSlider::TicksLeft</a></td></tr>
 <tr valign="top" class="even"><td><a href="qslider.html#TickPosition-enum">QSlider::NoMarks</a></td><td><a href="qslider.html#TickPosition-enum">QSlider::NoTicks</a></td></tr>
 <tr valign="top" class="odd"><td><a href="qslider.html#TickPosition-enum">QSlider::Right</a></td><td><a href="qslider.html#TickPosition-enum">QSlider::TicksRight</a></td></tr>
-<tr valign="top" class="even"><td>QSocket::Closing</td><td><a href="q3socket.html#State-enum">Q3Socket::Closing</a></td></tr>
-<tr valign="top" class="odd"><td>QSocket::Connected</td><td><a href="q3socket.html#State-enum">Q3Socket::Connected</a></td></tr>
-<tr valign="top" class="even"><td>QSocket::Connecting</td><td><a href="q3socket.html#State-enum">Q3Socket::Connecting</a></td></tr>
-<tr valign="top" class="odd"><td>QSocket::Connection</td><td><a href="q3socket.html#State-enum">Q3Socket::Connection</a></td></tr>
-<tr valign="top" class="even"><td>QSocket::ErrConnectionRefused</td><td><a href="q3socket.html#Error-enum">Q3Socket::ErrConnectionRefused</a></td></tr>
-<tr valign="top" class="odd"><td>QSocket::ErrHostNotFound</td><td><a href="q3socket.html#Error-enum">Q3Socket::ErrHostNotFound</a></td></tr>
-<tr valign="top" class="even"><td>QSocket::ErrSocketRead</td><td><a href="q3socket.html#Error-enum">Q3Socket::ErrSocketRead</a></td></tr>
+<tr valign="top" class="even"><td>QSocket::Closing</td><td>Q3Socket::Closing</td></tr>
+<tr valign="top" class="odd"><td>QSocket::Connected</td><td>Q3Socket::Connected</td></tr>
+<tr valign="top" class="even"><td>QSocket::Connecting</td><td>Q3Socket::Connecting</td></tr>
+<tr valign="top" class="odd"><td>QSocket::Connection</td><td>Q3Socket::Connection</td></tr>
+<tr valign="top" class="even"><td>QSocket::ErrConnectionRefused</td><td>Q3Socket::ErrConnectionRefused</td></tr>
+<tr valign="top" class="odd"><td>QSocket::ErrHostNotFound</td><td>Q3Socket::ErrHostNotFound</td></tr>
+<tr valign="top" class="even"><td>QSocket::ErrSocketRead</td><td>Q3Socket::ErrSocketRead</td></tr>
 <tr valign="top" class="odd"><td>QSocket::HostLookup</td><td><a href="qabstractsocket.html#SocketState-enum">QAbstractSocket::HostLookupState</a></td></tr>
 <tr valign="top" class="even"><td>QSocket::Idle</td><td><a href="qabstractsocket.html#SocketState-enum">QAbstractSocket::UnconnectedState</a></td></tr>
 <tr valign="top" class="odd"><td><a href="qsqlerror.html#ErrorType-enum">QSqlError::Connection</a></td><td><a href="qsqlerror.html#ErrorType-enum">QSqlError::ConnectionError</a></td></tr>
@@ -605,7 +605,7 @@
 <tr valign="top" class="odd"><td>QButton::toggleState</td><td>Use <a href="qcheckbox-qt3.html#setState">QCheckBox::setState</a>() and <a href="qcheckbox-qt3.html#state">QCheckBox::state</a>() instead.</td></tr>
 <tr valign="top" class="even"><td>QButton::toggleType</td><td>Use <a href="qcheckbox.html#tristate-prop">QCheckBox::setTristate</a>() instead.</td></tr>
 <tr valign="top" class="odd"><td>QComboBox::autoResize</td><td>Call <a href="qwidget.html">QWidget</a>:setFixedSize(<a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>()) whenever you change the contents.</td></tr>
-<tr valign="top" class="even"><td>QFrame::contentsRect</td><td>Use <a href="q3frame.html#contentsRect-prop">Q3Frame::contentsRect</a>() instead.</td></tr>
+<tr valign="top" class="even"><td>QFrame::contentsRect</td><td>Use Q3Frame::contentsRect() instead.</td></tr>
 <tr valign="top" class="odd"><td>QFrame::margin</td><td>Use <a href="qwidget.html#setContentsMargins">QWidget::setContentsMargins</a>() instead.</td></tr>
 <tr valign="top" class="even"><td>QTabBar::keyboardFocusTab</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>QToolButton::offIconSet</td><td>Use the <a href="qicon.html#State-enum">off component</a> of <a href="qabstractbutton.html#icon-prop">QAbstractButton::icon</a> instead.</td></tr>
@@ -619,7 +619,7 @@
 <li><a href="qimage.html">QImage</a></li>
 <li><a href="qbitarray.html">QBitArray</a></li>
 <li><a href="qbytearray.html">QByteArray</a></li>
-<li><a href="q3pointarray.html">Q3PointArray</a></li>
+<li>Q3PointArray</li>
 </ul>
 <p>This means that if you took a copy of an instance of the class (using operator=() or the class's copy constructor), any modification to the copy would affect the original and vice versa. Needless to say, this behavior is rarely desirable.</p>
 <p>Fortunately, nearly all Qt 3 applications don't rely on explicit sharing. When porting, you typically only need to remove calls to detach() and/or copy(), which aren't necessary anymore.</p>
@@ -643,13 +643,13 @@
 <p>(Notice the <tt>&amp;</tt> in the parameter declaration.)</p>
 <a name="qaccel"></a>
 <h2>QAccel</h2>
-<p>The <tt>QAccel</tt> class has been renamed <a href="q3accel.html">Q3Accel</a> and moved to the <a href="qt3support.html">Qt3Support</a> module. In new applications, you have three options:</p>
+<p>The <tt>QAccel</tt> class has been renamed Q3Accel and moved to the <a href="qt3support.html">Qt3Support</a> module. In new applications, you have three options:</p>
 <ol type="1">
 <li>You can use <a href="qaction.html">QAction</a> and set a key sequence using <a href="qaction.html#shortcut-prop">QAction::setShortcut</a>().</li>
-<li>You can use <a href="qshortcut.html">QShortcut</a>, a class that provides similar functionality to <a href="q3accel.html">Q3Accel</a>.</li>
+<li>You can use <a href="qshortcut.html">QShortcut</a>, a class that provides similar functionality to Q3Accel.</li>
 <li>You can use <a href="qwidget.html#grabShortcut">QWidget::grabShortcut</a>() and process &quot;shortcut&quot; events by reimplementing <a href="qwidget.html#event">QWidget::event</a>().</li>
 </ol>
-<p>The <a href="q3accel.html">Q3Accel</a> class also supports multiple accelerators using the same object, by calling <a href="q3accel.html#insertItem">Q3Accel::insertItem</a>() multiple times. In Qt 4, the solution is to create multiple <a href="qshortcut.html">QShortcut</a> objects.</p>
+<p>The Q3Accel class also supports multiple accelerators using the same object, by calling Q3Accel::insertItem() multiple times. In Qt 4, the solution is to create multiple <a href="qshortcut.html">QShortcut</a> objects.</p>
 <a name="qaccessibleinterface"></a>
 <h2>QAccessibleInterface</h2>
 <p>The <a href="qaccessibleinterface.html">QAccessibleInterface</a> class has undergone some API changes in Qt 4, to make it more consistent with the rest of the Qt API.</p>
@@ -661,7 +661,7 @@
 <a name="qaction-section"></a><a name="qaction"></a>
 <h2>QAction</h2>
 <p>The <a href="qaction.html">QAction</a> class has been redesigned in Qt 4 to integrate better with the rest of the menu system. It unifies the old <tt>QMenuItem</tt> class and the old <tt>QAction</tt> class into one class, avoiding unnecessary data duplication and the need to learn two different APIs.</p>
-<p>The old <tt>QAction</tt> and <tt>QActionGroup</tt> classes have been renamed <a href="q3action.html">Q3Action</a> and <a href="q3actiongroup.html">Q3ActionGroup</a> and moved to <a href="qt3support.html">Qt3Support</a>. In addition, the new <a href="qaction.html">QAction</a> class has compatibility functions to ease transition to Qt 4. Note that when using <a href="q3toolbar.html">Q3ToolBar</a> and <a href="q3popupmenu.html">Q3PopupMenu</a>, their actions must be <a href="q3action.html">Q3Action</a>s.</p>
+<p>The old <tt>QAction</tt> and <tt>QActionGroup</tt> classes have been renamed Q3Action and Q3ActionGroup and moved to <a href="qt3support.html">Qt3Support</a>. In addition, the new <a href="qaction.html">QAction</a> class has compatibility functions to ease transition to Qt 4. Note that when using Q3ToolBar and Q3PopupMenu, their actions must be Q3Actions.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qaction.html">QAction</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qactiongroup"></a>
 <h2>QActionGroup</h2>
@@ -697,12 +697,12 @@
 <p>The <tt>QAquaStyle</tt> class is no longer provided in Qt 4. Use QMacStyle instead.</p>
 <a name="qasciidict-section"></a><a name="qasciicache-t"></a>
 <h2>QAsciiCache&lt;T&gt;</h2>
-<p><tt>QAsciiCache&lt;T&gt;</tt> has been renamed <a href="q3asciicache.html">Q3AsciiCache</a>&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. It has been replaced by <a href="qcache.html">QCache</a>&lt;<a href="qbytearray.html">QByteArray</a>, T&gt;.</p>
+<p><tt>QAsciiCache&lt;T&gt;</tt> has been renamed Q3AsciiCache&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. It has been replaced by <a href="qcache.html">QCache</a>&lt;<a href="qbytearray.html">QByteArray</a>, T&gt;.</p>
 <p>For details, read the <a href="#qcache-section">section on QCache&lt;T&gt;</a>, mentally substituting <a href="qbytearray.html">QByteArray</a> for <a href="qstring.html">QString</a>.</p>
 <a name="qasciidict-t"></a>
 <h2>QAsciiDict&lt;T&gt;</h2>
-<p>QAsciiDict&lt;T&gt; and QAsciiDictIterator&lt;T&gt; have been renamed <a href="q3asciidict.html">Q3AsciiDict</a>&lt;T&gt; and <a href="q3asciidictiterator.html">Q3AsciiDictIterator</a>&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. They have been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes and their associated iterator classes.</p>
-<p>When porting old code that uses <a href="q3asciidict.html">Q3AsciiDict</a>&lt;T&gt; to Qt 4, there are four classes that you can use:</p>
+<p>QAsciiDict&lt;T&gt; and QAsciiDictIterator&lt;T&gt; have been renamed Q3AsciiDict&lt;T&gt; and Q3AsciiDictIterator&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. They have been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes and their associated iterator classes.</p>
+<p>When porting old code that uses Q3AsciiDict&lt;T&gt; to Qt 4, there are four classes that you can use:</p>
 <ul>
 <li><a href="qmultihash.html">QMultiHash</a>&lt;<a href="qbytearray.html">QByteArray</a>, T *&gt;</li>
 <li><a href="qmultihash.html">QMultiHash</a>&lt;<a href="qbytearray.html">QByteArray</a>, T&gt;</li>
@@ -724,7 +724,7 @@
 <p>The <tt>QBitVal</tt> class has been renamed QBitRef.</p>
 <a name="qbutton"></a>
 <h2>QButton</h2>
-<p>The <tt>QButton</tt> class has been replaced by <a href="qabstractbutton.html">QAbstractButton</a> in Qt 4. Classes like <a href="qpushbutton.html">QPushButton</a> and <a href="qradiobutton.html">QRadioButton</a> inherit from <a href="qabstractbutton.html">QAbstractButton</a>. As a help when porting older Qt applications, the <a href="qt3support.html">Qt3Support</a> library contains a <a href="q3button.html">Q3Button</a> class implemented in terms of the new <a href="qabstractbutton.html">QAbstractButton</a>.</p>
+<p>The <tt>QButton</tt> class has been replaced by <a href="qabstractbutton.html">QAbstractButton</a> in Qt 4. Classes like <a href="qpushbutton.html">QPushButton</a> and <a href="qradiobutton.html">QRadioButton</a> inherit from <a href="qabstractbutton.html">QAbstractButton</a>. As a help when porting older Qt applications, the <a href="qt3support.html">Qt3Support</a> library contains a Q3Button class implemented in terms of the new <a href="qabstractbutton.html">QAbstractButton</a>.</p>
 <p>If you used the <tt>QButton</tt> class as a base class for your own button type and want to port your code to the newer <a href="qabstractbutton.html">QAbstractButton</a>, you need to be aware that <a href="qabstractbutton.html">QAbstractButton</a> has no equivalent for the Q3Button::drawButton(<a href="qpainter.html">QPainter</a> *) virtual function. The solution is to reimplement <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>() in your <a href="qabstractbutton.html">QAbstractButton</a> subclass as follows:</p>
 <pre> void MyButton::paintEvent(QPaintEvent *)
  {
@@ -732,10 +732,10 @@
      drawButton(&amp;painter);
  }</pre>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3button.html">Q3Button</a> function</th><th><a href="qabstractbutton.html">QAbstractButton</a> equivalent</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>Q3Button function</th><th><a href="qabstractbutton.html">QAbstractButton</a> equivalent</th></tr></thead>
 <tr valign="top" class="odd"><td>Q3Button::autoResize()</td><td>Call <a href="qwidget.html">QWidget</a>:setFixedSize(<a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>()) whenever you change the contents.</td></tr>
 <tr valign="top" class="even"><td>Q3Button::isExclusiveToggle()</td><td>Use <a href="qabstractbutton.html#group">QAbstractButton::group</a>() or <a href="qabstractbutton.html#autoExclusive-prop">QAbstractButton::autoExclusive</a>() instead.</td></tr>
-<tr valign="top" class="odd"><td><a href="qabstractbutton-qt3.html#pixmap">Q3Button::pixmap</a>() const</td><td><a href="qabstractbutton.html#icon-prop">QAbstractButton::icon</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3Button::pixmap() const</td><td><a href="qabstractbutton.html#icon-prop">QAbstractButton::icon</a>()</td></tr>
 <tr valign="top" class="even"><td>Q3Button::setAutoResize()</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3Button::setPixmap(const <a href="qpixmap.html">QPixmap</a> &amp;)</td><td>QAbstractButton::setIcon(const <a href="qicon.html">QIcon</a> &amp;)</td></tr>
 <tr valign="top" class="even"><td>Q3Button::setState(ToggleState)</td><td>See remark below</td></tr>
@@ -753,14 +753,14 @@
 <p>See <a href="#properties">Properties</a> for a list of <tt>QButton</tt> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qbuttongroup"></a>
 <h2>QButtonGroup</h2>
-<p>The <tt>QButtonGroup</tt> class has been completely redesigned in Qt 4. For compatibility, the old <tt>QButtonGroup</tt> class has been renamed <a href="q3buttongroup.html">Q3ButtonGroup</a> and has been moved to <a href="qt3support.html">Qt3Support</a>. Likewise, the <tt>QHButtonGroup</tt> and <tt>QVButtonGroup</tt> convenience subclasses have been renamed <tt>Q3HButtonGroup</tt> and <tt>Q3VButtonGroup</tt> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
-<p>The old <tt>QButtonGroup</tt>, as well as <a href="q3buttongroup.html">Q3ButtonGroup</a>, can be used in two ways:</p>
+<p>The <tt>QButtonGroup</tt> class has been completely redesigned in Qt 4. For compatibility, the old <tt>QButtonGroup</tt> class has been renamed Q3ButtonGroup and has been moved to <a href="qt3support.html">Qt3Support</a>. Likewise, the <tt>QHButtonGroup</tt> and <tt>QVButtonGroup</tt> convenience subclasses have been renamed <tt>Q3HButtonGroup</tt> and <tt>Q3VButtonGroup</tt> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The old <tt>QButtonGroup</tt>, as well as Q3ButtonGroup, can be used in two ways:</p>
 <ol type="1">
-<li>The button group is the parent widget of a number of buttons, i.e. the button group is the parent argument in the button constructor. The buttons are assigned identifiers 0, 1, 2, etc., in the order they are created. A <a href="q3buttongroup.html">Q3ButtonGroup</a> can display a frame and a title because it inherits <a href="q3groupbox.html">Q3GroupBox</a>.</li>
-<li>The button group is an invisible widget and the contained buttons have some other parent widget. In this usage, each button must be manually inserted, using <a href="q3buttongroup.html#insert">Q3ButtonGroup::insert</a>(), into the button group and given an ID number.</li>
+<li>The button group is the parent widget of a number of buttons, i.e. the button group is the parent argument in the button constructor. The buttons are assigned identifiers 0, 1, 2, etc., in the order they are created. A Q3ButtonGroup can display a frame and a title because it inherits Q3GroupBox.</li>
+<li>The button group is an invisible widget and the contained buttons have some other parent widget. In this usage, each button must be manually inserted, using Q3ButtonGroup::insert(), into the button group and given an ID number.</li>
 </ol>
-<p>Unlike <a href="q3buttongroup.html">Q3ButtonGroup</a>, the new <a href="qbuttongroup.html">QButtonGroup</a> doesn't inherit <a href="qwidget.html">QWidget</a>. It is very similar to a &quot;hidden <a href="q3buttongroup.html">Q3ButtonGroup</a>&quot;.</p>
-<p>If you use a <a href="q3buttongroup.html">Q3ButtonGroup</a>, <a href="q3hbuttongroup.html">Q3HButtonGroup</a>, or <a href="q3vbuttongroup.html">Q3VButtonGroup</a> as a widget and want to port to Qt 4, you can replace it with <a href="qgroupbox.html">QGroupBox</a>. In Qt 4, radio buttons with the same parent are automatically part of an exclusive group, so you normally don't need to do anything else. See also the <a href="#qgroupbox-section">section on QGroupBox</a> below.</p>
+<p>Unlike Q3ButtonGroup, the new <a href="qbuttongroup.html">QButtonGroup</a> doesn't inherit <a href="qwidget.html">QWidget</a>. It is very similar to a &quot;hidden Q3ButtonGroup&quot;.</p>
+<p>If you use a Q3ButtonGroup, Q3HButtonGroup, or Q3VButtonGroup as a widget and want to port to Qt 4, you can replace it with <a href="qgroupbox.html">QGroupBox</a>. In Qt 4, radio buttons with the same parent are automatically part of an exclusive group, so you normally don't need to do anything else. See also the <a href="#qgroupbox-section">section on QGroupBox</a> below.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qbuttongroup.html">QButtonGroup</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qbytearray-section"></a><a name="qbytearray"></a>
 <h2>QByteArray</h2>
@@ -783,28 +783,28 @@
 <p><a href="qbytearray.html">QByteArray</a> was an explicitly shared class in Qt 3. See <a href="#explicit-sharing">Explicit Sharing</a> for more information.</p>
 <a name="qcache-section"></a><a name="qcache-t"></a>
 <h2>QCache&lt;T&gt;</h2>
-<p><a href="qcache.html">QCache</a>&lt;T&gt; has been renamed <a href="q3cache.html">Q3Cache</a>&lt;T&gt; and moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qcache.html">QCache</a> class has a different API, and takes different template parameters: <a href="qcache.html">QCache</a>&lt;Key, T&gt;.</p>
-<p>When porting to Qt 4, <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt; is the obvious substitute for <a href="q3cache.html">Q3Cache</a>&lt;T&gt;. The following table summarizes the API differences.</p>
+<p><a href="qcache.html">QCache</a>&lt;T&gt; has been renamed Q3Cache&lt;T&gt; and moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qcache.html">QCache</a> class has a different API, and takes different template parameters: <a href="qcache.html">QCache</a>&lt;Key, T&gt;.</p>
+<p>When porting to Qt 4, <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt; is the obvious substitute for Q3Cache&lt;T&gt;. The following table summarizes the API differences.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3cache.html">Q3Cache</a>&lt;T&gt; function</th><th><a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt; equivalent</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>Q3Cache&lt;T&gt; function</th><th><a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt; equivalent</th></tr></thead>
 <tr valign="top" class="odd"><td>Q3Cache::Q3Cache(int maxCost, int size, bool caseSensitive)</td><td>See remark below</td></tr>
-<tr valign="top" class="even"><td><a href="q3ptrcollection.html#autoDelete">Q3Cache::autoDelete</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cache.html#count">Q3Cache::count</a>()</td><td><a href="qcache.html#count">QCache::count</a>() or <a href="qcache.html#size">QCache::size</a>() (equivalent)</td></tr>
-<tr valign="top" class="even"><td><a href="q3ptrcollection.html#setAutoDelete">Q3Cache::setAutoDelete</a>()</td><td>See remark below</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cache.html#size">Q3Cache::size</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td><a href="q3cache.html#statistics">Q3Cache::statistics</a>()</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3Cache::autoDelete()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3Cache::count()</td><td><a href="qcache.html#count">QCache::count</a>() or <a href="qcache.html#size">QCache::size</a>() (equivalent)</td></tr>
+<tr valign="top" class="even"><td>Q3Cache::setAutoDelete()</td><td>See remark below</td></tr>
+<tr valign="top" class="odd"><td>Q3Cache::size()</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3Cache::statistics()</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3Cache::operator=()</td><td>See remark below</td></tr>
 </table></p>
 <p>Remarks:</p>
 <ol type="1">
-<li><a href="q3cache.html">Q3Cache</a> requires the user to allocate a specific number of buckets by passing a prime number (17 by default) to the constructor. In contrast, the new <a href="qcache.html">QCache</a>'s hash table automatically grows and shrinks as needed, and the constructor doesn't take a prime number.</li>
-<li><a href="q3cache.html">Q3Cache</a> supportes case-insensitive lookups by passing false as second argument to the constructor. This feature has no equivalent in <a href="qmultihash.html">QMultiHash</a>. Instead, call <a href="qstring.html#toLower">QString::toLower</a>() before you insert or lookup a key in the hash.</li>
-<li>The <a href="q3cache.html#insert">Q3Cache::insert</a>() function returns a <tt>bool</tt> value that indicates whether or not the item actually was inserted in the cache. If the item wasn't inserted, it was the caller's responsibility to delete the item. The new <a href="qcache.html#insert">QCache::insert</a>() function returns <tt>void</tt> and either adds it to the cache or deletes it right away. Old code like<pre> if (!cache.insert(key, object))
+<li>Q3Cache requires the user to allocate a specific number of buckets by passing a prime number (17 by default) to the constructor. In contrast, the new <a href="qcache.html">QCache</a>'s hash table automatically grows and shrinks as needed, and the constructor doesn't take a prime number.</li>
+<li>Q3Cache supportes case-insensitive lookups by passing false as second argument to the constructor. This feature has no equivalent in <a href="qmultihash.html">QMultiHash</a>. Instead, call <a href="qstring.html#toLower">QString::toLower</a>() before you insert or lookup a key in the hash.</li>
+<li>The Q3Cache::insert() function returns a <tt>bool</tt> value that indicates whether or not the item actually was inserted in the cache. If the item wasn't inserted, it was the caller's responsibility to delete the item. The new <a href="qcache.html#insert">QCache::insert</a>() function returns <tt>void</tt> and either adds it to the cache or deletes it right away. Old code like<pre> if (!cache.insert(key, object))
      delete object;</pre>
 <p>becomes</p>
 <pre> cache.insert(key, object);</pre>
 </li>
-<li>The new <a href="qcache.html">QCache</a> class <i>always</i> takes ownership of the items it stores (i.e. auto-delete is always on). If you use <a href="q3cache.html">Q3Cache</a> with auto-delete turned off (the rarely useful default), you cannot use <a href="qcache.html">QCache</a> as a direct substitute. One unelegant trick that works well in practice is to use <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T *&gt; instead of <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt;. In that case, <a href="qcache.html">QCache</a> owns the pointers, not the objects that the pointers refer to. For example,<pre>     Q3Cache&lt;QWidget&gt; cache;
+<li>The new <a href="qcache.html">QCache</a> class <i>always</i> takes ownership of the items it stores (i.e. auto-delete is always on). If you use Q3Cache with auto-delete turned off (the rarely useful default), you cannot use <a href="qcache.html">QCache</a> as a direct substitute. One unelegant trick that works well in practice is to use <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T *&gt; instead of <a href="qcache.html">QCache</a>&lt;<a href="qstring.html">QString</a>, T&gt;. In that case, <a href="qcache.html">QCache</a> owns the pointers, not the objects that the pointers refer to. For example,<pre>     Q3Cache&lt;QWidget&gt; cache;
      cache.insert(widget-&gt;name(), widget);
      ...
      QWidget *foo = cache.take(&quot;foo&quot;);
@@ -821,29 +821,29 @@
          delete ptr;
          foo-&gt;show();
      }</pre>
-<p>An alternative is to stick to using <a href="q3cache.html">Q3Cache</a>.</p>
+<p>An alternative is to stick to using Q3Cache.</p>
 </li>
 </ol>
-<p>QCacheIterator&lt;T&gt; has been renamed <a href="q3cacheiterator.html">Q3CacheIterator</a>&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. The new <a href="qcache.html">QCache</a> class doesn't offer any iterator types.</p>
+<p>QCacheIterator&lt;T&gt; has been renamed Q3CacheIterator&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. The new <a href="qcache.html">QCache</a> class doesn't offer any iterator types.</p>
 <a name="qcanvas"></a>
 <h2>QCanvas</h2>
 <p>The canvas module classes have been renamed and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qt 3 class name</th><th>Compatibility class in Qt 4</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>QCanvas</tt></td><td><a href="q3canvas.html">Q3Canvas</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasEllipse</tt></td><td><a href="q3canvasellipse.html">Q3CanvasEllipse</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasItem</tt></td><td><a href="q3canvasitem.html">Q3CanvasItem</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasItemList</tt></td><td><a href="q3canvasitemlist.html">Q3CanvasItemList</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasLine</tt></td><td><a href="q3canvasline.html">Q3CanvasLine</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasPixmap</tt></td><td><a href="q3canvaspixmap.html">Q3CanvasPixmap</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasPixmapArray</tt></td><td><a href="q3canvaspixmaparray.html">Q3CanvasPixmapArray</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasPolygon</tt></td><td><a href="q3canvaspolygon.html">Q3CanvasPolygon</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasPolygonalItem</tt></td><td><a href="q3canvaspolygonalitem.html">Q3CanvasPolygonalItem</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasRectangle</tt></td><td><a href="q3canvasrectangle.html">Q3CanvasRectangle</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasSpline</tt></td><td><a href="q3canvasspline.html">Q3CanvasSpline</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasSprite</tt></td><td><a href="q3canvassprite.html">Q3CanvasSprite</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QCanvasText</tt></td><td><a href="q3canvastext.html">Q3CanvasText</a></td></tr>
-<tr valign="top" class="even"><td><tt>QCanvasView</tt></td><td><a href="q3canvasview.html">Q3CanvasView</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvas</tt></td><td>Q3Canvas</td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasEllipse</tt></td><td><a href="graphicsview-porting.html#q3canvasellipse">Q3CanvasEllipse</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasItem</tt></td><td>Q3CanvasItem</td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasItemList</tt></td><td><a href="graphicsview-porting.html#q3canvasitemlist">Q3CanvasItemList</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasLine</tt></td><td><a href="graphicsview-porting.html#q3canvasline">Q3CanvasLine</a></td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasPixmap</tt></td><td>Q3CanvasPixmap</td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasPixmapArray</tt></td><td>Q3CanvasPixmapArray</td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasPolygon</tt></td><td><a href="graphicsview-porting.html#q3canvaspolygon">Q3CanvasPolygon</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasPolygonalItem</tt></td><td><a href="graphicsview-porting.html#q3canvaspolygonalitem">Q3CanvasPolygonalItem</a></td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasRectangle</tt></td><td><a href="graphicsview-porting.html#q3canvasrectangle">Q3CanvasRectangle</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasSpline</tt></td><td><a href="graphicsview-porting.html#q3canvasspline">Q3CanvasSpline</a></td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasSprite</tt></td><td><a href="graphicsview-porting.html#q3canvassprite">Q3CanvasSprite</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QCanvasText</tt></td><td><a href="graphicsview-porting.html#q3canvastext">Q3CanvasText</a></td></tr>
+<tr valign="top" class="even"><td><tt>QCanvasView</tt></td><td>Q3CanvasView</td></tr>
 </table></p>
 <p><a href="graphicsview.html">The Graphics View Framework</a> replaces <a href="#qcanvas">QCanvas</a>. For more on porting to Graphics View, see <a href="graphicsview-porting.html">Porting to Graphics View</a>.</p>
 <a name="qcolor"></a>
@@ -873,7 +873,7 @@
 <pre> painter.setBrush(palette().brush(QPalette::Text));</pre>
 <a name="qcolordrag"></a>
 <h2>QColorDrag</h2>
-<p>The <tt>QColorDrag</tt> class has been renamed <a href="q3colordrag.html">Q3ColorDrag</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setColor() to set the color.</p>
+<p>The <tt>QColorDrag</tt> class has been renamed Q3ColorDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setColor() to set the color.</p>
 <a name="qcombobox"></a>
 <h2>QComboBox</h2>
 <p>In Qt 3, the list box used to display the contents of a <tt>QComboBox</tt> widget could be accessed by using the <tt>listBox()</tt> function. In Qt 4, the standard list box is provided by a <a href="qlistview.html">QListView</a> widget, and can be accessed with the <a href="qcombobox.html#view">view()</a> function.</p>
@@ -886,7 +886,7 @@
  ba.size();             <span class="comment">// returns 5 (the '\0' is not counted)</span>
  ba.length();           <span class="comment">// returns 5</span>
  ba.data()[5];          <span class="comment">// returns '\0'</span></pre>
-<p>The <a href="qt3support.html">Qt3Support</a> library contains a class called <a href="q3cstring.html">Q3CString</a> that inherits from the new <a href="qbytearray.html">QByteArray</a> class and that extends it to provide an API that is as close to the old <tt>QCString</tt> class as possible. Note that the following functions aren't provided by <a href="q3cstring.html">Q3CString</a>:</p>
+<p>The <a href="qt3support.html">Qt3Support</a> library contains a class called Q3CString that inherits from the new <a href="qbytearray.html">QByteArray</a> class and that extends it to provide an API that is as close to the old <tt>QCString</tt> class as possible. Note that the following functions aren't provided by Q3CString:</p>
 <ul>
 <li>QCString::find(const <a href="qregexp.html">QRegExp</a> &amp;, int)</li>
 <li>QCString::findRev(const <a href="qregexp.html">QRegExp</a> &amp;, int)</li>
@@ -904,32 +904,32 @@
 </ul>
 <p>In both cases, the solution is to convert the <tt>QCString</tt> to a <a href="qstring.html">QString</a> and use the corresponding <a href="qstring.html">QString</a> functions instead.</p>
 <p>Also be aware that <tt>QCString::size()</tt> (inherited from <a href="qbytearray.html">QByteArray</a>) used to return the size of the character data <i>including</i> the '\0'-terminator, whereas the new <a href="qbytearray.html#size">QByteArray::size</a>() is just a synonym for <a href="qbytearray.html#length">QByteArray::length</a>(). This brings <a href="qbytearray.html">QByteArray</a> in line with <a href="qstring.html">QString</a>.</p>
-<p>When porting to Qt 4, occurrences of <tt>QCString</tt> should be replaced with <a href="qbytearray.html">QByteArray</a> or <a href="qstring.html">QString</a>. The following table summarizes the API differences between the <a href="q3cstring.html">Q3CString</a> class and the Qt 4 <a href="qbytearray.html">QByteArray</a> and <a href="qstring.html">QString</a> classes:</p>
+<p>When porting to Qt 4, occurrences of <tt>QCString</tt> should be replaced with <a href="qbytearray.html">QByteArray</a> or <a href="qstring.html">QString</a>. The following table summarizes the API differences between the Q3CString class and the Qt 4 <a href="qbytearray.html">QByteArray</a> and <a href="qstring.html">QString</a> classes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3cstring.html">Q3CString</a> function</th><th>Qt 4 equivalent</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>Q3CString function</th><th>Qt 4 equivalent</th></tr></thead>
 <tr valign="top" class="odd"><td>Q3CString::Q3CString(const char *, uint)</td><td>See remark below</td></tr>
 <tr valign="top" class="even"><td>Q3CString::Q3CString(int)</td><td>QByteArray::QByteArray(int, char)</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#leftJustify">Q3CString::leftJustify</a>()</td><td><a href="qstring.html#leftJustified">QString::leftJustified</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="qbytearray.html#length">Q3CString::length</a>()</td><td><a href="qbytearray.html#length">QByteArray::length</a>() or <a href="qbytearray.html#size">QByteArray::size</a>() (equivalent)</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#lower">Q3CString::lower</a>()</td><td><a href="qbytearray.html#toLower">QByteArray::toLower</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#rightJustify">Q3CString::rightJustify</a>()</td><td><a href="qstring.html#rightJustified">QString::rightJustified</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#setExpand">Q3CString::setExpand</a>()</td><td>See remark below</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#simplifyWhiteSpace">Q3CString::simplifyWhiteSpace</a>()</td><td><a href="qbytearray.html#simplified">QByteArray::simplified</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#sprintf">Q3CString::sprintf</a>()</td><td><a href="qstring.html#sprintf">QString::sprintf</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#stripWhiteSpace">Q3CString::stripWhiteSpace</a>()</td><td><a href="qbytearray.html#trimmed">QByteArray::trimmed</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#toDouble">Q3CString::toDouble</a>()</td><td><a href="qstring.html#toDouble">QString::toDouble</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#toFloat">Q3CString::toFloat</a>()</td><td><a href="qstring.html#toFloat">QString::toFloat</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#toInt">Q3CString::toInt</a>()</td><td><a href="qstring.html#toInt">QString::toInt</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#toLong">Q3CString::toLong</a>()</td><td><a href="qstring.html#toLong">QString::toLong</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#toShort">Q3CString::toShort</a>()</td><td><a href="qstring.html#toShort">QString::toShort</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#toUInt">Q3CString::toUInt</a>()</td><td><a href="qstring.html#toUInt">QString::toUInt</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#toULong">Q3CString::toULong</a>()</td><td><a href="qstring.html#toULong">QString::toULong</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3cstring.html#toUShort">Q3CString::toUShort</a>()</td><td><a href="qstring.html#toUShort">QString::toUShort</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3cstring.html#upper">Q3CString::upper</a>()</td><td><a href="qbytearray.html#toUpper">QByteArray::toUpper</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::leftJustify()</td><td><a href="qstring.html#leftJustified">QString::leftJustified</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::length()</td><td><a href="qbytearray.html#length">QByteArray::length</a>() or <a href="qbytearray.html#size">QByteArray::size</a>() (equivalent)</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::lower()</td><td><a href="qbytearray.html#toLower">QByteArray::toLower</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::rightJustify()</td><td><a href="qstring.html#rightJustified">QString::rightJustified</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::setExpand()</td><td>See remark below</td></tr>
+<tr valign="top" class="even"><td>Q3CString::simplifyWhiteSpace()</td><td><a href="qbytearray.html#simplified">QByteArray::simplified</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::sprintf()</td><td><a href="qstring.html#sprintf">QString::sprintf</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::stripWhiteSpace()</td><td><a href="qbytearray.html#trimmed">QByteArray::trimmed</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::toDouble()</td><td><a href="qstring.html#toDouble">QString::toDouble</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::toFloat()</td><td><a href="qstring.html#toFloat">QString::toFloat</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::toInt()</td><td><a href="qstring.html#toInt">QString::toInt</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::toLong()</td><td><a href="qstring.html#toLong">QString::toLong</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::toShort()</td><td><a href="qstring.html#toShort">QString::toShort</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::toUInt()</td><td><a href="qstring.html#toUInt">QString::toUInt</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::toULong()</td><td><a href="qstring.html#toULong">QString::toULong</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3CString::toUShort()</td><td><a href="qstring.html#toUShort">QString::toUShort</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3CString::upper()</td><td><a href="qbytearray.html#toUpper">QByteArray::toUpper</a>()</td></tr>
 </table></p>
 <p>Remarks:</p>
 <ol type="1">
-<li><a href="q3cstring.html">Q3CString</a>(const char *str, uint max) constructs a string of length strlen(str) or <i>max</i> - 1, whichever is shorter. <a href="qbytearray.html">QByteArray</a>(const char *data, int size) constructs a byte array containing exactly <i>size</i> bytes.<p>For example, if you have code like</p>
+<li>Q3CString(const char *str, uint max) constructs a string of length strlen(str) or <i>max</i> - 1, whichever is shorter. <a href="qbytearray.html">QByteArray</a>(const char *data, int size) constructs a byte array containing exactly <i>size</i> bytes.<p>For example, if you have code like</p>
 <pre><font color="#404040">     QCString str1(&quot;Hello&quot;, 4);           // &quot;Hel&quot;
      QCString str2(&quot;Hello world!&quot;, n);</font></pre>
 <p>you can rewrite it as</p>
@@ -954,7 +954,7 @@
 <p>In Qt 4, custom events are created by subclassing <a href="qevent.html">QEvent</a>. Event-specific data can be stored in a way that is appropriate for your application. Custom events are still delivered to each object's <a href="qobject.html#customEvent">customEvent()</a> handler function, but as <a href="qevent.html">QEvent</a> objects rather than as deprecated <a href="qcustomevent.html">QCustomEvent</a> objects.</p>
 <a name="qdatabrowser"></a>
 <h2>QDataBrowser</h2>
-<p>The <tt>QDataBrowser</tt> class has been renamed <a href="q3databrowser.html">Q3DataBrowser</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
+<p>The <tt>QDataBrowser</tt> class has been renamed Q3DataBrowser and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qdatapump"></a>
 <h2>QDataPump</h2>
@@ -969,27 +969,27 @@
 <p>The <tt>QDataSource</tt> class was used internally in Qt 2.x in conjunction with QImageConsumer. It was obsoleted in Qt 3.0. If you use this mechanism in your application, please submit a report to the <a href="http://www.trolltech.com/developer/task-tracker">Task Tracker</a> on the Trolltech website and we will try to find a satisfactory substitute.</p>
 <a name="qdatatable"></a>
 <h2>QDataTable</h2>
-<p>The <tt>QDataTable</tt> class has been renamed <a href="q3datatable.html">Q3DataTable</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
+<p>The <tt>QDataTable</tt> class has been renamed Q3DataTable and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qdataview"></a>
 <h2>QDataView</h2>
-<p>The <tt>QDataView</tt> class has been renamed <a href="q3dataview.html">Q3DataView</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
+<p>The <tt>QDataView</tt> class has been renamed Q3DataView and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4.2, you should use the <a href="qdatawidgetmapper.html">QDataWidgetMapper</a> class to create data-aware forms.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qdateedit"></a>
 <h2>QDateEdit</h2>
-<p>The <a href="qdateedit.html">QDateEdit</a> class in Qt 4 is a convenience class based on <a href="qdatetimeedit.html">QDateTimeEdit</a>. The old class has been renamed <a href="q3dateedit.html">Q3DateEdit</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="qdateedit.html">QDateEdit</a> class in Qt 4 is a convenience class based on <a href="qdatetimeedit.html">QDateTimeEdit</a>. The old class has been renamed Q3DateEdit and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <tt>QDateEdit</tt> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qdatetimeeditbase"></a>
 <h2>QDateTimeEditBase</h2>
-<p>The <tt>QDateTimeEditBase</tt> class has been renamed <a href="q3datetimeeditbase.html">Q3DateTimeEditBase</a> and moved to <a href="qt3support.html">Qt3Support</a>. Use <a href="qdatetimeedit.html">QDateTimeEdit</a> or <a href="qabstractspinbox.html">QAbstractSpinBox</a> instead.</p>
+<p>The <tt>QDateTimeEditBase</tt> class has been renamed Q3DateTimeEditBase and moved to <a href="qt3support.html">Qt3Support</a>. Use <a href="qdatetimeedit.html">QDateTimeEdit</a> or <a href="qabstractspinbox.html">QAbstractSpinBox</a> instead.</p>
 <a name="qdatetimeedit"></a>
 <h2>QDateTimeEdit</h2>
-<p>The old <tt>QDateTimeEdit</tt> class has been renamed <a href="q3datetimeeditbase.html">Q3DateTimeEditBase</a> and moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qdatetimeedit.html">QDateTimeEdit</a> in Qt 4 has been rewritten from scratch to provide a more flexible and powerful API.</p>
+<p>The old <tt>QDateTimeEdit</tt> class has been renamed Q3DateTimeEditBase and moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qdatetimeedit.html">QDateTimeEdit</a> in Qt 4 has been rewritten from scratch to provide a more flexible and powerful API.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qdatetimeedit.html">QDateTimeEdit</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qdeepcopy-t"></a>
 <h2>QDeepCopy&lt;T&gt;</h2>
 <p>The <tt>QDeepCopy&lt;T&gt;</tt> class in Qt 3 provided a means of ensuring that implicitly shared and explicitly shared classes referenced unique data. This was necessary because the reference counting in Qt's container classes was done in a thread-unsafe manner.</p>
-<p>With Qt 4, <tt>QDeepCopy&lt;T&gt;</tt> has been renamed <a href="q3deepcopy.html">Q3DeepCopy</a>&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. Removing it from existing code is straightforward.</p>
+<p>With Qt 4, <tt>QDeepCopy&lt;T&gt;</tt> has been renamed Q3DeepCopy&lt;T&gt; and moved to the <a href="qt3support.html">Qt3Support</a> library. Removing it from existing code is straightforward.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QString str1 = &quot;I am a string&quot;;
  QDeepCopy&lt;QString&gt; str2 = str1;
@@ -1004,42 +1004,42 @@
 <p>See <a href="#properties">Properties</a> for a list of <a href="qdial.html">QDial</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qdict-section"></a><a name="qdict-t"></a>
 <h2>QDict&lt;T&gt;</h2>
-<p><tt>QDict&lt;T&gt;</tt> has been renamed <a href="q3dict.html">Q3Dict</a>&lt;T&gt; and moved to <a href="qt3support.html">Qt3Support</a>. It has been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes.</p>
+<p><tt>QDict&lt;T&gt;</tt> has been renamed Q3Dict&lt;T&gt; and moved to <a href="qt3support.html">Qt3Support</a>. It has been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes.</p>
 <p>When porting old code that uses QDict&lt;T&gt; to Qt 4, there are four classes that you can use:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qt 4 class</th><th>When to use it</th></tr></thead>
-<tr valign="top" class="odd"><td><a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt;</td><td>Since <a href="q3dict.html">Q3Dict</a>&lt;T&gt; is pointer-based and allows duplicate keys, this is usually the most straightforward conversion.</td></tr>
+<tr valign="top" class="odd"><td><a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt;</td><td>Since Q3Dict&lt;T&gt; is pointer-based and allows duplicate keys, this is usually the most straightforward conversion.</td></tr>
 <tr valign="top" class="even"><td><a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T&gt;</td><td>If type <tt>T</tt> is an <a href="containers.html#assignable-data-types">assignable data type</a>, you can use <tt>T</tt> as the value type rather than <tt>T *</tt>. This often leads to nicer code.</td></tr>
 <tr valign="top" class="odd"><td><a href="qhash.html">QHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt;</td><td rowspan="2">If you don't use duplicate keys, you can use <a href="qhash.html">QHash</a> instead of <a href="qmultihash.html">QMultiHash</a>. <a href="qmultihash.html">QMultiHash</a> inherits from <a href="qhash.html">QHash</a>.</td></tr>
 <tr valign="top" class="even"><td><a href="qhash.html">QHash</a>&lt;<a href="qstring.html">QString</a>, T&gt;</td></tr>
 </table></p>
-<p>The APIs of <a href="q3dict.html">Q3Dict</a>&lt;T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt; are quite similar. The main issue is that <a href="q3dict.html">Q3Dict</a> supports auto-delete whereas <a href="qmultihash.html">QMultiHash</a> doesn't.</p>
+<p>The APIs of Q3Dict&lt;T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt; are quite similar. The main issue is that Q3Dict supports auto-delete whereas <a href="qmultihash.html">QMultiHash</a> doesn't.</p>
 <p>The following table summarizes the API differences between the two classes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3dict.html">Q3Dict</a> function</th><th><a href="qmultihash.html">QMultiHash</a> equivalent</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>Q3Dict function</th><th><a href="qmultihash.html">QMultiHash</a> equivalent</th></tr></thead>
 <tr valign="top" class="odd"><td>Q3Dict::Q3Dict(int size, bool caseSensitive)</td><td>See remarks below</td></tr>
-<tr valign="top" class="even"><td><a href="q3ptrcollection.html#autoDelete">Q3Dict::autoDelete</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3dict.html#count">Q3Dict::count</a>()</td><td><a href="qhash.html#count">QMultiHash::count</a>() or <a href="qhash.html#size">QMultiHash::size</a>() (equivalent)</td></tr>
+<tr valign="top" class="even"><td>Q3Dict::autoDelete()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3Dict::count()</td><td><a href="qhash.html#count">QMultiHash::count</a>() or <a href="qhash.html#size">QMultiHash::size</a>() (equivalent)</td></tr>
 <tr valign="top" class="even"><td>Q3Dict::find(const <a href="qstring.html">QString</a> &amp;)</td><td>QMultiHash::value(const <a href="qstring.html">QString</a> &amp;)</td></tr>
 <tr valign="top" class="odd"><td>Q3Dict::remove(const <a href="qstring.html">QString</a> &amp;)</td><td>QMultiHash::take(const <a href="qstring.html">QString</a> &amp;)</td></tr>
 <tr valign="top" class="even"><td>Q3Dict::resize(uint)</td><td>QMultiHash::reserve(int)</td></tr>
-<tr valign="top" class="odd"><td><a href="q3ptrcollection.html#setAutoDelete">Q3Dict::setAutoDelete</a>()</td><td>See discussion below</td></tr>
-<tr valign="top" class="even"><td><a href="q3dict.html#size">Q3Dict::size</a>()</td><td><a href="qhash.html#capacity">QMultiHash::capacity</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3dict.html#statistics">Q3Dict::statistics</a>()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3Dict::setAutoDelete()</td><td>See discussion below</td></tr>
+<tr valign="top" class="even"><td>Q3Dict::size()</td><td><a href="qhash.html#capacity">QMultiHash::capacity</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3Dict::statistics()</td><td>N/A</td></tr>
 <tr valign="top" class="even"><td>Q3Dict::operator[](const <a href="qstring.html">QString</a> &amp;)</td><td>See remark below</td></tr>
 </table></p>
 <p>Remarks:</p>
 <ol type="1">
-<li><a href="q3dict.html">Q3Dict</a> requires the user to allocate a specific number of buckets by passing a prime number (17 by default) to the constructor and/or calling <a href="q3dict.html#resize">Q3Dict::resize</a>() later on. In contrast, <a href="qmultihash.html">QMultiHash</a>'s hash table automatically grows and shrinks as needed, and the constructor doesn't take a prime number.</li>
-<li><a href="q3dict.html">Q3Dict</a> supportes case-insensitive lookups by passing false as second argument to the constructor. This feature has no equivalent in <a href="qmultihash.html">QMultiHash</a>. Instead, call <a href="qstring.html#toLower">QString::toLower</a>() before you insert or lookup a key in the hash.</li>
-<li><a href="q3dict.html#size">Q3Dict::size</a>() and <a href="qhash.html#size">QMultiHash::size</a>() have different semantics. The former returns the number of buckets in the container, whereas the latter returns the number of <i>items</i> in the container.</li>
-<li>If there are multiple items with the same key, <a href="q3dict.html#remove">Q3Dict::remove</a>() removes only the most recently inserted item, whereas <a href="qhash.html#remove">QMultiHash::remove</a>() removes all items that share a particular key. To remove only the most recently inserted item, call <a href="qhash.html#take">QMultiHash::take</a>().</li>
-<li><a href="q3dict.html">Q3Dict</a> has only one [] operator (Q3Dict::operator[]()), providing const access to an item's value. <a href="qmultihash.html">QMultiHash</a> also has a non-const overload that can be used on the left side of the assignment operator. If you use the [] operator on a non-const <a href="qhash.html">QHash</a> with an unexisting item, <a href="qhash.html">QHash</a> will created an element and initialize it to be a null pointer. For that reason, Q3Dict::operator[] should be converted to <a href="qhash.html#value">QMultiHash::value</a>(), not QMultiHash::operator[].</li>
+<li>Q3Dict requires the user to allocate a specific number of buckets by passing a prime number (17 by default) to the constructor and/or calling Q3Dict::resize() later on. In contrast, <a href="qmultihash.html">QMultiHash</a>'s hash table automatically grows and shrinks as needed, and the constructor doesn't take a prime number.</li>
+<li>Q3Dict supportes case-insensitive lookups by passing false as second argument to the constructor. This feature has no equivalent in <a href="qmultihash.html">QMultiHash</a>. Instead, call <a href="qstring.html#toLower">QString::toLower</a>() before you insert or lookup a key in the hash.</li>
+<li>Q3Dict::size() and <a href="qhash.html#size">QMultiHash::size</a>() have different semantics. The former returns the number of buckets in the container, whereas the latter returns the number of <i>items</i> in the container.</li>
+<li>If there are multiple items with the same key, Q3Dict::remove() removes only the most recently inserted item, whereas <a href="qhash.html#remove">QMultiHash::remove</a>() removes all items that share a particular key. To remove only the most recently inserted item, call <a href="qhash.html#take">QMultiHash::take</a>().</li>
+<li>Q3Dict has only one [] operator (Q3Dict::operator[]()), providing const access to an item's value. <a href="qmultihash.html">QMultiHash</a> also has a non-const overload that can be used on the left side of the assignment operator. If you use the [] operator on a non-const <a href="qhash.html">QHash</a> with an unexisting item, <a href="qhash.html">QHash</a> will created an element and initialize it to be a null pointer. For that reason, Q3Dict::operator[] should be converted to <a href="qhash.html#value">QMultiHash::value</a>(), not QMultiHash::operator[].</li>
 </ol>
-<p>If you use <a href="q3dict.html">Q3Dict</a>'s auto-delete feature (by calling Q3Dict::setAutoDelete(true)), you need to do some more work. You have two options: Either you call <tt>delete</tt> yourself whenever you remove an item from the container, or you use <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T&gt; instead of <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt; (i.e. store values directly instead of pointers to values). Here, we'll see when to call <tt>delete</tt>.</p>
+<p>If you use Q3Dict's auto-delete feature (by calling Q3Dict::setAutoDelete(true)), you need to do some more work. You have two options: Either you call <tt>delete</tt> yourself whenever you remove an item from the container, or you use <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T&gt; instead of <a href="qmultihash.html">QMultiHash</a>&lt;<a href="qstring.html">QString</a>, T *&gt; (i.e. store values directly instead of pointers to values). Here, we'll see when to call <tt>delete</tt>.</p>
 <p>The following table summarizes the idioms that you need to watch out for if you want to call <tt>delete</tt> yourself.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3dict.html">Q3Dict</a> idiom</th><th><a href="qmultihash.html">QMultiHash</a> idiom</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th>Q3Dict idiom</th><th><a href="qmultihash.html">QMultiHash</a> idiom</th></tr></thead>
 <tr valign="top" class="odd"><td><pre> dict.replace(key, value);</pre>
 </td><td><pre> delete hash.take(key);
  hash.insert(key, value);</pre>
@@ -1048,7 +1048,7 @@
 </td><td><pre> delete hash.take(key);</pre>
 </td></tr>
 <tr valign="top" class="odd"><td><pre> dict.clear();</pre>
-<p>(also called from <a href="q3dict.html">Q3Dict</a>'s destructor)</p>
+<p>(also called from Q3Dict's destructor)</p>
 </td><td><pre> while (!hash.isEmpty()) {
      T *value = *hash.begin();
      dict.erase(hash.begin());
@@ -1060,20 +1060,20 @@
 <p>However, it may lead to crashes if <tt>hash</tt> is referenced from the value type's destructor, because <tt>hash</tt> contains dangling pointers until clear() is called.</p>
 </td></tr>
 </table></p>
-<p>Be aware that <a href="q3dict.html">Q3Dict</a>'s destructor automatically calls clear(). If you have a <a href="q3dict.html">Q3Dict</a> data member in a custom class and use the auto-delete feature, you will need to call <tt>delete</tt> on all the items in the container from your class destructor to avoid a memory leak.</p>
-<p>Finally, <tt>QDictIterator&lt;T&gt;</tt> (renamed <a href="q3dictiterator.html">Q3DictIterator</a>&lt;T&gt;) must also be ported. There are no fewer than four iterator classes that can be used as a replacement: <a href="qhash-const-iterator.html">QHash::const_iterator</a>, <a href="qhash-iterator.html">QHash::iterator</a>, <a href="qhashiterator.html">QHashIterator</a>, and <a href="qmutablehashiterator.html">QMutableHashIterator</a>. The most straightforward class to use when porting is <a href="qhashiterator.html">QHashIterator</a>&lt;<a href="qstring.html">QString</a>, T *&gt;. The following table summarizes the API differences:</p>
+<p>Be aware that Q3Dict's destructor automatically calls clear(). If you have a Q3Dict data member in a custom class and use the auto-delete feature, you will need to call <tt>delete</tt> on all the items in the container from your class destructor to avoid a memory leak.</p>
+<p>Finally, <tt>QDictIterator&lt;T&gt;</tt> (renamed Q3DictIterator&lt;T&gt;) must also be ported. There are no fewer than four iterator classes that can be used as a replacement: <a href="qhash-const-iterator.html">QHash::const_iterator</a>, <a href="qhash-iterator.html">QHash::iterator</a>, <a href="qhashiterator.html">QHashIterator</a>, and <a href="qmutablehashiterator.html">QMutableHashIterator</a>. The most straightforward class to use when porting is <a href="qhashiterator.html">QHashIterator</a>&lt;<a href="qstring.html">QString</a>, T *&gt;. The following table summarizes the API differences:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="q3dictiterator.html">Q3DictIterator</a> functions</th><th>Qt 4 equivalent</th></tr></thead>
-<tr valign="top" class="odd"><td><a href="q3dictiterator.html#count">Q3DictIterator::count</a>()</td><td><a href="qhash.html#count">QHash::count</a>() or <a href="qhash.html#size">QHash::size</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3dictiterator.html#current">Q3DictIterator::current</a>()</td><td><a href="qhashiterator.html#value">QHashIterator::value</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3dictiterator.html#currentKey">Q3DictIterator::currentKey</a>()</td><td><a href="qhashiterator.html#key">QHashIterator::key</a>()</td></tr>
-<tr valign="top" class="even"><td><a href="q3dictiterator.html#isEmpty">Q3DictIterator::isEmpty</a>()</td><td><a href="qhash.html#isEmpty">QHash::isEmpty</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3dictiterator.html#toFirst">Q3DictIterator::toFirst</a>()</td><td><a href="qhashiterator.html#toFront">QHashIterator::toFront</a>()</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Q3DictIterator functions</th><th>Qt 4 equivalent</th></tr></thead>
+<tr valign="top" class="odd"><td>Q3DictIterator::count()</td><td><a href="qhash.html#count">QHash::count</a>() or <a href="qhash.html#size">QHash::size</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3DictIterator::current()</td><td><a href="qhashiterator.html#value">QHashIterator::value</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3DictIterator::currentKey()</td><td><a href="qhashiterator.html#key">QHashIterator::key</a>()</td></tr>
+<tr valign="top" class="even"><td>Q3DictIterator::isEmpty()</td><td><a href="qhash.html#isEmpty">QHash::isEmpty</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3DictIterator::toFirst()</td><td><a href="qhashiterator.html#toFront">QHashIterator::toFront</a>()</td></tr>
 <tr valign="top" class="even"><td>Q3DictIterator::operator()()</td><td><a href="qhashiterator.html#value">QHashIterator::value</a>()</td></tr>
 <tr valign="top" class="odd"><td>Q3DictIterator::operator*()</td><td><a href="qhashiterator.html#value">QHashIterator::value</a>()</td></tr>
 <tr valign="top" class="even"><td>Q3DictIterator::operator++()</td><td>See remark below</td></tr>
 </table></p>
-<p>Be aware that <a href="qhashiterator.html">QHashIterator</a> has a different way of iterating than <a href="q3dictiterator.html">Q3DictIterator</a>. A typical loop with <a href="q3dictiterator.html">Q3DictIterator</a> looks like this:</p>
+<p>Be aware that <a href="qhashiterator.html">QHashIterator</a> has a different way of iterating than Q3DictIterator. A typical loop with Q3DictIterator looks like this:</p>
 <pre> Q3DictIterator&lt;QWidget&gt; i(dict);
  while (i.current() != 0) {
      do_something(i.currentKey(), i.current());
@@ -1126,22 +1126,22 @@
 <a name="qdns"></a>
 <h2>QDns</h2>
 <p>Qt 3 used its own implementation of the DNS protocol and provided a low-level <tt>QDns</tt> class. Qt 4's <a href="qhostinfo.html">QHostInfo</a> class uses the system's <tt>gethostbyname()</tt> function from a thread instead.</p>
-<p>The old <tt>QDns</tt> class has been renamed <a href="q3dns.html">Q3Dns</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. The new <a href="qhostinfo.html">QHostInfo</a> class has a radically different API: It consists mainly of two static functions, one of which is blocking (<a href="qhostinfo.html#fromName">QHostInfo::fromName</a>()), the other non-blocking (<a href="qhostinfo.html#lookupHost">QHostInfo::lookupHost</a>()). See the <a href="qhostinfo.html">QHostInfo</a> class documentation for details.</p>
+<p>The old <tt>QDns</tt> class has been renamed Q3Dns and moved to the <a href="qt3support.html">Qt3Support</a> library. The new <a href="qhostinfo.html">QHostInfo</a> class has a radically different API: It consists mainly of two static functions, one of which is blocking (<a href="qhostinfo.html#fromName">QHostInfo::fromName</a>()), the other non-blocking (<a href="qhostinfo.html#lookupHost">QHostInfo::lookupHost</a>()). See the <a href="qhostinfo.html">QHostInfo</a> class documentation for details.</p>
 <a name="qdockarea"></a>
 <h2>QDockArea</h2>
-<p>The <tt>QDockArea</tt> class has been renamed <a href="q3dockarea.html">Q3DockArea</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, <a href="qmainwindow.html">QMainWindow</a> handles the dock and toolbar areas itself. See the <a href="qmainwindow.html">QMainWindow</a> documentation for details.</p>
+<p>The <tt>QDockArea</tt> class has been renamed Q3DockArea and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, <a href="qmainwindow.html">QMainWindow</a> handles the dock and toolbar areas itself. See the <a href="qmainwindow.html">QMainWindow</a> documentation for details.</p>
 <a name="qdockwindow"></a>
 <h2>QDockWindow</h2>
-<p>The old <tt>QDockWindow</tt> class has been renamed <a href="q3dockwindow.html">Q3DockWindow</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, there is a new <a href="qdockwidget.html">QDockWidget</a> class with a different API. See the class documentation for details.</p>
+<p>The old <tt>QDockWindow</tt> class has been renamed Q3DockWindow and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, there is a new <a href="qdockwidget.html">QDockWidget</a> class with a different API. See the class documentation for details.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qdockwidget.html">QDockWidget</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qdragobject"></a>
 <h2>QDragObject</h2>
-<p>The <tt>QDragObject</tt> class has been renamed <a href="q3dragobject.html">Q3DragObject</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by the <a href="qmimedata.html">QMimeData</a> class. See the class documentation for details.</p>
-<p>Note that the <a href="q3dragobject.html#DragMode-enum">Q3DragObject::DragCopyOrMove</a> drag and drop mode is interpreted differently to Qt 3's QDragObject::DragCopyOrMove mode. In Qt 3, a move operation was performed by default, and the user had to hold down the <b>Ctrl</b> key to perform a copy operation. In Qt 4, a copy operation is performed by default; the user has to hold down the <b>Shift</b> key to perform a move operation.</p>
+<p>The <tt>QDragObject</tt> class has been renamed Q3DragObject and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by the <a href="qmimedata.html">QMimeData</a> class. See the class documentation for details.</p>
+<p>Note that the Q3DragObject::DragCopyOrMove drag and drop mode is interpreted differently to Qt 3's QDragObject::DragCopyOrMove mode. In Qt 3, a move operation was performed by default, and the user had to hold down the <b>Ctrl</b> key to perform a copy operation. In Qt 4, a copy operation is performed by default; the user has to hold down the <b>Shift</b> key to perform a move operation.</p>
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qdropsite"></a>
 <h2>QDropSite</h2>
-<p>The <tt>QDropSite</tt> class has been renamed <a href="q3dropsite.html">Q3DropSite</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QDropSite</tt> class has been renamed Q3DropSite and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>The <a href="#qdropsite">QDropSite</a> class has been obsolete ever since Qt 2.0. The only thing it does is call QWidget::setAcceptDrops(true).</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> class MyWidget : public QWidget, public QDropSite
@@ -1167,7 +1167,7 @@
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qeditorfactory"></a>
 <h2>QEditorFactory</h2>
-<p>The <tt>QEditorFactory</tt> class has been renamed <a href="q3editorfactory.html">Q3EditorFactory</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QEditorFactory</tt> class has been renamed Q3EditorFactory and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qeventloop"></a>
 <h2>QEventLoop</h2>
@@ -1176,7 +1176,7 @@
 <a name="qfiledialog"></a>
 <h2>QFileDialog</h2>
 <p>The <a href="qfiledialog.html">QFileDialog</a> class in Qt 4 has been totally rewritten. It provides most of the functionality of the old <tt>QFileDialog</tt> class, but with a different API. Some functionality, such as the ability to preview files, is expected to be added in a later Qt 4 release.</p>
-<p>The old <tt>QFileDialog</tt>, <tt>QFileIconProvider</tt>, and <tt>QFilePreview</tt> classes has been renamed <a href="q3filedialog.html">Q3FileDialog</a>, <a href="q3fileiconprovider.html">Q3FileIconProvider</a>, and <a href="q3filepreview.html">Q3FilePreview</a> and have been moved to <a href="qt3support.html">Qt3Support</a>. You can use them if you need some functionality not provided yet by the new <a href="qfiledialog.html">QFileDialog</a> class.</p>
+<p>The old <tt>QFileDialog</tt>, <tt>QFileIconProvider</tt>, and <tt>QFilePreview</tt> classes has been renamed Q3FileDialog, Q3FileIconProvider, and Q3FilePreview and have been moved to <a href="qt3support.html">Qt3Support</a>. You can use them if you need some functionality not provided yet by the new <a href="qfiledialog.html">QFileDialog</a> class.</p>
 <p>The following table lists which functions have been renamed or removed in Qt 4.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Old function</th><th>Qt 4 equivalent</th></tr></thead>
@@ -1185,21 +1185,21 @@
 <tr valign="top" class="odd"><td>Q3FileDialog::addRightWidget(<a href="qwidget.html">QWidget</a> *)</td><td>N/A</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::addToolButton(<a href="qabstractbutton.html">QAbstractButton</a> *, bool separator)</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::addWidgets(<a href="qlabel.html">QLabel</a> *, <a href="qwidget.html">QWidget</a> *, <a href="qpushbutton.html">QPushButton</a> *)</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td><a href="q3filedialog.html#dir">Q3FileDialog::dir</a>()</td><td><a href="qfiledialog.html#directory">QFileDialog::directory</a>()</td></tr>
-<tr valign="top" class="odd"><td><a href="q3filedialog.html#dirPath-prop">Q3FileDialog::dirPath</a>()</td><td><a href="qfiledialog.html#directory">QFileDialog::directory</a>().path()</td></tr>
-<tr valign="top" class="even"><td><a href="q3filedialog.html#iconProvider">Q3FileDialog::iconProvider</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3filedialog.html#contentsPreview-prop">Q3FileDialog::isContentsPreviewEnabled</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td><a href="q3filedialog.html#infoPreview-prop">Q3FileDialog::isInfoPreviewEnabled</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3filedialog.html#previewMode-prop">Q3FileDialog::previewMode</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td><a href="q3filedialog.html#rereadDir">Q3FileDialog::rereadDir</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3filedialog.html#resortDir">Q3FileDialog::resortDir</a>()</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::dir()</td><td><a href="qfiledialog.html#directory">QFileDialog::directory</a>()</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::dirPath()</td><td><a href="qfiledialog.html#directory">QFileDialog::directory</a>().path()</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::iconProvider()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::isContentsPreviewEnabled()</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::isInfoPreviewEnabled()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::previewMode()</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::rereadDir()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::resortDir()</td><td>N/A</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::selectAll(bool)</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td>Q3FileDialog::setContentsPreview(<a href="qwidget.html">QWidget</a> *, <a href="q3filepreview.html">Q3FilePreview</a> *)</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::setContentsPreview(<a href="qwidget.html">QWidget</a> *, Q3FilePreview *)</td><td>N/A</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::setContentsPreviewEnabled(bool)</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::setDir(const <a href="qstring.html">QString</a> &amp;)</td><td>QFileDialog::setDirectory(const <a href="qstring.html">QString</a> &amp;)</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::setFilters(const char **)</td><td>Q3FileDialog::setFilters(const <a href="qstringlist.html">QStringList</a> &amp;)</td></tr>
-<tr valign="top" class="odd"><td>Q3FileDialog::setIconProvider(<a href="q3fileiconprovider.html">Q3FileIconProvider</a> *)</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td>Q3FileDialog::setInfoPreview(<a href="qwidget.html">QWidget</a> *, <a href="q3filepreview.html">Q3FilePreview</a> *)</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::setIconProvider(Q3FileIconProvider *)</td><td>N/A</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::setInfoPreview(<a href="qwidget.html">QWidget</a> *, Q3FilePreview *)</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::setInfoPreviewEnabled(bool)</td><td>N/A</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::setPreviewMode(PreviewMode)</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::setSelectedFilter(const <a href="qstring.html">QString</a> &amp;)</td><td>QFileDialog::selectFilter(const <a href="qstring.html">QString</a> &amp;)</td></tr>
@@ -1207,8 +1207,8 @@
 <tr valign="top" class="odd"><td>Q3FileDialog::setSelection(const <a href="qstring.html">QString</a> &amp;)</td><td>QFileDialog::selectFile(const <a href="qstring.html">QString</a> &amp;)</td></tr>
 <tr valign="top" class="even"><td>Q3FileDialog::setShowHiddenFiles(bool)</td><td>showHidden()</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::setUrl(const <a href="#qurloperator">QUrlOperator</a> &amp;)</td><td>N/A</td></tr>
-<tr valign="top" class="even"><td><a href="q3filedialog.html#showHiddenFiles-prop">Q3FileDialog::showHiddenFiles</a>()</td><td>N/A</td></tr>
-<tr valign="top" class="odd"><td><a href="q3filedialog.html#url">Q3FileDialog::url</a>()</td><td>QUrl::fromLocalFile(<a href="qfiledialog.html#directory">QFileDialog::directory</a>())</td></tr>
+<tr valign="top" class="even"><td>Q3FileDialog::showHiddenFiles()</td><td>N/A</td></tr>
+<tr valign="top" class="odd"><td>Q3FileDialog::url()</td><td>QUrl::fromLocalFile(<a href="qfiledialog.html#directory">QFileDialog::directory</a>())</td></tr>
 <thead><tr valign="top" class="qt-style"><th>Old signals</th><th>Qt 4 equivalent</th></tr></thead>
 <tr valign="top" class="even"><td>Q3FileDialog::fileHighlighted(const <a href="qstring.html">QString</a> &amp;)</td><td>N/A</td></tr>
 <tr valign="top" class="odd"><td>Q3FileDialog::fileSelected(const <a href="qstring.html">QString</a> &amp;)</td><td>QFileDialog::filesSelected(const <a href="qstringlist.html">QStringList</a> &amp;)</td></tr>
@@ -1249,19 +1249,19 @@
 <li><a href="qframe.html">QFrame</a> no longer has a frameChanged() function, reimplement <a href="qwidget.html#resizeEvent">QFrame::resizeEvent</a>() instead.</li>
 <li><a href="qframe.html">QFrame</a> used to have drawFrame(<a href="qpainter.html">QPainter</a> *) and drawContents(<a href="qpainter.html">QPainter</a> *) virtual functions. These are now gone. In Qt 4, the frame is drawn by the <a href="qwidget.html#paintEvent">QFrame::paintEvent</a>() function. If you want to change the way <a href="qframe.html">QFrame</a> paints itself, reimplement this function. To draw the contents of the frame, reimplement <a href="qframe.html">QFrame</a>:paintEvent() and call the base class implementation of the function before you use the <a href="qwidget.html#contentsRect">contentsRect()</a> function inherited from <a href="qwidget.html">QWidget</a>, to retrieve the rectangle to paint on.</li>
 </ul>
-<p>To help with porting, the <a href="qt3support.html">Qt3Support</a> library contains a <a href="q3frame.html">Q3Frame</a> class that inherits <a href="qframe.html">QFrame</a> and provides a similar API to the old <a href="qframe.html">QFrame</a> class. If you derived from <a href="qframe.html">QFrame</a> in your application, you might want to use <a href="q3frame.html">Q3Frame</a> as a base class as a first step in the porting process, and later move on to the new <a href="qframe.html">QFrame</a> class.</p>
+<p>To help with porting, the <a href="qt3support.html">Qt3Support</a> library contains a Q3Frame class that inherits <a href="qframe.html">QFrame</a> and provides a similar API to the old <a href="qframe.html">QFrame</a> class. If you derived from <a href="qframe.html">QFrame</a> in your application, you might want to use Q3Frame as a base class as a first step in the porting process, and later move on to the new <a href="qframe.html">QFrame</a> class.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qframe.html">QFrame</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qftp"></a>
 <h2>QFtp</h2>
 <p><a href="qftp.html">QFtp</a> no longer inherits from <a href="#qnetworkprotocol">QNetworkProtocol</a>. See the <a href="#qnetworkprotocol-section">section on QNetworkProtocol</a> for details.</p>
-<p>The old <tt>QFtp</tt> class has been renamed <a href="q3ftp.html">Q3Ftp</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The old <tt>QFtp</tt> class has been renamed Q3Ftp and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <a name="qglayoutiterator-section"></a><a name="qglayoutiterator"></a>
 <h2>QGLayoutIterator</h2>
 <p>The <a href="#qglayoutiterator">QGLayoutIterator</a> class no longer exists in Qt 4. This makes only a difference if you implemented custom layout managers (i.e., <a href="qlayout.html">QLayout</a> subclasses).</p>
 <p>The new approach is much simpler: It consists in reimplementing <a href="qlayout.html#itemAt">QLayout::itemAt</a>() and <a href="qlayout.html#takeAt">QLayout::takeAt</a>(). These functions operate on indexes, eliminating the need for a layout iterator class.</p>
 <a name="qgrid"></a>
 <h2>QGrid</h2>
-<p>The <tt>QGrid</tt> class is now only available as <a href="q3grid.html">Q3Grid</a> in Qt 4. You can achieve the same result as <tt>QGrid</tt> by creating a <a href="qwidget.html">QWidget</a> with a grid layout:</p>
+<p>The <tt>QGrid</tt> class is now only available as Q3Grid in Qt 4. You can achieve the same result as <tt>QGrid</tt> by creating a <a href="qwidget.html">QWidget</a> with a grid layout:</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QGrid *grid = new QGrid(2, Qt::Horizontal);
  QPushButton *child1 = new QPushButton(grid);
@@ -1286,24 +1286,24 @@
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qgridlayout.html">QGridLayout</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qgridview"></a>
 <h2>QGridView</h2>
-<p>The <tt>QGridView</tt> class has been renamed <a href="q3gridview.html">Q3GridView</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, we recommend that you use <a href="qtableview.html">QTableView</a> or <a href="qabstractitemview.html">QAbstractItemView</a> for presenting tabular data.</p>
+<p>The <tt>QGridView</tt> class has been renamed Q3GridView and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, we recommend that you use <a href="qtableview.html">QTableView</a> or <a href="qabstractitemview.html">QAbstractItemView</a> for presenting tabular data.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qgroupbox-section"></a><a name="qgroupbox"></a>
 <h2>QGroupBox</h2>
-<p>The <a href="qgroupbox.html">QGroupBox</a> class has been redesigned in Qt 4. The old <tt>QGroupBox</tt> class has been renamed <a href="q3groupbox.html">Q3GroupBox</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="qgroupbox.html">QGroupBox</a> class has been redesigned in Qt 4. The old <tt>QGroupBox</tt> class has been renamed Q3GroupBox and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>The new <a href="qgroupbox.html">QGroupBox</a> is more lightweight. It doesn't attempt to duplicate functionality already provided by <a href="qgridlayout.html">QGridLayout</a>. For that reason, the following members have been removed:</p>
 <ul>
-<li><a href="q3groupbox.html#columns-prop">Q3GroupBox::setColumns</a>(), <a href="q3groupbox.html#columns-prop">Q3GroupBox::columns</a>()</li>
-<li><a href="q3groupbox.html#orientation-prop">Q3GroupBox::setOrientation</a>(), <a href="q3groupbox.html#orientation-prop">Q3GroupBox::orientation</a>()</li>
-<li><a href="q3groupbox.html#setInsideMargin">Q3GroupBox::setInsideMargin</a>(), <a href="q3groupbox.html#insideMargin">Q3GroupBox::insideMargin</a>()</li>
-<li><a href="q3groupbox.html#addSpace">Q3GroupBox::addSpace</a>()</li>
+<li>Q3GroupBox::setColumns(), Q3GroupBox::columns()</li>
+<li>Q3GroupBox::setOrientation(), Q3GroupBox::orientation()</li>
+<li>Q3GroupBox::setInsideMargin(), Q3GroupBox::insideMargin()</li>
+<li>Q3GroupBox::addSpace()</li>
 </ul>
 <p>Naturally, the <tt>columns</tt> and <tt>orientation</tt> properties have also been removed.</p>
-<p>If you rely on some of the missing functionality in your application, you can use <a href="q3groupbox.html">Q3GroupBox</a> instead of <a href="qgroupbox.html">QGroupBox</a> as a help to porting.</p>
+<p>If you rely on some of the missing functionality in your application, you can use Q3GroupBox instead of <a href="qgroupbox.html">QGroupBox</a> as a help to porting.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <a href="qgroupbox.html">QGroupBox</a> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qhbox"></a>
 <h2>QHBox</h2>
-<p>The <tt>QHBox</tt> class is now only available as <a href="q3hbox.html">Q3HBox</a> in Qt 4. You can achieve the same result as <tt>QHBox</tt> by creating a <a href="qwidget.html">QWidget</a> with an horizontal layout:</p>
+<p>The <tt>QHBox</tt> class is now only available as Q3HBox in Qt 4. You can achieve the same result as <tt>QHBox</tt> by creating a <a href="qwidget.html">QWidget</a> with an horizontal layout:</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QHBox *hbox = new QHBox;
  QPushButton *child1 = new QPushButton(hbox);
@@ -1320,12 +1320,12 @@
 <p>Note that child widgets are not automatically placed into the widget's layout; you will need to manually add each widget to the <a href="qhboxlayout.html">QHBoxLayout</a>.</p>
 <a name="qheader"></a>
 <h2>QHeader</h2>
-<p>The <tt>QHeader</tt> class has been renamed <a href="q3header.html">Q3Header</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it is replaced by the <a href="qheaderview.html">QHeaderView</a> class.</p>
+<p>The <tt>QHeader</tt> class has been renamed Q3Header and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it is replaced by the <a href="qheaderview.html">QHeaderView</a> class.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qhttp"></a>
 <h2>QHttp</h2>
 <p><a href="qhttp.html">QHttp</a> no longer inherits from <a href="#qnetworkprotocol">QNetworkProtocol</a>. See the See the <a href="#qnetworkprotocol-section">section on QNetworkProtocol</a> for details.</p>
-<p>The old <tt>QHttp</tt>, <tt>QHttpHeader</tt>, <tt>QHttpRequestHeader</tt>, and <tt>QHttpResponseHeader</tt> classes have been renamed <a href="q3http.html">Q3Http</a>, <a href="q3httpheader.html">Q3HttpHeader</a>, <a href="q3httprequestheader.html">Q3HttpRequestHeader</a>, and <a href="q3httpresponseheader.html">Q3HttpResponseHeader</a> and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The old <tt>QHttp</tt>, <tt>QHttpHeader</tt>, <tt>QHttpRequestHeader</tt>, and <tt>QHttpResponseHeader</tt> classes have been renamed Q3Http, Q3HttpHeader, Q3HttpRequestHeader, and Q3HttpResponseHeader and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <a name="qiconfactory"></a>
 <h2>QIconFactory</h2>
 <p>The <a href="#qiconfactory">QIconFactory</a> class is no longer part of Qt. It has been replaced by the <a href="qiconengine.html">QIconEngine</a> class.</p>
@@ -1334,11 +1334,11 @@
 <p>The QIconSet class is no longer part of Qt. It has been replaced by the <a href="qicon.html">QIcon</a> class.</p>
 <a name="qiconview"></a>
 <h2>QIconView</h2>
-<p>The <tt>QIconView</tt>, <tt>QIconViewItem</tt>, <tt>QIconDrag</tt>, and <tt>QIconDragItem</tt> classes has been renamed <a href="q3iconview.html">Q3IconView</a>, <a href="q3iconviewitem.html">Q3IconViewItem</a>, <a href="q3icondrag.html">Q3IconDrag</a>, and <a href="q3icondragitem.html">Q3IconDragItem</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use <a href="qlistwidget.html">QListWidget</a> or its base class <a href="qlistview.html">QListView</a> instead, and call QListView::setViewMode(<a href="qlistview.html#ViewMode-enum">QListView::IconMode</a>) to obtain an &quot;icon view&quot; look.</p>
+<p>The <tt>QIconView</tt>, <tt>QIconViewItem</tt>, <tt>QIconDrag</tt>, and <tt>QIconDragItem</tt> classes has been renamed Q3IconView, Q3IconViewItem, Q3IconDrag, and Q3IconDragItem and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use <a href="qlistwidget.html">QListWidget</a> or its base class <a href="qlistview.html">QListView</a> instead, and call QListView::setViewMode(<a href="qlistview.html#ViewMode-enum">QListView::IconMode</a>) to obtain an &quot;icon view&quot; look.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qimagedrag"></a>
 <h2>QImageDrag</h2>
-<p>The <tt>QImageDrag</tt> class has been renamed <a href="q3imagedrag.html">Q3ImageDrag</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setImage() to set the image.</p>
+<p>The <tt>QImageDrag</tt> class has been renamed Q3ImageDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setImage() to set the image.</p>
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qimageio"></a>
 <h2>QImageIO</h2>
@@ -1473,18 +1473,18 @@
 <p>See <a href="#properties">Properties</a> for a list of <a href="qlineedit.html">QLineEdit</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qlistbox"></a>
 <h2>QListBox</h2>
-<p>The <tt>QListBox</tt>, <tt>QListBoxItem</tt>, <tt>QListBoxText</tt>, and <tt>QListBoxPixmap</tt> classes have been renamed <a href="q3listbox.html">Q3ListBox</a>, <a href="q3listboxitem.html">Q3ListBoxItem</a>, <a href="q3listboxtext.html">Q3ListBoxText</a>, and <a href="q3listboxpixmap.html">Q3ListBoxPixmap</a> and have been moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use <a href="qlistwidget.html">QListWidget</a> or its base class <a href="qlistview.html">QListView</a> instead.</p>
+<p>The <tt>QListBox</tt>, <tt>QListBoxItem</tt>, <tt>QListBoxText</tt>, and <tt>QListBoxPixmap</tt> classes have been renamed Q3ListBox, Q3ListBoxItem, Q3ListBoxText, and Q3ListBoxPixmap and have been moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use <a href="qlistwidget.html">QListWidget</a> or its base class <a href="qlistview.html">QListView</a> instead.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qlistview"></a>
 <h2>QListView</h2>
-<p>The <tt>QListView</tt>, <tt>QListViewItem</tt>, <tt>QCheckListItem</tt>, and <tt>QListViewItemIterator</tt> classes have been renamed <a href="q3listview.html">Q3ListView</a>, <a href="q3listviewitem.html">Q3ListViewItem</a>, <a href="q3checklistitem.html">Q3CheckListItem</a>, and <a href="q3listviewitemiterator.html">Q3ListViewItemIterator</a>, and have been moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use one of the following four classes instead: <a href="qtreeview.html">QTreeView</a> or <a href="qtreewidget.html">QTreeWidget</a> for tree-like structures; <a href="qlistwidget.html">QListWidget</a> or the new <a href="qlistview.html">QListView</a> class for one-dimensional lists.</p>
+<p>The <tt>QListView</tt>, <tt>QListViewItem</tt>, <tt>QCheckListItem</tt>, and <tt>QListViewItemIterator</tt> classes have been renamed Q3ListView, Q3ListViewItem, Q3CheckListItem, and Q3ListViewItemIterator, and have been moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use one of the following four classes instead: <a href="qtreeview.html">QTreeView</a> or <a href="qtreewidget.html">QTreeWidget</a> for tree-like structures; <a href="qlistwidget.html">QListWidget</a> or the new <a href="qlistview.html">QListView</a> class for one-dimensional lists.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qlocalfs"></a>
 <h2>QLocalFs</h2>
-<p>The <tt>QLocalFs</tt> class is no longer part of the public Qt API. It has been renamed <a href="q3localfs.html">Q3LocalFs</a> and moved to <a href="qt3support.html">Qt3Support</a>. Use <a href="qdir.html">QDir</a>, <a href="qfileinfo.html">QFileInfo</a>, or <a href="qfile.html">QFile</a> instead.</p>
+<p>The <tt>QLocalFs</tt> class is no longer part of the public Qt API. It has been renamed Q3LocalFs and moved to <a href="qt3support.html">Qt3Support</a>. Use <a href="qdir.html">QDir</a>, <a href="qfileinfo.html">QFileInfo</a>, or <a href="qfile.html">QFile</a> instead.</p>
 <a name="qmainwindow"></a>
 <h2>QMainWindow</h2>
-<p>The <a href="qmainwindow.html">QMainWindow</a> class has been redesigned in Qt 4 to provide a more modern look and feel and more flexibility. The API has changed to reflect that. The old <tt>QMainWindow</tt> class has been renamed <a href="q3mainwindow.html">Q3MainWindow</a> and moved to <a href="qt3support.html">Qt3Support</a>. See the <a href="qmainwindow.html">QMainWindow</a> class documentation for details.</p>
+<p>The <a href="qmainwindow.html">QMainWindow</a> class has been redesigned in Qt 4 to provide a more modern look and feel and more flexibility. The API has changed to reflect that. The old <tt>QMainWindow</tt> class has been renamed Q3MainWindow and moved to <a href="qt3support.html">Qt3Support</a>. See the <a href="qmainwindow.html">QMainWindow</a> class documentation for details.</p>
 <a name="qmemarray-section"></a><a name="qmemarray-t"></a>
 <h2>QMemArray&lt;T&gt;</h2>
 <p>QMemArray&lt;T&gt; has been moved to <a href="qt3support.html">Qt3Support</a>. It has been replaced by the <a href="qvector.html">QVector</a>&lt;T&gt; class.</p>
@@ -1522,7 +1522,7 @@
 <p>The <a href="qmessagebox.html#iconPixmap-prop">QMessageBox::iconPixmap</a>() function used to return a &quot;const <a href="qpixmap.html">QPixmap</a> *&quot;. In Qt 4, it returns a <a href="qpixmap.html">QPixmap</a>.</p>
 <a name="qmimesourcefactory"></a>
 <h2>QMimeSourceFactory</h2>
-<p>The <tt>QMimeSourceFactory</tt> has been renamed <a href="q3mimesourcefactory.html">Q3MimeSourceFactory</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use Qt 4's <a href="resources.html#resource-system">Resource System</a> instead.</p>
+<p>The <tt>QMimeSourceFactory</tt> has been renamed Q3MimeSourceFactory and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use Qt 4's <a href="resources.html#resource-system">Resource System</a> instead.</p>
 <a name="qmovie"></a>
 <h2>QMovie</h2>
 <p>The <a href="qmovie.html">QMovie</a> API has been revised in Qt 4 to make it more consistent with the other Qt classes (notably <a href="qimagereader.html">QImageReader</a>). The table below summarizes the changes.</p>
@@ -1553,10 +1553,10 @@
 </table></p>
 <a name="qmultilineedit"></a>
 <h2>QMultiLineEdit</h2>
-<p>The <tt>QMultiLineEdit</tt> class in Qt 3 was a convenience <a href="qtextedit.html">QTextEdit</a> subclass that provided an interface compatible with Qt 2's <a href="#qmultilineedit">QMultiLineEdit</a> class. In Qt 4, it is called <a href="q3multilineedit.html">Q3MultiLineEdit</a>, it inherits <a href="q3textedit.html">Q3TextEdit</a>, and it is part of <a href="qt3support.html">Qt3Support</a>. Use <a href="qtextedit.html">QTextEdit</a> in new code.</p>
+<p>The <tt>QMultiLineEdit</tt> class in Qt 3 was a convenience <a href="qtextedit.html">QTextEdit</a> subclass that provided an interface compatible with Qt 2's <a href="#qmultilineedit">QMultiLineEdit</a> class. In Qt 4, it is called Q3MultiLineEdit, it inherits Q3TextEdit, and it is part of <a href="qt3support.html">Qt3Support</a>. Use <a href="qtextedit.html">QTextEdit</a> in new code.</p>
 <a name="qnetworkprotocol-section"></a><a name="qnetworkprotocol"></a>
 <h2>QNetworkProtocol</h2>
-<p>The <a href="#qnetworkprotocol">QNetworkProtocol</a>, QNetworkProtocolFactoryBase, QNetworkProtocolFactory&lt;T&gt;, and QNetworkOperation classes are no longer part of the public Qt API. They have been renamed <a href="q3networkprotocol.html">Q3NetworkProtocol</a>, Q3NetworkProtocolFactoryBase, Q3NetworkProtocolFactory&lt;T&gt;, and <a href="q3networkoperation.html">Q3NetworkOperation</a> and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="#qnetworkprotocol">QNetworkProtocol</a>, QNetworkProtocolFactoryBase, QNetworkProtocolFactory&lt;T&gt;, and QNetworkOperation classes are no longer part of the public Qt API. They have been renamed Q3NetworkProtocol, Q3NetworkProtocolFactoryBase, Q3NetworkProtocolFactory&lt;T&gt;, and Q3NetworkOperation and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>In Qt 4 applications, you can use classes like <a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> directly to perform file-related actions on a remote host.</p>
 <a name="qobject"></a>
 <h2>QObject</h2>
@@ -1584,16 +1584,16 @@
      int deviceDepth = metrics.depth();</font></pre>
 <p>you can rewrite it as</p>
 <pre>     int deviceDepth = widget-&gt;depth();</pre>
-<p>For compatibility, the old <tt>QPaintDeviceMetrics</tt> class has been renamed <a href="q3paintdevicemetrics.html">Q3PaintDeviceMetrics</a> and moved to <a href="qt3support.html">Qt3Support</a>.</p>
+<p>For compatibility, the old <tt>QPaintDeviceMetrics</tt> class has been renamed Q3PaintDeviceMetrics and moved to <a href="qt3support.html">Qt3Support</a>.</p>
 <a name="qpainter"></a>
 <h2>QPainter</h2>
 <p>The <a href="qpainter.html">QPainter</a> class has undergone some changes in Qt 4 because of the way rectangles are drawn. In Qt 4, the result of drawing a <a href="qrect.html">QRect</a> with a pen width of 1 pixel is 1 pixel wider and 1 pixel taller than in Qt 3.</p>
-<p>For compatibility, we provide a <a href="q3painter.html">Q3Painter</a> class in <a href="qt3support.html">Qt3Support</a> that provides the old semantics. See the <a href="q3painter.html">Q3Painter</a> documentation for details and for the reasons why we had to make this change.</p>
+<p>For compatibility, we provide a Q3Painter class in <a href="qt3support.html">Qt3Support</a> that provides the old semantics. See the Q3Painter documentation for details and for the reasons why we had to make this change.</p>
 <p>The <a href="http://doc.trolltech.com/3.3/qpainter.html#CoordinateMode-enum">QPainter::CoordinateMode</a> enum has been removed in Qt 4. All clipping operations are now defined using logical coordinates and are subject to transformation operations.</p>
 <p>The <a href="http://doc.trolltech.com/3.3/qpainter.html#RasterOP-enum">QPainter::RasterOP</a> enum has been replaced with <a href="qpainter.html#CompositionMode-enum">QPainter::CompositionMode</a>.</p>
 <a name="qpicture"></a>
 <h2>QPicture</h2>
-<p>In Qt 3, a <a href="qpicture.html">QPicture</a> could be saved in the SVG file format. In Qt 4, the SVG support is separated into the <a href="qtsvg.html">QtSvg</a> module, which provides classes for <i>displaying</i> the contents of SVG files. Qt 4 does not currently support saving of pictures in this format, but it can be achieved using the <a href="q3picture.html">Q3Picture</a> compatibility class.</p>
+<p>In Qt 3, a <a href="qpicture.html">QPicture</a> could be saved in the SVG file format. In Qt 4, the SVG support is separated into the <a href="qtsvg.html">QtSvg</a> module, which provides classes for <i>displaying</i> the contents of SVG files. Qt 4 does not currently support saving of pictures in this format, but it can be achieved using the Q3Picture compatibility class.</p>
 <a name="qpixmap"></a>
 <h2>QPixmap</h2>
 <p>The mask() function has been changed to return a reference to a <a href="qbitmap.html">QBitmap</a> rather than a pointer. As a result, it is no longer possible simply to test for a null pointer when determining whether a pixmap has a mask. Instead, you need to explicitly test whether the mask bitmap is null or not.</p>
@@ -1607,11 +1607,11 @@
 <a name="qpointarray"></a>
 <h2>QPointArray</h2>
 <p>The <tt>QPointArray</tt> class has been renamed <a href="qpolygon.html">QPolygon</a> in Qt 4 and has undergone significant changes. In Qt 3, <tt>QPointArray</tt> inherited from QMemArray&lt;<a href="qpoint.html">QPoint</a>&gt;. In Qt 4, <a href="qpolygon.html">QPolygon</a> inherits from <a href="qvector.html">QVector</a>&lt;<a href="qpoint.html">QPoint</a>&gt;. Everything mentioned in the <a href="#qmemarray-section">section on QMemArray&lt;T&gt;</a> apply for <a href="#qpointarray">QPointArray</a> as well.</p>
-<p>The <a href="qt3support.html">Qt3Support</a> library contains a <a href="q3pointarray.html">Q3PointArray</a> class that inherits from <a href="qpolygon.html">QPolygon</a> and provides a few functions that existed in <tt>QPointArray</tt> but no longer exist in <a href="qpolygon.html">QPolygon</a>. These functions include <a href="q3pointarray.html#makeArc">Q3PointArray::makeArc</a>(), <a href="q3pointarray.html#makeEllipse">Q3PointArray::makeEllipse</a>(), and <a href="q3pointarray.html#cubicBezier">Q3PointArray::cubicBezier</a>(). In Qt 4, we recommend that you use <a href="qpainterpath.html">QPainterPath</a> for representing arcs, ellipses, and Bezier curves, rather than <a href="qpolygon.html">QPolygon</a>.</p>
+<p>The <a href="qt3support.html">Qt3Support</a> library contains a Q3PointArray class that inherits from <a href="qpolygon.html">QPolygon</a> and provides a few functions that existed in <tt>QPointArray</tt> but no longer exist in <a href="qpolygon.html">QPolygon</a>. These functions include Q3PointArray::makeArc(), Q3PointArray::makeEllipse(), and Q3PointArray::cubicBezier(). In Qt 4, we recommend that you use <a href="qpainterpath.html">QPainterPath</a> for representing arcs, ellipses, and Bezier curves, rather than <a href="qpolygon.html">QPolygon</a>.</p>
 <p>The <a href="qpolygon.html#setPoints">QPolygon::setPoints</a>() and <a href="qpolygon.html#putPoints">QPolygon::putPoints</a>() functions return <tt>void</tt> in Qt 4. The corresponding Qt 3 functions returned a <tt>bool</tt> indicating whether the array was successfully resized or not. This can now be checked by checking <a href="qvector.html#size">QPolygon::size</a>() after the call.</p>
 <a name="qpopupmenu"></a>
 <h2>QPopupMenu</h2>
-<p>For most purposes, <a href="#qpopupmenu">QPopupMenu</a> has been replaced by <a href="qmenu.html">QMenu</a> in Qt 4. For compatibility with older applications, <a href="q3popupmenu.html">Q3PopupMenu</a> provides the old API and features that are specific to popup menus. Note that, when using <a href="q3popupmenu.html">Q3PopupMenu</a>, the menu's actions must be <a href="q3action.html">Q3Action</a>s.</p>
+<p>For most purposes, <a href="#qpopupmenu">QPopupMenu</a> has been replaced by <a href="qmenu.html">QMenu</a> in Qt 4. For compatibility with older applications, Q3PopupMenu provides the old API and features that are specific to popup menus. Note that, when using Q3PopupMenu, the menu's actions must be Q3Actions.</p>
 <p>In Qt 3, it was common practice to add entries to popup menus using the insertItem() function, maintaining identifiers for future use; for example, to dynamically change menu items. In Qt 4, menu entries are completely represented by actions for consistency with other user interface components, such as toolbar buttons. Create new menus with the <a href="qmenu.html">QMenu</a> class, and use the overloaded <a href="qmenu.html#addAction">QMenu::addAction</a>() functions to insert new entries. If you need to manage a set of actions created for a particular menu, we suggest that you construct a <a href="qactiongroup.html">QActionGroup</a> and add them to that.</p>
 <p>The Main Window examples provided show how to use Qt's action system to construct menus, toolbars, and other common user interface elements.</p>
 <a name="qprinter"></a>
@@ -1620,22 +1620,22 @@
 <a name="qprocess"></a>
 <h2>QProcess</h2>
 <p>The <a href="qprocess.html">QProcess</a> class has undergone major improvements in Qt 4. It now inherits <a href="qiodevice.html">QIODevice</a>, which makes it possible to combine <a href="qprocess.html">QProcess</a> with a <a href="qtextstream.html">QTextStream</a> or a <a href="qdatastream.html">QDataStream</a>.</p>
-<p>The old <tt>QProcess</tt> class has been renamed <a href="q3process.html">Q3Process</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The old <tt>QProcess</tt> class has been renamed Q3Process and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <a name="qprogressbar"></a>
 <h2>QProgressBar</h2>
-<p>The <a href="qprogressbar.html">QProgressBar</a> API has been significantly improved in Qt 4. The old <tt>QProgressBar</tt> API is available as <a href="q3progressbar.html">Q3ProgressBar</a> in the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="qprogressbar.html">QProgressBar</a> API has been significantly improved in Qt 4. The old <tt>QProgressBar</tt> API is available as Q3ProgressBar in the <a href="qt3support.html">Qt3Support</a> library.</p>
 <a name="qprogressdialog"></a>
 <h2>QProgressDialog</h2>
-<p>The <a href="qprogressdialog.html">QProgressDialog</a> API has been significantly improved in Qt 4. The old <tt>QProgressDialog</tt> API is available as <a href="q3progressdialog.html">Q3ProgressDialog</a> in the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="qprogressdialog.html">QProgressDialog</a> API has been significantly improved in Qt 4. The old <tt>QProgressDialog</tt> API is available as Q3ProgressDialog in the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="#properties">Properties</a> for a list of <a href="qprogressdialog.html">QProgressDialog</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qptrcollection-t"></a>
 <h2>QPtrCollection&lt;T&gt;</h2>
-<p>The <tt>QPtrCollection&lt;T&gt;</tt> abstract base class has been renamed <a href="q3ptrcollection.html">Q3PtrCollection</a>&lt;T&gt; moved to the <a href="qt3support.html">Qt3Support</a> library. There is no direct equivalent in Qt 4.</p>
+<p>The <tt>QPtrCollection&lt;T&gt;</tt> abstract base class has been renamed Q3PtrCollection&lt;T&gt; moved to the <a href="qt3support.html">Qt3Support</a> library. There is no direct equivalent in Qt 4.</p>
 <p>See <a href="containers.html">Generic Containers</a> for a list of Qt 4 containers.</p>
 <a name="qptrdict-t"></a>
 <h2>QPtrDict&lt;T&gt;</h2>
-<p><tt>QPtrDict&lt;T&gt;</tt> and <tt>QPtrDictIterator&lt;T&gt;</tt> have been renamed <a href="q3ptrdict.html">Q3PtrDict</a>&lt;T&gt; and <a href="q3ptrdictiterator.html">Q3PtrDictIterator</a>&lt;T&gt; and have been moved to the <a href="qt3support.html">Qt3Support</a> library. They have been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes and their associated iterator classes.</p>
-<p>When porting old code that uses <a href="q3ptrdict.html">Q3PtrDict</a>&lt;T&gt; to Qt 4, there are four classes that you can use:</p>
+<p><tt>QPtrDict&lt;T&gt;</tt> and <tt>QPtrDictIterator&lt;T&gt;</tt> have been renamed Q3PtrDict&lt;T&gt; and Q3PtrDictIterator&lt;T&gt; and have been moved to the <a href="qt3support.html">Qt3Support</a> library. They have been replaced by the more modern <a href="qhash.html">QHash</a>&lt;Key, T&gt; and <a href="qmultihash.html">QMultiHash</a>&lt;Key, T&gt; classes and their associated iterator classes.</p>
+<p>When porting old code that uses Q3PtrDict&lt;T&gt; to Qt 4, there are four classes that you can use:</p>
 <ul>
 <li><a href="qmultihash.html">QMultiHash</a>&lt;void *, T *&gt;</li>
 <li><a href="qmultihash.html">QMultiHash</a>&lt;void *, T&gt;</li>
@@ -1643,7 +1643,7 @@
 <li><a href="qhash.html">QHash</a>&lt;void *, T&gt;</li>
 </ul>
 <p>(You can naturally use other types than <tt>void *</tt> for the key type, e.g. <tt>QWidget *</tt>.)</p>
-<p>To port <a href="q3ptrdict.html">Q3PtrDict</a>&lt;T&gt; to Qt 4, read the <a href="#qdict-section">section on QDict&lt;T&gt;</a>, mentally substituting <tt>void *</tt> for <a href="qstring.html">QString</a>.</p>
+<p>To port Q3PtrDict&lt;T&gt; to Qt 4, read the <a href="#qdict-section">section on QDict&lt;T&gt;</a>, mentally substituting <tt>void *</tt> for <a href="qstring.html">QString</a>.</p>
 <a name="qptrlist-section"></a><a name="qptrlist-t"></a>
 <h2>QPtrList&lt;T&gt;</h2>
 <p>QPtrList&lt;T&gt;, QPtrListIterator&lt;T&gt;, and QPtrListStdIterator&lt;T&gt; have been moved to the <a href="qt3support.html">Qt3Support</a> library. They have been replaced by the more modern <a href="qlist.html">QList</a> and <a href="qlinkedlist.html">QLinkedList</a> classes and their associated iterator classes.</p>
@@ -1919,7 +1919,7 @@
 <h2>QRangeControl</h2>
 <p>In Qt 3, various &quot;range control&quot; widgets (<a href="qdial.html">QDial</a>, <a href="qscrollbar.html">QScrollBar</a>, <a href="qslider.html">QSlider</a>, and QSpin) inherited from both <a href="qwidget.html">QWidget</a> and <tt>QRangeControl</tt>.</p>
 <p>In Qt 4, <tt>QRangeControl</tt> has been replaced with the new <a href="qabstractslider.html">QAbstractSlider</a> and <a href="qabstractspinbox.html">QAbstractSpinBox</a> classes, which inherit from <a href="qwidget.html">QWidget</a> and provides similar functionality. Apart from eliminating unnecessary multiple inheritance, the new design allows <a href="qabstractslider.html">QAbstractSlider</a> to provide signals, slots, and properties.</p>
-<p>The old <tt>QRangeControl</tt> class has been renamed <a href="q3rangecontrol.html">Q3RangeControl</a> and moved to the <a href="qt3support.html">Qt3Support</a> library, together with the (undocumented) <tt>QSpinWidget</tt> class.</p>
+<p>The old <tt>QRangeControl</tt> class has been renamed Q3RangeControl and moved to the <a href="qt3support.html">Qt3Support</a> library, together with the (undocumented) <tt>QSpinWidget</tt> class.</p>
 <p>If you use <tt>QRangeControl</tt> as a base class in your application, you can switch to use <a href="qabstractslider.html">QAbstractSlider</a> or <a href="qabstractspinbox.html">QAbstractSpinBox</a> instead.</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040">     class VolumeControl : public QWidget, public QRangeControl
@@ -1963,20 +1963,20 @@
 <p>See <a href="#properties">Properties</a> for a list of <a href="qscrollbar.html">QScrollBar</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qscrollview"></a>
 <h2>QScrollView</h2>
-<p>The <tt>QScrollView</tt> class has been renamed <a href="q3scrollview.html">Q3ScrollView</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. It has been replaced by the <a href="qabstractscrollarea.html">QAbstractScrollArea</a> and <a href="qscrollarea.html">QScrollArea</a> classes.</p>
+<p>The <tt>QScrollView</tt> class has been renamed Q3ScrollView and moved to the <a href="qt3support.html">Qt3Support</a> library. It has been replaced by the <a href="qabstractscrollarea.html">QAbstractScrollArea</a> and <a href="qscrollarea.html">QScrollArea</a> classes.</p>
 <p>Note that Qt 4 in general uses the <a href="qscrollarea.html#widget">QScrollArea::widget</a>() function where Qt 3 used QScrollView::viewport(). The rationale for this is that it is no longer possible to draw directly on a scroll area. The <a href="qscrollarea.html#widget">QScrollArea::widget</a>() function returns the widget set on the scroll area.</p>
 <p><tt>QScrollView</tt> was designed to work around the 16-bit limitation on widget coordinates found on most window systems. In Qt 4, this is done transparently for <i>all</i> widgets, so there is no longer a need for such functionality in <tt>QScrollView</tt>. For that reason, the new <a href="qabstractscrollarea.html">QAbstractScrollArea</a> and <a href="qscrollarea.html">QScrollArea</a> classes are much more lightweight, and concentrate on handling scroll bars.</p>
 <a name="qserversocket"></a>
 <h2>QServerSocket</h2>
-<p>The <tt>QServerSocket</tt> class has been renamed <a href="q3serversocket.html">Q3ServerSocket</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by <a href="qtcpserver.html">QTcpServer</a>.</p>
-<p>With <a href="q3serversocket.html">Q3ServerSocket</a>, connections are accepted by reimplementing a virtual function (<a href="q3serversocket.html#newConnection">Q3ServerSocket::newConnection</a>()). With <a href="qtcpserver.html">QTcpServer</a>, on the other hand, you don't need to subclass. Instead, simply connect to the <a href="qtcpserver.html#newConnection">QTcpServer::newConnection</a>() signal.</p>
+<p>The <tt>QServerSocket</tt> class has been renamed Q3ServerSocket and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by <a href="qtcpserver.html">QTcpServer</a>.</p>
+<p>With Q3ServerSocket, connections are accepted by reimplementing a virtual function (Q3ServerSocket::newConnection()). With <a href="qtcpserver.html">QTcpServer</a>, on the other hand, you don't need to subclass. Instead, simply connect to the <a href="qtcpserver.html#newConnection">QTcpServer::newConnection</a>() signal.</p>
 <a name="qsettings"></a>
 <h2>QSettings</h2>
 <p>The <a href="qsettings.html">QSettings</a> class has been rewritten to be more robust and to respect existing standards (e.g., the INI file format). The API has also been extensively revised. The old API is still provided when Qt 3 support is enabled.</p>
 <p>Since the format and location of settings have changed between Qt 3 and Qt 4, the Qt 4 version of your application won't recognize settings written using Qt 3.</p>
 <a name="qshared"></a>
 <h2>QShared</h2>
-<p>The <tt>QShared</tt> class has been obsoleted by the more powerful <a href="qshareddata.html">QSharedData</a> and <a href="qshareddatapointer.html">QSharedDataPointer</a> as a means of creating custom implicitly shared classes. It has been renamed <a href="q3shared.html">Q3Shared</a> moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QShared</tt> class has been obsoleted by the more powerful <a href="qshareddata.html">QSharedData</a> and <a href="qshareddatapointer.html">QSharedDataPointer</a> as a means of creating custom implicitly shared classes. It has been renamed Q3Shared moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>An easy way of porting to Qt 4 is to include this class into your project and to use it instead of <tt>QShared</tt>:</p>
 <pre>     struct Shared
      {
@@ -1988,10 +1988,10 @@
 <p>If possible, we recommend that you use <a href="qshareddata.html">QSharedData</a> and <a href="qshareddatapointer.html">QSharedDataPointer</a> instead. They provide thread-safe reference counting and handle all the reference counting behind the scenes, eliminating the risks of forgetting to increment or decrement the reference count.</p>
 <a name="qsignal"></a>
 <h2>QSignal</h2>
-<p>The <a href="#qsignal">QSignal</a> class has been renamed to <a href="q3signal.html">Q3Signal</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. The preferred approach is to create your own <a href="qobject.html">QObject</a> subclass with a signal that has the desired signature. Alternatively, you can call <a href="qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>() if you want to invoke a slot.</p>
+<p>The <a href="#qsignal">QSignal</a> class has been renamed to Q3Signal and moved to the <a href="qt3support.html">Qt3Support</a> library. The preferred approach is to create your own <a href="qobject.html">QObject</a> subclass with a signal that has the desired signature. Alternatively, you can call <a href="qmetaobject.html#invokeMethod">QMetaObject::invokeMethod</a>() if you want to invoke a slot.</p>
 <a name="qsimplerichtext"></a>
 <h2>QSimpleRichText</h2>
-<p>The <tt>QSimpleRichText</tt> class has been renamed <a href="q3simplerichtext.html">Q3SimpleRichText</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QSimpleRichText</tt> class has been renamed Q3SimpleRichText and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="richtext.html">Rich Text Processing</a> for an overview of the Qt 4 rich text classes.</p>
 <a name="qslider"></a>
 <h2>QSlider</h2>
@@ -2000,14 +2000,14 @@
 <p>See <a href="#properties">Properties</a> for a list of <a href="qslider.html">QSlider</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qsocket"></a>
 <h2>QSocket</h2>
-<p>The <tt>QSocket</tt> class has been renamed <a href="q3socket.html">Q3Socket</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by the <a href="qtcpsocket.html">QTcpSocket</a> class, which inherits most of its functionality from <a href="qabstractsocket.html">QAbstractSocket</a>.</p>
+<p>The <tt>QSocket</tt> class has been renamed Q3Socket and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, it has been replaced by the <a href="qtcpsocket.html">QTcpSocket</a> class, which inherits most of its functionality from <a href="qabstractsocket.html">QAbstractSocket</a>.</p>
 <a name="qsocketdevice"></a>
 <h2>QSocketDevice</h2>
-<p>The <tt>QSocketDevice</tt> class has been renamed <a href="q3socketdevice.html">Q3SocketDevice</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, there is no direct equivalent to <a href="q3socketdevice.html">Q3SocketDevice</a>:</p>
+<p>The <tt>QSocketDevice</tt> class has been renamed Q3SocketDevice and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, there is no direct equivalent to Q3SocketDevice:</p>
 <ul>
-<li>If you use <a href="q3socketdevice.html">Q3SocketDevice</a> in a thread to perform blocking network I/O (a technique encouraged by the <i>Qt Quarterly</i> article <a href="http://doc.trolltech.com/qq/qq09-networkthread.html">Unblocking Networking</a>), you can now use <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qftp.html">QFtp</a>, or <a href="qhttp.html">QHttp</a> instead, which can now be used from non-GUI threads.</li>
-<li>If you use <a href="q3socketdevice.html">Q3SocketDevice</a> for UDP, you can now use <a href="qudpsocket.html">QUdpSocket</a> instead.</li>
-<li>If you use <a href="q3socketdevice.html">Q3SocketDevice</a> for other uses, Qt 4 offers no alternative right now. However, there is a <tt>QAbstractSocketEngine</tt> internal class that offers a low-level socket API similar to <a href="q3socketdevice.html">Q3SocketDevice</a>. Should the need for such functionality arise in Qt 4 applications, we will consider making this class public in a future release.</li>
+<li>If you use Q3SocketDevice in a thread to perform blocking network I/O (a technique encouraged by the <i>Qt Quarterly</i> article <a href="http://doc.trolltech.com/qq/qq09-networkthread.html">Unblocking Networking</a>), you can now use <a href="qtcpsocket.html">QTcpSocket</a>, <a href="qftp.html">QFtp</a>, or <a href="qhttp.html">QHttp</a> instead, which can now be used from non-GUI threads.</li>
+<li>If you use Q3SocketDevice for UDP, you can now use <a href="qudpsocket.html">QUdpSocket</a> instead.</li>
+<li>If you use Q3SocketDevice for other uses, Qt 4 offers no alternative right now. However, there is a <tt>QAbstractSocketEngine</tt> internal class that offers a low-level socket API similar to Q3SocketDevice. Should the need for such functionality arise in Qt 4 applications, we will consider making this class public in a future release.</li>
 </ul>
 <a name="qsortedlist"></a>
 <h2>QSortedList</h2>
@@ -2022,14 +2022,14 @@
 <p>See <a href="#properties">Properties</a> for a list of <a href="qspinbox.html">QSpinBox</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qsqlcursor"></a>
 <h2>QSqlCursor</h2>
-<p>The <tt>QSqlCursor</tt> class has been renamed <a href="q3sqlcursor.html">Q3SqlCursor</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, you can use <a href="qsqlquery.html">QSqlQuery</a>, <a href="qsqlquerymodel.html">QSqlQueryModel</a>, or <a href="qsqltablemodel.html">QSqlTableModel</a>, depending on whether you want a low-level or a high-level interface for accessing databases.</p>
+<p>The <tt>QSqlCursor</tt> class has been renamed Q3SqlCursor and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, you can use <a href="qsqlquery.html">QSqlQuery</a>, <a href="qsqlquerymodel.html">QSqlQueryModel</a>, or <a href="qsqltablemodel.html">QSqlTableModel</a>, depending on whether you want a low-level or a high-level interface for accessing databases.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqldatabase"></a>
 <h2>QSqlDatabase</h2>
 <p><a href="qsqldatabase.html">QSqlDatabase</a> is now a smart pointer that is passed around by value. Simply replace all <a href="qsqldatabase.html">QSqlDatabase</a> pointers by <a href="qsqldatabase.html">QSqlDatabase</a> objects.</p>
 <a name="qsqleditorfactory"></a>
 <h2>QSqlEditorFactory</h2>
-<p>The <tt>QSqlEditorFactory</tt> class has been renamed <a href="q3sqleditorfactory.html">Q3SqlEditorFactory</a> and moved to <a href="qt3support.html">Qt3Support</a>.</p>
+<p>The <tt>QSqlEditorFactory</tt> class has been renamed Q3SqlEditorFactory and moved to <a href="qt3support.html">Qt3Support</a>.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqlerror"></a>
 <h2>QSqlError</h2>
@@ -2047,11 +2047,11 @@
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqlform"></a>
 <h2>QSqlForm</h2>
-<p>The <tt>QSqlForm</tt> class has been renamed <a href="q3sqlform.html">Q3SqlForm</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QSqlForm</tt> class has been renamed Q3SqlForm and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqlpropertymap"></a>
 <h2>QSqlPropertyMap</h2>
-<p>The <tt>QSqlPropertyMap</tt> class has been renamed <a href="q3sqlpropertymap.html">Q3SqlPropertyMap</a> moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QSqlPropertyMap</tt> class has been renamed Q3SqlPropertyMap moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqlquery"></a>
 <h2>QSqlQuery</h2>
@@ -2065,11 +2065,11 @@
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qsqlselectcursor"></a>
 <h2>QSqlSelectCursor</h2>
-<p>The <tt>QSqlSelectCursor</tt> class has been renamed <a href="q3sqlselectcursor.html">Q3SqlSelectCursor</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QSqlSelectCursor</tt> class has been renamed Q3SqlSelectCursor and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="qtsql.html">QtSql Module</a> for an overview of the new SQL classes.</p>
 <a name="qstoreddrag"></a>
 <h2>QStoredDrag</h2>
-<p>The <tt>QStoredDrag</tt> class has been renamed <a href="q3storeddrag.html">Q3StoredDrag</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call <a href="qmimedata.html#setData">QMimeData::setData</a>() to set the data.</p>
+<p>The <tt>QStoredDrag</tt> class has been renamed Q3StoredDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call <a href="qmimedata.html#setData">QMimeData::setData</a>() to set the data.</p>
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qstr-i-list"></a>
 <h2>QStr(I)List</h2>
@@ -2197,33 +2197,33 @@
 <p>The QStyle::itemRect() overload that took both a pixmap and a string is also removed, use either <a href="qstyle.html#itemTextRect">QStyle::itemTextRect</a>() or <a href="qstyle.html#itemPixmapRect">QStyle::itemPixmapRect</a>() instead.</p>
 <a name="qstylesheet"></a>
 <h2>QStyleSheet</h2>
-<p>The <a href="#qstylesheet">QStyleSheet</a> and QStyleSheetItem classes have been renamed <a href="q3stylesheet.html">Q3StyleSheet</a> and <a href="q3stylesheetitem.html">Q3StyleSheetItem</a>, and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="#qstylesheet">QStyleSheet</a> and QStyleSheetItem classes have been renamed Q3StyleSheet and Q3StyleSheetItem, and have been moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="richtext.html">Rich Text Processing</a> for an overview of the Qt 4 rich text classes, and <a href="stylesheet.html">Qt Style Sheets</a> for a description of CSS-like style sheet support in Qt 4.2 and above.</p>
 <a name="qsyntaxhighlighter"></a>
 <h2>QSyntaxHighlighter</h2>
-<p>The <tt>QSyntaxHighlighter</tt> class from Qt 3 has been renamed <a href="q3syntaxhighlighter.html">Q3SyntaxHighlighter</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. Since Qt 4.1, it has been replaced by a new <a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a> class based on Qt 4's new rich text engine.</p>
+<p>The <tt>QSyntaxHighlighter</tt> class from Qt 3 has been renamed Q3SyntaxHighlighter and moved to the <a href="qt3support.html">Qt3Support</a> library. Since Qt 4.1, it has been replaced by a new <a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a> class based on Qt 4's new rich text engine.</p>
 <a name="qtabbar"></a>
 <h2>QTabBar</h2>
 <p>See <a href="#properties">Properties</a> for a list of <a href="qtabbar.html">QTabBar</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qtabdialog"></a>
 <h2>QTabDialog</h2>
-<p>The <tt>QTabDialog</tt> class is no longer part of the public Qt API. It has been renamed <a href="q3tabdialog.html">Q3TabDialog</a> and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can easily obtain the same result by combining a <a href="qtabwidget.html">QTabWidget</a> with a <a href="qdialog.html">QDialog</a> and provide <a href="qpushbutton.html">QPushButton</a>s yourself.</p>
+<p>The <tt>QTabDialog</tt> class is no longer part of the public Qt API. It has been renamed Q3TabDialog and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can easily obtain the same result by combining a <a href="qtabwidget.html">QTabWidget</a> with a <a href="qdialog.html">QDialog</a> and provide <a href="qpushbutton.html">QPushButton</a>s yourself.</p>
 <p>See also the dialogs/tabdialog example, which shows how to implement tab dialogs in Qt 4.</p>
 <a name="qtabwidget"></a>
 <h2>QTabWidget</h2>
 <p>See <a href="#properties">Properties</a> for a list of <a href="qtabwidget.html">QTabWidget</a> properties in Qt 3 that have changed in Qt 4.</p>
 <a name="qtable"></a>
 <h2>QTable</h2>
-<p>The <tt>QTable</tt>, <tt>QTableItem</tt>, <tt>QComboTableItem</tt>, <tt>QCheckTableItem</tt>, and <tt>QTableSelection</tt> classes have been renamed <a href="q3table.html">Q3Table</a>, <a href="q3tableitem.html">Q3TableItem</a>, <a href="q3combotableitem.html">Q3ComboTableItem</a>, <a href="q3checktableitem.html">Q3CheckTableItem</a>, and <a href="q3tableselection.html">Q3TableSelection</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use the new <a href="qtablewidget.html">QTableWidget</a> or <a href="qtableview.html">QTableView</a> class instead.</p>
-<p>Some of these classes behave differently with respect to the way they handle <tt>NULL</tt> pointers. For example, <a href="q3tableitem.html#setPixmap">Q3TableItem::setPixmap</a>() no longer accepts <tt>NULL</tt> or 0 to indicate that the item should contain a null pixmap; in this case, a null pixmap should be constructed and passed explicitly to the function.</p>
+<p>The <tt>QTable</tt>, <tt>QTableItem</tt>, <tt>QComboTableItem</tt>, <tt>QCheckTableItem</tt>, and <tt>QTableSelection</tt> classes have been renamed Q3Table, Q3TableItem, Q3ComboTableItem, Q3CheckTableItem, and Q3TableSelection and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use the new <a href="qtablewidget.html">QTableWidget</a> or <a href="qtableview.html">QTableView</a> class instead.</p>
+<p>Some of these classes behave differently with respect to the way they handle <tt>NULL</tt> pointers. For example, Q3TableItem::setPixmap() no longer accepts <tt>NULL</tt> or 0 to indicate that the item should contain a null pixmap; in this case, a null pixmap should be constructed and passed explicitly to the function.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
 <a name="qtextdrag"></a>
 <h2>QTextDrag</h2>
-<p>The <tt>QTextDrag</tt> class has been renamed <a href="q3textdrag.html">Q3TextDrag</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call <a href="qmimedata.html#setText">QMimeData::setText</a>() to set the data.</p>
+<p>The <tt>QTextDrag</tt> class has been renamed Q3TextDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call <a href="qmimedata.html#setText">QMimeData::setText</a>() to set the data.</p>
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qtextedit"></a>
 <h2>QTextEdit</h2>
-<p>The old <a href="qtextedit.html">QTextEdit</a> and <a href="qtextbrowser.html">QTextBrowser</a> classes have been renamed <a href="q3textedit.html">Q3TextEdit</a> and <a href="q3textbrowser.html">Q3TextBrowser</a>, and have been moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qtextedit.html">QTextEdit</a> and <a href="qtextbrowser.html">QTextBrowser</a> have a somewhat different API.</p>
+<p>The old <a href="qtextedit.html">QTextEdit</a> and <a href="qtextbrowser.html">QTextBrowser</a> classes have been renamed Q3TextEdit and Q3TextBrowser, and have been moved to <a href="qt3support.html">Qt3Support</a>. The new <a href="qtextedit.html">QTextEdit</a> and <a href="qtextbrowser.html">QTextBrowser</a> have a somewhat different API.</p>
 <p>See <a href="richtext.html">Rich Text Processing</a> for an overview of the Qt 4 rich text classes.</p>
 <a name="qtextistream"></a>
 <h2>QTextIStream</h2>
@@ -2245,10 +2245,10 @@
 <p>Note that when using a <a href="qtextstream.html">QTextStream</a> on a <a href="qfile.html">QFile</a> in Qt 4, calling <a href="qiodevice.html#reset">QIODevice::reset</a>() on the <a href="qfile.html">QFile</a> will not have the expected result because <a href="qtextstream.html">QTextStream</a> now buffers the file. Use the <a href="qtextstream.html#seek">QTextStream::seek</a>() function instead.</p>
 <a name="qtextview"></a>
 <h2>QTextView</h2>
-<p>The <tt>QTextView</tt> class has been renamed <a href="q3textview.html">Q3TextView</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <tt>QTextView</tt> class has been renamed Q3TextView and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <a name="qtimeedit"></a>
 <h2>QTimeEdit</h2>
-<p>The <a href="qtimeedit.html">QTimeEdit</a> class in Qt 4 is a convenience class based on <a href="qdatetimeedit.html">QDateTimeEdit</a>. The old class has been renamed <a href="q3timeedit.html">Q3TimeEdit</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The <a href="qtimeedit.html">QTimeEdit</a> class in Qt 4 is a convenience class based on <a href="qdatetimeedit.html">QDateTimeEdit</a>. The old class has been renamed Q3TimeEdit and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
 <p>See <a href="#virtual-functions">Virtual Functions</a> for a list of <tt>QTimeEdit</tt> virtual member functions in Qt 3 that are no longer virtual in Qt 4.</p>
 <a name="qtimer"></a>
 <h2>QTimer</h2>
@@ -2256,7 +2256,7 @@
 <p>Note that other versions of Windows have a lower timer resolution, and that code relying on underlying system timer restrictions encounters no such limitations using Qt 4 (e.g., setting an interval of 0 millisecond results in Qt occupying all of the processor time when no GUI events need processing).</p>
 <a name="qtoolbar"></a>
 <h2>QToolBar</h2>
-<p>The old <tt>QToolBar</tt> class, which worked with the old <tt>QMainWindow</tt> and <tt>QDockArea</tt> classes and inherited from <tt>QDockWindow</tt>, has been renamed <a href="q3toolbar.html">Q3ToolBar</a> and moved to <a href="qt3support.html">Qt3Support</a>. Note that, when using <a href="q3toolbar.html">Q3ToolBar</a>, the toolbar's actions must be <a href="q3action.html">Q3Action</a>s.</p>
+<p>The old <tt>QToolBar</tt> class, which worked with the old <tt>QMainWindow</tt> and <tt>QDockArea</tt> classes and inherited from <tt>QDockWindow</tt>, has been renamed Q3ToolBar and moved to <a href="qt3support.html">Qt3Support</a>. Note that, when using Q3ToolBar, the toolbar's actions must be Q3Actions.</p>
 <p>Use the new <a href="qtoolbar.html">QToolBar</a> class in new applications.</p>
 <a name="qtoolbutton"></a>
 <h2>QToolButton</h2>
@@ -2266,22 +2266,22 @@
 <p>The QToolTip::setGloballyEnabled() function no longer exists. Tooltips can be disabled by consuming events of type <a href="qevent.html#Type-enum">QEvent::ToolTip</a>.</p>
 <a name="quridrag"></a>
 <h2>QUriDrag</h2>
-<p>The <tt>QUriDrag</tt> class has been renamed <a href="q3uridrag.html">Q3UriDrag</a> and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setUrl() to set the URL.</p>
+<p>The <tt>QUriDrag</tt> class has been renamed Q3UriDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call QMimeData::setUrl() to set the URL.</p>
 <p>See <a href="porting4-dnd.html">Porting to Qt 4 (Drag and Drop)</a> for a comparison between the drag and drop APIs in Qt 3 and Qt 4.</p>
 <a name="qurl"></a>
 <h2>QUrl</h2>
-<p>The <a href="qurl.html">QUrl</a> class has been rewritten from scratch in Qt 4 to be more standard-compliant. The old <a href="qurl.html">QUrl</a> class has been renamed <a href="q3url.html">Q3Url</a> and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
-<p>The new <a href="qurl.html">QUrl</a> class provides an extensive list of compatibility functions to ease porting from <a href="q3url.html">Q3Url</a> to <a href="qurl.html">QUrl</a>. A few functions require you to change your code:</p>
+<p>The <a href="qurl.html">QUrl</a> class has been rewritten from scratch in Qt 4 to be more standard-compliant. The old <a href="qurl.html">QUrl</a> class has been renamed Q3Url and moved to the <a href="qt3support.html">Qt3Support</a> library.</p>
+<p>The new <a href="qurl.html">QUrl</a> class provides an extensive list of compatibility functions to ease porting from Q3Url to <a href="qurl.html">QUrl</a>. A few functions require you to change your code:</p>
 <ul>
-<li>Q3Url::Q3Url(const <a href="q3url.html">Q3Url</a> &amp;, const <a href="qstring.html">QString</a> &amp;, bool) can be simulated by combining the URLs manually (using QString::operator+(), for example).</li>
+<li>Q3Url::Q3Url(const Q3Url &amp;, const <a href="qstring.html">QString</a> &amp;, bool) can be simulated by combining the URLs manually (using QString::operator+(), for example).</li>
 <li>Q3Url::setEncodedPathAndQuery(const <a href="qstring.html">QString</a> &amp;) is replaced by <a href="qurl.html#setPath">QUrl::setPath</a>() and <a href="qurl.html#setEncodedQuery">QUrl::setEncodedQuery</a>().</li>
-<li><a href="q3url.html#encodedPathAndQuery">Q3Url::encodedPathAndQuery</a>() is replaced by <a href="qurl.html#path">QUrl::path</a>() and <a href="qurl.html#encodedQuery">QUrl::encodedQuery</a>().</li>
-<li><a href="q3url.html#isLocalFile">Q3Url::isLocalFile</a>() can be simulated by checking that <a href="qurl-qt3.html#protocol">QUrl::protocol</a>() is &quot;file&quot;.</li>
+<li>Q3Url::encodedPathAndQuery() is replaced by <a href="qurl.html#path">QUrl::path</a>() and <a href="qurl.html#encodedQuery">QUrl::encodedQuery</a>().</li>
+<li>Q3Url::isLocalFile() can be simulated by checking that <a href="qurl-qt3.html#protocol">QUrl::protocol</a>() is &quot;file&quot;.</li>
 <li>Q3Url::toString(bool, bool) is replaced by QUrl::toString(int), where the <tt>int</tt> parameter specifies a combination of <a href="qurl.html#FormattingOption-enum">formatting options</a>.</li>
 </ul>
 <a name="qurloperator"></a>
 <h2>QUrlOperator</h2>
-<p>The <tt>QUrlOperator</tt> class is no longer part of the public Qt API. It has been renamed <a href="q3urloperator.html">Q3UrlOperator</a> and moved to <a href="qt3support.html">Qt3Support</a>.</p>
+<p>The <tt>QUrlOperator</tt> class is no longer part of the public Qt API. It has been renamed Q3UrlOperator and moved to <a href="qt3support.html">Qt3Support</a>.</p>
 <p>In Qt 4 applications, you can use classes like <a href="qftp.html">QFtp</a> and <a href="qhttp.html">QHttp</a> directly to perform file-related actions on a remote host.</p>
 <a name="qvaluelist-section"></a><a name="qvaluelist-t"></a>
 <h2>QValueList&lt;T&gt;</h2>
@@ -2307,7 +2307,7 @@
 </ul>
 <a name="qvaluevector-t"></a>
 <h2>QValueVector&lt;T&gt;</h2>
-<p>The QValueVector&lt;T&gt; class has been replaced by <a href="qvector.html">QVector</a>&lt;T&gt; in Qt 4. As a help when porting older Qt applications, the <a href="qt3support.html">Qt3Support</a> library contains a <a href="q3valuevector.html">Q3ValueVector</a>&lt;T&gt; class implemented in terms of the new <a href="qvector.html">QVector</a>&lt;T&gt;.</p>
+<p>The QValueVector&lt;T&gt; class has been replaced by <a href="qvector.html">QVector</a>&lt;T&gt; in Qt 4. As a help when porting older Qt applications, the <a href="qt3support.html">Qt3Support</a> library contains a Q3ValueVector&lt;T&gt; class implemented in terms of the new <a href="qvector.html">QVector</a>&lt;T&gt;.</p>
 <p>When porting from QValueVector&lt;T&gt; to <a href="qvector.html">QVector</a>&lt;T&gt;, you might run into the following incompatibilities:</p>
 <ul>
 <li>QValueVector(const std::vector&lt;T&gt; &amp;) doesn't exist in <a href="qvector.html">QVector</a>. You can simulate it by calling <a href="qvector.html#append">QVector::append</a>()} in a loop.</li>
@@ -2327,7 +2327,7 @@
 <p>Also, the <a href="qvariant.html">QVariant</a>(bool, int) constructor has been replaced by <a href="qvariant.html">QVariant</a>(bool). Old code like <a href="qvariant.html">QVariant</a>(true, 0) should be replaced with <a href="qvariant.html">QVariant</a>(true); otherwise, the <a href="qvariant.html">QVariant</a>(int, void *) overload might accidentally be triggered.</p>
 <a name="qvbox"></a>
 <h2>QVBox</h2>
-<p>The <tt>QVBox</tt> class is now only available as <a href="q3vbox.html">Q3VBox</a> in Qt 4. You can achieve the same result as <tt>QVBox</tt> by creating a <a href="qwidget.html">QWidget</a> with a vertical layout:</p>
+<p>The <tt>QVBox</tt> class is now only available as Q3VBox in Qt 4. You can achieve the same result as <tt>QVBox</tt> by creating a <a href="qwidget.html">QWidget</a> with a vertical layout:</p>
 <p>For example, if you have code like</p>
 <pre><font color="#404040"> QVBox *vbox = new QVBox;
  QPushButton *child1 = new QPushButton(vbox);
@@ -2344,7 +2344,7 @@
 <p>Note that child widgets are not automatically placed into the widget's layout; you will need to manually add each widget to the <a href="qvboxlayout.html">QVBoxLayout</a>.</p>
 <a name="qwhatsthis"></a>
 <h2>QWhatsThis</h2>
-<p>The <a href="qwhatsthis.html">QWhatsThis</a> class has been redesigned in Qt 4. The old <tt>QWhatsThis</tt> class is available as <a href="q3whatsthis.html">Q3WhatsThis</a> in <a href="qt3support.html">Qt3Support</a>.</p>
+<p>The <a href="qwhatsthis.html">QWhatsThis</a> class has been redesigned in Qt 4. The old <tt>QWhatsThis</tt> class is available as Q3WhatsThis in <a href="qt3support.html">Qt3Support</a>.</p>
 <a name="qwidget"></a>
 <h2>QWidget</h2>
 <p>Widget background painting has been greatly improved, supporting flicker-free updates and making it possible to have semi-transparent widgets. This renders the following background handling functions obsolete:</p>
@@ -2469,10 +2469,10 @@
 <p>The <a href="#qwidgetplugin">QWidgetPlugin</a> class is no longer available in Qt 4. To create custom widget plugins, subclass <a href="qdesignercustomwidgetinterface.html">QDesignerCustomWidgetInterface</a> to provide information about the custom widget, and build a plugin in the way described in the Custom Widget Plugin example.</p>
 <a name="qwidgetstack"></a>
 <h2>QWidgetStack</h2>
-<p>The <a href="#qwidgetstack">QWidgetStack</a> class is no longer part of the Qt public API. It has been renamed <a href="q3widgetstack.html">Q3WidgetStack</a> and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can use <a href="qstackedwidget.html">QStackedWidget</a> instead to obtain the same results.</p>
+<p>The <a href="#qwidgetstack">QWidgetStack</a> class is no longer part of the Qt public API. It has been renamed Q3WidgetStack and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can use <a href="qstackedwidget.html">QStackedWidget</a> instead to obtain the same results.</p>
 <a name="qwizard"></a>
 <h2>QWizard</h2>
-<p>The <tt>QWizard</tt> class is no longer part of the Qt public API. It has been renamed <a href="q3wizard.html">Q3Wizard</a> and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can obtain the same result by combining a <a href="qstackedwidget.html">QStackedWidget</a> with a <a href="qdialog.html">QDialog</a> and provide <a href="qpushbutton.html">QPushButton</a>s yourself.</p>
+<p>The <tt>QWizard</tt> class is no longer part of the Qt public API. It has been renamed Q3Wizard and moved to <a href="qt3support.html">Qt3Support</a>. In Qt 4 applications, you can obtain the same result by combining a <a href="qstackedwidget.html">QStackedWidget</a> with a <a href="qdialog.html">QDialog</a> and provide <a href="qpushbutton.html">QPushButton</a>s yourself.</p>
 <p>There is also a <a href="http://www.trolltech.com/products/qt/addon/solutions/catalog/4/Widgets/qtwizard/">QtWizard</a> solution available from Trolltech. The new class was designed to work both for linear wizards and for wizards with more complex structures which let users reach different pages depending on the options they select. Based on the feedback we get, <a href="http://www.trolltech.com/products/qt/addon/solutions/catalog/4/Widgets/qtwizard/">QtWizard</a> may be considered for inclusion in a future Qt release.</p>
 <a name="qworkspace"></a>
 <h2>QWorkspace</h2>
@@ -2556,22 +2556,22 @@
 <tr valign="top" class="even"><td>QMemArray&lt;int&gt; QAccessibleInterface::selection() const</td><td>Port to the new <a href="qaccessibleinterface.html">QAccessibleInterface</a> API.</td></tr>
 <tr valign="top" class="odd"><td>bool QAccessibleInterface::setFocus(int)</td><td>Port to the new <a href="qaccessibleinterface.html">QAccessibleInterface</a> API.</td></tr>
 <tr valign="top" class="even"><td>bool QAccessibleInterface::setSelected(int, bool, bool)</td><td>Port to the new <a href="qaccessibleinterface.html">QAccessibleInterface</a> API.</td></tr>
-<tr valign="top" class="odd"><td>bool QAction::addTo(<a href="qwidget.html">QWidget</a> *)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::addedTo(<a href="qwidget.html">QWidget</a> *, <a href="qwidget.html">QWidget</a> *)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::addedTo(int, <a href="#qpopupmenu">QPopupMenu</a> *)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>bool QAction::removeFrom(<a href="qwidget.html">QWidget</a> *)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::setAccel(const <a href="qkeysequence.html">QKeySequence</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::setEnabled(bool)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::setIconSet(const <a href="qicon.html">QIcon</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::setMenuText(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::setOn(bool)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::setStatusTip(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::setText(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::setToggleAction(bool)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QAction::setToolTip(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QAction::setWhatsThis(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3action.html">Q3Action</a> instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QButton::drawButton(<a href="qpainter.html">QPainter</a> *)</td><td>Use <a href="q3button.html">Q3Button</a> instead or reimplement QButton::paintEvent().</td></tr>
-<tr valign="top" class="even"><td>void QButton::drawButtonLabel(<a href="qpainter.html">QPainter</a> *)</td><td>Use <a href="q3button.html">Q3Button</a> instead or reimplement QButton::paintEvent().</td></tr>
+<tr valign="top" class="odd"><td>bool QAction::addTo(<a href="qwidget.html">QWidget</a> *)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::addedTo(<a href="qwidget.html">QWidget</a> *, <a href="qwidget.html">QWidget</a> *)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::addedTo(int, <a href="#qpopupmenu">QPopupMenu</a> *)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>bool QAction::removeFrom(<a href="qwidget.html">QWidget</a> *)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::setAccel(const <a href="qkeysequence.html">QKeySequence</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::setEnabled(bool)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::setIconSet(const <a href="qicon.html">QIcon</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::setMenuText(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::setOn(bool)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::setStatusTip(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::setText(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::setToggleAction(bool)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QAction::setToolTip(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QAction::setWhatsThis(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Action instead or port to the new <a href="qaction.html">QAction</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QButton::drawButton(<a href="qpainter.html">QPainter</a> *)</td><td>Use Q3Button instead or reimplement QButton::paintEvent().</td></tr>
+<tr valign="top" class="even"><td>void QButton::drawButtonLabel(<a href="qpainter.html">QPainter</a> *)</td><td>Use Q3Button instead or reimplement QButton::paintEvent().</td></tr>
 <tr valign="top" class="odd"><td>void QButton::setAccel(const <a href="qkeysequence.html">QKeySequence</a> &amp;)</td><td>Setter.</td></tr>
 <tr valign="top" class="even"><td>void QButton::setAutoRepeat(bool)</td><td>Setter.</td></tr>
 <tr valign="top" class="odd"><td>void QButton::setDown(bool)</td><td>Setter.</td></tr>
@@ -2648,23 +2648,23 @@
 <tr valign="top" class="even"><td>void QDir::setNameFilter(const <a href="qstring.html">QString</a> &amp;)</td><td>Value type.</td></tr>
 <tr valign="top" class="odd"><td>void QDir::setPath(const <a href="qstring.html">QString</a> &amp;)</td><td>Value type.</td></tr>
 <tr valign="top" class="even"><td>void QDir::setSorting(int)</td><td>Value type.</td></tr>
-<tr valign="top" class="odd"><td>void QDns::setLabel(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3dns.html">Q3Dns</a> instead.</td></tr>
-<tr valign="top" class="even"><td>void QDns::setLabel(const <a href="qhostaddress.html">QHostAddress</a> &amp;)</td><td>Use <a href="q3dns.html">Q3Dns</a> instead.</td></tr>
-<tr valign="top" class="odd"><td>void QDns::setRecordType(RecordType)</td><td>Use <a href="q3dns.html">Q3Dns</a> instead.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::dock()</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setCloseMode(int)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setFixedExtentHeight(int)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setFixedExtentWidth(int)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setHorizontallyStretchable(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setMovingEnabled(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setNewLine(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setOffset(int)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setOpaqueMoving(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setOrientation(Orientation)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setResizeEnabled(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::setVerticallyStretchable(bool)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QDockWindow::setWidget(<a href="qwidget.html">QWidget</a> *)</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QDockWindow::undock()</td><td>Use <a href="q3dockwindow.html">Q3DockWindow</a> instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDns::setLabel(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3Dns instead.</td></tr>
+<tr valign="top" class="even"><td>void QDns::setLabel(const <a href="qhostaddress.html">QHostAddress</a> &amp;)</td><td>Use Q3Dns instead.</td></tr>
+<tr valign="top" class="odd"><td>void QDns::setRecordType(RecordType)</td><td>Use Q3Dns instead.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::dock()</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setCloseMode(int)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setFixedExtentHeight(int)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setFixedExtentWidth(int)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setHorizontallyStretchable(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setMovingEnabled(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setNewLine(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setOffset(int)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setOpaqueMoving(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setOrientation(Orientation)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setResizeEnabled(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::setVerticallyStretchable(bool)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QDockWindow::setWidget(<a href="qwidget.html">QWidget</a> *)</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QDockWindow::undock()</td><td>Use Q3DockWindow instead or port to the new <a href="qdockwidget.html">QDockWidget</a> API.</td></tr>
 <tr valign="top" class="even"><td><a href="qstring.html">QString</a> <a href="qdomattr.html#name">QDomAttr::name</a>() const</td><td>Value type.</td></tr>
 <tr valign="top" class="odd"><td><a href="qdomelement.html">QDomElement</a> <a href="qdomattr.html#ownerElement">QDomAttr::ownerElement</a>() const</td><td>Value type.</td></tr>
 <tr valign="top" class="even"><td>void QDomAttr::setValue(const <a href="qstring.html">QString</a> &amp;)</td><td>Value type.</td></tr>
@@ -2750,9 +2750,9 @@
 <tr valign="top" class="even"><td>void QEventLoop::registerSocketNotifier(<a href="qsocketnotifier.html">QSocketNotifier</a> *)</td><td>Port to the new <a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a> API.</td></tr>
 <tr valign="top" class="odd"><td>void QEventLoop::unregisterSocketNotifier(<a href="qsocketnotifier.html">QSocketNotifier</a> *)</td><td>Port to the new <a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a> API.</td></tr>
 <tr valign="top" class="even"><td>void <a href="qeventloop.html#wakeUp">QEventLoop::wakeUp</a>()</td><td>Port to the new <a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QFrame::drawContents(<a href="qpainter.html">QPainter</a> *)</td><td>Use <a href="q3frame.html">Q3Frame</a> or reimplement <a href="qwidget.html#paintEvent">QFrame::paintEvent</a>() instead.</td></tr>
-<tr valign="top" class="even"><td>void QFrame::drawFrame(<a href="qpainter.html">QPainter</a> *)</td><td>Use <a href="q3frame.html">Q3Frame</a> or reimplement <a href="qwidget.html#paintEvent">QFrame::paintEvent</a>() instead.</td></tr>
-<tr valign="top" class="odd"><td>void QFrame::frameChanged()</td><td>Use <a href="q3frame.html">Q3Frame</a> or reimplement <a href="qwidget.html#resizeEvent">QFrame::resizeEvent</a>() instead.</td></tr>
+<tr valign="top" class="odd"><td>void QFrame::drawContents(<a href="qpainter.html">QPainter</a> *)</td><td>Use Q3Frame or reimplement <a href="qwidget.html#paintEvent">QFrame::paintEvent</a>() instead.</td></tr>
+<tr valign="top" class="even"><td>void QFrame::drawFrame(<a href="qpainter.html">QPainter</a> *)</td><td>Use Q3Frame or reimplement <a href="qwidget.html#paintEvent">QFrame::paintEvent</a>() instead.</td></tr>
+<tr valign="top" class="odd"><td>void QFrame::frameChanged()</td><td>Use Q3Frame or reimplement <a href="qwidget.html#resizeEvent">QFrame::resizeEvent</a>() instead.</td></tr>
 <tr valign="top" class="even"><td>void QFrame::setFrameRect(const <a href="qrect.html">QRect</a> &amp;)</td><td>Setter.</td></tr>
 <tr valign="top" class="odd"><td>void QFrame::setFrameStyle(int)</td><td>Setter.</td></tr>
 <tr valign="top" class="even"><td>void QFrame::setLineWidth(int)</td><td>Setter.</td></tr>
@@ -2997,68 +2997,68 @@
 <tr valign="top" class="odd"><td>void QTabWidget::insertTab(<a href="qwidget.html">QWidget</a> *, QTab *, int)</td><td>Reimplement <a href="qtabwidget.html#tabInserted">QTabWidget::tabInserted</a>() instead.</td></tr>
 <tr valign="top" class="even"><td>void QTabWidget::removePage(<a href="qwidget.html">QWidget</a> *)</td><td>Reimplement <a href="qtabwidget.html#tabRemoved">QTabWidget::tabRemoved</a>() instead.</td></tr>
 <tr valign="top" class="odd"><td>void QTabWidget::showPage(<a href="qwidget.html">QWidget</a> *)</td><td>Connect to <a href="qtabwidget.html#currentChanged">QTabWidget::currentChanged</a>() instead.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::append(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit.html#clear">QTextEdit::clear</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::clearParagraphBackground(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit.html#copy">QTextEdit::copy</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td><a href="#qpopupmenu">QPopupMenu</a> * QTextEdit::createPopupMenu(const <a href="qpoint.html">QPoint</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td><a href="#qpopupmenu">QPopupMenu</a> * QTextEdit::createPopupMenu()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void <a href="qtextedit.html#cut">QTextEdit::cut</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::del()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::doKeyboardAction(KeyboardAction)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit.html#ensureCursorVisible">QTextEdit::ensureCursorVisible</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>bool QTextEdit::find(const <a href="qstring.html">QString</a> &amp;, bool, bool, bool, int *, int *)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>bool QTextEdit::focusNextPrevChild(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>int QTextEdit::heightForWidth(int) const</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::insert(const <a href="qstring.html">QString</a> &amp;, bool, bool, bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::insertAt(const <a href="qstring.html">QString</a> &amp;, int, int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::insertParagraph(const <a href="qstring.html">QString</a> &amp;, int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::moveCursor(CursorAction, bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit.html#paste">QTextEdit::paste</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::pasteSubType(const <a href="#qcstring">QCString</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::placeCursor(const <a href="qpoint.html">QPoint</a> &amp;, <a href="qtextcursor.html">QTextCursor</a> *)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void <a href="qtextedit.html#redo">QTextEdit::redo</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::removeParagraph(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::removeSelectedText(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::removeSelection(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::scrollToAnchor(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::scrollToBottom()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::selectAll(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setAlignment(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setBold(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setColor(const <a href="qcolor.html">QColor</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setCurrentFont(const <a href="qfont.html">QFont</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setCursorPosition(int, int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setFamily(const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setItalic(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setLinkUnderline(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setMimeSourceFactory(<a href="#qmimesourcefactory">QMimeSourceFactory</a> *)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setModified(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setOverwriteMode(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setPaper(const <a href="qbrush.html">QBrush</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setParagraphBackgroundColor(int, const <a href="qcolor.html">QColor</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setPointSize(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setReadOnly(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setSelection(int, int, int, int, int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setSelectionAttributes(int, const <a href="qcolor.html">QColor</a> &amp;, bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setStyleSheet(<a href="#qstylesheet">QStyleSheet</a> *)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setTabStopWidth(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setText(const <a href="qstring.html">QString</a> &amp;, const <a href="qstring.html">QString</a> &amp;)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setTextFormat(TextFormat)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setUnderline(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setUndoDepth(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setUndoRedoEnabled(bool)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setVerticalAlignment(VerticalAlignment)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setWordWrap(WordWrap)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::setWrapColumnOrWidth(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::setWrapPolicy(WrapPolicy)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit-qt3.html#sync">QTextEdit::sync</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void <a href="qtextedit.html#undo">QTextEdit::undo</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qtextedit.html#zoomIn">QTextEdit::zoomIn</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void QTextEdit::zoomIn(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::zoomOut(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="even"><td>void <a href="qtextedit.html#zoomOut">QTextEdit::zoomOut</a>()</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
-<tr valign="top" class="odd"><td>void QTextEdit::zoomTo(int)</td><td>Use <a href="q3textedit.html">Q3TextEdit</a> or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::append(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit.html#clear">QTextEdit::clear</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::clearParagraphBackground(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit.html#copy">QTextEdit::copy</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td><a href="#qpopupmenu">QPopupMenu</a> * QTextEdit::createPopupMenu(const <a href="qpoint.html">QPoint</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td><a href="#qpopupmenu">QPopupMenu</a> * QTextEdit::createPopupMenu()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qtextedit.html#cut">QTextEdit::cut</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::del()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::doKeyboardAction(KeyboardAction)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit.html#ensureCursorVisible">QTextEdit::ensureCursorVisible</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>bool QTextEdit::find(const <a href="qstring.html">QString</a> &amp;, bool, bool, bool, int *, int *)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>bool QTextEdit::focusNextPrevChild(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>int QTextEdit::heightForWidth(int) const</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::insert(const <a href="qstring.html">QString</a> &amp;, bool, bool, bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::insertAt(const <a href="qstring.html">QString</a> &amp;, int, int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::insertParagraph(const <a href="qstring.html">QString</a> &amp;, int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::moveCursor(CursorAction, bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit.html#paste">QTextEdit::paste</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::pasteSubType(const <a href="#qcstring">QCString</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::placeCursor(const <a href="qpoint.html">QPoint</a> &amp;, <a href="qtextcursor.html">QTextCursor</a> *)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qtextedit.html#redo">QTextEdit::redo</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::removeParagraph(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::removeSelectedText(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::removeSelection(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::scrollToAnchor(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::scrollToBottom()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::selectAll(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setAlignment(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setBold(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setColor(const <a href="qcolor.html">QColor</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setCurrentFont(const <a href="qfont.html">QFont</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setCursorPosition(int, int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setFamily(const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setItalic(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setLinkUnderline(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setMimeSourceFactory(<a href="#qmimesourcefactory">QMimeSourceFactory</a> *)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setModified(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setOverwriteMode(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setPaper(const <a href="qbrush.html">QBrush</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setParagraphBackgroundColor(int, const <a href="qcolor.html">QColor</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setPointSize(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setReadOnly(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setSelection(int, int, int, int, int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setSelectionAttributes(int, const <a href="qcolor.html">QColor</a> &amp;, bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setStyleSheet(<a href="#qstylesheet">QStyleSheet</a> *)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setTabStopWidth(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setText(const <a href="qstring.html">QString</a> &amp;, const <a href="qstring.html">QString</a> &amp;)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setTextFormat(TextFormat)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setUnderline(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setUndoDepth(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setUndoRedoEnabled(bool)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setVerticalAlignment(VerticalAlignment)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setWordWrap(WordWrap)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::setWrapColumnOrWidth(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::setWrapPolicy(WrapPolicy)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit-qt3.html#sync">QTextEdit::sync</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qtextedit.html#undo">QTextEdit::undo</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qtextedit.html#zoomIn">QTextEdit::zoomIn</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void QTextEdit::zoomIn(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::zoomOut(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qtextedit.html#zoomOut">QTextEdit::zoomOut</a>()</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
+<tr valign="top" class="odd"><td>void QTextEdit::zoomTo(int)</td><td>Use Q3TextEdit or port to the new <a href="qtextedit.html">QTextEdit</a> API.</td></tr>
 <tr valign="top" class="even"><td><a href="qstring.html">QString</a> QTimeEdit::sectionFormattedText(int)</td><td>Port to the new <a href="qdatetimeedit.html">QDateTimeEdit</a> API.</td></tr>
 <tr valign="top" class="odd"><td>void QTimeEdit::setAutoAdvance(bool)</td><td>Port to the new <a href="qdatetimeedit.html">QDateTimeEdit</a> API.</td></tr>
 <tr valign="top" class="even"><td>void QTimeEdit::setHour(int)</td><td>Port to the new <a href="qdatetimeedit.html">QDateTimeEdit</a> API.</td></tr>
@@ -3157,7 +3157,7 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
 <td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
 </tr></table></div></address></body>

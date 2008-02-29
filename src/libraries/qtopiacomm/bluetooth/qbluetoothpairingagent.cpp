@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -121,8 +121,8 @@ void QBluetoothPairingAgent::start()
     m_busy = true;
     m_delayedStart = false;
 
-    m_waitWidget->setText( (m_op == Pair) ? tr("Pairing in progress...") :
-            tr("Unpairing in progress...") );
+    m_waitWidget->setText( (m_op == Pair) ? tr("Pairing...") :
+            tr("Unpairing...") );
     m_waitWidget->show();
 
     if ( m_op == Pair ) {

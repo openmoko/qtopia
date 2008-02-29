@@ -13,7 +13,23 @@ else:QT_DEPOT_PATH=$$DQT_DEPOT_PATH
 
 # qmake should load this automatically...
 exists($$QTDIR/.qmake.cache):include($$QTDIR/.qmake.cache)
-else:error(Missing $$QTDIR/.qmake.cache. Please configure Qt.)
+else:error(Missing $$fixpath($$QTDIR/.qmake.cache). Please configure Qt.)
+
+# Extract the QT_CONFIG variables into QTE_CONFIG and DQT_CONFIG
+# Global scope protected by a function call
+defineTest(readqtconfig) {
+    QT_CONFIG=
+    exists($$DQTDIR/mkspecs/qconfig.pri):include($$DQTDIR/mkspecs/qconfig.pri)
+    DQT_CONFIG=$$QT_CONFIG
+    export(DQT_CONFIG)
+
+    QT_CONFIG=
+    exists($$QTEDIR/mkspecs/qconfig.pri):include($$QTEDIR/mkspecs/qconfig.pri)
+    QTE_CONFIG=$$QT_CONFIG
+    export(QTE_CONFIG)
+}
+
+readqtconfig()
 
 # We need this later to help ensure the correct Qt libs are used
 CONFIG(debug,debug|release):QT_DEBUG_LIBS=1
@@ -27,8 +43,8 @@ equals(DQT_MINOR_VERSION,2):QT+=svg
 # FIXME compat code should be removed
 DEFINES+=QPE_NO_COMPAT
 
-# Deal with qmake quirks
-contains(QMAKE_QUIRKS,keep_quotes) {
+# Deal with qmake behaviors
+contains(QMAKE_BEHAVIORS,keep_quotes) {
     LITERAL_QUOTE="
     LITERAL_ESCAPED_QUOTE=\"
     LITERAL_SQUOTE='
@@ -112,6 +128,11 @@ containsre($$QTOPIA_ID,^3rdparty) {
     enable_werror {
         QMAKE_CFLAGS+=-Werror
         QMAKE_CXXFLAGS+=-Werror
+    }
+    # If enabled, warn about overloaded virtual functions.
+    # This will help us to track down certain bugs more easily.
+    enable_woverloaded_virtual {
+        QMAKE_CXXFLAGS+=-Woverloaded-virtual
     }
 }
 

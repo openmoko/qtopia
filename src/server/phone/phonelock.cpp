@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -386,7 +386,9 @@ void BasicSimPinLock::processKeyEvent(QKeyEvent *e)
         QString newNumber = d->m_number;
         State newState = d->m_state;
 
-        if(key == lockKey() && !d->m_number.isEmpty()) {
+        // Key_NumberSign (#), is required for GCF compliance.
+        // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
+        if((key == lockKey() || key == Qt::Key_NumberSign) && !d->m_number.isEmpty()) {
             // Submit number
             Q_ASSERT(SimPinRequired == state() ||
                      SimPukRequired == state() ||

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -41,6 +41,7 @@
 #include <QVBoxLayout>
 #include <QDialog>
 #include <QSoftMenuBar>
+#include <QTimer>
 
 #include <QMenu>
 #include <QAction>
@@ -197,6 +198,7 @@ public:
 public slots:
     void finished(int result);
     void start();
+    void removeNameFocus();
 
 private:
     Ui::DeviceInfo *m_ui;
@@ -244,9 +246,22 @@ void DeviceInfoWindow::start()
     m_prev = m_device->name();
     m_ui->nameEdit->setText(m_prev);
 
+    // it's quite annoying for the user if the "name" field automatically
+    // gets edit focus when the dialog is shown (since then you have to
+    // click to get out of it, even if you just want to view the details
+    // and not change anything), so remove the name focus on start-up
+    QTimer::singleShot(0, this, SLOT(removeNameFocus()));
+
     this->setModal( true );
     QtopiaApplication::execDialog( this );
 }
+
+void DeviceInfoWindow::removeNameFocus()
+{
+    m_ui->nameEdit->home(false);
+    m_ui->nameEdit->setEditFocus(false);
+}
+
 
 
 class BTSettings_Private {
@@ -287,13 +302,11 @@ BTSettingsMainWindow::BTSettingsMainWindow(QWidget *parent, Qt::WFlags fl)
     QBluetoothLocalDeviceManager manager;
     QString defaultDeviceName = manager.defaultDevice();
     if (defaultDeviceName.isNull()) {
-        QVBoxLayout *layout = new QVBoxLayout(this);
+        QVBoxLayout *layout = new QVBoxLayout(m_data->m_mainWidget);
         QLabel *label = new QLabel(tr("<P>No bluetooth adapters found"));
         label->setWordWrap(true);
         layout->addWidget(label);
-        m_data->m_mainWidget->setLayout(layout);
         setCentralWidget(m_data->m_mainWidget);
-
         return;
     }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,7 +38,7 @@ public:
     };
 
     enum StandardLabel {
-        NoLabel, Options, Ok, Edit, Select, View, Cancel, Back, BackSpace, Next, Previous
+        NoLabel, Options, Ok, Edit, Select, View, Cancel, Back, BackSpace, Next, Previous, EndEdit, RevertEdit, Deselect
     };
 
     enum LabelType {

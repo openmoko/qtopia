@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,6 +43,8 @@ public slots:
 signals:
     void requestDial(const QString &, const QUniqueId &);
     void speedDial(const QString&);
+    void filterKeys(const QString&, bool&);
+    void filterSelect(const QString&, bool&);
 };
 
 

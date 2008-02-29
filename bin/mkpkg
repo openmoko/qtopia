@@ -41,7 +41,7 @@ for ( $make, $format, $working_path, $arch, $project_root, $languages,
 }
 
 # Defaults
-if ( !$format ) { $format = "ipk"; }
+if ( !$format ) { $format = "qpk"; }
 
 if ( DEBUG )
 {
@@ -174,7 +174,7 @@ sub make_pkg
     find(sub {
             my $file = $File::Find::name;
             if ( -f $file || -l $file ) {
-                $file =~ s/^\Q$data_path\E//;
+                $file =~ s/^\Q$data_path\E\///;
                 push(@files, $file);
             }
         }, "$data_path/$path");

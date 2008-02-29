@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -389,7 +389,7 @@ QUuid QUniqueId::deviceId() {
   If the identifier is for removable media or a foriegn device, a device id should
   also be obtained for the generator.
 
-  \ingroup qtopiaemb
+  \ingroup misc
 */
 
 /*!
@@ -539,7 +539,7 @@ bool QUniqueId::isTemporary() const
 
   \sa QUniqueIdGenerator
 
-  \ingroup qtopiaemb
+  \ingroup misc
 */
 
 /*!
@@ -628,12 +628,10 @@ QUniqueId::QUniqueId(const QUniqueId &o) : mContext(o.mContext), mId(o.mId) {}
 QUniqueId::QUniqueId(const QByteArray &array)
 {
 #ifndef QT_NO_DATASTREAM
-    QDataStream ds(array);
     if (array.size() == 8) {
-        // small version
-        ds >> mContext;
-        ds >> mId;
+        memcpy(&mContext, array.constData(), 8);
     } else {
+        QDataStream ds(array);
         ds >> *this;
         // large version.
         if (!mContext)
@@ -740,14 +738,8 @@ QString QUniqueId::toLocalContextString() const
 */
 QByteArray QUniqueId::toLocalContextByteArray() const
 {
-#ifndef QT_NO_DATASTREAM
-    QByteArray data;
-    QDataStream s(&data, QIODevice::WriteOnly);
-    toLocalContextDataStream(s);
+    QByteArray data((const char *)&mContext, 8);
     return data;
-#else
-    return QByteArray();
-#endif
 }
 
 #ifndef QT_NO_DATASTREAM
@@ -793,7 +785,7 @@ QDataStream &QUniqueId::toLocalContextDataStream( QDataStream &s ) const
 
   \sa QUniqueId, QUniqueIdGenerator
 
-  \ingroup qtopiaemb
+  \ingroup misc
 */
 
 /*!

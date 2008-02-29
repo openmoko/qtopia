@@ -7,8 +7,8 @@ crispconf.hint=themecfg
 crispconf.outdir=$$PWD
 crispdata.files=$$QTOPIA_DEPOT_PATH/etc/themes/crisp/*.xml $$QTOPIA_DEPOT_PATH/etc/themes/crisp/*rc
 crispdata.path=/etc/themes/crisp
-crisppics.files=$$QTOPIA_DEPOT_PATH/pics/themes/crisp
-crisppics.path=/pics/themes
+crisppics.files=$$QTOPIA_DEPOT_PATH/pics/themes/crisp/*
+crisppics.path=/pics/themes/crisp
 crisppics.hint=pics
 
 INSTALLS+=crispconf crispdata crisppics

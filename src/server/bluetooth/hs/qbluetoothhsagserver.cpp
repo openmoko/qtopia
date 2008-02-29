@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -19,11 +19,10 @@
 **
 ****************************************************************************/
 
-#ifdef HAVE_ALSA
-
 #include "qbluetoothhsagserver_p.h"
 #include "qbluetoothhsservice_p.h"
 #include <qtopia/comm/qbluetoothaddress.h>
+#include <qtopialog.h>
 
 QBluetoothHeadsetAudioGatewayServer::QBluetoothHeadsetAudioGatewayServer(
         QBluetoothHeadsetService *parent,
@@ -67,6 +66,7 @@ void QBluetoothHeadsetAudioGatewayServer::connect(const QBluetoothAddress &addr,
 
 void QBluetoothHeadsetAudioGatewayServer::disconnect()
 {
+    qLog(Bluetooth) << "Headset AG got a disconnect request";
     m_parent->disconnect();
 }
 
@@ -89,5 +89,3 @@ void QBluetoothHeadsetAudioGatewayServer::connectAudio()
 {
     m_parent->connectAudio();
 }
-
-#endif

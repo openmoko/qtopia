@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -34,7 +34,7 @@
     allows related player objects to be group together and updated when the
     shared media content object changes.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     \keyword {player object}
 
@@ -161,7 +161,7 @@ public:
     \brief The QMediaControlNotifier class watches a media content object for
     the availability of a given media control.
 
-    \ingroup QtopiaMedia
+    \ingroup multimedia
 
     When a control becomes available for the media content object the class
     emits a valid() signal. Similarly the class emits an invalid() signal when

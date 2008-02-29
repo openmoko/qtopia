@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -102,9 +102,15 @@ private:
     // Potential value of margin - used for selectedItem.
     static const int MARGIN_DEFAULT = 6;
 
+#ifdef QTOPIA_TEST
+    // This is just temporary until this is configurable
+    // If this is a test configuration we want launcher grid navigation to be fast
+    static const int DEFAULT_MOVE_TIME_DURATION = 0;
+#else
     // Number of milliseconds that selectedItem takes to move across to a neighbouring
     // GridItem - used for selectedItem.
     static const int DEFAULT_MOVE_TIME_DURATION = 400;
+#endif
 
     // Potential file used for the background image of selectedItem.
     static const QString SELECTED_BACKGROUND_FILE_MOUSE_PREFERRED;

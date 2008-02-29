@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -223,8 +223,8 @@ bool QTaskIO::setTaskField(int row, QTaskModel::Field k,  const QVariant &v)
 /*!
   \internal
 
-  Ensures state of store is consistent with what is on perminant storage.  if \a force is true
-  forces a reaload of cache even if checks indicates is up to date.
+  Ensures state of store is consistent with what is on permanent storage.  if \a force is true
+  forces a reload of cache even if checks indicates is up to date.
 */
 void QTaskIO::ensureDataCurrent(bool force)
 {

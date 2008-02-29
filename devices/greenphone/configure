@@ -1,4 +1,4 @@
--edition phone -xplatform greenphone -arch arm -no-qvfb
+-xplatform greenphone -arch arm -no-qvfb
 -reduce-exports=yes
 -displaysize 240x320
 -font dejavu:100,110,130,150,160,170,180,190,280,360:50,80
@@ -7,8 +7,13 @@
 -prefix /opt/Qtopia
 -no-helix -no-sxe -no-drm
 -no-infrared
+-dbus
+-dbuspath "/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux/arm-linux"
+-bluetooth
 -extra-target-qt-config "-qt-libjpeg"
 -extra-target-qt-config "-qt-libmng"
 -extra-target-qt-config "-qt-libpng"
 -extra-target-qt-config "-qt-zlib"
+-extra-target-qt-config "-qt-mouse-linuxtp"
 -D SYSINFO_GEEK_MODE
+-D QT_QWS_SCREEN_COORDINATES

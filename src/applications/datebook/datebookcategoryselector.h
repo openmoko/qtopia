@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -25,7 +25,7 @@
 
 
 /* Datebook wide category scope variable */
-static const char * DateBookCategoryScope = "Todo List"; //No tr
+static const char * DateBookCategoryScope = "Calendar"; //No tr
 
 /* Simple class used to set the scope of our QCategorySelectors when we create them
    from .ui files.  Also see the todo/todocategoryselector.h file.

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,6 +43,7 @@
 #include <qtopiaipcenvelope.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
+#include <qbootsourceaccessory.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -72,6 +73,10 @@ QSXE_APP_KEY
 
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <QValueSpaceItem>
+#include <QKeyEvent>
+#include <ThemedView>
 
 #ifdef QPE_OWNAPM
 #include <sys/ioctl.h>
@@ -341,6 +346,68 @@ private:
 };
 #endif
 
+class BootCharger : public ThemedView {
+    Q_OBJECT
+public:
+    BootCharger() :
+        ThemedView(),
+        vsoCharging("/Accessories/Battery/Charging")
+    {
+        QSettings qpeCfg("Trolltech", "qpe");
+        qpeCfg.beginGroup("Appearance");
+        QString themeDir = Qtopia::qtopiaDir() + "etc/themes/";
+        QString theme = qpeCfg.value("Theme").toString();
+
+        QSettings themeCfg(themeDir + theme, QSettings::IniFormat);
+        themeCfg.beginGroup("Theme");
+        if (themeCfg.contains("BootChargerConfig")) {
+            QString themeFile = themeCfg.value("BootChargerConfig").toString();
+        
+            setSourceFile(themeDir + themeFile);
+            if (loadSource())
+                layout();
+            else
+                qWarning("Invalid BootCharger theme.");
+        } else {
+            qWarning("Invalid BootCharger theme.");
+        }
+
+        connect(&vsoCharging, SIGNAL(contentsChanged()), SLOT(chargingStateChanged()));
+        grabKeyboard();
+    }
+
+    ~BootCharger()
+    {
+        releaseKeyboard();
+    }
+
+    void keyPressEvent(QKeyEvent *e)
+    {
+        if (e->key() == Qt::Key_Hangup) {
+            emit finished();
+        }
+    }
+
+    bool charging()
+    {
+        return vsoCharging.value().toBool();
+    }
+
+signals:
+    void finished();
+
+public slots:
+    void chargingStateChanged()
+    {
+        if (!vsoCharging.value().toBool()) {
+            QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
+        }
+    }
+
+private:
+    QValueSpaceItem vsoCharging;
+};
+
 void Qtopia_initAlarmServer(); // from qalarmserver.cpp
 
 //
@@ -352,7 +419,7 @@ void Qtopia_initAlarmServer(); // from qalarmserver.cpp
 //
 int initApplication( int argc, char ** argv )
 {
-    if(!QtopiaServerApplication::startup(argc, argv))
+    if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "prestartup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
 #ifdef QPE_OWNAPM
@@ -367,12 +434,35 @@ int initApplication( int argc, char ** argv )
     qLog(Performance) << "QtopiaServer : " << "Keyboard initialisation : "
                       << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
+    const QByteArray warmBootFile = "/tmp/warm-boot";
+    if ( !QFile::exists( warmBootFile ) &&
+         QValueSpaceItem("/Accessories/Battery/Charging").value().toBool() ) {
+
+        QBootSourceAccessory bsa;
+        if (bsa.bootSource() == QBootSourceAccessory::Charger) {
+
+            BootCharger *bootCharger = new BootCharger;
+            bootCharger->showFullScreen();
+
+            QEventLoop eventloop;
+            eventloop.connect(bootCharger, SIGNAL(finished()), SLOT(quit()));
+            eventloop.exec();
+
+            delete bootCharger;
+        }
+    }
+    ::system( "touch " + warmBootFile );
+
 #if defined(QTOPIA_ANIMATED_SPLASH)
     SplashScreen *splash = new SplashScreen;
     splash->splash(QString(":image/splash"));
     qLog(Performance) << "QtopiaServer : " << "Splash screen creation : "
                       << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 #endif
+
+    if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "startup"))
+        qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
+
 
 #if 0 // FIXME first use is broken. just disable it for now
     // Don't use first use under Windows
@@ -523,3 +613,6 @@ int main( int argc, char ** argv )
 }
 
 #endif // WIN32
+
+#include "main.moc"
+

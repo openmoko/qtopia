@@ -1,7 +1,6 @@
 /*
  * linux/include/asm-arm/arch-pxa/sysdevs.h
  *
- * Author:	Wells Jiao
  * Created:	Sep 7, 2004
  * Copyright:	
  * 
@@ -25,9 +24,11 @@
 #define	OMEGAPM_SLEEP	8
 
 /* sysdevs->bootsrc */
-#define OMEGABOOT_NORM	0
-#define OMEGABOOT_CHG	1
-#define OMEGABOOT_ALRM	2
+#define OMEGABOOT_NORM      0
+#define OMEGABOOT_CHG       1
+#define OMEGABOOT_ALRM      2
+#define OMEGABOOT_WDR       3
+#define OMEGABOOT_REBOOT    4
 
 /*
  * detect device id

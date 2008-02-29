@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -179,19 +179,102 @@ void QBluetoothAbstractService_Private::searchResult(const QSDAPSearchResult &re
     \o emit error() when a fatal error has occured while running the service
     \endlist
 
-    Note that a \c QBluetoothAbstractService is very different from a
+    (Note that a \c QBluetoothAbstractService is very different from a
     Bluetooth SDP service that is registered through the \l QSDP class. For
     example, \c QBluetoothAbstractService could be subclassed to create a
     \c ObjectPushService class, and when start() is called, this subclass
     could advertise an Object Push SDP service (using the sdpRegister()
-    function) and then start an Object Push server.
+    function) and then start an Object Push server.)
 
-    It is not strictly necessary to subclass QBluetoothAbstractService to
-    create a system Bluetooth service, but it provides a convenient way
-    to do so. If one prefers, it is possible to directly use
-    QAbstractIpcInterfaceGroup and QBluetoothServiceControlServer instead.
-    See the QBluetoothServiceControlServer documentation for more
-    information.
+    Here is an example of creating a custom Bluetooth service using a class
+    named \c MyBluetoothService. The service will advertise the Serial
+    Port Profile, and we'll call the service "MySerialPortService".
+
+    Firstly, the constructor:
+
+    \code
+        MyBluetoothService::MyBluetoothService(QObject *parent = 0)
+            : QBluetoothAbstractService("MySerialPortService", parent)
+        {
+            initialize();
+        }
+    \endcode
+
+    This creates a service named "MySerialPortService". This name must be
+    unique among Qtopia Bluetooth services, as it is used internally to
+    uniquely identify the service (for example, for storing information in
+    the value space). The code above also calls initialize() to perform the
+    necessary set-up for internal components.
+
+    Then, we implement the start() method:
+
+    \code
+        void MyBluetoothService::start(int channel)
+        {
+            if (!startMyService()) {    // call some method to start the service
+                emit started(QBluetooth::UnknownError,
+                          tr("Unable to start MySerialPortService"));
+                return;
+            }
+
+            QBluetoothLocalDevice local;
+            if (!sdpRegister(local.address(), QBluetooth::SerialPortProfile, channel)) {
+                // call some method to shut down the service
+                close();
+                emit started(QBluetooth::SDPServerError,
+                             tr("Error registering with SDP server"));
+                return;
+            }
+
+            // service was successfully started
+            emit started(QBluetooth::NoError, QString());
+        }
+    \endcode
+
+    The start() method is called by Qtopia when the service should
+    be started. Note how the example emits the started()
+    signal when the service fails to start, and also when it does start
+    successfully. Also, it calls sdpRegister() to advertise the
+    appropriate SDP service.
+
+    The class also needs to have a stop() method:
+
+    \code
+        void MyBluetoothService::stop()
+        {
+            // call some method to shut down the service
+            close();
+
+            if (!sdpUnregister()) {
+                emit stopped(QBluetooth::SDPServerError,
+                             tr("Error unregistering from SDP server"));
+                return;
+            }
+
+            // service was successfully stopped
+            emit stopped(QBluetooth::NoError, QString());
+        }
+    \endcode
+
+    As with start(), the stopped() signal is emitted
+    when the service is stopped successfully and also when it fails to stop.
+
+    To set the display name for the service, implement
+    translatableDisplayName():
+
+    \code
+        QString MyBluetoothService::translatableDisplayName() const
+        {
+            return tr("My Serial Port Service");
+        }
+    \endcode
+
+    This string will be used, for example, to describe the service in the
+    list of Bluetooth services in Qtopia's Bluetooth settings application.
+
+    Finally, the class will need to implement the
+    setSecurityOptions() method to provide the ability to modify
+    the security settings for the service.
 
     \ingroup qtopiabluetooth
 */
@@ -216,7 +299,7 @@ QBluetoothAbstractService::~QBluetoothAbstractService()
 }
 
 /*!
-    Initialize the service. This must be called complete the initialization
+    Initialize the service. This must be called to complete the initialization
     process.
 
     If the service is being created for the first time, when this method is
@@ -246,6 +329,10 @@ void QBluetoothAbstractService::initialize()
     If the started() signal is emitted with QBluetooth::SDPServerError, the
     system will attempt to restart the service on a different channel.
 
+    \warning This function must be implementated in such a way that any intermediate
+    objects (which have be created up to the point where the error occured)
+    are cleaned up before the error signal is emitted.
+
     \sa started()
  */
 
@@ -258,6 +345,11 @@ void QBluetoothAbstractService::initialize()
 
     A subclass must emit stopped() when the service has stopped (i.e. at the end
     of this method), or failed while trying to stop.
+
+    \warning An SDP error is not considered to be a critical error. The Bluetooth
+    service manager will still assume that the service is stopped despite the fact
+    that the sdp server couldn't unregister the service. This means the sdp unregistration
+    must be the last step of this function.
 
     \sa stopped()
  */

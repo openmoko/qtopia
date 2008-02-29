@@ -69,7 +69,7 @@ defineTest(qt_inc) {
 defineTest(resolve_variables) {
     prefixes=$$1
     variables=$$2
-    contains(QMAKE_QUIRKS,func_in_join):!contains(QMAKE_QUIRKS,var_split) {
+    contains(QMAKE_BEHAVIORS,func_in_join):!contains(QMAKE_BEHAVIORS,var_split) {
         prefixes=$$split(prefixes," ")
         variables=$$split(variables," ")
     }
@@ -91,20 +91,20 @@ defineTest(resolve_include) {
 # $$fixpath(val) returns a platform-suitable path with no duplicated path separators
 defineReplace(fixpath) {
     val="$$1"
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         val~=s/^"//
         val~=s/"$//
     }
     win32 {
         val~=s,/,\,g
         lc="$$lower($$val)"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             lc~=s/^"//
             lc~=s/"$//
         }
         lc~=s,^(.):.*,\1,
         len="$$lc"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             len~=s/^"//
             len~=s/"$//
         }
@@ -112,7 +112,7 @@ defineReplace(fixpath) {
         isEmpty(len) {
             val~=s,^.,,
             val="$$lc$$val"
-            contains(QMAKE_QUIRKS,keep_quotes) {
+            contains(QMAKE_BEHAVIORS,keep_quotes) {
                 val~=s/^"//
                 val~=s/"$//
             }
@@ -127,20 +127,20 @@ defineReplace(fixpath) {
 # $$unixpath(val) returns a unix path with no duplicated path separators
 defineReplace(unixpath) {
     val="$$1"
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         val~=s/^"//
         val~=s/"$//
     }
     win32 {
         val~=s,\\\,/,g
         lc="$$lower($$val)"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             lc~=s/^"//
             lc~=s/"$//
         }
         lc~=s,^(.):.*,\1,
         len="$$lc"
-        contains(QMAKE_QUIRKS,keep_quotes) {
+        contains(QMAKE_BEHAVIORS,keep_quotes) {
             len~=s/^"//
             len~=s/"$//
         }
@@ -148,7 +148,7 @@ defineReplace(unixpath) {
         isEmpty(len) {
             val~=s,^.,,
             val="$$lc$$val"
-            contains(QMAKE_QUIRKS,keep_quotes) {
+            contains(QMAKE_BEHAVIORS,keep_quotes) {
                 val~=s/^"//
                 val~=s/"$//
             }
@@ -161,7 +161,7 @@ defineReplace(unixpath) {
 # containsre(val,regex,flags,splitchar) is like containstext() but it uses a regular expression
 defineTest(containsre) {
     tmp="$$1"
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         tmp~=s/^"//
         tmp~=s/"$//
     }
@@ -171,7 +171,7 @@ defineTest(containsre) {
     isEmpty(splitter):splitter=,
 
     eval(tmp~=s$$splitter\$$re$$splitter ___CONTAINSTEXT_FOUND_THE_TEXT___ $$splitter\$$flags)
-    contains(QMAKE_QUIRKS,var_split) {
+    contains(QMAKE_BEHAVIORS,var_split) {
         tmp=$$tmp
     } else {
         tmp=$$split(tmp," ")
@@ -203,7 +203,7 @@ defineTest(qtopia_project) {
 
     # Make sure we can process the keywords
     arg=$$1
-    contains(QMAKE_QUIRKS,func_in_join):!contains(QMAKE_QUIRKS,var_split):arg=$$split(arg," ")
+    contains(QMAKE_BEHAVIORS,func_in_join):!contains(QMAKE_BEHAVIORS,var_split):arg=$$split(arg," ")
     for(kw,PROJECT_KEYWORDS) {
         contains(arg,$$kw) {
             arg-=$$kw
@@ -237,7 +237,7 @@ defineTest(qtopia_project) {
     for(t,PROJECT_TYPE) {
         cmds=$$eval(keyword.$${t}.commands)
         !isEmpty(cmds):for(c,cmds) {
-            contains(QMAKE_QUIRKS,keep_quotes) {
+            contains(QMAKE_BEHAVIORS,keep_quotes) {
                 c~=s/^"//
                 c~=s/"$//
             }
@@ -291,7 +291,7 @@ defineTest(runlast) {
 
 defineReplace(reverse) {
     val=$$1
-    contains(QMAKE_QUIRKS,func_in_join):!contains(QMAKE_QUIRKS,var_split):val=$$split(val," ")
+    contains(QMAKE_BEHAVIORS,func_in_join):!contains(QMAKE_BEHAVIORS,var_split):val=$$split(val," ")
     ret=
     for(it,val) {
         ret=$$it $$ret
@@ -304,7 +304,7 @@ defineTest(license) {
 }
 
 defineReplace(esc) {
-    contains(QMAKE_QUIRKS,quote_is_escape_expand) {
+    contains(QMAKE_BEHAVIORS,quote_is_escape_expand) {
         return($$escape_expand($$1))
     } else {
         return($$quote($$1))
@@ -389,19 +389,12 @@ defineTest(resolveRelativeFiles) {
     export($$var)
 }
 
-# Read the QT_CONFIG variable from Qt's qconfig.pri
-defineTest(readqconfig) {
-    cmd=include($$QTDIR/mkspecs/qconfig.pri)
-    eval($$cmd)
-    export(QT_CONFIG)
-}
-
 # Generate a header with defines, based on a QMAKE variable
 defineTest(createHeader) {
     file=$$1
     style=$$2
     val=$$3
-    contains(QMAKE_QUIRKS,func_in_join):!contains(QMAKE_QUIRKS,var_split) {
+    contains(QMAKE_BEHAVIORS,func_in_join):!contains(QMAKE_BEHAVIORS,var_split) {
         val=$$split(val," ")
     }
 

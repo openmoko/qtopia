@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -196,6 +196,11 @@ void QPasswordWidget::keyPressEvent( QKeyEvent *e )
 #ifdef QTOPIA_PHONE
     if ( e->key() == Qt::Key_Select )
         emit passwordEntered( text );
+    if ( e->key() == Qt::Key_NumberSign && mode == QPasswordDialog::Pin ) {
+        // Key_NumberSign (#), is required for GCF compliance.
+        // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
+        emit passwordEntered( text );
+    }
 #else
     if ( e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return )
         emit passwordEntered( text );
@@ -334,7 +339,7 @@ QString QPasswordDialog::getPassword( QWidget* parent,
 {
     bool max = true;
 
-    if ( mode == Plain )
+    if ( mode == Plain || mode == Pin )
         max = false;
 
     QPasswordDialog pd( parent );

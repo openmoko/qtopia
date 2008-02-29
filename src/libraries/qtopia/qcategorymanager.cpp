@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -51,7 +51,7 @@ public:
   that have a set of categories assigned.  It also provides methods to store
   the current filtering method in a QSettings file.
 
-  \ingroup qtopiaemb
+  \ingroup categories
 */
 
 /*!
@@ -288,7 +288,7 @@ public:
   Categories.  It also provides signals to notify when another program or object has
   modified the set of available Categories.
 
-  \ingroup qtopiaemb
+  \ingroup categories
 */
 
 /*!

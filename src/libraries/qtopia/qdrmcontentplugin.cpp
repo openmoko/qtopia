@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -194,6 +194,8 @@ private:
 
     \sa QDrmContent
     \sa QDrmContentPlugin
+
+    \ingroup drm
  */
 
 /*!
@@ -286,6 +288,8 @@ public:
     new rights.
 
     \sa QDrmContent
+
+    \ingroup drm
 */
 
 /*!
@@ -563,6 +567,8 @@ void QDrmContentPlugin::initialize()
     license management facilities.  QDrmAgentPlugin allows agents to implement a single plugin that instantiates a regular
     QDrmContentPlugin in DRM enabled applications and a Qtopia service and license management and settings widgets in a common
     DRM management application.
+
+    \ingroup drm
 */
 
 /*!

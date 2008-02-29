@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -316,8 +316,25 @@ void DialerControl::dial( const QString &number, bool sendcallerid, const QStrin
     }
     if( !hasActiveCalls() && !isDialing() )
     {
+        // Collect up the dial options.
+        QDialOptions dialopts;
+        dialopts.setNumber( number );
+        if ( sendcallerid )
+            dialopts.setCallerId( QDialOptions::SendCallerId );
+        else
+            dialopts.setCallerId( QDialOptions::DefaultCallerId );
+        dialopts.setContact( contact );
+
+        // Allow other parts of the server (e.g. GsmKeyActions) to
+        // modify the dial options to account for supplementary services.
+        bool handledAlready = false;
+        emit modifyDial( dialopts, handledAlready );
+        if ( handledAlready )
+            return;
+
+        // Call the specified number.
         QPhoneCall call = createCall(callType);
-        call.dial( number, sendcallerid, contact );
+        call.dial( dialopts );
         phoneValueSpace.setAttribute("LastDialedCall", number);
     }
 }
@@ -357,6 +374,32 @@ void DialerControl::endCall()
 }
 
 /*!
+    End a specific call with the modem identifier \a id.
+    This will typically only work with GSM calls that set the
+    QPhoneCall::modemIdentifier() value.  It is used to implement
+    the GSM \c{1x SEND} key sequence where \c{x} is the identifier.
+*/
+void DialerControl::endCall(int id)
+{
+    QPhoneCall call = callManager().fromModemIdentifier(id);
+    if ( !call.isNull() )
+        call.hangup(QPhoneCall::CallOnly);
+}
+
+/*!
+    Activate a specific call with the modem identifier \a id.
+    This will typically only work with GSM calls that set the
+    QPhoneCall::modemIdentifier() value.  It is used to implement
+    the GSM \c{2x SEND} key sequence where \c{x} is the identifier.
+*/
+void DialerControl::activateCall( int id )
+{
+    QPhoneCall call = callManager().fromModemIdentifier(id);
+    if ( !call.isNull() )
+        call.activate(QPhoneCall::CallOnly);
+}
+
+/*!
   Ends all calls, whether dialing, active, incoming, or on hold.
 */
 void DialerControl::endAllCalls()
@@ -365,6 +408,20 @@ void DialerControl::endAllCalls()
     QList<QPhoneCall>::Iterator iter;
     for ( iter = calls.begin(); iter != calls.end(); ++iter ) {
         (*iter).hangup();
+    }
+}
+
+/*!
+    End the held calls.
+*/
+void DialerControl::endHeldCalls()
+{
+    // Individually hang up all of the held calls.
+    QList<QPhoneCall> calls = callsOnHold();
+    QList<QPhoneCall>::Iterator iter;
+    for ( iter = calls.begin(); iter != calls.end(); ++iter ) {
+        if ((*iter).state() == QPhoneCall::Hold)
+            (*iter).hangup(QPhoneCall::CallOnly);
     }
 }
 
@@ -423,12 +480,25 @@ void DialerControl::join()
 }
 
 /*!
+  Joins the active calls and calls on hold to form a multiparty call,
+  and then detaches the local user.
 */
 void DialerControl::transfer()
 {
     QList<QPhoneCall> coh = callsOnHold();
     if (  hasActiveCalls() && coh.count() ) {
         coh.first().join( true );
+    }
+}
+
+/*!
+    Deflect the incoming call to a new \a number.
+*/
+void DialerControl::deflect( const QString& number )
+{
+    if ( hasIncomingCall() )
+    {
+        incomingCall().transfer( number );
     }
 }
 
@@ -478,6 +548,18 @@ QCallList &DialerControl::callList()
 
   Emitted whenever auto answer is enabled and the auto answer time has elapsed.
  */
+
+/*!
+  \fn void DialerControl::modifyDial( QDialOptions& options, bool& handledAlready )
+
+  Emitted whenever a dial is about to be performed with the information
+  in \a options.  This gives other parts of the server (e.g. GsmKeyActions)
+  the ability to modify the request if it contains supplementary service
+  information.  The \a handledAlready parameter is set to false prior to
+  emitting the signal.  If a slot sets this to true, then DialerControl
+  will assume that the request was already handled and the normal dial
+  should not be performed.
+*/
 
 /*! \internal */
 void DialerControl::timerEvent(QTimerEvent *)

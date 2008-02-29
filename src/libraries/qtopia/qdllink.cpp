@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -96,7 +96,7 @@ QDLLinkPrivate::QDLLinkPrivate()
     activation will not succeed. The client can then decide how, or
     if broken links should be displayed.
 
-    \ingroup qtopiaemb
+    \ingroup ipc
 */
 
 /*!

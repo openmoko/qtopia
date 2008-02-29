@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -521,6 +521,8 @@ private:
   You can create new template instance items using ThemeTemplateItem::createInstance().
   Template instances are parented to an item when created and automatically removed from that item's children
   when deleted.
+
+    \ingroup appearance
 */
 // TODO  more details
 
@@ -576,6 +578,8 @@ struct ThemeTemplateItemPrivate
   ThemeListModel makes use of templates to theme items in a QListView.
 
   \sa ThemeListModel, {Themed View Elements#themetemplateelement}{template element}
+
+  \ingroup appearance
 */
 
 /*!
@@ -1609,6 +1613,8 @@ void ThemeItem::addCharacters(const QString &ch)
   specify the relevant attributes and data for this item in the themed view XML.
 
   \sa {Themed View Elements#themegroupelement}{group element}
+
+  \ingroup appearance
 */
 
 /*!
@@ -1656,6 +1662,7 @@ void ThemeGroupItem::setPressed( bool p )
   specify the relevant attributes and data for this item in the themed view XML.
 
     \sa {Themed View Elements#themepluginelement}{plugin element}
+  \ingroup appearance
 */
 struct ThemePluginItemPrivate
 {
@@ -1774,6 +1781,7 @@ void ThemePluginItem::releasePlugin()
   specify the relevant attributes and data for this item in the themed view XML.
 
   \sa {Themed View Elements#themeexclusiveelement}{exclusive element}
+  \ingroup appearance
 */
 
 /*!
@@ -1843,6 +1851,7 @@ struct ThemeLayoutItemPrivate
   geometry of any child items.
 
   \sa {Themed View Elements#themelayoutelement}{layout element}
+  \ingroup appearance
 */
 
 /*!
@@ -1983,6 +1992,7 @@ struct ThemePageItemPrivate
   specify the relevant attributes and data for this item in the themed view XML.
 
   \sa {Themed View Elements#themepageelement}{page element}
+  \ingroup appearance
 */
 
 
@@ -2219,6 +2229,7 @@ struct ThemeGraphicItemPrivate
 
   Normally you do not want to call this item's functions directly, but rather
   specify the relevant attributes and data for this item in the themed view XML.
+  \ingroup appearance
 */
 
 /*!
@@ -2414,6 +2425,7 @@ struct ThemeTextItemPrivate {
   specify the relevant attributes and data for this item in the themed view XML.
 
     \sa {Themed View Elements#themetextelement}{text element}
+  \ingroup appearance
 */
 
 /*!
@@ -2794,6 +2806,7 @@ public:
   specify the relevant attributes and data for this item in the themed view XML.
 
     \sa {Themed View Elements#themerectelement}{rect element}
+  \ingroup appearance
 */
 
 /*!
@@ -2893,6 +2906,7 @@ void ThemeRectItem::paint(QPainter *p, const QRect &rect)
   specify the relevant attributes and data for this item in the themed view XML.
 
   \sa {Themed View Elements#themelineelement}{line element}
+  \ingroup appearance
 */
 
 /*!
@@ -2955,6 +2969,7 @@ struct ThemePixmapItemPrivate
 
   Normally you do not want to call this item's functions directly, but rather
   specify the relevant attributes and data for this item in the themed view XML.
+  \ingroup appearance
 */
 
 /*!
@@ -3316,6 +3331,7 @@ struct ThemeAnimationItemPrivate
   specify the relevant attributes and data for this item in the themed view XML.
 
 \sa {Themed View Elements#themeanimelement}{anim element}
+  \ingroup appearance
   */
 
 /*!
@@ -3684,6 +3700,7 @@ struct ThemeLevelItemPrivate
   specify the relevant attributes and data for this item in the themed view XML.
 
     \sa {Themed View Elements#themelevelelement}{level element}
+  \ingroup appearance
 */
 
 /*!
@@ -3818,6 +3835,7 @@ struct ThemeStatusItemPrivate
   greyed out when it is off or not appear at all.
 
     \sa {Themed View Elements#themestatuselement}{status element}
+  \ingroup appearance
 */
 
 /*!
@@ -4012,6 +4030,7 @@ struct ThemeImageItemPrivate
   specify the relevant attributes and data for this item in the themed view XML.
 
     \sa {Themed View Elements#themeimageelement}{image element}
+  \ingroup appearance
   */
 
 /*!
@@ -4162,9 +4181,11 @@ void ThemeImageItem::updateImage( ThemeItem::State st )
 */
 void ThemeImageItem::setImage( const QPixmap &p, ThemeItem::State st )
 {
-    setPixmap( QLatin1String("src"), p, st );
-    if( isVisible() )
-        update();
+    if (pixmap(QLatin1String("src"), st).serialNumber() != p.serialNumber()) {
+        setPixmap( QLatin1String("src"), p, st );
+        if( isVisible() )
+            update();
+    }
 }
 
 /*!
@@ -4356,6 +4377,7 @@ protected:
   to provide a widget that way.
 
   \sa {Themed View Elements#themewidgetelement}{widget element}
+  \ingroup appearance
 */
 
 /*!
@@ -4569,6 +4591,7 @@ struct ThemeListItemPrivate
   automatically using ThemeListItem::setModel().
 
     \sa ThemeListModel, {Themed View Elements#themelistelement}{list element}
+  \ingroup appearance
 */
 
 /*!
@@ -4688,6 +4711,7 @@ struct ThemeListModelEntryPrivate
     value.
 
     \sa ThemeListModel, ThemeTemplateItem, ThemeTemplateInstanceItem
+  \ingroup appearance
 */
 
 /* define ThemeListModelEntry */
@@ -4878,6 +4902,7 @@ struct ThemeListModelPrivate
     \endcode
 
     \sa {Themed View Elements}, ThemeTemplateItem, ThemeTemplateInstanceItem, ThemeListModelEntry
+  \ingroup appearance
 */
 
 
@@ -5129,6 +5154,7 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
   Alternatively, theme items can send IPC messages to services or a specific channel when clicked. This allows themed views to effect
   the system without tight coupling. See the documentation of ThemeItem for details.
 
+  \ingroup appearance
 */
 
 /*!

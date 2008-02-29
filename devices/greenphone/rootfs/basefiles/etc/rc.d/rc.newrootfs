@@ -1,52 +1,110 @@
 #!/bin/sh
 
-if [ -e /.newrootflashed ]; then
-  QTOPIA_IMAGE_PATH=/
+QTOPIA_IMAGE_PATH=""
 
-  if [ ! -f /mnt/user/fs.ver ] || grep -v '^troll' /mnt/user/fs.ver; then
-    echo "TROLL: Recreating /mnt/user"
-    umount /mnt/user
+BOOTERRORS="/usr/share/booterrors"
+
+EXTRACT_ERROR=0
+NEED_REBOOT=0
+
+# Make sure /mnt/user is mounted
+if ! grep '^[^ ].* /mnt/user ' /proc/mounts >/dev/null; then
+    echo "TROLL: Creating filesystem on /mnt/user (/dev/tffsc)"
+
     /sbin/mkfs.ext2 /dev/tffsc
     mount /mnt/user
-    echo "troll v1.0" > /mnt/user/fs.ver
+fi
 
-    echo "TROLL: Recreating /mnt/user_local"
-    umount /mnt/user_local
+# Create /mnt/user
+if ! md5sum -c /mnt/user/.user_default.md5 -s 2>/dev/null; then
+    echo "TROLL: Extracting user_default.tgz"
+
+    if tar -xzf $QTOPIA_IMAGE_PATH/user_default.tgz -C /mnt/user; then
+        md5sum $QTOPIA_IMAGE_PATH/user_default.tgz > /mnt/user/.user_default.md5
+    else
+        echo "TROLL: Error extracting user_default.tgz"
+        /usr/local/bin/gifanim $BOOTERRORS/boot-error-userdefault.gif
+        EXTRACT_ERROR=1
+    fi
+
+    NEED_REBOOT=1
+fi
+
+if ! md5sum -c /mnt/user/.user_tools.md5 -s 2>/dev/null; then
+    echo "TROLL: Extracting user_tools.tgz"
+
+    rm -rf /mnt/user/tools
+    if tar -xzf $QTOPIA_IMAGE_PATH/user_tools.tgz -C /mnt/user; then
+        md5sum $QTOPIA_IMAGE_PATH/user_tools.tgz > /mnt/user/.user_tools.md5
+    else
+        echo "TROLL: Error extracting user_tools.tgz"
+        /usr/local/bin/gifanim $BOOTERRORS/boot-error-usertools.gif
+        EXTRACT_ERROR=1
+    fi
+
+    NEED_REBOOT=1
+fi
+
+# Make sure /mnt/user_local is mounted
+if ! grep '^[^ ].* /mnt/user_local ' /proc/mounts >/dev/null; then
+    echo "TROLL: Creating filesystem on /mnt/user_local (/dev/tffsd)"
+
     /sbin/mkdosfs -F 32 /dev/tffsd
     mount /mnt/user_local
-  fi
+fi
 
-  if [ -r $QTOPIA_IMAGE_PATH/user_default.tgz ]; then
-    echo "TROLL: Extracting user_default.tgz"
-    tar -xzf $QTOPIA_IMAGE_PATH/user_default.tgz -C /mnt/user
-  fi
-  if [ -r $QTOPIA_IMAGE_PATH/user_tools.tgz ]; then
-    echo "TROLL: Extracting user_tools.tgz"
-    rm -rf /mnt/user/tools
-    tar -xzf $QTOPIA_IMAGE_PATH/user_tools.tgz -C /mnt/user
-  fi
-  if [ -r $QTOPIA_IMAGE_PATH/home_default.tgz ] && [ ! -d /mnt/user/home ]; then
-    echo "TROLL: Extracting home_default.tgz"
-    tar -xzf $QTOPIA_IMAGE_PATH/home_default.tgz -C /mnt/user
-  fi
+# Make sure /mnt/disk2 is mounted
+if ! grep '^[^ ].* /mnt/disk2 ' /proc/mounts >/dev/null; then
+    echo "TROLL: Creating filesystem on /mnt/disk2 (/dev/tffsb)"
 
-  echo "TROLL: Recreating writeable Qtopia filesystem"
-  umount /mnt/disk2
-  /sbin/mkfs.ext2 /dev/tffsb
-  mount /mnt/disk2
-  echo "troll v1.0" > /mnt/disk2/fs.ver
+    /sbin/mkfs.ext2 /dev/tffsb
+    mount /mnt/disk2
+fi
 
-  tar -xzf $QTOPIA_IMAGE_PATH/qtopia_default.tgz -C /mnt/disk2
+# Extract qtopia_default.tgz if required
+if ! md5sum -c /mnt/disk2/.qtopia_default.md5 -s 2>/dev/null; then
+    echo "TROLL: Recreating writable /opt/Qtopia filesystem"
 
-  mount -o remount,rw,async,noatime /
-  rm -f /.newrootflashed
-  mount -o remount,ro /
+    rm -rf /mnt/disk2/Qtopia
+    mkdir /mnt/disk2/Qtopia
 
-  sync
+    if [ -f /opt/Qtopia.rom/qtopia_default.tgz ] &&
+       tar -xzf /opt/Qtopia.rom/qtopia_default.tgz -C /mnt/disk2/Qtopia; then
+        md5sum /opt/Qtopia.rom/qtopia_default.tgz > /mnt/disk2/.qtopia_default.md5
+    else
+        echo "TROLL: Error extracting qtopia_default.tgz"
+        /usr/local/bin/gifanim $BOOTERRORS/boot-error-qtopiadefault.gif
+        EXTRACT_ERROR=1
+    fi
 
-  umount /mnt/disk2
-  umount /mnt/user
-  umount /mnt/user_local
-  reboot
+    NEED_REBOOT=1
+fi
+
+# Move home directories to new location
+[ -d /mnt/disk2/home ] || mkdir -p /mnt/disk2/home
+if [ -d /mnt/user/home ] && [ ! -d /mnt/disk2/home/4.1 ]; then
+    mv /mnt/user/home /mnt/disk2/home/4.1
+    NEED_REBOOT=1
+fi
+if [ -d /mnt/user/home_4.2 ] && [ ! -d /mnt/disk2/home/4.2 ]; then
+    mv /mnt/user/home_4.2 /mnt/disk2/home/4.2
+    NEED_REBOOT=1
+fi
+if [ -d /mnt/user/sd_home ] && [ ! -d /mnt/disk2/home/sd ]; then
+    mv /mnt/user/sd_home /mnt/disk2/home/sd
+    NEED_REBOOT=1
+fi
+
+sync
+
+# Reboot only if all tar files were extracted successfully.
+# Otherwise continue booting.
+if [ $NEED_REBOOT -eq 1 ] && [ $EXTRACT_ERROR -eq 0 ]; then
+    umount -a -r
+    reboot
+fi
+
+if [ $EXTRACT_ERROR -eq 1 ]; then
+    touch /tmp/boot-fail
 fi
 

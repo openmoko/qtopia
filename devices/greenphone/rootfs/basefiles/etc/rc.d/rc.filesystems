@@ -7,13 +7,13 @@ tar -xzf /dev.tgz -C /dev
 mount /dev/pts
 
 mount /var
-mkdir -p /var/log /var/lock/subsys /var/mnt /var/run /var/spool/at /var/tmp /var/run/samba/locks
+tar -xzf /var.tgz -C /var
 
 # check all filesystems for errors
 NEED_REBOOT=0
 mount -o remount,ro /
 
-for part in tffsa tffsb tffsc tffsd; do
+for part in tffsb tffsc tffsd; do
     if fsck -a /dev/$part 2>&1 | grep REBOOT; then
         echo "TROLL: Filesystem errors fixed on /dev/$part"
         NEED_REBOOT=1
@@ -23,6 +23,7 @@ done
 [ $NEED_REBOOT -eq 1 ] && reboot
 
 # mount local filesystems
+mount /dev/tffsa2
 mount /dev/tffsb
 mount /dev/tffsc
 mount /dev/tffsd

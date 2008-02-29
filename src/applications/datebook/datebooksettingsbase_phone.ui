@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>DateBookSettingsBase</class>
  <widget class="QDialog" name="DateBookSettingsBase" >
   <property name="geometry" >
@@ -17,19 +14,19 @@
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
-    <number>3</number>
+    <number>9</number>
    </property>
    <property name="spacing" >
-    <number>3</number>
+    <number>6</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="fraStart" >
+    <widget class="QGroupBox" name="fraView" >
      <property name="title" >
-      <string>Day starts at</string>
+      <string>View Settings</string>
      </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
-       <number>11</number>
+       <number>9</number>
       </property>
       <property name="spacing" >
        <number>6</number>
@@ -43,9 +40,40 @@
          <number>6</number>
         </property>
         <item>
+         <widget class="QLabel" name="lblDefView" >
+          <property name="text" >
+           <string>Default view</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmbDefaultView" >
+          <item>
+           <property name="text" >
+            <string>Day</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Month</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
          <widget class="QLabel" name="lblStartTime" >
           <property name="text" >
-           <string>Day Start</string>
+           <string>Day starts at</string>
           </property>
          </widget>
         </item>
@@ -64,6 +92,35 @@
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QWidget" native="1" name="widCompress" >
+        <layout class="QVBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" >
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="chkCompressDayView" >
+             <property name="text" >
+              <string comment="Show only day time" >Compress Day View</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -74,7 +131,7 @@
      </property>
      <layout class="QVBoxLayout" >
       <property name="margin" >
-       <number>11</number>
+       <number>3</number>
       </property>
       <property name="spacing" >
        <number>6</number>
@@ -82,7 +139,7 @@
       <item>
        <layout class="QHBoxLayout" >
         <property name="margin" >
-         <number>0</number>
+         <number>3</number>
         </property>
         <property name="spacing" >
          <number>3</number>
@@ -126,39 +183,27 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="fraDayView" >
-     <property name="title" >
-      <string>Day View</string>
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
      </property>
-     <layout class="QVBoxLayout" >
-      <property name="margin" >
-       <number>11</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
-       <layout class="QHBoxLayout" >
-        <property name="margin" >
-         <number>0</number>
-        </property>
-        <property name="spacing" >
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QCheckBox" name="chkCompressDayView" >
-          <property name="text" >
-           <string comment="Show only day time" >Compress Day View</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cmbDefaultView</tabstop>
+  <tabstop>spinStart</tabstop>
+  <tabstop>chkCompressDayView</tabstop>
+  <tabstop>chkAlarmPreset</tabstop>
+  <tabstop>spinPreset</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

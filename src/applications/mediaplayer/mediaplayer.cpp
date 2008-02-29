@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -117,6 +117,7 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     m_mediabrowser = new MediaBrowser( m_playercontrol, m_requesthandler );
 
     m_mediabrowser->setCurrentPlaylist( m_playlist );
+    m_playerwidget->setPlaylist( m_playlist );
 
     m_layout->addWidget( m_mediabrowser );
     setLayout( m_layout );
@@ -146,6 +147,7 @@ void MediaPlayer::setPlaylist( Playlist* playlist )
     }
 
     setPlayerVisible( true );
+    m_playercontrol->setState( PlayerControl::Playing );
 }
 
 void MediaPlayer::setPlayerVisible( bool visible )

@@ -123,26 +123,26 @@
 <pre>    QPhoneCallManager mgr;
     QPhoneCall call = mgr.create( &quot;Voice&quot;, &quot;modem&quot; );</pre>
 <p>Once the service has been located, QPhoneCallManager::create() calls QPhoneCallManagerPrivate::create() in <tt>qphonecallmanager.cpp</tt>. This method constructs a QPhoneCallPrivate instance, wraps it with a QPhoneCall reference, and returns it to the caller.</p>
-<p>The constructor for QPhoneCallPrivate in <tt>qphonecall.cpp</tt> attaches to two <a href="qcop.html">QCop</a> channels:</p>
+<p>The constructor for QPhoneCallPrivate in <tt>qphonecall.cpp</tt> attaches to two Qtopia IPC channels:</p>
 <pre>    QPE/Telephony/QPhoneCallProvider/Request
     QPE/Telephony/QPhoneCallProvider/Response</pre>
-<p>The first QCop channel is used to send requests to the telephony service to perform call operations. The second QCop channel is used to receive state information about the call back from the telephony service.</p>
+<p>The first Qtopia IPC channel is used to send requests to the telephony service to perform call operations. The second Qtopia IPC channel is used to receive state information about the call back from the telephony service.</p>
 <p>The next step is to dial the call:</p>
 <pre>    QDialOptions dialOptions;
     dialOptions.setNumber( &quot;1234567&quot; );
 
     call.dial( dialOptions );</pre>
-<p>After initializing the local state of QPhoneCallPrivate, QPhoneCall::dial() sends the QCop message <tt>dial(QString,QString,QString,QDialOptions)</tt> to the <tt>Request</tt> channel.</p>
-<p>In the telephony service, the QCop message is received by QPhoneCallProvider::dial() in <tt>qphonecallprovider.cpp</tt>. It filters the message to check that it is intended for that service (all call providers listen on the same channel), and then calls QPhoneCallProvider::create() to create a QPhoneCallImpl object to represent the server-side instance of the phone call.</p>
+<p>After initializing the local state of QPhoneCallPrivate, QPhoneCall::dial() sends the Qtopia IPC message <tt>dial(QString,QString,QString,QDialOptions)</tt> to the <tt>Request</tt> channel.</p>
+<p>In the telephony service, the Qtopia IPC message is received by QPhoneCallProvider::dial() in <tt>qphonecallprovider.cpp</tt>. It filters the message to check that it is intended for that service (all call providers listen on the same channel), and then calls QPhoneCallProvider::create() to create a QPhoneCallImpl object to represent the server-side instance of the phone call.</p>
 <p>The QPhoneCallProvider::create() method is implemented differently for each telephony service. For AT-based modems, it is overridden by QModemCallProvider::create() in <tt>qmodemcallprovider.cpp</tt>, which then creates a QModemCall object.</p>
 <p>Once the server-side instance has been created, QPhoneCallProvider::dial() calls QPhoneCallImpl::dial(), which in our case is overridden by QModemCall::dial() in <tt>qmodemcall.cpp</tt>. QModemCall::dial() issues the <tt>ATD</tt> command to the modem and the dial starts.</p>
 <p>As the call progresses, the QModemCall class will advertise state changes by calling the QPhoneCallImpl::setState() method. This will cause the QPhoneCallProvider::stateChanged() slot to be invoked, which in turn calls QPhoneCallProvider::sendState().</p>
-<p>The QPhoneCallProvider::sendState() method in <tt>qphonecallprovider.cpp</tt> sends a QCop message on the <tt>Response</tt> channel, which will return back to the client application in the QPhoneCallPrivate::callStateChanged() method in <tt>qphonecall.cpp</tt>. This will cause the <tt>stateChanged()</tt> signal to be emitted on QPhoneCall, notifying the client application.</p>
+<p>The QPhoneCallProvider::sendState() method in <tt>qphonecallprovider.cpp</tt> sends a Qtopia IPC message on the <tt>Response</tt> channel, which will return back to the client application in the QPhoneCallPrivate::callStateChanged() method in <tt>qphonecall.cpp</tt>. This will cause the <tt>stateChanged()</tt> signal to be emitted on QPhoneCall, notifying the client application.</p>
 <p>See also QPhoneCall, QPhoneCallManager, QDialOptions, QPhoneCallProvider, QModemService, QModemCallProvider, and QModemCall.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

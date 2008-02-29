@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -97,7 +97,7 @@ void QDSServiceInfoPrivate::processSettings()
     }
 
     // Generate the filename of the services file, and check it exists
-    QString filename = QDS::SERVICES_DIR + "/" + mService;
+    QString filename = Qtopia::qtopiaDir() + "etc/qds/" + mService;
     QFileInfo file( filename);
     if ( !file.exists() ) {
         mValid = false;
@@ -161,9 +161,21 @@ bool QDSServiceInfoPrivate::correctQtopiaServiceDescription()
         return false;
     }
 
-    QTranslatableSettings settings( serviceDFile, QSettings::IniFormat );
-    settings.beginGroup( "Service" );
-    QString actions = settings.value( "Actions" ).toString();
+    static QString lastDFile;
+    static QString lastActions;
+
+    QString actions;
+    if (lastDFile == serviceDFile) {
+        actions = lastActions;
+    } else {
+        QTranslatableSettings settings( serviceDFile, QSettings::IniFormat );
+        settings.beginGroup( "Service" );
+        actions = settings.value( "Actions" ).toString();
+        settings.endGroup();
+        // Cache last result, because we're likely to be called again soon.
+        lastActions = actions;
+        lastDFile = serviceDFile;
+    }
     if ( !actions.contains( mName + "(QDSActionRequest)" ) ) {
         qWarning() << "No action for"
                    << mName + "(QDSActionRequest)"
@@ -171,7 +183,6 @@ bool QDSServiceInfoPrivate::correctQtopiaServiceDescription()
                    << serviceDFile;
         return false;
     }
-    settings.endGroup();
 
     return true;
 }
@@ -303,6 +314,8 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
     \endcode
 
     \sa QDSAction, QDSActionRequest, QDSServices
+
+    \ingroup ipc
 */
 
 /*!

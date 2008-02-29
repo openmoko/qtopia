@@ -57,7 +57,7 @@ for(l,forever) {
 }
 
 for(c,LICENSE_REQ) {
-    contains(QMAKE_QUIRKS,keep_quotes) {
+    contains(QMAKE_BEHAVIORS,keep_quotes) {
         c~=s/^"//
         c~=s/"$//
     }

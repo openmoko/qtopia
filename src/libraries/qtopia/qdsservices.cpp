@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -63,6 +63,8 @@
     do not support wildcards.
 
     \sa QDSServiceInfo
+
+    \ingroup ipc
 */
 
 /*!
@@ -76,7 +78,7 @@ QDSServices::QDSServices( const QString& requestDataType,
                           const QStringList& attributes,
                           const QString& service )
 {
-    QDir files( QDS::SERVICES_DIR, service, QDir::Unsorted, QDir::Files );
+    QDir files( Qtopia::qtopiaDir()+QLatin1String("etc/qds"), service, QDir::Unsorted, QDir::Files );
     QStringList filesList = files.entryList();
     if ( filesList.count() == 0 )
         return;
@@ -114,7 +116,7 @@ void QDSServices::processQdsServiceFile( const QString service,
                                          const QString& responseDataTypeFilter,
                                          const QStringList& attributesFilter )
 {
-    QSettings serviceFile( QDS::SERVICES_DIR + "/" + service, QSettings::IniFormat );
+    QSettings serviceFile( Qtopia::qtopiaDir() + QLatin1String("etc/qds/") + service, QSettings::IniFormat );
     QStringList qdsServices = serviceFile.childGroups();
     foreach ( QString name, qdsServices ) {
         if ( name == QLatin1String("QDSInformation") ) //the group QDSInformation is reserved

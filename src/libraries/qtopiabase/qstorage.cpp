@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -57,8 +57,24 @@
   the \c update() method. Note that this will automatically be signaled
   by the operating system when a disk has been mounted or unmounted.
 
-  \ingroup qtopiaemb
+  \ingroup io
 */
+
+class QStorageMetaInfoPrivate
+{
+public:
+    QStorageMetaInfoPrivate()
+        : channel( 0 )
+        , documentsFileSystem( 0 )
+        , applicationsFileSystem( 0 )
+    {
+    }
+
+    QList<QFileSystem*> fileSystems;
+    QtopiaChannel *channel;
+    QFileSystem *documentsFileSystem;
+    QFileSystem *applicationsFileSystem;
+};
 
 /*! Constructor that determines the current mount points of the filesystem.
   The standard \a parent parameters is passed on to QObject.
@@ -66,11 +82,13 @@
 QStorageMetaInfo::QStorageMetaInfo( QObject *parent )
     : QObject( parent )
 {
+    d = new QStorageMetaInfoPrivate;
+
 #ifdef Q_WS_QWS
     if ( qt_fbdpy )
     {
-        channel = new QtopiaChannel( "QPE/Card", this );
-        connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
+        d->channel = new QtopiaChannel( "QPE/Card", this );
+        connect( d->channel, SIGNAL(received(const QString&,const QByteArray&)),
                 this, SLOT(cardMessage(const QString&,const QByteArray&)) );
     }
 #endif
@@ -82,8 +100,10 @@ QStorageMetaInfo::QStorageMetaInfo( QObject *parent )
 */
 QStorageMetaInfo::~QStorageMetaInfo()
 {
-    foreach(QFileSystem *f, mFileSystems)
+    foreach(QFileSystem *f, d->fileSystems)
         delete f;
+
+    delete d;
 }
 
 /*! Returns the longest matching \c QFileSystem that starts with the
@@ -107,7 +127,7 @@ const QFileSystem *QStorageMetaInfo::fileSystemOf( const QString &filename, bool
             break;
     }
     int devno = st.st_dev;
-    for (QListIterator<QFileSystem> i(mFileSystems); i.current(); ++i) {
+    for (QListIterator<QFileSystem> i(d->fileSystems); i.current(); ++i) {
         if ( 0==stat(QFile::encodeName((*i)->path()),&st) ) {
             if ( st.st_dev == devno ) {
                 return *i;
@@ -142,6 +162,21 @@ const QFileSystem *QStorageMetaInfo::fileSystemOf( const QString &filename, bool
 #endif
 }
 
+/*!
+    Returns a pointer to the file system on which the default documents path is located.
+*/
+const QFileSystem *QStorageMetaInfo::documentsFileSystem()
+{
+    return d->documentsFileSystem;
+}
+
+/*!
+    Returns a pointer to the file system on which the default applications path is located.
+ */
+const QFileSystem *QStorageMetaInfo::applicationsFileSystem()
+{
+    return d->applicationsFileSystem;
+}
 
 void QStorageMetaInfo::cardMessage( const QString& msg, const QByteArray& )
 {
@@ -160,7 +195,7 @@ void QStorageMetaInfo::update()
     mntent *me;
     FILE *mntfp = NULL;
     QHash<QString, QString> mountEntries;
-    QString disk, path, prevPath, options, name;
+    QString disk, path, prevPath, options, name, documentsPath, applicationsPath;
     bool removable, applications, documents, contentDatabase, connected;
 
     mntfp = setmntent( "/proc/mounts", "r" );
@@ -174,22 +209,27 @@ void QStorageMetaInfo::update()
 
     cfg.beginGroup(QLatin1String("MountTable"));
     QStringList mountpointslist;
+
     if (cfg.contains("MountPoints"))
         mountpointslist = cfg.value(QLatin1String("MountPoints")).toString().split(QLatin1String(","));
+
+    QString documentsMount = cfg.value( QLatin1String( "DocumentsDefault" ), QLatin1String("HOME") ).toString();
+    QString applicationsMount = cfg.value( QLatin1String( "ApplicationsDefault" ), QLatin1String("HOME") ).toString();
+
     qLog(DocAPI) << "cfg.mountpoints =" << cfg.value(QLatin1String("MountPoints")).toString();
     qLog(DocAPI) << "mountpointslist =" << mountpointslist;
     cfg.endGroup();
 
-    if(mFileSystems.count() != mountpointslist.count() + 1)
+    if(d->fileSystems.count() != mountpointslist.count() + 2)
     {
         // save the path info (so we can record the "previous path")
         QHash<QString, QString> prevPaths;
-        foreach(QFileSystem *f, mFileSystems) {
+        foreach(QFileSystem *f, d->fileSystems) {
             prevPaths[f->disk()] = (!f->path().isEmpty()?f->path():f->prevPath());
             delete f;
         }
-        mFileSystems.clear();
-        // refresh mFileSystems
+        d->fileSystems.clear();
+        // refresh d->fileSystems
         foreach(QString entry, mountpointslist)
         {
             cfg.beginGroup(entry);
@@ -203,14 +243,25 @@ void QStorageMetaInfo::update()
             }
             options         = cfg.value(QLatin1String("Options"), QLatin1String("rw")).toString();
             name            = cfg.value(QLatin1String("Name[]"), disk).toString();
+            documentsPath    = cfg.value(QLatin1String("DocumentsPath")).toString();
+            applicationsPath = cfg.value(QLatin1String("ApplicationsPath")).toString();
             removable       = cfg.value(QLatin1String("Removable"), false).toBool();
             applications    = cfg.value(QLatin1String("Applications"), false).toBool();
             documents       = cfg.value(QLatin1String("Documents"), false).toBool();
             contentDatabase = cfg.value(QLatin1String("ContentDatabase"), documents).toBool();
             connected       = removable?false:true;
-            qLog(DocAPI) << "disk, path, options, name, removable, applications, documents, contentDatabase, connected ="
-                    << disk << path << options << name << removable << applications << documents << contentDatabase << connected;
-            mFileSystems.append(new QFileSystem(disk, path, prevPath, options, name, removable, applications, documents, contentDatabase, connected));
+            qLog(DocAPI) << "disk, path, options, name, documentsPath, applicationsPath, removable, applications, "
+                            "documents, contentDatabase, connected ="
+                         << disk << path << options << name << documentsPath << applicationsPath << removable
+                         << applications << documents << contentDatabase << connected;
+            d->fileSystems.append(new QFileSystem(disk, path, prevPath, options, name, documentsPath, applicationsPath,
+                                removable, applications, documents, contentDatabase, connected));
+
+            if( entry == documentsMount )
+                d->documentsFileSystem = d->fileSystems.last();
+            if( entry == applicationsMount )
+                d->applicationsFileSystem = d->fileSystems.last();
+
             cfg.endGroup();
         }
 
@@ -226,49 +277,77 @@ void QStorageMetaInfo::update()
             } else {
                 disk        = QLatin1String("HOME");
             }
-            path            = QDir::homePath();
-            options         = cfg.value(QLatin1String("Options"), QLatin1String("rw")).toString();
-            name            = cfg.value(QLatin1String("Name[]"), QLatin1String("HOME")).toString();
-            removable       = cfg.value(QLatin1String("Removable"), false).toBool();
-            applications    = cfg.value(QLatin1String("Applications"), true).toBool();
-            documents       = cfg.value(QLatin1String("Documents"), true).toBool();
-            contentDatabase = false; // This setting makes no sense because HOME's database is always loaded.
-            connected       = removable?false:true;
-            qLog(DocAPI) << "disk, path, options, name, removable, applications, documents, contentDatabase, connected ="
-                    << disk << path << options << name << removable << applications << documents << contentDatabase << connected;
-            mFileSystems.append(new QFileSystem(disk, path, path, options, name, removable, applications, documents, contentDatabase, connected));
+            path             = QDir::homePath();
+            options          = cfg.value(QLatin1String("Options"), QLatin1String("rw")).toString();
+            name             = cfg.value(QLatin1String("Name[]"), QLatin1String("HOME")).toString();
+            documentsPath    = cfg.value(QLatin1String("DocumentsPath"), QLatin1String("/Documents")).toString();
+            applicationsPath = cfg.value(QLatin1String("ApplicationsPath"), QLatin1String("/Applications")).toString();
+            removable        = cfg.value(QLatin1String("Removable"), false).toBool();
+            applications     = cfg.value(QLatin1String("Applications"), true).toBool();
+            documents        = cfg.value(QLatin1String("Documents"), true).toBool();
+            contentDatabase  = false; // This setting makes no sense because HOME's database is always loaded.
+            connected        = removable?false:true;
+            qLog(DocAPI) << "disk, path, options, name, documentsPath, applicationsPath, removable, applications, "
+                    "documents, contentDatabase, connected ="
+                    << disk << path << options << name << documentsPath << applicationsPath << removable
+                    << applications << documents << contentDatabase << connected;
+            d->fileSystems.append(new QFileSystem(disk, path, path, options, name, documentsPath, applicationsPath,
+                                removable, applications, documents, contentDatabase, connected));
+
+            if( QLatin1String("HOME") == documentsMount )
+                d->documentsFileSystem = d->fileSystems.last();
+            if( QLatin1String("HOME") == applicationsMount )
+                d->applicationsFileSystem = d->fileSystems.last();
+
             cfg.endGroup();
         } while (0);
 
         // add [PREFIX]
         do {
             cfg.beginGroup(QLatin1String("PREFIX"));
-            disk            = QLatin1String("PREFIX");
-            path            = Qtopia::qtopiaDir();
-            options         = cfg.value(QLatin1String("Options"), QLatin1String("ro")).toString();
-            name            = cfg.value(QLatin1String("Name[]"), QLatin1String("PREFIX")).toString();
-            removable       = cfg.value(QLatin1String("Removable"), false).toBool();
-            applications    = cfg.value(QLatin1String("Applications"), false).toBool();
-            documents       = cfg.value(QLatin1String("Documents"), false).toBool();
-            contentDatabase = cfg.value(QLatin1String("ContentDatabase"), true).toBool();
-            connected       = removable?false:true;
-            qLog(DocAPI) << "disk, path, options, name, removable, applications, documents, contentDatabase, connected ="
-                    << disk << path << options << name << removable << applications << documents << contentDatabase << connected;
-            mFileSystems.append(new QFileSystem(disk, path, path, options, name, removable, applications, documents, contentDatabase, connected));
+            disk             = QLatin1String("PREFIX");
+            path             = Qtopia::qtopiaDir();
+            options          = cfg.value(QLatin1String("Options"), QLatin1String("ro")).toString();
+            name             = cfg.value(QLatin1String("Name[]"), QLatin1String("PREFIX")).toString();
+            documentsPath    = cfg.value(QLatin1String("DocumentsPath")).toString();
+            applicationsPath = cfg.value(QLatin1String("ApplicationsPath")).toString();
+            removable        = cfg.value(QLatin1String("Removable"), false).toBool();
+            applications     = cfg.value(QLatin1String("Applications"), false).toBool();
+            documents        = cfg.value(QLatin1String("Documents"), false).toBool();
+            contentDatabase  = cfg.value(QLatin1String("ContentDatabase"), true).toBool();
+            connected        = removable?false:true;
+            qLog(DocAPI) << "disk, path, options, name, documentsPath, applicationsPath, removable, applications, "
+                    "documents, contentDatabase, connected ="
+                    << disk << path << options << name << documentsPath << applicationsPath << removable
+                    << applications << documents << contentDatabase << connected;
+            d->fileSystems.append(new QFileSystem(disk, path, path, options, name, documentsPath, applicationsPath,
+                                removable, applications, documents, contentDatabase, connected));
+
+            if( QLatin1String("PREFIX") == documentsMount )
+                d->documentsFileSystem = d->fileSystems.last();
+            if( QLatin1String("PREFIX") == applicationsMount )
+                d->applicationsFileSystem = d->fileSystems.last();
+
             cfg.endGroup();
         } while (0);
     }
 
-    foreach(QFileSystem *fs, mFileSystems)
+    foreach(QFileSystem *fs, d->fileSystems)
     {
+        bool connected = !fs->isRemovable();
+        QString path;
+
         if (fs->disk() != QLatin1String("HOME") &&
             fs->disk() != QLatin1String("PREFIX") )
         {
-            fs->mConnected = mountEntries.contains(fs->mDisk);
-            if (fs->mConnected)
-                fs->mPath = mountEntries[fs->mDisk];
+            connected = mountEntries.contains(fs->disk());
+            if( connected )
+                path = mountEntries[fs->disk()];
+
+            fs->update( connected, path );
         }
-        fs->update();
+        else
+            fs->update();
     }
     emit disksChanged();
 #endif
@@ -317,10 +396,10 @@ QString QStorageMetaInfo::infoString( QList<QFileSystem*> filesystems, const QSt
 */
 QList<QFileSystem*> QStorageMetaInfo::fileSystems( QFileSystemFilter *filter, bool connectedOnly )
 {
-    if(mFileSystems.count() == 0)
+    if(d->fileSystems.count() == 0)
         update();
     QList<QFileSystem*> ret;
-    foreach ( QFileSystem *fs, mFileSystems ) {
+    foreach ( QFileSystem *fs, d->fileSystems ) {
         if(fs->isConnected() || connectedOnly == false) {
             fs->update();
             if ( !filter || filter->filter( fs ) )
@@ -336,7 +415,7 @@ QList<QFileSystem*> QStorageMetaInfo::fileSystems( QFileSystemFilter *filter, bo
 */
 QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool connectedOnly )
 {
-    if(mFileSystems.count() == 0)
+    if(d->fileSystems.count() == 0)
         update();
     QStringList strings;
     foreach ( QFileSystem *fs, fileSystems(filter, connectedOnly) )
@@ -349,106 +428,329 @@ QStringList QStorageMetaInfo::fileSystemNames( QFileSystemFilter *filter, bool c
   a CF card has been inserted.
 */
 
+Q_GLOBAL_STATIC(QStorageMetaInfo,storageMetaInfoInstance);
+
+QStorageMetaInfo *QStorageMetaInfo::instance()
+{
+    return storageMetaInfoInstance();
+}
+
 //---------------------------------------------------------------------------
 
-QFileSystem::QFileSystem( const QString &disk, const QString &path, const QString &prevPath, const QString &options,
-                        const QString &name, bool removable, bool applications, bool documents,
-                        bool contentDatabase, bool connected)
-    : mDisk( disk ), mPath( path ), mPrevPath( prevPath ), mOptions( options ), mName( name ),
-    mRemovable( removable ), mApplications( applications ), mDocuments( documents ), mContentDatabase( contentDatabase ),
-    mConnected(connected), mBlockSize( 512 ), mTotalBlocks( 0 ), mAvailBlocks( 0 )
+class QFileSystemPrivate : public QSharedData
 {
-    update();
+public:
+    QFileSystemPrivate()
+        : removable( false )
+        , applications( false )
+        , documents( false )
+        , contentDatabase( false )
+        , connected( false )
+        , blockSize( 512 )
+        , totalBlocks( 0 )
+        , availBlocks( 0 )
+    {
+    }
+
+    QString disk;
+    QString path;
+    QString prevPath;
+    QString options;
+    QString name;
+    QString documentsPath;
+    QString applicationsPath;
+    bool removable;
+    bool applications;
+    bool documents;
+    bool contentDatabase;
+    bool connected;
+
+    long blockSize;
+    long totalBlocks;
+    long availBlocks;
+};
+
+
+/*! \class QFileSystem
+    \brief The QFileSystem class describes a single mount point.
+
+    This class returns mount point information including:
+    \list
+    \o file system name
+    \o mount point
+    \o human readable name
+    \o size information
+    \o mount options.
+    \endlist
+
+    \ingroup io
+
+    \sa QStorageMetaInfo
+*/
+
+/*!
+    Constructs a null QFileSystem.
+*/
+QFileSystem::QFileSystem()
+{
+    d = new QFileSystemPrivate;
+}
+
+/*!
+    Constructs a copy of the QFileSystem \a other.
+*/
+QFileSystem::QFileSystem( const QFileSystem &other )
+    : d( other.d )
+{
+}
+
+QFileSystem::QFileSystem( const QString &disk, const QString &path, const QString &prevPath, const QString &options,
+                        const QString &name, const QString &documentsPath, const QString &applicationsPath, bool removable,
+                        bool applications, bool documents, bool contentDatabase, bool connected)
+{
+    d = new QFileSystemPrivate;
+
+    d->disk = disk;
+    d->path = path;
+    d->prevPath = prevPath;
+    d->options = options;
+    d->name = name;
+    d->documentsPath = path + documentsPath;
+    d->applicationsPath = path + applicationsPath;
+    d->removable = removable;
+    d->applications = applications;
+    d->documents = documents;
+    d->contentDatabase = contentDatabase;
+    d->connected = connected;
+}
+
+/*!
+    Destroys a QFileSystem.
+*/
+QFileSystem::~QFileSystem()
+{
+}
+
+/*!
+    Copies the value of the QFileSystem \a other to a QFileSystem.
+*/
+QFileSystem &QFileSystem::operator =( const QFileSystem &other )
+{
+    d = other.d;
+
+    return *this;
 }
 
 void QFileSystem::update()
 {
-    mBlockSize = 0;
-    mTotalBlocks = 0;
-    mAvailBlocks = 0;
+    QFileSystemPrivate *_d = const_cast< QFileSystemPrivate * >( d.constData() ); // Circumvent the copy on write.
+
+    _d->blockSize = 0;
+    _d->totalBlocks = 0;
+    _d->availBlocks = 0;
 #ifdef Q_OS_LINUX
     struct statfs fs;
-    if ( mConnected && statfs( mPath.toLocal8Bit(), &fs ) ==0 ) {
-        mBlockSize = fs.f_bsize;
-        mTotalBlocks = fs.f_blocks;
-        mAvailBlocks = fs.f_bavail;
+    if ( _d->connected && statfs( _d->path.toLocal8Bit(), &fs ) ==0 ) {
+        _d->blockSize = fs.f_bsize;
+        _d->totalBlocks = fs.f_blocks;
+        _d->availBlocks = fs.f_bavail;
     }
 #endif
 }
 
-/*! \class QFileSystem
-  \brief The QFileSystem class describes a single mount point.
+void QFileSystem::update( bool connected, const QString &path )
+{
+    if( d.constData()->connected != connected )
+    {
+        QFileSystemPrivate *_d = const_cast< QFileSystemPrivate * >( d.constData() ); // Circumvent the copy on write.
 
-  This class returns mount point information including:
-  \list
-  \o file system name
-  \o mount point
-  \o human readable name
-  \o size information
-  \o mount options.
-  \endlist
+        _d->connected = connected;
 
-  \ingroup qtopiaemb
+        _d->documentsPath = path + _d->documentsPath.mid( _d->path.length() );
+        _d->applicationsPath = path + _d->applicationsPath.mid( _d->path.length() );
 
-  \sa QStorageMetaInfo
+        _d->prevPath = _d->path;
+        _d->path = path;
+    }
+    update();
+}
+
+/*!
+    Returns true if the QFileSystem is unitialised.
 */
+bool QFileSystem::isNull() const
+{
+    return d->name.isEmpty();
+}
 
-/*! \fn const QString &QFileSystem::disk() const
+/*!
   Returns the file system name, such as /dev/hda3
 */
+const QString &QFileSystem::disk() const
+{
+    return d->disk;
+}
 
-/*! \fn const QString &QFileSystem::path() const
+/*!
   Returns the mount path, such as /home
 */
+const QString &QFileSystem::path() const
+{
+    return d->path;
+}
 
-/*! \fn const QString &QFileSystem::prevPath() const
+/*!
+    Returns the path of the documents directory, such as /home/Documents.
+*/
+const QString &QFileSystem::documentsPath() const
+{
+    return d->documentsPath;
+}
+
+/*!
+    Returns the path of the applications directory, such as /home/Applications.
+*/
+const QString &QFileSystem::applicationsPath() const
+{
+    return d->applicationsPath;
+}
+
+/*!
   Returns the previous mount path, such as /home (useful when a filesystem has been unmounted)
 */
+const QString &QFileSystem::prevPath() const
+{
+    return d->prevPath;
+}
 
-/*! \fn const QString &QFileSystem::name() const
+/*!
   Returns the translated, human readable name for the mount directory.
 */
+const QString &QFileSystem::name() const
+{
+    return d->name;
+}
 
-/*! \fn const QString &QFileSystem::options() const
+/*!
   Returns the mount options
 */
+const QString &QFileSystem::options() const
+{
+    return d->options;
+}
 
-/*! \fn long QFileSystem::blockSize() const
+/*!
   Returns the size of each block on the file system.
 */
+long QFileSystem::blockSize() const
+{
+    return d->blockSize;
+}
 
-/*! \fn long QFileSystem::totalBlocks() const
+/*!
   Returns the total number of blocks on the file system
 */
+long QFileSystem::totalBlocks() const
+{
+    return d->totalBlocks;
+}
 
-/*! \fn long QFileSystem::availBlocks() const
+/*!
   Returns the number of available blocks on the file system
  */
+long QFileSystem::availBlocks() const
+{
+    return d->availBlocks;
+}
 
-/*! \fn bool QFileSystem::isRemovable() const
+/*!
   Returns flag indicating if the file system can be removed. For example, a CF card would be removable, but the internal memory would not.
 */
+bool QFileSystem::isRemovable() const
+{
+    return d->removable;
+}
 
-/*! \fn bool QFileSystem::applications() const
+/*!
   Returns flag indicating if the file system can contain applications.
 */
+bool QFileSystem::applications() const
+{
+    return d->applications;
+}
 
-/*! \fn bool QFileSystem::documents() const
+/*!
   Returns flag indicating if the file system can contain documents.
 */
+bool QFileSystem::documents() const
+{
+    return d->documents;
+}
 
-/*! \fn bool QFileSystem::isWritable() const
+/*!
   Returns flag indicating if the file system is mounted as writable or read-only.
   Returns false if read-only, true if read and write.
 */
+bool QFileSystem::isWritable() const
+{
+    return d->options.contains("rw");
+}
 
-/*! \fn bool QFileSystem::contentDatabase() const
+/*!
   Returns flag indicating if the file system has it's own content database stored.
  */
+bool QFileSystem::contentDatabase() const
+{
+    return d->contentDatabase;
+}
 
-/*! \fn bool QFileSystem::isConnected() const
+/*!
   Returns flag indicating if the file system is currently connected.
  */
+bool QFileSystem::isConnected() const
+{
+    return d->connected;
+}
+
+/*!
+    Returns a QFileSystem describing the file system on which the file with the name \a fileName is located.
+
+    If \a connectedOnly is true the QFileSystem will only be returned if it is currently connected.
+*/
+QFileSystem QFileSystem::fromFileName( const QString &fileName, bool connectedOnly )
+{
+    const QFileSystem *fs = QStorageMetaInfo::instance()->fileSystemOf( fileName, connectedOnly );
+
+    return fs ? *fs : QFileSystem();
+}
+
+/*!
+    Returns the QFileSystem which contains the default document storage path.
+
+    The default document storage path can be obtained by calling \c{QFileSystem::documentsFileSystem().documentsPath()}.
+
+    \sa documentsPath()
+*/
+QFileSystem QFileSystem::documentsFileSystem()
+{
+    const QFileSystem *fs = QStorageMetaInfo::instance()->documentsFileSystem();
+
+    return fs ? *fs : QFileSystem();
+}
+
+/*!
+    Returns the QFileSystem which contains the default application storage path.
+
+    The default application storage path can be obtained by calling \c{QFileSystem::applicationsFileSystem().applicationsPath()}.
+
+    \sa applicationsPath()
+ */
+QFileSystem QFileSystem::applicationsFileSystem()
+{
+    const QFileSystem *fs = QStorageMetaInfo::instance()->applicationsFileSystem();
+
+    return fs ? *fs : QFileSystem();
+}
 
 // ====================================================================
 
@@ -478,7 +780,7 @@ public:
 };
   \endcode
 
-  \ingroup qtopiaemb
+  \ingroup io
 */
 
 /*!

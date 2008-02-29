@@ -99,11 +99,22 @@ void fs_append_stroke(const QPoint &pos)
     // This covers the screen, but allows space for the context key bar at the
     // the header
     qLog(Input) << "QWSScreenStroke being instantiated with geometry" << desktopAvailableRect;
-    setAttribute(Qt::WA_NoSystemBackground);
-    setAutoFillBackground(false);
+
+    // Note that in qt 4.1 this code leads to a blue widget on 16 bit displays
+    // The alternative for those displays is to set opacity to 1.0, and use
+    // semi-transparent brushes (see qtopia 4.1 code).  However, This approach 
+    // requires that the QPaintEngine supports composition modes to avoid 
+    // very ugly strokes, and composition modes are frequently not supported.
+    // If neither transparent widgets nor composition modes are supported
+    // properly (non-standard displays using qt < 4.2), the line must be 
+    // simplified - using a thin black line without shadow is recommended
+    // (Although anti-aliasing is supported even without compositon modes)
     
+    setPalette(QPalette(QColor(0,0,0,0)));
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setWindowOpacity(4.0/7.0);
+
     setGeometry(desktopAvailableRect);
-    setWindowOpacity(1);
     strokeWidth = 5; // TODO: handle default Stroke width more intelligently
     shadowWidth = 2; // possibly add get/set functions?
     // Note that the overlapping drawing relies on 
@@ -156,18 +167,13 @@ void QWSScreenStroke::append(const QPoint pos)
 
 void QWSScreenStroke::end()
 {
-    //    hide(); // for now
     currentStroke = false;
-    //    QString strokeString = "Current Strokes: ";
-    //    for(int i = 0; i < currentStrokePoints.size(); i++)
-    //        strokeString = strokeString + "(" + QString::number((currentStrokePoints[i]).x()) + "," + QString::number((currentStrokePoints[i]).y()) + ") ";
     currentStrokePoints.clear();
     update();
 }
 
 void QWSScreenStroke::clearCurrent() {
     currentStrokePoints.clear();
-    //    update();
     hide();
 }
 
@@ -178,60 +184,50 @@ void QWSScreenStroke::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e);
     QPainter p(this);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    if(fullScreenClearFlag && isVisible())
-    {
-        // fullScreenClear only makes sense if the paint event encompasses the whole widget
-        // be sure to call update() immediately after setting it to ensure the next paint event is a fullscreen one
-        // This function assumes that if the widget is not visible, then the first visible paintevent will be a fullscreen one
-        qLog(Input) << "QWSScreenStroke::paintEvent - full screen clear of " << e->rect();
-        Q_ASSERT(e->rect().width()==this->width());
-        fullScreenClearFlag = false;
-        p.fillRect(e->rect(), QBrush(QColor(0,0,0,0)));
-    };        
 
     if (currentStrokePoints.size() == 0)
         return;
 
-    QColor transparentBlack = QColor(0,0,0,125);
-    Q_ASSERT(transparentBlack.isValid());
-    QBrush transparentBlackBrush = QBrush(transparentBlack);
-    QColor transparentMagenta = QColor(Qt::magenta);
-    transparentMagenta.setAlpha(125);
-    QBrush transparentMagentaBrush = QBrush(transparentMagenta);
+    QColor edge = Qt::black;
+    QColor stroke = Qt::magenta;
+    QBrush edgeBrush = QBrush(edge);
+    QBrush strokeBrush = QBrush(stroke);
 
-    QPen shadowPen = QPen(transparentBlack, strokeWidth+shadowWidth);
-    shadowPen.setJoinStyle(Qt::RoundJoin);
-    shadowPen.setCapStyle(Qt::RoundCap);
-    QPen strokePen = QPen(transparentMagentaBrush, strokeWidth);
+    QPen edgePen = QPen(edge, strokeWidth+shadowWidth);
+    edgePen.setJoinStyle(Qt::RoundJoin);
+    edgePen.setCapStyle(Qt::RoundCap);
+    QPen strokePen = QPen(strokeBrush, strokeWidth);
     strokePen.setJoinStyle(Qt::RoundJoin);
     strokePen.setCapStyle(Qt::RoundCap);
-    //    p.drawLine(0,0, 150,150);
+    
     /* funky stroke drawing here */
     if (currentStrokePoints.size() == 1)
     {
-        //draw a point, for now, nothing
-        p.setPen(shadowPen);
+        //draw a point
+        p.setPen(edgePen);
         p.drawPoint(lastPoint);
         p.setPen(strokePen);
         p.drawPoint(lastPoint);
     } else
     {
-#ifdef QWSSCREENSTROKE_DRAW_OVERLAPPED  // This code isn't working yet.
+#ifdef QWSSCREENSTROKE_DRAW_OVERLAPPED 
         for(;lastDrawnOptimisation < currentStrokePoints.size();lastDrawnOptimisation++)
         {
             //            if(shadowWidth>0)
             //            {   
-            p.setPen(shadowPen);
+            p.setPen(edgePen);
             p.drawLine(currentStrokePoints[lastDrawnOptimisation-1], currentStrokePoints[lastDrawnOptimisation]);
             //            };
             p.setPen(strokePen);
             p.drawLine(currentStrokePoints[lastDrawnOptimisation-1], currentStrokePoints[lastDrawnOptimisation]);
             // draw the stroke before last to overwrite the shadow we've just drawn there.
+            // Note that this must be drawn either solidly (not transparent),
+            // or using QPainter::CompositionMode_Source. Otherwise, the
+            // overlapping causes irregular and ugly colouration
             if(lastDrawnOptimisation>=2) p.drawLine(currentStrokePoints[lastDrawnOptimisation-2], currentStrokePoints[lastDrawnOptimisation-1]);
         };
 #else
-        p.setPen(shadowPen);
+        p.setPen(edgePen);
         p.drawPolyline(currentStrokePoints);
         p.setPen(strokePen);
         p.drawPolyline(currentStrokePoints);
@@ -475,11 +471,11 @@ void PkIM::setHint(const QString& s)
 
         QSettings config("Trolltech","handwriting");
         config.beginGroup( "Settings" );
-        config.setValue("ShownFirstUseHelp", TRUE);
+        config.setValue("ShownFirstUseHelp", true);
         QString prof = config.value( "FSProfile", "fs" ).toString();
         QtopiaServiceRequest e("Help", "setDocument(QString)");
         e << QString("handwriting-fsim.html");
-        shownHelp = TRUE;
+        shownHelp = true;
         return;
     }
 
@@ -498,7 +494,7 @@ void PkIM::setHint(const QString& s)
 
     if (h.contains("only"))
     {
-        onlyHintFlag=TRUE; // This is currently ignored, as only one charSet can be activated at once.  Multiple input types in a hint leads to undefined behaviour.
+        onlyHintFlag=true; // This is currently ignored, as only one charSet can be activated at once.  Multiple input types in a hint leads to undefined behaviour.
         h.remove("only");
     };
 
@@ -509,7 +505,7 @@ void PkIM::setHint(const QString& s)
             matcherSet->setHintedMode("int");
             setCharSetCalled = true;
             cMode = Int;
-            active = TRUE;
+            active = true;
             setModePixmap();
             // XXX updateStatusIcon();
         }
@@ -533,7 +529,7 @@ void PkIM::setHint(const QString& s)
                 penMatcher->setCharSet( profile->charSet("Text") ); // no tr
                 setCharSetCalled = true;
                 cMode = Lower;
-                active = TRUE;
+                active = true;
                 // XXX updateStatusIcon();
             } else
                 qLog(Input) << "PkIM::setHint(" << h << ") - already in words mode";
@@ -576,7 +572,7 @@ void PkIM::setMode(const QString &h, bool hasShift)
     }
     if (h != matcherSet->currentMode()->id() || hasShift != shift) {
         if (!h.isEmpty() && matcherSet->setCurrentMode(h)) {
-            active = TRUE;
+            active = true;
             shift = hasShift;
             setModePixmap();
             emit stateChanged(QtopiaInputMethod::Ready);
@@ -626,7 +622,7 @@ void PkIM::reset()
     qLog(Input) << "PkIM::reset() - word was " << word << ", text was "<<text;
     if (active) {
         sendAndEnd();
-        active = TRUE;
+        active = true;
         word.clear();
         text.clear();
         if (symbolPicker)
@@ -642,7 +638,7 @@ void PkIM::reset()
         if (inputStroke) {
             fs_end_stroke();
 #ifndef QT_NO_QWS_CURSOR
-            qwsServer->setCursorVisible(TRUE);
+            qwsServer->setCursorVisible(true);
 #endif
             if (!protectInputStroke) {
                 // only true in cases where it will be deleted anyway,
@@ -655,7 +651,7 @@ void PkIM::reset()
             if (lClickTimer) lClickTimer->stop();
 
             could_be_left_click = FALSE;
-            ignoreNextMouse = TRUE; // ?? 
+            ignoreNextMouse = true; // ?? 
             midStroke = FALSE;
             //            updateStatusIcon(); 
         }
@@ -760,11 +756,11 @@ void PkIM::endWord()
     }
     word.clear();
 }
-void PkIM::sendAndEnd()
+void PkIM::sendAndEnd(bool forceCommit)
 {
     qLog(Input) << "PkIM::sendAndEnd() - word = "<<word<<", text = "<<text<<" choices = "<<choices;
 
-    if (!text.isEmpty()){
+    if (forceCommit || !text.isEmpty() ){
         sendCommitString(text,0,0);
         word += text;
     }
@@ -825,7 +821,7 @@ void PkIM::compose()
 
             WordWraps *w = wraps;
             while(choices.count() < 1 && (w->prefix != 0 || w->postfix != 0)) {
-                choices = matcher->choices(TRUE, FALSE, w->prefix, w->postfix);
+                choices = matcher->choices(true, FALSE, w->prefix, w->postfix);
                 w += 1;
             }
             // still no choices? try with number word
@@ -833,7 +829,7 @@ void PkIM::compose()
             while(choices.count() < 1 && (w->prefix != 0 || w->postfix != 0)) {
                 QString nword = matcher->numberWord(w->prefix, w->postfix);
                 if (!nword.isEmpty()) {
-                    added_number = TRUE;
+                    added_number = true;
                     choices += nword;
                 }
                 w += 1;
@@ -852,7 +848,7 @@ void PkIM::compose()
             if (!added_number) {
                 QString nword = matcher->numberWord(QString(), QString());
                 if (!nword.isEmpty()) {
-                    added_number = TRUE;
+                    added_number = true;
                     choices += nword;
                 }
             }
@@ -920,7 +916,7 @@ void PkIM::revertLookup()
     {
         // sendAndEnd();
 #ifndef QT_NO_QWS_CURSOR
-        qwsServer->setCursorVisible(TRUE);
+        qwsServer->setCursorVisible(true);
 #endif
     };
 
@@ -1003,7 +999,6 @@ void PkIM::symbolPopup()
  */
 bool PkIM::filter(const QPoint &posIn, int state, int w)
 {
-
     QPoint pos = posIn;
     //    Q_ASSERT(penMatcher->charSet() != 0); // off - suddenly failing.
 
@@ -1087,7 +1082,7 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             // should be configurable.  canvas height should be user-drawing height.
             inputStroke->setCanvasHeight(canvasHeight);
             inputStroke->beginInput(pos);
-            midStroke = TRUE;
+            midStroke = true;
         }
         fs_append_stroke(pos);
         lastPoint = pos;
@@ -1102,7 +1097,7 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             inputStroke->endInput();
 
 #ifndef QT_NO_QWS_CURSOR
-            qwsServer->setCursorVisible(TRUE);
+            qwsServer->setCursorVisible(true);
 #endif
             lClickTimer->stop();
             fs_end_stroke();
@@ -1111,10 +1106,11 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
                 qLog(Input) << "PkIM::filter() - if (could_be_left_click) is true- sending mouse event";
 #endif // DEBUG_PKIM_FILTER
 
-                protectInputStroke = TRUE;
+                protectInputStroke = true;
                 // send mouse
                 // must have started a stroke, so we'll assume we've got a qt_screenstroke
                 if(qt_screenstroke){
+                    sendAndEnd();
                     sendMouseEvent(qt_screenstroke->mapToGlobal(
                         inputStroke->startingPoint()), Qt::LeftButton, w);
                     sendMouseEvent(qt_screenstroke->mapToGlobal(
@@ -1143,7 +1139,7 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
             return FALSE;
         };
     }
-    return TRUE;
+    return true;
 }
 
 #ifdef DEBUG_PKIM_FILTER 
@@ -1164,32 +1160,32 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
     
     if ( waitforrelease ) { 
         if ( isPress || autoRepeat ){
-            return TRUE;
+            return true;
         };
         REPORT_FILTER_KEY_RESULT_MACRO("- consumed, autorepeats, now released");
         waitforrelease = FALSE;
-        return TRUE;
+        return true;
     }
 
     if (symbolPicker && symbolPicker->isVisible()) {
         if (!symbolPicker->filterKey(unicode, keycode, modifiers, isPress, autoRepeat))
             symbolPicker->hide();
         REPORT_FILTER_KEY_RESULT_MACRO(" - forwarded to symbolPicker");
-        return TRUE;
+        return true;
     }
 
     if (wordPicker && wordPicker->isVisible()) {
         if (!wordPicker->filterKey(unicode, keycode, modifiers, isPress, autoRepeat))
             wordPicker->hide();
         REPORT_FILTER_KEY_RESULT_MACRO(" - forwarded to wordPicker");
-        return TRUE;
+        return true;
     }
 
     if (modePicker && modePicker->isVisible()) {
         if (!modePicker->filterKey(unicode, keycode, modifiers, isPress, autoRepeat))
             modePicker->hide();
         REPORT_FILTER_KEY_RESULT_MACRO(" - forwarded to modePicker");
-        return TRUE;
+        return true;
     }
 
     // doesn't filter anything if off
@@ -1199,7 +1195,7 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
     };
     if (autoRepeat && unicode) {
         REPORT_FILTER_KEY_RESULT_MACRO(" - consumed autorepeated unicode");
-        return TRUE;
+        return true;
     };
 
     actionsSinceChangeMode++;
@@ -1218,14 +1214,14 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
                 hold_key = keycode;
                 hold_item = item;
                 REPORT_FILTER_KEY_RESULT_MACRO(" - consumed, setting hold for it");
-                return TRUE; // we will hold, need to wait for release
+                return true; // we will hold, need to wait for release
             }
             // XXX Add check for single char taparg.
             // nature of func may need to wait till we have spec that uses it though.
             // in this case should just modify uni-code and pass through.
             if (item.tapfunc != noFunction) {
                 REPORT_FILTER_KEY_RESULT_MACRO(" - consumed, no action till key release");
-                return TRUE; // we will do it on release.
+                return true; // we will do it on release.
             }
             // no tap set, no hold set.  send, end, and let this key go through.
             REPORT_FILTER_KEY_RESULT_MACRO(" - rejected and terminating word, no tap set or hold set");
@@ -1281,12 +1277,12 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
                 }
                 lastUnicode = unicode;
                 REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - inserting text");
-                return TRUE;
+                return true;
             }
             if (item.tapfunc != noFunction) {
                 REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - applying tap function");
                 applyFunction(item.tapfunc);
-                return TRUE;
+                return true;
             }
             // no tap set, no tap function, if there is a hold though we might have delayed the press.
             // if so, compose and send text now.
@@ -1294,7 +1290,7 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
                 text += unicode;
                 sendAndEnd();
                 REPORT_FILTER_KEY_RESULT_MACRO(" - consumed - applying hold function");
-                return TRUE;
+                return true;
             }
         }
         REPORT_FILTER_KEY_RESULT_MACRO(" - rejected. unicode in matcher map, but not processed");
@@ -1313,7 +1309,10 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
         if (text.length())  {
             revertLookup();
             REPORT_FILTER_KEY_RESULT_MACRO(" - consumed backspace, reverting lookup");
-            return TRUE;
+            if(!text.length())
+                sendAndEnd(true);
+
+            return true;
         };
         sendAndEnd(); 
         qLog(Input) << "calling sendAndEnd on empty text";
@@ -1344,10 +1343,10 @@ void PkIM::timerEvent(QTimerEvent* e)
             // send the hold characer
             text += item.holdarg;
             sendAndEnd();
-            waitforrelease = TRUE;
+            waitforrelease = true;
         } else if (item.holdfunc != noFunction) {
             applyFunction(item.holdfunc);
-            waitforrelease = TRUE;
+            waitforrelease = true;
         }
     } else if ( e->timerId() == tid_abcautoend ) {
         lastUnicode = 0;
@@ -1404,6 +1403,7 @@ void PkIM::toggleMode()
         return;
     sendAndEnd();
     endWord();
+    lastUnicode=0;
     // press, release.. here.
     if (actionsSinceChangeMode < 3) {
         matcherSet->nextMode();
@@ -1473,7 +1473,7 @@ void PkIM::loadProfiles()
     QStringList::Iterator it;
 
     for ( it = list.begin(); it != list.end(); ++it ) {
-        QIMPenProfile *p = new QIMPenProfile( path + "/" + *it );
+        QIMPenProfile *p = new QIMPenProfile( path + '/' + *it );
         profileList.append( p );
         //if ( p->shortcut() ) {
         //QIMPenCharIterator it( p->shortcut()->characters() );
@@ -1764,18 +1764,19 @@ void PkIM::ignoreRestOfStroke()
     qLog(Input) << "PkIM::ignoreRestOfStroke()";
     fs_end_stroke();
 #ifndef QT_NO_QWS_CURSOR
-    qwsServer->setCursorVisible(TRUE);
+    qwsServer->setCursorVisible(true);
 #endif
-    protectInputStroke = TRUE;
+    protectInputStroke = true;
     Q_ASSERT(inputStroke);
     Q_ASSERT(qt_screenstroke);
+    sendAndEnd();
     sendMouseEvent(qt_screenstroke->mapToGlobal(inputStroke->startingPoint()), Qt::LeftButton, 0); //TEMP
     protectInputStroke = FALSE;
     delete inputStroke;
     inputStroke = 0;
     lClickTimer->stop();
     could_be_left_click = FALSE;
-    ignoreNextMouse = TRUE;
+    ignoreNextMouse = true;
     midStroke = FALSE;
     // XXX updateStatusIcon();
 }
@@ -1795,4 +1796,27 @@ void PkIM::pluginMessage(const QString &m, const QByteArray &a)
     }
 }
 
-
+/*!
+    This function handles update information from the server
+    \sa QWSInputMethod::updateHandler()
+*/
+void PkIM::updateHandler ( int type )
+{
+    switch(type){
+        case(QWSInputMethod::Update):
+            sendQuery(Qt::ImMicroFocus); // TODO: Check whether this made all the other microfocus queries redundant
+            break;
+        case(QWSInputMethod::FocusIn):
+            break;
+        case(QWSInputMethod::FocusOut):
+            sendAndEnd(); // PkIM recieves Reset before FocusOut, and reset calls sendAndEnd(), so this is mostly for completeness
+            break;
+        case(QWSInputMethod::Reset):
+            reset();
+            break;
+        case(QWSInputMethod::Destroyed):
+            break;
+        default:
+            ;
+    };
+};

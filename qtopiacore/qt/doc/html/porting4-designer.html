@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/porting4-designer.qdoc -->
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/porting4-designer.qdoc -->
 <head>
   <title>Qt 4.2: Porting .ui Files to Qt 4</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -117,18 +117,18 @@
 <p><tt>uic3</tt> tries very hard to map Qt 3 classes and their properties to Qt 4. However, the behavior of some classes changed significantly in Qt 4. To keep the form working, some Qt 3 classes are mapped to classes in the <a href="qt3support.html">Qt3Support</a> library. Table 1 shows a list of classes this applies to.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qt 3 class</th><th>Qt 4 class</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>QButtonGroup</tt></td><td><a href="q3buttongroup.html">Q3ButtonGroup</a></td></tr>
-<tr valign="top" class="even"><td><tt>QDateEdit</tt></td><td><a href="q3dateedit.html">Q3DateEdit</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QDateTimeEdit</tt></td><td><a href="q3datetimeedit.html">Q3DateTimeEdit</a></td></tr>
-<tr valign="top" class="even"><td><tt>QGroupBox</tt></td><td><a href="q3groupbox.html">Q3GroupBox</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QListBox</tt></td><td><a href="q3listbox.html">Q3ListBox</a></td></tr>
-<tr valign="top" class="even"><td><tt>QListView</tt></td><td><a href="q3listview.html">Q3ListView</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QMainWindow</tt></td><td><a href="q3mainwindow.html">Q3MainWindow</a></td></tr>
-<tr valign="top" class="even"><td><tt>QTextEdit</tt></td><td><a href="q3textedit.html">Q3TextEdit</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QTextView</tt></td><td><a href="q3textview.html">Q3TextView</a></td></tr>
-<tr valign="top" class="even"><td><tt>QTimeEdit</tt></td><td><a href="q3timeedit.html">Q3TimeEdit</a></td></tr>
-<tr valign="top" class="odd"><td><tt>QWidgetStack</tt></td><td><a href="q3widgetstack.html">Q3WidgetStack</a></td></tr>
-<tr valign="top" class="even"><td><tt>QWizard</tt></td><td><a href="q3wizard.html">Q3Wizard</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QButtonGroup</tt></td><td>Q3ButtonGroup</td></tr>
+<tr valign="top" class="even"><td><tt>QDateEdit</tt></td><td>Q3DateEdit</td></tr>
+<tr valign="top" class="odd"><td><tt>QDateTimeEdit</tt></td><td>Q3DateTimeEdit</td></tr>
+<tr valign="top" class="even"><td><tt>QGroupBox</tt></td><td>Q3GroupBox</td></tr>
+<tr valign="top" class="odd"><td><tt>QListBox</tt></td><td>Q3ListBox</td></tr>
+<tr valign="top" class="even"><td><tt>QListView</tt></td><td>Q3ListView</td></tr>
+<tr valign="top" class="odd"><td><tt>QMainWindow</tt></td><td>Q3MainWindow</td></tr>
+<tr valign="top" class="even"><td><tt>QTextEdit</tt></td><td>Q3TextEdit</td></tr>
+<tr valign="top" class="odd"><td><tt>QTextView</tt></td><td>Q3TextView</td></tr>
+<tr valign="top" class="even"><td><tt>QTimeEdit</tt></td><td>Q3TimeEdit</td></tr>
+<tr valign="top" class="odd"><td><tt>QWidgetStack</tt></td><td>Q3WidgetStack</td></tr>
+<tr valign="top" class="even"><td><tt>QWizard</tt></td><td>Q3Wizard</td></tr>
 </table></p>
 <a name="limitations-of-uic3"></a>
 <h2>Limitations of uic3</h2>
@@ -216,7 +216,7 @@
 <p><tt>uic3 -convert</tt> handles the conversion of custom widgets to the new <tt>.ui</tt> format, however all custom signals and slots are lost. Furthermore, since Qt Designer 3 never knew the base widget class of a custom widget, it is taken to be <a href="qwidget.html">QWidget</a>. This is often sufficient. If not, the custom widgets have to be inserted manually into the form.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
 <td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
 </tr></table></div></address></body>

@@ -6,8 +6,8 @@ gelconf.trtarget=Gel
 gelconf.hint=themecfg
 geldata.files=*.xml *rc
 geldata.path=/etc/themes/gel
-gelpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/gel
-gelpics.path=/pics/themes
+gelpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/gel/*
+gelpics.path=/pics/themes/gel
 gelpics.hint=pics
 
 INSTALLS+=gelconf geldata gelpics

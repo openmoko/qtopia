@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -85,7 +85,7 @@
   allows selection of a document using the selector before revealing
   the document viewer or editor.
 
-  \ingroup qtopiaemb
+  \ingroup documentselection
   \sa QImageDocumentSelectorDialog, QDocumentSelector
 */
 
@@ -380,7 +380,7 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
     }
   \endcode
 
-  \ingroup qtopiaemb
+  \ingroup documentselection
   \sa QImageDocumentSelector
 */
 

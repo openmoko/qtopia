@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -266,7 +266,6 @@ void QWidget::setEditFocus(bool on)
 
     if ((!on && !QWidgetPrivate::editingWidget)
         || (on && QWidgetPrivate::editingWidget == f)) {
-        update();
         return;
     }
 
@@ -281,7 +280,6 @@ void QWidget::setEditFocus(bool on)
         QApplication::sendEvent(f, &event);
         QApplication::sendEvent(f->style(), &event);
     }
-    update();
 }
 #endif
 

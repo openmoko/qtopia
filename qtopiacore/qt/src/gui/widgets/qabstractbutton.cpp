@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -1128,6 +1128,11 @@ void QAbstractButton::keyPressEvent(QKeyEvent *e)
             if (hasFocus()) // nothing happend, propagate
                 e->ignore();
         } else {
+#ifdef QT_KEYPAD_NAVIGATION
+            if (QApplication::keypadNavigationEnabled() && (e->key() == Qt::Key_Left || e->key() == Qt::Key_Right))
+                e->ignore();
+            else
+#endif
             focusNextPrevChild(next);
         }
         break;

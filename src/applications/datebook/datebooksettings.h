@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -44,6 +44,10 @@ public:
     int alarmType() const;
     void setCompressDay( bool );
     bool compressDay() const;
+
+    enum ViewType {DayView = 0, MonthView, WeekView};
+    ViewType defaultView() const;
+    void setDefaultView( ViewType viewType);
 
 private slots:
     void slot12Hour( int );

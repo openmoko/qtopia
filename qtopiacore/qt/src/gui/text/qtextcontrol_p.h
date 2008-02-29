@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -102,9 +102,13 @@ public:
     QTextCursor cursorForPosition(const QPointF &pos) const;
     QRectF cursorRect(const QTextCursor &cursor) const;
     QRectF cursorRect() const;
+    QRectF selectionRect(const QTextCursor &cursor) const;
+    QRectF selectionRect() const;
 
     QString anchorAt(const QPointF &pos) const;
     QPointF anchorPosition(const QString &name) const;
+
+    QString anchorAtCursor() const;
 
     bool overwriteMode() const;
     void setOverwriteMode(bool overwrite);
@@ -193,7 +197,10 @@ public:
     virtual bool canInsertFromMimeData(const QMimeData *source) const;
     virtual void insertFromMimeData(const QMimeData *source);
 
+    bool setFocusToAnchor(const QTextCursor &newCursor);
     bool setFocusToNextOrPreviousAnchor(bool next);
+    bool findNextPrevAnchor(const QTextCursor& from, bool next, QTextCursor& newAnchor);
+
 
 protected:
     virtual void timerEvent(QTimerEvent *e);

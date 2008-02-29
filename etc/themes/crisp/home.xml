@@ -3,21 +3,21 @@
 	<plugin name="bgplugin"/>
     </rect>
     <image name="dialer" rect="58,86,-57,-70" src="dialerbutton" onclick="src=dialerbuttonp;color=Highlight" interactive="yes" keypad="no" scale="yes"/>
-    <layout rect="0,29,0x65" spacing="-1">
-	<rect name="calls" rect="0,0,59x65" color="#72715a" brush="Base" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
-	    <image rect="3,1,45x41" src="phone"/>
-	    <text name="calls" size="7" rect="0,31,59x34" align="hcenter" format="RichText">
+    <layout rect="0,13.64%,0x88" align="hcenter">
+      <rect name="calls" rect="0,0,88x0" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
+	    <image rect="25,1,45x41" src="phone" scale="yes"/>
+	    <text name="calls" size="7" color="Text" rect="0,41,88x47" align="hcenter" format="RichText">
 		<tr><trtext>%1 missed call(s)</trtext><trarg>@/Communications/Calls/MissedCalls</trarg></tr>
 	    </text>
 	</rect>
-	<rect name="messages" rect="0,0,59x65" color="#72715a" brush="Base" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0" interactive="yes">
-	    <image rect="3,3,58x42" src="mail"/>
-	    <text name="messages" size="7" rect="0,31,59x34" align="hcenter" format="RichText">
+	<rect name="messages" rect="0,0,88x0" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0" interactive="yes">
+      <image rect="25,3,58x42" src="mail"/>
+      <text name="messages" size="7" color="Text" rect="0,41,88x47" align="hcenter" format="RichText">
 		<tr><trtext>%1 new message(s)</trtext><trarg>@/Communications/Messages/NewMessages</trarg></tr>
 	    </text>
 	</rect>
     </layout>
-    <text name="operator" rect="0,-50,0x16" size="10" outline="#FFFFFF" color="#000000" align="hcenter" >
+    <text name="operator" rect="0,84%,0x9pt" size="7" bold="yes" outline="#FFFFFF" color="#000000" align="hcenter" >
 	expr:@/Telephony/Status/OperatorName
     </text>
     <rect name="profile" rect="0,-34,0x16" color="#72715a" brush="#72715a" transient="yes" active="expr:!@/UI/Profile/Default" interactive="yes">

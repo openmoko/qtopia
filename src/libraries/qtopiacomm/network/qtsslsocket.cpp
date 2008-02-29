@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -608,9 +608,16 @@ QtSslSocket::QtSslSocket(Mode mode, QObject *parent)
     d->initializeConnection(d->socket);
 
     //get the path to the SSL library
-
     QString libPath = Qtopia::qtopiaDir() + "lib/libssl.so";
 
+    // It's not always in qtopiaDir, so check the other installedPaths.
+    foreach (QString prefix, Qtopia::installPaths()) {
+        if( QFile::exists( prefix + "lib/libssl.so" ) ) {
+            libPath = prefix + "lib/libssl.so";
+        }
+    }
+
+    // Unfortunately if we can't find the lib, we're going to crash.
     lib = new SSLLibrary(libPath);
 
     lib->SSL_library_init();

@@ -12,6 +12,10 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Support<br /><small></small></h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<ul><li><a href="#hardware-requirements">Hardware Requirements</a></li>
+<li><a href="#software-requirements">Software Requirements</a></li>
+<li><a href="#qtopia-configuration">Qtopia Configuration</a></li>
+</ul>
 <li><a href="#integration">Integration</a></li>
 <li><a href="#functionality">Functionality</a></li>
 <ul><li><a href="#device-configuration">Device Configuration</a></li>
@@ -27,7 +31,13 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia 4.2 supports the BlueZ Bluetooth framework (Version 3.7). It consists of several daemons and tools that allow the system to manipulate local Bluetooth devices and discover remote devices and services.</p>
+<p>Qtopia supports Bluetooth communications hardware and software profiles by relying on BlueZ, the official Linux Bluetooth stack. Qtopia provides implementations of Bluetooth profiles; settings applications for device and profile configuration; and advanced framework classes that enable implementation of custom profiles.</p>
+<a name="hardware-requirements"></a>
+<h3>Hardware Requirements</h3>
+<p>Qtopia does not have any special hardware requirements. For Bluetooth support to work correctly, the target device must be supported by the BlueZ Bluetooth stack.</p>
+<a name="software-requirements"></a>
+<h3>Software Requirements</h3>
+<p>Qtopia 4.2 supports the BlueZ Bluetooth framework Version 3 and above (For exact requirements, please check the release notes for your specific version of Qtopia). BlueZ consists of several daemons and tools that allow the system to manipulate local Bluetooth devices and discover remote devices and services.</p>
 <p>BlueZ libraries and daemons must be installed and running prior to Qtopia startup as Qtopia relies on information provided by the daemons to detect local host adapters and services.</p>
 <p>BlueZ consists of three main daemons as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -49,8 +59,9 @@
 <p><b>Note:</b> This daemon is not currently used by Qtopia.</p>
 </td></tr>
 </table></p>
-<p>Each Bluetooth device or local Bluetooth host adapter has an associated Bluetooth address that is stored as a six byte array and is commonly represented as six hexadecimal bytes separated by colons. For example: <tt>FF:FF:FF:FF:FF:FF</tt>.</p>
-<p>BlueZ and Qtopia support multiple local Bluetooth host adapters, however the most common case is to use a single adapter.</p>
+<p>Qtopia uses the DBUS interface of hcid to communicate with the BlueZ stack. Thus Qtopia also requires DBUS libraries in order to support Bluetooth.</p>
+<a name="qtopia-configuration"></a>
+<h3>Qtopia Configuration</h3>
 <p>In order to build Qtopia with Bluetooth support enabled, you must pass the following options:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
@@ -67,6 +78,8 @@
 <h2>Functionality</h2>
 <a name="device-configuration"></a>
 <h3>Device Configuration</h3>
+<p>Each Bluetooth device or local Bluetooth host adapter has an associated Bluetooth address that is stored as a six byte array and is commonly represented as six hexadecimal bytes separated by colons. For example: <tt>FF:FF:FF:FF:FF:FF</tt>.</p>
+<p>BlueZ and Qtopia support multiple local Bluetooth host adapters, however the most common case is to use a single adapter.</p>
 <p>The local host adapter can be controlled through the <tt>QBluetoothLocalDevice</tt> class where the adapter can be switched on/off and device visibility can be controlled. Visibility is controlled by two variables:</p>
 <ol type="1">
 <li><tt>page scan</tt> - controls whether remote devices can connect to the local device.</li>
@@ -112,10 +125,11 @@
 <p>Qtopia provides a framework for creating and managing Bluetooth services. A Bluetooth service can be created and registered within this framework by subclassing the <a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a> class. The framework allows registered services to be controlled by external sources through IPC messages. For example, Qtopia's Bluetooth Settings application allows end users to enable or disable registered services, and also modify the security settings of registered services.</p>
 <p>The service management framework stores various settings for each known service in the <tt>BluetoothServices.conf</tt> configuration file. This configuration file can be modified to provide default settings for registered services. As an example, a default configuration file is provided at <tt>etc/default/Trolltech/BluetoothServices.conf</tt>. This file sets the default security for the OBEX Object Push Service to 0, as Object Push services do not generally require authentication or encryption.</p>
 <p>The service management framework is implemented through the service manager in <tt>src/server/bluetoothservicemanager.h</tt> and the service control interface (for external control through IPC) in <tt>/src/libraries/qtopiacomm/bluetooth/bluetoothservicecontroller.h</tt>.</p>
+<p>For more information, see the <a href="bluetooth-servicemanager.html">Bluetooth Service Management Framework</a> page.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

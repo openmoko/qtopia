@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -75,7 +75,7 @@ inline QImage scale( const QImage& image, int width, int height )
         }
     }
 
-   return buffer;
+    return buffer;
 }
 
 ImageProcessor::ImageProcessor( ImageIO* iio, QObject* parent )
@@ -97,9 +97,8 @@ void ImageProcessor::crop( const QRect& rect )
 
 QPoint ImageProcessor::map( const QPoint& point ) const
 {
-    QPoint p( point );
     // Apply transformations to point
-    p = transformation_matrix.map( p );
+    QPoint p = transformation_matrix.map( point );
     // Calculate displacement to make transformed image positive
     QRect space( transformation_matrix.map( viewport ).normalized() );
     // Apply displacement to point
@@ -134,7 +133,6 @@ const QPixmap& ImageProcessor::preview( const QRect& rect ) const
     if ( sample.isNull() ) {
         _preview = QPixmap();
     } else {
-
         // Apply transformations to image
         sample = transform( sample, sample.rect() );
         // Scale up
@@ -149,11 +147,7 @@ const QPixmap& ImageProcessor::preview( const QRect& rect ) const
 QImage ImageProcessor::image() const
 {
     QImage img = image_io->image();
-    if ( img.isNull() ) {
-        return img;
-    } else {
-        return transform( image_io->image(), viewport );
-    }
+    return img.isNull() ? img : transform( img, viewport );
 }
 
 QImage ImageProcessor::image( const QSize& target ) const
@@ -163,8 +157,7 @@ QImage ImageProcessor::image( const QSize& target ) const
     (double)(dw)/(double)(sw) )
 
     // Determine reduction ratio for tranformed image
-    QSize transformed( transformation_matrix.map( viewport ).normalized().
-        size() );
+    QSize transformed( transformation_matrix.map( viewport ).normalized(). size() );
     double reduction_ratio = REDUCTION_RATIO( target.width(), target.height(),
         transformed.width(), transformed.height() );
     // Determine image level closest to reduction ratio
@@ -175,9 +168,8 @@ QImage ImageProcessor::image( const QSize& target ) const
     QRect reduced_viewport( viewport.topLeft() * level_factor,
         viewport.bottomRight() * level_factor );
 
-    // Retrive image at closest level and apply transformations
-    QImage sample( transform( image_io->image( closest_level ),
-        reduced_viewport ) );
+    // Retrieve image at closest level and apply transformations
+    QImage sample( transform( image_io->image( closest_level ), reduced_viewport ) );
 
     // Scale image up to size
     double scale_factor = reduction_ratio / level_factor;

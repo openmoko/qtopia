@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -69,7 +69,7 @@ private slots:
 private:
     void init();
     void createPeerId();
-    bool writeSystemFiles();
+    int writeSystemFiles();
 
 
     DialupConfig* config;
@@ -336,11 +336,14 @@ void DialupUI::accept()
         config->writeProperties(props);
 
         createPeerId();
-        if ( writeSystemFiles() )
+        int ret = writeSystemFiles();
+        if ( ret == 0 )
             QDialog::accept();
-        else if ( !errorText.isEmpty() ){
+        else {
             QMessageBox::warning(this, tr("Error"), "<qt>"+errorText+"</qt>",
                     QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+            if ( ret > 0 )
+                stack->setCurrentIndex( ret );
         }
 #ifdef QTOPIA_PHONE
     } else {
@@ -365,7 +368,13 @@ void DialupUI::createPeerId( )
     }
 }
 
-bool DialupUI::writeSystemFiles()
+/*
+  Return values:
+    -1 -> general error not connected to specific configuration
+    0  -> no error
+    >0 -> returned number gives indication of widget that could fix the problem
+  */
+int DialupUI::writeSystemFiles()
 {
     qLog(Network) << "Writing system files";
     const QtopiaNetworkProperties prop = config->getProperties();
@@ -404,7 +413,7 @@ bool DialupUI::writeSystemFiles()
         if ( phone.isEmpty() ) {
             errorText = tr("Missing dialup number");
             qLog(Network) << errorText;
-            return false;
+            return 2;
         }
         if ( prop.value("Serial/SilentDial") == "y" )
             dial += "ATM0 OK ";
@@ -437,7 +446,7 @@ bool DialupUI::writeSystemFiles()
         fc.close();
     } else {
         qLog(Network) << "Cannot write chat file";
-        return false;
+        return -1;
     }
 
     QFile fd( disconnectF );
@@ -452,7 +461,7 @@ bool DialupUI::writeSystemFiles()
         qLog(Network) << "Cannot write disconnect file";
         //delete connect chat file
         fc.remove();
-        return false;
+        return -1;
     }
 
     // GPRS modems require the the following pppd options
@@ -513,7 +522,7 @@ bool DialupUI::writeSystemFiles()
     } else {
         fc.remove(); //delete connect chat
         fd.remove(); //delete disconnect chat
-        return false; //cannot write peer file
+        return -1; //cannot write peer file
     }
 
     QStringList params;
@@ -528,7 +537,7 @@ bool DialupUI::writeSystemFiles()
     QFile::remove( peerFileName );
     //TODO write password files (pap, chap)
 
-    return true;
+    return 0;
 }
 
 #ifdef QTOPIA_PHONE

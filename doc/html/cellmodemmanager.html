@@ -29,6 +29,7 @@
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#callForwardingEnabled">callForwardingEnabled</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#cellLocation">cellLocation</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#networkOperator">networkOperator</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#networkRegistered">networkRegistered</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#planeModeEnabled">planeModeEnabled</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#planeModeSupported">planeModeSupported</a></b> () const</li>
@@ -98,10 +99,11 @@
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/Roaming</tt></td><td>Set to true if the network is in the roaming statem otherwise false.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the <a href="cellmodemmanager.html#cellLocation">cellLocation</a>() method.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/OperatorName</tt></td><td>Set to the current network operator name. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperator">networkOperator</a>() method.</td></tr>
-<tr valign="top" class="even"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
-<tr valign="top" class="odd"><td><tt>/Telephony/Status/PlaneModeAvailable</tt></td><td>True if the modem supports &quot;plane mode&quot;. Possible values are &quot;Yes&quot;, &quot;No&quot; or &quot;Unknown&quot;. The &quot;Unknown&quot; value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.</td></tr>
-<tr valign="top" class="even"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
-<tr valign="top" class="odd"><td><tt>/Telephony/Status/SimToolkitAvailable</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/OperatorCountry</tt></td><td>Set to the current network operator's country name, if available. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a>() method.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/PlaneModeAvailable</tt></td><td>True if the modem supports &quot;plane mode&quot;. Possible values are &quot;Yes&quot;, &quot;No&quot; or &quot;Unknown&quot;. The &quot;Unknown&quot; value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.</td></tr>
+<tr valign="top" class="odd"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkitAvailable</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
 </table></p>
 <p>The CellModemManager class provides the <tt>CellModem</tt> task.</p>
 <hr />
@@ -147,11 +149,13 @@
 <p>A call to this method disables this functionality and setModemEnabled() must be called manually to control the modem. This method can only be called prior to <a href="cellmodemmanager.html">CellModemManager</a>'s construction.</p>
 <p>See also <a href="cellmodemmanager.html#profilesControlModem">CellModemManager::profilesControlModem</a>().</p>
 <h3 class="fn"><a name="emergencyNumbers"></a><a href="qstringlist.html">QStringList</a> CellModemManager::emergencyNumbers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Return the list of emergency numbers. This list is currently <tt>112</tt>, <tt>911</tt> and <tt>000</tt> but may change in the future.</p>
+<p>Return the list of emergency numbers. This list is currently <tt>112</tt>, <tt>911</tt>, <tt>08</tt>, and <tt>000</tt> but may change in the future.</p>
 <h3 class="fn"><a name="networkOperator"></a><a href="qstring.html">QString</a> CellModemManager::networkOperator () const</h3>
 <p>Returns the current network operator. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
 <h3 class="fn"><a name="networkOperatorChanged"></a>void CellModemManager::networkOperatorChanged ( const <a href="qstring.html">QString</a> &amp; <i>networkOperator</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the network operator changes. <i>networkOperator</i> will be set to the new value.</p>
+<h3 class="fn"><a name="networkOperatorCountry"></a><a href="qstring.html">QString</a> CellModemManager::networkOperatorCountry () const</h3>
+<p>Returns the current network operator's country. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
 <h3 class="fn"><a name="networkRegistered"></a>bool CellModemManager::networkRegistered () const</h3>
 <p>Returns true if a network is registered, false otherwise. A network is registered if <a href="cellmodemmanager.html#registrationState">registrationState</a>() is either QTelephony::RegistrationHome or QTelephony::RegistrationRoaming.</p>
 <h3 class="fn"><a name="planeModeEnabled"></a>bool CellModemManager::planeModeEnabled () const</h3>
@@ -194,8 +198,8 @@
 <p>Returns <i>state</i> as a string.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

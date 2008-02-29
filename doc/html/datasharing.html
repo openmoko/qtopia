@@ -166,7 +166,8 @@
 <p>As with client applications, for devices which use SXE an application providing a QDS service must include <tt>qds</tt> in the package domain in the project file (see above for details), as well as the domain which provides access to the service class.</p>
 <a name="extensibility"></a>
 <h2>Extensibility</h2>
-<p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class. Eg. For a class VCard and streaming operator <tt>QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )</tt>:</p>
+<p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class.</p>
+<p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="qbytearray.html">QByteArray</a>.</p>
 <pre>    VCard vcard;
     QByteArray vCardArray;
     {
@@ -174,11 +175,22 @@
         stream &lt;&lt; vcard;
     }
     QDSData vCardData( vCardArray, QMimeType( &quot;text/x-vCard&quot; ) );</pre>
-<p>This allows services to be provided for <tt>text/x-vCard</tt> data.</p>
+<p>This allows services to be provided for <tt>text/x-vCard</tt> data assuming that there has streaming operator defined in the VCard class.</p>
+<p>For example</p>
+<pre><span class="comment">    //declare the streaming function in the VCard's header file</span>
+    QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard );
+
+    ...
+
+<span class="comment">    //implement the streaming function in the VCard's cpp file</span>
+    QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )
+    {
+    ...
+    }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

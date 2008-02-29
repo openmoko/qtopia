@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -433,9 +433,19 @@ void InputMethods::loadInputMethods()
 
     loader = new QPluginManager( "inputmethods" );
 
+    if ( !loader ){
+        qLog(Input) << "Missing inputmethods loader";
+        selector->blockSignals(false);
+        return;
+    }
+
     foreach ( QString name, loader->list() ) {
         qLog(Input) << "Loading IM: "<<name;
         QObject *instance = loader->instance(name);
+        if ( !instance ){
+            qLog(Input) << "Missing loader instance";
+            continue;
+        }
         QtopiaInputMethod *plugin = qobject_cast<QtopiaInputMethod*>(instance);
         if ( plugin ) {
             bool require_keypad = plugin->testProperty(QtopiaInputMethod::RequireKeypad);
@@ -512,7 +522,7 @@ void InputMethods::updateIMVisibility()
                 || !lastActiveWindow
                 || !hintMap.contains(lastActiveWindow)
                 || hintMap[lastActiveWindow] == "")
-            && !selector->current()->testProperty(QtopiaInputMethod::InteractiveIcon)) {
+            && (!selector->current() || !selector->current()->testProperty(QtopiaInputMethod::InteractiveIcon))) {
         selector->showChoice( false );
 
     }

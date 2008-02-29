@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/qt4-styles.qdoc -->
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.1/qtopiacore/qt/doc/src/qt4-styles.qdoc -->
 <head>
   <title>Qt 4.2: The Qt 4 Style API</title>
   <link rel="prev" href="qt4-network.html" />
@@ -34,7 +34,7 @@
 <li>a <a href="qwidget.html">QWidget</a> on which the drawing is performed (optional)</li>
 </ul>
 <p>The style gets all the information it needs to render the graphical element from <a href="qstyleoption.html">QStyleOption</a>. The widget is passed as the last argument in case the style needs it to perform special effects (such as animated default buttons on Mac OS X), but it isn't mandatory. In fact, <a href="qstyle.html">QStyle</a> can be used to draw on any paint device, not just widgets, by setting the <a href="qpainter.html">QPainter</a> properly.</p>
-<p>Thanks to <a href="qstyleoption.html">QStyleOption</a>, it is now possible to make <a href="qstyle.html">QStyle</a> draw widgets without linking in any code for the widget. This is how Qt's built-in styles can draw Qt 3 widgets such as <a href="q3listview.html">Q3ListView</a> without necessarily linking against the <a href="qt3support.html">Qt3Support</a> library. Another significant benefit of the new approach is that it's now possible to use <a href="qstyle.html">QStyle</a>'s draw functions on other widgets than the built-in widgets; for example, you can draw a combobox on any widget, not just on a <a href="qcombobox.html">QComboBox</a>.</p>
+<p>Thanks to <a href="qstyleoption.html">QStyleOption</a>, it is now possible to make <a href="qstyle.html">QStyle</a> draw widgets without linking in any code for the widget. This is how Qt's built-in styles can draw Qt 3 widgets such as Q3ListView without necessarily linking against the <a href="qt3support.html">Qt3Support</a> library. Another significant benefit of the new approach is that it's now possible to use <a href="qstyle.html">QStyle</a>'s draw functions on other widgets than the built-in widgets; for example, you can draw a combobox on any widget, not just on a <a href="qcombobox.html">QComboBox</a>.</p>
 <p><a href="qstyleoption.html">QStyleOption</a> has various subclasses for the various types of graphical elements that can be drawn, and it's possible to create custom subclasses. For example, the <a href="qstyle.html#PrimitiveElement-enum">QStyle::PE_FrameFocusRect</a> element expects a <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a> argument. This is documented for each enum value.</p>
 <p>When reimplementing <a href="qstyle.html">QStyle</a> functions that take a <a href="qstyleoption.html">QStyleOption</a> parameter, you often need to cast the <a href="qstyleoption.html">QStyleOption</a> to a subclass (e.g., <a href="qstyleoptionfocusrect.html">QStyleOptionFocusRect</a>). For safety, you can use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to ensure that the pointer type is correct. If the object isn't of the right type, <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() returns 0. For example:</p>
 <pre> const QStyleOptionFocusRect *focusRectOption =
@@ -129,7 +129,7 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
 <td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
 </tr></table></div></address></body>

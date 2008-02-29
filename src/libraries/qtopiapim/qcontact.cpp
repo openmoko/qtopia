@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -117,11 +117,11 @@ QString emailSeparator() { return " "; }
 /*!
   \class QContact
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QContact class holds the data of an address book entry.
 
   This data includes information the name of the person, contact
-  information, and business information such as deparment and job title.
+  information, and business information such as department and job title.
 
 */
 
@@ -676,7 +676,7 @@ void QContact::clearEmailList()
 
   The format is a set of pattern separated by '|'s.  Each pattern is
   a set of space separated tokens.  A token can either be _ for a space,
-  an identifier as from indentifierKey(), or any string.  The format for label
+  an identifier as from identifierKey(), or any string.  The format for label
   will the first pattern for which all fields specified are non null for the contact.
 
   For example:
@@ -694,7 +694,7 @@ void QContact::setLabelFormat(const QString &f)
 
   The format is a set of pattern separated by '|'s.  Each pattern is
   a set of space separated tokens.  A token can either be _ for a space,
-  an identifier as from indentifierKey(), or any string.  The format for label
+  an identifier as from identifierKey(), or any string.  The format for label
   will the first pattern for which all fields specified are non null for the contact.
 
   For example:
@@ -824,9 +824,21 @@ QPixmap QContact::thumbnail() const
     }
 
     if (result.isNull()) {
-        QLatin1String key("pimcontact-generic-thumb");
+        QLatin1String key = QLatin1String("pimcontact-generic-personal-thumb");
+        QString filename(":image/addressbook/generic-personal-contact");
+
+        if (nameTitle().isEmpty() && firstName().isEmpty()
+                && middleName().isEmpty() && lastName().isEmpty()
+                && suffix().isEmpty() && !company().isEmpty()) {
+            key = QLatin1String("pimcontact-generic-corporation-contact");
+            filename = ":image/addressbook/generic-corporation-contact";
+        } else if (d->mCategories.contains("Business")) { // no tr
+            key = QLatin1String("pimcontact-generic-thumb");
+            filename = ":image/addressbook/generic-contact";
+        }
+
         if (!QGlobalPixmapCache::find(key, result)) {
-            QImageReader reader(":image/addressbook/generic-contact");
+            QImageReader reader(filename);
             reader.setScaledSize(thumbnailSize());
             QImage img = reader.read();
             if (!img.isNull()) {
@@ -886,7 +898,17 @@ QPixmap QContact::portrait() const
     }
 
     if (result.isNull()) {
-        QImageReader reader(":image/addressbook/generic-contact");
+        QString filename(":image/addressbook/generic-personal-contact");
+
+        if (nameTitle().isEmpty() && firstName().isEmpty()
+                && middleName().isEmpty() && lastName().isEmpty()
+                && suffix().isEmpty() && !company().isEmpty()) {
+            filename = ":image/addressbook/generic-corporation-contact";
+        } else if (d->mCategories.contains("Business")) { // no tr
+            filename = ":image/addressbook/generic-contact";
+        }
+
+        QImageReader reader(filename);
         reader.setScaledSize(portraitSize());
         QImage img = reader.read();
         if (!img.isNull())
@@ -1231,7 +1253,7 @@ static QContact parseVObject( VObject *obj )
             }
             // evil if, indicates that if there was even one property we didn't know, don't store this value.
             if ( (type & UNKNOWN) == UNKNOWN ) {
-                qWarning("found unkown attribute in vobject, %s", (const char *)name.toLocal8Bit());
+                qWarning("found unknown attribute in vobject, %s", (const char *)name.toLocal8Bit());
             }
 
             if ( ( type & (HOME|WORK) ) == 0 ) // default
@@ -1394,7 +1416,7 @@ static QContact parseVObject( VObject *obj )
 }
 
 /*!
-  Compares to \a other contacts and returns true if it is equivilent.
+  Compares to \a other contacts and returns true if it is equivalent.
   Otherwise returns false
 */
 bool QContact::operator==(const QContact &other) const
@@ -1643,7 +1665,7 @@ const QMap<QString, QString> &QContact::customFieldsRef() const { return d->cust
 
 void QContact::changePortrait( const QPixmap &p )
 {
-    //  Check for existing contact portraits, and delete them if necissary.
+    //  Check for existing contact portraits, and delete them if necessary.
     QString photoFile = portraitFile();
     QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
 
@@ -1658,7 +1680,7 @@ void QContact::changePortrait( const QPixmap &p )
     }
 
     if( !p.isNull() ) {
-        //  If there was no portrait initally, find a filename for the portrait.
+        //  If there was no portrait initially, find a filename for the portrait.
         if( photoFile.isEmpty() ) {
             QString baseFileName = "ci-" + QString::number( ::time(0) ) + "-";
             int i = 0;
@@ -1691,22 +1713,22 @@ void QContact::changePortrait( const QPixmap &p )
   information with \a contact.  Returns the merged contact.
 
   Formatting rules include using () for the nick name, "" for pronunciation,
-  standard name titles and suffixes as well as detecting first, middl and last name ordering.
+  standard name titles and suffixes as well as detecting first, middle and last name ordering.
 */
 QContact QContact::parseLabel(const QString &text, const QContact &contact)
 {
     //QRegExp pronunciationRE("\\s*\\((?!\\(+)\\)\\s*");
     //QRegExp nickRE("\\s*\"(?!\"+)\"\\s*");
-    QRegExp pronunciationRE("\\((.+)\\)");
+    static QRegExp pronunciationRE("\\((.+)\\)");
     pronunciationRE.setMinimal(true);
-    QRegExp nickRE("\"(.+)\"");
+    static QRegExp nickRE("\"(.+)\"");
     nickRE.setMinimal(true);
 
 
-    QRegExp fmlRE("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*$");
-    QRegExp lfmRE("^\\s*(\\S+),\\s+(\\S+)\\s+(\\S+)\\s*$");
-    QRegExp flRE("^\\s*(\\S+)\\s+(\\S+)\\s*$");
-    QRegExp lfRE("^\\s*(\\S+),\\s+(\\S+)\\s*$");
+    static QRegExp fmlRE("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*$");
+    static QRegExp lfmRE("^\\s*(\\S+),\\s+(\\S+)\\s+(\\S+)\\s*$");
+    static QRegExp flRE("^\\s*(\\S+)\\s+(\\S+)\\s*$");
+    static QRegExp lfRE("^\\s*(\\S+),\\s+(\\S+)\\s*$");
 
     QContact c = contact;
     QString label = text;
@@ -1736,24 +1758,41 @@ QContact QContact::parseLabel(const QString &text, const QContact &contact)
     }
 
     /* NAME TITLE AND SUFFIX */
-    QStringList prefixes = QContactModel::localeNameTitles();
-    QStringList suffixes = QContactModel::localeSuffixes();
-    foreach(QString affix, prefixes) {
-        QRegExp re("^\\s*\\b"+QRegExp::escape(affix)+"\\b\\.?\\s+");
-        re.setCaseSensitivity(Qt::CaseInsensitive);
-        index = re.indexIn(label);
+    static QList<QRegExp *> prefixesRE;
+    static QList<QRegExp *> suffixesRE;
+    static QStringList prefixes(QContactModel::localeNameTitles());
+    static QStringList suffixes(QContactModel::localeSuffixes());
+
+    if (prefixesRE.count() != prefixes.count()) {
+        foreach(QString affix, prefixes) {
+            QRegExp *re = new QRegExp("^\\s*\\b"+QRegExp::escape(affix)+"\\b\\.?\\s+");
+            re->setCaseSensitivity(Qt::CaseInsensitive);
+            prefixesRE.append(re);
+        }
+    }
+    if (suffixesRE.count() != suffixes.count()) {
+        foreach(QString affix, suffixes) {
+            QRegExp *re = new QRegExp("^\\s*\\b"+QRegExp::escape(affix)+"\\b\\.?\\s+");
+            re->setCaseSensitivity(Qt::CaseInsensitive);
+            suffixesRE.append(re);
+        }
+    }
+
+    int i;
+    for (i = 0; i < prefixesRE.count(); i++) {
+        index = prefixesRE[i]->indexIn(label);
         if (index != -1) {
-            label = label.left(index) + " " + label.mid(index+re.matchedLength());
+            QString affix = prefixes[i];
+            label = label.left(index) + " " + label.mid(index+prefixesRE[i]->matchedLength());
             c.setNameTitle(affix);
             break;
         }
     }
-    foreach(QString affix, suffixes) {
-        QRegExp re("\\s+\\b"+QRegExp::escape(affix)+"\\b\\.?\\s*$");
-        re.setCaseSensitivity(Qt::CaseInsensitive);
-        index = re.indexIn(label);
+    for (i = 0; i < suffixesRE.count(); i++) {
+        index = suffixesRE[i]->indexIn(label);
         if (index != -1) {
-            label = label.left(index) + " " + label.mid(index+re.matchedLength());
+            QString affix = suffixes[i];
+            label = label.left(index) + " " + label.mid(index+suffixesRE[i]->matchedLength());
             c.setSuffix(affix);
             break;
         }

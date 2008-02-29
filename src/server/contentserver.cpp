@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -226,11 +226,7 @@ void ContentServer::initDocScan()
     QFileSystemFilter fsf;
     fsf.documents = QFileSystemFilter::Set;
     foreach ( QFileSystem *fs, storage.fileSystems( &fsf, true )) {
-        // FIXME Storage.conf should be more flexible so that this magic is not required
-        QString path = fs->path();
-        if ( fs->disk() == "HOME" )
-            path = fs->path() + "/Documents";
-        DirectoryScannerManager::scan(path, 0);
+        DirectoryScannerManager::scan(fs->documentsPath(), 0);
     }
 }
 

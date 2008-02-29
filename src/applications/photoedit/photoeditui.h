@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -34,22 +34,19 @@
 #include "slideshow/slideshowui.h"
 #include "slideshow/slideshow.h"
 
-#include <qimagedocumentselector.h>
-#include <qsoftmenubar.h>
-#include <qdrmcontent.h>
+#include <qcategorymanager.h>
 #include <qtopiaabstractservice.h>
-
-#include <qstring.h>
-#include <qslider.h>
-
-#include <QStackedWidget>
-#include <QMenu>
+#include <QString>
 
 class QDSActionRequest;
 class QResizeEvent;
+class QMenu;
+class QStackedWidget;
+class QImageDocumentSelector;
 
 
-class PhotoEditUI : public QWidget {
+class PhotoEditUI : public QWidget
+{
     Q_OBJECT
     friend class PhotoEditService;
 public:
@@ -106,9 +103,11 @@ private slots:
     // Change to multi view in image selector
     void setViewThumbnail();
 
+#ifndef QTOPIA_PHONE
     // Only Qtopia PDA
     // Launch selector popup menu
     void launchPopupMenu( const QContent&, const QPoint& );
+#endif
 
     // Launch slide show dialog
     void launchSlideShowDialog();
@@ -132,9 +131,11 @@ private slots:
     // Open currently highlighted image in image selector for editing
     void editCurrentSelection();
 
+#ifdef QTOPIA_PHONE
     // Only Qtopia Phone
     // Ignore changes to image and exit from editor
     void cancelEdit();
+#endif
 
     // Perform crop on current image using region from region selector
     void cropImage();
@@ -202,13 +203,12 @@ private:
     QDrmContent selector_image;
 
 #ifdef QTOPIA_PHONE
-    QMenu *selector_menu;
     QAction *separator_action, *properties_action, *beam_action, *print_action;
     QAction *delete_action, *edit_action, *slide_show_action;
 #else
     SelectorUI *selector_ui;
-    QMenu *selector_menu;
 #endif
+    QMenu *selector_menu;
     QImageDocumentSelector *image_selector;
 
     EditorUI *editor_ui;

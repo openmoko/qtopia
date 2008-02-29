@@ -1,7 +1,7 @@
 qtopia_project(qtopia core lib)
 license(FREEWARE)
 TARGET          =   qtdbus
-CONFIG+=no_tr no_singleexec
+CONFIG+=no_tr
 
 DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJECT_TO_CHANGE QDBUS_NO_SPECIALTYPES
 

@@ -64,7 +64,7 @@
 <li><div class="fn"/>QtopiaServerApplication * <b><a href="qtopiaserverapplication.html#instance">instance</a></b> ()</li>
 <li><div class="fn"/>QObject * <b><a href="qtopiaserverapplication.html#qtopiaTask">qtopiaTask</a></b> ( const QByteArray &amp; <i>taskName</i>, bool <i>onlyRunning</i> = false )</li>
 <li><div class="fn"/>ShutdownType <b><a href="qtopiaserverapplication.html#shutdownType">shutdownType</a></b> ()</li>
-<li><div class="fn"/>bool <b><a href="qtopiaserverapplication.html#startup">startup</a></b> ( int &amp; <i>argc</i>, char ** <i>argv</i> )</li>
+<li><div class="fn"/>bool <b><a href="qtopiaserverapplication.html#startup">startup</a></b> ( int &amp; <i>argc</i>, char ** <i>argv</i>, const QList&lt;QByteArray&gt; &amp; <i>startupGroups</i> )</li>
 <li><div class="fn"/>QString <b><a href="qtopiaserverapplication.html#taskConfigFile">taskConfigFile</a></b> ()</li>
 <li><div class="fn"/>QByteArray <b><a href="qtopiaserverapplication.html#taskValueSpaceObject">taskValueSpaceObject</a></b> ( const QByteArray &amp; <i>taskName</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtopiaserverapplication.html#taskValueSpaceSetAttribute">taskValueSpaceSetAttribute</a></b> ( const QByteArray &amp; <i>taskName</i>, const QByteArray &amp; <i>attribute</i>, const QVariant &amp; <i>value</i> )</li>
@@ -229,9 +229,9 @@
 <p>Generally a UI will be connected to the shutdownRequested() signal to ask the user what they want to do. This UI should then invoke the <a href="qtopiaserverapplication.html#shutdown">shutdown</a>() method to perform the appropriate action.</p>
 <h3 class="fn"><a name="shutdownType"></a><a href="qtopiaserverapplication.html#ShutdownType-enum">ShutdownType</a> QtopiaServerApplication::shutdownType ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the type of shutdown previously requested by calling <a href="qtopiaserverapplication.html#shutdown">shutdown</a>(), or <a href="qtopiaserverapplication.html#ShutdownType-enum">NoShutdown</a> if no shutdown has been requested.</p>
-<h3 class="fn"><a name="startup"></a>bool QtopiaServerApplication::startup ( int &amp; <i>argc</i>, char ** <i>argv</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="startup"></a>bool QtopiaServerApplication::startup ( int &amp; <i>argc</i>, char ** <i>argv</i>, const <a href="qlist.html">QList</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt; &amp; <i>startupGroups</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Launches server tasks. This method is used to start the Qtopia server and should never be called from other code. Returns true on success, false on failure.</p>
-<p><i>argc</i> and <i>argv</i> should be the values passed to the main() function.</p>
+<p><i>argc</i> and <i>argv</i> should be the values passed to the main() function. <i>startupGroups</i> contains a list of Task groups to start.</p>
 <h3 class="fn"><a name="taskConfigFile"></a><a href="qstring.html">QString</a> QtopiaServerApplication::taskConfigFile ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the task system's configuration file.</p>
 <h3 class="fn"><a name="taskValueSpaceObject"></a><a href="qbytearray.html">QByteArray</a> QtopiaServerApplication::taskValueSpaceObject ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>taskName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -308,8 +308,8 @@
 <p><i>InterfaceName</i> should be a Qt Q_INTERFACE style interface. If you want to use a <a href="qobject.html">QObject</a> derived type as an interface, use the QTOPIA_TASK_INTERFACE() macro instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

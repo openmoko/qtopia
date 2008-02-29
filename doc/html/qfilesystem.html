@@ -18,13 +18,19 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
+<li><div class="fn"/><b><a href="qfilesystem.html#QFileSystem">QFileSystem</a></b> ()</li>
+<li><div class="fn"/><b><a href="qfilesystem.html#QFileSystem-2">QFileSystem</a></b> ( const QFileSystem &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="qfilesystem.html#dtor.QFileSystem">~QFileSystem</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#applications">applications</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#applicationsPath">applicationsPath</a></b> () const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#availBlocks">availBlocks</a></b> () const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#blockSize">blockSize</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#contentDatabase">contentDatabase</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#disk">disk</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#documents">documents</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#documentsPath">documentsPath</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isConnected">isConnected</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#isNull">isNull</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isRemovable">isRemovable</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isWritable">isWritable</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#name">name</a></b> () const</li>
@@ -32,6 +38,14 @@
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#path">path</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#prevPath">prevPath</a></b> () const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#totalBlocks">totalBlocks</a></b> () const</li>
+<li><div class="fn"/>QFileSystem &amp; <b><a href="qfilesystem.html#operator-eq">operator=</a></b> ( const QFileSystem &amp; <i>other</i> )</li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#applicationsFileSystem">applicationsFileSystem</a></b> ()</li>
+<li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#documentsFileSystem">documentsFileSystem</a></b> ()</li>
+<li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#fromFileName">fromFileName</a></b> ( const QString &amp; <i>fileName</i>, bool <i>connectedOnly</i> = true )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -48,8 +62,20 @@
 <p>See also <a href="qstoragemetainfo.html">QStorageMetaInfo</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QFileSystem"></a>QFileSystem::QFileSystem ()</h3>
+<p>Constructs a null <a href="qfilesystem.html">QFileSystem</a>.</p>
+<h3 class="fn"><a name="QFileSystem-2"></a>QFileSystem::QFileSystem ( const QFileSystem &amp; <i>other</i> )</h3>
+<p>Constructs a copy of the <a href="qfilesystem.html">QFileSystem</a> <i>other</i>.</p>
+<h3 class="fn"><a name="dtor.QFileSystem"></a>QFileSystem::~QFileSystem ()</h3>
+<p>Destroys a <a href="qfilesystem.html">QFileSystem</a>.</p>
 <h3 class="fn"><a name="applications"></a>bool QFileSystem::applications () const</h3>
 <p>Returns flag indicating if the file system can contain applications.</p>
+<h3 class="fn"><a name="applicationsFileSystem"></a>QFileSystem QFileSystem::applicationsFileSystem ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the <a href="qfilesystem.html">QFileSystem</a> which contains the default application storage path.</p>
+<p>The default application storage path can be obtained by calling <tt>QFileSystem::applicationsFileSystem().applicationsPath()</tt>.</p>
+<p>See also <a href="qfilesystem.html#applicationsPath">applicationsPath</a>().</p>
+<h3 class="fn"><a name="applicationsPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::applicationsPath () const</h3>
+<p>Returns the path of the applications directory, such as /home/Applications.</p>
 <h3 class="fn"><a name="availBlocks"></a>long QFileSystem::availBlocks () const</h3>
 <p>Returns the number of available blocks on the file system</p>
 <h3 class="fn"><a name="blockSize"></a>long QFileSystem::blockSize () const</h3>
@@ -60,8 +86,19 @@
 <p>Returns the file system name, such as /dev/hda3</p>
 <h3 class="fn"><a name="documents"></a>bool QFileSystem::documents () const</h3>
 <p>Returns flag indicating if the file system can contain documents.</p>
+<h3 class="fn"><a name="documentsFileSystem"></a>QFileSystem QFileSystem::documentsFileSystem ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the <a href="qfilesystem.html">QFileSystem</a> which contains the default document storage path.</p>
+<p>The default document storage path can be obtained by calling <tt>QFileSystem::documentsFileSystem().documentsPath()</tt>.</p>
+<p>See also <a href="qfilesystem.html#documentsPath">documentsPath</a>().</p>
+<h3 class="fn"><a name="documentsPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::documentsPath () const</h3>
+<p>Returns the path of the documents directory, such as /home/Documents.</p>
+<h3 class="fn"><a name="fromFileName"></a>QFileSystem QFileSystem::fromFileName ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, bool <i>connectedOnly</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns a <a href="qfilesystem.html">QFileSystem</a> describing the file system on which the file with the name <i>fileName</i> is located.</p>
+<p>If <i>connectedOnly</i> is true the <a href="qfilesystem.html">QFileSystem</a> will only be returned if it is currently connected.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QFileSystem::isConnected () const</h3>
 <p>Returns flag indicating if the file system is currently connected.</p>
+<h3 class="fn"><a name="isNull"></a>bool QFileSystem::isNull () const</h3>
+<p>Returns true if the <a href="qfilesystem.html">QFileSystem</a> is unitialised.</p>
 <h3 class="fn"><a name="isRemovable"></a>bool QFileSystem::isRemovable () const</h3>
 <p>Returns flag indicating if the file system can be removed. For example, a CF card would be removable, but the internal memory would not.</p>
 <h3 class="fn"><a name="isWritable"></a>bool QFileSystem::isWritable () const</h3>
@@ -76,10 +113,12 @@
 <p>Returns the previous mount path, such as /home (useful when a filesystem has been unmounted)</p>
 <h3 class="fn"><a name="totalBlocks"></a>long QFileSystem::totalBlocks () const</h3>
 <p>Returns the total number of blocks on the file system</p>
+<h3 class="fn"><a name="operator-eq"></a>QFileSystem &amp; QFileSystem::operator= ( const QFileSystem &amp; <i>other</i> )</h3>
+<p>Copies the value of the <a href="qfilesystem.html">QFileSystem</a> <i>other</i> to a <a href="qfilesystem.html">QFileSystem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

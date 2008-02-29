@@ -34,12 +34,11 @@ enable_singleexec {
 
     # We might need some additional stuff on our link line
     qt {
-        readqconfig()
-        contains(QT_CONFIG,system-jpeg):LIBS+=-ljpeg
-        contains(QT_CONFIG,system-png):LIBS+=-lpng
-        contains(QT_CONFIG,system-mng):LIBS+=-lmng
-        contains(QT_CONFIG,system-zlib):LIBS+=-lz
-        contains(QT_CONFIG,system-freetype) {
+        contains(QTE_CONFIG,system-jpeg):LIBS+=-ljpeg
+        contains(QTE_CONFIG,system-png):LIBS+=-lpng
+        contains(QTE_CONFIG,system-mng):LIBS+=-lmng
+        contains(QTE_CONFIG,system-zlib):LIBS+=-lz
+        contains(QTE_CONFIG,system-freetype) {
             include($$QT_SOURCE_TREE/config.tests/unix/freetype/freetype.pri)
             LIBS+=-lfreetype
         }

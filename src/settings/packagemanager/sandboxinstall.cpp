@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -57,7 +57,7 @@
   In this case the destination directory will be a symlink from the
   system root to the location on the media card.
   */
-SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, const QString &m )
+SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, const QString &m, ErrorReporter *reporter )
     : package( pkg )
     , media( m )
     , abort( false )
@@ -67,16 +67,27 @@ SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, co
     Q_ASSERT( sandboxRoot.exists() );
     if ( !pkg->isComplete() )   // must have the md5Sum value, plus content!
     {
-        PackageView::displayMessage(
-                QObject::tr( "Package %1 <font color=\"#CC0000\">is incomplete</font> - install cancelled." )
-                .arg( pkg->name ));
+        QString message = QObject::tr( "Package %1 <font color=\"#CC0000\">is incomplete</font> - install cancelled." )
+                .arg( pkg->name );
+
+        if( reporter )
+            reporter->reportError( message );
+        else
+            PackageView::displayMessage( message );
+
         abort = true;
         return;
     }
     if ( sandboxRoot.exists( pkg->md5Sum ))
     {
-        PackageView::displayMessage( QObject::tr( "<font color=\"#CC0000\">Package Error</font> "
-                    "Package %1 already installed" ).arg( pkg->name ));
+        QString message = QObject::tr( "<font color=\"#CC0000\">Package Error</font> "
+                "Package %1 already installed" ).arg( pkg->name );
+
+        if( reporter )
+            reporter->reportError( message );
+        else
+            PackageView::displayMessage( message );
+
         abort = true;
         return;
     }

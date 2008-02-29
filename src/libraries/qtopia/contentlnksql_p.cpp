@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -630,7 +630,8 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
     }
 
     {
-        QSqlQuery aNCM_fkchk_category_qry( QLatin1String("SELECT * FROM categories WHERE categoryid=:categoryid"), db );  // NO TR
+        static const QString selectString = QLatin1String("SELECT * FROM categories WHERE categoryid=:categoryid");
+        QSqlQuery aNCM_fkchk_category_qry( selectString, db );  // NO TR
 
         aNCM_fkchk_category_qry.bindValue( QLatin1String("categoryid"), cat );
 
@@ -645,19 +646,63 @@ bool ContentLinkSql::appendNewCategoryMap( const QString &cat, const QString &sc
 
         if ( !hasRecords( aNCM_fkchk_category_qry ) )
         {
-            aNCM_fkchk_category_qry.clear();
+            bool found = false;
+            QString catLabel;
+            QString catScope;
+            QString catIcon;
+            int catFlags = 0;
 
-            QSqlQuery aNCM_cat_qry( QLatin1String("INSERT INTO categories ( categoryid, categorytext, categoryscope ) VALUES ( :categoryid, :categorytext, :categoryscope )"), db );  // NO TR
+            foreach( QtopiaDatabaseId dbId, QtopiaSql::databaseIds() )
+            {
+                if( dbId == cid.first )
+                    continue;
 
-            aNCM_cat_qry.bindValue( QLatin1String("categoryid"), cat );
-            aNCM_cat_qry.bindValue( QLatin1String("categorytext"), trans.isEmpty() ? cat : trans );
-            aNCM_cat_qry.bindValue( QLatin1String("categoryscope"), scope );
+                QSqlQuery query( selectString, QtopiaSql::database( dbId ) );
 
+                query.bindValue( QLatin1String("categoryid"), cat );
+
+                QtopiaSql::logQuery( query );
+
+                if( query.exec() && query.first() )
+                {
+                    QSqlRecord record = query.record();
+
+                    catLabel = record.value( QLatin1String( "categorytext" ) ).toString();
+                    catScope = record.value( QLatin1String( "categoryscope" ) ).toString();
+                    catIcon = record.value( QLatin1String( "categoryicon" ) ).toString();
+                    catFlags = record.value( QLatin1String( "flags" ) ).toInt();
+
+                    found = true;
+
+                    break;
+                }
+            }
+
+            QSqlQuery aNCM_cat_qry( QLatin1String("INSERT INTO categories ( categoryid, categorytext, categoryscope, categoryicon, flags ) VALUES ( :categoryid, :categorytext, :categoryscope, :categoryicon, :flags )"), db );  // NO TR
+
+            if( found )
+            {
+                aNCM_cat_qry.bindValue( QLatin1String("categoryid"), cat );
+                aNCM_cat_qry.bindValue( QLatin1String("categorytext"), catLabel );
+                aNCM_cat_qry.bindValue( QLatin1String("categoryscope"), catScope );
+                aNCM_cat_qry.bindValue( QLatin1String("categoryicon"), catIcon );
+                aNCM_cat_qry.bindValue( QLatin1String("flags"), catFlags );
+
+                qDebug() << "Binding found values";
+            }
+            else
+            {
+                aNCM_cat_qry.bindValue( QLatin1String("categoryid"), cat );
+                aNCM_cat_qry.bindValue( QLatin1String("categorytext"), trans.isEmpty() ? cat : trans );
+                aNCM_cat_qry.bindValue( QLatin1String("categoryscope"), scope );
+                aNCM_cat_qry.bindValue( QLatin1String("categoryicon"), QString() );
+                aNCM_cat_qry.bindValue( QLatin1String("flags"), 0 );
+            }
             if (QtopiaSql::exec(aNCM_cat_qry, db, useTransaction).type() != QSqlError::NoError)
             {
                 isError = true;
                 errText += db.lastError().text();
-                qLog(DocAPI) << "couldn't update categories for" << cid;
+                qLog(DocAPI) << "couldn't insert category" << cat << "for" << cid;
                 return false;
             } else {
                 QtopiaIpcEnvelope e(QLatin1String("QPE/System"), QLatin1String("categoriesChanged()") );
@@ -1065,39 +1110,66 @@ bool ContentLinkSql::writeProperty(QContentId cId, const QString& key, const QSt
         grp = QLatin1String("none");
     if ( cId == QContent::InvalidId )
         return false;
-    QSqlQuery qProperties_qry( QtopiaSql::database(cId.first) );  // this cant be prepared
-    qProperties_qry.prepare( QLatin1String("select count(*) from contentProps where cid=:cid and name=:name and grp=:grp") );  // NO TR
-    qProperties_qry.bindValue( QLatin1String("cid"), cId.second );
-    qProperties_qry.bindValue( QLatin1String("name"), key );
-    qProperties_qry.bindValue( QLatin1String("grp"), grp );
+
     bool result = false;
-    QtopiaSql::logQuery( qProperties_qry );
-    if ( qProperties_qry.exec() )
+
+    if( value.isEmpty() )
     {
-        bool update = qProperties_qry.first() && qProperties_qry.value(0).toInt() > 0;
-        qProperties_qry.clear();
-        if (update) {
-            QSqlQuery qPropertiesUpdate_qry( QLatin1String("update contentProps set value = :value where cid = :cid and grp = :grp and name = :name"), QtopiaSql::database(cId.first) );  // no tr
-            qPropertiesUpdate_qry.bindValue( QLatin1String("value"), value );
-            qPropertiesUpdate_qry.bindValue( QLatin1String("cid"), cId.second );
-            qPropertiesUpdate_qry.bindValue( QLatin1String("grp"), grp );
-            qPropertiesUpdate_qry.bindValue( QLatin1String("name"), key );
-            QtopiaSql::logQuery( qPropertiesUpdate_qry );
-            result = qPropertiesUpdate_qry.exec();
-        } else {
-            QSqlQuery qPropertiesInsert_qry( QLatin1String("insert into contentProps(cid,name,value,grp) values (:cid, :name, :value, :grp)"), QtopiaSql::database(cId.first) );  // no tr
-            qPropertiesInsert_qry.bindValue( QLatin1String("cid"), cId.second );
-            qPropertiesInsert_qry.bindValue( QLatin1String("name"), key );
-            qPropertiesInsert_qry.bindValue( QLatin1String("value"), value );
-            qPropertiesInsert_qry.bindValue( QLatin1String("grp"), grp );
-            QtopiaSql::logQuery( qPropertiesInsert_qry );
-            result = qPropertiesInsert_qry.exec();
+        QSqlQuery removeQuery( 
+                QLatin1String( "delete from contentProps where cid=:cid and name=:name and grp=:grp" ),
+                QtopiaSql::database( cId.first ) );
+
+        removeQuery.bindValue( QLatin1String( "cid" ), cId.second );
+        removeQuery.bindValue( QLatin1String( "name" ), key );
+        removeQuery.bindValue( QLatin1String( "grp" ), grp );
+
+        QtopiaSql::logQuery( removeQuery );
+
+        if( removeQuery.exec() )
+        {
+            result = true;
+        }
+        else
+        {
+            qLog(DocAPI) << "Failed to delete property" << group << key << "from content" << cId;
         }
     }
     else
     {
-        qLog(DocAPI) << "ContentLinkSql::writeProperty: Query failed!! qry=" << qProperties_qry.lastQuery()
-                << "\nerror=" << qProperties_qry.lastError();
+        QSqlQuery qProperties_qry( QtopiaSql::database(cId.first) );  // this cant be prepared
+        qProperties_qry.prepare( QLatin1String("select count(*) from contentProps where cid=:cid and name=:name and grp=:grp") );  // NO TR
+        qProperties_qry.bindValue( QLatin1String("cid"), cId.second );
+        qProperties_qry.bindValue( QLatin1String("name"), key );
+        qProperties_qry.bindValue( QLatin1String("grp"), grp );
+
+        QtopiaSql::logQuery( qProperties_qry );
+        if ( qProperties_qry.exec() )
+        {
+            bool update = qProperties_qry.first() && qProperties_qry.value(0).toInt() > 0;
+            qProperties_qry.clear();
+            if (update) {
+                QSqlQuery qPropertiesUpdate_qry( QLatin1String("update contentProps set value = :value where cid = :cid and grp = :grp and name = :name"), QtopiaSql::database(cId.first) );  // no tr
+                qPropertiesUpdate_qry.bindValue( QLatin1String("value"), value );
+                qPropertiesUpdate_qry.bindValue( QLatin1String("cid"), cId.second );
+                qPropertiesUpdate_qry.bindValue( QLatin1String("grp"), grp );
+                qPropertiesUpdate_qry.bindValue( QLatin1String("name"), key );
+                QtopiaSql::logQuery( qPropertiesUpdate_qry );
+                result = qPropertiesUpdate_qry.exec();
+            } else {
+                QSqlQuery qPropertiesInsert_qry( QLatin1String("insert into contentProps(cid,name,value,grp) values (:cid, :name, :value, :grp)"), QtopiaSql::database(cId.first) );  // no tr
+                qPropertiesInsert_qry.bindValue( QLatin1String("cid"), cId.second );
+                qPropertiesInsert_qry.bindValue( QLatin1String("name"), key );
+                qPropertiesInsert_qry.bindValue( QLatin1String("value"), value );
+                qPropertiesInsert_qry.bindValue( QLatin1String("grp"), grp );
+                QtopiaSql::logQuery( qPropertiesInsert_qry );
+                result = qPropertiesInsert_qry.exec();
+            }
+        }
+        else
+        {
+            qLog(DocAPI) << "ContentLinkSql::writeProperty: Query failed!! qry=" << qProperties_qry.lastQuery()
+                    << "\nerror=" << qProperties_qry.lastError();
+        }
     }
     return result;
 }
@@ -1474,15 +1546,15 @@ QStringList ContentLinkSql::mimeFilterMatches( const QContentFilter &filter, con
         if( query.exec() )
         {
             while( query.next() )
-            {
+    {
                 QString f = qvariant_cast< QString >( query.value(0) );
 
                 if( !f.isEmpty() )
                     filters.insert( f, f );
-            }
         }
-        else
-        {
+    }
+    else
+    {
             qLog(DocAPI) << "mimeFilterMatches query failed";
             qLog(DocAPI) << queryString;
         }
@@ -1527,7 +1599,7 @@ QStringList ContentLinkSql::syntheticFilterGroups( const QContentFilter &filter 
         if( query.exec() )
         {
             while( query.next() )
-            {
+    {
                 QString group = qvariant_cast< QString >( query.value(0) );
 
                 if( !group.isEmpty() )
@@ -1584,14 +1656,14 @@ QStringList ContentLinkSql::syntheticFilterKeys( const QContentFilter &filter, c
         if( query.exec() )
         {
             while( query.next() )
-            {
+    {
                 QString key = qvariant_cast< QString >( query.value(0) );
 
                 if( !key.isEmpty() )
                     keys.insert( key, key );
             }
-        }
-        else
+    }
+    else
         {
             qLog(DocAPI) << "syntheticFilterMatches query failed";
             qLog(DocAPI) << queryString;
@@ -1642,7 +1714,7 @@ QStringList ContentLinkSql::syntheticFilterMatches( const QContentFilter &filter
         if( query.exec() )
         {
             while( query.next() )
-            {
+    {
                 QString f = qvariant_cast< QString >( query.value(0) );
 
                 filters.insert( f, filterBase + f );
@@ -1713,7 +1785,7 @@ QStringList ContentLinkSql::categoryFilterMatches( const QContentFilter &filter,
                 filters.insert( f, f );
             }
         }
-        else
+    else
         {
             qLog(DocAPI) << "categoryFilterMatches query failed";
             qLog(DocAPI) << queryString;
@@ -1808,7 +1880,7 @@ QHash<QString, QVariant> ContentLinkSql::linkByPath( const QString &path, bool i
         isError = true;
         errText += qLBI_qry.lastError().text();
         return QHash<QString, QVariant>();
-    }
+        }
     if ( !qLBI_qry.first() )
     {
         isError = true;
@@ -1931,24 +2003,25 @@ QHash<QString, QVariant> ContentLinkSql::linkFromRecord( const QSqlRecord &recor
         if (dot > 0)
             field = field.mid(dot+1);
 
-        if( field == QLatin1String("path") )
+        link[ field ] = record.value(f);
+    }
+    if(link.contains(QLatin1String("path")))
+    {
+        static QString real_location("real_location");
+        if(link.contains(real_location) && !link[real_location].toString().isEmpty())
         {
-            QString location = record.value( QLatin1String("real_location") ).toString();
-
-            link[ field ] = !location.isEmpty()
-                    ? location + '/' + record.value( f ).toString()
-                    : record.value( f );
+            link[QLatin1String("path")] = link[real_location].toString() + QChar('/') + link[QLatin1String("path")].toString();
+            link.remove(real_location);
         }
-        else if( field == QLatin1String( "linkFile" ) )
+        }
+    if(link.contains(QLatin1String("linkFile")))
+    {
+        static QString link_location("link_location");
+        if(link.contains(link_location) && !link[link_location].toString().isEmpty())
         {
-            QString location = record.value( QLatin1String("link_location") ).toString();
-
-            link[ field ] = !location.isEmpty()
-                    ? location + '/' + record.value( f ).toString()
-                    : record.value( f );
+            link[QLatin1String("linkFile")] = link[link_location].toString() + QChar('/') + link[QLatin1String("linkFile")].toString();
+            link.remove(link_location);
         }
-        else if( field != QLatin1String( "real_location" ) && field != QLatin1String( "link_location" ) )
-            link[ field ] = record.value(f);
     }
 
     return link;

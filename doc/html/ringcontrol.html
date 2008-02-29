@@ -47,6 +47,7 @@
 <h3>Public Slots</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="ringcontrol.html#muteRing">muteRing</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="ringcontrol.html#stopMessageAlert">stopMessageAlert</a></b> ()</li>
 </ul>
 <ul>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -127,6 +128,7 @@
 <h3 class="fn"><a name="setVolume"></a>void RingControl::setVolume ( int <i>volume</i> )</h3>
 <p>Sets the <i>volume</i> at which the rings will be played. <i>volume</i> may be from 0 (silent) to 5 (loudest).</p>
 <p>The ring volume only effects non-ascending rings. Ascending rings always commence at the lowest volume and slowly increase to the maximum volume. Generally setVolume() should not be called directly as it will be overridden by any change to the active <a href="qphoneprofile.html">QPhoneProfile</a>.</p>
+<h3 class="fn"><a name="stopMessageAlert"></a>void RingControl::stopMessageAlert ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <h3 class="fn"><a name="stopRing"></a>void RingControl::stopRing ()</h3>
 <p>Stop all ringing and vibration. Does nothing if no ring is in progress.</p>
 <h3 class="fn"><a name="vibrateDuration"></a>int RingControl::vibrateDuration () const</h3>
@@ -134,8 +136,8 @@
 <p>See also <a href="ringcontrol.html#setVibrateDuration">setVibrateDuration</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

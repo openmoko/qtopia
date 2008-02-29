@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -102,6 +102,7 @@ DateBook::DateBook(QWidget *parent, Qt::WFlags f)
 : DateBookGui(),
 #endif
   editorView(0),
+  categoryDialog(0),
   exceptionDialog(0),
   aPreset(false),
   presetTime(-1),
@@ -269,12 +270,14 @@ void DateBook::showSettings()
     frmSettings.setStartTime(startTime);
     frmSettings.setAlarmPreset(aPreset, presetTime);
     frmSettings.setCompressDay(compressDay);
+    frmSettings.setDefaultView(defaultView);
 
     if (QtopiaApplication::execDialog(&frmSettings)) {
         aPreset = frmSettings.alarmPreset();
         presetTime = frmSettings.presetTime();
         startTime = frmSettings.startTime();
         compressDay = frmSettings.compressDay();
+        defaultView = frmSettings.defaultView();
 
         if (dayView)
             dayView->setDaySpan( startTime, 17 );
@@ -298,6 +301,7 @@ void DateBook::showAccountSettings()
     AccountEditor *editor = new AccountEditor;
     editor->setModel(model);
     vl->addWidget(editor);
+    diag.setWindowTitle(tr("Accounts", "window title" ));
     diag.setLayout(vl);
     QtopiaApplication::execDialog(&diag);
 #endif
@@ -330,7 +334,7 @@ void DateBook::appMessage(const QString& msg, const QByteArray& data)
 
         //  May be more than one item.
         QDateTime alarmTime = when.addSecs(60 * warn);
-        QOccurrenceModel *om = new QOccurrenceModel(alarmTime, alarmTime, this);
+        QOccurrenceModel *om = new QOccurrenceModel(alarmTime, alarmTime.addSecs(1), this);
         om->completeFetch();
 
         for (int i = 0; i < om->rowCount(); i++) {
@@ -538,6 +542,11 @@ bool DateBook::newAppointment(const QString &description)
     end = current.addSecs(3600);
 
     return newAppointment(start, end, description, QString());
+}
+
+bool DateBook::newAppointment(const QDateTime& start, const QDateTime& end)
+{
+    return newAppointment(start, end, QString(), QString());
 }
 
 void DateBook::editCurrentOccurrence()
@@ -805,7 +814,7 @@ void DateBook::removeOccurrence(const QOccurrence &o)
     }
     else
     {
-        if (!Qtopia::confirmDelete(parentWidget->isVisible() ? parentWidget : 0, tr("Calendar"), a.description()))
+        if (!Qtopia::confirmDelete(parentWidget->isVisible() ? parentWidget : 0, tr("Calendar"), Qt::escape(a.description())))
             return;
         removeAppointmentQDLLink(a);
         model->removeAppointment(a);
@@ -1038,14 +1047,20 @@ void DateBook::updateIcons()
     actionMonth->setVisible(!showingDetails && viewStack->currentWidget() != monthView);
     actionSettings->setVisible(!showingDetails);
     actionAccounts->setVisible(!showingDetails);
+    actionCategory->setVisible(!showingDetails);
+
+    if ( showingDetails )
+        categoryLbl->hide();
+    else if ( ! model->categoryFilter().acceptAll() )
+        categoryLbl->show();
 
     if (QtopiaSendVia::isDataSupported("text/x-vcalendar"))
         actionBeam->setVisible(itemSelected);
 
-    if (itemSelected)
+    if (occurrenceSelected())
         QSoftMenuBar::setLabel(dayView, Qt::Key_Select, QSoftMenuBar::View);
     else if (dayView)
-        QSoftMenuBar::setLabel(dayView, Qt::Key_Select, QSoftMenuBar::NoLabel);
+        QSoftMenuBar::setLabel(dayView, Qt::Key_Select, "new", tr("New"));
 
     if (dayView &&
         viewStack->currentWidget() == dayView &&
@@ -1095,9 +1110,14 @@ void DateBook::closeEvent(QCloseEvent *e)
         return;
     }
     closeAfterView = false;
-    if ( viewStack->currentWidget() == monthView ) {
+    if ( defaultView == DateBookSettings::DayView && viewStack->currentWidget() == monthView ) {
         e->ignore();
         viewDay();
+        return;
+    }
+    if ( defaultView == DateBookSettings::MonthView && viewStack->currentWidget() == dayView ) {
+        e->ignore();
+        viewMonth();
         return;
     }
 #endif
@@ -1129,6 +1149,22 @@ void DateBook::closeEvent(QCloseEvent *e)
 #endif
 }
 
+bool DateBook::eventFilter( QObject *o, QEvent *e)
+{
+    if (o && o == dayView && e->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(e);
+        if (ke->key() == Qt::Key_Select) {
+            if (occurrenceSelected())
+                return false;
+            else {
+                newAppointment();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void DateBook::init()
 {
     dayView = 0;
@@ -1145,6 +1181,7 @@ void DateBook::init()
     beamfile += "/appointment.vcs";
 
     model = new QAppointmentModel(this);
+
     loadSettings();
     DateBookGui::init();
 #ifdef GOOGLE_CALENDAR_CONTEXT
@@ -1154,10 +1191,35 @@ void DateBook::init()
 #endif
 
 #ifndef QTOPIA_DESKTOP
-    viewStack = new QStackedWidget(parentWidget);
-    setCentralWidget(viewStack);
+    QWidget *widg = new QWidget();
+    QVBoxLayout *vbl = new QVBoxLayout();
+    vbl->setMargin(0);
+    vbl->setSpacing(0);
 
-    viewToday();
+    viewStack = new QStackedWidget(parentWidget);
+    categoryLbl = new QLabel();
+    categoryLbl->hide();
+
+    vbl->addWidget(viewStack);
+    vbl->addWidget(categoryLbl);
+    widg->setLayout(vbl);
+
+    setCentralWidget(widg);
+
+    lastToday = QDate::currentDate();
+    switch (defaultView)
+    {
+        case DateBookSettings::DayView:
+        default:
+            viewDay();
+            break;
+        case DateBookSettings::MonthView:
+            viewMonth();
+            break;
+        case DateBookSettings::WeekView:
+            viewWeek();
+            break;
+    }
 
     connect(qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock()));
     connect(qApp, SIGNAL(dateFormatChanged()), this, SLOT(changeClock()));
@@ -1170,6 +1232,12 @@ void DateBook::init()
 
     connect(qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
             this, SLOT(appMessage(const QString&,const QByteArray&)));
+
+    connect(this, SIGNAL(categoryChanged(const QCategoryFilter &)),
+            this, SLOT(categorySelected(const QCategoryFilter &)));
+
+    // and for good luck
+    emit categoryChanged(model->categoryFilter());
 
     new CalendarService( this );
 
@@ -1204,9 +1272,17 @@ void DateBook::initDayView()
                 this, SLOT(beamAppointment(const QAppointment&)));
         connect(dayView, SIGNAL(newAppointment(const QString&)),
                 this, SLOT(newAppointment(const QString&)));
+        connect(dayView, SIGNAL(newAppointment(const QDateTime&, const QDateTime&)),
+                this, SLOT(newAppointment(const QDateTime&, const QDateTime&)));
         connect(dayView, SIGNAL(dateChanged()), this, SLOT(updateIcons()));
         connect(dayView, SIGNAL(showDetails()), this, SLOT(showAppointmentDetails()));
         connect(dayView, SIGNAL(selectionChanged()), this, SLOT(updateIcons()));
+        connect(this, SIGNAL(categoryChanged( const QCategoryFilter &)),
+                dayView, SLOT(categorySelected(const QCategoryFilter &)));
+
+        dayView->categorySelected(model->categoryFilter());
+
+        dayView->installEventFilter(this);
     }
 }
 
@@ -1218,6 +1294,10 @@ void DateBook::initMonthView()
         viewStack->addWidget(monthView);
         connect(monthView, SIGNAL(activated(const QDate&)),
                 this, SLOT(viewDay(const QDate&)));
+        connect(this, SIGNAL(categoryChanged( const QCategoryFilter &)),
+                monthView, SLOT(categorySelected(const QCategoryFilter &)));
+
+        monthView->categorySelected(model->categoryFilter());
     }
 }
 
@@ -1276,11 +1356,17 @@ void DateBook::loadSettings()
         startTime = config.value("startviewtime", 8).toInt();
         aPreset = config.value("alarmpreset").toBool();
         presetTime = config.value("presettime").toInt();
+        defaultView = (DateBookSettings::ViewType) config.value("defaultview", DateBookSettings::DayView).toInt();
 #ifdef QTOPIA_PHONE
         compressDay = true;
 #else
         compressDay = config.value("compressday", true).toBool();
 #endif
+        QCategoryFilter f;
+        f.readConfig(config, "Category");
+        model->setCategoryFilter( f );
+        // Don't emit the changed signal here, we are called
+        // before we set up most of the gui
     }
 }
 
@@ -1293,6 +1379,8 @@ void DateBook::saveSettings()
     configDB.setValue("alarmpreset",aPreset);
     configDB.setValue("presettime",presetTime);
     configDB.setValue("compressday", compressDay);
+    configDB.setValue("defaultview", defaultView);
+    model->categoryFilter().writeConfig(configDB, "Category");
 }
 
 bool DateBook::receiveFile(const QString &filename)
@@ -1552,6 +1640,30 @@ QString DateBook::validateAppointment(const QAppointment &e)
 
     return QString();
 }
+
+void DateBook::categorySelected( const QCategoryFilter &c )
+{
+    model->setCategoryFilter( c );
+    if (c.acceptAll()) {
+        categoryLbl->hide();
+    } else {
+        categoryLbl->setText(tr("Category: %1").arg(c.label(DateBookCategoryScope)));
+        categoryLbl->show();
+    }
+}
+
+void DateBook::selectCategory()
+{
+    if (!categoryDialog) {
+        categoryDialog = new QCategoryDialog(DateBookCategoryScope, QCategoryDialog::Filter, this);
+        categoryDialog->setObjectName("Calendar");
+    }
+    categoryDialog->selectFilter(model->categoryFilter());
+
+    if (QtopiaApplication::execDialog(categoryDialog) == QDialog::Accepted)
+        emit categoryChanged(categoryDialog->selectedFilter());
+}
+
 
 /*!
     \service CalendarService Calendar

@@ -1,7 +1,7 @@
 /****************************************************************************
 // create links for the icon, binary
  **
- ** Copyright (C) 2000-2006 TROLLTECH ASA All rights reserved.
+ ** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
  **
  ** This file is part of the Phone Edition of the Qtopia Toolkit.
  **
@@ -75,11 +75,11 @@ InstallControl::~InstallControl()
   system package verification has been done.  This includes certificate
   validation and other checks.
 */
-void InstallControl::installPackage( const InstallControl::PackageInfo &pkg ) const
+bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
 {
-    SandboxInstallJob job( &pkg, m_installMedia );
+    SandboxInstallJob job( &pkg, m_installMedia, reporter );
     if ( job.isAborted() )
-        return;
+        return false;
 
     QString dataTarGz = job.destinationPath() + "/data.tar.gz";
 
@@ -98,8 +98,8 @@ void InstallControl::installPackage( const InstallControl::PackageInfo &pkg ) co
     QFile tmpPackage( packageFile );
     tmpPackage.remove();
 
-    if ( !verifyPackage( job.destinationPath(), pkg ))
-        return;
+    if ( !verifyPackage( job.destinationPath(), pkg, reporter ))
+        return false;
 
     job.registerPackageFiles();
 
@@ -137,6 +137,8 @@ void InstallControl::installPackage( const InstallControl::PackageInfo &pkg ) co
     }
 
     job.installContent();
+
+    return true;
 }
 
 /*!
@@ -154,23 +156,35 @@ void InstallControl::installPackage( const InstallControl::PackageInfo &pkg ) co
   \o If shipped with a certificate, is it valid against our root store? (Not currently implemented)
   \endlist
   */
-bool InstallControl::verifyPackage( const QString &packagePath, const InstallControl::PackageInfo &pkg ) const
+bool InstallControl::verifyPackage( const QString &packagePath, const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
 {
     PackageInformationReader infoReader( packagePath + QDir::separator() +
             AbstractPackageController::INFORMATION_FILE );
     if ( infoReader.getIsError() )
     {
-        PackageView::displayMessage( PackageView::tr( "<font color=\"#CC0000\">Package Error</font> "
+        QString message = PackageView::tr( "<font color=\"#CC0000\">Package Error</font> "
                     "Package %1 info corrupted, will be disabled."
-                    "Re-download, or contact the supplier" ).arg( pkg.name ));
+                    "Re-download, or contact the supplier" ).arg( pkg.name );
+
+        if( reporter )
+            reporter->reportError( message );
+        else
+            PackageView::displayMessage( message );
+
         return false;
     }
     if ( infoReader.domain() != pkg.domain )
     {
-        PackageView::displayMessage( PackageView::tr( "<font color=\"#CC0000\">Domain Error</font> "
+        QString message = PackageView::tr( "<font color=\"#CC0000\">Domain Error</font> "
                     "Package %1 has security problem, will be disabled. "
                     "Contact supplier. (Declared: %2, Install: %3)", "%1 = package name, %2 = declared domain, %3 = install domain" )
-                .arg( pkg.name ).arg( pkg.domain ).arg( infoReader.domain() ));
+                .arg( pkg.name ).arg( pkg.domain ).arg( infoReader.domain() );
+
+        if( reporter )
+            reporter->reportError( message );
+        else
+            PackageView::displayMessage( message );
+
         return false;
     }
     QString certPath = infoReader.trust();
@@ -180,6 +194,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     if ( !certFile.exists() )
     {
         qWarning( "Failed verification: cert file %s not found", qPrintable( certFile.filePath() ));
+
         return false;
     }
     if ( certFile.isFile() )

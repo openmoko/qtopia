@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -82,10 +82,10 @@ static QDateTime trimSeconds( const QDateTime &dt )
 /*!
   \class QAppointment
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QAppointment class holds the data of a calendar appointment.
 
-  This data includes descriptive data of the appointment and schedualing information.
+  This data includes descriptive data of the appointment and scheduling information.
 
 */
 
@@ -123,7 +123,7 @@ static QDateTime trimSeconds( const QDateTime &dt )
   \value Visible
     The appointment has dialog popup alarm set
   \value Audible
-    The appontment has an audible alarm set.
+    The appointment has an audible alarm set.
 
   \sa setAlarm(), alarm()
 */
@@ -244,7 +244,7 @@ int QAppointment::frequency() const { return d->mFrequency; }
 
 /*!
   Returns if the exact date the appointment would occur is not a valid date.
-  and  the appointment should be shown on the nearest match of an occurrence
+  and the appointment should be shown on the nearest match of an occurrence
 
   \sa setShowOnNearest()
 */
@@ -252,12 +252,12 @@ bool QAppointment::showOnNearest() const { return d->mShowOnNearest; }
 
 /*!
   Returns the flags representing the days of the week the appointment occurs
-  on when set as a Weekly recuring event.
+  on when set as a Weekly recurring event.
 */
 QAppointment::WeekFlags QAppointment::weekFlags() const { return d->weekMask; }
 
 /*!
-  Sets the days of the weeek the appointment occurs on to be those specified
+  Sets the days of the week the appointment occurs on to be those specified
   by the flags \a f.
 */
 void QAppointment::setWeekFlags(WeekFlags f) { d->weekMask = f; }
@@ -282,7 +282,7 @@ QDateTime QAppointment::start() const
 }
 
 /*!
-  Returns when the first occurrence of the appointment starts.
+  Returns when the first occurrence of the appointment ends.
 
   \sa endInCurrentTZ(), setEnd()
 */
@@ -295,6 +295,8 @@ QDateTime QAppointment::end() const
 
 /*!
   Constructs a new QAppointment.
+  The start time is set to the current time, and the end time is
+  five minutes after the current time.
 */
 QAppointment::QAppointment() : QPimRecord()
 {
@@ -313,6 +315,8 @@ QAppointment::QAppointment(const QAppointment &appointment) : QPimRecord(appoint
 
 /*!
   Constructs a new QAppointment starting at \a start and running until \a end.
+  If \a end is less than five minutes after \a start, the appointment will
+  be created with an end time of five minutes after the \a start value.
 */
 QAppointment::QAppointment(const QDateTime &start, const QDateTime &end)
 {
@@ -378,7 +382,7 @@ void QAppointment::setLocation( const QString &text )
 
 /*!
   Sets the start time of the appointment to \a time.
-  This will change the end time fo the appointment to maintain the same duration.
+  This will change the end time of the appointment to maintain the same duration.
 
   \sa start(), startInCurrentTZ()
 */
@@ -505,7 +509,7 @@ void QAppointment::setAllDay( bool enable )
 
 /*!
   Returns the time zone of the appointment or an invalid QTimeZone if the appointment has
-  no time zone.  All day appointments allways have no time zone.
+  no time zone.  All day appointments always have no time zone.
 
   \sa setTimeZone(), isAllDay()
 */
@@ -577,9 +581,9 @@ void QAppointment::setRepeatForever( )
   Sets whether to show a repeating appointment on the nearest previous date if the
   day it would repeat on does not exist to \a b.
 
-  An example would be a repeating appointment that occures on the 31st of each month.
+  An example would be a repeating appointment that occurs on the 31st of each month.
   Setting showOnNearest to true will have the appointment show up on the 30th on
-  months that do not have 31 days, (or 28/29 in the case of Febuary).
+  months that do not have 31 days, (or 28/29 in the case of February).
 
   \sa showOnNearest()
 */
@@ -651,7 +655,7 @@ bool QAppointment::repeatOnWeekDay(int day) const
 }
 
 /*!
-  Sets the appointment to repeat on the \a day of the wekif \a enable is true.
+  Sets the appointment to repeat on the \a day of the week if \a enable is true.
   Otherwise sets the appointment not to repeat on the \a day of the week.
 
   Event will always repeat on the day of the week that it started on.
@@ -797,7 +801,7 @@ QDate QAppointment::p_nextOccurrence(const QDate &from) const
             break;
         case Weekly:
             {
-                // first do a quick check to see if it i possble that there
+                // first do a quick check to see if it is possible that there
                 // is an overlap.
                 int diff = result.daysTo(after);
                 int mod = diff % (d->mFrequency * 7);
@@ -1191,7 +1195,7 @@ static void parseRrule( QAppointment &e, const QString &v)
                         break;;
                     }
                 }
-                // not an occurance list, but still monthly day.
+                // not an occurrence list, but still monthly day.
                 i--;
                 st = weekdaylist;;
                 break;
@@ -1236,7 +1240,7 @@ static void parseRrule( QAppointment &e, const QString &v)
                 // FALL THROUGH
             case monthlist:
                 // find the optional duration.
-                // find a # or more than 3 digets from end.
+                // find a # or more than 3 digits from end.
                 // note we will be at the start of the string here.
                 {
                     int space = value.lastIndexOf(QChar(' '));
@@ -1485,7 +1489,7 @@ static QAppointment parseVObject( VObject *obj )
         }
         else if ( name == VCRRuleProp) {
             // iCal RRULE differs from vCal RRULE
-            // vobject doesn't sub-object it for us for whaterver reason.
+            // vobject doesn't sub-object it for us for whatever reason.
             if (value.startsWith("FREQ")) {
                 QStringList parts = value.split(";");
                 // is iCal type
@@ -1513,11 +1517,11 @@ static QAppointment parseVObject( VObject *obj )
                 // type modifiers
                     } else if (subname == "BYDAY") { // don't do by second,minute/hour
                         // comma separated list of MO,TU,WE,TH,FR,SA,SU
-                        // each may be preceeded by +/- integer.  we can't
+                        // each may be preceded by +/- integer.  we can't
                         // handle that (repeat structure won't represent it)
                         // so we just use it to select between the three
                         // type of month repeats we do handle.
-                        // first check if preceeded by (+n/-n);
+                        // first check if preceded by (+n/-n);
                         if (subvalue[0] == '-') {
                             rModifier = QAppointment::MonthlyEndDay;
                         } else {
@@ -1631,6 +1635,7 @@ void QAppointment::writeVCalendar( const QString &filename, const QList<QAppoint
     }
 
     cleanStrTbl();
+    fclose(f);
 }
 
 /*!
@@ -1650,7 +1655,8 @@ void QAppointment::writeVCalendar( const QString &filename, const QAppointment &
         writeVObject( f, obj );
         cleanVObject( obj );
 
-        cleanStrTbl();
+	cleanStrTbl();
+    fclose(f);
 }
 
 /*!
@@ -1743,7 +1749,7 @@ QDateTime QAppointment::endInCurrentTZ() const
 }
 
 /*!
-  Returns the date the appointment will repeat till in the current system timezone.
+  Returns the date the appointment will repeat until in the current system timezone.
 
   \sa repeatUntil()
 */
@@ -1752,7 +1758,7 @@ QDate QAppointment::repeatUntilInCurrentTZ() const
     if (!timeZone().isValid())
         return repeatUntil();
 
-    // duration should be the same... shift the start.. dif to end.
+    // duration should be the same... shift the start.. diff to end.
     // if no zone given.. assume local
     QDateTime nStart = timeZone().toCurrent(start());
 
@@ -1779,10 +1785,10 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 /*!
   \class QOccurrence
   \module qpepim
-  \ingroup qpepim
+  \ingroup pim
   \brief The QOccurrence class holds the data of an occurrence of a calendar appointment.
 
-  This data includes descriptive data of the appointment and schedualing information.
+  This data includes descriptive data of the appointment and scheduling information.
 */
 
 
@@ -1828,7 +1834,7 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 
 /*!
   \fn QString QOccurrence::description() const
-  Returns the description of the appointment associated with the occcurrence.
+  Returns the description of the appointment associated with the occurrence.
 */
 
 /*!
@@ -1840,19 +1846,19 @@ QDateTime asDateTime( time_t dt, const QTimeZone &z)
 /*!
   \fn QString QOccurrence::location() const
 
-  Returns the location of the appointment associated with the occcurrence.
+  Returns the location of the appointment associated with the occurrence.
 */
 
 /*!
   \fn QString QOccurrence::notes() const
 
-  Returns the notes of the appointment associated with the occcurrence.
+  Returns the notes of the appointment associated with the occurrence.
 */
 
 /*!
   \fn QTimeZone QOccurrence::timeZone() const
 
-  Returns the notes of the time zone associated with the occcurrence.
+  Returns the notes of the time zone associated with the occurrence.
 */
 
 /*!
@@ -1947,7 +1953,7 @@ QDateTime QOccurrence::end() const
 
 // Timezone dependent functions...
 /*!
-  Returns the start date and timee of the occurrence in the current time zone.
+  Returns the start date and time of the occurrence in the current time zone.
 */
 QDateTime QOccurrence::startInCurrentTZ() const
 {
@@ -1958,7 +1964,7 @@ QDateTime QOccurrence::startInCurrentTZ() const
 }
 
 /*!
-  Returns the end date and timee of the occurrence in the current time zone.
+  Returns the end date and time of the occurrence in the current time zone.
 */
 QDateTime QOccurrence::endInCurrentTZ() const
 {
@@ -2072,7 +2078,7 @@ bool QAppointment::operator==( const QAppointment &other ) const
 }
 
 /*!
-  Returns true if the appoinment is not equal to \a other.  Otherwise
+  Returns true if the appointment is not equal to \a other.  Otherwise
   returns false.
 */
 bool QAppointment::operator!=( const QAppointment &other ) const
@@ -2119,3 +2125,15 @@ bool QAppointment::isException() const
 }
 
 Q_IMPLEMENT_USER_METATYPE(QAppointment)
+
+/*!
+  \class QAppointment::Exception
+
+  This structure has the following fields:
+
+  QDate date;
+
+  QUniqueId alternative;
+
+*/
+

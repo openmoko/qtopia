@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -220,7 +220,7 @@ QMimeType::Private& QMimeType::data()
     A QMimeType object is a light-weight value which
     provides MIME type information.
 
-    \ingroup qtopiaemb
+    \ingroup io
 */
 
 /*!

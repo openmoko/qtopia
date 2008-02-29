@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -38,6 +38,7 @@
     QKeypadLightAccessoryProvider.
 
     \sa QKeypadLightAccessoryProvider, QHardwareInterface
+  \ingroup hardware
 */
 
 /*!
@@ -99,6 +100,7 @@ void QKeypadLightAccessory::setOn( const bool value )
     functionality.
 
     \sa QKeypadLightAccessory
+  \ingroup hardware
 */
 
 /*!

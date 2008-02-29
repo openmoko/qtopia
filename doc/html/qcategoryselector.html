@@ -19,7 +19,7 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, ListView, ComboView, Filter, Editor }</li>
+<li><div class="fn"/>enum <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlag</a></b> { IncludeAll, IncludeUnfiled, ListView, ComboView, ..., ViewMask }</li>
 <li><div class="fn"/>flags <b><a href="qcategoryselector.html#ContentFlag-enum">ContentFlags</a></b></li>
 </ul>
 <a name="public-functions"></a>
@@ -94,8 +94,10 @@
 <tr><td valign="top"><tt>QCategorySelector::IncludeUnfiled</tt></td><td align="center" valign="top"><tt>0x08</tt></td><td valign="top">Include Unfiled Categories option.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::ListView</tt></td><td align="center" valign="top"><tt>0x10</tt></td><td valign="top">Force items to appear as a list widget rather than a combo box</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::ComboView</tt></td><td align="center" valign="top"><tt>0x20</tt></td><td valign="top">Force items to appear in a combo box rather than a list widget.</td></tr>
+<tr><td valign="top"><tt>QCategorySelector::DialogView</tt></td><td align="center" valign="top"><tt>0x30</tt></td><td valign="top">Force the selector to appear as a button that displays a dialog containing the list widget.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::Filter</tt></td><td align="center" valign="top"><tt>IncludeAll | IncludeUnfiled</tt></td><td valign="top">Selector is used to create a filter for viewing categoriesed objects.</td></tr>
 <tr><td valign="top"><tt>QCategorySelector::Editor</tt></td><td align="center" valign="top"><tt>IncludeUnfiled</tt></td><td valign="top">Selector is used to edit categories of an object.</td></tr>
+<tr><td valign="top"><tt>QCategorySelector::ViewMask</tt></td><td align="center" valign="top"><tt>ListView | ComboView | DialogView</tt></td><td valign="top">Masks the view selection flags.</td></tr>
 </table></p>
 <p>The ContentFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;ContentFlag&gt;. It stores an OR combination of ContentFlag values.</p>
 <hr />
@@ -129,8 +131,8 @@
 <p>Sets the frame style for the listview of the category selector to <i>style</i></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

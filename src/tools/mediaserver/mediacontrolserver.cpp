@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -51,6 +51,9 @@ MediaControlServer::MediaControlServer(MediaSession* mediaSession, QString const
 
     connect(m_mediaSession, SIGNAL(interfaceAvailable(const QString&)),
             this, SLOT(advertiseInterface(const QString&)) );
+
+    connect(m_mediaSession, SIGNAL(interfaceUnavailable(const QString&)),
+            this, SLOT(revokeInterface(const QString&)));
 
     // set initial values
     setValue(QLatin1String("playerState"), QtopiaMedia::Stopped);
@@ -148,6 +151,13 @@ void MediaControlServer::advertiseInterface(const QString& interface)
     setValue(QLatin1String("interfaces"), m_mediaSession->interfaces());
 
     emit controlAvailable(interface);
+}
+
+void MediaControlServer::revokeInterface(const QString& interface)
+{
+    setValue(QLatin1String("interfaces"), m_mediaSession->interfaces());
+
+    emit controlUnavailable(interface);
 }
 
 }   // ns mediaserver

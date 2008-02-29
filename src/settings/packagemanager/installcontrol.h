@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,13 @@
 
 #include <QString>
 #include <QDir>
+
+class ErrorReporter
+{
+public:
+    virtual ~ErrorReporter(){}
+    virtual void reportError( const QString &error ) = 0;
+};
 
 class InstallControl
 {
@@ -53,6 +60,7 @@ public:
         QString md5Sum;
         QStringList files;
         QString version;
+        QString url;
         bool isComplete() const
         {
             return !(name.isEmpty() ||
@@ -72,8 +80,8 @@ public:
     InstallControl();
     ~InstallControl();
 
-    void installPackage( const PackageInfo& ) const;
-    bool verifyPackage( const QString &, const PackageInfo & ) const;
+    bool installPackage( const PackageInfo&, ErrorReporter *reporter = 0 ) const;
+    bool verifyPackage( const QString &, const PackageInfo &, ErrorReporter *reporter = 0 ) const;
     void setInstallMedia( const QString &s ) { m_installMedia = s; }
     QString installMedia() const { return m_installMedia; }
 
@@ -158,6 +166,7 @@ inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( cons
     packageFile = d.packageFile;
     md5Sum = d.md5Sum;
     version = d.version;
+    url = d.url;
     return *this;
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,6 +43,8 @@ static const char* const QBATTERYACCESSORY_TIME     = "timeRemaining";
     Battery implementations should inherit from QBatteryAccessoryProvider.
 
     \sa QBatteryAccessoryProvider, QHardwareInterface
+
+    \ingroup hardware
 */
 
 
@@ -150,6 +152,8 @@ int QBatteryAccessory::timeRemaining() const
     indicate the level of functionality that is supported.
 
     \sa QBatteryAccessory
+
+    \ingroup hardware
 */
 
 /*!

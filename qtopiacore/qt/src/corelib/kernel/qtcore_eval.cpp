@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -20,7 +20,7 @@
 
 static const char * const dont_mess_with_me =
     "\nQt %1 Evaluation License\n"
-    "Copyright (C) 1992-2006 TROLLTECH ASA.\n"
+    "Copyright (C) 1992-2007 TROLLTECH ASA.\n"
     "All rights reserved.\n\n"
     "This trial version may only be used for evaluation purposes\n"
     "and will shut down after 120 minutes.\n"
@@ -31,7 +31,7 @@ static const char * const dont_mess_with_me =
 
 static const char * const dont_mess_with_supported =
     "\nQt %1 Evaluation License\n"
-    "Copyright (C) 1992-2006 TROLLTECH ASA.\n"
+    "Copyright (C) 1992-2007 TROLLTECH ASA.\n"
     "All rights reserved.\n\n"
     "This trial version may only be used for evaluation purposes\n"
     "Registered to:\n"

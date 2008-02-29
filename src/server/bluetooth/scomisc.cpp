@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -45,9 +45,11 @@
 #define SNDRV_HWDEP_IFACE_BT_SCO (SND_HWDEP_IFACE_BLUETOOTH + 1)
 #endif
 
-bool bt_sco_set_fd(snd_hwdep_t * handle, int sco_fd)
+bool bt_sco_set_fd(void *handle, int sco_fd)
 {
-    if (snd_hwdep_ioctl(handle, SNDRV_BT_SCO_IOCTL_SET_SCO_SOCKET, (void *) sco_fd) < 0) {
+    snd_hwdep_t *hnd = reinterpret_cast<snd_hwdep_t *>(handle);
+
+    if (snd_hwdep_ioctl(hnd, SNDRV_BT_SCO_IOCTL_SET_SCO_SOCKET, (void *) sco_fd) < 0) {
         qWarning("Unable to set SCO fd!");
         return false;
     }
@@ -121,4 +123,35 @@ next:
     return QByteArray();
 }
 
+void bt_sco_close(void *handle)
+{
+    snd_hwdep_close(reinterpret_cast<snd_hwdep_t *>(handle));
+}
+
+bool bt_sco_open(void **handle, const char *audioDev)
+{
+    return snd_hwdep_open(reinterpret_cast<snd_hwdep_t **>(handle), audioDev, O_RDWR) >= 0;
+}
+
+#else
+#include <QByteArray>
+
+bool bt_sco_set_fd(void *, int)
+{
+    return false;
+}
+
+QByteArray find_btsco_device(const QByteArray &idPref = QByteArray())
+{
+    return QByteArray();
+}
+
+void bt_sco_close(void *)
+{
+}
+
+bool bt_sco_open(void **, const char *)
+{
+    return false;
+}
 #endif

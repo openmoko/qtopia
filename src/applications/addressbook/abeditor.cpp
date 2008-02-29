@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -1076,6 +1076,7 @@ void AbEditor::initSimUI()
     gridLayout->addWidget(label, rowCount, 0);
 
     simNumber = new QLineEdit(0);
+    QtopiaApplication::setInputMethodHint(simNumber,QtopiaApplication::PhoneNumber);
     gridLayout->addWidget(simNumber, rowCount, 2);
 
     rowCount++;
@@ -1372,6 +1373,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Company"));
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     companyLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(companyLE, QtopiaApplication::Text);
     connect( companyLE, SIGNAL(textChanged(const QString&)),
         this, SLOT(specFieldsFilter(const QString&)) );
 
@@ -1572,6 +1574,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Manager") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     managerLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(managerLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( managerLE, rowCount, 2 );
@@ -1584,6 +1587,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Assistant") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     assistantLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(assistantLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( assistantLE, rowCount, 2 );
@@ -1713,6 +1717,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("URL") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     homeWebPageLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(homeWebPageLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( homeWebPageLE, rowCount, 2 );
@@ -1726,6 +1731,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Spouse") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     spouseLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(spouseLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( spouseLE, rowCount, 2 );
@@ -1739,6 +1745,7 @@ void AbEditor::setupTabs()
     label = new QLabel( tr("Children") );
     label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     childrenLE = new QLineEdit();
+    QtopiaApplication::setInputMethodHint(childrenLE, QtopiaApplication::Text);
 
     gridLayout->addWidget( label, rowCount, 0 );
     gridLayout->addWidget( childrenLE, rowCount, 2 );
@@ -2334,6 +2341,7 @@ void AbEditor::setEntryOther()
         photoPB->setIcon( QIcon(e) );
     }
 
+    txtNote->setHtml(ent.notes());
     QDL::loadLinks( ent.customField( QDL::CLIENT_DATA_KEY ), QDL::clients( this ) );
     txtNoteQC->verifyLinks();
 
@@ -2341,7 +2349,6 @@ void AbEditor::setEntryOther()
     if ( !ent.customField("tone").isEmpty() )
         editTonePB->setTone( QContent( ent.customField("tone") ) ); // No tr()
 #endif
-    txtNote->setHtml(ent.notes());
 }
 
 void AbEditor::closeEvent(QCloseEvent *e)

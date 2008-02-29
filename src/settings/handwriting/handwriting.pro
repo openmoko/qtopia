@@ -13,6 +13,7 @@ desktop.path=/apps/Settings
 desktop.hint=desktop
 pics.files=$$QTOPIA_DEPOT_PATH/pics/hwsettings/*
 pics.path=/pics/hwsettings
+pics.hint=pics
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=hwsettings*.html
 help.hint=help

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -475,7 +475,7 @@ void Main::about()
 	"<p><b><font size=\"+2\">Qtopia Core build configuration</font></b></p>"
 	"<p></p>"
 	"<p>Version 2.0</p>"
-	"<p>Copyright (C) 2001-2006 TROLLTECH ASA. All rights reserved.</p>"
+	"<p>Copyright (C) 2001-2007 TROLLTECH ASA. All rights reserved.</p>"
 	"<p></p>"
 	"<p>This program is licensed to you under the terms of the GNU General "
 	"Public License Version 2 as published by the Free Software Foundation. This "

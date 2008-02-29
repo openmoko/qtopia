@@ -118,11 +118,11 @@
 </ul>
 <pre>    QDocumentSelector *selector = new QDocumentSelector( this );
     selector-&gt;setSortMode( QDocumentSelector::Chronological );
-    selector-&gt;enableOption( QDocumentSelector::NewDocument );
+    selector-&gt;enableOptions( QDocumentSelector::NewDocument );
 
     connect( selector, SIGNAL(newSelected()), this, SLOT(newDocument()) );
     connect( selector, SIGNAL(documentSelected(const QContent&amp;)),
-    this, SLOT(openDocument(const QContent&amp;)) );</pre>
+             this, SLOT(openDocument(const QContent&amp;)) );</pre>
 <p>QDocumentSelector is often the first widget seen in a <a href="docwidget.html">document-oriented application </a>. Used in combination with <a href="qstackedwidget.html">QStackedWidget</a>, a typical application allows selecton of a document using the selector before revealing the document viewer or editor.</p>
 <p>See also <a href="qimagedocumentselector.html">QImageDocumentSelector</a>.</p>
 <hr />
@@ -224,8 +224,8 @@
 <p>See also <a href="qdocumentselector.html#setSortMode">setSortMode</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

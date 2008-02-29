@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -112,6 +112,8 @@ void QDeviceIndicatorsPrivate::update()
   \c {/Hardware/IndicatorLights} path.  For example, the "Email" indicator
   status could be read and set directly through the
   \c {/Hardware/IndicatorLights/Email} item.
+
+    \ingroup hardware
  */
 
 /*!

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -148,9 +148,12 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
             //QString id = QString("_apps_%1").arg(ts.value("Name[]").toString());
             QString id = ts.value("Name[]").toString();  // Don't format the id.
             // Ensure the category id exists
-            catMan.addCategory( id, ts.value("Name[]").toString(), ts.value("Icon").toString(), false, true );
-            if(!catMan.isSystem(id))
-                catMan.setSystem(id);
+            if( !catMan.exists( id ) )
+            {
+                catMan.addCategory( id, ts.value("Name[]").toString(), ts.value("Icon").toString(), false, true );
+                if(!catMan.isSystem(id))
+                    catMan.setSystem(id);
+            }
             categories.append( id );
         }
         else
@@ -158,9 +161,12 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
             // No .directory file exists, just use the Applications category
             QString id = QLatin1String("Applications");
             // Ensure the category id exists
-            catMan.addCategory( id, id, QString(), false, true );
-            if(!catMan.isSystem(id))
-                catMan.setSystem(id);
+            if( !catMan.exists( id ) )
+            {
+                catMan.addCategory( id, id, QLatin1String( "qpe/AppsIcon" ), false, true );
+                if(!catMan.isSystem(id))
+                    catMan.setSystem(id);
+            }
             categories.append( id );
         }
     }
@@ -285,7 +291,7 @@ ContentPluginManager::ContentPluginManager()
 
 ContentPluginManager::~ContentPluginManager()
 {
-    qDeleteAll( plugins );
+    // qDeleteAll( plugins );
 }
 
 QList< QContentPlugin * > ContentPluginManager::findPlugins( const QString &filePath )

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -97,6 +97,8 @@ private:
     // Direction for keys to move in.
     typedef enum{Up,Down,Left,Right} Direction;
 
+    typedef enum{NotAnimating,Animating,AnimationPending} AnimationState;
+
     // Get manual animations to run for 3 seconds.
     // TODO: make this configurable.
     static const int ANIMATION_TIME = 3000;
@@ -120,7 +122,9 @@ private:
 
     void moveRequested(Direction);
 
-    bool isAnimating();
+    AnimationState animationState() const;
+
+    bool isAnimating() const;
 
     void detachAnimation();
 
@@ -139,6 +143,9 @@ private:
     void drawAnimated(QPainter *);
 
     static void blendColor(QImage &img,QColor color);
+
+    qreal getXDrift();
+    qreal getYDrift();
 
     // Provides the signals/slots mechanism for this object.
     SelectedItemConnector *connector;
@@ -200,6 +207,18 @@ private:
     int currentY;
     int destX;
     int destY;
+
+    // These are also used during moving. They give the amount the selected
+    // item has to shift (to give the magnified effect) during a move.
+    // For example, when moving from Column 0 to Column 1, the image in
+    // column 0 will gradually shift leftwards until, by the end of the move,
+    // its x position is originalXPosition - xDrift.
+    // Meanwhile, the image in column 1 (the destination) will gradually
+    // shift to the right; at the start of the move its x position is
+    // originalXPosition + xDrift, while at the end of the
+    // move its x position is originalXPosition.
+    qreal xDrift;
+    qreal yDrift;
 };
 
 #endif

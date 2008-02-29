@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,7 @@
 #include "dayview.h"
 #include "monthview.h"
 #include "appointmentdetails.h"
+#include "datebooksettings.h"
 
 #if !QTOPIA_PHONE && QTOPIA4_TODO
 # include "weekview.h"
@@ -60,6 +61,7 @@ class AppointmentDetails;
 class QDLClient;
 class QDSActionRequest;
 class EntryDialog;
+class QCategoryDialog;
 
 class DateBook : public DateBookGui
 {
@@ -102,6 +104,7 @@ public slots:
 
     void newAppointment();
     bool newAppointment(const QString &str);
+    bool newAppointment(const QDateTime &dstart, const QDateTime &dend);
     bool newAppointment(const QDateTime &dstart, const QDateTime &dend, const QString &description, const QString &notes);
 
     void addAppointment(const QAppointment &e);
@@ -128,6 +131,9 @@ public slots:
     void qdlActivateLink( const QDSActionRequest& request );
     void qdlRequestLinks( const QDSActionRequest& request );
 
+    void categorySelected( const QCategoryFilter &c );
+    void selectCategory();
+
     /*void find();
     void doFind(const QString &, const QDate &, Qt::CaseSensitivity, bool, const QCategoryFilter &);*/
 
@@ -136,10 +142,12 @@ public slots:
 signals:
     void searchNotFound();
     void searchWrapAround();
+    void categoryChanged( const QCategoryFilter & c );
 
 protected:
     void timerEvent(QTimerEvent *e);
     void closeEvent(QCloseEvent *e);
+    bool eventFilter(QObject *o, QEvent *e);
 
     void init();
     void initDayView();
@@ -177,10 +185,14 @@ private:
     MonthView *monthView;
     AppointmentDetails *appointmentDetails;
     QStackedWidget *viewStack;
+    QLabel *categoryLbl;
+
 #if !QTOPIA_PHONE && QTOPIA4_TODO
     WeekView *weekView;
 #endif
     EntryDialog* editorView;
+
+    QCategoryDialog *categoryDialog;
 
     ExceptionDialog *exceptionDialog;
 
@@ -191,6 +203,7 @@ private:
     bool ampm;
     bool onMonday;
     bool compressDay;
+    DateBookSettings::ViewType defaultView;
 
     bool syncing;
     bool inSearch;
@@ -200,7 +213,6 @@ private:
     QTimer *updateIconsTimer;
 
     QStack<QOccurrence> prevOccurrences;
-
     QString beamfile;
 };
 

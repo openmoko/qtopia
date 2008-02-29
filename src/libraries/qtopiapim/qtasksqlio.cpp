@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -284,8 +284,10 @@ QUniqueId QTaskSqlIO::addTask(const QTask &task, const QPimSource &source, bool 
     s.context = contextId();
     QUniqueId i = addRecord(task, source.isNull() ? s : source, createuid);
     if (!i.isNull()) {
-        notifyAdded(task);
-        emit recordsUpdated();
+        QTask added = task;
+        added.setUid(i);
+        notifyAdded(added);
+	emit recordsUpdated();
     }
     return i;
 }

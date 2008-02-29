@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -22,14 +22,15 @@
 #ifndef EDITORUI_H
 #define EDITORUI_H
 
-#include <qsoftmenubar.h>
-
 #include <qmainwindow.h>
-#include <qtoolbar.h>
-#include <qmenubar.h>
-#include <qaction.h>
 
-class EditorUI : public QMainWindow {
+#ifndef QTOPIA_PHONE
+class QAction;
+class QMenu;
+#endif
+
+class EditorUI : public QMainWindow
+{
     Q_OBJECT
 public:
     EditorUI( QWidget* parent = 0, Qt::WFlags f = 0 );
@@ -43,12 +44,13 @@ public:
 #endif
 
 signals:
-    // Only Qtopia PDA
+#ifndef QTOPIA_PHONE
     // Open selected
     void open();
-
-    // Only Qtopia Phone
+#else
+    // Cancel selected
     void cancel();
+#endif
 
     // Crop selected;
     void crop();
@@ -68,17 +70,8 @@ signals:
 protected:
     void closeEvent( QCloseEvent * );
 private:
-    QAction *open_action;
 #ifndef QTOPIA_PHONE
-    QAction *brightness_action, *rotate_action, *crop_action;
-    QAction *zoom_action, *fullscreen_action;
-#endif
-
-#ifdef QTOPIA_PHONE
-    QMenu *context_menu;
-#else
-    QToolBar *toolbar;
-    QMenuBar *menubar;
+    QAction *open_action;
     QMenu *file_menu;
 #endif
 };

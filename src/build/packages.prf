@@ -33,7 +33,8 @@ isEmpty(DEFAULT_VERSION) {
     # Some defaults for the "default" package
     isEmpty(pkg.deps):pkg.deps=$$QTOPIA_DEPENDS
     for(i,INSTALLS) {
-        pkg.targets+=install_$$i
+        c=$$eval($${i}.CONFIG)
+        !contains(c,no_default_install):!contains(pkg.no_install,$$i):pkg.targets*=install_$$i
     }
     pkg.targets-=install_register_domain
 }

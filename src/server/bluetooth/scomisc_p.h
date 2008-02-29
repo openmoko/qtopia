@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -22,11 +22,9 @@
 #ifndef __SCOMISC_H__
 #define __SCOMISC_H__
 
-#ifdef HAVE_ALSA
-#include <alsa/asoundlib.h>
-
-bool bt_sco_set_fd(snd_hwdep_t * handle, int sco_fd);
+bool bt_sco_set_fd(void *handle, int sco_fd);
 QByteArray find_btsco_device(const QByteArray &idPref = QByteArray());
-#endif
+void bt_sco_close(void *handle);
+int bt_sco_open(void **handle, const char *);
 
 #endif

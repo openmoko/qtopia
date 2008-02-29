@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,8 @@ public:
     virtual void addMark(int minutes);
 
     virtual int markPosition(int minutes) const;
+    virtual int markMinutes(int position, int direction = 0) const;
+
     QList<int> marks() const;
 
     QSize minimumSizeHint() const;
@@ -77,6 +79,8 @@ class CompressedTimeManager : public TimeManager
 public:
     CompressedTimeManager(QWidget *parent = 0);
     void populateMarks();
+    void addMark(int minutes);
+    void clearMarks();
 
     void setIdealHeight(int ideal);
     int idealHeight() const;
@@ -110,6 +114,7 @@ public:
     void setCurrentIndex(const QModelIndex &);
 
     QModelIndex index(const QPoint& point) const;
+    QDateTime timeAtPoint(const QPoint& globalPoint, int direction = 0) const;
 
     void setItemDelegate(QAbstractItemDelegate *);
     QAbstractItemDelegate *itemDelegate() const;

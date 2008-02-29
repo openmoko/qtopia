@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -41,6 +41,8 @@ static const char* const QINFRAREDACCESSORY_MODE = "mode";
     QInfraredAccessoryProvider.
 
     \sa QInfraredAccessoryProvider, QHardwareInterface
+
+  \ingroup hardware
 */
 
 /*!
@@ -105,6 +107,7 @@ QInfraredAccessory::Mode QInfraredAccessory::mode() const
     is supported.
 
     \sa QInfraredAccessory
+  \ingroup hardware
 */
 
 /*!

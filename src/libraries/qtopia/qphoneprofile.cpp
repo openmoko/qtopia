@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,8 @@
   QPhoneProfile::setApplicationSettings() or
   QPhoneProfile::setApplicationSetting() methods and read via the
   QPhoneProfile::applicationSetting() call.
+
+  \ingroup io
  */
 
 // define QPhoneProfile::Setting
@@ -248,6 +250,8 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
   \class QPhoneProfile
   \brief The QPhoneProfile class encapsulates a single phone profile
          configuration.
+
+  \ingroup io
  */
 
 // define QPhoneProfile
@@ -826,6 +830,8 @@ void QPhoneProfile::write(QSettings &c) const
   should be activated.  A profile's schedule can be read through the
   QPhoneProfile::schedule() method, and set through a
   QPhoneProfile::setSchedule() call.
+
+  \ingroup io
  */
 // define QPhoneProfile::Schedule
 /*!
@@ -1085,6 +1091,7 @@ public:
   be set to auto-activate at certain times, controlled through by
   QPhoneProfile::schedule(), or when a phone accessory is attached.
 
+  \ingroup io
  */
 
 // define QPhoneProfileManager

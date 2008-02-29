@@ -83,7 +83,6 @@ qtopiatest:PROJECTS*=\
 	applications/clock \
 	applications/mediarecorder \
 	applications/photoedit \
-	applications/sysinfo \
 	applications/textedit \
 	games/qasteroids\
 	games/fifteen\
@@ -114,6 +113,7 @@ PROJECTS*=\
     settings/light-and-power \
     settings/packagemanager\
     applications/helpbrowser \
+    applications/sysinfo \
     tools/qcop \
     tools/vsexplorer \
     tools/symlinker \

@@ -41,6 +41,15 @@
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>virtual void <b><a href="pkim.html#updateHandler">updateHandler</a></b> ( int <i>type</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>8 protected functions inherited from <a href="qwsinputmethod.html#protected-functions">QWSInputMethod</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+</ul>
 <a name="protected-slots"></a>
 <h3>Protected Slots</h3>
 <ul>
@@ -52,8 +61,6 @@
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qwsinputmethod.html#protected-functions">QWSInputMethod</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 <li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
 </ul>
@@ -89,10 +96,14 @@
 <h3 class="fn"><a name="stateChanged"></a>void PkIM::stateChanged ( int <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the state of the input method changes. It is used by the server to update icon state and visability appropriately.</p>
 <p>If the input method is filtering <i>state</i> will be <a href="qtopiainputmethod.html#State-enum">QtopiaInputMethod::Ready</a>. Otherwise <i>state</i> will be <a href="qtopiainputmethod.html#State-enum">QtopiaInputMethod::Sleeping</a>.</p>
+<h3 class="fn"><a name="updateHandler"></a>void PkIM::updateHandler ( int <i>type</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<p>This function handles update information from the server</p>
+<p>Reimplemented from <a href="qwsinputmethod.html#updateHandler">QWSInputMethod</a>.</p>
+<p>See also <a href="qwsinputmethod.html#updateHandler">QWSInputMethod::updateHandler</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

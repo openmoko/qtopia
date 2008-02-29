@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -63,9 +63,11 @@ public:
         IncludeUnfiled = 0x08, // Adds "Unfiled" option
         ListView = 0x10,      // Forces it to appear as a list
         ComboView = 0x20,     // Forces it to appear as a combobox
+        DialogView = 0x30,    // Forces it to appear as a button that displays a dialog.
 
         Filter = IncludeAll | IncludeUnfiled,
-        Editor = IncludeUnfiled
+        Editor = IncludeUnfiled,
+        ViewMask = ListView | ComboView | DialogView
     };
     Q_DECLARE_FLAGS(ContentFlags, ContentFlag)
 

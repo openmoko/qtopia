@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -35,7 +35,7 @@
 
   Can calculate closeness of match to
   another stroke.
-  \ingroup qtopiahandwriting
+  \ingroup userinput
 */
 
 bool QIMPenStroke::useVertPos = true;
@@ -239,7 +239,7 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
         return 400000;
     }
 
-    err3 = asig.calcError( pen->asig );
+    err3 = asig.calcError( pen->asig, pen->dsig );
     if ( err3 > asig.maxError() ) {
         return 400000;
     }

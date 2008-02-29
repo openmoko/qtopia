@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include "accounteditor.h"
 #include "googleaccount.h"
+#include "qsoftmenubar.h"
 
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -34,6 +35,7 @@
 #include <QDialog>
 #include <QTimer>
 #include <QtopiaApplication>
+#include <QKeyEvent>
 
 #include <qtopia/pim/private/qgooglecontext_p.h>
 
@@ -75,7 +77,9 @@ AccountEditor::AccountEditor( QWidget *parent )
 
     setLayout(vbl);
 
-    connect(mChoices, SIGNAL(currentRowChanged(int)), this, SLOT(updateActions()));
+    connect(mChoices, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem* )),
+                this, SLOT(currentAccountChanged(QListWidgetItem *)));
+    mChoices->installEventFilter(this);
 
     actionAdd = new QAction(QIcon(":icon/new"), tr("Add Account"), this);
     actionAdd->setWhatsThis(tr("Create a new account"));
@@ -89,11 +93,11 @@ AccountEditor::AccountEditor( QWidget *parent )
     actionRemove->setWhatsThis(tr("Delete the selected account"));
     connect(actionRemove, SIGNAL(triggered()), this, SLOT(removeCurrentAccount()));
 
-    actionSync = new QAction(tr("Sync Account"), this);
+    actionSync = new QAction(QIcon(":icon/sync"), tr("Sync Account"), this);
     actionSync->setWhatsThis(tr("Syncs the selected accounts"));
     connect(actionSync, SIGNAL(triggered()), this, SLOT(syncCurrentAccount()));
 
-    actionSyncAll = new QAction(QIcon(":icon/new"), tr("Sync All"), this);
+    actionSyncAll = new QAction(QIcon(":icon/sync"), tr("Sync All"), this);
     actionSyncAll->setWhatsThis(tr("Syncs all the accounts"));
     connect(actionSyncAll, SIGNAL(triggered()), this, SLOT(syncAllAccounts()));
 
@@ -160,6 +164,8 @@ void AccountEditor::addAccount()
     QDialog diag;
     QVBoxLayout *vl = new QVBoxLayout;
     vl->addWidget(accountTypes);
+    vl->setMargin(7);
+    diag.setWindowTitle(tr("Account Type", "window title"));
     diag.setLayout(vl);
 
     foreach(QPimContext *c, mModel->contexts()) {
@@ -169,7 +175,16 @@ void AccountEditor::addAccount()
         }
     }
 
+    // Select the first item
+    accountTypes->setCurrentRow(0);
+    if (accountTypes->currentItem())
+        accountTypes->currentItem()->setSelected(true);
+
     connect(accountTypes, SIGNAL(itemActivated(QListWidgetItem *)), &diag, SLOT(accept()));
+
+    // and make this a menu like dialog so we can cancel
+    QtopiaApplication::setMenuLike(&diag, true);
+
     if (QtopiaApplication::execDialog(&diag)) {
         AccountWidgetItem *item = (AccountWidgetItem*)accountTypes->currentItem();
         if (item) {
@@ -199,7 +214,6 @@ void AccountEditor::removeCurrentAccount()
         gcal->removeAccount(item->source().identity);
         mChoices->takeItem(mChoices->row(item));
         delete item;
-        return; // redundent, left here for future account types.
     }
     populate();
     updateActions();
@@ -219,7 +233,7 @@ void AccountEditor::editCurrentAccount()
         diag.setPassword(gcal->password(account));
         diag.setName(gcal->name(account));
         diag.setFeedType(gcal->feedType(account));
-        if (diag.exec()) {
+        if (QtopiaApplication::execDialog( &diag )) {
             if (account != diag.email()) {
                 gcal->removeAccount(account);
                 gcal->addAccount(diag.email(), diag.password());
@@ -228,7 +242,6 @@ void AccountEditor::editCurrentAccount()
             }
             gcal->setFeedType(diag.email(), diag.feedType());
         }
-        return; // redundent, left here for future account types.
     }
     populate();
     updateActions();
@@ -260,6 +273,33 @@ void AccountEditor::syncCurrentAccount()
         updateProgress();
         return; // redundent, left here for future account types.
     }
+}
+
+void AccountEditor::currentAccountChanged(QListWidgetItem *qlwi)
+{
+    if (qlwi != NULL) {
+        qlwi->setSelected(true);
+    }
+    updateActions();
+}
+
+bool AccountEditor::eventFilter(QObject *o, QEvent *e)
+{
+    if (o) {
+        if (e->type() == QEvent::KeyPress) {
+            QKeyEvent *kk = (QKeyEvent*) e;
+            if( o == mChoices) {
+                if (kk->key() == Qt::Key_Select) {
+                    if (mChoices->count() == 0)
+                        addAccount();
+                    else
+                        editCurrentAccount();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 void AccountEditor::updateActions()
@@ -298,6 +338,11 @@ void AccountEditor::updateActions()
     actionRemove->setVisible(hasCurrent);
     actionSync->setVisible(currentSyncable);
     actionSyncAll->setVisible(anySyncable);
+
+    if (hasCurrent)
+        QSoftMenuBar::setLabel(mChoices, Qt::Key_Select, QSoftMenuBar::Edit);
+    else
+        QSoftMenuBar::setLabel(mChoices, Qt::Key_Select, "new", tr("New"));
 }
 
 void AccountEditor::updateProgress()

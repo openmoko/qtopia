@@ -23,6 +23,8 @@ DEFINES+=QTOPIA_KEYPAD_NAVIGATION
 
 # Stuff for apps
 app {
+    # If quicklaunch is forced on, ignore no_quicklaunch from the .pro file
+    qtopia_main:force_quicklaunch:CONFIG-=no_quicklaunch
     # If we don't use the app macros, quicklaunch and singleexec won't work
     !qtopia_main {
         CONFIG+=no_quicklaunch
@@ -36,9 +38,7 @@ app {
         TEMPLATE=lib
         CONFIG-=app
         CONFIG+=quicklaunch plugin 
-	contains( QT_CONFIG, reduce_exports ) {
-		CONFIG+=qtopia_visibility
-	}
+        CONFIG+=qtopia_visibility
         plugin_type=application
         DEFINES+=QTOPIA_APP_INTERFACE
         !enable_singleexec:!no_singleexec {

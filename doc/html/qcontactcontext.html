@@ -53,19 +53,19 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QContactContext class represents a storage context of contact data.</p>
-<p>The QContactContext class represenets a storage context of contact data, such as SIM Card contacts or contacts stored on the phone in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
+<p>The QContactContext class represents a storage context of contact data, such as SIM Card contacts or contacts stored on the phone in Qtopia's native format. The class can be used to perform operations that relate to a specific context of PIM data.</p>
 <p>Currently there is no way for applications to implement their own contexts. This feature is being considered for future versions of Qtopia.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContactContext"></a>QContactContext::QContactContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs a <a href="qcontactcontext.html">QContactContext</a> with parent <i>parent</i>.</p>
 <h3 class="fn"><a name="addContact"></a><a href="quniqueid.html">QUniqueId</a> QContactContext::addContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Adds the <i>contact</i> to the PIM data <i>source</i> if it is controlled by this context. If the contact is sucessfully add returns the new unique id for this contact, otherwise returns a null id.</p>
+<p>Adds the <i>contact</i> to the PIM data <i>source</i> if it is controlled by this context. If the contact is successfully added, returns the new unique id for this contact, otherwise returns a null id.</p>
 <h3 class="fn"><a name="exportContact"></a><a href="qcontact.html">QContact</a> QContactContext::exportContact ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Exports a single contact identified by <i>id</i>. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
 <p>See also <a href="qcontactcontext.html#exportContacts">exportContacts</a>().</p>
 <h3 class="fn"><a name="exportContacts"></a><a href="qlist.html">QList</a>&lt;<a href="qcontact.html">QContact</a>&gt; QContactContext::exportContacts ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Exports the contacts stored in the PIM data <i>source</i> and returns them as a list. The source must be controlled by this context. If sucessful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
+<p>Exports the contacts stored in the PIM data <i>source</i> and returns them as a list. The source must be controlled by this context. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
 <p>There isn't necessarily going to be a one to one match to contacts in the PIM data source. Contacts may be merged or split over multiple contacts to form the list.</p>
 <h3 class="fn"><a name="importContact"></a>bool QContactContext::importContact ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Imports a single <i>contact</i> to the PIM data <i>source</i>. If successful returns true, otherwise returns false.</p>
@@ -79,8 +79,8 @@
 <p>Updates the contact with the same identifier as <i>contact</i> if it exists in this context.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

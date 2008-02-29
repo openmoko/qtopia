@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -18,8 +18,6 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
-#ifdef HAVE_ALSA
 
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include "qbluetoothhfservice_p.h"
@@ -41,9 +39,10 @@
 #include <bluetooth/bluetooth.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "bluetooth/scomisc_p.h"
-#include <alsa/asoundlib.h>
 
 class HandsfreeIpcAdaptor : public QtopiaIpcAdaptor
 {
@@ -105,7 +104,7 @@ public:
 
     QBluetoothAddress m_remotePeer;
 
-    snd_hwdep_t *m_audioDev;
+    void *m_audioDev;
 
     QValueSpaceItem *m_serialPorts;
 
@@ -148,12 +147,13 @@ QBluetoothHandsfreeService::QBluetoothHandsfreeService(const QString &service,
                      this, SLOT(serialPortsChanged()));
 
     m_data->m_session = 0;
+    m_data->m_interface = 0;
 }
 
 QBluetoothHandsfreeService::~QBluetoothHandsfreeService()
 {
     if (m_data) {
-        snd_hwdep_close(m_data->m_audioDev);
+        bt_sco_close(m_data->m_audioDev);
         delete m_data->m_server;
         delete m_data->m_scoServer;
         delete m_data->m_scoSocket;
@@ -182,18 +182,25 @@ void QBluetoothHandsfreeService::serialPortsChanged()
     doDisconnect();
 }
 
-void QBluetoothHandsfreeService::initialize()
+/*!
+  Returns true if the audio gateway is up and running
+  otherwise attempts to start the gateway
+  */
+bool QBluetoothHandsfreeService::audioGatewayInitialized()
 {
+    if ( m_data->m_interface )
+        return true;
+
     QByteArray audioDev = find_btsco_device("Handsfree");
 
     if (audioDev.isEmpty()) {
         qWarning("No headset audio devices available...");
-        goto error;
+        return false;
     }
 
-    if (snd_hwdep_open(&m_data->m_audioDev, audioDev.constData(), O_RDWR) < 0) {
+    if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData()) < 0) {
         qWarning("Unable to open audio device: %s", audioDev.constData());
-        goto error;
+        return false;
     }
 
     if ( !supports<QBluetoothAudioGateway>() ) {
@@ -202,18 +209,23 @@ void QBluetoothHandsfreeService::initialize()
         addInterface( m_data->m_interface );
     }
 
-error:
-    QBluetoothAbstractService::initialize();
+    return true;
 }
-
 // Methods from the Control Interface
 void QBluetoothHandsfreeService::start(int channel)
 {
     qLog(Bluetooth) << "QBluetoothHeadsetService::start";
 
+    
     if (m_data->m_server->isListening()) {
         emit started(QBluetooth::AlreadyRunning,
                      tr("Headset Audio Gateway already running."));
+        return;
+    }
+
+    if ( !audioGatewayInitialized() ) {
+        emit started(QBluetooth::UnknownError,
+                     tr("Could not start audio gateway."));
         return;
     }
 
@@ -366,8 +378,13 @@ void QBluetoothHandsfreeService::disconnect()
         return;
     }
 
-    if (!m_data->m_activeClient)
+    if (!m_data->m_activeClient) {
+        m_data->m_interface->setValue("IsConnected", false);
+        m_data->m_remotePeer = QBluetoothAddress::invalid;
+        m_data->m_interface->setValue("RemotePeer",
+                                      QVariant::fromValue(m_data->m_remotePeer));
         return;
+    }
 
     QtopiaServiceRequest req( "ModemEmulator", "removeSerialPort(QString)" );
     req << m_data->m_activeClient->boundDevice();
@@ -392,12 +409,8 @@ void QBluetoothHandsfreeService::doDisconnect()
 
 void QBluetoothHandsfreeService::setSpeakerVolume(int volume)
 {
-    if (!m_data->m_client)
+    if (!m_data->m_activeClient)
         return;
-
-    if (m_data->m_client->state() != QBluetoothRfcommSocket::ConnectedState) {
-        return;
-    }
 
     if (volume == m_data->m_speakerVolume)
         return;
@@ -415,12 +428,8 @@ void QBluetoothHandsfreeService::updateSpeakerVolume(int volume)
 
 void QBluetoothHandsfreeService::setMicrophoneVolume(int volume)
 {
-    if (!m_data->m_client)
+    if (!m_data->m_activeClient)
         return;
-
-    if (m_data->m_client->state() != QBluetoothRfcommSocket::ConnectedState) {
-        return;
-    }
 
     if (volume == m_data->m_microphoneVolume)
         return;
@@ -689,5 +698,3 @@ void QBluetoothHandsfreeService::newScoConnection()
 }
 
 #include "qbluetoothhfservice.moc"
-
-#endif

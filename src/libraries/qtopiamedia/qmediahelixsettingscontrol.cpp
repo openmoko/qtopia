@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -64,6 +64,8 @@ signals:
 
     It is only available when the Helix Client is being used as the media
     provider in Qtopia's media system.
+
+    \ingroup multimedia
 */
 
 /*!

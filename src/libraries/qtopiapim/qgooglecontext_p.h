@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -128,7 +128,7 @@ signals:
 
 private slots:
     void updateFetchingProgress(int, int);
-    void updateFetchingState(Status);
+    void updateFetchingState(QGoogleCalendarContext::Status);
     void syncAccountList();
 private:
     QList<QGoogleCalendarFetcher *> mFetchers;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -271,10 +271,19 @@ void WindowManagementPrivate::windowEvent(QWSWindow *w,
     static int active = 0;
 
     bool known = false;
-    for(QSet<QWidget *>::ConstIterator iter = widgets.begin();
-            !known && widgets.end() != iter;
-            ++iter)
-        known = ((*iter)->winId() == (unsigned)w->winId());
+
+    // only calculate known for these events, and only for created QWSWindows (otherwise QWidget::winId() creates them)
+    switch (e) {
+        case QWSServer::Raise:
+        case QWSServer::Show:
+        case QWSServer::Active:
+        case QWSServer::Name:
+            for(QSet<QWidget *>::ConstIterator iter = widgets.begin();
+                    !known && widgets.end() != iter;
+                    ++iter)
+                known = ((*iter)->testAttribute(Qt::WA_WState_Created)) && (((*iter)->winId() == (unsigned)w->winId()));
+            break;
+    }
 
     switch( e ) {
         case QWSServer::Raise:

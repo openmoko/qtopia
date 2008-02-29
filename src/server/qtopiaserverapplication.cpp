@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -59,7 +59,7 @@ public:
     struct Task;
 
     void enableTaskReporting();
-    bool determineStartupOrder(QList<Task *> &);
+    bool determineStartupOrder(const QList<QByteArray> &, QList<Task *> &);
     void determineStartupOrder(const QByteArray &, bool, bool,
                                TaskStartupInfo &);
 
@@ -125,6 +125,40 @@ public slots:
     void shutdownProceed();
 };
 Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
+
+
+#ifdef QTOPIA_TEST
+
+/*!
+    \internal
+    This filter is used by the test framework to record events.
+*/
+class TestKeyFilter : public QObject, QtopiaServerApplication::QWSEventFilter
+{
+Q_OBJECT
+public:
+    TestKeyFilter(QtopiaServerTestSlave *slave) : m_serverSlave(slave)
+    {
+        QtopiaServerApplication::instance()->installQWSEventFilter(this);
+    }
+    ~TestKeyFilter()
+    {
+        QtopiaServerApplication::instance()->removeQWSEventFilter(this);
+    }
+
+protected:
+    virtual bool qwsEventFilter(QWSEvent *e)
+    {
+        m_serverSlave->qwsEventFilter(e);
+        return false;
+    }
+
+private:
+    QtopiaServerTestSlave *m_serverSlave;
+};
+
+#endif
+
 
 /*!
   \class QtopiaServerApplication
@@ -562,6 +596,10 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     m_instance = this;
     QValueSpace::initValuespaceManager();
     qtopiaServerTasks()->enableTaskReporting();
+
+#ifdef QTOPIA_TEST
+    m_testKeyFilter = new TestKeyFilter(&m_serverSlave);
+#endif
 }
 
 /*! \internal */
@@ -570,6 +608,10 @@ QtopiaServerApplication::~QtopiaServerApplication()
     Q_ASSERT(m_instance);
     Q_ASSERT(m_filters.isEmpty());
     m_instance = 0;
+
+#ifdef QTOPIA_TEST
+    delete m_testKeyFilter;
+#endif
 }
 
 /*!
@@ -835,7 +877,7 @@ void QtopiaServerTasksPrivate::determineStartupOrder(const QByteArray &group,
     }
 }
 
-bool QtopiaServerTasksPrivate::determineStartupOrder(QList<Task *> &startupOrder)
+bool QtopiaServerTasksPrivate::determineStartupOrder(const QList<QByteArray> &startupGroups, QList<Task *> &startupOrder)
 {
     // Parse config file
     QFile tasks(taskConfigFile());
@@ -923,7 +965,8 @@ bool QtopiaServerTasksPrivate::determineStartupOrder(QList<Task *> &startupOrder
     }
 
     // Setup orders
-    determineStartupOrder("startup", false, true, startupInfo);
+    for (int ii = 0; ii < startupGroups.count(); ++ii)
+        determineStartupOrder(startupGroups.at(ii), false, true, startupInfo);
     startupInfo.seenTasks.clear();
 
     for(int ii = 0; ii < groupOrder.count(); ++ii)
@@ -952,21 +995,23 @@ bool QtopiaServerTasksPrivate::determineStartupOrder(QList<Task *> &startupOrder
         }
     }
 
-    // Transform ordered list into actual list
-    QList<Task *> interfaceOrder;
-    for(int ii = 0; ii < startupInfo.orderedTasks.count(); ++ii) {
-        QConstCString name(startupInfo.orderedTasks.at(ii).constData(),
-                           startupInfo.orderedTasks.at(ii).length());
+    if (m_availableInterfaces.isEmpty()) {
+        // Transform ordered list into actual list
+        QList<Task *> interfaceOrder;
+        for(int ii = 0; ii < startupInfo.orderedTasks.count(); ++ii) {
+            QConstCString name(startupInfo.orderedTasks.at(ii).constData(),
+                               startupInfo.orderedTasks.at(ii).length());
 
-        QMap<QConstCString, Task *>::ConstIterator iter =
-            m_availableTasks.find(name);
+            QMap<QConstCString, Task *>::ConstIterator iter =
+                m_availableTasks.find(name);
 
-        if(iter != m_availableTasks.end()) {
-            interfaceOrder.append(*iter);
+            if(iter != m_availableTasks.end()) {
+                interfaceOrder.append(*iter);
+            }
         }
-    }
 
-    setupInterfaceList(interfaceOrder);
+        setupInterfaceList(interfaceOrder);
+    }
 
     // Transform the startup order into a return list
     for(int ii = 0; ii < startupInfo.startupTasks.count(); ++ii) {
@@ -1116,8 +1161,9 @@ char **QtopiaServerApplication::argv()
   false on failure.
 
   \a argc and \a argv should be the values passed to the main() function.
+  \a startupGroups contains a list of Task groups to start.
  */
-bool QtopiaServerApplication::startup(int &argc, char **argv)
+bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteArray> &startupGroups)
 {
     QtopiaServerTasksPrivate *qst = qtopiaServerTasks();
     Q_ASSERT(qst);
@@ -1130,7 +1176,7 @@ bool QtopiaServerApplication::startup(int &argc, char **argv)
 
     QList<QtopiaServerTasksPrivate::Task *> startupOrder;
     // Determine startup order
-    if(!qst->determineStartupOrder(startupOrder))
+    if(!qst->determineStartupOrder(startupGroups, startupOrder))
         return false;
 
     // Actually start the tasks

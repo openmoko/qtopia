@@ -15,6 +15,7 @@
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/><a href="dialercontrol.html#accept">accept</a> ()</li>
+<li><div class="fn"/><a href="dialercontrol.html#activateCall">activateCall</a> ( int )</li>
 <li><div class="fn"/><a href="dialercontrol.html#activeCalls">activeCalls</a> () const : QList&lt;QPhoneCall&gt;</li>
 <li><div class="fn"/><a href="dialercontrol.html#activeCallsCount">activeCallsCount</a> () const : uint</li>
 <li><div class="fn"/><a href="dialercontrol.html#activeCount">activeCount</a> ( int )</li>
@@ -41,6 +42,7 @@
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
 <li><div class="fn"/><a href="qobject.html#customEvent">customEvent</a> ( QEvent * )</li>
+<li><div class="fn"/><a href="dialercontrol.html#deflect">deflect</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#deleteLater">deleteLater</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#destroyed">destroyed</a> ( QObject * )</li>
 <li><div class="fn"/><a href="dialercontrol.html#dial">dial</a> ( const QString &amp;, bool, const QString &amp;, const QUniqueId &amp; )</li>
@@ -53,6 +55,8 @@
 <li><div class="fn"/><a href="qobject.html#dynamicPropertyNames">dynamicPropertyNames</a> () const</li>
 <li><div class="fn"/><a href="dialercontrol.html#endAllCalls">endAllCalls</a> ()</li>
 <li><div class="fn"/><a href="dialercontrol.html#endCall">endCall</a> ()</li>
+<li><div class="fn"/><a href="dialercontrol.html#endCall-2">endCall</a> ( int )</li>
+<li><div class="fn"/><a href="dialercontrol.html#endHeldCalls">endHeldCalls</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#event">event</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#eventFilter">eventFilter</a> ( QObject *, QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const</li>
@@ -60,8 +64,8 @@
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const</li>
 <li><div class="fn"/><a href="dialercontrol.html#hasActiveCalls">hasActiveCalls</a> () const : bool</li>
 <li><div class="fn"/><a href="dialercontrol.html#hasCallsOnHold">hasCallsOnHold</a> () const : bool</li>
-<li><div class="fn"/><a href="dialercontrol.html#hasIncomingCall">hasIncomingCall</a> () const : bool</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="dialercontrol.html#hasIncomingCall">hasIncomingCall</a> () const : bool</li>
 <li><div class="fn"/><a href="dialercontrol.html#hold">hold</a> ()</li>
 <li><div class="fn"/><a href="dialercontrol.html#incomingCall">incomingCall</a> () const : QPhoneCall</li>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
@@ -77,6 +81,7 @@
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const</li>
 <li><div class="fn"/><a href="dialercontrol.html#missedCallCount">missedCallCount</a> () const : int</li>
 <li><div class="fn"/><a href="dialercontrol.html#missedCount">missedCount</a> ( int )</li>
+<li><div class="fn"/><a href="dialercontrol.html#modifyDial">modifyDial</a> ( QDialOptions &amp;, bool &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
 <li><div class="fn"/><a href="qobject.html#name">name</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#name-2">name</a> ( const char * ) const</li>
@@ -112,8 +117,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

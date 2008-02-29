@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -377,6 +377,8 @@ bool QWorldmapPrivate::winToZone(
     The QWorldmap widget displays a worldmap for time zone selection.
     selectNewZone() is used to select one of the available time zones from
     the map.
+
+    \ingroup time
 */
 
 /*!
@@ -532,7 +534,7 @@ void QWorldmap::mouseReleaseEvent( QMouseEvent* event )
         emit newZone( QTimeZone( line.toLatin1() ) );
         d->m_last = QTimeZone();
     }
-    d->tHide->start( 5000);
+    d->tHide->start( 120000);
 }
 
 /*!
@@ -970,7 +972,7 @@ void QWorldmap::setCursorPoint( int ox, int oy, QString city )
 
     d->lblCity->move( x, y );
     d->lblCity->show();
-    d->tHide->start( 5000 );
+    d->tHide->start( 120000 );
     viewport()->update();
 }
 

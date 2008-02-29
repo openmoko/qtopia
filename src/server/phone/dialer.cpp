@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -79,6 +79,7 @@ public slots:
 signals:
     void dial(const QString&, const QUniqueId&);
     void closeMe();
+    void keyEntered(const QString&);
 
 protected slots:
     virtual void dialerItemClicked( ThemeItem *item );
@@ -295,6 +296,7 @@ void Dialer::themeLoaded( const QString & )
     }
 
     connect( display, SIGNAL(textChanged(const QString&)), this, SLOT(updateIcons(const QString&)) );
+    connect( display, SIGNAL(textChanged(const QString&)), this, SIGNAL(keyEntered(const QString&)) );
     display->setFocus();
     display->setFocusPolicy(Qt::StrongFocus);
     setFocusPolicy(Qt::NoFocus);
@@ -501,6 +503,7 @@ PhoneTouchDialerScreen::PhoneTouchDialerScreen(QWidget *parent, Qt::WFlags flags
                      this,
                      SIGNAL(requestDial(const QString &, const QUniqueId &)));
     QObject::connect(m_dialer, SIGNAL(closeMe()), this, SLOT(close()));
+    QObject::connect(m_dialer, SIGNAL(keyEntered(const QString&)), this, SLOT(keyEntered(const QString&)));
 }
 
 /*! \internal */
@@ -525,6 +528,15 @@ void PhoneTouchDialerScreen::setDigits(const QString &digits)
 QString PhoneTouchDialerScreen::digits() const
 {
     return m_dialer->digits();
+}
+
+void PhoneTouchDialerScreen::keyEntered(const QString &key)
+{
+    bool filtered = false;
+    emit filterKeys( key, filtered );
+    if ( filtered ) {
+        m_dialer->setDigits( QString() );
+    }
 }
 
 QTOPIA_REPLACE_WIDGET_WHEN(QAbstractDialerScreen, PhoneTouchDialerScreen, Touchscreen);

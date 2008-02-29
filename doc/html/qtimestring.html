@@ -38,7 +38,7 @@
 <li><div class="fn"/>QString <b><a href="qtimestring.html#nameOfMonth">nameOfMonth</a></b> ( int <i>m</i>, Length <i>len</i> = Medium )</li>
 <li><div class="fn"/>QString <b><a href="qtimestring.html#nameOfWeekDay">nameOfWeekDay</a></b> ( int <i>d</i>, Length <i>len</i> = Medium )</li>
 <li><div class="fn"/>QString <b><a href="qtimestring.html#numberDateString">numberDateString</a></b> ( const QDate &amp; <i>date</i>, Length <i>len</i> = Medium )</li>
-<li><div class="fn"/>bool <b><a href="qtimestring.html#parseDate">parseDate</a></b> ( const QString &amp; <i>date</i>, int &amp; <i>year</i>, int &amp; <i>month</i>, int &amp; <i>day</i> )</li>
+<li><div class="fn"/>bool <b><a href="qtimestring.html#parseDate">parseDate</a></b> ( const QString &amp; <i>date</i>, int &amp; <i>year</i>, int &amp; <i>month</i>, int &amp; <i>day</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -160,13 +160,12 @@
 </ul>
 <p>The format, including order depends on the user's settings.</p>
 <h3 class="fn"><a name="parseDate"></a>bool QTimeString::parseDate ( const <a href="qstring.html">QString</a> &amp; <i>date</i>, int &amp; <i>year</i>, int &amp; <i>month</i>, int &amp; <i>day</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Parses a user-entered <i>date</i> into component <i>year</i>, <i>month</i>, and <i>day</i>, according to the user's format preferences.</p>
-<p>If <i>date</i> is partial (eg. &quot;9-11&quot;), the undefined components will not be changed.</p>
-<p>Returns true if <i>date</i> was well-formed, otherwise returns false and no components are changed.</p>
+<p><b>This function is deprecated.</b></p>
+<p>Use <a href="qdate.html#fromString">QDate::fromString</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>

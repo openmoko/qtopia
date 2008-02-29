@@ -173,7 +173,12 @@ sub parse_pro_file
         s/\s+$//;
         # handle continuations (lines ending with \)
         if ( s/\\$// ) {
-            $data[0] = $_.$data[0];
+            if ( scalar(@data) == 0 ) {
+                warn "Unterminated \\ on the last line of $proFile\n";
+                push(@data, $_);
+            } else {
+                $data[0] = $_.$data[0];
+            }
             next;
         }
         if ( !keys %{$$vars{PROJECT_TYPE}} && /qtopia_project\((.*)\)/ ) {

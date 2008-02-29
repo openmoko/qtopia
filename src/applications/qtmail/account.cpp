@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -882,6 +882,7 @@ void MailAccount::readSettings(QSettings *conf)
     _networkCfg = conf->value("networkConfig").toString();
     _autoDL = conf->value("autoDownload").toBool();
 
+    QString oldGroup = conf->group();
     if ( _accountType == IMAP ) {
         uint count = conf->value("mailboxes", 0).toInt();
         Mailbox *box;
@@ -904,6 +905,7 @@ void MailAccount::readSettings(QSettings *conf)
             uidList.append( conf->value( QString::number(x) ).toString() );
         }
         conf->endGroup();
+        conf->beginGroup( oldGroup );
     }
 
     search->setFromAccount( id() );

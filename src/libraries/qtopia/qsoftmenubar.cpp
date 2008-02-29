@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -75,7 +75,7 @@
 
   QSoftMenuBar is only available in the Qtopia Phone Edition.
 
-  \ingroup qtopiaemb
+  \ingroup userinput
 */
 
 /*!
@@ -506,7 +506,7 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
     }
     QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
     QSoftMenuBar::setLabel(w, key(), QSoftMenuBar::Options, state);
-    QSoftMenuBar::setLabel(menu, key(), QSoftMenuBar::Options, QSoftMenuBar::AnyFocus);
+    QSoftMenuBar::setLabel(menu, key(), "options-hide", tr("Hide"), QSoftMenuBar::AnyFocus);
 
     if (state & QSoftMenuBar::EditFocus)
         modalMenuMap.insert(w, menu);
@@ -631,6 +631,24 @@ bool MenuManager::triggerMenuItem( QMenu *menu, int keyNum )
 
 bool MenuManager::eventFilter(QObject *o, QEvent *e)
 {
+    if (e->type() == QEvent::Hide) {
+        // If the window hiding has a visible menu, hide the menu too.
+        QMap<QWidget*, QWidget*>::ConstIterator it;
+        QWidget *w = 0;
+        it = focusWidgetMap.find((QWidget*)o);
+        if (it == focusWidgetMap.end())
+            w = qobject_cast<QWidget*>(o);
+        else
+            w = *it;
+        if (w) {
+            QMenu *menu = internalMenuFor(w, w->hasEditFocus() ? QSoftMenuBar::EditFocus : QSoftMenuBar::NavigationFocus);
+            if (menu && menu->isVisible()) {
+                menu->close();
+            }
+        }
+        return false;
+    }
+
     if (!o || !e || e->type() != QEvent::KeyPress )
         return false;
 

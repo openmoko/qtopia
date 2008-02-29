@@ -6,8 +6,8 @@ portalconf.trtarget=Portal
 portalconf.hint=themecfg
 portaldata.files=*.xml *rc
 portaldata.path=/etc/themes/portal
-portalpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/portal
-portalpics.path=/pics/themes
+portalpics.files=$$QTOPIA_DEPOT_PATH/pics/themes/portal/*
+portalpics.path=/pics/themes/portal
 portalpics.hint=pics
 
 INSTALLS+=portalconf portaldata portalpics

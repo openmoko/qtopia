@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -182,8 +182,8 @@ void SettingsDialog::readConfig()
     config.endArray();
 
     if( !m_speedcombo->count() ) {
-        m_speedcombo->addItem( "GPRS (32 kbps)", 32000 );
-        m_speedcombo->addItem( "EGPRS (128 kbps)", 128000 );
+        m_speedcombo->addItem( tr("GPRS (32 kbps)"), 32000 );
+        m_speedcombo->addItem( tr("EGPRS (128 kbps)"), 128000 );
     }
 
     QVariant value = config.value( "ConnectionSpeedIndex" );
@@ -982,19 +982,28 @@ void ThrottleKeyMapper::processIntensityChange( int intensity )
     {
     case -1:
         {
+        if( m_lastpressed ) {
+            // Send release event
+            processIntensityChange( 0 );
+        }
         m_lastpressed = m_mapping == LeftRight ? KEY_LEFT_HOLD : Qt::Key_Down;
         QKeyEvent event = QKeyEvent( QEvent::KeyPress, m_lastpressed, Qt::NoModifier );
         QCoreApplication::sendEvent( parent(), &event );
         }
         break;
     case 0:
-        {
-        QKeyEvent event = QKeyEvent( QEvent::KeyRelease, m_lastpressed, Qt::NoModifier );
-        QCoreApplication::sendEvent( parent(), &event );
+        if( m_lastpressed ) {
+            QKeyEvent event = QKeyEvent( QEvent::KeyRelease, m_lastpressed, Qt::NoModifier );
+            QCoreApplication::sendEvent( parent(), &event );
+            m_lastpressed = 0;
         }
         break;
     case 1:
         {
+        if( m_lastpressed ) {
+            // Send release event
+            processIntensityChange( 0 );
+        }
         m_lastpressed = m_mapping == LeftRight ? KEY_RIGHT_HOLD : Qt::Key_Up;
         QKeyEvent event = QKeyEvent( QEvent::KeyPress, m_lastpressed, Qt::NoModifier );
         QCoreApplication::sendEvent( parent(), &event );
@@ -1269,7 +1278,6 @@ void PlayerWidget::setPlaylist( Playlist* playlist )
 
         if( m_currenttrack.isValid() ) {
             openCurrentTrack();
-            m_playercontrol->setState( PlayerControl::Playing );
         }
     } else {
         qLog(Media) << "PlayerWidget::setPlaylist playlist is null";

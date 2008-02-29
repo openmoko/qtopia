@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **
@@ -455,34 +455,22 @@ void QWSCalibratedMouseHandler::calibrate(const QWSPointerCalibrationData *data)
     const qint64 y1 = p1.y();
     const qint64 y2 = p2.y();
 
-    qint64 s64 = ((xd0 - xd2)*(yd1 - yd2) - (xd1 - xd2)*(yd0 - yd2));
+    qint64 scale = ((xd0 - xd2)*(yd1 - yd2) - (xd1 - xd2)*(yd0 - yd2));
+    int shift = 0;
 
-    qint64 a64 = ((x0 - x2)*(yd1 - yd2) - (x1 - x2)*(yd0 - yd2));
-    qint64 b64 = ((xd0 - xd2)*(x1 - x2) - (x0 - x2)*(xd1 - xd2));
-    qint64 c64 = (yd0*(xd2*x1 - xd1*x2) + yd1*(xd0*x2 - xd2*x0) + yd2*(xd1*x0 - xd0*x1));
-    qint64 d64 = ((y0 - y2)*(yd1 - yd2) - (y1 - y2)*(yd0 - yd2));
-    qint64 e64 = ((xd0 - xd2)*(y1 - y2) - (y0 - y2)*(xd1 - xd2));
-    qint64 f64 = (yd0*(xd2*y1 - xd1*y2) + yd1*(xd0*y2 - xd2*y0) + yd2*(xd1*y0 - xd0*y1));
+    // use maximum 16 bit precision to reduce risk of integer overflow
+    if (scale > (1 << 16)) {
+        shift = int(log2(double(qAbs(scale) >> 16))) + 1;
+        scale >>= shift;
+    }
 
-    quint64 max = quint64(qAbs(s64));
-    max = qMax(max, quint64(qAbs(a64)));
-    max = qMax(max, quint64(qAbs(b64)));
-    max = qMax(max, quint64(qAbs(c64)));
-    max = qMax(max, quint64(qAbs(d64)));
-    max = qMax(max, quint64(qAbs(e64)));
-    max = qMax(max, quint64(qAbs(f64)));
-
-    int k = 0;
-    if ((max >> 31) > 0)
-        k = int(log2(double(max >> 31))) + 1;
-
-    s = s64 >> k;
-    a = a64 >> k;
-    b = b64 >> k;
-    c = c64 >> k;
-    d = d64 >> k;
-    e = e64 >> k;
-    f = f64 >> k;
+    s = scale;
+    a = ((x0 - x2)*(yd1 - yd2) - (x1 - x2)*(yd0 - yd2)) >> shift;
+    b = ((xd0 - xd2)*(x1 - x2) - (x0 - x2)*(xd1 - xd2)) >> shift;
+    c = (yd0*(xd2*x1 - xd1*x2) + yd1*(xd0*x2 - xd2*x0) + yd2*(xd1*x0 - xd0*x1)) >> shift;
+    d = ((y0 - y2)*(yd1 - yd2) - (y1 - y2)*(yd0 - yd2)) >> shift;
+    e = ((xd0 - xd2)*(y1 - y2) - (y0 - y2)*(xd1 - xd2)) >> shift;
+    f = (yd0*(xd2*y1 - xd1*y2) + yd1*(xd0*y2 - xd2*y0) + yd2*(xd1*y0 - xd0*y1)) >> shift;
 
     writeCalibration();
 }

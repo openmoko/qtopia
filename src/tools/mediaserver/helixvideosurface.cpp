@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -43,8 +43,14 @@ static HelixColorLibrary load_color_library()
     return symbols;
 }
 
+static int NullConverter( unsigned char*, int, int, int, int, int, int, int,
+    unsigned char*, int, int, int, int, int, int, int )
+{
+    return 0;
+}
+
 GenericVideoSurface::GenericVideoSurface()
-    : m_refCount( 0 )
+    : m_refCount( 0 ), Converter( 0 )
 {
     m_library = load_color_library();
 
@@ -64,43 +70,46 @@ STDMETHODIMP GenericVideoSurface::BeginOptimizedBlt( HXBitmapInfoHeader *pBitmap
 
 STDMETHODIMP GenericVideoSurface::Blt( UCHAR* pImageBits, HXBitmapInfoHeader* pBitmapInfo, REF(HXxRect) rDestRect, REF(HXxRect) rSrcRect )
 {
-    // Update widget buffer
-    int width = rDestRect.right - rDestRect.left;
-    int height = rDestRect.bottom - rDestRect.top;
-
-    if( m_buffer.width() != width || m_buffer.height() != height ) {
-        m_buffer = QImage( width, height, QImage::Format_RGB32 );
+    if( m_buffer.isNull() ) {
+        // Assume rDestRect does not change
+        m_buffer = QImage( rDestRect.right - rDestRect.left,
+            rDestRect.bottom - rDestRect.top,
+            QImage::Format_RGB32 );
     }
 
-    HXBitmapInfoHeader bufferInfo;
-    memset( &bufferInfo, 0, sizeof(HXBitmapInfoHeader) );
+    // Obtain color converter
+    if( !Converter ) {
+        if( m_library.GetColorConverter ) {
+            HXBitmapInfoHeader bufferInfo;
+            memset( &bufferInfo, 0, sizeof(HXBitmapInfoHeader) );
 
-    bufferInfo.biWidth = m_buffer.width();
-    bufferInfo.biHeight = m_buffer.height();
-    bufferInfo.biPlanes = 1;
-    bufferInfo.biCompression = HX_RGB;
-    bufferInfo.biBitCount = 32;
-    bufferInfo.biSizeImage = bufferInfo.biHeight * (( (bufferInfo.biWidth * 4) + 3) & ~3);
+            bufferInfo.biWidth = m_buffer.width();
+            bufferInfo.biHeight = m_buffer.height();
+            bufferInfo.biPlanes = 1;
+            bufferInfo.biCompression = HX_RGB;
+            bufferInfo.biBitCount = 32;
+            bufferInfo.biSizeImage = bufferInfo.biHeight * (( (bufferInfo.biWidth * 4) + 3) & ~3);
 
-    int bufferCID = GETBITMAPCOLOR( &bufferInfo );
-    int bufferPitch = (((bufferInfo.biWidth * 4) + 3) & ~3); // ### only when buffer change size
+            m_bufferPitch = (((bufferInfo.biWidth * 4) + 3) & ~3);
+            m_inPitch = GETBITMAPPITCH( pBitmapInfo );
 
-    int inCID = GETBITMAPCOLOR( pBitmapInfo );
-    int inPitch = GETBITMAPPITCH( pBitmapInfo ); // ### only when pBitmapInfo change size
+            int bufferCID = GETBITMAPCOLOR( &bufferInfo );
+            int inCID = GETBITMAPCOLOR( pBitmapInfo );
 
-    if( m_library.GetColorConverter ) {
-        LPHXCOLORCONVERTER Convert = m_library.GetColorConverter( inCID, bufferCID );
-        if( Convert ) {
-            Convert( m_buffer.bits(), bufferInfo.biWidth, bufferInfo.biHeight, bufferPitch,
-                0, 0, m_buffer.width(), m_buffer.height(),
-                pImageBits, pBitmapInfo->biWidth, pBitmapInfo->biHeight, inPitch,
-                rSrcRect.left, rSrcRect.top, rSrcRect.right - rSrcRect.left, rSrcRect.bottom - rSrcRect.top );
-        } else {
-            REPORT_ERROR( ERR_HELIX );
+            Converter = m_library.GetColorConverter( inCID, bufferCID );
         }
-    } else {
-        REPORT_ERROR( ERR_HELIX ); // ### optimize here
+
+        if( !Converter ) {
+            REPORT_ERROR( ERR_UNSUPPORTED );
+            // Assign null converter if no converter available
+            Converter = &NullConverter;
+        }
     }
+
+    Converter( m_buffer.bits(), m_buffer.width(), m_buffer.height(), m_bufferPitch,
+        0, 0, m_buffer.width(), m_buffer.height(),
+        pImageBits, pBitmapInfo->biWidth, pBitmapInfo->biHeight, m_inPitch,
+        rSrcRect.left, rSrcRect.top, rSrcRect.right - rSrcRect.left, rSrcRect.bottom - rSrcRect.top );
 
     // Notify observers
     notify();

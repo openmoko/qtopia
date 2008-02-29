@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -293,7 +293,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
 
     setWindowTitle( tr("Contacts") );
     setWindowIcon(QIcon(":image/AddressBook"));
-    setBackgroundRole(QPalette::Button);
 
     centralView = new QStackedWidget(this);
     setCentralWidget(centralView);
@@ -692,9 +691,18 @@ bool AddressbookWindow::eventFilter( QObject *o, QEvent *e )
 void AddressbookWindow::contactsChanged()
 {
     if (!abList->currentIndex().isValid()) {
-        QModelIndex first = contacts->index(0,0);
-        if(first.isValid())
-            abList->selectionModel()->setCurrentIndex(first, QItemSelectionModel::Current);
+        QModelIndex newSel;
+        if ( mView &&
+            ( centralView->currentIndex() == AB_DETAILVIEW ) &&
+            ( mView->entry() != QContact() ) )
+                newSel = contacts->index(mView->entry().uid());
+        if ( ! newSel.isValid())
+            newSel = contacts->index(0,0);
+        if(newSel.isValid())
+        {
+            abList->selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::Current);
+            abList->scrollTo(newSel, QAbstractItemView::PositionAtCenter);
+        }
     }
     updateIcons();
 }
@@ -1015,38 +1023,33 @@ void AddressbookWindow::readConfig(void)
     QSettings config( "Trolltech", "Contacts" );
 
     config.beginGroup( "default" );
-    if (config.contains("SelectedSources/size")) {
-        int count = config.beginReadArray("SelectedSources");
-        QSet<QPimSource> set;
-        for(int i = 0; i < count; ++i) {
-            config.setArrayIndex(i);
-            QPimSource s;
-            s.context = QUuid(config.value("context").toString());
-            s.identity = config.value("identity").toString();
-            set.insert(s);
-        }
-        config.endArray();
-        contacts->setVisibleSources(set);
+    int count = config.beginReadArray("SelectedSources");
+    QSet<QPimSource> set;
+    for(int i = 0; i < count; ++i) {
+        config.setArrayIndex(i);
+        QPimSource s;
+        s.context = QUuid(config.value("context").toString());
+        s.identity = config.value("identity").toString();
+        set.insert(s);
     }
+    config.endArray();
+    if (count > 0)
+        contacts->setVisibleSources(set);
 
-#ifndef QTOPIA_PHONE
     QCategoryFilter f;
     f.readConfig( config, "SelectedCategory" );
     showCategory( f );
     config.endGroup();
-#endif
 }
 
 void AddressbookWindow::writeConfig(void)
 {
-#ifndef QTOPIA_PHONE
     QSettings config( "Trolltech", "Contacts" );
 
     config.beginGroup( "default" );
     QCategoryFilter f = contacts->categoryFilter();
     f.writeConfig( config, "SelectedCategory" );
     config.endGroup();
-#endif
 }
 
 void AddressbookWindow::updateIcons()

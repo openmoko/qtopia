@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -89,14 +89,16 @@ public:
 /*!
     \class QContentFilterModel::Template
     \brief The QContentFilterModel::Template class defines the structure of a QContentFilterModel.
+
+  \ingroup content
 */
 
 /*!
     Constructs a new empty Template.
 */
 QContentFilterModel::Template::Template()
-    : d( 0 )
 {
+    d = new QContentFilterModelTemplatePrivate;
 }
 
 /*!
@@ -197,7 +199,7 @@ QContentFilterModel::Template &QContentFilterModel::Template::operator =( const 
 */
 bool QContentFilterModel::Template::isValid() const
 {
-    return d;
+    return !d->items.isEmpty();
 }
 
 /*!
@@ -205,7 +207,7 @@ bool QContentFilterModel::Template::isValid() const
 */
 QContentFilterModel::TemplateOptions QContentFilterModel::Template::options() const
 {
-    return d ? d->options : QContentFilterModel::NoTemplateOptions;
+    return d->options;
 }
 
 /*!
@@ -213,9 +215,6 @@ QContentFilterModel::TemplateOptions QContentFilterModel::Template::options() co
 */
 void QContentFilterModel::Template::setOptions( TemplateOptions options )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     d->options = options;
 }
 
@@ -224,9 +223,6 @@ void QContentFilterModel::Template::setOptions( TemplateOptions options )
 */
 void QContentFilterModel::Template::addLabel( const QString &title, bool checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.title = title;
@@ -241,9 +237,6 @@ void QContentFilterModel::Template::addLabel( const QString &title, bool checked
 */
 void QContentFilterModel::Template::addLabel( const QString &title, const QContentFilter &filter, bool checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.title  = title;
@@ -261,9 +254,6 @@ void QContentFilterModel::Template::addLabel( const QString &title, const QConte
 */
 void QContentFilterModel::Template::addLabel( const Template &target, const QString &title, bool checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.target = target;
@@ -281,9 +271,6 @@ void QContentFilterModel::Template::addLabel( const Template &target, const QStr
 */
 void QContentFilterModel::Template::addLabel( const Template &target, const QString &title, const QContentFilter &filter, bool checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.target       = target;
@@ -301,9 +288,6 @@ void QContentFilterModel::Template::addLabel( const Template &target, const QStr
 */
 void QContentFilterModel::Template::addList( QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.filterType    = type;
@@ -322,9 +306,6 @@ void QContentFilterModel::Template::addList( QContentFilter::FilterType type, co
  */
 void QContentFilterModel::Template::addList( const Template &target, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.target        = target;
@@ -342,9 +323,6 @@ void QContentFilterModel::Template::addList( const Template &target, QContentFil
  */
 void QContentFilterModel::Template::addList( const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.filterType    = type;
@@ -364,9 +342,6 @@ void QContentFilterModel::Template::addList( const QContentFilter &filter, QCont
  */
 void QContentFilterModel::Template::addList( const Template &target, const QContentFilter &filter, QContentFilter::FilterType type, const QString &subType, const QStringList &checked )
 {
-    if( !d )
-        d = new QContentFilterModelTemplatePrivate;
-
     TemplateItem item;
 
     item.target        = target;
@@ -1670,6 +1645,8 @@ QContentFilterModelPrivate::Selection QContentFilterModelPrivate::selection( int
     \endcode
 
     \sa QContentFilterSelector, QContentFilterDialog
+
+  \ingroup content
 */
 
 /*!

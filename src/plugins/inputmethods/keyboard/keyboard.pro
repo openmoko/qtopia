@@ -18,9 +18,9 @@ desktop.path=/plugins/inputmethods/
 desktop.hint=desktop
 INSTALLS+=desktop
 
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*.png
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*
 pics.path=/pics/keyboard
-
+pics.hint=pics
 INSTALLS += pics
  
 pkg.name=qpe-keyboard

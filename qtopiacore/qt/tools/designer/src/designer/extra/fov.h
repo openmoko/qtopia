@@ -1,7 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2005-2006 TROLLTECH ASA. All rights reserved.
-** Copyright (C) 2002-2006 Bjoern Bergstroem
+** Copyright (C) 2005-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2002-2007 Bjoern Bergstroem
 **
 ** This file is part of the Phone Edition of the Qt Toolkit.
 **

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -28,10 +28,12 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/param.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #include <QDebug>
+#include <QTime>
 
 #include <qtopialog.h>
 
@@ -39,19 +41,23 @@ class QBluetoothRfcommSerialPortPrivate: public QObject
 {
 public:
     QBluetoothRfcommSerialPortPrivate( QObject* parent = 0 )
-        : QObject( parent ), deviceID( -1 )
+        : QObject( parent ), deviceID( -1 ), ttyFd( -1 ), bindVersionCalled(false)
     {
     }
 
     int16_t deviceID;
+    int ttyFd;
+    QString devName;
+    bool bindVersionCalled;
 };
 
 
 /*!
   \class QBluetoothRfcommSerialPort
-  \brief The QBluetoothRfcommSerialPort class represents a serial device which enables access to a bluetooth serial port protocol
+  \brief The QBluetoothRfcommSerialPort class represents a RFCOMM serial device and
+  enables access to a bluetooth serial port protocol. 
 
-  This class provides the same functionality as the command line tool rfcomm.
+  This class provides a similiar functionality as the command line tool rfcomm.
   It allows to set up and maintain the RFCOMM configuration of the Bluetooth subsystem.
 
   \ingroup qtopiabluetooth
@@ -102,21 +108,58 @@ QString QBluetoothRfcommSerialPort::createTty( QBluetoothRfcommSocket* socket )
 
     if ( getsockname( socket->socketDescriptor(), (struct sockaddr*)&saddr, &len ) < 0 )
         return QString();
-    rqst.channel = saddr.rc_channel;
+
+    rqst.channel = socket->remoteChannel();
     rqst.flags = (1 << RFCOMM_REUSE_DLC ) |( 1 << RFCOMM_RELEASE_ONHUP );
 
     // Set the socket non-blocking
     int flags = fcntl(socket->socketDescriptor(), F_GETFL, 0);
     flags &= ~O_NONBLOCK;
     fcntl(socket->socketDescriptor(), F_SETFL, flags);
-
     d->deviceID = ioctl( socket->socketDescriptor(), RFCOMMCREATEDEV, &rqst );
     if ( d->deviceID < 0 ) {
         qLog(Bluetooth) << "RfcommSerialPort::createTty( socket ): " << strerror(errno);
         return QString();
     }
 
-    return QString("/dev/rfcomm"+QString::number(d->deviceID));
+    char devname[MAXPATHLEN];
+
+    QTime started = QTime::currentTime();
+    QTime now = started;
+
+    do {
+        snprintf(devname, MAXPATHLEN - 1, "/dev/rfcomm%d", d->deviceID);
+        if ((d->ttyFd = open(devname, O_RDONLY | O_NOCTTY)) < 0) {
+            snprintf(devname, MAXPATHLEN-1, "/dev/bluetooth/rfcomm/%d", d->deviceID);
+            if ((d->ttyFd = open(devname, O_RDONLY | O_NOCTTY)) < 0) {
+                snprintf(devname, MAXPATHLEN - 1, "/dev/rfcomm%d", d->deviceID);
+                now = QTime::currentTime();
+                if (started > now) // crossed midnight
+                    started = now;
+
+                // sleep 100 ms, so we don't use up CPU cycles all the time.
+                struct timeval usleep_tv;
+                usleep_tv.tv_sec = 0;
+                usleep_tv.tv_usec = 100000;
+                select(0, 0, 0, 0, &usleep_tv);
+            }
+        }
+    } while ((d->ttyFd < 0) && (started.msecsTo(now) < 1000));
+
+    if (d->ttyFd < 0) {
+        qLog(Bluetooth) << "RFCOMM Tty created successfully, but no /dev entry found!";
+        memset(&rqst, 0, sizeof(rqst));
+        rqst.dev_id = d->deviceID;
+        rqst.flags = (1 << RFCOMM_HANGUP_NOW);
+        ioctl(socket->socketDescriptor(), RFCOMMRELEASEDEV, &rqst);
+
+        return QString();
+    }
+
+    ::fcntl(d->ttyFd, F_SETFD, FD_CLOEXEC);
+    d->devName = QString(devname);
+    d->bindVersionCalled = false;
+    return d->devName;
 }
 
 /*!
@@ -152,6 +195,10 @@ QString QBluetoothRfcommSerialPort::createTty( const QBluetoothAddress& local,
         perror( "QBluetoothRfcommSerialPort::bind");
         return QString();
     }
+
+    d->bindVersionCalled = true;
+
+    // TODO: This is not quite correct
     return QString("/dev/rfcomm"+QString::number(d->deviceID));
 }
 
@@ -160,25 +207,48 @@ QString QBluetoothRfcommSerialPort::createTty( const QBluetoothAddress& local,
   */
 void QBluetoothRfcommSerialPort::releaseTty()
 {
+    if (d->bindVersionCalled) {
+        releaseTty(d->deviceID);
+    }
+    else {
+        ::close( d->ttyFd);
+        d->ttyFd = -1;
+    }
+}
+
+/*!
+    Returns the device id of the associated RFCOMM device.  If no device is found,
+    returns -1.  The device id is usually in the range of 0-31.
+*/
+int QBluetoothRfcommSerialPort::id() const
+{
+    return d->deviceID;
+}
+
+/*!
+    Releases the RFCOMM device with \a id.
+*/
+bool QBluetoothRfcommSerialPort::releaseTty(int id)
+{
     int socket = ::socket(AF_BLUETOOTH, SOCK_RAW, BTPROTO_RFCOMM );
     if ( socket < 0 ) {
         perror("QBluetoothRfcommSerialPort::release");
-        return;
+        return false;
     }
 
     struct rfcomm_dev_req rqst;
     ::memset( &rqst, 0, sizeof( struct rfcomm_dev_req ) );
-    rqst.dev_id = d->deviceID;
+    rqst.dev_id = id;
     rqst.flags = (1 << RFCOMM_HANGUP_NOW );
     int ret = ::ioctl( socket, RFCOMMRELEASEDEV, &rqst );
-    if ( ret < 0  && errno != ENODEV )
+    if ( ret < 0  && errno != ENODEV ) {
         perror( "QBluetoothRfcommSerialPort::release" );
-    else
-        d->deviceID = -1;
+        return false;
+    }
 
     ::close( socket );
 
-    return;
+    return true;
 }
 
 /*!
@@ -207,6 +277,8 @@ QStringList QBluetoothRfcommSerialPort::listBindings()
         struct rfcomm_dev_info* next;
         for( int i = 0; i<allInfos->dev_num; i++ ) {
             next = info+i;
+            // TODO: This cannot always be relied upon
+            // it e.g. can be /dev/bluetooth/rfcomm0 
             QString dev( "/dev/rfcomm/" + QString::number( next->id ) );
             result.append( dev );
         }
@@ -226,7 +298,5 @@ QString QBluetoothRfcommSerialPort::boundDevice() const
     if ( d->deviceID < 0 )
         return QString();
 
-    return QString( "/dev/rfcomm"+QString::number( d->deviceID ) );
+    return d->devName;
 }
-
-

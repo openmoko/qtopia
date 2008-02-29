@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -758,7 +758,7 @@ QStringList SandboxedExeApplicationLauncher::applicationExecutable(const QString
     if ( app.startsWith( "/" )  && app.contains(Qtopia::packagePath()) )
         return QStringList() << app;
 
-    QStringList rv(Qtopia::packagePath() + "bin/");
+    QStringList rv(Qtopia::packagePath() + "bin/" + app);
 
     return rv;
 }
@@ -1080,8 +1080,12 @@ void ConsoleApplicationLauncher::launch(const QString &app)
             capp->state = Starting;
             capp->process->setReadChannelMode(QProcess::ForwardedChannels);
             capp->process->closeWriteChannel();
+            qLog(QtopiaServer) << "ConsoleApplicationLauncher: Starting"
+                               << exes.at(ii);
             capp->process->start(exes.at(ii));
 
+            QObject::connect(capp->process, SIGNAL(started()),
+                             this, SLOT(appStarted()));
             QObject::connect(capp->process, SIGNAL(finished(int)),
                              this, SLOT(appExited(int)));
             QObject::connect(capp->process, SIGNAL(error(QProcess::ProcessError)),
@@ -1095,11 +1099,21 @@ void ConsoleApplicationLauncher::launch(const QString &app)
 #endif
 
             emit applicationStateChanged(app, Starting);
-            capp->state = Running;
-            emit applicationStateChanged(app, Running);
             return;
         }
     }
+}
+
+void ConsoleApplicationLauncher::appStarted()
+{
+    QProcess *proc = qobject_cast<QProcess *>(sender());
+    Q_ASSERT(proc);
+
+    ConsoleApplicationLauncherPrivate::App *app = d->processToApp(proc);
+    Q_ASSERT(proc);
+
+    app->state = Running;
+    emit applicationStateChanged(app->app, Running);
 }
 
 void ConsoleApplicationLauncher::appExited(int)
@@ -1321,8 +1335,32 @@ void ApplicationLauncher::terminated(const QString &app,
     for(int ii = 0; !filtered && ii < termHandlers.count(); ++ii)
         filtered = termHandlers.at(ii)->terminated(app, reason);
 
+    if(qLogEnabled(QtopiaServer)) {
+        QString reasonText("Unknown");
+        switch(reason) {
+            case ApplicationTypeLauncher::FailedToStart:
+                reasonText = "FailedToStart";
+                break;
+            case ApplicationTypeLauncher::Crashed:
+                reasonText = "Crashed";
+                break;
+            case ApplicationTypeLauncher::Unknown: 
+                reasonText = "Unknown"; 
+                break;
+            case ApplicationTypeLauncher::Normal: 
+                reasonText = "Normal";
+                break;
+            case ApplicationTypeLauncher::Killed:
+                reasonText = "Killed";
+                break;
+        }
+
+        qLog(QtopiaServer) << "ApplicationLauncher::applicationTerminated(" << app << ", " << reasonText << ", " << (filtered?"true":"false") << ")";
+    }
+
     emit applicationTerminated(app, reason, filtered);
 
+    qLog(QtopiaServer) << "ApplicationLauncher::stateChanged(" << app << ", NotRunning)";
     emit applicationStateChanged(app, ApplicationTypeLauncher::NotRunning);
 }
 

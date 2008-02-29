@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -81,6 +81,9 @@ void QDLWidgetClientPrivate::verifyLinks( QDLClient* client )
         }
     }
 
+#ifdef QDL_DEBUG
+    // Disable this stuff due to performance, complete, but expensive tests
+
     // Check for links which don't exist in the widget text
     {
         QList<int> invalidLids;
@@ -103,11 +106,13 @@ void QDLWidgetClientPrivate::verifyLinks( QDLClient* client )
             client->removeLink( id );
     }
 
-    // Check for links in the text that don't exist in QDLClient and remove them
+    // Check for links in the text that don't exist in QDLClient and remove
+    // them
     {
         QList<int> ids = client->linkIds();
         QString t = text();
         QString anchor;
+        bool changed = false;
         int pos = QDLPrivate::indexOfQDLAnchor( t, 0, anchor );
         while ( pos != -1 ) {
             QString clientName;
@@ -121,6 +126,7 @@ void QDLWidgetClientPrivate::verifyLinks( QDLClient* client )
                 {
                     t.remove( pos, anchor.length() );
                     pos = QDLPrivate::indexOfQDLAnchor( t, pos, anchor );
+                    changed = true;
                     continue;
                 }
             }
@@ -130,8 +136,10 @@ void QDLWidgetClientPrivate::verifyLinks( QDLClient* client )
                                                 anchor );
         }
 
-        setText( t );
+        if (changed)
+            setText( t );
     }
+#endif
 }
 
 void QDLWidgetClientPrivate::breakLink( QDLClient* client, const int linkId )

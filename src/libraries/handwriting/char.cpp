@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -60,7 +60,7 @@ const QIMPenSpecialKeys qimpen_specialKeys[] = {
   Can calculate closeness of match to
   another character.
 
-  \ingroup qtopiahandwriting
+  \ingroup userinput
 */
 
 QIMPenChar::QIMPenChar()
@@ -388,7 +388,7 @@ bool QIMPenCharMatch::operator<=( const QIMPenCharMatch &m ) const
 /*!
   \class QIMPenCharSet
   \brief The QIMPenCharSet class maintains a set of related characters.
-  \ingroup qtopiahandwriting
+  \ingroup userinput
 */
 
 QIMPenCharSet::QIMPenCharSet()

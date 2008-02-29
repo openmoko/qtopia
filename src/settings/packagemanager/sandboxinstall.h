@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
@@ -27,7 +27,7 @@
 class SandboxInstallJob
 {
     public:
-        SandboxInstallJob( const InstallControl::PackageInfo *, const QString & );
+        SandboxInstallJob( const InstallControl::PackageInfo *, const QString &, ErrorReporter *reporter = 0 );
         QString destinationPath() const { return destination; }
         bool isAborted() const { return abort; }
         void registerPackageFiles( const QString &f = QString() );

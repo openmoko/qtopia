@@ -114,7 +114,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QAppointment class holds the data of a calendar appointment.</p>
-<p>This data includes descriptive data of the appointment and schedualing information.</p>
+<p>This data includes descriptive data of the appointment and scheduling information.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="flags"><a name="AlarmFlag-enum"></a>enum QAppointment::AlarmFlag<br />flags QAppointment::AlarmFlags</h3>
@@ -123,7 +123,7 @@
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QAppointment::NoAlarm</tt></td><td align="center" valign="top"><tt>0x00</tt></td><td valign="top">The appointment has no alarm set</td></tr>
 <tr><td valign="top"><tt>QAppointment::Visible</tt></td><td align="center" valign="top"><tt>0x01</tt></td><td valign="top">The appointment has dialog popup alarm set</td></tr>
-<tr><td valign="top"><tt>QAppointment::Audible</tt></td><td align="center" valign="top"><tt>0x02 | Visible</tt></td><td valign="top">The appontment has an audible alarm set.</td></tr>
+<tr><td valign="top"><tt>QAppointment::Audible</tt></td><td align="center" valign="top"><tt>0x02 | Visible</tt></td><td valign="top">The appointment has an audible alarm set.</td></tr>
 </table></p>
 <p>The AlarmFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;AlarmFlag&gt;. It stores an OR combination of AlarmFlag values.</p>
 <p>See also <a href="qappointment.html#setAlarm">setAlarm</a>() and <a href="qappointment.html#alarm">alarm</a>().</p>
@@ -156,11 +156,11 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QAppointment"></a>QAppointment::QAppointment ()</h3>
-<p>Constructs a new <a href="qappointment.html">QAppointment</a>.</p>
+<p>Constructs a new <a href="qappointment.html">QAppointment</a>. The start time is set to the current time, and the end time is five minutes after the current time.</p>
 <h3 class="fn"><a name="QAppointment-2"></a>QAppointment::QAppointment ( const QAppointment &amp; <i>appointment</i> )</h3>
 <p>Constructs a new <a href="qappointment.html">QAppointment</a> as a copy of <i>appointment</i>.</p>
 <h3 class="fn"><a name="QAppointment-3"></a>QAppointment::QAppointment ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i> )</h3>
-<p>Constructs a new <a href="qappointment.html">QAppointment</a> starting at <i>start</i> and running until <i>end</i>.</p>
+<p>Constructs a new <a href="qappointment.html">QAppointment</a> starting at <i>start</i> and running until <i>end</i>. If <i>end</i> is less than five minutes after <i>start</i>, the appointment will be created with an end time of five minutes after the <i>start</i> value.</p>
 <h3 class="fn"><a name="dtor.QAppointment"></a>QAppointment::~QAppointment ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys a <a href="qappointment.html">QAppointment</a>.</p>
 <h3 class="fn"><a name="alarm"></a><a href="qappointment.html#AlarmFlag-enum">AlarmFlags</a> QAppointment::alarm () const</h3>
@@ -189,7 +189,7 @@
 <p>Returns the description of the appointment.</p>
 <p>See also <a href="qappointment.html#setDescription">setDescription</a>().</p>
 <h3 class="fn"><a name="end"></a><a href="qdatetime.html">QDateTime</a> QAppointment::end () const</h3>
-<p>Returns when the first occurrence of the appointment starts.</p>
+<p>Returns when the first occurrence of the appointment ends.</p>
 <p>See also <a href="qappointment.html#endInCurrentTZ">endInCurrentTZ</a>() and <a href="qappointment.html#setEnd">setEnd</a>().</p>
 <h3 class="fn"><a name="endInCurrentTZ"></a><a href="qdatetime.html">QDateTime</a> QAppointment::endInCurrentTZ () const</h3>
 <p>Returns the end time of the appointment in the current system timezone.</p>
@@ -250,7 +250,7 @@
 <p>Returns the date the appointment will repeat until</p>
 <p>See also <a href="qappointment.html#repeatForever">repeatForever</a>() and <a href="qappointment.html#setRepeatUntil">setRepeatUntil</a>().</p>
 <h3 class="fn"><a name="repeatUntilInCurrentTZ"></a><a href="qdate.html">QDate</a> QAppointment::repeatUntilInCurrentTZ () const</h3>
-<p>Returns the date the appointment will repeat till in the current system timezone.</p>
+<p>Returns the date the appointment will repeat until in the current system timezone.</p>
 <p>See also <a href="qappointment.html#repeatUntil">repeatUntil</a>().</p>
 <h3 class="fn"><a name="setAlarm"></a>void QAppointment::setAlarm ( int <i>minutes</i>, <a href="qappointment.html#AlarmFlag-enum">AlarmFlags</a> <i>s</i> )</h3>
 <p>Sets an alarm for the appointment, <i>minutes</i> before the start of the appointment, with an alarm type of <i>s</i>.</p>
@@ -285,7 +285,7 @@
 <p>Sets the appointment to repeat forever.</p>
 <p>See also <a href="qappointment.html#repeatForever">repeatForever</a>().</p>
 <h3 class="fn"><a name="setRepeatOnWeekDay"></a>void QAppointment::setRepeatOnWeekDay ( int <i>day</i>, bool <i>enable</i> )</h3>
-<p>Sets the appointment to repeat on the <i>day</i> of the wekif <i>enable</i> is true. Otherwise sets the appointment not to repeat on the <i>day</i> of the week.</p>
+<p>Sets the appointment to repeat on the <i>day</i> of the week if <i>enable</i> is true. Otherwise sets the appointment not to repeat on the <i>day</i> of the week.</p>
 <p>Event will always repeat on the day of the week that it started on.</p>
 <p>See also <a href="qappointment.html#repeatOnWeekDay">repeatOnWeekDay</a>().</p>
 <h3 class="fn"><a name="setRepeatRule"></a>void QAppointment::setRepeatRule ( <a href="qappointment.html#RepeatRule-enum">RepeatRule</a> <i>t</i> )</h3>
@@ -296,17 +296,17 @@
 <p>See also <a href="qappointment.html#repeatUntil">repeatUntil</a>() and <a href="qappointment.html#repeatForever">repeatForever</a>().</p>
 <h3 class="fn"><a name="setShowOnNearest"></a>void QAppointment::setShowOnNearest ( bool <i>b</i> )</h3>
 <p>Sets whether to show a repeating appointment on the nearest previous date if the day it would repeat on does not exist to <i>b</i>.</p>
-<p>An example would be a repeating appointment that occures on the 31st of each month. Setting showOnNearest to true will have the appointment show up on the 30th on months that do not have 31 days, (or 28/29 in the case of Febuary).</p>
+<p>An example would be a repeating appointment that occurs on the 31st of each month. Setting showOnNearest to true will have the appointment show up on the 30th on months that do not have 31 days, (or 28/29 in the case of February).</p>
 <p>See also <a href="qappointment.html#showOnNearest">showOnNearest</a>().</p>
 <h3 class="fn"><a name="setStart"></a>void QAppointment::setStart ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>time</i> )</h3>
-<p>Sets the start time of the appointment to <i>time</i>. This will change the end time fo the appointment to maintain the same duration.</p>
+<p>Sets the start time of the appointment to <i>time</i>. This will change the end time of the appointment to maintain the same duration.</p>
 <p>See also <a href="qappointment.html#start">start</a>() and <a href="qappointment.html#startInCurrentTZ">startInCurrentTZ</a>().</p>
 <h3 class="fn"><a name="setTimeZone"></a>void QAppointment::setTimeZone ( const <a href="qtimezone.html">QTimeZone</a> &amp; <i>zone</i> )</h3>
 <p>Sets the time zone of the appointment to <i>zone</i>. This will affect when the appointment occurs in UTC. All day appointments cannot have a time zone set.</p>
 <p>Setting the time zone to an invalid <a href="qtimezone.html">QTimeZone</a> will cause the appointment to have no associated time zone.</p>
 <p>See also <a href="qappointment.html#timeZone">timeZone</a>() and <a href="qappointment.html#isAllDay">isAllDay</a>().</p>
 <h3 class="fn"><a name="setWeekFlags"></a>void QAppointment::setWeekFlags ( <a href="qappointment.html#WeekFlag-enum">WeekFlags</a> <i>f</i> )</h3>
-<p>Sets the days of the weeek the appointment occurs on to be those specified by the flags <i>f</i>.</p>
+<p>Sets the days of the week the appointment occurs on to be those specified by the flags <i>f</i>.</p>
 <p>See also <a href="qappointment.html#weekFlags">weekFlags</a>().</p>
 <h3 class="fn"><a name="showOnNearest"></a>bool QAppointment::showOnNearest () const</h3>
 <p>Returns if the exact date the appointment would occur is not a valid date. and the appointment should be shown on the nearest match of an occurrence</p>
@@ -318,7 +318,7 @@
 <p>Returns the start time of the appointment in the current system timezone.</p>
 <p>See also <a href="qappointment.html#start">start</a>().</p>
 <h3 class="fn"><a name="timeZone"></a><a href="qtimezone.html">QTimeZone</a> QAppointment::timeZone () const</h3>
-<p>Returns the time zone of the appointment or an invalid <a href="qtimezone.html">QTimeZone</a> if the appointment has no time zone. All day appointments allways have no time zone.</p>
+<p>Returns the time zone of the appointment or an invalid <a href="qtimezone.html">QTimeZone</a> if the appointment has no time zone. All day appointments always have no time zone.</p>
 <p>See also <a href="qappointment.html#setTimeZone">setTimeZone</a>() and <a href="qappointment.html#isAllDay">isAllDay</a>().</p>
 <h3 class="fn"><a name="toDateDay"></a>int QAppointment::toDateDay ( <a href="qappointment.html#WeekFlag-enum">WeekFlag</a> <i>day</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the <a href="qt.html#DayOfWeek-enum">Qt::DayOfWeek</a> associated with <i>day</i>.</p>
@@ -328,7 +328,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reimplemented from <a href="qpimrecord.html#uidRef-2">QPimRecord</a>.</p>
 <h3 class="fn"><a name="weekFlags"></a><a href="qappointment.html#WeekFlag-enum">WeekFlags</a> QAppointment::weekFlags () const</h3>
-<p>Returns the flags representing the days of the week the appointment occurs on when set as a Weekly recuring event.</p>
+<p>Returns the flags representing the days of the week the appointment occurs on when set as a Weekly recurring event.</p>
 <p>See also <a href="qappointment.html#setWeekFlags">setWeekFlags</a>().</p>
 <h3 class="fn"><a name="weekOffset"></a>int QAppointment::weekOffset () const</h3>
 <p>Returns the instance of the week the appointment will occur for the repeat types <a href="qappointment.html#RepeatRule-enum">MonthlyDay</a> and <a href="qappointment.html#RepeatRule-enum">MonthlyEndDay</a>. The week offset is determined by the starting date of the appointment.</p>
@@ -342,15 +342,15 @@
 <p>Write the <i>appointment</i> as a vCalendar to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qappointment.html#readVCalendar">readVCalendar</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QAppointment::operator!= ( const QAppointment &amp; <i>other</i> ) const</h3>
-<p>Returns true if the appoinment is not equal to <i>other</i>. Otherwise returns false.</p>
+<p>Returns true if the appointment is not equal to <i>other</i>. Otherwise returns false.</p>
 <h3 class="fn"><a name="operator-eq"></a>QAppointment &amp; QAppointment::operator= ( const QAppointment &amp; <i>other</i> )</h3>
 <p>Sets the appointment to be a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QAppointment::operator== ( const QAppointment &amp; <i>other</i> ) const</h3>
 <p>Returns true if the appointment is equal to <i>other</i>. Otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.1</div></td>
 </tr></table></div></address></body>
 </html>
