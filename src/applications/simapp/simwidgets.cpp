@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,7 @@
 #include <QPhoneCallManager>
 #include <qtopiaservices.h>
 #include <QMessageBox>
+#include <QMenu>
 
 #ifdef MEDIA_SERVER
 #include <QSoundControl>
@@ -44,7 +45,7 @@
 #include <QSound>
 
 #ifndef QTOPIA_TEST
-#include "../../server/applicationmonitor.h"
+#include "../../server/processctrl/appmonitor/applicationmonitor.h"
 #endif
 
 #define AUTOCLEARTIMEOUT 3000
@@ -305,8 +306,7 @@ SimText::SimText(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *par
     browser->setFrameStyle(NoFrame);
     browser->installEventFilter(this);
 
-    QSoftMenuBar::setLabel( browser, Qt::Key_Context1, QSoftMenuBar::NoLabel );
-    QSoftMenuBar::setLabel( browser, Qt::Key_Back, "", tr( "OK" ) );
+    updateSoftMenuBar();
 
     if ( (int)simCmd.iconId() ) {
         icons->needIconInFile( (int)simCmd.iconId() );
@@ -314,6 +314,15 @@ SimText::SimText(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *par
     } else {
         write();
     }
+}
+
+void SimText::updateSoftMenuBar()
+{
+    QSoftMenuBar::setLabel( browser, Qt::Key_Context1, QSoftMenuBar::NoLabel );
+    if ( m_command.clearAfterDelay() )
+        QSoftMenuBar::setLabel( browser, Qt::Key_Select, QSoftMenuBar::NoLabel );
+    else
+        QSoftMenuBar::setLabel( browser, Qt::Key_Select, "", tr( "OK" ) );
 }
 
 void SimText::setCommand(const QSimCommand &simCmd, QSimIconReader *reader)
@@ -329,6 +338,8 @@ void SimText::setCommand(const QSimCommand &simCmd, QSimIconReader *reader)
     } else {
         write();
     }
+    updateSoftMenuBar();
+    initTimer();
 }
 
 void SimText::initTimer()
@@ -359,17 +370,19 @@ void SimText::write()
     }
 }
 
-void SimText::timerEvent(QTimerEvent *)
+void SimText::timerEvent(QTimerEvent * /*te*/)
 {
     killTimer(tid);
     tid = 0;
 
-    if ( m_command.clearAfterDelay() ) {
-        // auto clear text after 3 seconds
-        response( QSimTerminalResponse::Success );
-    } else if ( !m_command.immediateResponse() ) {
-        // no reaponse from user after 2 minutes
-        response( QSimTerminalResponse::NoResponseFromUser );
+    if ( m_command.immediateResponse() ) {
+        // Response already sent. No more response.
+        emit hideApp();
+    } else {
+        if ( m_command.clearAfterDelay() )
+            response( QSimTerminalResponse::Success );
+        else
+            response( QSimTerminalResponse::NoResponseFromUser );
     }
 }
 
@@ -378,9 +391,8 @@ void SimText::showEvent(QShowEvent *e)
     if ( m_command.immediateResponse() ) {
         // send immediate response to the sim tool kit
         response( QSimTerminalResponse::Success );
-    } else {
-        initTimer();
     }
+    initTimer();
 
     SimCommandView::showEvent(e);
 }
@@ -403,15 +415,29 @@ void SimText::iconsReady()
         cursor.insertText( m_command.text() );
 }
 
-bool SimText::eventFilter(QObject *, QEvent *e)
+bool SimText::eventFilter(QObject * /*o*/, QEvent *e)
 {
     if ( e->type() == QEvent::KeyPress ) {
         QKeyEvent *ke = static_cast<QKeyEvent*>(e);
-        if (ke->key() == Qt::Key_Back || ke->key() == Qt::Key_No) {
+        if (ke->key() == Qt::Key_Back) {
 
-            if ( ke->key() == Qt::Key_Back && !m_command.immediateResponse() ) {
-                response( QSimTerminalResponse::Success );
+            if ( !m_command.immediateResponse() )
+                response( QSimTerminalResponse::BackwardMove );
+            else
+                hideApp();
+
+            if (tid) {
+                killTimer(tid);
+                tid = 0;
             }
+            return true;
+        } else if (ke->key() == Qt::Key_Select) {
+            if (m_command.clearAfterDelay())
+                return false;
+            if (!m_command.immediateResponse())
+                response( QSimTerminalResponse::Success );
+            else
+                emit hideApp();
 
             if (tid) {
                 killTimer(tid);
@@ -436,7 +462,7 @@ void SimText::response( const QSimTerminalResponse::Result &result )
 //===========================================================================
 
 SimInKey::SimInKey(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *parent)
-    : SimCommandView( simCmd, reader, parent ), iconLabel(0), edit(0)
+    : SimCommandView( simCmd, reader, parent ), iconLabel(0), edit(0), asteriskTid(0)
 {
     QVBoxLayout *vb = new QVBoxLayout(this);
     if ( (int)simCmd.iconId() ) {
@@ -512,20 +538,38 @@ void SimInKey::keyPressEvent(QKeyEvent *e)
             response( "Yes" );
         }
     } else if (digitsOnly && !e->text().isEmpty() && !wantYesNo) {
-        response(e->text());
+        // Need to support a way to enter '+'
+        // '+' can be entered by pressing '*' twice in a short period time(1sec)
+        if ( e->key() != Qt::Key_Asterisk )
+            response(e->text());
+        else {
+            if ( !asteriskTid )
+                asteriskTid = startTimer( 1000 );
+            else {
+                killTimer( asteriskTid );
+                asteriskTid = 0;
+                response( "+" );
+            }
+        }
     } else if (e->key() == Qt::Key_Hangup
             || e->key() == Qt::Key_Call) {
         SimCommandView::keyPressEvent(e);
     }
 }
 
-void SimInKey::timerEvent(QTimerEvent *)
+void SimInKey::timerEvent(QTimerEvent *te)
 {
-    killTimer(tid);
-    tid = 0;
+    if ( te->timerId() == asteriskTid ) {
+        killTimer( asteriskTid );
+        asteriskTid = 0;
+        response( "*" );
+    } else if ( te->timerId() == tid ) {
+        killTimer(tid);
+        tid = 0;
 
-    // no response from user time out
-    response( QSimTerminalResponse::NoResponseFromUser );
+        // no response from user time out
+        response( QSimTerminalResponse::NoResponseFromUser );
+    }
 }
 
 void SimInKey::iconsReady()
@@ -594,8 +638,10 @@ QValidator::State SimWidgetsDigitValidator::validate(QString &input, int &) cons
 //===========================================================================
 
 SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
-    : SimCommandView(simCmd, parent), lineEdit(0), multiEdit(0)
+    : SimCommandView(simCmd, parent), lineEdit(0), multiEdit(0), focusWidget(0)
 {
+    setFocusPolicy(Qt::StrongFocus);
+
     QVBoxLayout *vb = new QVBoxLayout(this);
     if (!simCmd.text().isEmpty()) {
         text = new QLabel( Qt::escape( simCmd.text() ), this);
@@ -612,15 +658,14 @@ SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
         multiEdit->setFrameStyle(QFrame::NoFrame);
         multiEdit->installEventFilter(this);
         vb->addWidget(multiEdit);
+        connect(multiEdit, SIGNAL(textChanged()), this, SLOT(validateInput()));
 
         QtopiaApplication::setInputMethodHint(multiEdit,QtopiaApplication::Text);
 
-        QSoftMenuBar::removeMenuFrom( this, QSoftMenuBar::menuFor(multiEdit) );
-        if ( simCmd.hasHelp() )
-            QSoftMenuBar::setLabel( multiEdit, Qt::Key_Context1, "help", tr( "Help" ) );
-        else
-            QSoftMenuBar::setLabel( multiEdit, Qt::Key_Context1, QSoftMenuBar::NoLabel );
+        if ( !simCmd.defaultText().isEmpty() )
+            multiEdit->setText( simCmd.defaultText() );
 
+        focusWidget = multiEdit;
     } else {
         lineEdit = new QLineEdit(this);
         lineEdit->setMaxLength(simCmd.maximumLength());
@@ -635,14 +680,26 @@ SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
         }
         lineEdit->installEventFilter(this);
         vb->addWidget(lineEdit);
+        connect(lineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(validateInput()));
 
-        QSoftMenuBar::removeMenuFrom( this, QSoftMenuBar::menuFor(lineEdit) );
-        if ( simCmd.hasHelp() )
-            QSoftMenuBar::setLabel( lineEdit, Qt::Key_Context1, "help", tr( "Help" ) );
-        else
-            QSoftMenuBar::setLabel( lineEdit, Qt::Key_Context1, QSoftMenuBar::NoLabel );
+        if ( !simCmd.defaultText().isEmpty() )
+            lineEdit->setText( simCmd.defaultText() );
 
+        focusWidget = lineEdit;
     }
+
+    if ( focusWidget ) {
+        QMenu *menu = QSoftMenuBar::menuFor( focusWidget );
+        if ( simCmd.hasHelp() )
+            menu->addAction( QIcon(":icon/help"), tr( "Help" ), this, SLOT(sendHelpRequest()) );;
+        QSoftMenuBar::setHelpEnabled( focusWidget, false );
+        QSoftMenuBar::setLabel( focusWidget, Qt::Key_Back, QSoftMenuBar::Back );
+
+        focusWidget->installEventFilter( this );
+        focusWidget->setEditFocus( true );
+    }
+
+    validateInput();
 }
 
 void SimInput::setInput(const QString &input)
@@ -655,21 +712,16 @@ void SimInput::setInput(const QString &input)
 
 void SimInput::keyPressEvent(QKeyEvent *e)
 {
-    if (e->key() == Qt::Key_Back || e->key() == Qt::Key_No) {
-        QSimTerminalResponse resp;
-        resp.setCommand(m_command);
-        resp.setResult(QSimTerminalResponse::BackwardMove);
-        emit sendResponse(resp);
-    } else if (e->key() == Qt::Key_Select) {
-        done();
-    } else if (e->key() == Qt::Key_Hangup
-            || e->key() == Qt::Key_Call) {
+    if ( e->key() == Qt::Key_Call
+            || e->key() == Qt::Key_Hangup )
         SimCommandView::keyPressEvent(e);
-    }
 }
 
-bool SimInput::eventFilter(QObject *, QEvent *e)
+bool SimInput::eventFilter(QObject *o, QEvent *e)
 {
+    if ( o != focusWidget)
+        return false;
+
     if( Qtopia::mousePreferred() ) {
         if (e->type() == QEvent::LeaveEditFocus) {
             done();
@@ -679,13 +731,26 @@ bool SimInput::eventFilter(QObject *, QEvent *e)
     // FIXME temporary workaround until menu can be removed from line & text edit.
     if ( e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = static_cast<QKeyEvent*>(e);
-        if ( ke->key() == Qt::Key_Context1
-                && m_command.hasHelp() ) {
+        Qt::Key key = (Qt::Key)ke->key();
+        if ( key == Qt::Key_Back ) {
+            if (multiEdit && multiEdit->toPlainText().length())
+                return false;
+            if (lineEdit && lineEdit->text().length())
+                return false;
+
             QSimTerminalResponse resp;
-            resp.setCommand( m_command );
-            resp.setResult(QSimTerminalResponse::HelpInformationRequested);
+            resp.setCommand(m_command);
+            resp.setResult(QSimTerminalResponse::BackwardMove);
             emit sendResponse(resp);
         }
+    } else if ( e->type() == QEvent::KeyPress ) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(e);
+        Qt::Key key = (Qt::Key)ke->key();
+        if ( key == Qt::Key_Select ) {
+            done();
+            return true;
+        } else if ( key == Qt::Key_Up || key == Qt::Key_Down )
+            return true;
     }
     return false;
 }
@@ -698,9 +763,55 @@ void SimInput::done()
     else
         in = lineEdit->text();
 
+    if (uint(in.length()) >= m_command.minimumLength() &&
+            (uint(in.length()) <= m_command.maximumLength() || m_command.maximumLength() == 255)){
+        QSimTerminalResponse resp;
+        resp.setCommand(m_command);
+        resp.setText(in);
+        emit sendResponse(resp);
+    }else{
+        qLog(STK) << "Text input not in the bounds of min and max length";
+    }
+}
+
+void SimInput::validateInput()
+{
+    if (!multiEdit && !lineEdit)
+        return;
+
+    // check that input is valid
+    QWidget *inputWidget=0;
+    QString in;
+
+    if (multiEdit){
+        inputWidget  = multiEdit;
+        in = multiEdit->toPlainText();
+    }else{
+        inputWidget = lineEdit;
+        in = lineEdit->text();
+    }
+
+    if (in.length())
+        QSoftMenuBar::setLabel(inputWidget, Qt::Key_Back, QSoftMenuBar::BackSpace);
+    else
+        QSoftMenuBar::setLabel(inputWidget, Qt::Key_Back, QSoftMenuBar::Back);
+
+    if (uint(in.length()) >= m_command.minimumLength() &&
+            (uint(in.length()) <= m_command.maximumLength() || m_command.maximumLength() == 255)){
+        QSoftMenuBar::setLabel(inputWidget, Qt::Key_Select, QSoftMenuBar::Ok);
+    }else{
+        QSoftMenuBar::setLabel(inputWidget, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    }
+
+    // reset no response timer
+    setNoResponseTimeout(NORESPONSETIMEOUT);
+}
+
+void SimInput::sendHelpRequest()
+{
     QSimTerminalResponse resp;
-    resp.setCommand(m_command);
-    resp.setText(in);
+    resp.setCommand( m_command );
+    resp.setResult(QSimTerminalResponse::HelpInformationRequested);
     emit sendResponse(resp);
 }
 
@@ -860,8 +971,8 @@ SimTone::SimTone(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *par
     vb->setMargin(0);
 
     // tone title
-    if (!simCmd.title().isEmpty())
-        title = new QLabel(simCmd.title(), this);
+    if (!simCmd.text().isEmpty())
+        title = new QLabel(simCmd.text(), this);
     else
         title = new QLabel(tr("Playing a sound."), this);
     title->setWordWrap(true);
@@ -1527,7 +1638,7 @@ void SimLaunchBrowser::keyPressEvent( QKeyEvent *e )
             // send service request
             if ( isRunning &&
                     m_command.browserLaunchMode() == QSimCommand::CloseExistingAndLaunch ) {
-                QtopiaServiceRequest clear( "WebAcess", "clearSession()" );
+                QtopiaServiceRequest clear( "WebAccess", "clearSession()" );
                 clear.send();
             }
 

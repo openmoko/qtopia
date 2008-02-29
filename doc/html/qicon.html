@@ -51,8 +51,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qicon.html#operator-lt-lt-60">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QIcon &amp; <i>icon</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qicon.html#operator-gt-gt-35">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QIcon &amp; <i>icon</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qicon.html#operator-lt-lt-107">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QIcon &amp; <i>icon</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qicon.html#operator-gt-gt-62">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QIcon &amp; <i>icon</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -162,54 +162,18 @@
 <p>Assigns the <i>other</i> icon to this icon and returns a reference to this icon.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-60"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QIcon &amp; <i>icon</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-107"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QIcon &amp; <i>icon</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>icon</i> to the the given <i>stream</i> as a PNG image. If the icon contains more than one image, all images will be written to the stream. Note that writing the stream to a file will not produce a valid image file.</p>
 <p>This function was introduced in Qt 4.2.</p>
-<h3 class="fn"><a name="operator-gt-gt-35"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QIcon &amp; <i>icon</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-62"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QIcon &amp; <i>icon</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads an image, or a set of images, from the given <i>stream</i> into the given <i>icon</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="Size-enum"></a>enum QIcon::Size</h3>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QIcon::Small</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Use QStyle::pixelMetric(<a href="qstyle.html#PixelMetric-enum">QStyle::PM_SmallIconSize</a>) instead.</td></tr>
-<tr><td valign="top"><tt>QIcon::Large</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Use QStyle::pixelMetric(<a href="qstyle.html#PixelMetric-enum">QStyle::PM_LargeIconSize</a>) instead.</td></tr>
-<tr><td valign="top"><tt>QIcon::Automatic</tt></td><td align="center" valign="top"><tt>Small</tt></td><td valign="top">N/A.</td></tr>
-</table></p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="pixmap-2"></a><a href="qpixmap.html">QPixmap</a> QIcon::pixmap ( <a href="qicon-qt3.html#Size-enum">Size</a> <i>size</i>, <a href="qicon.html#Mode-enum">Mode</a> <i>mode</i>, <a href="qicon.html#State-enum">State</a> <i>state</i> = Off ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use pixmap(<a href="qsize.html">QSize</a>(..&#x2e;), <i>mode</i>, <i>state</i>), where the first argument is an appropriate <a href="qsize.html">QSize</a> instead of a <a href="qicon-qt3.html#Size-enum">Size</a> value.</p>
-<p>See also <a href="qicon-qt3.html#pixmapSize">pixmapSize</a>().</p>
-<h3 class="fn"><a name="pixmap-3"></a><a href="qpixmap.html">QPixmap</a> QIcon::pixmap ( <a href="qicon-qt3.html#Size-enum">Size</a> <i>size</i>, bool <i>enabled</i>, <a href="qicon.html#State-enum">State</a> <i>state</i> = Off ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use pixmap(<a href="qsize.html">QSize</a>(..&#x2e;), mode, <i>state</i>), where the first argument is an appropriate <a href="qsize.html">QSize</a> instead of a <a href="qicon-qt3.html#Size-enum">Size</a> value, and the second argument is <a href="qicon.html#Mode-enum">QIcon::Normal</a> or <a href="qicon.html#Mode-enum">QIcon::Disabled</a>, depending on the value of <i>enabled</i>.</p>
-<p>See also <a href="qicon-qt3.html#pixmapSize">pixmapSize</a>().</p>
-<h3 class="fn"><a name="pixmap-4"></a><a href="qpixmap.html">QPixmap</a> QIcon::pixmap () const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use one of the other <a href="qicon.html#pixmap">pixmap</a>() overloads.</p>
-<h3 class="fn"><a name="pixmapSize"></a><a href="qsize.html">QSize</a> QIcon::pixmapSize ( <a href="qicon-qt3.html#Size-enum">Size</a> <i>which</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qstyle.html#pixelMetric">QStyle::pixelMetric</a>() with <a href="qstyle.html#PixelMetric-enum">QStyle::PM_SmallIconSize</a> or <a href="qstyle.html#PixelMetric-enum">QStyle::PM_LargeIconSize</a> as the first argument, depending on <i>which</i>.</p>
-<p>See also <a href="qicon-qt3.html#setPixmapSize">setPixmapSize</a>().</p>
-<h3 class="fn"><a name="reset"></a>void QIcon::reset ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, <a href="qicon-qt3.html#Size-enum">Size</a> <i>size</i> )</h3>
-<p>Use the constructor that takes a <a href="qpixmap.html">QPixmap</a> and operator=().</p>
-<h3 class="fn"><a name="setPixmap"></a>void QIcon::setPixmap ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, <a href="qicon-qt3.html#Size-enum">Size</a> <i>size</i>, <a href="qicon.html#Mode-enum">Mode</a> <i>mode</i> = Normal, <a href="qicon.html#State-enum">State</a> <i>state</i> = Off )</h3>
-<p>Use addPixmap(<i>pixmap</i>, <i>mode</i>, <i>state</i>) instead. The <i>size</i> parameter is ignored.</p>
-<p>See also <a href="qicon.html#pixmap">pixmap</a>().</p>
-<h3 class="fn"><a name="setPixmap-2"></a>void QIcon::setPixmap ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, <a href="qicon-qt3.html#Size-enum">Size</a> <i>size</i>, <a href="qicon.html#Mode-enum">Mode</a> <i>mode</i> = Normal, <a href="qicon.html#State-enum">State</a> <i>state</i> = Off )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use addFile(<i>fileName</i>, <i>mode</i>, <i>state</i>) instead. The <i>size</i> parameter is ignored.</p>
-<h3 class="fn"><a name="setPixmapSize"></a>void QIcon::setPixmapSize ( <a href="qicon-qt3.html#Size-enum">Size</a> <i>which</i>, const <a href="qsize.html">QSize</a> &amp; <i>size</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>The <a href="qicon.html#pixmap">pixmap</a>() function now takes a <a href="qsize.html">QSize</a> instead of a <a href="qicon-qt3.html#Size-enum">QIcon::Size</a>, so there is no need for this function in new code.</p>
-<p>See also <a href="qicon-qt3.html#pixmapSize">pixmapSize</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

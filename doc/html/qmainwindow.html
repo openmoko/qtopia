@@ -137,7 +137,7 @@
 </ul>
 <a name="qt-main-window-framework"></a>
 <h3>Qt Main Window Framework</h3>
-<p>A main window provides a framework for building an application's user interface. Qt has QMainWindow and its <a href="application.html">related classes</a> for main window management. QMainWindow has its own layout to which you can add <a href="qtoolbar.html">QToolBar</a>s, <a href="porting4.html#qdockwindow">QDockWindow</a>s, a <a href="qmenubar.html">QMenuBar</a>, and a <a href="qstatusbar.html">QStatusBar</a>. The layout has a center area that can be occupied by any kind of widget. You can see an image of the layout below.</p>
+<p>A main window provides a framework for building an application's user interface. Qt has QMainWindow and its <a href="application.html">related classes</a> for main window management. QMainWindow has its own layout to which you can add <a href="qtoolbar.html">QToolBar</a>s, <a href="qdockwidget.html">QDockWidget</a>s, a <a href="qmenubar.html">QMenuBar</a>, and a <a href="qstatusbar.html">QStatusBar</a>. The layout has a center area that can be occupied by any kind of widget. You can see an image of the layout below.</p>
 <p align="center"><img src="images/mainwindowlayout.png" /></p><a name="creating-main-window-components"></a>
 <h3>Creating Main Window Components</h3>
 <p>A central widget will typically be a standard Qt widget such as a <a href="qtextedit.html">QTextEdit</a> or a <a href="qgraphicsview.html">QGraphicsView</a>. Custom widgets can also be used for advanced applications. You set the central widget with <tt>setCentralWidget()</tt>.</p>
@@ -256,6 +256,7 @@
 <li>QToolBars in this toolbar area are not movable and you cannot drag other toolbars to it</li>
 <li>Toolbar breaks are not respected or preserved</li>
 <li>Any custom widgets in the toolbar will not be shown if the toolbar becomes too small (only actions will be shown)</li>
+<li>If you call <a href="qwidget.html#showFullScreen">showFullScreen</a>() on the main window, the <a href="porting4.html#qtoolbar">QToolbar</a> will disappear since it is considered to be part of the title bar. You can work around this by doing the following by turning off the unified toolbar before you call showFullScrenn() and restore the value after you call <a href="qwidget.html#showNormal">showNormal</a>().</li>
 </ul>
 <p>Setting this back to false will remove these restrictions.</p>
 <p>The <a href="qt.html#WidgetAttribute-enum">Qt::WA_MacBrushedMetal</a> attribute takes precedence over this property.</p>
@@ -295,7 +296,7 @@
 <p>Returns the dock widget area that occupies the specified <i>corner</i>.</p>
 <p>See also <a href="qmainwindow.html#setCorner">setCorner</a>().</p>
 <h3 class="fn"><a name="createPopupMenu"></a><a href="qmenu.html">QMenu</a> * QMainWindow::createPopupMenu ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns a popup menu containing checkable entries for the toolbars and dock widgets present in the main window.</p>
+<p>Returns a popup menu containing checkable entries for the toolbars and dock widgets present in the main window. If there are no toolbars and dock widgets present, this function returns a null pointer.</p>
 <p>By default, this function is called by the main window when the user activates a context menu, typically by right-clicking on a toolbar or a dock widget.</p>
 <p>If you want to create a custom popup menu, reimplement this function and return a newly-created popup menu. Ownership of the popup menu is transferred to the caller.</p>
 <p>See also <a href="qmainwindow.html#addDockWidget">addDockWidget</a>(), <a href="qmainwindow.html#addToolBar">addToolBar</a>(), and <a href="qmainwindow.html#menuBar">menuBar</a>().</p>
@@ -373,14 +374,10 @@
 <p>This signal is emitted when the style used for tool buttons in the window is changed. The new style is passed in <i>toolButtonStyle</i>.</p>
 <p>You can connect this signal to other components to help maintain a consistent appearance for your application.</p>
 <p>See also <a href="qmainwindow.html#toolButtonStyle-prop">setToolButtonStyle</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMainWindow-2"></a>QMainWindow::QMainWindow ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>flags</i> = 0 )</h3>
-<p>Constructs a <a href="qmainwindow.html">QMainWindow</a> with the given <i>parent</i>, <i>name</i>, and with the specified widget <i>flags</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

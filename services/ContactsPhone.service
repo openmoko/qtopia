@@ -3,7 +3,7 @@ File=QtopiaServices
 Context=ContactsPhone
 [Service]
 Actions = "smsBusinessCard();pushVCard(QDSActionRequest)"
-Icon = addressbook/AddressBook
+Icon = service/Contacts/AddressBook
 Name[]=Contacts
 [smsBusinessCard()]
 Icon = phone/sms

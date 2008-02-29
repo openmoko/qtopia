@@ -1,6 +1,7 @@
 PROJECTS*=\
     plugins/qtopiacore/kbddrivers/ficgta01\
-    plugins/audiohardware/ficgta01
+    plugins/audiohardware/ficgta01\
+    devtools 
 
 	  
 

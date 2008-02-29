@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -362,15 +362,22 @@ bool QAudioStateManagerPrivate::setState(const QAudioStateInfo &info, QAudio::Au
 
 bool QAudioStateManagerPrivate::setState(QAudioState *state, QAudio::AudioCapability capability)
 {
-    if (!(state->capabilities() & capability))
+    if (!(state->capabilities() & capability)) {
+        qLog(AudioState) << "Warning: State " << state->info() << "does not have capability:" << capability;
         return false;
+    }
 
     if (m_current) {
-        if (!m_current->leave())
+        if (!m_current->leave()) {
+            qLog(AudioState) << "Warning: Could not leave current state!";
             return false;
+        }
     }
 
     bool ret = state->enter(capability);
+
+    if (!ret)
+        qLog(AudioState) << "Warning: Unable to enter state:" << state->info();
 
     if (ret)
         stateChanged(state, capability);
@@ -502,13 +509,18 @@ void QAudioStateManagerPrivate::doNotUseHint()
 
     qLog(AudioState) << "State" << state->info() << "sent the do not use hint";
 
-    if (state == m_current) {
-        if (m_prev && (m_prev->info().domain() == m_current->info().domain()) &&
-             (m_prev->capabilities() & m_currentCap) && (m_prev->isAvailable())) {
-            setState(m_prev, m_currentCap);
-        } else {
-            setHighestPriorityButNot(m_current, m_current->info().domain(), m_currentCap);
-        }
+    if (state != m_current) {
+        qLog(AudioState) << "State sent the do not use hint, but it is not current, ignoring";
+        return;
+    }
+
+    if (m_prev && (m_prev->info().domain() == m_current->info().domain()) &&
+            (m_prev->capabilities() & m_currentCap) && (m_prev->isAvailable())) {
+        qLog(AudioState) << "Setting the Audio State to the previous state";
+        setState(m_prev, m_currentCap);
+    } else {
+        qLog(AudioState) << "Finding highest priority state";
+        setHighestPriorityButNot(m_current, m_current->info().domain(), m_currentCap);
     }
 }
 
@@ -528,12 +540,20 @@ void QAudioStateManagerPrivate::useHint()
 
     qLog(AudioState) << "State" << state->info() << "sent the use hint";
 
-    if ((state == m_current) || (!state->isAvailable())) {
+    if (state == m_current) {
+        qWarning() << "State is already current!";
         return;
     }
 
-    if (m_current->info().domain() != state->info().domain())
+    if (!state->isAvailable()) {
+        qWarning() << "State is not available!";
         return;
+    }
+
+    if (m_current->info().domain() != state->info().domain()) {
+        qLog(AudioState) << "Current domain does not match the the state that sent the useHint, ignoring";
+        return;
+    }
 
     setState(state, m_currentCap);
 }
@@ -583,7 +603,8 @@ QAudioStateManager::QAudioStateManager(QObject *parent)
     m_data = new QAudioStateManagerPrivate;
 
     if (!m_data->isValid()) {
-        qWarning("No Audio States found!  Media functionality will probably NOT work correctly!");
+// Lets not scare anyone
+//        qWarning("No Audio States found!  Media functionality will probably NOT work correctly!");
         delete m_data;
         m_data = 0;
         return;

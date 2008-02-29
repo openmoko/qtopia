@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,20 +32,10 @@ void readArray( T **array, const Ifd::Header &header, QDataStream &stream, qint6
 {
     *array = new T[ header.count ];
 
-    if( sizeof( T ) * header.count < sizeof( quint32 ) )
-    {
-        const T *source = reinterpret_cast< const T * >( &(header.offset) );
+    stream.device()->seek( baseOffset + header.offset );
 
-        for( uint i = 0; i < header.count; i++ )
-            (*array)[ i ] = source[ i ];
-    }
-    else
-    {
-        stream.device()->seek( baseOffset + header.offset );
-
-        for( uint i = 0; i < header.count; i++ )
-            stream >> (*array)[ i ];
-    }
+    for( uint i = 0; i < header.count; i++ )
+        stream >> (*array)[ i ];
 }
 
 Ifd::Ifd( const Header &h, QDataStream &stream, qint64 baseOffset )
@@ -58,12 +48,44 @@ Ifd::Ifd( const Header &h, QDataStream &stream, qint64 baseOffset )
         {
         case Byte:
         case Undefined:
-        case Ascii:          readArray( (quint8**)&bytes, h, stream, baseOffset ); break;
-        case Short:          readArray( &uShorts,         h, stream, baseOffset ); break;
-        case Long:           readArray( &uLongs,          h, stream, baseOffset ); break;
-        case Rational:       readArray( &uRationals,      h, stream, baseOffset ); break;
-        case SignedLong:     readArray( &sLongs,          h, stream, baseOffset ); break;
-        case SignedRational: readArray( &sRationals,      h, stream, baseOffset );
+        case Ascii:
+            {
+                bytes = new char[ header.count ];
+
+                if( header.count <= 4 )
+                {
+                    for( quint32 i = 0; i < header.count; i++ )
+                        bytes[ i ] = header.offsetBytes[ i ];
+                }
+                else
+                {
+                    stream.device()->seek( baseOffset + header.offset );
+
+                    stream.readRawData( bytes, header.count );
+                }
+            }
+        case Short:
+            if( header.count == 2 )
+            {
+                uShorts = new quint16[ 2 ];
+
+                uShorts[ 0 ] = header.offsetShorts[ 0 ];
+                uShorts[ 1 ] = header.offsetShorts[ 1 ];
+            }
+            else
+                readArray( &uShorts, h, stream, baseOffset );
+            break;
+        case Long:
+            readArray( &uLongs,h, stream, baseOffset );
+            break;
+        case Rational:
+            readArray( &uRationals, h, stream, baseOffset );
+            break;
+        case SignedLong:
+            readArray( &sLongs, h, stream, baseOffset );
+            break;
+        case SignedRational:
+            readArray( &sRationals, h, stream, baseOffset );
         }
     }
     else
@@ -73,7 +95,11 @@ Ifd::Ifd( const Header &h, QDataStream &stream, qint64 baseOffset )
         case Byte:
         case Undefined:
         case Ascii:
+            byte = header.offsetBytes[ 0 ];
+            break;
         case Short:
+            uShort = header.offsetShorts[ 0 ];
+            break;
         case Long:
         case SignedLong:
             uLong = header.offset;
@@ -278,7 +304,27 @@ QDataStream &operator >>( QDataStream &stream, Ifd::Header &header )
     stream >> header.tag;
     stream >> header.type;
     stream >> header.count;
-    stream >> header.offset;
+
+    switch( header.type )
+    {
+    case Ifd::Byte:
+    case Ifd::Ascii:
+    case Ifd::Undefined:
+        if( header.count <= 4 )
+        {
+            stream.readRawData( header.offsetBytes, 4 );
+            break;
+        }
+    case Ifd::Short:
+        if( header.count <= 2 )
+        {
+            stream >> header.offsetShorts[ 0 ];
+            stream >> header.offsetShorts[ 1 ];
+            break;
+        }
+    default:
+        stream >> header.offset;
+    }
 
     return stream;
 }

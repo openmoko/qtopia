@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,14 +22,16 @@
 #ifndef __QTOPIA_MEDIASERVER_MEDIADECODER_H
 #define __QTOPIA_MEDIASERVER_MEDIADECODER_H
 
+#include <qtopiamedia/media.h>
 #include <QMediaDevice>
 
 #include <qtopiaglobal.h>
 
-class QMediaPipe;
 
 class QTOPIAMEDIA_EXPORT QMediaDecoder : public QMediaDevice
 {
+    Q_OBJECT
+
 public:
     virtual ~QMediaDecoder();
 
@@ -37,7 +39,7 @@ public:
     virtual void stop() = 0;
     virtual void pause() = 0;
 
-    virtual quint32 length() = 0;
+    virtual quint64 length() = 0;
     virtual bool seek(qint64 ms) = 0;
 
     virtual void setVolume(int volume) = 0;
@@ -45,8 +47,14 @@ public:
 
     virtual void setMuted(bool mute) = 0;
     virtual bool isMuted() = 0;
-};
 
+signals:
+    void playerStateChanged(QtopiaMedia::State state);
+    void positionChanged(quint32 ms);
+    void lengthChanged(quint32 ms);
+    void volumeChanged(int volume);
+    void volumeMuted(bool muted);
+};
 
 #endif  // __QTOPIA_MEDIASERVER_MEDIADECODER_H
 

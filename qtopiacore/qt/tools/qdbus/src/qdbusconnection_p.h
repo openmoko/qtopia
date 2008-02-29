@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -72,8 +70,8 @@ class QDBusMessage;
 class QSocketNotifier;
 class QTimerEvent;
 class QDBusObjectPrivate;
-class CallDeliveryEvent;
-class ActivateObjectEvent;
+class QDBusCallDeliveryEvent;
+class QDBusActivateObjectEvent;
 class QMetaMethod;
 class QDBusInterfacePrivate;
 struct QDBusMetaObject;
@@ -151,6 +149,7 @@ public:
     // public methods are entry points from other objects
     explicit QDBusConnectionPrivate(QObject *parent = 0);
     ~QDBusConnectionPrivate();
+    void deleteYourself();
 
     void setConnection(DBusConnection *connection, const QDBusErrorInternal &error);
     void setServer(DBusServer *server, const QDBusErrorInternal &error);
@@ -195,8 +194,8 @@ private:
     void activateObject(ObjectTreeNode &node, const QDBusMessage &msg, int pathStartPos);
     bool activateInternalFilters(const ObjectTreeNode &node, const QDBusMessage &msg);
     bool activateCall(QObject *object, int flags, const QDBusMessage &msg);
-    CallDeliveryEvent *prepareReply(QObject *object, int idx, const QList<int> &metaTypes,
-                                    const QDBusMessage &msg);
+    QDBusCallDeliveryEvent *prepareReply(QObject *object, int idx, const QList<int> &metaTypes,
+                                         const QDBusMessage &msg);
 
     void sendError(const QDBusMessage &msg, QDBusError::ErrorType code);
     void deliverCall(QObject *object, int flags, const QDBusMessage &msg,
@@ -250,7 +249,7 @@ public:
     MetaObjectHash cachedMetaObjects;
 
     QMutex callDeliveryMutex;
-    CallDeliveryEvent *callDeliveryState; // protected by the callDeliveryMutex mutex
+    QDBusCallDeliveryEvent *callDeliveryState; // protected by the callDeliveryMutex mutex
 
 public:
     // static methods
@@ -267,8 +266,8 @@ public:
 
     static void setSender(const QDBusConnectionPrivate *s);
 
-    friend class ActivateObjectEvent;
-    friend class CallDeliveryEvent;
+    friend class QDBusActivateObjectEvent;
+    friend class QDBusCallDeliveryEvent;
 };
 
 // in qdbusmisc.cpp

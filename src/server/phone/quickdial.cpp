@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -73,7 +73,6 @@ QuickDialContactView::QuickDialContactView(QWidget *parent)
     : CallContactListView(parent)
 {
     connect( this, SIGNAL(activated(QModelIndex)), this, SLOT(selectedNumber(QModelIndex)) );
-    connect( this, SIGNAL(clicked(QModelIndex)), this, SLOT(selectedNumber(QModelIndex)) );
 }
 
 void QuickDialContactView::selectedNumber(const QModelIndex& idx)
@@ -265,6 +264,8 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     l->addWidget(mNumberDS);
     QtopiaApplication::setInputMethodHint( mNumberDS, QtopiaApplication::AlwaysOff );
 
+    // cadams - fix for bug 188035
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "phone/calls" , tr( "Dial", "dial highlighted number" ) );
     QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
     mDialList = new QuickDialContactView( this );
     l->addWidget(mDialList);
@@ -427,10 +428,14 @@ bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
     else if( o == mNumberDS )
     {
         QModelIndex idx;
-        if( mDialModel->rowCount() && key == Qt::Key_Down )
-            idx = mDialModel->index(0);
-        else if( mDialModel->rowCount() && key == Qt::Key_Up )
-            idx = mDialModel->index(mDialModel->rowCount()-1);
+        if ( key == Qt::Key_Down || key == Qt::Key_Up ) {
+            if ( !mDialModel->rowCount() )
+                return true;    // Do not move focus if no matching number exists
+            if ( key == Qt::Key_Down )
+                idx = mDialModel->index(0);
+            else
+                idx = mDialModel->index(mDialModel->rowCount()-1);
+        }
         if (idx.isValid()) {
             mDialList->setFocus();
             mDialList->setCurrentIndex(idx);

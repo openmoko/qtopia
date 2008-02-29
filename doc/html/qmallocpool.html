@@ -65,14 +65,14 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMallocPool"></a>QMallocPool::QMallocPool ()</h3>
 <p>Creates an invalid <a href="qmallocpool.html">QMallocPool</a>.</p>
-<h3 class="fn"><a name="QMallocPool-2"></a>QMallocPool::QMallocPool ( void * <i>poolBase</i>, unsigned int <i>poolLength</i>, <a href="qmallocpool.html#PoolType-enum">PoolType</a> <i>type</i> = Owned, const <a href="qstring.html">QString</a> &amp; <i>name</i> = QString() )</h3>
+<h3 class="fn"><a name="QMallocPool-2"></a>QMallocPool::QMallocPool ( void * <i>poolBase</i>, unsigned int <i>poolLength</i>, <a href="qmallocpool.html#PoolType-enum">PoolType</a> <i>type</i> = Owned, const <a href="./qstring.html">QString</a> &amp; <i>name</i> = QString() )</h3>
 <p>Creates a <a href="qmallocpool.html">QMallocPool</a> on the memory region <i>poolBase</i> of length <i>poolLength</i>. The pool will be constructed with the passed <i>type</i> and <i>name</i>. The <i>name</i> is used for diagnostics purposes only.</p>
 <h3 class="fn"><a name="dtor.QMallocPool"></a>QMallocPool::~QMallocPool ()</h3>
 <p>Destroys the malloc pool.</p>
 <h3 class="fn"><a name="calloc"></a>void * QMallocPool::calloc ( size_t <i>nmemb</i>, size_t <i>size</i> )</h3>
 <p>Allocates memory for an array of <i>nmemb</i> elements of <i>size</i> each and returns a pointer to the allocated memory. The memory is set to zero. Returns 0 if the memory could not be allocated.</p>
 <h3 class="fn"><a name="dumpStats"></a>void QMallocPool::dumpStats () const</h3>
-<p>Outputs statistical information regarding the state of the malloc pool using <a href="qtopiadesktop/.html#qLog">qLog</a>().</p>
+<p>Outputs statistical information regarding the state of the malloc pool using <a href="qtopiadesktop/qlog-h.html#qLog">qLog</a>().</p>
 <h3 class="fn"><a name="free"></a>void QMallocPool::free ( void * <i>ptr</i> )</h3>
 <p>Frees the memory space pointed to by <i>ptr</i>, which must have been returned by a previous call to <a href="qmallocpool.html#malloc">malloc</a>(), <a href="qmallocpool.html#calloc">calloc</a>() or <a href="qmallocpool.html#realloc">realloc</a>(). Otherwise, or if <tt>free(ptr)</tt> has already been called before, undefined behaviour occurs. If <i>ptr</i> is 0, no operation is performed.</p>
 <h3 class="fn"><a name="isValid"></a>bool QMallocPool::isValid () const</h3>
@@ -87,8 +87,8 @@
 <p>Returns the allocated size of <i>mem</i>, assuming <i>mem</i> was previously returned by <a href="qmallocpool.html#malloc">malloc</a>(), <a href="qmallocpool.html#calloc">calloc</a>() or <a href="qmallocpool.html#realloc">realloc</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -264,7 +264,8 @@ void MailListView::setCurrentMailbox(const QString &mailbox)
     _mailbox = mailbox;
 }
 
-void MailListView::treeInsert(const QMailIdList& idList)
+void MailListView::treeInsert(const QMailIdList& idList, 
+			      const QSoftMenuBar::StandardLabel label)
 {
     this->clear();
     setRowCount(idList.count());
@@ -272,14 +273,14 @@ void MailListView::treeInsert(const QMailIdList& idList)
         setItem(i, 0, new EmailListItem(this, idList[i], 0) );
     }
 
-    QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? QSoftMenuBar::View : QSoftMenuBar::NoLabel);
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? label : QSoftMenuBar::NoLabel);
 }
 
 
 /*  May be expanded to have a thread-view of messages.  Ignore all disabled
     code for now ( doesn't work yet either way )
 */
-void MailListView::treeInsert(const QMailId& id)
+void MailListView::treeInsert(const QMailId& id, const QSoftMenuBar::StandardLabel label)
 {
 //    bool isEmail = (message.messageType() == QMailMessage::Email);
 //    if ((showEmailsOnly() && !isEmail) ||
@@ -288,7 +289,7 @@ void MailListView::treeInsert(const QMailId& id)
     
     insertRow(0);
     setItem(0, 0, new EmailListItem(this, id, 0) );
-    QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? QSoftMenuBar::View : QSoftMenuBar::NoLabel);
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, rowCount() ? label : QSoftMenuBar::NoLabel);
 
 /*
     if ( mail->inReplyTo().isEmpty() ) {
@@ -443,3 +444,10 @@ void MailListView::setSelectedRow(int row)
         setSelectedItem(rowItem);
 }
 
+void MailListView::resetNameCaches()
+{
+    for(int i = 0; i < rowCount(); ++i) {
+        EmailListItem *listItem = static_cast<EmailListItem *>( item(i, 0) );
+        listItem->setCachedName( QString::null );
+    }
+}

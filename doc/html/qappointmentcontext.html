@@ -35,7 +35,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 public functions inherited from <a href="qpimcontext.html#public-functions">QPimContext</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -43,17 +43,16 @@
 <li><div class="fn"/><b><a href="qappointmentcontext.html#QAppointmentContext">QAppointmentContext</a></b> ( QObject * <i>parent</i> = 0 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -64,39 +63,39 @@
 <p>See also <a href="qappointmentmodel.html">QAppointmentModel</a> and <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAppointmentContext"></a>QAppointmentContext::QAppointmentContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="QAppointmentContext"></a>QAppointmentContext::QAppointmentContext ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs a <a href="qappointmentcontext.html">QAppointmentContext</a> with parent <i>parent</i>.</p>
 <h3 class="fn"><a name="addAppointment"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentContext::addAppointment ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i>, const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Adds the <i>appointment</i> to the PIM data <i>source</i> if it is controlled by this context. If the appointment is successfully added, returns the new unique id for this appointment, otherwise returns a null id.</p>
 <h3 class="fn"><a name="exportAppointment"></a><a href="qappointment.html">QAppointment</a> QAppointmentContext::exportAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Exports a single appointment identified by <i>id</i>. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
 <p>See also <a href="qappointmentcontext.html#exportAppointments">exportAppointments</a>().</p>
-<h3 class="fn"><a name="exportAppointments"></a><a href="qlist.html">QList</a>&lt;<a href="qappointment.html">QAppointment</a>&gt; QAppointmentContext::exportAppointments ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="exportAppointments"></a><a href="./qlist.html">QList</a>&lt;<a href="qappointment.html">QAppointment</a>&gt; QAppointmentContext::exportAppointments ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, bool &amp; <i>ok</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Exports the appointments stored in the PIM data <i>source</i> and returns them as a list. The source must be controlled by this context. If successful sets <i>ok</i> to true, otherwise sets <i>ok</i> to false.</p>
 <p>There isn't necessarily going to be a one to one match to appointments in the PIM data source. Appointments may be merged or split over multiple appointments to form the list.</p>
 <h3 class="fn"><a name="importAppointment"></a>bool QAppointmentContext::importAppointment ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Imports a single <i>appointment</i> to the PIM data <i>source</i>. If successful returns true, otherwise returns false.</p>
 <p>See also <a href="qappointmentcontext.html#importAppointments">importAppointments</a>().</p>
-<h3 class="fn"><a name="importAppointments"></a>bool QAppointmentContext::importAppointments ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="qlist.html">QList</a>&lt;<a href="qappointment.html">QAppointment</a>&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="importAppointments"></a>bool QAppointmentContext::importAppointments ( const <a href="qpimsource.html">QPimSource</a> &amp; <i>source</i>, const <a href="./qlist.html">QList</a>&lt;<a href="qappointment.html">QAppointment</a>&gt; &amp; <i>appointments</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Imports the <i>appointments</i> and merges them with the appointments listed in the PIM data <i>source</i>. The source must be controlled by this context. If successful returns true, otherwise returns false.</p>
 <p>There isn't necessarily going to be a one to one match to appointments in the PIM data source. Appointments may be merged or split over multiple appointments. Also appointments that match in name will be updated from the list rather than additional appointments created.</p>
 <h3 class="fn"><a name="removeAppointment"></a>bool QAppointmentContext::removeAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Removes the appointment with the identifier <i>id</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
-<h3 class="fn"><a name="removeOccurrence"></a>bool QAppointmentContext::removeOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="removeOccurrence"></a>bool QAppointmentContext::removeOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Mark the repeating appointment identified by <i>id</i> in this context so as not to occur on <i>date</i>. Returns true if the appointment was successfully updated, otherwise returns false.</p>
-<h3 class="fn"><a name="replaceOccurrence"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentContext::replaceOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qoccurrence.html">QOccurrence</a> &amp; <i>occurrence</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> = QDate() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="replaceOccurrence"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentContext::replaceOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qoccurrence.html">QOccurrence</a> &amp; <i>occurrence</i>, const <a href="./qdate.html">QDate</a> &amp; <i>date</i> = QDate() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Replaces an occurrence that occurs on <i>date</i> of the appointment identified by <i>id</i> with <i>occurrence</i>. If <i>date</i> is null, the date of the supplied <i>occurrence</i> will be used. Returns true if the appointment was successfully updated, otherwise returns false.</p>
-<h3 class="fn"><a name="replaceRemaining"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentContext::replaceRemaining ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> = QDate() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="replaceRemaining"></a><a href="quniqueid.html">QUniqueId</a> QAppointmentContext::replaceRemaining ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i>, const <a href="./qdate.html">QDate</a> &amp; <i>date</i> = QDate() )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Modifies the appointment identified by <i>id</i> to not repeat after <i>date</i> and adds <i>appointment</i> to the PIM data source that stores the appointment identified by <i>id</i>. If <i>date</i> is null, the date of the first occurrence of <i>appointment</i> will be used. Returns the unique id for the new appointment if successful, otherwise returns a null id.</p>
-<h3 class="fn"><a name="restoreOccurrence"></a>bool QAppointmentContext::restoreOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="restoreOccurrence"></a>bool QAppointmentContext::restoreOccurrence ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>If an recurring appointment with the specified <i>identifier</i> has an exception listed for the given <i>date</i>, restores the original occurrence for that date. If the exception included a replacement appointment will also remove the replacement.</p>
 <p>Returns true if the appointment was successfully updated.</p>
 <h3 class="fn"><a name="updateAppointment"></a>bool QAppointmentContext::updateAppointment ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Updates the appointment with the same identifier as <i>appointment</i> if it exists in this context. Returns true upon success; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

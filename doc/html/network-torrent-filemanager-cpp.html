@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2004-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2004-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -167,13 +165,13 @@
 
      do {
          {
-             <span class="comment">// Go to sleep if there's nothing to do.</span>
+             <span class="comment">//</span> Go to sleep if there's nothing to do.
              QMutexLocker locker(&amp;mutex);
              if (!quit &amp;&amp; readRequests.isEmpty() &amp;&amp; writeRequests.isEmpty() &amp;&amp; !startVerification)
                  cond.wait(&amp;mutex);
          }
 
-         <span class="comment">// Read pending read requests</span>
+         <span class="comment">//</span> Read pending read requests
          mutex.lock();
          QList&lt;ReadRequest&gt; newReadRequests = readRequests;
          readRequests.clear();
@@ -184,7 +182,7 @@
              emit dataRead(request.id, request.pieceIndex, request.offset, block);
          }
 
-         <span class="comment">// Write pending write requests</span>
+         <span class="comment">//</span> Write pending write requests
          mutex.lock();
          QList&lt;WriteRequest&gt; newWriteRequests = writeRequests;
          writeRequests.clear();
@@ -193,7 +191,7 @@
              writeBlock(request.pieceIndex, request.offset, request.data);
          }
 
-         <span class="comment">// Process pending verification requests</span>
+         <span class="comment">//</span> Process pending verification requests
          if (startVerification) {
              newPendingVerificationRequests = pendingVerificationRequests;
              pendingVerificationRequests.clear();
@@ -205,7 +203,7 @@
 
      } while (!quit);
 
-     <span class="comment">// Write pending write requests</span>
+     <span class="comment">//</span> Write pending write requests
      mutex.lock();
      QList&lt;WriteRequest&gt; newWriteRequests = writeRequests;
      writeRequests.clear();
@@ -227,7 +225,7 @@
  {
      numPieces = -1;
 
-     <span class="comment">// Set up the thread local data</span>
+     <span class="comment">//</span> Set up the thread local data
      if (metaInfo.fileForm() == MetaInfo::SingleFileForm) {
          QMutexLocker locker(&amp;mutex);
          MetaInfoSingleFile singleFile = metaInfo.singleFile();
@@ -414,7 +412,7 @@
 
  void FileManager::verifyFileContents()
  {
-     <span class="comment">// Verify all pieces the first time</span>
+     <span class="comment">//</span> Verify all pieces the first time
      if (newPendingVerificationRequests.isEmpty()) {
          if (verifiedPieces.count(true) == 0) {
              verifiedPieces.resize(sha1s.size());
@@ -438,7 +436,7 @@
          return;
      }
 
-     <span class="comment">// Verify all pending pieces</span>
+     <span class="comment">//</span> Verify all pending pieces
      foreach (int index, newPendingVerificationRequests)
          emit pieceVerified(index, verifySinglePiece(index));
  }
@@ -482,8 +480,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -172,38 +172,16 @@
 <p>Changes the status bar's appearance to account for item changes.</p>
 <p>Special subclasses may need this function, but geometry management will usually take care of any necessary rearrangements.</p>
 <h3 class="fn"><a name="removeWidget"></a>void QStatusBar::removeWidget ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
-<p>Removes the specified <i>widget</i> from the status bar (without deleting it).</p>
+<p>Removes the specified <i>widget</i> from the status bar.</p>
+<p><b>Note:</b> This function does not delete the widget but <i>hides</i> it. To add the widget again, you must call both the <a href="qstatusbar.html#addWidget">addWidget</a>() and <a href="qwidget.html#show">show</a>() functions.</p>
 <p>See also <a href="qstatusbar.html#addWidget">addWidget</a>(), <a href="qstatusbar.html#addPermanentWidget">addPermanentWidget</a>(), and <a href="qstatusbar.html#clearMessage">clearMessage</a>().</p>
 <h3 class="fn"><a name="showMessage"></a>void QStatusBar::showMessage ( const <a href="qstring.html">QString</a> &amp; <i>message</i>, int <i>timeout</i> = 0 )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Hides the normal status indications and displays the given <i>message</i> for the specified <i>timeout</i> milli-seconds (if non-zero), or until <a href="qstatusbar.html#clearMessage">clearMessage</a>() or another showMessage() is called, whichever occurs first.</p>
 <p>See also <a href="qstatusbar.html#messageChanged">messageChanged</a>(), <a href="qstatusbar.html#currentMessage">currentMessage</a>(), and <a href="qstatusbar.html#clearMessage">clearMessage</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QStatusBar-2"></a>QStatusBar::QStatusBar ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a status bar with a size grip and the given <i>parent</i> and object <i>name</i>.</p>
-<p>Use the <a href="qstatusbar.html#QStatusBar">QStatusBar</a>() constructor and the <a href="qobject.html#objectName-prop">QObject::setObjectName</a>() function instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QStatusBar *myStatusBar = new QStatusBar(parent, name);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QStatusBar *myStatusBar = new QStatusBar(parent);
- myStatusBar-&gt;setObjectName(name);</pre>
-<h3 class="fn"><a name="addWidget-2"></a>void QStatusBar::addWidget ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, int <i>stretch</i>, bool <i>permanent</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qstatusbar.html#addWidget">addWidget</a>() or <a href="qstatusbar.html#addPermanentWidget">addPermanentWidget</a>() instead, depending on the value of the <i>permanent</i> parameter.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QStatusBar *myStatusBar;
- myStatusBar-&gt;addWidget(widget, stretch, permanent);  // permanent == true</font></pre>
-<p>you can rewrite it as</p>
-<pre> QStatusBar *myStatusBar;
- myStatusBar-&gt;addPermanentWidget(widget, stretch);</pre>
-<h3 class="fn"><a name="clear"></a>void QStatusBar::clear ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use the <a href="qstatusbar.html#clearMessage">clearMessage</a>() function instead.</p>
-<h3 class="fn"><a name="message"></a>void QStatusBar::message ( const <a href="qstring.html">QString</a> &amp; <i>message</i>, int <i>timeout</i> = 0 )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use the <a href="qstatusbar.html#showMessage">showMessage</a>() function instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

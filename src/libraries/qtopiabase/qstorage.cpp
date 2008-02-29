@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -156,17 +156,16 @@ const QFileSystem *QStorageMetaInfo::fileSystemOf( const QString &filename, bool
     int currLen;
 
     foreach ( QFileSystem *fs, fileSystems( NULL, connectedOnly) ) {
-        if ( filename.startsWith( fs->path() ) ) {
-            currLen = fs->path().length();
+        QString path = !fs->path().isEmpty() ? fs->path() : fs->prevPath();
+        if ( path.length() > bestLen && filename.startsWith( path ) ) {
+            currLen = path.length();
             if ( currLen == 1 )
                 currLen = 0; // Fix checking '/' root mount which is a special case
             if ( filename.length() == currLen ||
                  filename[currLen] == '/' ||
                  filename[currLen] == '\\') {
-                if ( currLen > bestLen || bestLen == 0 ) {
-                    bestMatch = fs;
-                    bestLen = currLen;
-                }
+                bestMatch = fs;
+                bestLen = path.length();
             }
         }
     }
@@ -332,7 +331,7 @@ void QStorageMetaInfo::update()
         do {
             cfg.beginGroup(QLatin1String("PREFIX"));
             disk             = QLatin1String("PREFIX");
-            path             = Qtopia::qtopiaDir();
+            path             = QDir::cleanPath( Qtopia::qtopiaDir() );
             options          = cfg.value(QLatin1String("Options"), QLatin1String("ro")).toString();
             name             = cfg.value(QLatin1String("Name[]"), QLatin1String("PREFIX")).toString();
             documentsPath    = cfg.value(QLatin1String("DocumentsPath")).toString();

@@ -57,7 +57,7 @@
 <h2>Examples</h2>
 <p>The first group of examples show how to use the new Java-style iterators. The main difference between the Java-style iterators and the STL-style iterators is that the Java-style ones point between items (or before the first item, or after the last item), whereas the STL ones point at an item (or past the last item). One advantage of the Java-style iterators is that iterating forward and backward are symmetric operations.</p>
 <p>Traversing a container using a Java-style iterator:</p>
-<pre><span class="comment"> // forward                                  // backward</span>
+<pre><span class="comment"> //</span> forward                                  <span class="comment">//</span> backward
  QList&lt;QString&gt; list;                        QList&lt;QString&gt; list;
  ...                                         ...
  QListIterator&lt;QString&gt; i(list);             QListIterator&lt;QString&gt; i(list);
@@ -65,21 +65,21 @@
      cout &lt;&lt; i.next().ascii() &lt;&lt; endl;       while (i.hasPrev())
                                                  cout &lt;&lt; i.prev().ascii() &lt;&lt; endl;</pre>
 <p>Modifying items using a Java-style iterator:</p>
-<pre><span class="comment"> // forward                                  // backward</span>
+<pre><span class="comment"> //</span> forward                                  <span class="comment">//</span> backward
  QMutableListIterator&lt;int&gt; i(list);          QMutableListIterator&lt;int&gt; i(list);
  while (i.hasNext())                         i.toBack();
      if (i.next() &gt; 128)                     while (i.hasPrev())
          i.setValue(128);                        if (i.prev() &gt; 128)
                                                      i.setValue(128);</pre>
 <p>Removing items using a Java-style iterator:</p>
-<pre><span class="comment"> // forward                                  // backward</span>
+<pre><span class="comment"> //</span> forward                                  <span class="comment">//</span> backward
  QMutableListIterator&lt;int&gt; i(list);          QMutableListIterator&lt;int&gt; i(list);
  while (i.hasNext())                         i.toBack();
      if (i.next() % 2 != 0)                  while (i.hasPrev())
          i.remove();                             if (i.prev() % 2 != 0)
                                                      i.remove();</pre>
 <p>Iterating over items with a particular value using STL-style vs. Java-style iterators:</p>
-<pre><span class="comment"> // STL-style                                // Java-style</span>
+<pre><span class="comment"> //</span> STL-style                                <span class="comment">//</span> Java-style
  QMap&lt;int, QWidget *&gt;::const_iterator i;     QMapIterator&lt;int, QWidget *&gt; i(map);
  for (i = map.begin(); i != map.end(); ++i)  while (i.findNext(widget))
      if (i.value() == widget)                    cout &lt;&lt; &quot;Found widget &quot; &lt;&lt; widget
@@ -87,7 +87,7 @@
               &lt;&lt; &quot; under key &quot;                        &lt;&lt; i.key() &lt;&lt; endl;
               &lt;&lt; i.key() &lt;&lt; endl;</pre>
 <p>Modifying and removing items using STL-style vs. Java-style iterators:</p>
-<pre><span class="comment"> // STL-style                                // Java-style</span>
+<pre><span class="comment"> //</span> STL-style                                <span class="comment">//</span> Java-style
  QList&lt;int&gt;::iterator i = list.begin();      QMutableListIterator&lt;int&gt; i(list);
  while (i != list.end()) {                   while (i.hasNext()) {
      if (*i == 0) {                              int val = i.next();
@@ -109,7 +109,7 @@
 <p>Retrieving a value from a map, using a default value if the key doesn't exist:</p>
 <pre> QMap&lt;QString, int&gt; map;
  ...
- map.value(&quot;TIMEOUT&quot;, 30);  <span class="comment">// returns 30 if &quot;TIMEOUT&quot; isn't in the map</span></pre>
+ map.value(&quot;TIMEOUT&quot;, 30);  <span class="comment">//</span> returns 30 if &quot;TIMEOUT&quot; isn't in the map</pre>
 <p>Getting all the values for a particular key in a <a href="qmultimap.html">QMultiMap</a> or <a href="qmultihash.html">QMultiHash</a>:</p>
 <pre> QMultiMap&lt;QString, int&gt; map;
  ...
@@ -127,8 +127,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

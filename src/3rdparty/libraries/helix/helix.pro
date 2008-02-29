@@ -6,8 +6,16 @@ HELIX_PATH=$$QPEDIR/src/3rdparty/libraries/helix/helixbuild
 
 depends(libraries/qtopia)
 
-CONFIG(release,debug|release):release=-t release
-else:release=-t debug
+CONFIG(release,debug|release) {
+    release=-t release
+    LOGGING=no
+    BUILDPART=splay_nodist_qtopia 
+}
+else {
+    release=-t debug
+    LOGGING=yes
+    BUILDPART=splay_nodist_qtopia_log
+}
 
 enable_rpath:!isEmpty(QTOPIA_RPATH):RPATHVALUE=$$QTOPIA_RPATH$$QTOPIA_PREFIX
 
@@ -25,7 +33,8 @@ setup_helixbuild.commands=$$COMMAND_HEADER\
         $$LITERAL_QUOTE$$QTEDIR$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$QPEDIR$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$RPATHVALUE$$LITERAL_QUOTE\
-        $$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE $$LINE_SEP\
+        $$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
+        $$LITERAL_QUOTE$$LOGGING$$LITERAL_QUOTE $$LINE_SEP\
     cd $$HELIX_PATH;\
     for patch in $$PWD/trolltech/patches/*.patch; do\
         patch -g0 -t -p2 <\$$patch;\
@@ -55,7 +64,7 @@ setup_helix.commands=$$COMMAND_HEADER\
           BUILDRC=$$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
           SYSTEM_ID=$$HELIX_SYSTEM_ID \
     # we have to ignore errors from this script because it always give us an error
-    python build/bin/build.py $$release -U -P helix-client-qtopia-nodist splay_nodist_qtopia \$$output || true $$LINE_SEP\
+    python build/bin/build.py $$release -U -P helix-client-qtopia-nodist $$BUILDPART \$$output || true $$LINE_SEP\
     if [ ! -f $$HELIX_PATH/Makefile ]; then\
         echo $${LITERAL_QUOTE}ERROR: Helix build system failure.$${LITERAL_QUOTE};\
         exit 1;\
@@ -84,7 +93,7 @@ redirect_all.commands=$$COMMAND_HEADER\
           BUILDRC=$$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
           SYSTEM_ID=$$HELIX_SYSTEM_ID \
     # we have to ignore errors from this script because it always give us an error
-    python build/bin/build.py $$release -P helix-client-qtopia-nodist splay_nodist_qtopia $$LINE_SEP
+    python build/bin/build.py $$release -P helix-client-qtopia-nodist $$BUILDPART $$LINE_SEP
 QMAKE_EXTRA_TARGETS+=redirect_all
 ALL_DEPS+=redirect_all
 

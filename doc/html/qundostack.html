@@ -151,12 +151,12 @@
 <pre> stack.beginMacro(&quot;insert red text&quot;);
  stack.push(new InsertText(document, idx, text));
  stack.push(new SetColor(document, idx, text.length(), Qt::red));
- stack.endMacro(); <span class="comment">// indexChanged() is emitted</span></pre>
+ stack.endMacro(); <span class="comment">//</span> indexChanged() is emitted</pre>
 <p>This code is equivalent to:</p>
-<pre> QUndoCommand *insertRed = new QUndoCommand(); <span class="comment">// an empty command</span>
+<pre> QUndoCommand *insertRed = new QUndoCommand(); <span class="comment">//</span> an empty command
  insertRed-&gt;setText(&quot;insert red text&quot;);
 
- new InsertText(document, idx, text, insertRed); <span class="comment">// becomes child of insertRed</span>
+ new InsertText(document, idx, text, insertRed); <span class="comment">//</span> becomes child of insertRed
  new SetColor(document, idx, text.length(), Qt::red, insertRed);
 
  stack.push(insertRed);</pre>
@@ -251,8 +251,8 @@
 <p>This signal is emitted whenever the value of <a href="qundostack.html#undoText">undoText</a>() changes. It is used to update the text property of the undo action returned by <a href="qundostack.html#createUndoAction">createUndoAction</a>(). <i>undoText</i> specifies the new text.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

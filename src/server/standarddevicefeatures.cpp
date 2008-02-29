@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,8 +21,10 @@
 
 #include "standarddevicefeatures.h"
 #include "qtopiaserverapplication.h"
-#include "phone/cameramonitor.h"
+#include "cameramonitor.h"
 #include "qtopiainputevents.h"
+
+#include "systemsuspend.h"
 
 #include <qvaluespace.h>
 
@@ -46,6 +48,8 @@ private slots:
     void doTimeTick();
     void dateFormatChanged();
     void clockChanged(bool);
+    void systemSuspending();
+    void systemWaking();
 
 private:
     QtopiaTimer *m_timer;
@@ -285,6 +289,19 @@ void TimeControl::clockChanged(bool)
             QTimeString::localHM(QDateTime::currentDateTime().time(), QTimeString::Short));
 }
 
+void TimeControl::systemSuspending()
+{
+    timeValueSpace.setAttribute("Date", QString());
+    timeValueSpace.setAttribute("BriefDate", QString());
+    timeValueSpace.setAttribute("Time", QString());
+}
+
+void TimeControl::systemWaking()
+{
+    clockChanged(QTimeString::currentAMPM());
+    dateFormatChanged();
+}
+
 TimeControl::TimeControl(QObject *parent)
 : QObject(parent), m_timer(0), timeValueSpace("/UI/DisplayTime")
 {
@@ -294,6 +311,11 @@ TimeControl::TimeControl(QObject *parent)
     QObject::connect(qApp, SIGNAL(timeChanged()), this, SLOT(doTimeTick()));
     QObject::connect(qApp, SIGNAL(dateFormatChanged()), this, SLOT(dateFormatChanged()));
     QObject::connect(qApp, SIGNAL(clockChanged(bool)), this, SLOT(clockChanged(bool)));
+
+    QObject::connect(qtopiaTask<SystemSuspend>(), SIGNAL(systemSuspending()),
+                     this, SLOT(systemSuspending()));
+    QObject::connect(qtopiaTask<SystemSuspend>(), SIGNAL(systemWaking()),
+                     this, SLOT(systemWaking()));
 }
 
 #include "standarddevicefeatures.moc"

@@ -14,7 +14,7 @@ HEADERS		+= dayview.h \
 		  findwidget_p.h \
 		  appointmentpicker.h \
 		  exceptiondialog.h \
-		  alarmdialog.h \
+		  alarmview.h \
 		  appointmentdetails.h \
                   appointmentlist.h
 
@@ -29,24 +29,23 @@ SOURCES		+= dayview.cpp \
 		  findwidget_p.cpp \
 		  appointmentpicker.cpp \
 		  exceptiondialog.cpp \
-		  alarmdialog.cpp \
+		  alarmview.cpp \
 		  appointmentdetails.cpp \
                   appointmentlist.cpp \
                   main.cpp
 
 
 FORMS	+=         findwidgetbase_p.ui \
-		   exceptiondialogbase.ui \
-                   datebooksettingsbase_phone.ui
+		   exceptiondialogbase.ui
 
     HEADERS += googleaccount.h \
                accounteditor.h
     SOURCES += googleaccount.cpp \
                accounteditor.cpp
-    DEFINES += GOOGLE_CALENDAR_CONTEXT
 
-TRANSLATABLES   +=  datebooksettingsbase_phone.ui \
-                    googleaccount.h \
+#DEFINES += GOOGLE_CALENDAR_CONTEXT
+
+TRANSLATABLES   +=  googleaccount.h \
                     googleaccount.cpp \
                     accounteditor.h \
                     accounteditor.cpp
@@ -85,10 +84,8 @@ help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=datebook*
 help.hint=help
 INSTALLS+=help
-pics.files=$$QTOPIA_DEPOT_PATH/pics/datebook/*
-pics.path=/pics/datebook
-pics.hint=pics
-INSTALLS+=pics
- 
+
+# pics are installed by libqtopiapim since they're shared
+
 pkg.desc=Calendar for Qtopia.
-pkg.domain=window,pim,alarm,qdl,qds,beaming,cardreader,bluetooth,categories
+pkg.domain=trusted

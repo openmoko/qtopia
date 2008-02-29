@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -439,8 +439,7 @@ QSharedMemoryManager::QSharedMemoryManager()
     if ( !f.exists() ) {
         if (!f.open(QIODevice::WriteOnly))
             qFatal("%s creating shared memory key file %s",
-                    ( f.error() == QFile::PermissionsError, "Permissions error",
-                      "Error" ), qPrintable(tmp));
+                    ( f.error() == QFile::PermissionsError ? "Permissions error" : "Error" ), qPrintable(tmp));
         f.close();
     }
 

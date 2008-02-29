@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1227,6 +1225,12 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
     glPushMatrix();
     glLoadIdentity();
     glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_EDGE_FLAG_ARRAY);
+    glDisableClientState(GL_INDEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if (QGLExtensions::glExtensions & QGLExtensions::SampleBuffers)
         glDisable(GL_MULTISAMPLE);
@@ -1322,8 +1326,12 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
 
         glGenTextures(1, &d->drawable_texture);
         glBindTexture(GL_TEXTURE_2D, d->drawable_texture);
+        QSize adjusted_size(qt_next_power_of_two(sz.width()),
+                            qt_next_power_of_two(sz.height()));
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, sz.width(), sz.height(), 0,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+                     adjusted_size.width(),
+                     adjusted_size.height(), 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1331,7 +1339,7 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        d->drawable_texture_size = sz;
+        d->drawable_texture_size = adjusted_size;
     }
 #endif
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1960,7 +1958,6 @@ void QPlastiqueStyle::drawPrimitive(PrimitiveElement element, const QStyleOption
 void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *option,
                                   QPainter *painter, const QWidget *widget) const
 {
-    Q_D(const QPlastiqueStyle);
     QColor borderColor = option->palette.background().color().darker(178);
     QColor alphaCornerColor;
     if (widget) {
@@ -2569,6 +2566,7 @@ void QPlastiqueStyle::drawControl(ControlElement element, const QStyleOption *op
         break;
     case CE_ProgressBarContents:
         if (const QStyleOptionProgressBar *bar = qstyleoption_cast<const QStyleOptionProgressBar *>(option)) {
+            Q_D(const QPlastiqueStyle);
             QRect rect = bar->rect;
             bool vertical = false;
             bool inverted = false;
@@ -4597,7 +4595,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 dockwidget.QStyleOption::operator=(*option);
                 dockwidget.title = titleBar->text;
                 drawControl(CE_DockWidgetTitle, &dockwidget, painter, widget);
-            } else 
+            } else
 #endif // QT3_SUPPORT
 
             {
@@ -4688,7 +4686,7 @@ void QPlastiqueStyle::drawComplexControl(ComplexControl control, const QStyleOpt
                 painter->setPen(titleBar->palette.highlightedText().color());
                 painter->drawText(textRect, titleBar->text, option);
             }
-            
+
             // min button
             if ((titleBar->subControls & SC_TitleBarMinButton)
                     && (titleBar->titleBarFlags & Qt::WindowMinimizeButtonHint)
@@ -6221,8 +6219,9 @@ int QPlastiqueStyle::layoutSpacingImplementation(QSizePolicy::ControlType contro
 */
 bool QPlastiqueStyle::eventFilter(QObject *watched, QEvent *event)
 {
-    Q_D(QPlastiqueStyle);
 #ifndef QT_NO_PROGRESSBAR
+    Q_D(QPlastiqueStyle);
+
     switch (event->type()) {
     case QEvent::Show:
         if (QProgressBar *bar = qobject_cast<QProgressBar *>(watched)) {
@@ -6275,8 +6274,9 @@ bool QPlastiqueStyle::eventFilter(QObject *watched, QEvent *event)
 */
 void QPlastiqueStyle::timerEvent(QTimerEvent *event)
 {
-    Q_D(QPlastiqueStyle);
 #ifndef QT_NO_PROGRESSBAR
+    Q_D(QPlastiqueStyle);
+
     if (event->timerId() == d->progressBarAnimateTimer) {
         Q_ASSERT(ProgressBarFps > 0);
         d->animateStep = d->timer.elapsed() / (1000 / ProgressBarFps);

@@ -30,7 +30,7 @@
 <p>The QWSScreenSaver class is a base class for screensavers in Qtopia Core.</p>
 <p>When running <a href="qtopiacore.html">Qtopia Core</a> applications, it is the server application that installs and controls the screensaver. <a href="qtopiacore.html">Qtopia Core</a> supports multilevel screen saving, i.e&#x2e;, it is possible to specify several different levels of screen responsiveness. For example, you can choose to first turn off the light before you fully activate the screensaver.</p>
 <p>Note that there exists no default screensaver implementation.</p>
-<p>To create a custom screen driver, derive from this class and reimplement the <a href="qwsscreensaver.html#restore">restore</a>() and <a href="qwsscreensaver.html#save">save</a>() functions. These functions are called whenever the screensaver is activated or deactivated, respectively. Once an instance of your custom screensaver is created, you can use the <a href="qwsserver.html#setScreenSaver">QWSServer::setScreenSaver</a>() function to install it.</p>
+<p>To create a custom screensaver, derive from this class and reimplement the <a href="qwsscreensaver.html#restore">restore</a>() and <a href="qwsscreensaver.html#save">save</a>() functions. These functions are called whenever the screensaver is activated or deactivated, respectively. Once an instance of your custom screensaver is created, you can use the <a href="qwsserver.html#setScreenSaver">QWSServer::setScreenSaver</a>() function to install it.</p>
 <p>See also <a href="qwsserver.html">QWSServer</a>, <a href="qscreen.html">QScreen</a>, and <a href="qtopiacore.html">Qtopia Core</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -46,8 +46,8 @@
 <p>See also <a href="qwsscreensaver.html#restore">restore</a>() and <a href="qwsserver.html#screenSaverActivate">QWSServer::screenSaverActivate</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

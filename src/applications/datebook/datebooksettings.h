@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,24 +22,29 @@
 #ifndef DATEBOOKSETTINGS_H
 #define DATEBOOKSETTINGS_H
 
-#include "ui_datebooksettingsbase_phone.h"
+#include <QDialog>
+#include <QAppointment>
 
-class DateBookSettings : public QDialog, public Ui::DateBookSettingsBase
+class QGroupBox;
+class QSpinBox;
+class QComboBox;
+class ReminderPicker;
+
+class DateBookSettings : public QDialog
 {
     Q_OBJECT
 public:
     DateBookSettings( bool whichClock, QWidget *parent = 0,
                       Qt::WFlags = 0 );
     virtual ~DateBookSettings();
+
     void setStartTime( int newStartViewTime );
     int startTime() const;
-    void setAlarmPreset( bool bAlarm, int presetTime );
-    bool alarmPreset() const;
-    int presetTime() const;
-    void setAlarmType( int alarmType );
-    int alarmType() const;
-    void setCompressDay( bool );
-    bool compressDay() const;
+
+    void setPresetAlarm(QAppointment::AlarmFlags, int minutes);
+
+    QAppointment::AlarmFlags alarmType() const;
+    int alarmDelay() const;
 
     enum ViewType {DayView = 0, MonthView, WeekView};
     ViewType defaultView() const;
@@ -48,11 +53,18 @@ public:
 private slots:
     void slot12Hour( int );
     void slotChangeClock( bool );
-    void enablePresetDetails(int);
+
+protected:
+    QGroupBox *fraView;
+    QComboBox *cmbDefaultView;
+    QSpinBox *spinStart;
+    QGroupBox *fraAlarm;
+    ReminderPicker *picker;
 
 private:
     void init();
     bool ampm;
     int oldtime;
+    QAppointment mAppt;
 };
 #endif

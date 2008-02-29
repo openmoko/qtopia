@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qpalette.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qpalette.cpp -->
 <head>
   <title>Qt 4.3: QPalette Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -78,8 +78,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpalette.html#operator-lt-lt-75">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>s</i>, const QPalette &amp; <i>p</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpalette.html#operator-gt-gt-47">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>s</i>, QPalette &amp; <i>p</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpalette.html#operator-lt-lt-9">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>s</i>, const QPalette &amp; <i>p</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpalette.html#operator-gt-gt-6">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>s</i>, QPalette &amp; <i>p</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -286,45 +286,18 @@
 <p>Returns true (usually quickly) if this palette is equal to <i>p</i>; otherwise returns false (slowly).</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-75"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, const QPalette &amp; <i>p</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-9"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, const QPalette &amp; <i>p</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the palette, <i>p</i> to the stream <i>s</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-47"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, QPalette &amp; <i>p</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-6"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, QPalette &amp; <i>p</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a palette from the stream, <i>s</i> into the palette <i>p</i>, and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPalette-7"></a>QPalette::QPalette ( const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>active</i>, const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>disabled</i>, const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>inactive</i> )</h3>
-<p>Constructs a palette with the specified <i>active</i>, <i>disabled</i> and <i>inactive</i> color groups.</p>
-<h3 class="fn"><a name="active"></a><a href="qcolorgroup.html">QColorGroup</a> QPalette::active () const</h3>
-<p>See also <a href="qpalette-qt3.html#setActive">setActive</a>().</p>
-<h3 class="fn"><a name="copy"></a>QPalette QPalette::copy () const</h3>
-<p>Use simple assignment instead.</p>
-<h3 class="fn"><a name="disabled"></a><a href="qcolorgroup.html">QColorGroup</a> QPalette::disabled () const</h3>
-<p>See also <a href="qpalette-qt3.html#setDisabled">setDisabled</a>().</p>
-<h3 class="fn"><a name="inactive"></a><a href="qcolorgroup.html">QColorGroup</a> QPalette::inactive () const</h3>
-<p>See also <a href="qpalette-qt3.html#setInactive">setInactive</a>().</p>
-<h3 class="fn"><a name="normal"></a><a href="qcolorgroup.html">QColorGroup</a> QPalette::normal () const</h3>
-<p>Use createColorGroup(Active) instead.</p>
-<p>See also <a href="qpalette-qt3.html#setNormal">setNormal</a>().</p>
-<h3 class="fn"><a name="setActive"></a>void QPalette::setActive ( const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>colorGroup</i> )</h3>
-<p>Use setColorGroup(Active, colorGroup) instead.</p>
-<p>See also <a href="qpalette-qt3.html#active">active</a>().</p>
-<h3 class="fn"><a name="setDisabled"></a>void QPalette::setDisabled ( const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>colorGroup</i> )</h3>
-<p>Use setColorGroup(Disabled, colorGroup) instead.</p>
-<p>See also <a href="qpalette-qt3.html#disabled">disabled</a>().</p>
-<h3 class="fn"><a name="setInactive"></a>void QPalette::setInactive ( const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>colorGroup</i> )</h3>
-<p>Use setColorGroup(Inactive, colorGroup) instead.</p>
-<p>See also <a href="qpalette-qt3.html#inactive">inactive</a>().</p>
-<h3 class="fn"><a name="setNormal"></a>void QPalette::setNormal ( const <a href="qcolorgroup.html">QColorGroup</a> &amp; <i>colorGroup</i> )</h3>
-<p>Use setColorGroup(Active, colorGroup) instead.</p>
-<p>See also <a href="qpalette-qt3.html#normal">normal</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

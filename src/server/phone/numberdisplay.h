@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -38,15 +38,15 @@ public:
     NumberDisplay( QWidget *parent );
     void appendNumber( const QString &numbers, bool speedDial = true );
     void setNumber( const QString &number );
-    QString number() const;
 
     void clear();
 
     void setWildcardNumber(const QString &);
-    QString wildcardNumber() const;
 
 public slots:
     void backspace();
+    QString number() const;
+    QString wildcardNumber() const;
 
     QSize sizeHint() const;
 protected slots:

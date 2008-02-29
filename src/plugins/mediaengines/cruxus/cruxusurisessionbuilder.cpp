@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,7 @@
 #include <QMimeType>
 #include <QMediaCodecPlugin>
 #include <QMediaSessionRequest>
+#include <QMediaDecoder>
 
 #include "contentdevice.h"
 #include "cruxusengine.h"
@@ -108,20 +109,19 @@ QMediaServerSession* UriSessionBuilder::createSession(QMediaSessionRequest sessi
                 QMediaDevice*   inputDevice  = UriHandlers::createInputDevice(url.scheme(), path);
                 QMediaDevice*   outputDevice = OutputDevices::createOutputDevice();
 
-                if (inputDevice != 0 && outputDevice != 0)
-                {
+                if (inputDevice != 0 && outputDevice != 0) {
                     QMimeType           mimeType(path);
                     QMediaCodecPlugin*  plugin = it.value();
+                    QMediaDecoder*      coder = plugin->decoder(mimeType.id());
 
                     session = new SimpleSession(QMediaHandle(sessionRequest.id()),
                                                 inputDevice,
-                                                plugin->decoder(mimeType.id()),
+                                                coder,
                                                 outputDevice);
 
                     d->engine->registerSession(session);
                 }
-                else
-                {
+                else {
                     UriHandlers::destroyInputDevice(inputDevice);
                     OutputDevices::destroyOutputDevice(outputDevice);
                 }
@@ -135,7 +135,7 @@ QMediaServerSession* UriSessionBuilder::createSession(QMediaSessionRequest sessi
 void UriSessionBuilder::destroySession(QMediaServerSession* session)
 {
     d->engine->unregisterSession(session);
-
+    session->stop();
     delete session;
 }
 // }}}

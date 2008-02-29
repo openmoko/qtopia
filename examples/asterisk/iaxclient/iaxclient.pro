@@ -44,7 +44,7 @@ depends(3rdparty/libraries/gsm)
 depends(asterisk/speex)
 
 pkg.desc=IAX client library
-pkg.domain=lib
+pkg.domain=trusted
 
 # FIXME "make syncqtopia"
 dep(INCLUDEPATH+=$$PWD)

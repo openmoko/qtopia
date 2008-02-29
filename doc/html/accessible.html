@@ -101,7 +101,7 @@
 <h3>QAccessibleWidget Example</h3>
 <p>Instead of creating a custom widget and implementing an interface for it, we will show how accessibility can be implemented for one of Qt's standard widgets: <a href="qslider.html">QSlider</a>. Making this widget accessible demonstrates many of the issues that need to be faced when making a custom widget accessible.</p>
 <p>The slider is a complex control that functions as a <a href="qaccessible.html#RelationFlag-enum">Controller</a> for its accessible children. This relationship must be known by the interface (for <a href="qaccessibleinterface.html#relationTo">relationTo()</a> and <a href="qaccessibleinterface.html#navigate">navigate()</a>). This can be done using a controlling signal, which is a mechanism provided by <a href="qaccessiblewidget.html">QAccessibleWidget</a>. We do this in the constructor:</p>
-<pre> AccessibleSlider::QAccessibleSlider(QWidget *w)
+<pre> QAccessibleSlider::QAccessibleSlider(QWidget *w)
  : QAccessibleAbstractSlider(w)
  {
      Q_ASSERT(slider());
@@ -274,8 +274,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

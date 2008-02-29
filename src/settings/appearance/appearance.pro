@@ -22,4 +22,4 @@ captureService.path=/services/Settings
 INSTALLS+=captureService
 
 pkg.desc=Appearance settings for Qtopia.
-pkg.domain=window,doc_write,profiles,cardreader,doc_server,homescreensettings
+pkg.domain=trusted

@@ -11,8 +11,12 @@ export LD_LIBRARY_PATH=$QTDIR/lib
 export PATH=$QPEDIR/bin:$PATH
 export QTOPIA_PHONE_DUMMY=1
 
+if [ -e /dev/input/event3 ]; then
+	export QWS_MOUSE_PROTO="tslib:/dev/input/event3"
+else
+	export QWS_MOUSE_PROTO="tslib:/dev/input/event2"
+fi
 
-export QWS_MOUSE_PROTO="tslib:/dev/input/event2"
 export QWS_KEYBOARD="nokiakbdhandler"
 #export QWS_KEYBOARD="TTY"
 export QWS_SIZE="800x480"
@@ -27,8 +31,8 @@ case $1 in
 	echo "Starting QPE..."
 
 	cd $HOME
-	/opt/killmaemo.sh &
-	KILLPROGS="dbus-daemon bme-dbus-proxy dbus-daemon Xomap sapwood-server matchbox-window-manager clipboard-manager gconfd-2 qpe quicklauncher mediaserver mediaplayer sipagent"
+#	/opt/killmaemo.sh &
+	KILLPROGS="quicklauncher qss mediaplayer sipagent"
 
 	touch /tmp/restart-qtopia
  	while [ -e /tmp/restart-qtopia ]; do
@@ -47,7 +51,7 @@ case $1 in
 *)
 	echo "Starting QPE..."
 
-	KILLPROGS="dbus-daemon bme-dbus-proxy dbus-daemon Xomap sapwood-server matchbox-window-manager clipboard-manager gconfd-2 qpe quicklauncher mediaserver mediaplayer sipagent"
+	KILLPROGS="quicklauncher qss mediaplayer sipagent"
 
      	killall $KILLPROGS 2>/dev/null
      	qpe 2>log >log

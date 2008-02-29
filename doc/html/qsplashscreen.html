@@ -99,12 +99,12 @@
  QSplashScreen *splash = new QSplashScreen(pixmap);
  splash-&gt;show();
 
- ... <span class="comment">// Loading some items</span>
+ ... <span class="comment">//</span> Loading some items
  splash-&gt;showMessage(&quot;Loaded modules&quot;);
 
  qApp-&gt;processEvents();
 
- ... <span class="comment">// Establishing connections</span>
+ ... <span class="comment">//</span> Establishing connections
  splash-&gt;showMessage(&quot;Established connections&quot;);
 
  qApp-&gt;processEvents();</pre>
@@ -139,16 +139,10 @@
 <h3 class="fn"><a name="showMessage"></a>void QSplashScreen::showMessage ( const <a href="qstring.html">QString</a> &amp; <i>message</i>, int <i>alignment</i> = Qt::AlignLeft, const <a href="qcolor.html">QColor</a> &amp; <i>color</i> = Qt::black )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Draws the <i>message</i> text onto the splash screen with color <i>color</i> and aligns the text according to the flags in <i>alignment</i>.</p>
 <p>See also <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a> and <a href="qsplashscreen.html#clearMessage">clearMessage</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="clear"></a>void QSplashScreen::clear ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use <a href="qsplashscreen.html#clearMessage">clearMessage</a>() instead.</p>
-<h3 class="fn"><a name="message"></a>void QSplashScreen::message ( const <a href="qstring.html">QString</a> &amp; <i>message</i>, int <i>alignment</i> = Qt::AlignLeft, const <a href="qcolor.html">QColor</a> &amp; <i>color</i> = Qt::black )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use <a href="qsplashscreen.html#showMessage">showMessage</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

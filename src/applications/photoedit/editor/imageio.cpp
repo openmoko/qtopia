@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,32 +46,19 @@ ImageIO::Status ImageIO::load( const QContent& lnk, int levels )
 
     QImageReader reader( lnk.fileName() );
 
-    QImage image;
+    _format = reader.format();
 
-    bool scaled = false;
+    QImage image;
 
     if( reader.supportsOption( QImageIOHandler::Size ) )
     {
         QSize size = reader.size();
 
-        int area = size.width() * size.height();
-
-        if( area > maxArea )
+        if( size.width() * size.height() > maxArea )
         {
-            if( reader.supportsOption( QImageIOHandler::ScaledSize ) )
-            {
-                size *= sqrt( qreal( maxArea ) / qreal( area ) );
+            _status = SIZE_ERROR;
 
-                reader.setScaledSize( size );
-
-                scaled = true;
-            }
-            else
-            {
-                _status = SIZE_ERROR;
-
-                return _status;
-            }
+            return _status;
         }
     }
     else if( QFileInfo( lnk.file() ).size() > maxSize )
@@ -81,17 +68,8 @@ ImageIO::Status ImageIO::load( const QContent& lnk, int levels )
         return _status;
     }
 
-    QByteArray format = reader.format();
-
     if( reader.read( &image ) )
-    {
         _status = load( image, levels );
-
-        _format = format;
-
-        if( scaled && _status == NORMAL )
-            _status = REDUCED_SIZE;
-    }
     else
         _status = LOAD_ERROR;
 
@@ -101,8 +79,6 @@ ImageIO::Status ImageIO::load( const QContent& lnk, int levels )
 ImageIO::Status ImageIO::load( const QImage& image, int levels )
 {
 #define SUPPORTED_DEPTH QImage::Format_ARGB32
-    _format = QByteArray();
-
     // Remove previously loaded image samples
     delete[] image_samples;
 
@@ -171,7 +147,7 @@ bool ImageIO::isReadOnly() const
     return false;
 }
 
-bool ImageIO::save( const QImage& image, bool overwrite )
+QContent ImageIO::save( const QImage& image, bool overwrite )
 {
 #define DEFAULT_FORMAT "PNG"
 #define DEFAULT_MIME_TYPE "image/png"
@@ -187,7 +163,7 @@ bool ImageIO::save( const QImage& image, bool overwrite )
                 // Generate link changed signal to notify of change to image
                 _lnk.commit();
 
-                return true;
+                return _lnk;
             }
         } else {
             // Generate unique file name
@@ -204,7 +180,7 @@ bool ImageIO::save( const QImage& image, bool overwrite )
                 delete device;
                 lnk.commit();
 
-                return true;
+                return lnk;
             }
             else if( device )
             {
@@ -228,7 +204,7 @@ bool ImageIO::save( const QImage& image, bool overwrite )
                 delete device;
                 lnk.commit();
 
-                return true;
+                return lnk;
             }
             else if( device )
             {
@@ -238,7 +214,7 @@ bool ImageIO::save( const QImage& image, bool overwrite )
             }
     }
 
-    return false;
+    return QContent();
 }
 
 int ImageIO::level( double x ) const

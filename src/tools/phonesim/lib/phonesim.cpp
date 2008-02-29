@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -527,9 +527,6 @@ SimRules::SimRules( int fd, QObject *p,  const QString& filename, HardwareManipu
         machine = hmf->create(0);
 
     if (machine) {
-        machine->setWindowTitle("none");
-        if (machine->shouldShow()) machine->show();
-
         connect(machine, SIGNAL(unsolicitedCommand(QString)),
                 this, SLOT(unsolicited(QString)));
         connect(machine, SIGNAL(command(QString)),
@@ -650,6 +647,7 @@ SimRules::SimRules( int fd, QObject *p,  const QString& filename, HardwareManipu
     currentState = state( start );
     if ( !currentState )
         currentState = defState;
+    currentState->enter();
 }
 
 
@@ -896,7 +894,7 @@ void SimRules::destruct()
 #endif
 
 #ifndef PHONESIM_TARGET
-    if (machine) machine->close();
+    if (machine) machine->deleteLater();
 #endif
     deleteLater();
 }
@@ -906,7 +904,7 @@ void SimRules::setPhoneNumber(const QString &s)
     mPhoneNumber = s;
 
 #ifndef PHONESIM_TARGET
-    if (machine) machine->setWindowTitle("Phonesim - Number: " + s);
+    if (machine) machine->setPhoneNumber(s);
 #endif
 }
 
@@ -990,6 +988,48 @@ SimState *SimRules::state( const QString& name ) const
 }
 
 
+bool SimRules::simCommand( const QString& cmd )
+{
+    // If not AT+CSIM, then this is not a SIM toolkit command.
+    if ( !cmd.startsWith( "AT+CSIM=" ) )
+        return false;
+
+    // Extract the binary payload of the AT+CSIM command.
+    int comma = cmd.indexOf( QChar(',') );
+    if ( comma < 0 )
+        return false;
+    QByteArray param = QAtUtils::fromHex( cmd.mid(comma + 1) );
+    if ( param.length() < 5 || param[0] != (char)0xA0 )
+        return false;
+
+    // Determine what kind of command we are dealing with.
+    if ( param[1] == (char)0x2C && param[4] == (char)0x10 && param.size() >= 21 ) {
+        // UNBLOCK CHV command, for resetting a PIN using a PUK.
+        QString pinName = "PINVALUE";
+        QString pukName = "PUKVALUE";
+        if ( param[3] == (char)0x02 ) {
+            pinName = "PIN2VALUE";
+            pukName = "PUK2VALUE";
+        }
+        QByteArray pukValue = param.mid(5, 8);
+        QByteArray pinValue = param.mid(13, 8);
+        while ( pukValue.size() > 0 && pukValue[pukValue.size() - 1] == (char)0xFF )
+            pukValue = pukValue.left( pukValue.size() - 1 );
+        while ( pinValue.size() > 0 && pinValue[pinValue.size() - 1] == (char)0xFF )
+            pinValue = pinValue.left( pinValue.size() - 1 );
+        if ( QString::fromUtf8( pukValue ) != variable( pukName ) ) {
+            respond( "+CSIM: 4,9804\nOK" );
+        } else {
+            setVariable( pinName, QString::fromUtf8( pinValue ) );
+            respond( "+CSIM: 4,9000\nOK" );
+        }
+        return true;
+    }
+
+    // Don't know this SIM command.
+    return false;
+}
+
 void SimRules::command( const QString& cmd )
 {
 
@@ -1011,6 +1051,10 @@ void SimRules::command( const QString& cmd )
 
     // Process SIM toolkit related commands with the current SIM application.
     if ( toolkitApp && toolkitApp->execute( cmd ) )
+        return;
+
+    // Process other SIM commands sent via AT+CSIM.
+    if ( simCommand( cmd ) )
         return;
 
     if ( ! currentState->command( cmd ) ) {

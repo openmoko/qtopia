@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2594,7 +2592,7 @@ static inline uint BYTE_MUL_RGB16(uint x, uint a) {
 }
 
 static inline uint BYTE_MUL_RGB16_32(uint x, uint a) {
-    uint t = (((x & 0xf81f07e0)>>5)*a) & 0xf81f07e0;
+    uint t = (((x & 0xf81f07e0) >> 5)*a) & 0xf81f07e0;
     t |= (((x & 0x07e0f81f)*a) >> 5) & 0x07e0f81f;
     return t;
 }
@@ -2961,6 +2959,63 @@ static void blend_untransformed_argb_callback(int count, const QSpan *spans,
 }
 #endif // Q_WS_QWS
 
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+static inline quint16 interpolate_pixel_rgb16_255(quint16 x, quint8 a,
+                                                  quint16 y, quint8 b)
+{
+    quint16 t = ((((x & 0x07e0) * a) + ((y & 0x07e0) * b)) >> 5) & 0x07e0;
+    t |= ((((x & 0xf81f) * a) + ((y & 0xf81f) * b)) >> 5) & 0xf81f;
+
+    return t;
+}
+
+static inline quint32 interpolate_pixel_rgb16x2_255(quint32 x, quint8 a,
+                                                    quint32 y, quint8 b)
+{
+    uint t;
+    t = ((((x & 0xf81f07e0) >> 5) * a) + (((y & 0xf81f07e0) >> 5) * b)) & 0xf81f07e0;
+    t |= ((((x & 0x07e0f81f) * a) + ((y & 0x07e0f81f) * b)) >> 5) & 0x07e0f81f;
+    return t;
+}
+
+static inline void blend_sourceOver_rgb16_rgb16(quint16 *dest,
+                                                const quint16 *src,
+                                                int length,
+                                                const quint8 alpha,
+                                                const quint8 ialpha)
+{
+    const int dstAlign = ((long)dest) & 0x3;
+    if (dstAlign) {
+        *dest = interpolate_pixel_rgb16_255(*src, alpha,
+                                            *dest, ialpha);
+        ++dest;
+        ++src;
+        --length;
+    }
+    const int srcAlign = ((long)src) & 0x3;
+    int length32 = length >> 1;
+    if (length32 && srcAlign == 0) {
+        while (length32--) {
+            const quint32 *src32 = reinterpret_cast<const quint32*>(src);
+            quint32 *dest32 = reinterpret_cast<quint32*>(dest);
+            *dest32 = interpolate_pixel_rgb16x2_255(*src32,
+                                                    alpha,
+                                                    *dest32,
+                                                    ialpha);
+            dest += 2;
+            src += 2;
+        }
+        length &= 0x1;
+    }
+    while (length--) {
+        *dest = interpolate_pixel_rgb16_255(*src, alpha,
+                                            *dest, ialpha);
+        ++dest;
+        ++src;
+    }
+}
+#endif
+
 static void blend_untransformed_rgb16(int count, const QSpan *spans, void *userData)
 {
     QSpanData *data = reinterpret_cast<QSpanData *>(userData);
@@ -2998,6 +3053,72 @@ static void blend_untransformed_rgb16(int count, const QSpan *spans, void *userD
                     ushort *dest = ((ushort *)data->rasterBuffer->scanLine(spans->y)) + x;
                     const uint *src = (uint *)data->texture.scanLine(sy) + sx;
                     if (coverage == 255) {
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+                        const int dstAlign = ((long)dest) & 0x3;
+                        if (dstAlign) {
+                            const quint8 alpha = qAlpha(*src);
+                            if (alpha) {
+                                quint16 s = qConvertRgb32To16(*src);
+                                if (alpha < 255)
+                                    s += BYTE_MUL_RGB16(*dest, 255 - alpha);
+                                *dest = s;
+                            }
+                            ++dest;
+                            ++src;
+                            --length;
+                        }
+                        const int length32 = length >> 1;
+                        const int srcAlign = ((long)src) & 0x3;
+                        if (length32) {
+                            for (int i = 0; i < length32; ++i) {
+                                quint32 *dest32 = reinterpret_cast<quint32*>(dest);
+                                const quint8 a1 = qAlpha(src[0]);
+                                const quint8 a2 = qAlpha(src[1]);
+                                quint32 s;
+
+                                if (!a1 && !a2) {
+                                    src += 2;
+                                    dest +=2;
+                                    continue;
+                                }
+
+                                if (srcAlign) {
+                                    s = qConvertRgb32To16(src[0])
+                                        | (qConvertRgb32To16(src[1]) << 16);
+                                } else {
+                                    const quint64 *src64 =
+                                        reinterpret_cast<const quint64*>(src);
+                                    s = qConvertRgb32To16x2(*src64);
+                                }
+
+                                if (a1 == a2) {
+                                    if (a1 < 255) {
+                                        const quint8 sa = ((255 - a1)+1) >> 3;
+                                        s += BYTE_MUL_RGB16_32(*dest32, sa);
+                                    }
+                                } else {
+                                    if (a1 < 255)
+                                        s += BYTE_MUL_RGB16(dest[0], 255 - a1);
+                                    if (a2 < 255)
+                                        s += BYTE_MUL_RGB16(dest[1], 255 - a2) << 16;
+                                }
+
+                                *dest32 = s;
+                                src += 2;
+                                dest += 2;
+                            }
+                        }
+                        const int tail = length & 0x1;
+                        if (tail) {
+                            const quint8 alpha = qAlpha(*src);
+                            if (alpha) {
+                                quint16 s = qConvertRgb32To16(*src);
+                                if (alpha < 255)
+                                    s += BYTE_MUL_RGB16(*dest, 255 - alpha);
+                                *dest = s;
+                            }
+                        }
+#else
                         for (int i = 0; i < length; ++i) {
                             uint s = src[i];
                             int alpha = qAlpha(s);
@@ -3006,6 +3127,7 @@ static void blend_untransformed_rgb16(int count, const QSpan *spans, void *userD
                                 s += BYTE_MUL_RGB16(dest[i], 255 - alpha);
                             dest[i] = s;
                         }
+#endif
                     } else {
                         for (int i = 0; i < length; ++i) {
                             uint s = src[i];
@@ -3026,7 +3148,11 @@ static void blend_untransformed_rgb16(int count, const QSpan *spans, void *userD
 
     // texture is RGB16
     while (count--) {
-        int coverage = (data->texture.const_alpha * spans->coverage) >> 8;
+        const int coverage = (data->texture.const_alpha * spans->coverage) >> 8;
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+        const int alpha = (coverage + 1) >> 3;
+        const int ialpha = 0x20 - alpha;
+#endif
         int x = spans->x;
         int length = spans->len;
         int sx = xoff + x;
@@ -3042,14 +3168,23 @@ static void blend_untransformed_rgb16(int count, const QSpan *spans, void *userD
             if (length > 0) {
                 ushort *dest = ((ushort *)data->rasterBuffer->scanLine(spans->y)) + x;
                 const ushort *src = (ushort *)data->texture.scanLine(sy) + sx;
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+                if (alpha == 0x20) {
+                    memcpy(dest, src, length*sizeof(quint16));
+                } else if (alpha > 0) {
+                    blend_sourceOver_rgb16_rgb16(dest, src, length,
+                                                 alpha, ialpha);
+                }
+#else
                 if (coverage == 255) {
                     memcpy(dest, src, length*sizeof(quint16));
-                } else {
-                    int ialpha = 255 - coverage;
+                } else if (coverage > 0) {
+                    const int ialpha = 255 - coverage;
                     for (int i = 0; i < length; ++i)
                         dest[i] = qConvertRgb32To16(INTERPOLATE_PIXEL_255(qConvertRgb16To32(src[i]), coverage,
                                                                          qConvertRgb16To32(dest[i]), ialpha));
                 }
+#endif
             }
         }
         ++spans;
@@ -3348,6 +3483,36 @@ static void blend_tiled_rgb16(int count, const QSpan *spans, void *userData)
             sy += image_height;
 
         int coverage = (data->texture.const_alpha * spans->coverage) >> 8;
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+        const int alpha = (coverage + 1) >> 3;
+
+        if (alpha == 0x20) {
+            while (length) {
+                int l = qMin(image_width - sx, length);
+                if (buffer_size < l)
+                    l = buffer_size;
+                ushort *dest = ((ushort *)data->rasterBuffer->scanLine(spans->y)) + x;
+                const ushort *src = (ushort *)data->texture.scanLine(sy) + sx;
+                memcpy(dest, src, l*sizeof(quint16));
+                x += l;
+                length -= l;
+                sx = 0;
+            }
+        } else if (alpha > 0) {
+            const int ialpha = 0x20 - alpha;
+            while (length) {
+                int l = qMin(image_width - sx, length);
+                if (buffer_size < l)
+                    l = buffer_size;
+                ushort *dest = ((ushort *)data->rasterBuffer->scanLine(spans->y)) + x;
+                const ushort *src = (ushort *)data->texture.scanLine(sy) + sx;
+                blend_sourceOver_rgb16_rgb16(dest, src, l, alpha, ialpha);
+                x += l;
+                length -= l;
+                sx = 0;
+            }
+        }
+#else
         if (coverage == 255) {
             while (length) {
                 int l = qMin(image_width - sx, length);
@@ -3376,6 +3541,7 @@ static void blend_tiled_rgb16(int count, const QSpan *spans, void *userData)
                 sx = 0;
             }
         }
+#endif
         ++spans;
     }
 }
@@ -5792,3 +5958,67 @@ QT_IMPL_MEMROTATE(quint32, quint8)
 QT_IMPL_MEMROTATE(quint16, quint8)
 QT_IMPL_MEMROTATE(quint8, quint8)
 
+#ifdef QT_QWS_DEPTH_GENERIC
+QT_IMPL_MEMROTATE(quint32, qrgb_generic16)
+QT_IMPL_MEMROTATE(quint16, qrgb_generic16)
+#endif
+
+#ifdef QT_QWS_DEPTH_GENERIC
+
+int qrgb::bpp = 0;
+int qrgb::len_red = 0;
+int qrgb::len_green = 0;
+int qrgb::len_blue = 0;
+int qrgb::len_alpha = 0;
+int qrgb::off_red = 0;
+int qrgb::off_green = 0;
+int qrgb::off_blue = 0;
+int qrgb::off_alpha = 0;
+
+template <typename SRC>
+static inline void qt_rectconvert_rgb(qrgb *dest, const SRC *src,
+                                      int x, int y, int width, int height,
+                                      int dstStride, int srcStride)
+{
+    quint8 *dest8 = reinterpret_cast<quint8*>(dest)
+                    + y * dstStride + x * qrgb::bpp;
+
+    srcStride = srcStride / sizeof(SRC) - width;
+    dstStride -= (width * qrgb::bpp);
+
+    for (int j = 0;  j < height; ++j) {
+        for (int i = 0; i < width; ++i) {
+            const quint32 v = qt_convertToRgb<SRC>(*src++);
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+            for (int j = qrgb::bpp - 1; j >= 0; --j)
+                *dest8++ = (v >> (8 * j)) & 0xff;
+#else
+            for (int j = 0; j < qrgb::bpp; ++j)
+                *dest8++ = (v >> (8 * j)) & 0xff;
+#endif
+        }
+
+        dest8 += dstStride;
+        src += srcStride;
+    }
+}
+
+template <>
+void qt_rectconvert(qrgb *dest, const quint32 *src,
+                    int x, int y, int width, int height,
+                    int dstStride, int srcStride)
+{
+    qt_rectconvert_rgb<quint32>(dest, src, x, y, width, height,
+                                dstStride, srcStride);
+}
+
+template <>
+void qt_rectconvert(qrgb *dest, const quint16 *src,
+                    int x, int y, int width, int height,
+                    int dstStride, int srcStride)
+{
+    qt_rectconvert_rgb<quint16>(dest, src, x, y, width, height,
+                                dstStride, srcStride);
+}
+
+#endif // QT_QWS_DEPTH_GENERIC

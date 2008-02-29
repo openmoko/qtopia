@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -300,7 +300,7 @@ bool QIMPenSettingsWidget::selectSet( QPoint p )
 /*!
   Hopefully returns a sensible size.
 */
-QSize QIMPenSettingsWidget::sizeHint()
+QSize QIMPenSettingsWidget::sizeHint() const
 {
     return QSize( TITLE_WIDTH * charSets.count(), 75 );
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1081,7 +1079,7 @@ bool Moc::until(Token target) {
         case LBRACK: ++brackCount; break;
         case LPAREN: ++parenCount; break;
         case LANGLE: ++angleCount; break;
-        default: ;
+        default: break;
         }
     }
     while (index < symbols.size()) {
@@ -1095,6 +1093,7 @@ bool Moc::until(Token target) {
         case RPAREN: --parenCount; break;
         case LANGLE: ++angleCount; break;
         case RANGLE: --angleCount; break;
+        case GTGT: angleCount -= 2; t = RANGLE; break;
         default: break;
         }
         if (t == target

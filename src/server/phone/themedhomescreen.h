@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,7 +39,6 @@ public:
     ~ThemedHomeScreen();
 
     void updateBackground();
-    void applyHomeScreenImage();
     void updateHomeScreenInfo();
     void updateInformation();
     void activatePinbox(bool enable);
@@ -47,6 +46,9 @@ public:
 
 protected:
 //    bool eventFilter(QObject *, QEvent *);
+
+public Q_SLOTS:
+    void applyHomeScreenImage();
 
 private Q_SLOTS:
     void themeLoaded();

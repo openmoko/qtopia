@@ -31,13 +31,13 @@ void CharList::setMicroFocus( int x, int y )
 // (although this function can be expensive)
 
     QPoint p;
-    if (y < cellHeight+5)
-        p = QPoint(x, y + cellHeight + fm->height() + 5);
+    if (y < QApplication::desktop()->availableGeometry().top() + cellHeight+ 5)
+        p = QPoint(x, y + fm->height() + 5);
     else
-        p = QPoint(x, y+2);
+        p = QPoint(x, y - ( cellHeight + 2 ));
 
     int dw = QApplication::desktop()->availableGeometry().width();
-    if (p.x() + width() > dw)
+    if ( p.x() + width() > dw)
 	p.setX(dw-width());
     else if (p.x() < 4)         p.setX(4);
     

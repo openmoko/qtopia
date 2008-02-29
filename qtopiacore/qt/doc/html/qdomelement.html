@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/xml/qdom.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/xml/qdom.cpp -->
 <head>
   <title>Qt 4.3: QDomElement Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -68,8 +68,8 @@
 <p>Elements have a <a href="qdomelement.html#tagName">tagName</a>() and zero or more attributes associated with them. The tag name can be changed with <a href="qdomelement.html#setTagName">setTagName</a>().</p>
 <p>Element attributes are represented by <a href="qdomattr.html">QDomAttr</a> objects that can be queried using the <a href="qdomelement.html#attributex">attribute</a>() and <a href="qdomelement.html#attributeNode">attributeNode</a>() functions. You can set attributes with the <a href="qdomelement.html#setAttribute">setAttribute</a>() and <a href="qdomelement.html#setAttributeNode">setAttributeNode</a>() functions. Attributes can be removed with <a href="qdomelement.html#removeAttribute">removeAttribute</a>(). There are namespace-aware equivalents to these functions, i.e&#x2e; <a href="qdomelement.html#setAttributeNS">setAttributeNS</a>(), <a href="qdomelement.html#setAttributeNodeNS">setAttributeNodeNS</a>() and <a href="qdomelement.html#removeAttributeNS">removeAttributeNS</a>().</p>
 <p>If you want to access the text of a node use <a href="qdomelement.html#text">text</a>(), e.g&#x2e;</p>
-<pre> QDomElement e = <span class="comment">//...</span>
-<span class="comment"> //...</span>
+<pre> QDomElement e = <span class="comment">//</span>...
+<span class="comment"> //</span>...
  QString s = e.text()</pre>
 <p>The <a href="qdomelement.html#text">text</a>() function operates recursively to find the text (since not all elements contain text). If you want to find all the text in all of a node's children, iterate over the children looking for <a href="qdomtext.html">QDomText</a> nodes, e.g&#x2e;</p>
 <pre> QString text;
@@ -83,11 +83,11 @@
 <p>Note that we attempt to convert each node to a text node and use <a href="qdomelement.html#text">text</a>() rather than using <a href="qdomnode.html#firstChild">firstChild</a>().<a href="qdomnode.html#toText">toText</a>().data() or n.<a href="qdomnode.html#toText">toText</a>().data() directly on the node, because the node may not be a text element.</p>
 <p>You can get a list of all the decendents of an element which have a specified tag name with <a href="qdomelement.html#elementsByTagName">elementsByTagName</a>() or <a href="qdomelement.html#elementsByTagNameNS">elementsByTagNameNS</a>().</p>
 <p>To browse the elements of a dom document use <a href="qdomnode.html#firstChildElement">firstChildElement</a>(), <a href="qdomnode.html#lastChildElement">lastChildElement</a>(), <a href="qdomnode.html#nextSiblingElement">nextSiblingElement</a>() and <a href="qdomnode.html#previousSiblingElement">previousSiblingElement</a>(). For example, to iterate over all child elements called &quot;entry&quot; in a root element called &quot;database&quot;, you can use:</p>
-<pre> QDomDocument doc = <span class="comment">// ...</span>
+<pre> QDomDocument doc = <span class="comment">//</span> ...
  QDomElement root = doc.firstChildElement(&quot;database&quot;);
  QDomElement elt = root.firstChildElement(&quot;entry&quot;);
  for (; !elt.isNull(); elt = elt.nextSiblingElelement(&quot;entry&quot;)) {
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> ...
  }</pre>
 <p>For further information about the Document Object Model see <a href="http://www.w3.org/TR/REC-DOM-Level-1/">Level 1</a> and <a href="http://www.w3.org/TR/DOM-Level-2-Core/">Level 2 Core</a>. For a more general introduction of the DOM implementation see the <a href="qdomdocument.html">QDomDocument</a> documentation.</p>
 <hr />
@@ -192,8 +192,8 @@
 <p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

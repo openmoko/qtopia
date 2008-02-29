@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -119,6 +119,14 @@ void MMSSlideImage::showEvent(QShowEvent* event)
 {
     QLabel::showEvent(event);
 
+    if (m_content.isValid() && m_image.isNull())
+    {
+        // We have deferred loading this image
+        QPixmap pixmap(loadImage());
+        m_contentSize = pixmap.size();
+        setImage( pixmap );
+    }
+
     if (!m_image.isNull())
     {
         m_image = scale( m_image );
@@ -187,37 +195,42 @@ QPixmap MMSSlideImage::scale( const QPixmap &src ) const
     return src;
 }
 
+QPixmap MMSSlideImage::loadImage() const
+{
+    // Load the image to fit our display
+    QImageReader imageReader( m_content.open() );
+
+    if (imageReader.supportsOption(QImageIOHandler::Size)) {
+        QSize fileSize(imageReader.size());
+
+        QSize bounds(isVisible() ? size() : QApplication::desktop()->availableGeometry().size());
+
+        // See if the image needs to be scaled during load
+        if ((fileSize.width() > bounds.width()) || (fileSize.height() > bounds.height()))
+        {
+            // And the loaded size should maintain the image aspect ratio
+            QSize imageSize(fileSize);
+            imageSize.scale(bounds, Qt::KeepAspectRatio);
+            imageReader.setScaledSize(imageSize);
+        }
+    }
+
+    return QPixmap::fromImage( imageReader.read() );
+}
+
 void MMSSlideImage::setImage( const QContent& document )
 {
     m_content = document;
 
     QPixmap pixmap;
-    if (m_content.isValid())
+    if (!m_content.isValid())
     {
-        // Load the image to fit our display
-        QImageReader imageReader( m_content.open() );
-
-        if (imageReader.supportsOption(QImageIOHandler::Size)) {
-            m_contentSize = imageReader.size();
-
-            QSize bounds(isVisible() ? size() : QApplication::desktop()->availableGeometry().size());
-
-            // See if the image needs to be scaled during load
-            if ((m_contentSize.width() > bounds.width()) || (m_contentSize.height() > bounds.height()))
-            {
-                // And the loaded size should maintain the image aspect ratio
-                QSize imageSize(m_contentSize);
-                imageSize.scale(bounds, Qt::KeepAspectRatio);
-                imageReader.setScaledSize(imageSize);
-            }
-        }
-
-        pixmap = QPixmap::fromImage( imageReader.read() );
-
-        if (!imageReader.supportsOption(QImageIOHandler::Size))
-            m_contentSize = pixmap.size();
-    } else {
         m_contentSize = QSize();
+    }
+    else if (isVisible())
+    {
+        pixmap = loadImage();
+        m_contentSize = pixmap.size();
     }
 
     setImage( pixmap );
@@ -227,7 +240,7 @@ void MMSSlideImage::setImage( const QPixmap& image )
 {
     m_image = (isVisible() ? scale( image ) : image);
 
-    if( m_image.isNull() ) {
+    if( m_image.isNull() && !m_content.isValid() ) {
         setText( tr("Slide image") );
     } else if (isVisible()) {
         setPixmap( m_image );
@@ -248,7 +261,7 @@ QPixmap MMSSlideImage::image() const
 
 bool MMSSlideImage::isEmpty() const
 {
-    return m_image.isNull();
+    return (m_image.isNull() && !m_content.isValid());
 }
 
 
@@ -276,7 +289,7 @@ bool MMSSlideText::event( QEvent *e )
     return a;
 }
 
-void MMSSlideText::mousePressEvent( QMouseEvent * e )
+void MMSSlideText::mousePressEvent( QMouseEvent * )
 {
     if( !m_hasFocus )
     {
@@ -459,7 +472,7 @@ bool MMSSlideAudio::isEmpty() const
 //===========================================================================
 
 MMSSlide::MMSSlide(QWidget *parent)
-    : QWidget(parent), m_firstShow( true ), m_duration( 5000 )
+    : QWidget(parent), m_duration( 5000 )
 {
     setFocusPolicy( Qt::NoFocus );
     setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
@@ -510,16 +523,6 @@ MMSSlideText *MMSSlide::textContent() const
 MMSSlideAudio *MMSSlide::audioContent() const
 {
     return m_audioContent;
-}
-
-void MMSSlide::showEvent( QShowEvent *event )
-{
-    QWidget::showEvent( event );
-    if( m_firstShow )
-    {
-        m_imageContent->setFocus();
-        m_firstShow = false;
-    }
 }
 
 //==============================================================================
@@ -739,7 +742,6 @@ void MMSComposer::setCurrentSlide( int a_slide )
         m_internalUpdate = false;
         m_curSlide = a_slide;
         m_slideStack->setCurrentWidget( slide( m_curSlide ) );
-        slide( m_curSlide )->m_imageContent->setFocus();
         emit currentChanged( m_curSlide );
     }
 }
@@ -878,45 +880,76 @@ MMSSmil MMSComposer::parseSmil( const QString &smil )
     return s;
 }
 
+// This logic is replicated in the SMIL viewer...
+static QString smilStartMarker(const QMailMessage& mail)
+{
+    QMailMessageContentType type(mail.headerField("X-qtmail-internal-original-content-type"));
+    if (type.isNull()) {
+        type = QMailMessageContentType(mail.headerField("Content-Type"));
+    }
+    if (!type.isNull()) {
+        QString startElement = type.parameter("start");
+        if (!startElement.isEmpty())
+            return startElement;
+    }
+
+    return QString("<presentation-part>");
+}
+
+static uint smilStartIndex(const QMailMessage& mail)
+{
+    QString startMarker(smilStartMarker(mail));
+
+    for (uint i = 0; i < mail.partCount(); ++i)
+        if (mail.partAt(i).contentID() == startMarker)
+            return i;
+
+    return 0;
+}
+
+static bool smilPartMatch(const QString identifier, const QMailMessagePart& part)
+{
+    // See if the identifer is a Content-ID marker
+    QString id(identifier);
+    if (id.toLower().startsWith("cid:"))
+        id.remove(0, 4);
+
+    return ((part.contentID() == id) || (part.displayName() == id) || (part.contentLocation() == id));
+}
+
 void MMSComposer::setMessage( const QMailMessage &mail )
 {
     clear();
     MMSSlide *curSlide = slide( currentSlide() );
 
-    QString doc;
-    int smilPartIndex = 0;
-    for( uint i = 0 ; i < mail.partCount() ; ++i )
+    if (mail.partCount() > 1) 
     {
-        if( mail.partAt( i ).contentID().toLower().contains("presentation-part") )
-        {
-            doc = mail.partAt( i ).body().data();
-            smilPartIndex = i;
-            break;
-        }
-    }
-    if( !doc.isNull() )
-    {
-        // parse smil
+        // This message must contain SMIL
+        uint smilPartIndex = smilStartIndex(mail);
+        MMSSmil smil = parseSmil( mail.partAt( smilPartIndex ).body().data() );
+
+        // For each SMIL slide...
         int numSlides = 0;
-        MMSSmil smil = parseSmil( doc );
         foreach( const MMSSmilPart& smilPart, smil.parts )
         {
             if( numSlides )
                 addSlide();
 
             MMSSlide *curSlide = slide( slideCount() -1 );
-            for( int i = 0 ; i < static_cast<int>(mail.partCount()) ; ++i ) {
+
+            // ...for each part in the message...
+            for( uint i = 0 ; i < mail.partCount(); ++i ) {
                 if(i == smilPartIndex)
                     continue;
 
-                QMailMessagePart part = mail.partAt( i );
-                QString partName = part.displayName();
+                const QMailMessagePart& part = mail.partAt( i );
                 QString fileName(part.attachmentPath());
 
-                if( partName == smilPart.text ) {
+                // ...see if this part is used in this slide
+                if (smilPartMatch(smilPart.text, part)) {
                     QString t = part.body().data();
                     curSlide->textContent()->setText( t );
-                } else if( partName == smilPart.image ) {
+                } else if (smilPartMatch(smilPart.image, part)) {
                     if (!fileName.isEmpty()) {
                         curSlide->imageContent()->setImage( QContent(fileName) );
                     } else {
@@ -924,12 +957,12 @@ void MMSComposer::setMessage( const QMailMessage &mail )
                         pix.loadFromData(part.body().data(QMailMessageBody::Decoded));
                         curSlide->imageContent()->setImage( pix );
                     }
-                } else if( partName == smilPart.audio ) {
+                } else if (smilPartMatch(smilPart.audio, part)) {
                     if (!fileName.isEmpty()) {
                         curSlide->audioContent()->setAudio( QContent(fileName) );
                     } else {
                         QByteArray data = part.body().data(QMailMessageBody::Decoded);
-                        curSlide->audioContent()->setAudio( data, partName );
+                        curSlide->audioContent()->setAudio( data, part.displayName() );
                     }
                 }
             }
@@ -1166,7 +1199,9 @@ QMailMessage MMSComposerInterface::message() const
                 }
 
                 const QByteArray type("text/plain; charset=UTF-8");
-                partDetails.append(qMakePair(QString(), qMakePair(qMakePair(type, textFileName.toLatin1()), buffer)));
+                PartDetails details(qMakePair(QString(), qMakePair(qMakePair(type, textFileName.toLatin1()), buffer)));
+                if (!partDetails.contains(details))
+                    partDetails.append(details);
             }
             if( !imageContent->isEmpty() )
             {
@@ -1179,7 +1214,10 @@ QMailMessage MMSComposerInterface::message() const
                 QString imgFileName;
                 if (imageContent->document().isValid()) {
                     imgFileName = imageContent->document().fileName();
-                    partDetails.append(qMakePair(imgFileName, nullPart));
+
+                    PartDetails details(qMakePair(imgFileName, nullPart));
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
 
                     QFileInfo fi(imgFileName);
                     imgFileName = fi.fileName();
@@ -1191,7 +1229,9 @@ QMailMessage MMSComposerInterface::message() const
                     imageContent->image().save(&buffer, "JPEG");
 
                     const QByteArray type("image/jpeg");
-                    partDetails.append(qMakePair(QString(), qMakePair(qMakePair(type, imgFileName.toLatin1()), buffer.data())));
+                    PartDetails details(qMakePair(QString(), qMakePair(qMakePair(type, imgFileName.toLatin1()), buffer.data())));
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
                 }
 
                 part += imageTemplate.arg( Qt::escape(imgFileName) ).arg( "image" );
@@ -1200,7 +1240,10 @@ QMailMessage MMSComposerInterface::message() const
                 QString audioFileName;
                 if (audioContent->document().isValid()) {
                     audioFileName = audioContent->document().fileName();
-                    partDetails.append(qMakePair(audioFileName, nullPart));
+
+                    PartDetails details(qMakePair(audioFileName, nullPart));
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
 
                     QFileInfo fi(audioFileName);
                     audioFileName = fi.fileName();
@@ -1209,7 +1252,9 @@ QMailMessage MMSComposerInterface::message() const
                     QString ext = mimeType.extension();
                     audioFileName = "mmsaudio" + QString::number( s ) + '.' + ext;
 
-                    partDetails.append(qMakePair(QString(), qMakePair(qMakePair(mimeType.id().toLatin1(), audioFileName.toLatin1()), audioContent->audio())));
+                    PartDetails details(qMakePair(QString(), qMakePair(qMakePair(mimeType.id().toLatin1(), audioFileName.toLatin1()), audioContent->audio())));
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
                 }
 
                 part += audioTemplate.arg( Qt::escape(audioFileName) );
@@ -1277,6 +1322,9 @@ QMailMessage MMSComposerInterface::message() const
 
     // add binary data as mail attachments
     foreach (const PartDetails& details, partDetails) {
+        QMailMessagePart part;
+        QByteArray identifier;
+
         if (!details.first.isNull()) {
             // Ensure that the nominated file is accessible
             QFileInfo fi( details.first );
@@ -1291,38 +1339,50 @@ QMailMessage MMSComposerInterface::message() const
             }
 
             // Add this part from the file
-            QByteArray fileName(fi.fileName().toLatin1());
+            identifier = fi.fileName().toLatin1();
 
-            QMailMessageContentDisposition disposition( QMailMessageContentDisposition::Attachment );
-            disposition.setFilename( fileName );
+            QMailMessageContentDisposition disposition(QMailMessageContentDisposition::Attachment);
+            disposition.setFilename(identifier);
 
-            QMailMessageContentType type( QMimeType( path ).id().toLatin1() );
-            type.setName( fileName );
+            QMailMessageContentType type( QMimeType(path).id().toLatin1() );
+            type.setName(identifier);
 
-            QMailMessagePart part(QMailMessagePart::fromFile(path, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
-            mmsMail.appendPart( part );
+            part = QMailMessagePart(QMailMessagePart::fromFile(path, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
         } else {
             // Add the part from the data
             const InlinePartDetails& inlineDetails(details.second);
+            identifier = inlineDetails.first.second;
 
             QMailMessageContentDisposition disposition(QMailMessageContentDisposition::Attachment);
-            disposition.setFilename(inlineDetails.first.second);
+            disposition.setFilename(identifier);
 
             QMailMessageContentType type(inlineDetails.first.first);
-            type.setName(inlineDetails.first.second);
+            type.setName(identifier);
 
-            QMailMessagePart part(QMailMessagePart::fromData(inlineDetails.second, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
-            mmsMail.appendPart( part );
+            part = QMailMessagePart(QMailMessagePart::fromData(inlineDetails.second, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
         }
+
+        // Set the Content-ID and Content-Location fields to prevent them being synthesized by MMSC
+        part.setContentID(identifier);
+        part.setContentLocation(identifier);
+
+        mmsMail.appendPart(part);
     }
 
     return mmsMail;
 }
 
-void MMSComposerInterface::attach( const QContent &lnk )
+void MMSComposerInterface::attach( const QContent &lnk, QMailMessage::AttachmentsAction action )
 {
+    if (action != QMailMessage::LinkToAttachments) {
+        // TODO: handle temporary files
+        qWarning() << "MMS: Unable to handle attachment of transient document!";
+        return;
+    }
+
     if (!m_composer->slideCount())
         m_composer->addSlide();
+
     MMSSlide *curSlide = m_composer->slide( m_composer->slideCount()-1 );
 
     if (lnk.type().startsWith("image/")) {
@@ -1353,7 +1413,7 @@ void MMSComposerInterface::attach( const QContent &lnk )
         }
         curSlide->audioContent()->setAudio(lnk);
     } else {
-        // XXX deal with other attachments
+        // TODO: deal with other attachments
     }
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qt Toolkit.
 **

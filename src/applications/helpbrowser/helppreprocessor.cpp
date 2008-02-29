@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,15 +26,18 @@
 #include <QTextStream>
 #include <QStyle>
 
+#include <qdesktopwidget.h>
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
 
 #include <QDebug>
 
 /*
-   Supports very basic SSI
-    - line based - don't put set/include/conditions on the same line
-    - supports limited recursion (parameterize) to avoid DoS
+    Supports very basic SSI
+     - line based - don't put set/include/conditions on the same line
+     - supports limited recursion (parameterize) to avoid DoS
+    When changing this function, please ensure that doc/src/tools/help-preprocessor.qdoc
+    is updated to accurately reflect the changes.
 */
 
 HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
@@ -47,11 +50,17 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
 #if defined(QTOPIA_CELL)
     replace["CELL"]="1";
 #endif
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     replace["TELEPHONY"]="1";
 #endif
 #if defined(QTOPIA_INFRARED)
     replace["INFRARED"]="1";
+#endif
+#if defined(QTOPIA_BLUETOOTH)
+    replace["BLUETOOTH"]="1";
+#endif
+#if !defined(QT_NO_CLIPBOARD)
+    replace["CLIPBOARD"]="1";
 #endif
 
     if (QApplication::style()->inherits("QThumbStyle"))
@@ -62,6 +71,8 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
         replace["KEYPAD"]="1";
     if ( Qtopia::hasKey( Qt::Key_Flip ) )
         replace["FLIP"]="1";
+    if (QApplication::desktop()->numScreens() > 1)
+        replace["MULTISCREEN"]="1";
 }
 
 QString HelpPreProcessor::text()
@@ -103,9 +114,11 @@ QString HelpPreProcessor::parse(const QString& filename)
     QRegExp tagInclude( "<!--#include\\s+file=\"([^\"]*)\"\\s*-->" );
 
     bool skip = false;
+    int lnum=0;
 
     do {
         line = ts.readLine();
+        lnum++;
         if ( tagAny.indexIn(line) != -1 ) {
             int offset;
             int matchLen;
@@ -130,11 +143,14 @@ QString HelpPreProcessor::parse(const QString& filename)
 
             offset = 0;
             matchLen = 0;
+            bool err=false;
             while ( (offset = tagEndif.indexIn( line, offset + matchLen )) != -1 ) {
                 matchLen = tagEndif.matchedLength();
-                tests.pop();
-                inverts.pop();
+                if (!tests.isEmpty()) tests.pop(); else err=true;
+                if (!inverts.isEmpty()) inverts.pop(); else err=true;
             }
+            if (err)
+                qWarning("%s:%d:Unexpected #endif",filename.toLatin1().data(),lnum);
 
             QStack<QStringList>::ConstIterator it;
             QStack<bool>::ConstIterator bit;

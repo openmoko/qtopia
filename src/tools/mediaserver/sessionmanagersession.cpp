@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -75,13 +75,13 @@ QMediaServerSession* SessionManagerSession::wrappedSession() const
 void SessionManagerSession::activate()
 {
     if (d->selectState == QtopiaMedia::Playing)
-        d->wrapped->start();
+        d->wrapped->resume();
 }
 
 void SessionManagerSession::deactivate()
 {
     if (d->selectState == QtopiaMedia::Playing)
-        d->wrapped->pause();
+        d->wrapped->suspend();
 }
 
 void SessionManagerSession::start()

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -72,7 +72,7 @@
 
 #include "qmailaddress.h"
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include "../../settings/ringprofile/ringtoneeditor.h"
 #endif
 
@@ -124,8 +124,8 @@ bool PhoneFieldType::operator!=( const PhoneFieldType &other ) const
 
 //-----------------------------------------------------------------------
 
-PhoneFieldManager::PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc )
-    : QObject( parent ), parLayout(layout), rowCount(rc), firstRow(rc)
+PhoneFieldManager::PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc, AbFullEditor *editor )
+    : QObject( parent ), parLayout(layout), rowCount(rc), firstRow(rc), mEditor(editor)
 {
     setObjectName("phoneFieldManager");
     mEmitFieldChanged = true;
@@ -202,6 +202,82 @@ void PhoneFieldManager::add( const QString &number, const PhoneFieldType &type )
     }
 }
 
+bool PhoneFieldManager::removeNumber(PhoneFieldType type)
+{
+    QMutableListIterator<PhoneField *> it(phoneFields);
+    QWidget *focusee = 0;
+
+    while(it.hasNext())
+    {
+        PhoneField *f = it.next();
+
+        if (f->type() == type) {
+
+            emitFieldChanged(QString(), f->type());
+
+            f->remove();
+            it.remove();
+            delete f;
+
+            if (it.hasNext()) {
+                PhoneField *next = it.next();
+                focusee = next->numberLE;
+            }
+
+            if (focusee)
+                focusee->setFocus();
+            else {
+                // Presumably no fields left
+                checkForAdd();
+                phoneFields.first()->numberLE->setFocus();
+            }
+            return true;
+        } else
+            focusee = f->numberLE;
+    }
+
+    return false;
+}
+
+bool PhoneFieldManager::removeNumber(QWidget *w)
+{
+    // The supplied widget is the line edit in a phone field
+    QMutableListIterator<PhoneField *> it(phoneFields);
+    QWidget *focusee = 0;
+
+    while(it.hasNext())
+    {
+        PhoneField *f = it.next();
+
+        if (f->numberLE == w) {
+
+            emitFieldChanged(QString(), f->type());
+
+            f->remove();
+            it.remove();
+            delete f;
+
+            if (it.hasNext()) {
+                PhoneField *next = it.next();
+                focusee = next->numberLE;
+            }
+
+            if (focusee)
+                focusee->setFocus();
+            else {
+                // Presumably no fields left
+                checkForAdd();
+                phoneFields.first()->numberLE->setFocus();
+            }
+
+            return true;
+        } else
+            focusee = f->numberLE;
+    }
+
+    return false;
+}
+
 void PhoneFieldManager::addEmpty()
 {
     if( isFull() )
@@ -217,8 +293,9 @@ void PhoneFieldManager::addEmpty()
         availTypes.removeAll( f->type() );
     }
 
-    PhoneField *nf = new PhoneField( parLayout, rowCount, (QWidget *)parent() );
+    PhoneField *nf = new PhoneField( parLayout, rowCount, (QWidget *)parent());
     phoneFields.append( nf );
+    mEditor->addRemoveNumberMenu(nf->numberLE);
     nf->setTypes( mTypes );
     nf->setType( availTypes.first() );
 
@@ -409,8 +486,7 @@ PhoneField::PhoneField( QGridLayout *l, int &rowCount, QWidget *parent )
     QMenu *contextMenu = QSoftMenuBar::menuFor( numberLE, QSoftMenuBar::AnyFocus );
     contextMenu->addAction( tr("Type"), typeIS, SIGNAL(clicked()));
 
-    connect( numberLE, SIGNAL(textChanged(QString)),
-        this, SIGNAL(numberChanged(QString)) );
+    connect( numberLE, SIGNAL(textChanged(QString)), this, SIGNAL(numberChanged(QString)) );
     QtopiaApplication::setInputMethodHint(numberLE,QtopiaApplication::PhoneNumber);
 
     l->addWidget( typeIS, rowCount, 0, Qt::AlignHCenter );
@@ -436,8 +512,12 @@ PhoneField::~PhoneField()
 
 void PhoneField::remove()
 {
-    delete typeIS;
-    delete numberLE;
+    disconnect( typeIS, SIGNAL(activated(int)), this, SLOT(userChangedType(int)) );
+    disconnect( numberLE, SIGNAL(textChanged(QString)), this, SIGNAL(numberChanged(QString)) );
+    typeIS->hide();
+    numberLE->hide();
+    typeIS->deleteLater();
+    numberLE->deleteLater();
 }
 
 void PhoneField::userChangedType( int /* idx */)
@@ -594,9 +674,6 @@ void AbDetailEditor::setFields( const QMap<QContactModel::Field, QString> &f )
     for ( QList<QContactModel::Field>::ConstIterator fieldKey = g.begin() ;
           fieldKey != g.end() ; ++fieldKey ) {
 
-        QLabel *label = new QLabel( dn[ *fieldKey ], container );
-        label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-
         // do a switch on the field type; most are line edits,
         // the exceptions get a case, the default is a linedit
         editor = 0;
@@ -652,10 +729,7 @@ void AbDetailEditor::setFields( const QMap<QContactModel::Field, QString> &f )
                 //FIXME : ugly temporary solution
                 QLineEdit *lineedit = new QLineEdit( container );
 
-                if ( *fieldKey == QContactModel::FirstNamePronunciation
-                  || *fieldKey == QContactModel::LastNamePronunciation )
-                    adjustPronWidgets(label,lineedit);
-                else if( *fieldKey == QContactModel::BusinessZip ||
+                if( *fieldKey == QContactModel::BusinessZip ||
                          *fieldKey == QContactModel::HomeZip )
                     QtopiaApplication::setInputMethodHint( lineedit, QtopiaApplication::Number );
                 lineedit->setText( myFields[ *fieldKey ] );
@@ -667,7 +741,12 @@ void AbDetailEditor::setFields( const QMap<QContactModel::Field, QString> &f )
 
         if ( editor )
         {
-            gl->addRow(label, editor);
+            gl->addRow( dn[ *fieldKey], editor);
+            if ( *fieldKey == QContactModel::FirstNamePronunciation
+                    || *fieldKey == QContactModel::LastNamePronunciation ) {
+                QLabel* label = qobject_cast<QLabel*>(gl->labelForField(editor));
+                adjustPronWidgets(label, qobject_cast<QLineEdit*>(editor));
+            }
 
             if ( lastEditor )
             {
@@ -677,11 +756,6 @@ void AbDetailEditor::setFields( const QMap<QContactModel::Field, QString> &f )
 
             // increment the field number for this tab
             fieldInTabNum++;
-        }
-        else
-        {
-            delete label;
-            label = 0;
         }
     }
     mView->setWidget(container);
@@ -1032,6 +1106,8 @@ void AbFullEditor::init()
 
 void AbFullEditor::initMainUI()
 {
+    actionRemoveNumber = new QAction(QIcon(":icon/trash"), tr("Remove number"), this);
+    connect(actionRemoveNumber, SIGNAL(triggered()), this, SLOT(removeNumber()));
     setupTabs();
 }
 
@@ -1079,6 +1155,14 @@ void AbFullEditor::prepareTab(int tab)
     default:
         break;
     }
+}
+
+void AbFullEditor::addRemoveNumberMenu(QWidget *w)
+{
+    Q_ASSERT(w);
+    QMenu* contextMenu = QSoftMenuBar::menuFor(w, QSoftMenuBar::AnyFocus );
+    contextMenu->addAction(actionRemoveNumber);
+    connect(contextMenu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenu()));
 }
 
 #include "abeditor.moc"
@@ -1177,20 +1261,18 @@ void AbFullEditor::setupTabCommon()
     //   Specific widgets : Depend on whether or not this is a business contact.
     //
 
-    specCompanyLA = new QLabel(tr("Company"));
-    specCompanyLA->setAlignment(Qt::AlignRight);
     specCompanyLE = new QLineEdit();
     connect(specCompanyLE, SIGNAL(textChanged(QString)),
         this, SLOT(specFieldsFilter(QString)));
-    formLayout->addRow(specCompanyLA, specCompanyLE);
+    formLayout->addRow(tr("Company"), specCompanyLE);
+    specCompanyLA = qobject_cast<QLabel*>(formLayout->labelForField(specCompanyLE));
     QtopiaApplication::setInputMethodHint(specCompanyLE, QtopiaApplication::ProperNouns);
 
-    specJobTitleLA = new QLabel(tr("Title"));
-    specJobTitleLA->setAlignment(Qt::AlignRight);
     specJobTitleLE = new QLineEdit();
     connect(specJobTitleLE, SIGNAL(textChanged(QString)),
         this, SLOT(specFieldsFilter(QString)));
-    formLayout->addRow(specJobTitleLA, specJobTitleLE);
+    formLayout->addRow(tr("Title"), specJobTitleLE);
+    specJobTitleLA = qobject_cast<QLabel*>(formLayout->labelForField(specJobTitleLE));
 
     //
     //    Phone fields
@@ -1198,9 +1280,13 @@ void AbFullEditor::setupTabCommon()
 
     QGridLayout *gridLayout = new QGridLayout();
     formLayout->addRow(gridLayout);
-    phoneMan = new PhoneFieldManager(wContactTab, gridLayout, rowCount);
+    phoneMan = new PhoneFieldManager(wContactTab, gridLayout, rowCount, this);
     phoneMan->setTypes(phoneTypes);
     phoneMan->addEmpty();
+
+    // We try to make sure the fields have at least some useable width,
+    // since QLineEdit::minimumWidth isn't really that useable.
+    emailLE->setMinimumWidth(100);
 
     connect( phoneMan, SIGNAL(fieldChanged(QString,PhoneFieldType)),
             this, SLOT(phoneFieldsToDetailsFilter(QString,PhoneFieldType)) );
@@ -1239,12 +1325,10 @@ void AbFullEditor::setupTabWork()
     //  Company pronunciation
     //
 
-    QLabel *label = new QLabel(tr("Pronunciation"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     companyProLE = new QLineEdit();
+    formLayout->addRow(tr("Pronunciation"), companyProLE);
+    QLabel* label = qobject_cast<QLabel*>(formLayout->labelForField(companyProLE));
     adjustPronWidgets(label, companyProLE);
-    formLayout->addRow(label, companyProLE);
-    label->setBuddy(companyProLE);
 
     //
     //  Job title
@@ -1261,6 +1345,7 @@ void AbFullEditor::setupTabWork()
     //
 
     busPhoneLE = new QLineEdit();
+    addRemoveNumberMenu(busPhoneLE);
     lineEdits[QContactModel::BusinessPhone] = busPhoneLE;
     QtopiaApplication::setInputMethodHint(busPhoneLE,QtopiaApplication::PhoneNumber);
     connect( busPhoneLE, SIGNAL(textChanged(QString)), this,
@@ -1272,6 +1357,7 @@ void AbFullEditor::setupTabWork()
     //
 
     busMobileLE = new QLineEdit();
+    addRemoveNumberMenu(busMobileLE);
     lineEdits[QContactModel::BusinessMobile] = busMobileLE;
     QtopiaApplication::setInputMethodHint(busMobileLE,QtopiaApplication::PhoneNumber);
     connect( busMobileLE, SIGNAL(textChanged(QString)), this,
@@ -1284,6 +1370,7 @@ void AbFullEditor::setupTabWork()
     //
 
     busVoipLE = new QLineEdit();
+    addRemoveNumberMenu(busVoipLE);
     lineEdits[QContactModel::BusinessVOIP] = busVoipLE;
     QtopiaApplication::setInputMethodHint(busVoipLE, "email");
     connect( busVoipLE, SIGNAL(textChanged(QString)), this,
@@ -1295,6 +1382,7 @@ void AbFullEditor::setupTabWork()
     //
 
     busFaxLE = new QLineEdit();
+    addRemoveNumberMenu(busFaxLE);
     lineEdits[QContactModel::BusinessFax] = busFaxLE;
     QtopiaApplication::setInputMethodHint(busFaxLE,QtopiaApplication::PhoneNumber);
     connect( busFaxLE, SIGNAL(textChanged(QString)), this,
@@ -1306,6 +1394,7 @@ void AbFullEditor::setupTabWork()
     //
 
     busPagerLE = new QLineEdit();
+    addRemoveNumberMenu(busPagerLE);
     lineEdits[QContactModel::BusinessPager] = busPagerLE;
     QtopiaApplication::setInputMethodHint(busPagerLE,QtopiaApplication::PhoneNumber);
     connect( busPagerLE, SIGNAL(textChanged(QString)), this,
@@ -1351,13 +1440,11 @@ void AbFullEditor::setupTabWork()
     //    Department
     //
 
-    label = new QLabel( tr("Department") );
-    label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     deptLE = new QLineEdit();
     lineEdits[QContactModel::Department] = deptLE;
+    formLayout->addRow(tr("Department"), deptLE);
+    label = qobject_cast<QLabel*>(formLayout->labelForField(deptLE));
     adjustPronWidgets(label, deptLE);
-    formLayout->addRow(label, deptLE);
-    label->setBuddy(deptLE);
 
     //
     //    Office
@@ -1415,6 +1502,7 @@ void AbFullEditor::setupTabHome()
     //
 
     homePhoneLE = new QLineEdit();
+    addRemoveNumberMenu(homePhoneLE);
     lineEdits[QContactModel::HomePhone] = homePhoneLE;
     QtopiaApplication::setInputMethodHint(homePhoneLE,QtopiaApplication::PhoneNumber);
     connect( homePhoneLE, SIGNAL(textChanged(QString)), this,
@@ -1426,6 +1514,7 @@ void AbFullEditor::setupTabHome()
     //
 
     homeMobileLE = new QLineEdit();
+    addRemoveNumberMenu(homeMobileLE);
     lineEdits[QContactModel::HomeMobile] = homeMobileLE;
     QtopiaApplication::setInputMethodHint(homeMobileLE,QtopiaApplication::PhoneNumber);
     connect( homeMobileLE, SIGNAL(textChanged(QString)), this,
@@ -1438,6 +1527,7 @@ void AbFullEditor::setupTabHome()
     //
 
     homeVoipLE = new QLineEdit();
+    addRemoveNumberMenu(homeVoipLE);
     lineEdits[QContactModel::HomeVOIP] = homeVoipLE;
     QtopiaApplication::setInputMethodHint(homeVoipLE, "email");
     connect( homeVoipLE, SIGNAL(textChanged(QString)), this,
@@ -1450,6 +1540,7 @@ void AbFullEditor::setupTabHome()
     //
 
     homeFaxLE = new QLineEdit();
+    addRemoveNumberMenu(homeFaxLE);
     lineEdits[QContactModel::HomeFax] = homeFaxLE;
     QtopiaApplication::setInputMethodHint(homeFaxLE,QtopiaApplication::PhoneNumber);
     connect( homeFaxLE, SIGNAL(textChanged(QString)), this,
@@ -1536,12 +1627,12 @@ void AbFullEditor::setupTabHome()
     anniversaryEdit = new QDateEdit( );
     anniversaryEdit->setDate(QDate::currentDate());
 
-    QFormLayout *fl = new QFormLayout();
+    QFormLayout *fl = new QFormLayout(anniversaryCheck);
     fl->addRow(anniversaryEdit);
-    anniversaryRP = new ReminderPicker(this, fl);
-    anniversaryRP->setAllDay(true);
-    anniversaryCheck->setLayout(fl);
+    anniversaryRP = new ReminderPicker(this, fl, anniversaryAppt);
     formLayout->addRow(anniversaryCheck);
+
+    connect(anniversaryCheck, SIGNAL(clicked(bool)), anniversaryRP, SLOT(updateUI(bool)));
 
     //
     //    Birthday
@@ -1555,13 +1646,12 @@ void AbFullEditor::setupTabHome()
     bdayEdit = new QDateEdit( );
     bdayEdit->setDate(QDate::currentDate());
 
-    fl = new QFormLayout();
+    fl = new QFormLayout(bdayCheck);
     fl->addRow(bdayEdit);
-    birthdayRP = new ReminderPicker(this, fl);
-    birthdayRP->setAllDay(true);
-    bdayCheck->setLayout(fl);
-
+    birthdayRP = new ReminderPicker(this, fl, birthdayAppt);
     formLayout->addRow(bdayCheck);
+
+    connect(bdayCheck, SIGNAL(clicked(bool)), birthdayRP, SLOT(updateUI(bool)));
 
     personalTab->setWidget(wPersonalTab);
     setEntryHome();
@@ -1590,7 +1680,7 @@ void AbFullEditor::setupTabOther()
     connect( photoPB, SIGNAL(clicked()), this, SLOT(editPhoto()) );
     formLayout->addRow(tr("Photo"), photoPB);
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     //
     //      Ringtone selection
     //
@@ -1653,6 +1743,27 @@ void AbFullEditor::editPhoto()
     delete iface;
 }
 
+void AbFullEditor::removeNumber()
+{
+    // Find out what has focus
+    QWidget *w = focusWidget();
+
+    if (!phoneMan->removeNumber(w)) {
+        // rely on the contentsChanged signal to update everything
+        QLineEdit *le = qobject_cast<QLineEdit*>(w);
+        if (le) {
+            le->clear();
+            if (le->hasEditFocus())
+                le->setEditFocus(false);
+        }
+
+        // Now try to remove the corresponding phoneman field
+        PhoneFieldType type = findPhoneField(le);
+        if (!type.icon.isNull())
+            phoneMan->removeNumber(type);
+    }
+}
+
 void AbFullEditor::catCheckBoxChanged( bool  b )
 {
     QString bcatid = QLatin1String("Business"); // no tr
@@ -1680,10 +1791,10 @@ void AbFullEditor::showSpecWidgets( bool s )
         specJobTitleLA->setMaximumHeight(QWIDGETSIZE_MAX);
         specJobTitleLE->show();
     } else {
-        specCompanyLA->setMaximumHeight(1);
+        specCompanyLA->setMaximumHeight(0);
         specCompanyLE->hide();
 
-        specJobTitleLA->setMaximumHeight(1);
+        specJobTitleLA->setMaximumHeight(0);
         specJobTitleLE->hide();
     }
 }
@@ -1757,10 +1868,8 @@ void AbFullEditor::phoneFieldsToDetailsFilter( const QString &newNumber,
     }
 }
 
-// when details of phone fields changed, this updates the phone field manager
-void AbFullEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
+PhoneFieldType AbFullEditor::findPhoneField(QLineEdit *detail)
 {
-    QLineEdit *detail = (QLineEdit *)sender();
     PhoneFieldType type;
 
     if( detail == busPhoneLE )
@@ -1784,18 +1893,18 @@ void AbFullEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
     else if( detail == homeFaxLE )
         type = mHFType ;
 
+    return type;
+}
+
+// when details of phone fields changed, this updates the phone field manager
+void AbFullEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
+{
+    PhoneFieldType type = findPhoneField((QLineEdit*) sender());
+
     if( !type.icon.isNull() && !lastUpdateInternal )
         phoneMan->setNumberFromType( type, newNumber );
 
     lastUpdateInternal = false;
-}
-
-void AbFullEditor::updateAppts()
-{
-    if (birthdayRP)
-        birthdayAppt.setAlarm(birthdayRP->reminderMinutes(), birthdayRP->reminderType());
-    if (anniversaryRP)
-        anniversaryAppt.setAlarm(anniversaryRP->reminderMinutes(), anniversaryRP->reminderType());
 }
 
 void AbFullEditor::editGroups()
@@ -1813,7 +1922,7 @@ void AbFullEditor::editGroups()
         actionAddGroup = new QAction(QIcon(":icon/new"), QApplication::translate("AddressbookWindow", "New group"), this);
         actionAddGroup->setWhatsThis(QApplication::translate("AddressbookWindow", "Add new contact group."));
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         actionSetRingTone = new QAction(QIcon(), QApplication::translate("AddressbookWindow", "Set group ringtone...", "Set ringtone to current contact group"), this);
         actionSetRingTone->setWhatsThis(QApplication::translate("AddressbookWindow", "Set a ringtone that is played when an incoming call comes in from this group members."));
 #endif
@@ -1824,7 +1933,7 @@ void AbFullEditor::editGroups()
         actionRenameGroup = new QAction(QIcon(":icon/edit"), QApplication::translate("AddressbookWindow", "Rename", "Rename current contact group"), this);
         actionRenameGroup->setWhatsThis(QApplication::translate("AddressbookWindow", "Rename highlighted contact group."));
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         connect(actionSetRingTone, SIGNAL(triggered()), mGroupPicker, SLOT(setGroupRingTone()));
 #endif
         connect(actionAddGroup, SIGNAL(triggered()), mGroupPicker, SLOT(addGroup()));
@@ -1834,13 +1943,13 @@ void AbFullEditor::editGroups()
         QMenu* contextMenu = QSoftMenuBar::menuFor(mGroupDialog);
 
         contextMenu->addAction(actionAddGroup);
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         contextMenu->addAction(actionSetRingTone);
 #endif
         contextMenu->addAction(actionRemoveGroup);
         contextMenu->addAction(actionRenameGroup);
 
-        connect(mGroupPicker, SIGNAL(groupHighlighted(QString)), this, SLOT(updateContextMenu()));
+        connect(contextMenu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenu()));
     }
 
     mGroupPicker->setSelectedGroups(mGroupList);
@@ -1857,16 +1966,22 @@ void AbFullEditor::editGroups()
 
 void AbFullEditor::updateContextMenu()
 {
-    if (mGroupPicker) {
+    if (mGroupPicker && mGroupPicker->isVisible()) {
         bool groupSelected = mGroupPicker->currentIndex().isValid();
         bool groupSystem = groupSelected && mGroupPicker->isCurrentSystemGroup();
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         actionSetRingTone->setVisible( groupSelected );
 #endif
         actionRemoveGroup->setVisible( groupSelected && !groupSystem);
         actionRenameGroup->setVisible( groupSelected && !groupSystem);
     }
+
+    // Note that actionRemoveNumber is only present on phone number fields,
+    // but we don't need to be that specific to update this
+    QLineEdit *le = qobject_cast<QLineEdit *>(focusWidget());
+    if (le)
+        actionRemoveNumber->setVisible(!le->text().isEmpty());
 }
 
 void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
@@ -1967,12 +2082,20 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
         setAlarm = config.value("alarmpreset").toBool();
     }
 
+    int alarmMinutes = -(defaultReminderTime.hour() * 60 + defaultReminderTime.minute());
+
     if (anniversaryAppt.uid().isNull()) {
-        anniversaryAppt.setAlarm(-(defaultReminderTime.hour() * 60 + defaultReminderTime.minute()), setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+        anniversaryAppt.setAlarm(alarmMinutes, setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+        anniversaryAppt.setAllDay();
+    } else if (anniversaryAppt.alarm() == QAppointment::NoAlarm) {
+        anniversaryAppt.setAlarm(alarmMinutes, QAppointment::NoAlarm);
     }
 
     if (birthdayAppt.uid().isNull()) {
-        birthdayAppt.setAlarm(-(defaultReminderTime.hour() * 60 + defaultReminderTime.minute()), setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+        birthdayAppt.setAlarm(alarmMinutes, setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+        birthdayAppt.setAllDay();
+    } else if (birthdayAppt.alarm() == QAppointment::NoAlarm) {
+        birthdayAppt.setAlarm(alarmMinutes, QAppointment::NoAlarm);
     }
 
     if (wOtherTab)
@@ -1988,6 +2111,7 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
 void AbFullEditor::setEntryHome()
 {
     QDate bday = ent.birthday();
+
     if (bday.isNull()) {
         bdayCheck->setChecked(false);
     } else {
@@ -2007,11 +2131,6 @@ void AbFullEditor::setEntryHome()
             genderCombo->setCurrentIndex(2);
             break;
     }
-
-    birthdayRP->setReminderType(birthdayAppt.alarm());
-    birthdayRP->setReminderMinutes(birthdayAppt.alarmDelay());
-    anniversaryRP->setReminderType(anniversaryAppt.alarm());
-    anniversaryRP->setReminderMinutes(anniversaryAppt.alarmDelay());
 
     //
     //  Home
@@ -2045,6 +2164,9 @@ void AbFullEditor::setEntryHome()
 #endif
 
     homeWebPageLE->setText( ent.homeWebpage() );
+
+    birthdayRP->updateUI(!bday.isNull());
+    anniversaryRP->updateUI(!aday.isNull());
 }
 
 void AbFullEditor::setEntryWork()
@@ -2103,7 +2225,7 @@ void AbFullEditor::setEntryOther()
         QDL::loadLinks( ent.customField( QDL::CLIENT_DATA_KEY ), QDL::clients( this ) );
     txtNoteQC->verifyLinks();
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     if ( !ent.customField("tone").isEmpty() )
         editTonePB->setTone( QContent( ent.customField("tone") ) ); // No tr()
     if ( !ent.customField("videotone").isEmpty() )
@@ -2255,7 +2377,7 @@ bool AbFullEditor::isEmpty() const
         if ( ent.gender() != QContact::UnspecifiedGender )
             return false;
     }
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     if(wOtherTab) {
         if (editTonePB->tone().isValid() )
             return false;
@@ -2392,7 +2514,7 @@ void AbFullEditor::contactFromFields(QContact &e)
             e.setNotes(QString());
         else
             e.setNotes( txtNote->toHtml() );
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         if ( !editTonePB->tone().isValid() )
             e.removeCustomField("tone"); // No tr()
         else
@@ -2417,12 +2539,31 @@ void AbFullEditor::showEvent( QShowEvent *e )
 void AbFullEditor::setNameFocus()
 {
     tabs->setCurrentIndex( tabs->indexOf(contactTab) );
+
+    // Also reset the focused widget for the other tabs
+    if (wBusinessTab) {
+        companyLE->setFocus();
+        businessTab->ensureVisible(0,0,0,0);
+    }
+
+    if (wPersonalTab) {
+        homePhoneLE->setFocus();
+        personalTab->ensureVisible(0,0,0,0);
+    }
+
+    if (wOtherTab) {
+        photoPB->setFocus();
+        otherTab->ensureVisible(0,0,0,0);
+    }
+
+    // Finally this
     abName->setFocus();
+    contactTab->ensureVisible(0,0,0,0);
 }
 
 void AbFullEditor::toneSelected( const QContent &tone )
 {
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     // normal ringtone and video ringtone are mutually exclusive
     if ( sender() == editTonePB && tone.isValid() )
         editVideoTonePB->setTone( QContent() );
@@ -2475,6 +2616,8 @@ AbSimEditor::AbSimEditor(QWidget *parent, Qt::WFlags fl)
     setWindowState(windowState() | Qt::WindowMaximized);
 
     mNewEntry = false;
+
+    initSimUI();
 }
 
 AbSimEditor::~AbSimEditor()
@@ -2529,7 +2672,6 @@ void AbSimEditor::initSimUI()
 void AbSimEditor::setEntry( const QContact &entry, bool newEntry)
 {
     ent = entry;
-    initSimUI();
     if( newEntry )
         setWindowTitle(tr("New SIM Contact"));
     else

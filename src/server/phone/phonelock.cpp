@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -474,20 +474,23 @@ bool BasicEmergencyLock::processKeyEvent(QKeyEvent *e)
     }
 
     if (newNumber != d->m_number) {
-        QStringList emergency = CellModemManager::emergencyNumbers();
-
-        for(int ii = 0; ii < emergency.count(); ++ii) {
-            if(emergency.at(ii).length() < newNumber.length()) {
-            } else if(emergency.at(ii) == newNumber) {
-                d->m_state = EmergencyNumber;
-                d->m_number = newNumber;
-                emit stateChanged(d->m_state, d->m_number);
-                return false;
-            } else if(emergency.at(ii).startsWith(newNumber)) {
-                d->m_state = PartialEmergencyNumber;
-                d->m_number = newNumber;
-                emit stateChanged(d->m_state, d->m_number);
-                return false;
+        if ( !newNumber.isEmpty() ) {
+            // Check that the given number is not an emergency number (or prefix of one)
+            QStringList emergency = CellModemManager::emergencyNumbers();
+            for(int ii = 0; ii < emergency.count(); ++ii) {
+                if(emergency.at(ii).length() < newNumber.length()) {
+                    // the given number is too long to be this emergency number
+                } else if(emergency.at(ii) == newNumber) {
+                    d->m_state = EmergencyNumber;
+                    d->m_number = newNumber;
+                    emit stateChanged(d->m_state, d->m_number);
+                    return false;
+                } else if(emergency.at(ii).startsWith(newNumber)) {
+                    d->m_state = PartialEmergencyNumber;
+                    d->m_number = newNumber;
+                    emit stateChanged(d->m_state, d->m_number);
+                    return false;
+                }
             }
         }
 

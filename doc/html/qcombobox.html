@@ -434,69 +434,10 @@
 <h3 class="fn"><a name="view"></a><a href="qabstractitemview.html">QAbstractItemView</a> * QComboBox::view () const</h3>
 <p>Returns the list view used for the combobox popup.</p>
 <p>See also <a href="qcombobox.html#setView">setView</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="Policy-typedef"></a>typedef QComboBox::Policy</h3>
-<p>Use <a href="qcombobox.html#InsertPolicy-enum">QComboBox::InsertPolicy</a> instead.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QComboBox-2"></a>QComboBox::QComboBox ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="QComboBox-3"></a>QComboBox::QComboBox ( bool <i>rw</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> = 0 )</h3>
-<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="changeItem"></a>void QComboBox::changeItem ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>index</i> )</h3>
-<p>Use <a href="qcombobox.html#setItemText">setItemText</a>() instead.</p>
-<h3 class="fn"><a name="changeItem-2"></a>void QComboBox::changeItem ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, int <i>index</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qcombobox.html#setItemIcon">setItemIcon</a>() instead, for example, setItemIcon(index, <a href="qicon.html">QIcon</a>(pixmap)).</p>
-<h3 class="fn"><a name="changeItem-3"></a>void QComboBox::changeItem ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>index</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use setItem() instead, for example, setItem(index, <a href="qicon.html">QIcon</a>(pixmap),text).</p>
-<h3 class="fn"><a name="clearEdit"></a>void QComboBox::clearEdit ()</h3>
-<p>Use <a href="qcombobox.html#clearEditText">clearEditText</a>() instead.</p>
-<h3 class="fn"><a name="clearValidator"></a>void QComboBox::clearValidator ()</h3>
-<p>Use setValidator(0) instead.</p>
-<h3 class="fn"><a name="currentItem"></a>int QComboBox::currentItem () const</h3>
-<p>Use <a href="qcombobox.html#currentIndex-prop">currentIndex</a>() instead.</p>
-<p>See also <a href="qcombobox-qt3.html#setCurrentItem">setCurrentItem</a>().</p>
-<h3 class="fn"><a name="editable"></a>bool QComboBox::editable () const</h3>
-<p>Use <a href="qcombobox.html#editable-prop">isEditable</a>() instead.</p>
-<p>See also <a href="qcombobox.html#editable-prop">setEditable</a>().</p>
-<h3 class="fn"><a name="insertItem-3"></a>void QComboBox::insertItem ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>index</i> = -1 )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="insertItem-4"></a>void QComboBox::insertItem ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, int <i>index</i> = -1 )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use an <a href="qcombobox.html#insertItem">insertItem</a>() function that takes a <a href="qicon.html">QIcon</a> instead, for example, insertItem(index, <a href="qicon.html">QIcon</a>(pixmap)).</p>
-<h3 class="fn"><a name="insertItem-5"></a>void QComboBox::insertItem ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, int <i>index</i> = -1 )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use an <a href="qcombobox.html#insertItem">insertItem</a>() function that takes a <a href="qicon.html">QIcon</a> instead, for example, insertItem(index, <a href="qicon.html">QIcon</a>(pixmap), text).</p>
-<p>See also <a href="qcombobox.html#insertItems">insertItems</a>().</p>
-<h3 class="fn"><a name="insertStringList"></a>void QComboBox::insertStringList ( const <a href="qstringlist.html">QStringList</a> &amp; <i>list</i>, int <i>index</i> = -1 )</h3>
-<p>Use <a href="qcombobox.html#insertItems">insertItems</a>() instead.</p>
-<h3 class="fn"><a name="insertionPolicy"></a><a href="qcombobox.html#InsertPolicy-enum">InsertPolicy</a> QComboBox::insertionPolicy () const</h3>
-<p>Use <a href="qcombobox.html#insertPolicy-prop">QComboBox::insertPolicy</a> instead.</p>
-<p>See also <a href="qcombobox-qt3.html#setInsertionPolicy">setInsertionPolicy</a>().</p>
-<h3 class="fn"><a name="pixmap"></a><a href="qpixmap.html">QPixmap</a> QComboBox::pixmap ( int <i>index</i> ) const</h3>
-<p>Use <a href="qcombobox.html#itemIcon">itemIcon</a>() instead.</p>
-<h3 class="fn"><a name="popup"></a>void QComboBox::popup ()</h3>
-<p>Use <a href="qcombobox.html#showPopup">showPopup</a>() instead.</p>
-<h3 class="fn"><a name="setCurrentItem"></a>void QComboBox::setCurrentItem ( int <i>index</i> )</h3>
-<p>Use setCurrentIndex(int) instead.</p>
-<p>See also <a href="qcombobox-qt3.html#currentItem">currentItem</a>().</p>
-<h3 class="fn"><a name="setCurrentText"></a>void QComboBox::setCurrentText ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
-<p>Use <a href="qcombobox.html#setItemText">setItemText</a>() instead.</p>
-<p>See also <a href="qcombobox.html#currentText-prop">currentText</a>() and <a href="qcombobox.html#currentIndex-prop">currentIndex</a>().</p>
-<h3 class="fn"><a name="setInsertionPolicy"></a>void QComboBox::setInsertionPolicy ( <a href="qcombobox.html#InsertPolicy-enum">InsertPolicy</a> <i>policy</i> )</h3>
-<p>Use <a href="qcombobox.html#insertPolicy-prop">QComboBox::insertPolicy</a> instead.</p>
-<p>See also <a href="qcombobox-qt3.html#insertionPolicy">insertionPolicy</a>().</p>
-<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QComboBox::text ( int <i>index</i> ) const</h3>
-<p>Use <a href="qcombobox.html#itemText">itemText</a>() instead.</p>
-<h3 class="fn"><a name="textChanged"></a>void QComboBox::textChanged ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Use the editTextChanged(const <a href="qstring.html">QString</a> &amp;text) signal instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

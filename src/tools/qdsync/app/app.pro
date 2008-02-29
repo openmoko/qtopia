@@ -11,15 +11,12 @@ VPATH+=..
 SOURCES+=\
     main.cpp\
 
-pkg.name=$$TARGET
 pkg.desc=Synchronization
-pkg.version=$$VERSION-1
-
-# This is how I ask SXE for permission to do things.
-# 'window' lets me have a GUI
-# 'pim' is for the PIM code (plugins cannot give privileges to the apps that load them)
-# 'qdsync' gives me LIDS access and allows some QCop messages to be sent inter-process
-pkg.domain=window,pim,qdsync
+pkg.domain=trusted
+pkg.multi=\
+    tools/qdsync/base\
+    tools/qdsync/common\
+    tools/qdsync/pim
 
 desktop.files=../qdsync.desktop
 desktop.path=/apps/Applications

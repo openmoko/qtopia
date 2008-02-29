@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/opengl/qgl.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/opengl/qgl.cpp -->
 <head>
   <title>Qt 4.3: QGLWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -119,7 +119,7 @@
 <p>Here is a rough outline of how a QGLWidget subclass might look:</p>
 <pre> class MyGLDrawer : public QGLWidget
  {
-     Q_OBJECT        <span class="comment">// must include this if you use Qt signals/slots</span>
+     Q_OBJECT        <span class="comment">//</span> must include this if you use Qt signals/slots
 
  public:
      MyGLDrawer(QWidget *parent)
@@ -129,7 +129,7 @@
 
      void initializeGL()
      {
-         <span class="comment">// Set up the rendering context, define display lists etc.:</span>
+         <span class="comment">//</span> Set up the rendering context, define display lists etc.:
          ...
          glClearColor(0.0, 0.0, 0.0, 0.0);
          glEnable(GL_DEPTH_TEST);
@@ -138,7 +138,7 @@
 
      void resizeGL(int w, int h)
      {
-         <span class="comment">// setup viewport, projection etc.:</span>
+         <span class="comment">//</span> setup viewport, projection etc.:
          glViewport(0, 0, (GLint)w, (GLint)h);
          ...
          glFrustum(...);
@@ -147,7 +147,7 @@
 
      void paintGL()
      {
-         <span class="comment">// draw the scene:</span>
+         <span class="comment">//</span> draw the scene:
          ...
          glRotatef(...);
          glMaterialfv(...);
@@ -345,15 +345,10 @@
 <h3 class="fn"><a name="updateOverlayGL"></a>void QGLWidget::updateOverlayGL ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Updates the widget's overlay (if any). Will cause the virtual function <a href="qglwidget.html#paintOverlayGL">paintOverlayGL</a>() to be executed.</p>
 <p>The widget's rendering context will become the current context and <a href="qglwidget.html#initializeGL">initializeGL</a>() will be called if it hasn't already been called.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QGLWidget-4"></a>QGLWidget::QGLWidget ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<h3 class="fn"><a name="QGLWidget-5"></a>QGLWidget::QGLWidget ( const <a href="qglformat.html">QGLFormat</a> &amp; <i>format</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<h3 class="fn"><a name="QGLWidget-6"></a>QGLWidget::QGLWidget ( <a href="qglcontext.html">QGLContext</a> * <i>context</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, const QGLWidget * <i>shareWidget</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

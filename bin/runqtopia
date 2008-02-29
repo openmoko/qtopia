@@ -22,6 +22,10 @@ $cols = 80 unless ( $cols );
 # the width of the first column (calculated in _init_formats)
 my $fcwidth;
 
+# The "en_US" below is irrelevant - but the "UTF-8" is needed for initializations
+# prior to Qtopia setting LANG from the user's settings.
+$ENV{LANG}="en_US.UTF-8";
+
 # This script works even if configure has not been run (but only for displaying -help)
 eval { Qtopia::Paths::get_paths(); };
 my $no_qpedir_error = "";
@@ -44,12 +48,19 @@ use constant DEBUG => 0;
 
 # By default assume we don't have an X11 build.
 my $x11 = 0;
+# By default assume RPATH is set.
+my $rpath = 1;
 # We can only find this out if we have a build (ie. this can't influence the docs)
 if ( $QPEDIR ) {
     open IN, "$QPEDIR/config.cache" or die "Can't read $QPEDIR/config.cache";
-    my @tmp = grep(/^opt\.qws\.value=/, <IN>);
+    my @data = <IN>;
+    my @tmp = grep(/^opt\.qws\.value=/, @data);
     if ( @tmp && $tmp[0] =~ /^opt\.qws\.value=(.*)/ ) {
         $x11 = !$1;
+    }
+    @tmp = grep(/^opt\.rpath\.value=/, @data);
+    if ( @tmp && $tmp[0] =~ /^opt\.rpath\.value=(.*)/ ) {
+        $rpath = $1;
     }
     close IN;
 }
@@ -149,6 +160,57 @@ set_optvar( "qvfb", +{
 });
 set_optvar( "qvfb_only", +{
     "set" => [ "%", "Only run QVFb." ],
+});
+set_optvar( "phonesim", +{
+    "set" => [ "%=s", "Extra arguments for phonesim." ],
+    "arg" => "arguments",
+    "value" => "",
+    "visible" => sub { ( !$ENV{QTOPIA_PHONE_DEVICE} || $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost/ ); },
+});
+set_optvar( "phonesim_port", +{
+    "set" => [ "%=s", "Use phonesim port number <num>." ],
+    "arg" => "num",
+    "setfunc" => sub {
+        opt("phonesim_port") = $_[1];
+        if ( opt("phonesim_port") < 1024 ) {
+            warn "\nWARNING: Ports below 1024 are generally not usable by non-root accounts.\n\n";
+        }
+    },
+    "default" => sub {
+        my $def = "12345";
+        if ( $ENV{QTOPIA_PHONE_DEVICE} && $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost:(\d+)$/ ) {
+            $def = $1;
+        }
+        $def;
+    },
+    "visible" => sub { ( !$ENV{QTOPIA_PHONE_DEVICE} || $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost/ ); },
+    "showauto" => 1,
+});
+set_optvar( "run_phonesim", +{
+    "set" => [ "%", "Run phonesim (QTOPIA_PHONE_DEVICE must be unset or set to sim:localhost)." ],
+    "unset" => [ "no-%", "Do not run phonesim." ],
+    "setfunc" => sub {
+        if ( !$ENV{QTOPIA_PHONE_DEVICE} || $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost/ ) {
+            opt("run_phonesim") = 1;
+        } else {
+            die "Cannot run phonesim because QTOPIA_PHONE_DEVICE is set to ".$ENV{QTOPIA_PHONE_DEVICE}."\n";
+        }
+    },
+    "default" => sub {
+        my $def = 0;
+        if ( !opt("test") && (!$ENV{QTOPIA_PHONE_DEVICE} || $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost/) ) {
+            $def = 1;
+        }
+        $def;
+    },
+    "showauto" => 1,
+});
+set_optvar( "restart_phonesim", +{
+    "set" => [ "%", "Restart phonesim if it is running (kill any processes using the phonesim port)." ],
+    "unset" => [ "no-%", "Do not restart phonesim if it is running." ],
+    "default" => 0,
+    "visible" => sub { ( !$ENV{QTOPIA_PHONE_DEVICE} || $ENV{QTOPIA_PHONE_DEVICE} =~ /^sim:localhost/ ); },
+    "showauto" => 1,
 });
 set_optvar( "performance", +{
     "set" => [ "%", "Run Qtopia in performance test mode (not compatible with -exec or -runmode)." ],
@@ -254,6 +316,11 @@ set_optvar( "exec", +{
                       "so any shell code is valid here." ],
     "arg" => "shell code",
 });
+set_optvar( "rpath", +{
+    "set" => [ "%", "Qtopia was built with an RPATH." ],
+    "unset" => [ "no-%", "Qtopia was not built with an RPATH. Set LD_LIBRARY_PATH so that it can work." ],
+    "default" => $rpath,
+});
 
 
 my $ok = opt_get_options( "nohelp" );
@@ -349,9 +416,16 @@ exit $ret if ( $ret );
 $ret = run_qvfb();
 exit $ret if ( $ret );
 
-if ( !opt("qvfb_only") ) {
-    $ret = run_qtopia();
+if ( opt("qvfb_only") ) {
+    exit $ret;
 }
+
+if ( opt("run_phonesim") ) {
+    $ret = run_phonesim();
+    exit $ret if ( $ret );
+}
+
+$ret = run_qtopia();
 exit $ret;
 
 
@@ -365,6 +439,7 @@ sub run_qvfb
     my $qvfb_path = "$QPEDIR/bin/qvfb";
     my $skin_path = "$QPEDIR/src/tools/qt/qvfb";
 
+    print "Waiting for QVFb to start...\n";
     print "Saving QVFb output to /tmp/.qtvfb_log-".opt("display")."\n";
     my $display_opt;
     my $mapfile;
@@ -442,6 +517,15 @@ sub run_qtopia
     $ENV{XAUTHORITY} = "$ENV{HOME}/.Xauthority";
 
     $ENV{HOME} = opt("home");
+
+    my $phone_device = $ENV{QTOPIA_PHONE_DEVICE};
+    if ( !$phone_device || $phone_device =~ /^sim:localhost/ ) {
+        $phone_device = "sim:localhost:".opt("phonesim_port");
+    }
+    $ENV{QTOPIA_PHONE_DEVICE} = $phone_device;
+    if ( !opt("rpath") ) {
+        $ENV{LD_LIBRARY_PATH} = "$prefix/lib";
+    }
 
     chdir($prefix);
 
@@ -635,5 +719,39 @@ sub check_ownership
     }
 
     return $ret;
+}
+
+sub run_phonesim
+{
+    my $start = 0;
+    if ( open IN, "fuser -n tcp ".opt("phonesim_port")." 2>&1 |" ) {
+        my @data = <IN>;
+        close IN;
+        if ( @data ) {
+            if ( opt("restart_phonesim") ) {
+                for ( @data ) {
+                    if ( /(\d+)$/ ) {
+                        kill "TERM", $1;
+                    }
+                }
+                $start = 1;
+            } else {
+                warn "Phonesim is already running!\n";
+            }
+        } else {
+            $start = 1;
+        }
+    } else {
+        warn "fuser is not installed. Cannot detect if phonesim is running.\n";
+    }
+
+    if ( $start ) {
+        print "Saving phonesim output to /tmp/.phonesim_log-".opt("phonesim_port")."\n";
+        system("$QPEDIR/bin/phonesim ".opt("phonesim")." -p ".opt("phonesim_port").
+               " $depotpath/src/tools/phonesim/troll.xml >/tmp/.phonesim_log-".opt("phonesim_port").
+               " 2>&1 &");
+    }
+
+    return 0;
 }
 

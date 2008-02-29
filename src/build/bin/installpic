@@ -149,11 +149,15 @@ if ( ! @ARGV ) {
 }
 
 my %pngscale_files;
+my @svgtopicture_files;
 processFiles( @ARGV );
 for my $key ( keys(%pngscale_files) ) {
     my $data = $pngscale_files{$key};
     my @list = @$data;
-    system("$QPEDIR/bin/pngscale", split(/\s+/, $key), @list);
+    system("$QPEDIR/bin/pngscale", split(/\s+/, $key), @list) == 0 or exit 1;
+}
+if ( @svgtopicture_files ) {
+    system("$QPEDIR/bin/svgtopicture", @svgtopicture_files) == 0 or exit 1;
 }
 
 exit 0;
@@ -244,7 +248,7 @@ sub processFiles
 	my $dest = "$picsDest/$srcfile";
 	DEBUG and print "dest = $dest\n";
 	if ( $picsSource ) {
-	    $dest =~ s,$picsSource/,,;
+	    $dest =~ s,(.+)$picsSource/,$1,;
         }
 	DEBUG and print "after munging dest = $dest\n";
 	installpic($srcfile, $dest);
@@ -269,7 +273,7 @@ sub installpic
 	if ( needCopy($srcfile, $dest) ) {
             if ( opt("svg_format") eq "pic" && $srcfile =~ /\.svg$/ ) {
                 OUTPUT and print "svgtopicture $srcfile $dest\n";
-                system("$QPEDIR/bin/svgtopicture $srcfile $dest");
+                push(@svgtopicture_files, $srcfile, $dest);
             } else {
                 OUTPUT and print "install -c $srcfile $dest\n";
                 copy($srcfile, $dest);
@@ -397,7 +401,8 @@ sub installicons
 	my $from = "$srcdir/$dir/$file";
         my $to = basename($from);
         if ( $from =~ m{/i18n/} ) {
-            $to =~ s{^.*/(i18n/)}{$1};
+            $to = $from;
+            $to =~ s{^.*/(i18n/.*)}{$1};
         }
         $to =~ s{\d+x\d+/}{};
         $to = "$dest/$to";

@@ -62,8 +62,13 @@ while [ -e /tmp/restart-qtopia ]; do
 #    chvol SYSTEM 100
 #    chvol CALL 60
 
+#crappy workaround for some weird suspend bug
+rm /dev/ttySAC0
+mknod /dev/ttySAC0 c 204 64 -m 660
+chgrp dialout /dev/ttySAC0
+
 # power gsm on
-# echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
 echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
 
 	echo "starting clock" > $HOME/log

@@ -198,9 +198,9 @@ Override resource limits. Set resource limits.
 
 ### 30: Allow killing protected processes. 
 #
--30:CAP_KILL_PROTECTED
++30:CAP_KILL_PROTECTED
 
 ### 31: Allow reading unprotected input without entering untrusted domain.
 #
--31:CAP_PROTECTED
++31:CAP_PROTECTED
 

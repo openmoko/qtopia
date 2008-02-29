@@ -27,4 +27,4 @@ captureService.path=/services/Settings
 INSTALLS+=captureService
 
 pkg.desc=Call Forwarding for Qtopia.
-pkg.domain=phonecomm,window,profiles,pim
+pkg.domain=trusted

@@ -8,5 +8,5 @@ SOURCES		= main.cpp launcher.cpp
 depends(3rdparty/libraries/qtdbus)
 
 pkg.desc=Interprocess communication client for Qtopia.
-#pkg.domain=comm
-pkg.domain=base
+#pkg.domain=trusted
+pkg.domain=trusted

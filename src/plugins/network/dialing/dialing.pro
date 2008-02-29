@@ -34,12 +34,14 @@ conf.files	+= $$QTOPIA_DEPOT_PATH/etc/network/dialup.conf \
 conf.path	= /etc/network
 INSTALLS+=conf
 
-bin.files   = $$QTOPIA_DEPOT_PATH/src/plugins/network/dialing/ppp-network \
-              $$QTOPIA_DEPOT_PATH/bin/qtopia-pppd-internal
-bin.path    = /bin
-bin.hint=script
-INSTALLS+=bin
+script=$$PWD/ppp-network
+variable=$$DIALING_NETWORK_SCRIPT
+include(../network_script.pri)
 
+bin2.files=$$QTOPIA_DEPOT_PATH/bin/qtopia-pppd-internal
+bin2.path=/bin
+bin2.hint=script
+INSTALLS+=bin2
 
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/dialup/*  
 pics.path	= /pics/Network/dialup

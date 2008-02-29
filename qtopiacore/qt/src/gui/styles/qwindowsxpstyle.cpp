@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -446,9 +444,11 @@ QRegion QWindowsXPStylePrivate::region(XPThemeData &themeData)
         return QRegion();
 
     QRegion rgn = QRegion(0,0,1,1);
-    CombineRgn(rgn.handle(), hRgn, 0, RGN_COPY);
+    const bool success = CombineRgn(rgn.handle(), hRgn, 0, RGN_COPY) != ERROR;
     DeleteObject(hRgn);
-    return rgn;
+    if (success)
+        return rgn;
+    return QRegion();
 }
 
 /*! \internal

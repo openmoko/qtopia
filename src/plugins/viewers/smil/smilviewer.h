@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -61,12 +61,12 @@ private slots:
     void cancelTransfer(SmilDataSource *dataSource, const QString &src);
 
 private:
-    QString findStartMarker() const;
     void tweakView();
     void advanceSlide();
 
     SmilView* view;
     QMap<SmilDataSource*,QIODevice*> transfers;
+    int menuKey;
     const QMailMessage* mail;
 };
 

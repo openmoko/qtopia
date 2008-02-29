@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qaction.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qaction.cpp -->
 <head>
   <title>Qt 4.3: QAction Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -402,60 +402,10 @@
 <p>This signal is emitted when an action is activated by the user; for example, when the user clicks a menu option, toolbar button, or presses an action's shortcut key combination, or when <a href="qaction.html#trigger">trigger</a>() was called. Notably, it is <i>not</i> emitted when <a href="qaction.html#checked-prop">setChecked</a>() or <a href="qaction.html#toggle">toggle</a>() is called.</p>
 <p>If the action is checkable, <i>checked</i> is true if the action is checked, or false if the action is unchecked.</p>
 <p>See also <a href="qaction.html#activate">QAction::activate</a>(), <a href="qaction.html#toggled">QAction::toggled</a>(), and <a href="qaction.html#checked-prop">checked</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAction-4"></a>QAction::QAction ( <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the <a href="qaction.html">QAction</a> constructors that doesn't take a <i>name</i> argument and call <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="QAction-5"></a>QAction::QAction ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qkeysequence.html">QKeySequence</a> &amp; <i>shortcut</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the <a href="qaction.html">QAction</a> constructors that doesn't take a <i>name</i> argument and call <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="QAction-6"></a>QAction::QAction ( const <a href="qicon.html">QIcon</a> &amp; <i>icon</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qkeysequence.html">QKeySequence</a> &amp; <i>shortcut</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the <a href="qaction.html">QAction</a> constructors that doesn't take a <i>name</i> argument and call <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="accel"></a><a href="qkeysequence.html">QKeySequence</a> QAction::accel () const</h3>
-<p>Use <a href="qaction.html#shortcut-prop">shortcut</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#setAccel">setAccel</a>().</p>
-<h3 class="fn"><a name="activated"></a>void QAction::activated ( int <i>i</i> = 0 )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Use <a href="qaction.html#triggered">triggered</a>() instead.</p>
-<h3 class="fn"><a name="addTo"></a>bool QAction::addTo ( <a href="qwidget.html">QWidget</a> * <i>w</i> )</h3>
-<p>Use <a href="qwidget.html#addAction">QWidget::addAction</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> action-&gt;addTo(widget);</font></pre>
-<p>you can rewrite it as</p>
-<pre> widget-&gt;addAction(action);</pre>
-<h3 class="fn"><a name="iconSet"></a><a href="qicon.html">QIcon</a> QAction::iconSet () const</h3>
-<p>Use <a href="qaction.html#icon-prop">icon</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#setIconSet">setIconSet</a>().</p>
-<h3 class="fn"><a name="isOn"></a>bool QAction::isOn () const</h3>
-<p>Use <a href="qaction.html#checked-prop">isChecked</a>() instead.</p>
-<h3 class="fn"><a name="isToggleAction"></a>bool QAction::isToggleAction () const</h3>
-<p>Use <a href="qaction.html#checkable-prop">isCheckable</a>() instead.</p>
-<h3 class="fn"><a name="menuText"></a><a href="qstring.html">QString</a> QAction::menuText () const</h3>
-<p>Use <a href="qaction.html#text-prop">text</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#setMenuText">setMenuText</a>().</p>
-<h3 class="fn"><a name="removeFrom"></a>bool QAction::removeFrom ( <a href="qwidget.html">QWidget</a> * <i>w</i> )</h3>
-<p>Use <a href="qwidget.html#removeAction">QWidget::removeAction</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> action-&gt;removeFrom(widget);</font></pre>
-<p>you can rewrite it as</p>
-<pre> widget-&gt;removeAction(action);</pre>
-<h3 class="fn"><a name="setAccel"></a>void QAction::setAccel ( const <a href="qkeysequence.html">QKeySequence</a> &amp; <i>shortcut</i> )</h3>
-<p>Use <a href="qaction.html#shortcut-prop">setShortcut</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#accel">accel</a>().</p>
-<h3 class="fn"><a name="setIconSet"></a>void QAction::setIconSet ( const <a href="qicon.html">QIcon</a> &amp; <i>i</i> )</h3>
-<p>Use <a href="qaction.html#icon-prop">setIcon</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#iconSet">iconSet</a>().</p>
-<h3 class="fn"><a name="setMenuText"></a>void QAction::setMenuText ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
-<p>Use <a href="qaction.html#text-prop">setText</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#menuText">menuText</a>().</p>
-<h3 class="fn"><a name="setOn"></a>void QAction::setOn ( bool <i>b</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use <a href="qaction.html#checked-prop">setChecked</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#isOn">isOn</a>().</p>
-<h3 class="fn"><a name="setToggleAction"></a>void QAction::setToggleAction ( bool <i>b</i> )</h3>
-<p>Use <a href="qaction.html#checkable-prop">setCheckable</a>() instead.</p>
-<p>See also <a href="qaction-qt3.html#isToggleAction">isToggleAction</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

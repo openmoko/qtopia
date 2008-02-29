@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,9 +30,9 @@ AccountList::AccountList(QObject *parent, const char *name)
     setObjectName( name );
 }
 
-QListIterator<MailAccount*> AccountList::accountIterator()
+QListIterator<QMailAccount*> AccountList::accountIterator()
 {
-    return ( QListIterator<MailAccount*>(list) );
+    return ( QListIterator<QMailAccount*>(list) );
 }
 
 int AccountList::count()
@@ -40,7 +40,7 @@ int AccountList::count()
     return list.count();
 }
 
-MailAccount* AccountList::at(int x)
+QMailAccount* AccountList::at(int x)
 {
     return list.at(x);
 };
@@ -49,7 +49,7 @@ MailAccount* AccountList::at(int x)
 void AccountList::readAccounts()
 {
     QSettings accountconf("Trolltech","qtmail_account");
-    MailAccount *account;
+    QMailAccount *account;
 
     accountconf.beginGroup( "accountglobal" );
     int count = accountconf.value("accounts", 0).toInt();
@@ -62,21 +62,21 @@ void AccountList::readAccounts()
 #endif
 
     for (int x = 0; x < count; x++) {
-        account = new MailAccount();
+        account = new QMailAccount();
         accountconf.endGroup();
         accountconf.beginGroup( "account_" + QString::number(x) );
         account->readSettings(&accountconf);
         append(account);
 
 #ifndef QTOPIA_NO_SMS
-        if (account->accountType() == MailAccount::SMS)
+        if (account->accountType() == QMailAccount::SMS)
             smsExists = true;
 #endif
-        if (account->accountType() == MailAccount::System)
+        if (account->accountType() == QMailAccount::System)
             systemExists = true;
 
 #ifndef QTOPIA_NO_MMS
-        else if (account->accountType() == MailAccount::MMS)
+        else if (account->accountType() == QMailAccount::MMS)
             mmsExists = true;
 #endif
     }
@@ -91,18 +91,16 @@ void AccountList::readAccounts()
 
 #ifndef QTOPIA_NO_SMS
     if (!smsExists) {
-        qDebug() << "SMS2";
-        account = new MailAccount();
-        account->setAccountType( MailAccount::SMS );
+        account = new QMailAccount();
+        account->setAccountType( QMailAccount::SMS );
         account->setAccountName( "SMS" );
         account->setMailServer( "SMS" );
         append(account);
     }
 #endif
     if (!systemExists) {
-        qDebug() << "MMS2";
-        account = new MailAccount();
-        account->setAccountType( MailAccount::System );
+        account = new QMailAccount();
+        account->setAccountType( QMailAccount::System );
         account->setAccountName( "System" );
         account->setMailServer( "System" );
         append(account);
@@ -110,8 +108,8 @@ void AccountList::readAccounts()
 #ifndef QTOPIA_NO_MMS
     if (!mmsExists) {
         qLog(Messaging) << "Adding MMS account";
-        account = new MailAccount();
-        account->setAccountType( MailAccount::MMS );
+        account = new QMailAccount();
+        account->setAccountType( QMailAccount::MMS );
         account->setAccountName( "MMS" );
         account->setMailServer("MMS");
         append(account);
@@ -126,7 +124,7 @@ void AccountList::saveAccounts()
 
     accountconf.setValue("accounts", count() );
     int count = 0;
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
         accountconf.endGroup();
         accountconf.beginGroup( "account_" + QString::number(count) );
@@ -151,7 +149,7 @@ uint AccountList::defaultMailServerCount()
 {
     uint count = 0;
 
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
         if ( it.next()->defaultMailServer() )
             count++;
@@ -160,22 +158,22 @@ uint AccountList::defaultMailServerCount()
     return count;
 }
 
-MailAccount* AccountList::defaultMailServer()
+QMailAccount* AccountList::defaultMailServer()
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if ( account->defaultMailServer() )
             return account;
     }
     return NULL;
 }
 
-void AccountList::setDefaultMailServer(MailAccount *account)
+void AccountList::setDefaultMailServer(QMailAccount *account)
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *a = it.next();
+        QMailAccount *a = it.next();
         if ( a != account ) {
             a->setDefaultMailServer( false );
         } else {
@@ -188,9 +186,9 @@ QStringList AccountList::emailAccounts()
 {
     QStringList l;
 
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if ( !account->emailAddress().isEmpty() ) {
             if( account == defaultMailServer() )
                 l.prepend( account->emailAddress() );
@@ -202,11 +200,11 @@ QStringList AccountList::emailAccounts()
     return l;
 }
 
-MailAccount* AccountList::getSmtpRef()
+QMailAccount* AccountList::getSmtpRef()
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if ( !account->smtpServer().isEmpty() )
             return account;
     }
@@ -219,13 +217,13 @@ MailAccount* AccountList::getSmtpRef()
 // any account it can find if the account doesn't exist.  For this
 // reason, new code should use "getAccountById" instead and
 // check for NULL.
-MailAccount* AccountList::getPopRefByAccount(QString user)
+QMailAccount* AccountList::getPopRefByAccount(QString user)
 {
     QString thisUser;
-    MailAccount* any=0;
-    QListIterator<MailAccount*> it(list);
+    QMailAccount* any=0;
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *a = it.next();
+        QMailAccount *a = it.next();
         if ( !a->mailServer().isEmpty() ) {
             if ( !any ) any = a;
             thisUser = a->id();
@@ -238,11 +236,11 @@ MailAccount* AccountList::getPopRefByAccount(QString user)
 }
 
 // gets an account that matches a particular id.  NULL if no such account.
-MailAccount* AccountList::getAccountById(QString id)
+QMailAccount* AccountList::getAccountById(QString id)
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *a = it.next();
+        QMailAccount *a = it.next();
         if ( a->id() == id ) {
             return a;
         }
@@ -251,11 +249,11 @@ MailAccount* AccountList::getAccountById(QString id)
 }
 
 /*  Find the account matching the email address */
-MailAccount* AccountList::getSmtpRefByMail(QString email)
+QMailAccount* AccountList::getSmtpRefByMail(QString email)
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if ( !account->smtpServer().isEmpty() ) {
             if ( account->emailAddress() == email )
                 return account;
@@ -268,9 +266,9 @@ MailAccount* AccountList::getSmtpRefByMail(QString email)
 //scans through the list to retrieve the first encountered username
 QString AccountList::getUserName()
 {
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if ( !account->userName().isEmpty() )
             return account->userName();
     }
@@ -278,12 +276,12 @@ QString AccountList::getUserName()
     return "";
 }
 
-void AccountList::intervalCheck(MailAccount *account)
+void AccountList::intervalCheck(QMailAccount *account)
 {
     int idCount = 0;
-    QListIterator<MailAccount*> it(list);
+    QListIterator<QMailAccount*> it(list);
     while (it.hasNext()) {
-        MailAccount *a = it.next();
+        QMailAccount *a = it.next();
         if ( a == account ) {
             emit checkAccount( idCount );
             break;
@@ -292,24 +290,24 @@ void AccountList::intervalCheck(MailAccount *account)
     }
 }
 
-void AccountList::append(MailAccount *a)
+void AccountList::append(QMailAccount *a)
 {
     list.append(a);
-    connect( a, SIGNAL(intervalCheck(MailAccount*)),
-             this, SLOT(intervalCheck(MailAccount*)) );
+    connect( a, SIGNAL(intervalCheck(QMailAccount*)),
+             this, SLOT(intervalCheck(QMailAccount*)) );
 };
 
 void AccountList::remove(int pos)
 {
     list.removeAt(pos);
     if ( at( pos ) )
-        disconnect( at( pos ), SIGNAL(intervalCheck(MailAccount*)),
-                    this, SLOT(intervalCheck(MailAccount*)) );
+        disconnect( at( pos ), SIGNAL(intervalCheck(QMailAccount*)),
+                    this, SLOT(intervalCheck(QMailAccount*)) );
 };
 
-void AccountList::remove(MailAccount* const a)
+void AccountList::remove(QMailAccount* const a)
 {
     list.removeAll(a);
-    disconnect( a, SIGNAL(intervalCheck(MailAccount*)),
-                this, SLOT(intervalCheck(MailAccount*)) );
+    disconnect( a, SIGNAL(intervalCheck(QMailAccount*)),
+                this, SLOT(intervalCheck(QMailAccount*)) );
 };

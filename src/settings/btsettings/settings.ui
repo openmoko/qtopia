@@ -1,6 +1,14 @@
 <ui version="4.0" >
  <class>Settings</class>
  <widget class="QWidget" name="Settings" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>191</width>
+    <height>193</height>
+   </rect>
+  </property>
   <property name="focusPolicy" >
    <enum>Qt::NoFocus</enum>
   </property>
@@ -79,14 +87,36 @@
          <number>0</number>
         </property>
         <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QLabel" name="label_2" >
           <property name="text" >
            <string>Timeout:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QSpinBox" name="timeoutSpinBox" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="specialValueText" >
            <string>Off</string>
           </property>
@@ -139,7 +169,7 @@
         <item>
          <widget class="QLineEdit" name="nameEdit" >
           <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -989,9 +987,7 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
             }
         }
 
-        if (fnt != QApplication::font()) {
-            QApplication::setFont(fnt);
-        }
+        QApplicationPrivate::setSystemFont(fnt);
     }
 
     if ((button || !resBG.isEmpty() || !resFG.isEmpty())) {// set app colors
@@ -4206,7 +4202,7 @@ bool QETWidget::translatePropertyEvent(const XEvent *event)
                 this->data->window_state = this->data->window_state | Qt::WindowMaximized;
                 send_event = true;
             } else if (!max && isMaximized()) {
-                this->data->window_state &= !Qt::WindowMaximized;
+                this->data->window_state &= ~Qt::WindowMaximized;
                 send_event = true;
             }
         }

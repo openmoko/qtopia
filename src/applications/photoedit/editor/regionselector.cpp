@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,7 +53,7 @@ QRect RegionSelector::region() const
         _region.left() != _region.right() &&
         _region.top() != _region.bottom() &&
         !image_ui->region().intersect( _region ).isEmpty() )
-        return _region.normalized();
+        return _region;
     return QRect();
 }
 
@@ -126,7 +126,7 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
         // painter.setRasterOp( Qt::XorROP );
 
         // Draw box around current selection region
-        painter.drawRect( _region.normalized().adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
+        painter.drawRect( _region.adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
 
         if( !Qtopia::mousePreferred() ) {
             QPoint center( _region.center() );
@@ -148,7 +148,7 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
             }
         }
 
-        QRegion region = image_ui->region().subtract( _region.normalized() );
+        QRegion region = image_ui->region().subtract( _region );
         if( !region.isEmpty() ) {
             painter.setClipRegion( region );
             painter.setClipping( true );
@@ -275,7 +275,7 @@ void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
         case MARK:
             // If stylus released within the selected region, emit selected
             // Otherwise, emit canceled signal
-            if( _region.normalized().contains( e->pos() ) ) emit selected();
+            if( _region.contains( e->pos() ) ) emit selected();
             else emit canceled();
             break;
         // If region is moving, change to mark
@@ -304,7 +304,7 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
             if( y > rect().bottom() ) y = rect().bottom();
 
             // Update region end with current stylus position
-            _region = QRect( region_start, QPoint( x, y ) );
+            _region = QRect( region_start, QPoint( x, y ) ).normalized();
             // Update display
             update();
         } else if ( !lag_area.contains( e->pos() ) ) {
@@ -318,10 +318,10 @@ void RegionSelector::setStateLabel()
 {
     switch( current_state ) {
     case MOVE:
-        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/resize", QString() );
+        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/resize", tr( "Size" ) );
         break;
     case SIZE:
-        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/move", QString() );
+        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/move", tr( "Move" ) );
         break;
     default:
         // Ignore

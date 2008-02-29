@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -60,7 +60,7 @@ void OutlookSyncPlugin::prepareForSync()
     so->moveToThread( thread );
 
     // connect up the sync messages to the thread
-    connect( this, SIGNAL(t_performSync(QDateTime)), so, SLOT(performSync(QDateTime)) );
+    connect( this, SIGNAL(t_fetchChangesSince(QDateTime)), so, SLOT(fetchChangesSince(QDateTime)) );
     connect( this, SIGNAL(t_updateClientRecord(QByteArray)), so, SLOT(updateClientRecord(QByteArray)), Qt::BlockingQueuedConnection );
     connect( this, SIGNAL(t_removeClientRecord(QString)), so, SLOT(removeClientRecord(QString)), Qt::BlockingQueuedConnection );
     // connect up the thread's signals to ours
@@ -83,11 +83,11 @@ void OutlookSyncPlugin::finishSync()
     emit finishedSync();
 }
 
-void OutlookSyncPlugin::performSync(const QDateTime &timestamp)
+void OutlookSyncPlugin::fetchChangesSince(const QDateTime &timestamp)
 {
-    TRACE(OutlookSyncPlugin) << "OutlookSyncPlugin::performSync";
+    TRACE(OutlookSyncPlugin) << "OutlookSyncPlugin::fetchChangesSince";
     // returns immediately
-    emit t_performSync( timestamp );
+    emit t_fetchChangesSince( timestamp );
 }
 
 void OutlookSyncPlugin::logonDone( bool ok )
@@ -270,9 +270,9 @@ void OTSyncObject::waitForAbort()
     TRACE(OutlookSyncPlugin) << "OTSyncObject::abort";
 }
 
-void OTSyncObject::performSync( const QDateTime &timestamp )
+void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
 {
-    TRACE(OutlookSyncPlugin) << "OTSyncObject::performSync" << "timestamp" << timestamp;
+    TRACE(OutlookSyncPlugin) << "OTSyncObject::fetchChangesSince" << "timestamp" << timestamp;
     QStringList leftover = rememberedIds;
     Outlook::MAPIFolderPtr folder = o->ns->GetDefaultFolder(q->folderEnum());
     Outlook::_ItemsPtr items = folder->GetItems();
@@ -409,4 +409,18 @@ IDispatchPtr OTSyncObject::findItem( const QString &entryid )
 
     return disp;
 }
+
+// Transaction support is not implemented
+void OutlookSyncPlugin::beginTransaction(const QDateTime & /*timestamp*/)
+{
+}
+
+void OutlookSyncPlugin::abortTransaction()
+{
+}
+
+void OutlookSyncPlugin::commitTransaction()
+{
+}
+
 

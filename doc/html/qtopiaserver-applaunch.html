@@ -22,20 +22,26 @@
 <p align="center"><img src="images/ApplicationControlTasks_UML.png" alt="&quot;Interacting with Application control tasks&quot;" /></p><p>The following classes are part of Qtopia's application control subsystem.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><th><a href="applicationipcrouter.html">ApplicationIpcRouter</a></th><td>Interface through which ApplicationTypeLauncher instances to control IPC message routing</td></tr>
+<tr valign="top" class="even"><th><a href="applicationlauncher.html">ApplicationLauncher</a></th><td>Responsible for fundamental application management and IPC routing within Qtopia</td></tr>
+<tr valign="top" class="odd"><th><a href="applicationshutdowntask.html">ApplicationShutdownTask</a></th><td>Way of terminating all running Qtopia applications before the Qtopia server itself terminates</td></tr>
 <tr valign="top" class="even"><th><a href="applicationterminationhandler.html">ApplicationTerminationHandler</a></th><td>Allows tasks to be notified, and possibly filter, when an application terminates</td></tr>
 <tr valign="top" class="odd"><th><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></th><td>Interface to control a particular application type in the system</td></tr>
 <tr valign="top" class="even"><th><a href="builtinapplicationlauncher.html">BuiltinApplicationLauncher</a></th><td>Supports launching simple applications that run inside the Qtopia Server process</td></tr>
 <tr valign="top" class="odd"><th><a href="consoleapplicationlauncher.html">ConsoleApplicationLauncher</a></th><td>Supports launching console applications</td></tr>
 <tr valign="top" class="even"><th><a href="exeapplicationlauncher.html">ExeApplicationLauncher</a></th><td>Simplifies implementing ApplicationTypeLauncher for process based applications</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiaserverapplicationlauncher.html">QtopiaServerApplicationLauncher</a></th><td>Acts as a proxy for the Qtopia Server within the application launcher framework</td></tr>
-<tr valign="top" class="even"><th><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></th><td>Supports launching quicklaunched Qtopia applications</td></tr>
-<tr valign="top" class="odd"><th><a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a></th><td>Represents an IPC route destination</td></tr>
-<tr valign="top" class="even"><th><a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a></th><td>Supports launching regular QtopiaApplication executables</td></tr>
+<tr valign="top" class="odd"><th><a href="qcoprouter.html">QCopRouter</a></th><td>Application ipc router for the QCop transport</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiaserverapplicationlauncher.html">QtopiaServerApplicationLauncher</a></th><td>Acts as a proxy for the Qtopia Server within the application launcher framework</td></tr>
+<tr valign="top" class="odd"><th><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></th><td>Supports launching quicklaunched Qtopia applications</td></tr>
+<tr valign="top" class="even"><th><a href="applicationipcrouter-routedestination.html">ApplicationIpcRouter::RouteDestination</a></th><td>Represents an IPC route destination</td></tr>
+<tr valign="top" class="odd"><th><a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a></th><td>Supports launching regular QtopiaApplication executables</td></tr>
+<tr valign="top" class="even"><th><a href="systemshutdownhandler.html">SystemShutdownHandler</a></th><td>Notifies tasks when the system is shutting down or restarting</td></tr>
+<tr valign="top" class="odd"><th><a href="taskmanagerentry.html">TaskManagerEntry</a></th><td>Used to insert non-application items into Qtopia's Running Applications/TaskManager window</td></tr>
+<tr valign="top" class="even"><th><a href="uiapplicationmonitor.html">UIApplicationMonitor</a></th><td>Monitors the running state of UI applications</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,7 @@
 #include "visualization.h"
 
 #include <stdlib.h>
+#include <QtopiaApplication>
 
 class Flake
 {
@@ -93,41 +94,47 @@ void FlakeFactory::retireAll()
 
 static const int MAX_POOL = 15;
 
-VisualizationWidget::VisualizationWidget( QWidget* parent )
-    : QWidget( parent ),  m_isactive( false ), m_generate( 0 ), m_update( 0 ), m_flakefactory( MAX_POOL )
+VisualizationWidget::VisualizationWidget(QWidget* parent):
+    QWidget(parent),
+    m_init(false),
+    m_isactive(false),
+    m_generate(0),
+    m_update(0),
+    m_flakefactory(MAX_POOL)
 {
-    static const QString FLAKE_PATH = ":icon/mediaplayer/visualization/qtopiaflake";
-
-    int flakeside = fontMetrics().height()*3;
-
-    m_flakepixmap = QIcon( FLAKE_PATH ).pixmap( QSize( flakeside, flakeside ) );
-    m_halfwidth = m_flakepixmap.width() / 2;
 }
 
 void VisualizationWidget::setActive( bool active )
 {
-    if( m_isactive == active ) {
+    if (m_isactive == active)
         return;
-    }
 
     m_isactive = active;
 
-    if( m_isactive ) {
-        m_generate = startTimer( 1500 );
-        m_update = startTimer( 50 );
-    } else {
-        if ( m_generate ){
-            killTimer( m_generate );
+    init();
+
+    if (m_isactive)
+    {
+        m_generate = startTimer(1500);
+        m_update = startTimer(50);
+    }
+    else
+    {
+        if (m_generate)
+        {
+            killTimer(m_generate);
             m_generate = 0;
         }
-        if ( m_update ) {
-            killTimer( m_update );
+
+        if (m_update)
+        {
+            killTimer(m_update);
             m_update = 0;
         }
 
         m_flakefactory.retireAll();
         update();
-   }
+    }
 }
 
 void VisualizationWidget::paintEvent( QPaintEvent* e )
@@ -135,6 +142,9 @@ void VisualizationWidget::paintEvent( QPaintEvent* e )
 #ifdef NO_VISUALIZATION
     return;
 #endif
+
+    if (!m_isactive)
+        return;
 
     QPainter painter( this );
 
@@ -177,8 +187,25 @@ void VisualizationWidget::timerEvent( QTimerEvent* e )
             if( flake ) {
                 flake->setPos( QPoint( rand() % width() - m_halfwidth,
                     -m_flakepixmap.height() - rand() % m_flakepixmap.height() ) );
-                flake->setStep( (step = ++step % 2) + 1 );
+                flake->setStep( (step = (step + 1) % 2) + 1 );
             }
         }
     }
 }
+
+void VisualizationWidget::init()
+{
+    static const QString FLAKE_PATH = ":icon/mediaplayer/visualization/qtopiaflake";
+
+    if (m_init)
+        return;
+
+    int flakeside = QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)*3;
+
+    m_flakepixmap = QIcon( FLAKE_PATH ).pixmap( QSize( flakeside, flakeside ) );
+    m_halfwidth = m_flakepixmap.width() / 2;
+
+    m_init = true;
+}
+
+

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -147,10 +147,10 @@ MediaServerProxy::MediaServerProxy()
     m_channel = QString(QTOPIA_MEDIALIBRARY_CHANNEL).arg(getpid());
     m_adaptor = new QtopiaIpcAdaptor(m_channel, this);
 
-    QtopiaIpcAdaptor::connect(m_adaptor, SIGNAL(sessionCreated(QUuid)),
+    QtopiaIpcAdaptor::connect(m_adaptor, MESSAGE(sessionCreated(QUuid)),
             this, SLOT(sessionCreated(QUuid)));
 
-    QtopiaIpcAdaptor::connect(m_adaptor, SIGNAL(sessionError(QUuid,QString)),
+    QtopiaIpcAdaptor::connect(m_adaptor, MESSAGE(sessionError(QUuid,QString)),
             this, SLOT(sessionError(QUuid,QString)));
 
     // values

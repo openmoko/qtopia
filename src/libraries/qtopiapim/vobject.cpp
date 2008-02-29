@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,15 +20,11 @@
 ****************************************************************************/
 
 /*!
-    \class VObjectLegal
-    \brief The VObjectLegal class is a placeholder for licensing information.
-
-    \ingroup qtopia3rdparty
-
-    The License from the file headers is reproduced here for your
-    convenience.
-
-    \quotation
+ \page vobjectlegal.html
+ \title VObject
+ \brief License information for VObject.
+ \ingroup qtopia3rdparty
+ \legalese
 (C) Copyright 1996 Apple Computer, Inc., AT&T Corp., International
 Business Machines Corporation and Siemens Rolm Communications Inc.
 
@@ -63,8 +59,9 @@ PURPOSE.
 The software is provided with RESTRICTED RIGHTS.  Use, duplication, or
 disclosure by the government are subject to restrictions set forth in
 DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
-\endquotation
+ \endlegalese
 */
+
 
 /*
  * src: vobject.c

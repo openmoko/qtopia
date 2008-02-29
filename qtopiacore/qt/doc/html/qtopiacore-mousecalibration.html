@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/mousecalibration.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/mousecalibration.qdoc -->
 <head>
   <title>Qt 4.3: Mouse Calibration Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -21,6 +21,7 @@
 <li><a href="qtopiacore-mousecalibration-scribblewidget-cpp.html">qtopiacore/mousecalibration/scribblewidget.cpp</a></li>
 <li><a href="qtopiacore-mousecalibration-scribblewidget-h.html">qtopiacore/mousecalibration/scribblewidget.h</a></li>
 <li><a href="qtopiacore-mousecalibration-main-cpp.html">qtopiacore/mousecalibration/main.cpp</a></li>
+<li><a href="qtopiacore-mousecalibration-mousecalibration-pro.html">qtopiacore/mousecalibration/mousecalibration.pro</a></li>
 </ul>
 <p>The Mouse Calibration example demonstrates how to write a simple program using the mechanisms provided by the <a href="qwsmousehandler.html">QWSMouseHandler</a> class to calibrate the mouse handler in <a href="qtopiacore.html">Qtopia Core</a>.</p>
 <p>Calibration is the process of mapping between physical (i.e&#x2e; device) coordinates and logical coordinates.</p>
@@ -146,7 +147,7 @@
 
      QPoint point = data.screenPoints[pressCount];
 
-     <span class="comment">// Map to logical coordinates in case the screen is transformed</span>
+     <span class="comment">//</span> Map to logical coordinates in case the screen is transformed
      QSize screenSize(qt_screen-&gt;deviceWidth(), qt_screen-&gt;deviceHeight());
      point = qt_screen-&gt;mapFromDevice(point, screenSize);
 
@@ -156,7 +157,7 @@
 <p>The <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>() function is reimplemented to receive the widget's paint events. A paint event is a request to repaint all or parts of the widget. It can happen as a result of <a href="qwidget.html#repaint">QWidget::repaint</a>() or <a href="qwidget.html#update">QWidget::update</a>(), or because the widget was obscured and has now been uncovered, or for many other reasons. In our reimplementation of the function we simply draw a cross at the next point the user should press.</p>
 <pre> void Calibration::mouseReleaseEvent(QMouseEvent *event)
  {
-     <span class="comment">// Map from device coordinates in case the screen is transformed</span>
+     <span class="comment">//</span> Map from device coordinates in case the screen is transformed
      QSize screenSize(qt_screen-&gt;width(), qt_screen-&gt;height());
      QPoint p = qt_screen-&gt;mapToDevice(event-&gt;pos(), screenSize);
 
@@ -179,8 +180,8 @@
 <p>Our reimplementation of the <a href="qdialog.html#accept">QDialog::accept</a>() slot simply activate the new calibration data using the <a href="qwsmousehandler.html#calibrate">QWSMouseHandler::calibrate</a>() function. We also use the <a href="qtglobal.html#Q_ASSERT">Q_ASSERT</a>() macro to ensure that the number of required samples are present.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

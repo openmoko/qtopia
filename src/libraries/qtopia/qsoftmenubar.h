@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 
 #include <qtopiaglobal.h>
 
+#include <QWidget>
 #include <qstring.h>
 #include <QList>
 
@@ -56,6 +57,7 @@ public:
     static bool hasMenu(QWidget *w, FocusState state=AnyFocus);
     static void addMenuTo(QWidget *w, QMenu *menu, FocusState state=AnyFocus);
     static void removeMenuFrom(QWidget *w, QMenu *menu, FocusState state=AnyFocus);
+    static QWidgetList widgetsFor(const QMenu *menu, FocusState state=AnyFocus);
     static void setHelpEnabled(QWidget *w, bool enable);
     static void setCancelEnabled(QWidget *w, bool enable);
     static void setInputMethodEnabled(QWidget *widget, bool enable);

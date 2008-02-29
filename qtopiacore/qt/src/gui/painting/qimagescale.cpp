@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -155,10 +153,11 @@ unsigned int** QImageScale::qimageCalcYPoints(unsigned int *src,
     }
     p = new unsigned int* [dh+1];
 
-    val = 0;
+    int up = abs(dh) >= sh;
+    val = up ? 0x8000 * sh / dh - 0x8000 : 0;
     inc = (sh << 16) / dh;
     for(i = 0; i < dh; i++){
-        p[j++] = src + ((val >> 16) * sw);
+        p[j++] = src + qMax(0, val >> 16) * sw;
         val += inc;
     }
     if(rv){
@@ -182,10 +181,11 @@ int* QImageScale::qimageCalcXPoints(int sw, int dw)
     }
     p = new int[dw+1];
 
-    val = 0;
+    int up = abs(dw) >= sw;
+    val = up ? 0x8000 * sw / dw - 0x8000 : 0;
     inc = (sw << 16) / dw;
     for(i = 0; i < dw; i++){
-        p[j++] = (val >> 16);
+        p[j++] = qMax(0, val >> 16);
         val += inc;
     }
 
@@ -213,12 +213,16 @@ int* QImageScale::qimageCalcApoints(int s, int d, int up)
     if(up){
         int val, inc;
 
-        val = 0;
+        val = 0x8000 * s / d - 0x8000;
         inc = (s << 16) / d;
         for(i = 0; i < d; i++){
-            p[j++] = (val >> 8) - ((val >> 8) & 0xffffff00);
-            if((val >> 16) >= (s - 1))
-                p[j - 1] = 0;
+            int pos = val >> 16;
+            if (pos < 0)
+                p[j++] = 0;
+            else if (pos >= (s - 1))
+                p[j++] = 0;
+            else
+                p[j++] = (val >> 8) - ((val >> 8) & 0xffffff00);
             val += inc;
         }
     }

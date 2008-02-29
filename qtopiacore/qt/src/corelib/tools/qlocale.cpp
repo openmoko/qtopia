@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -3320,7 +3318,7 @@ QString QLocalePrivate::doubleToString(double d,
             if (digits.length() > 0) {
                 int last_nonzero_idx = digits.length() - 1;
                 while (last_nonzero_idx > 0
-                       && digits.unicode()[last_nonzero_idx] == '0')
+                       && digits.unicode()[last_nonzero_idx] == QLatin1Char('0'))
                     --last_nonzero_idx;
                 digits.truncate(last_nonzero_idx + 1);
             }
@@ -3795,7 +3793,6 @@ double QLocalePrivate::stringToDouble(const QString &number, bool *ok,
             *ok = false;
         return 0.0;
     }
-
     return bytearrayToDouble(buff.constData(), ok);
 }
 
@@ -6560,22 +6557,48 @@ static char *_qdtoa( NEEDS_VOLATILE double d, int mode, int ndigits, int *decpt,
 }
 #else
 // NOT thread safe!
+
+#include <errno.h>
+
 Q_CORE_EXPORT char *qdtoa( double d, int mode, int ndigits, int *decpt, int *sign, char **rve, char **resultp)
 {
     if(rve)
       *rve = 0;
-    if(resultp)
-      *resultp = 0;
+
+    char *res;
+    if (mode == 0)
+        ndigits = 80;
+
     if (mode == 3)
-        return fcvt(d, ndigits, decpt, sign);
-    return ecvt(d, ndigits, decpt, sign);
+        res = fcvt(d, ndigits, decpt, sign);
+    else
+        res = ecvt(d, ndigits, decpt, sign);
+
+    int n = qstrlen(res);
+    if (mode == 0) { // remove trailing 0's
+        const int stop = qMax(1, *decpt);
+        int i;
+        for (i = n-1; i >= stop; --i) {
+            if (res[i] != '0')
+                break;
+        }
+        n = i + 1;
+    }
+    *resultp = static_cast<char*>(malloc(n + 1));
+    qstrncpy(*resultp, res, n + 1);
+    return *resultp;
 }
 
 Q_CORE_EXPORT double qstrtod(const char *s00, const char **se, bool *ok)
 {
     double ret = strtod((char*)s00, (char**)se);
-    if(ok)
+    if (ok) {
+      if((ret == 0.0l && errno == ERANGE)
+	 || ret == HUGE_VAL || ret == -HUGE_VAL)
+	*ok = false;
+      else
         *ok = true; // the result will be that we don't report underflow in this case
+    }
     return ret;
 }
 #endif // QT_QLOCALE_USES_FCVT

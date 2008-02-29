@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,10 +29,8 @@
 #include <QKeyEvent>
 #include <QPixmapCache>
 #include <QTimer>
+#include <QStyle>
 
-
-static const int minGrid = 16;
-static const int preferredGrid = 22;
 
 
 static void minefield_drawIcon(QPainter *p, const QPixmap &pixmap, int dimens, int margin)
@@ -76,7 +74,7 @@ public:
     Mine( MineField* );
     void paint( QPainter *painter, int x, int y, int width, int height );
 
-    QSize sizeHint() const { return QSize( preferredGrid, preferredGrid ); }
+    QSize sizeHint() const { return QSize( field->preferredGrid(), field->preferredGrid() ); }
 
     void activate( bool sure = true );
     void setHint( int );
@@ -353,6 +351,16 @@ MineField::MineField( QWidget* parent )
     topMargin = 0;
     leftMargin = 0;
 
+    _minGrid = 16;
+    _preferredGrid = 22;
+
+    if(style() && style()->inherits("QThumbStyle"))
+    {
+        this->physicalDpiX();
+        _minGrid = int(_minGrid  * 4.0f / 283.0f * this->physicalDpiX());
+        _preferredGrid = int(_preferredGrid * 4.0f / 283.0f * this->physicalDpiX());
+    };
+
     setState( GameOver );
     setFrameStyle(NoFrame);
     setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
@@ -478,8 +486,8 @@ int MineField::findCellSize()
     int h = availableRect.height() - 2;
 
     int size = qMin( w/numCols, h/numRows );
-    if (size < minGrid)
-        size = minGrid;
+    if (size < _minGrid)
+        size = _minGrid;
     return size;
 }
 

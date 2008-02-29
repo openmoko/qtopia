@@ -69,16 +69,16 @@
 <h3 class="fn"><a name="QBluetoothSdpUuid"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ()</h3>
 <p>Constructs a new invalid UUID.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="QBluetoothSdpUuid-2"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( quint16 <i>data</i> )</h3>
+<h3 class="fn"><a name="QBluetoothSdpUuid-2"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( <a href="./qtglobal.html#quint16-typedef">quint16</a> <i>data</i> )</h3>
 <p>Constructs a new 16 bit UUID with the value given by <i>data</i>. The type of the UUID will be <tt>UUID16</tt></p>
 <p>See also <a href="qbluetoothsdpuuid.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="QBluetoothSdpUuid-3"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( quint32 <i>data</i> )</h3>
+<h3 class="fn"><a name="QBluetoothSdpUuid-3"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>data</i> )</h3>
 <p>Constructs a new 32 bit UUID with the value given by <i>data</i>. The type of the UUID will be <tt>UUID32</tt></p>
 <p>See also <a href="qbluetoothsdpuuid.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="QBluetoothSdpUuid-4"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( quint128 <i>data</i> )</h3>
 <p>Constructs a new 128 bit UUID with the value given by <i>data</i>. The type of the UUID will be <tt>UUID128</tt></p>
 <p>See also <a href="qbluetoothsdpuuid.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="QBluetoothSdpUuid-5"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
+<h3 class="fn"><a name="QBluetoothSdpUuid-5"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( const <a href="./qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Constructs a new UUID from a string representation <i>str</i>. The UUID type will be inferred from the size and format of the string. If the string is not in a valid format, an invalid UUID is created.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="QBluetoothSdpUuid-6"></a>QBluetoothSdpUuid::QBluetoothSdpUuid ( const QBluetoothSdpUuid &amp; <i>other</i> )</h3>
@@ -88,17 +88,17 @@
 <h3 class="fn"><a name="create128Bit"></a>QBluetoothSdpUuid QBluetoothSdpUuid::create128Bit ( quint128 <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is a convenience method for creating 128 bit UUIDs. The <i>id</i> parameter specifies the 128 bit id to create.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#create16Bit">create16Bit</a>() and <a href="qbluetoothsdpuuid.html#create32Bit">create32Bit</a>().</p>
-<h3 class="fn"><a name="create16Bit"></a>QBluetoothSdpUuid QBluetoothSdpUuid::create16Bit ( quint16 <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="create16Bit"></a>QBluetoothSdpUuid QBluetoothSdpUuid::create16Bit ( <a href="./qtglobal.html#quint16-typedef">quint16</a> <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is a convenience method for creating 16 bit UUIDs. The <i>id</i> parameter specifies the 16 bit id to create.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#create32Bit">create32Bit</a>() and <a href="qbluetoothsdpuuid.html#create128Bit">create128Bit</a>().</p>
-<h3 class="fn"><a name="create32Bit"></a>QBluetoothSdpUuid QBluetoothSdpUuid::create32Bit ( quint32 <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="create32Bit"></a>QBluetoothSdpUuid QBluetoothSdpUuid::create32Bit ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is a convenience method for creating 32 bit UUIDs. The <i>id</i> parameter specifies the 32 bit id to create.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#create16Bit">create16Bit</a>() and <a href="qbluetoothsdpuuid.html#create128Bit">create128Bit</a>().</p>
 <h3 class="fn"><a name="fromProfile"></a>QBluetoothSdpUuid QBluetoothSdpUuid::fromProfile ( <a href="qbluetooth.html#SDPProfile-enum">QBluetooth::SDPProfile</a> <i>profile</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is a convenience method for creating a <a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a> from <i>profile</i>. The profile enumeration is converted to a Bluetooth assigned number corresponding to the the profile UUID.</p>
 <h3 class="fn"><a name="isValid"></a>bool QBluetoothSdpUuid::isValid () const</h3>
 <p>Returns whether the UUID is valid.</p>
-<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QBluetoothSdpUuid::toString () const</h3>
+<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QBluetoothSdpUuid::toString () const</h3>
 <p>Converts a UUID into string form.</p>
 <p>If the UUID is a 16 bit UUID, the string returned will be in this format: 0xXXXX, where X represents a hexadecimal number. The string will be 0-padded, e.g&#x2e; <tt>0x00FF</tt>.</p>
 <p>If the UUID is a 32 bit UUID, the string returned will be in this format: 0xXXXXXXXX where X represents a hexadecimal number. The string will be 0-padded, e.g&#x2e; <tt>0x0000FFFFFF</tt>.</p>
@@ -109,8 +109,8 @@
 <h3 class="fn"><a name="type"></a><a href="qbluetoothsdpuuid.html#Type-enum">QBluetoothSdpUuid::Type</a> QBluetoothSdpUuid::type () const</h3>
 <p>Returns the type of the UUID.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#uuid">uuid</a>().</p>
-<h3 class="fn"><a name="uuid"></a><a href="qvariant.html">QVariant</a> QBluetoothSdpUuid::uuid ()</h3>
-<p>Returns the uuid as a <a href="qvariant.html">QVariant</a>. The <a href="qvariant.html">QVariant</a> should be interpreted based on the <a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a> type. E.g&#x2e; <tt>quint16</tt> if type is <tt>UUID16</tt>, <tt>quint32</tt> if type is <tt>UUID32</tt>, and <tt>quint128</tt> if type is <tt>UUID128</tt>.</p>
+<h3 class="fn"><a name="uuid"></a><a href="./qvariant.html">QVariant</a> QBluetoothSdpUuid::uuid ()</h3>
+<p>Returns the uuid as a <a href="./qvariant.html">QVariant</a>. The <a href="./qvariant.html">QVariant</a> should be interpreted based on the <a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a> type. E.g&#x2e; <tt>quint16</tt> if type is <tt>UUID16</tt>, <tt>quint32</tt> if type is <tt>UUID32</tt>, and <tt>quint128</tt> if type is <tt>UUID128</tt>.</p>
 <p>See also <a href="qbluetoothsdpuuid.html#type">type</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QBluetoothSdpUuid::operator!= ( const QBluetoothSdpUuid &amp; <i>other</i> ) const</h3>
 <p>This function returns true if UUID in the current does not match the UUID given by <i>other</i>.</p>
@@ -121,8 +121,8 @@
 <p>Compares the current UUID to uuid given by <i>other</i>. If the types do not match, the UUIDs are converted to 128 bit UUIDs and are bitwise compared. The method returns true if uuids match, false otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

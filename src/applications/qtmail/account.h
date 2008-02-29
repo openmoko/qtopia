@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,7 +37,7 @@
 
 #include "folder.h"
 
-class MailAccount;
+class QMailAccount;
 class QSettings;
 class QTimer;
 
@@ -53,13 +53,15 @@ typedef uint FolderSyncSetting;
 class QTOPIAMAIL_EXPORT Mailbox : public Folder
 {
 public:
-    Mailbox(MailAccount *account, QString _flags, QString _delimiter, QString _name);
-    Mailbox(MailAccount *account);
+    Mailbox(QMailAccount *account, QString _flags, QString _delimiter, QString _name);
+    Mailbox(QMailAccount *account);
     ~Mailbox();
 
     void setServerUid(QStringList list);
     QStringList getServerUid() const;
-    QStringList getNewUid(QStringList list) const;
+
+    QStringList getNewUids(const QStringList& list) const;
+    QStringList getExpiredUids(const QStringList& list) const;
 
     void saveSettings(QSettings *config);
     void readSettings(QSettings *config);
@@ -100,7 +102,7 @@ public:
     QString fullName() const;
     QString displayName() const {return _displayName;};
     bool matchesEmail(const QMailMessage& message) const;
-    MailAccount* account() const { return _account; };
+    QMailAccount* account() const { return _account; };
 private:
     QString decodeModUTF7(QString in);
     QString decodeModBase64(QString in);
@@ -115,18 +117,18 @@ private:
     QString _name, oldName, uid, delimiter;
     QStringList serverUidList, delList;
 
-    MailAccount *_account;
+    QMailAccount *_account;
     Search *search;
     QString _displayName;
 };
 
-class QTOPIAMAIL_EXPORT MailAccount : public Folder
+class QTOPIAMAIL_EXPORT QMailAccount : public Folder
 {
     Q_OBJECT
 
 public:
-    MailAccount();
-    ~MailAccount();
+    QMailAccount();
+    ~QMailAccount();
 
     /* General */
     enum AccountType {
@@ -142,8 +144,9 @@ public:
     Auth_NONE = 0,
 #ifndef QT_NO_OPENSSL
     Auth_LOGIN = 1,
-    Auth_PLAIN = 2
+    Auth_PLAIN = 2,
 #endif
+    Auth_INCOMING = 3
     };
 
     enum EncryptType {
@@ -229,9 +232,12 @@ public:
     void setBaseFolder(QString s) { _baseFolder = s; };
     QString baseFolder() const { return _baseFolder; };
 
+    void addBox(Mailbox *box);
     void removeBox(Mailbox *box);
     Mailbox* getMailboxRef(QString name);
     Mailbox* getMailboxRefByMsgUid(QString _uid, const QString &box);
+
+    const QList<Mailbox*>& mailboxes() const;
 
     /* MMS Only */
     void setNetworkConfig(QString c) { _networkCfg = c; }
@@ -252,19 +258,11 @@ public:
     QString displayName() const { return accountName(); };
     bool matchesEmail(const QMailMessage& message) const;
 
-    QList<Mailbox*> mailboxes;
-
-    /* Message counts */
-    int unreadCount() const;
-    void setUnreadCount( int count );
-    int count() const;
-    void setCount( int count );
-
 public slots:
     void checkIntervalTimeout();
 
 signals:
-    void intervalCheck(MailAccount*);
+    void intervalCheck(QMailAccount*);
 
 private:
     AccountType _accountType;
@@ -305,8 +303,9 @@ private:
     QStringList delList;
 
     QTimer *intervalCheckTimer;
-    int _unreadCount;
-    int _count;
+
+    QList<Mailbox*> _mailboxes;
+    mutable bool _sortMailboxes;
 };
 
 #endif

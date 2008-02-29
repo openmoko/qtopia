@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,8 +24,9 @@
 #include "log.h"
 #include "qdlinkhelper.h"
 #include "qcopchannel_qd.h"
+#include "qtopia4sync.h"
 
-#include <custom-qtopia.h>
+#include <custom.h>
 
 #if defined(Q_WS_X11)
 #include <qcopchannel_x11.h>
@@ -40,10 +41,12 @@
 #include <version.h>
 #include <QTimer>
 
+// The documentation references these lines (see doc/src/syscust/custom.qdoc)
 #ifndef QDSYNC_MODEL
-#define QDSYNC_MODEL "Unspecified Device"
+#define QDSYNC_MODEL Qtopia::architecture()
 #endif
 
+// The documentation references these lines (see doc/src/syscust/custom.qdoc)
 #ifndef QDSYNC_SYSTEM
 #define QDSYNC_SYSTEM "Qtopia"
 #endif
@@ -248,7 +251,8 @@ QCopBridgePI::QCopBridgePI( QIODevice *socket, QObject *parent )
                                  "protocol=2;"
                                  "system=%5;"
                                  "model=%6;"
-                                 "hexversion=%7")
+                                 "hexversion=%7;"
+                                 "datasets=%8")
             .arg(QTOPIA_VERSION_STR)
             .arg(QString(SyncAuthentication::serverId()))
             .arg(QString(SyncAuthentication::loginName()))
@@ -256,6 +260,7 @@ QCopBridgePI::QCopBridgePI( QIODevice *socket, QObject *parent )
             .arg(QString(QDSYNC_SYSTEM))
             .arg(QString(QDSYNC_MODEL))
             .arg(QTOPIA_VERSION)
+            .arg(Qtopia4Sync::instance()->datasets().join(" "))
             .toLocal8Bit() );
 
     LOG() << "starting kill timer (5 seconds)";

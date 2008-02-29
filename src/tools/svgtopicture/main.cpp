@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,7 +26,7 @@
 #include <QPicture>
 #include <QSvgRenderer>
 #include <QPainter>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDebug>
 #include <QFile>
 
@@ -43,7 +43,7 @@ static void usage(const char *name)
 
 int main(int argc, char **argv)
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv, false);
 
     int i;
     for (i = 1; i < argc; i++) {

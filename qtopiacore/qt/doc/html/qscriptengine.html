@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/script/qscriptengine.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/script/qscriptengine.cpp -->
 <head>
   <title>Qt 4.3: QScriptEngine Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -240,7 +240,7 @@
 <pre> static QScriptValue getSetFoo(QScriptContext *context, QScriptEngine *engine)
  {
      QScriptValue callee = context-&gt;callee();
-     if (context-&gt;argumentCount() == 1) <span class="comment">// writing?</span>
+     if (context-&gt;argumentCount() == 1) <span class="comment">//</span> writing?
          callee.setProperty(&quot;value&quot;, context-&gt;argument(0));
      return callee.property(&quot;value&quot;);
  }
@@ -263,15 +263,15 @@
 <pre> QScriptValue Foo(QScriptContext *context, QScriptEngine *engine)
  {
      if (context-&gt;calledAsConstructor()) {
-         <span class="comment">// initialize the new object</span>
+         <span class="comment">//</span> initialize the new object
          context-&gt;thisObject().setProperty(&quot;bar&quot;, ...);
-         <span class="comment">// ...</span>
-         <span class="comment">// return a non-object value to indicate that the</span>
-         <span class="comment">// thisObject() should be the result of the &quot;new Foo()&quot; expression</span>
+         <span class="comment">//</span> ...
+         <span class="comment">//</span> return a non-object value to indicate that the
+         <span class="comment">//</span> thisObject() should be the result of the &quot;new Foo()&quot; expression
          return engine-&gt;undefinedValue();
      } else {
-         <span class="comment">// not called as &quot;new Foo()&quot;, just &quot;Foo()&quot;</span>
-         <span class="comment">// create our own object and return that one</span>
+         <span class="comment">//</span> not called as &quot;new Foo()&quot;, just &quot;Foo()&quot;
+         <span class="comment">//</span> create our own object and return that one
          QScriptValue object = engine-&gt;newObject();
          object.setPrototype(context-&gt;callee().property(&quot;prototype&quot;));
          object.setProperty(&quot;baz&quot;, ...);
@@ -292,20 +292,20 @@
  QScriptValue constructBar(QScriptContext *context, QScriptEngine *engine)
  {
      Bar bar;
-     <span class="comment">// initialize from arguments in context, if desired</span>
+     <span class="comment">//</span> initialize from arguments in context, if desired
      ...
      return engine-&gt;toScriptValue(bar);
  }
 
  class BarPrototype : public QObject, public QScriptable
  {
-<span class="comment"> // provide the scriptable interface of this type using slots and properties</span>
+<span class="comment"> //</span> provide the scriptable interface of this type using slots and properties
  ...
  };
 
  ...
 
-<span class="comment"> // create and register the Bar prototype and constructor in the engine</span>
+<span class="comment"> //</span> create and register the Bar prototype and constructor in the engine
  BarPrototype *barPrototypeObject = new BarPrototype(...);
  QScriptValue barProto = engine-&gt;newQObject(barPrototypeObject);
  engine-&gt;setDefaultPrototype(qMetaTypeId&lt;Bar&gt;, barProto);
@@ -463,7 +463,7 @@
  QVector&lt;int&gt; v = qscriptvalue_cast&lt;QVector&lt;int&gt; &gt;(engine-&gt;evaluate(&quot;[5, 1, 3, 2]&quot;));
  qSort(v.begin(), v.end());
  QScriptValue a = engine-&gt;toScriptValue(v);
- qDebug() &lt;&lt; a.toString(); <span class="comment">// outputs &quot;[1, 2, 3, 5]&quot;</span></pre>
+ qDebug() &lt;&lt; a.toString(); <span class="comment">//</span> outputs &quot;[1, 2, 3, 5]&quot;</pre>
 <p>See also <a href="qscriptengine.html#qScriptRegisterMetaType">qScriptRegisterMetaType</a>().</p>
 <h3 class="fn"><a name="qScriptValueFromQMetaObject"></a><a href="qscriptvalue.html">QScriptValue</a> qScriptValueFromQMetaObject ( QScriptEngine * <i>engine</i> )</h3>
 <p>Uses <i>engine</i> to create a <a href="qscriptvalue.html">QScriptValue</a> that represents the Qt class <tt>T</tt>.</p>
@@ -498,8 +498,8 @@
 <p>This function was introduced in Qt 4.3.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

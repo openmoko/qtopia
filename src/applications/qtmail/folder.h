@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,7 @@
 #include <qobject.h>
 
 #include <qtopiaglobal.h>
+#include <qsoftmenubar.h>
 
 class Search;
 class QMailMessage;
@@ -56,6 +57,7 @@ public:
     virtual QString fullName() const;
     virtual QString displayName() const;
     virtual void setName(QString str);
+    virtual QSoftMenuBar::StandardLabel menuLabel() const;
 
 private:
     int _folderType;

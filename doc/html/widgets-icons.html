@@ -24,6 +24,7 @@
 <li><a href="widgets-icons-mainwindow-cpp.html">widgets/icons/mainwindow.cpp</a></li>
 <li><a href="widgets-icons-mainwindow-h.html">widgets/icons/mainwindow.h</a></li>
 <li><a href="widgets-icons-main-cpp.html">widgets/icons/main.cpp</a></li>
+<li><a href="widgets-icons-icons-pro.html">widgets/icons/icons.pro</a></li>
 </ul>
 <p>The Icons example shows how <a href="qicon.html">QIcon</a> can generate pixmaps reflecting an icon's state, mode and size. These pixmaps are generated from the set of pixmaps made available to the icon, and are used by Qt widgets to show an icon representing a particular action.</p>
 <p align="center"><img src="images/icons-example.png" alt="Screenshot of the Icons example" /></p><p>Contents:</p>
@@ -720,7 +721,7 @@
  }</pre>
 <p>The constructor is trivial.</p>
 <pre> QWidget *ImageDelegate::createEditor(QWidget *parent,
-                                      const QStyleOptionViewItem &amp; /* option */</span>,
+                                      const QStyleOptionViewItem &amp; <span class="comment">/* option */</span>,
                                       const QModelIndex &amp;index) const
  {
      QComboBox *comboBox = new QComboBox(parent);
@@ -771,8 +772,8 @@
 <p>The <tt>emitCommitData()</tt> slot simply emit the <a href="qabstractitemdelegate.html#commitData">QAbstractItemDelegate::commitData</a>() signal for the editor that triggered the slot. This signal must be emitted when the editor widget has completed editing the data, and wants to write it back into the model.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qt4-sql.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/qt4-sql.qdoc -->
 <head>
   <title>Qt 4.3: The Qt 4 Database GUI Layer</title>
   <link rel="prev" href="qt4-accessibility.html" />
@@ -86,7 +86,7 @@
      return value;
  }</pre>
 <p>It is also possible to subclass <a href="qsqlquerymodel.html">QSqlQueryModel</a> to add support for editing. This is done by reimplementing <a href="qabstractitemmodel.html#flags">QAbstractItemModel::flags</a>() to specify which database fields are editable and <a href="qabstractitemmodel.html#setData">QAbstractItemModel::setData</a>() to modify the database. Here's an example of a setData() reimplementation that changes the first or last name of a person:</p>
-<pre> bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int /* role */</span>)
+<pre> bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int <span class="comment">/* role */</span>)
  {
      if (index.column() &lt; 1 || index.column() &gt; 2)
          return false;
@@ -131,8 +131,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

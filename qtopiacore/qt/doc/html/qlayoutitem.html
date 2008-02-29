@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qlayoutitem.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qlayoutitem.cpp -->
 <head>
   <title>Qt 4.3: QLayoutItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -80,7 +80,7 @@
 <pre> int MyLayout::heightForWidth(int w) const
  {
      if (cache_dirty || cached_width != w) {
-         <span class="comment">// not all C++ compilers support &quot;mutable&quot;</span>
+         <span class="comment">//</span> not all C++ compilers support &quot;mutable&quot;
          MyLayout *that = (MyLayout*)this;
          int h = calculateHeightForWidth(w);
          that-&gt;cached_hfw = h;
@@ -117,8 +117,8 @@
 <p>If this item is a <a href="qwidget.html">QWidget</a>, it is returned as a <a href="qwidget.html">QWidget</a>; otherwise 0 is returned. This function provides type-safe casting.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

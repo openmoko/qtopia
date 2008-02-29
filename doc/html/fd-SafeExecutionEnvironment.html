@@ -3,7 +3,7 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Content: Installed Software: Safe Execution Environment - Qtopia 4.3 Roadmap</title>
+  <title>Content: Installed Software: Safe Execution Environment</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -11,12 +11,52 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content: Installed Software: Safe Execution Environment - Qtopia 4.3 Roadmap<br><small>Functional Description</small></h1><p><strong>Qtopia 4.3.0 provides an expanded version of the Safe Execution Environment for experimental purposes, a more lightweight version is scheduled for the official release</strong>. <p /> The Safe Execution Environment provides a level of security to enable downloading, installing and running third-party native applications; by addressing the risk of compromising the operation of the device, or its data, when running such applications. <p/>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content: Installed Software: Safe Execution Environment<br><small>Functional Description</small></h1><p>The Safe Execution Environment provides a level of security to enable 
+downloading, installing and running third-party native applications; by 
+addressing the risk of compromising the operation of the device, or its data, 
+when running such applications. <p/> 
+<strong>The Safe Execution Environment for Qtopia 4.3 Final only supports the 
+download and secure execution of games</strong> <p />
+
 <h2>Features</h2>
-<ul><li><a href="#Safe_Execution_Package_Manager">Safe Execution Package Manager</a>
+<ul><li><a href="#Game_Download">Game Download</a>
+<li><a href="#Safe_Execution_Package_Manager">Safe Execution Package Manager</a>
+<li><a href="#Safe_Execution_Policy_Implementation">Safe Execution Policy Implementation</a>
+<li><a href="#Sample_Integration">Sample Integration</a>
+<li><a href="#Sandboxing">Sand-boxing</a>
 <li><a href="#Security_Monitor">Security Monitor</a>
-</ul><h3><a name="Safe_Execution_Package_Manager">Safe Execution Package Manager</a></h3>
+</ul><h3><a name="Game_Download">Game Download</a></h3>
+<p>End-users may safely download and run <b>games</b>.  Here <em>games</em> refers to restricted applications which do not require access to the full range of Qtopia features (such as networking and document access).
+
+<p>These applications are restricted to</p>
+<ul>
+	<li>write-only display access</li>
+	<li>a specific location on the file-system</li>
+	<li>play audio</li>
+</ul>
+
+<h3><a name="Safe_Execution_Package_Manager">Safe Execution Package Manager</a></h3>
 <p>Refer to the <span class="nobr"><a href="fd-PackageManager.html">Package Manager<sup></sup></a></span> spec for details of the SXE related features of the Package Manager.
+<h3><a name="Safe_Execution_Policy_Implementation">Safe Execution Policy Implementation</a></h3>
+<p><h4><a name="ApplicationLevelPolicy"></a>Application Level Policy</h4>
+
+<p>A policy file can be used to regulate the communication between applications and the server that take place along Qtopia IPC.  The policy file consists of a set of domains, each of which consists of a set of request strings.  There are currently 2 domains, untrusted and trusted.</p>
+
+<p>Through application policy,  requests can be allowed for applications in the trusted domain while denied for those in the untrusted domain.</p>
+
+<h4><a name="OSLevelPolicy"></a>OS Level Policy</h4>
+
+<p>Application level policy is supplemented by Operating System level policy provided by a number of scripts.  These scripts are used specify the policy of a Mandatory Access Control implementation ( such as LIDS from <span class="nobr"><a href="http://www.lids.org">http://www.lids.org<sup></sup></a></span>).  Mandatory Access Control can, for example, prevent a program accessing the network or modem device directly.</p>
+<h3><a name="Sample_Integration">Sample Integration</a></h3>
+<p>An example integration of MAC rules, SXE file-system and Qtopia is provided as part of the Greenphone image. Scripts to build modified versions of the kernel, and the image are available. Generic script templates are also provided so that system customization can be performed for other platforms. 
+<h3><a name="Sandboxing">Sand-boxing</a></h3>
+<p>Untrusted applications run under a sandbox MAC rule set which inverts the usual system of <em>allow, unless specifically denied</em> to instead be <em>deny, unless specifically allowed</em>.  This ensures that downloaded applications are not able to access any exploitable system resources.
+
+<p>The sandbox restricts the application to a specific subset of the file-system for its read-write access.  </p>
+
+<p>This feature includes a complete integration of the the SANDBOX rule into the 2.4 kernel based file-system on the Greenphone.  It also caters for read-only filesystems such as cramfs.</p>
+
+<p>The sandbox implementation is provided as a set of kernel patches and file-system tools, which builders of an SXE Qtopia device must apply during integration.</p>
 <h3><a name="Security_Monitor">Security Monitor</a></h3>
 <p>SxeMonitor is a Qtopia system process, which monitors breaches in SXE policy.  The following action is taken upon detection of a policy breach:
 <ul>
@@ -27,9 +67,9 @@
 	<li>All downloaded applications are terminated and disabled if a brute force attack on binary keys is detected.</li>
 </ul>
 
-<td width=10></table><hr /><div align="center">
+<hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div>

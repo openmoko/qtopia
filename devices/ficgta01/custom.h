@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,9 @@
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
 
+
+//#define QT_NO_LOG_STREAM
+
 #define QPE_NEED_CALIBRATION
 
 #define QTOPIA_PHONE_DEVICE "/dev/ttySAC0"
@@ -36,6 +39,7 @@
 #define QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
 #define NO_VISUALIZATION
 #define QGLOBAL_PIXMAP_CACHE_LIMIT 2097152
+
 
 
 // Define the devices whose packages are compatible with this device,

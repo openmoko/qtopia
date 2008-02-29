@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -29,8 +29,8 @@
     #include &quot;messageviewer.h&quot;
     #include &lt;qtopiaapplication.h&gt;
 
-<span class="comment">    // Comment out this line to use a manual main() function.</span>
-<span class="comment">    // Ensure you also remove CONFIG+=qtopia_main from application.pro if you do this.</span>
+<span class="comment">    //</span> Comment out this line to use a manual main() function.
+<span class="comment">    //</span> Ensure you also remove CONFIG+=qtopia_main from application.pro if you do this.
     #define USE_THE_MAIN_MACROS
 
     #ifdef USE_THE_MAIN_MACROS
@@ -47,18 +47,18 @@
     #define MAIN_FUNC main
     #endif
 
-<span class="comment">    // This is the storage for the SXE key that uniquely identified this applicaiton.</span>
-<span class="comment">    // make will fail without this!</span>
+<span class="comment">    //</span> This is the storage for the SXE key that uniquely identified this applicaiton.
+<span class="comment">    //</span> make will fail without this!
     QSXE_APP_KEY
 
     int MAIN_FUNC( int argc, char **argv )
     {
-        <span class="comment">// This is required to load the SXE key into memory</span>
+        <span class="comment">//</span> This is required to load the SXE key into memory
         QSXE_SET_APP_KEY(argv[0]);
 
         QtopiaApplication a( argc, argv );
 
-        <span class="comment">// Set the preferred document system connection type</span>
+        <span class="comment">//</span> Set the preferred document system connection type
         QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION();
 
         MessageViewer *mw = new MessageViewer();
@@ -76,8 +76,8 @@
     #endif</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

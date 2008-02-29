@@ -61,7 +61,7 @@ DEFINES    +=
 LIBS       += -lresolv
 
 pkg.desc=SIP library
-pkg.domain=lib
+pkg.domain=trusted
 
 # FIXME "make syncqtopia"
 dep(INCLUDEPATH+=$$PWD)

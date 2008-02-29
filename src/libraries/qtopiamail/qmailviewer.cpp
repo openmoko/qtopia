@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -67,8 +67,7 @@ public:
 private:
     virtual QString pluginFilename() const
     {
-        // Standard plugin-name-to-filename convention:
-        return QString("lib") + key().toLower() + ".so";
+        return key().toLower();
     }
 
     QPluginManager& pluginManager;

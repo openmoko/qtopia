@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -301,25 +299,6 @@ QDateTime
     later with setFile(). Use exists() to see if the file exists and
     size() to get its size.
 
-    Some of QFileInfo's functions query the file system, but for
-    performance reasons, some functions only operate on the
-    file name itself. For example: To return the absolute path of
-    a relative file name, absolutePath() has to query the file system.
-    The path() function, however, can work on the file name directly,
-    and so it is faster. By convention, QFileInfo interprets any path that
-    ends with a slash '/' as a directory (e.g., "C:/WINDOWS/"), and
-    those without a trailing slash (e.g., "C:/WINDOWS/hosts.txt")
-    are treated as files.
-
-    \note To speed up performance, QFileInfo caches information about the
-    file. 
-    
-    Because files can be changed by other users or programs, or
-    even by other parts of the same program, there is a function that
-    refreshes the file information: refresh(). If you want to switch
-    off a QFileInfo's caching and force it to access the file system
-    every time you request information from it call setCaching(false).
-
     The file's type is obtained with isFile(), isDir() and
     isSymLink(). The symLinkTarget() function provides the name of the file
     the symlink points to.
@@ -370,7 +349,11 @@ QDateTime
 
     Elements of the file's name can be extracted with path() and
     fileName(). The fileName()'s parts can be extracted with
-    baseName() and extension().
+    baseName() and extension(). QFileInfo objects to directories
+    created by Qt classes will not have a trailing file separator. If
+    you wish to use trailing separators in your own file info objects,
+    just append one to the file name given to the constructors or
+    setFile().
 
     The file's dates are returned by created(), lastModified() and
     lastRead(). Information about the file's access permissions is
@@ -378,6 +361,25 @@ QDateTime
     file's ownership is available from owner(), ownerId(), group() and
     groupId(). You can examine a file's permissions and ownership in a
     single statement using the permission() function.
+
+    \section1 Performance Issues
+
+    Some of QFileInfo's functions query the file system, but for
+    performance reasons, some functions only operate on the
+    file name itself. For example: To return the absolute path of
+    a relative file name, absolutePath() has to query the file system.
+    The path() function, however, can work on the file name directly,
+    and so it is faster.
+
+    \note To speed up performance, QFileInfo caches information about
+    the file.
+
+    To speed up performance, QFileInfo caches information about the
+    file. Because files can be changed by other users or programs, or
+    even by other parts of the same program, there is a function that
+    refreshes the file information: refresh(). If you want to switch
+    off a QFileInfo's caching and force it to access the file system
+    every time you request information from it call setCaching(false).
 
     \sa QDir, QFile
 */

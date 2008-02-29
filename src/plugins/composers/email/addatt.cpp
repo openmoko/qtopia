@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -38,8 +38,8 @@
 #include <QWhatsThis>
 #include <qsoftmenubar.h>
 
-AttachmentItem::AttachmentItem(QListWidget *parent, const QContent& att)
-  : QListWidgetItem(parent), mAttachment(att)
+AttachmentItem::AttachmentItem(QListWidget *parent, const QContent& att, QMailMessage::AttachmentsAction action)
+  : QListWidgetItem(parent), mAttachment(att), mAction(action)
 {
     QFileInfo fi(att.fileName());
     mSizeKB = fi.size() /1024; //to kb
@@ -48,20 +48,8 @@ AttachmentItem::AttachmentItem(QListWidget *parent, const QContent& att)
     setIcon(att.icon());
 }
 
-AttachmentItem::AttachmentItem(QListWidget *parent, const QString &filename )
-  : QListWidgetItem(parent), mFileName(filename)
+AttachmentItem::~AttachmentItem()
 {
-    QFileInfo fi( filename );
-    QMimeType mt( filename );
-    mSizeKB = fi.size() /1024; //to kb
-
-    setText(fi.fileName() );
-    setIcon(mt.icon() );
-}
-
-bool AttachmentItem::isDocument() const
-{
-    return mAttachment.isValid();
 }
 
 const QContent& AttachmentItem::document() const
@@ -69,18 +57,14 @@ const QContent& AttachmentItem::document() const
     return mAttachment;
 }
 
-QString AttachmentItem::fileName() const
-{
-    return mFileName;
-}
-
-AttachmentItem::~AttachmentItem()
-{
-}
-
 int AttachmentItem::sizeKB() const
 {
     return mSizeKB;
+}
+
+QMailMessage::AttachmentsAction AttachmentItem::action() const
+{
+    return mAction;
 }
 
 
@@ -147,16 +131,9 @@ void AddAttBase::clear()
     setHighlighted();
 }
 
-bool AddAttBase::addAttachment( const QString &filename )
+bool AddAttBase::addAttachment(const QContent &dl, QMailMessage::AttachmentsAction action)
 {
-    new AttachmentItem(attView,filename);
-    setHighlighted();
-    return true;
-}
-
-bool AddAttBase::addAttachment(const QContent &dl)
-{
-    new AttachmentItem(attView,dl);
+    new AttachmentItem(attView, dl, action);
     setHighlighted();
     return true;
 }
@@ -193,7 +170,7 @@ void AddAttBase::setMailMessageParts(QMailMessage *mail)
                 d.setType( type.content() );
             }
 
-            new AttachmentItem(attView, d );
+            new AttachmentItem(attView, d, QMailMessage::LinkToAttachments);
         }
     }
 }
@@ -315,20 +292,15 @@ void AddAttDialog::updateDisplay(bool onAttachmentItem)
     removeAction->setVisible(onAttachmentItem);
 }
 
-void AddAttDialog::attach( const QString &filename )
+void AddAttDialog::attach( const QContent &doclnk, QMailMessage::AttachmentsAction action )
 {
-    addAtt->addAttachment( filename );
-}
-
-void AddAttDialog::attach( const QContent &doclnk )
-{
-    addAtt->addAttachment( doclnk );
+    addAtt->addAttachment( doclnk, action );
 }
 
 void AddAttDialog::openFile(const QContent& dl)
 {
     fileSelectorDialog->accept();
-    addAtt->addAttachment( dl );
+    addAtt->addAttachment( dl, QMailMessage::LinkToAttachments );
 }
 
 void AddAttDialog::selectAttachment()

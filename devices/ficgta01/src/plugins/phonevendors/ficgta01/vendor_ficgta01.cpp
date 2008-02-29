@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <QFile>
 #include <QTextStream>
+#include <QSettings>
 
 #include <alsa/asoundlib.h>
 
@@ -262,6 +263,7 @@ Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     qLog(AtChat)<<"Ficgta01PhoneBook::Ficgta01PhoneBook";
     // Turn on status notification messages for finding out when
     // the phone book is ready to use.
+
     service->primaryAtChat()->registerNotificationType
         ( "%CSTAT:", this, SLOT(cstatNotification(QString)) );
     service->primaryAtChat()->chat( "AT%CSTAT=1" );
@@ -273,8 +275,7 @@ Ficgta01PhoneBook::~Ficgta01PhoneBook()
 
 bool Ficgta01PhoneBook::hasModemPhoneBookCache() const
 {
-    // TODO: make this return true once we know what %CSTAT looks like.
-    return false;
+    return true;
 }
 
 bool Ficgta01PhoneBook::hasEmptyPhoneBookIndex() const
@@ -292,8 +293,8 @@ void Ficgta01PhoneBook::cstatNotification( const QString& msg )
 // phonebook
 
         uint status = msg.mid(13).toInt();
-        if(status == 0) {
-
+        if(status == 1) {
+            phoneBooksReady();
         }
 
     } else if (entity == "RDY" ) {
@@ -336,7 +337,7 @@ static BandInfo const bandInfo[] = {
     {"DCS 1800",            2},
     {"PCS 1900",            4},
     {"E-GSM",               8},
-    {"GSM 850",             16},
+/*    {"GSM 850",             16}, */
     {"Tripleband 900/1800/1900", 15},
 };
 #define numBands    ((int)(sizeof(bandInfo) / sizeof(BandInfo)))
@@ -495,15 +496,20 @@ Ficgta01ModemService::Ficgta01ModemService
           QObject *parent )
     : QModemService( service, mux, parent )
 {
-
     connect( this, SIGNAL(resetModem()), this, SLOT(reset()) );
 
+    // Register a wakeup command to ping the modem if we haven't
+    // sent anything during the last 5 seconds.  This command may
+    // not get a response, but the modem should then become responsive
+    // to the next command that is sent afterwards.
+    primaryAtChat()->registerWakeupCommand( "ATE0", 5000 );
 
     // Turn on dynamic signal quality notifications.
     // Register for "%CSQ" notifications to get signal quality updates.
      primaryAtChat()->registerNotificationType
-         ( "%CSQ:", this, SLOT(csq(QString)), true );
+         ( "%CSQ:", this, SLOT(csq(QString)) );
      chat("AT%CSQ=1");
+     QTimer::singleShot( 2500, this, SLOT(firstCsqQuery()) );
 
 
      // Turn on SIM toolkit support in the modem.  This must be done
@@ -520,16 +526,17 @@ Ficgta01ModemService::Ficgta01ModemService
     chat( "AT%CUNS=1" );
 
     // Enable the reporting of timezone and local time information.
-     primaryAtChat()->registerNotificationType
-          ( "%CTZV:", this, SLOT(ctzv(QString)), true );
-     chat( "AT%CTZV=1" );
+    primaryAtChat()->registerNotificationType
+         ( "%CTZV:", this, SLOT(ctzv(QString)), true );
+    chat( "AT%CTZV=1" );
 
 
 // Turn on call progress indications, with phone number information.
     chat( "AT%CPI=2" );
 
-// blah
-    chat("AT+CFUN=1");
+    chat("AT+COPS=0");
+
+
 }
 
 Ficgta01ModemService::~Ficgta01ModemService()
@@ -543,11 +550,11 @@ void Ficgta01ModemService::initialize()
         addInterface( new Ficgta01SimToolkit( this ) );
 #endif
 
-    if ( !supports<QPhoneBook>() )
-        addInterface( new Ficgta01PhoneBook( this ) );
-
     if ( !supports<QPinManager>() )
         addInterface( new Ficgta01PinManager( this ) );
+
+    if ( !supports<QPhoneBook>() )
+        addInterface( new Ficgta01PhoneBook( this ) );
 
 
     if ( !supports<QBandSelection>() )
@@ -565,6 +572,9 @@ void Ficgta01ModemService::initialize()
     if ( !supports<QCallVolume>() )
         addInterface( new Ficgta01CallVolume(this));
 
+    if ( !supports<QPreferredNetworkOperators>() )
+        addInterface( new Ficgta01PreferredNetworkOperators(this));
+
 
    QModemService::initialize();
 }
@@ -572,22 +582,55 @@ void Ficgta01ModemService::initialize()
 void Ficgta01ModemService::csq( const QString& msg )
 {
     // Automatic signal quality update, in the range 0-31.
-    uint posn = 6;
-    uint rssi = QAtUtils::parseNumber( msg, posn );
-    indicators()->setSignalQuality( (int)rssi, 31 );
+    if ( msg.contains( QChar(',') ) ) {
+        uint posn = 6;
+        uint rssi = QAtUtils::parseNumber( msg, posn );
+        indicators()->setSignalQuality( (int)rssi, 31 );
+    }
 }
 
-
+void Ficgta01ModemService::firstCsqQuery()
+{
+    // Perform an initial AT%CSQ? which should cause the modem to
+    // respond with a %CSQ notification.  This is needed to shut
+    // off AT+CSQ polling in qmodemindicators.cpp when the modem is
+    // quiet and not sending periodic %CSQ notifications at startup.
+    chat( "AT%CSQ?" );
+}
 
 void Ficgta01ModemService::ctzv( const QString& msg )
 {
-    // Process a %CTZV notification from the modem.
-    // TODO: format on this is ->"yy/mm/dd,hh:mm:ss+/-tz"
-
-    qLog(AtChat)<<"ctzv"<<msg;
-
-
-//    Q_UNUSED(msg);
+    // Timezone information from the network.  Format is "yy/mm/dd,hh:mm:ss+/-tz".
+    // There is no dst indicator according to the spec, but we parse an extra
+    // argument just in case future modem firmware versions fix this oversight.
+    // If there is no extra argument, the default value of zero will be used.
+    uint posn = 7;
+    QString time = QAtUtils::nextString( msg, posn );
+    int dst = ((int)QAtUtils::parseNumber( msg, posn )) * 60;
+    int zoneIndex = time.length();
+    while ( zoneIndex > 0 && time[zoneIndex - 1] != QChar('-') &&
+            time[zoneIndex - 1] != QChar('+') )
+        --zoneIndex;
+    int zoneOffset;
+    if ( zoneIndex > 0 && time[zoneIndex - 1] == QChar('-') ) {
+        zoneOffset = time.mid(zoneIndex - 1).toInt() * 15;
+    } else if ( zoneIndex > 0 && time[zoneIndex - 1] == QChar('+') ) {
+        zoneOffset = time.mid(zoneIndex).toInt() * 15;
+    } else {
+        // Unknown timezone information.
+        return;
+    }
+    QString timeString;
+    if (zoneIndex > 0)
+        timeString = time.mid(0, zoneIndex - 1);
+    else
+        timeString = time;
+    QDateTime t = QDateTime::fromString(timeString, "yy/MM/dd,HH:mm:ss");
+    if (!t.isValid())
+        t = QDateTime::fromString(timeString, "yyyy/MM/dd,HH:mm:ss"); // Just in case.
+    QDateTime utc = QDateTime(t.date(), t.time(), Qt::UTC);
+    utc = utc.addSecs(-zoneOffset * 60);
+    indicators()->setNetworkTime( utc.toTime_t(), zoneOffset, dst );
 }
 
 void Ficgta01ModemService::configureDone( bool ok )
@@ -601,16 +644,22 @@ void Ficgta01ModemService::configureDone( bool ok )
 
 //     // Turn on "%CNAP" notifications, which supply the caller's
 //     // name on an call.  Only supported on some networks.
-//     chat( "AT%CNAP=1" );
+     chat( "AT%CNAP=1" );
 
-      chat("AT%NRG=0"); //force auto operations
+     //begin really ugky hack
+     QSettings cfg("Trolltech", "PhoneProfile");
+     cfg.beginGroup("Profiles");
+
+    if( !cfg.value("PlaneMode",false).toBool()) {
+         chat("AT%NRG=0"); //force auto operations
+     }
+
 //      chat("AT%COPS=0");
 
- }
+}
 
 void Ficgta01ModemService::sendSuspendDone()
 {
-    //   QtopiaChannel::send("QPE/GreenphoneModem", "sleep()");
     suspendDone();
 }
 
@@ -626,7 +675,7 @@ void Ficgta01ModemService::suspend()
     chat( "AT%CGREG=1" );
 
     // Turn off cell broadcast location messages.
-//     chat( "AT%CSQ=1" );
+     chat( "AT%CSQ=0" );
 
     // Turn off signal quality notifications while the system is suspended.
      QTimer::singleShot( 500, this, SLOT(sendSuspendDone()) );
@@ -638,12 +687,15 @@ void Ficgta01ModemService::wake()
 
 //reset modem
 
-//    chat( "AT%CWUP=1" );
-
+//  chat( "AT%CWUP=1" );
+    chat("\r");
+    chat("ATE0\r");
     // Turn cell id information back on.
-    chat( "AT+CREG=2" );
-    chat( "AT+CGREG=2" );
+     chat( "AT+CREG=2" );
+     chat( "AT+CGREG=2" );
 
+     //   chat( "AT%CREG=2" );
+     //   chat( "AT%CGREG=2" );
     // Turn cell broadcast location messages back on again.
 
     // Re-enable signal quality notifications when the system wakes up again.
@@ -797,8 +849,6 @@ Ficgta01SimInfo::Ficgta01SimInfo( Ficgta01ModemService *service )
     connect( d->checkTimer, SIGNAL(timeout()), this, SLOT(requestIdentity()) );
     d->count = 0;
 
-    connect( service, SIGNAL(simInserted()), this, SLOT(simInserted()) );
-    connect( service, SIGNAL(simRemoved()), this, SLOT(simRemoved()) );
 
     // Perform an initial AT+CIMI request to get the SIM identity.
     QTimer::singleShot( 0, this, SLOT(requestIdentity()) );
@@ -868,4 +918,18 @@ QString Ficgta01SimInfo::extractIdentity( const QString& content )
         }
     }
     return QString();
+}
+
+Ficgta01PreferredNetworkOperators::Ficgta01PreferredNetworkOperators( QModemService *service )
+    : QModemPreferredNetworkOperators( service )
+{
+    // We have to delete an entry before we can write operator details into it.
+    setDeleteBeforeUpdate( true );
+
+    // Quote operator numbers when modifying preferred operator entries.
+    setQuoteOperatorNumber( true );
+}
+
+Ficgta01PreferredNetworkOperators::~Ficgta01PreferredNetworkOperators()
+{
 }

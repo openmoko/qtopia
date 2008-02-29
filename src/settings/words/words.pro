@@ -21,4 +21,4 @@ desktop.hint=desktop
 INSTALLS+=desktop
 
 pkg.desc=Words settings dialog for Qtopia.
-pkg.domain=window,words
+pkg.domain=trusted

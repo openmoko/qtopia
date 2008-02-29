@@ -35,7 +35,7 @@ SOURCES += main.cpp \
            deps.cpp
 
 DEFINES -= QT_COMPAT_WARNINGS
-DEFINES += QT_COMPAT QT_UIC
+DEFINES += QT_COMPAT QT_UIC3
 
 target.path=$$[QT_INSTALL_BINS]
 INSTALLS += target

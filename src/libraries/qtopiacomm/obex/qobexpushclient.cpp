@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,84 +25,6 @@
 #include <QString>
 #include <QFile>
 #include <QHash>
-
-
-/*!
-    \class QObexPushClient
-    \mainclass
-    \brief The QObexPushClient class encapsulates an OBEX PUSH client.
-
-    The QObexPushClient class can be used to send files to an OBEX Push
-    server.  The file sent can either be a business card (vCard), calendar (vCal),
-    or any other file type.  This class can also be used to request a business card,
-    or perform a business card exchange.
-
-    Here is an example of using QObexPushClient to send a file over a
-    Bluetooth connection:
-
-    \code
-    // Connect to an RFCOMM server
-    QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
-    if (rfcommSocket->connect("11:22:33:aa:bb:cc", 9)) {
-
-        QObexPushClient *sender = new QObexPushClient(rfcommSocket);
-        sender->connect();
-        QByteArray data = getSomeData();
-        sender->send(data, "MyData.txt");
-        sender->disconnect();
-    }
-    \endcode
-
-    The functions connect(), disconnect(), send(), sendBusinessCard(),
-    requestBusinessCard() and exchangeBusinessCard() are all asynchronous.
-    When called, they return immediately, returning a unique identifier
-    for that particular operation. If the command cannot be performed
-    immediately because another command is in progress, the command is
-    scheduled for later execution.
-
-    When the execution of a command starts, the commandStarted() signal is
-    emitted with the identifier of the command. When it is finished, the
-    commandFinished() signal is emitted with the identifier and also a bool to
-    indicate whether the command finished with an error.
-
-    The done() signal is emitted when all pending commands have finished. This
-    can be used to automatically delete the client object when it has finished
-    its operations, by connecting the client's done() signal to the client's
-    QObject::deleteLater() slot. (The QIODevice object can similarly be connected
-    to automatically delete it when the client has finished.)
-
-    If an error occurs during the execution of one of the commands in a
-    sequence of commands, all the pending commands (i.e. scheduled, but not
-    yet executed commands) are cleared and no signals are emitted for them.
-    In this case, the done() signal is emitted with the error argument set to
-    \c true.
-
-    \ingroup qtopiaobex
- */
-
-/*!
-    \enum QObexPushClient::Error
-    Defines the possible errors for a push client.
-
-    \value NoError No error has occurred.
-    \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the QIODevice provided in the constructor should not be used for any more OBEX requests.
-    \value RequestFailed The client's request was refused by the remote service, or an error occurred while sending the request.
-    \value Aborted The command was aborted by a call to abort().
-    \value UnknownError An error other than those specified above occurred.
- */
-
-/*!
-    \enum QObexPushClient::Command
-    Defines the commands that may be returned from currentCommand() to
-    indicate the command that is being executed.
-
-    \value None No command is being executed.
-    \value Connect connect() is being executed.
-    \value Disconnect disconnect() is being executed.
-    \value Send send() is being executed.
-    \value SendBusinessCard sendBusinessCard() is being executed.
-    \value RequestBusinessCard requestBusinessCard() is being executed.
- */
 
 
 class QObexPushClientPrivate : public QObject
@@ -307,9 +229,118 @@ void QObexPushClientPrivate::done(bool error)
 //================================================================
 
 /*!
-    Constructs an OBEX Push client.  The \a device parameter specifies the
-    device to use for the transport connection. The \a parent specifies
-    the parent object.
+    \class QObexPushClient
+    \mainclass
+    \brief The QObexPushClient class encapsulates an OBEX PUSH client.
+
+    The QObexPushClient class can be used to send files to an OBEX Push
+    server.  The file sent can either be a business card (vCard), calendar (vCal),
+    or any other file type.  This class can also be used to request a business card,
+    or perform a business card exchange.
+
+    Here is an example of using QObexPushClient to send a file over a
+    Bluetooth connection:
+
+    \code
+    // Connect to an RFCOMM server
+    QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
+    if (rfcommSocket->connect("11:22:33:aa:bb:cc", 9)) {
+
+        QObexPushClient *sender = new QObexPushClient(rfcommSocket);
+        sender->connect();
+        QByteArray data = getSomeData();
+        sender->send(data, "MyData.txt");
+        sender->disconnect();
+    }
+    \endcode
+
+    The functions connect(), disconnect(), send(), sendBusinessCard(),
+    requestBusinessCard() and exchangeBusinessCard() are all asynchronous.
+    When called, they return immediately, returning a unique identifier
+    for that particular operation. If the command cannot be performed
+    immediately because another command is in progress, the command is
+    scheduled for later execution.
+
+    When the execution of a command starts, the commandStarted() signal is
+    emitted with the identifier of the command. When it is finished, the
+    commandFinished() signal is emitted with the identifier and also a bool to
+    indicate whether the command finished with an error.
+
+    The done() signal is emitted when all pending commands have finished. This
+    can be used to automatically delete the client object when it has finished
+    its operations, by connecting the client's done() signal to the client's
+    QObject::deleteLater() slot. (The QIODevice object can similarly be connected
+    to automatically delete it when the client has finished.)
+
+    If an error occurs during the execution of one of the commands in a
+    sequence of commands, all the pending commands (i.e. scheduled, but not
+    yet executed commands) are cleared and no signals are emitted for them.
+    In this case, the done() signal is emitted with the error argument set to
+    \c true.
+
+
+    \section1 Handling socket disconnections
+
+    You should ensure that the QIODevice provided in the constructor emits
+    QIODevice::aboutToClose() or QObject::destroyed() when the associated
+    transport connection is disconnected. If one of these signals
+    are emitted while a command is in progress, QObexPushClient will
+    know the transport connection has been lost, and will emit
+    commandFinished() with \c error set to \c true, and error() will return
+    ConnectionError.
+
+    This is particularly an issue for socket classes such as QTcpSocket that
+    do not emit QIODevice::aboutToClose() when a \c disconnected() signal is
+    emitted. In these cases, QObexPushClient will not know that the
+    transport has been disconnected. To avoid this, you can make the socket
+    emit QIODevice::aboutToClose() when it is disconnected:
+
+    \code
+    // make the socket emit aboutToClose() when disconnected() is emitted
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));
+    \endcode
+
+    Or, if the socket can be discarded as soon as it is disconnected:
+
+    \code
+    // delete the socket when the transport is disconnected
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    \endcode
+
+
+    \sa QObexPushService, QObexClientSession
+
+    \ingroup qtopiaobex
+ */
+
+/*!
+    \enum QObexPushClient::Error
+    Defines the possible errors for a push client.
+
+    \value NoError No error has occurred.
+    \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the QIODevice provided in the constructor should not be used for any more OBEX requests.
+    \value RequestFailed The client's request was refused by the remote service, or an error occurred while sending the request.
+    \value Aborted The command was aborted by a call to abort().
+    \value UnknownError An error other than those specified above occurred.
+ */
+
+/*!
+    \enum QObexPushClient::Command
+    Defines the commands that may be returned from currentCommand() to
+    indicate the command that is being executed.
+
+    \value None No command is being executed.
+    \value Connect connect() is being executed.
+    \value Disconnect disconnect() is being executed.
+    \value Send send() is being executed.
+    \value SendBusinessCard sendBusinessCard() is being executed.
+    \value RequestBusinessCard requestBusinessCard() is being executed.
+ */
+
+
+/*!
+    Constructs an OBEX Push client that uses \a device for the transport
+    connection. The \a parent is the QObject parent.
 
     The \a device should already be opened, or else commands will fail with
     ConnectionError.

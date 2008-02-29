@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -51,13 +51,12 @@ Clock::Clock(QWidget *parent, Qt::WFlags f)
     p.setColor(QPalette::Text, Qt::black);
     analogClock->setPalette(p);
     clockLcd->setNumDigits( 5 );
-    clockLcd->setFixedWidth( clockLcd->sizeHint().width() );
+    //clockLcd->setFixedWidth( clockLcd->sizeHint().width() );
+    clockLcd->setFixedWidth((int) ( 0.325f*(float)physicalDpiX()));
+    clockLcd->setFixedHeight((int)( 0.125f*(float)physicalDpiY()));
     QSoftMenuBar::setLabel(clockLcd, Qt::Key_Select, QSoftMenuBar::NoLabel);
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     date->setText( QTimeString::localYMD( QDate::currentDate(), QTimeString::Long ) );
-
-    if ( qApp->desktop()->height() > 240 )
-        clockLcd->setFixedHeight( 30 );
 
     t = new QTimer( this );
     connect( t, SIGNAL(timeout()), SLOT(updateClock()) );

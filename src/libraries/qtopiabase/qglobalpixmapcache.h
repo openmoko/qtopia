@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,9 +29,9 @@
 
 #include "custom.h"
 
+// The documentation references these lines (see doc/src/syscust/custom.qdoc)
 #ifndef QGLOBAL_PIXMAP_CACHE_LIMIT
-    //You can override this in your device profile custom.h
-    #define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     // 1 Mb
+#define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     // 1 Mb
 #endif
 
 class QTOPIABASE_EXPORT QGlobalPixmapCache

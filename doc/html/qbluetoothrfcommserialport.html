@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothRfcommSerialPort Class Reference</h1>
 <p>The QBluetoothRfcommSerialPort class represents a RFCOMM serial port device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothRfcommSerialPort&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothRfcommSerialPort&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbluetoothrfcommserialport-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -42,7 +42,7 @@
 <li><div class="fn"/>int <b><a href="qbluetoothrfcommserialport.html#remoteChannel">remoteChannel</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -52,7 +52,7 @@
 <li><div class="fn"/>void <b><a href="qbluetoothrfcommserialport.html#error-2">error</a></b> ( QBluetoothRfcommSerialPort::Error <i>err</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -62,16 +62,15 @@
 <li><div class="fn"/>bool <b><a href="qbluetoothrfcommserialport.html#releaseDevice">releaseDevice</a></b> ( int <i>id</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -79,10 +78,10 @@
 <p>The QBluetoothRfcommSerialPort class represents a RFCOMM serial port device.</p>
 <p>This class enables conversion of RFCOMM sockets into serial tty devices. The class can be used in two major ways, by adapting an existing connected RFCOMM socket or by using the <a href="qbluetoothrfcommserialport.html#connect">connect</a>() function to establish a client connection to a remote device and adapt the resulting connection to a tty device.</p>
 <p>The resulting tty device can be used by other applications like a regular serial tty device.</p>
-<pre><span class="comment">    // Adapt a connected RFCOMM socket into a serial tty device</span>
+<pre><span class="comment">    //</span> Adapt a connected RFCOMM socket into a serial tty device
 
     if (rfcommSocket-&gt;state() != QBluetoothRfcommSocket::ConnectedState) {
-        <span class="comment">// Bail out</span>
+        <span class="comment">//</span> Bail out
         return;
     }
 
@@ -90,13 +89,13 @@
         new QBluetoothRfcommSerialPort(rfcommSocket);
 
     if (serial-&gt;id() == -1) {
-        <span class="comment">// Error creating serial port</span>
+        <span class="comment">//</span> Error creating serial port
         return;
     }
 
     rfcommSocket-&gt;close();
 
-<span class="comment">    // Use serial port</span>
+<span class="comment">    //</span> Use serial port
     openSerialPort(serial-&gt;device());</pre>
 <p>See also <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> and <a href="qserialiodevice.html">QSerialIODevice</a>.</p>
 <hr />
@@ -120,9 +119,9 @@
 <p>The Flags type is a typedef for <a href="qflags.html">QFlags</a>&lt;Flag&gt;. It stores an OR combination of Flag values.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothRfcommSerialPort"></a>QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new RFCOMM serial port object. The <i>parent</i> is passed to the <a href="qobject.html">QObject</a> constructor.</p>
-<h3 class="fn"><a name="QBluetoothRfcommSerialPort-2"></a>QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort ( <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> * <i>socket</i>, <a href="qbluetoothrfcommserialport.html#Flag-enum">QBluetoothRfcommSerialPort::Flags</a> <i>deviceFlags</i> = 0, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothRfcommSerialPort"></a>QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new RFCOMM serial port object. The <i>parent</i> is passed to the <a href="./qobject.html">QObject</a> constructor.</p>
+<h3 class="fn"><a name="QBluetoothRfcommSerialPort-2"></a>QBluetoothRfcommSerialPort::QBluetoothRfcommSerialPort ( <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> * <i>socket</i>, <a href="qbluetoothrfcommserialport.html#Flag-enum">QBluetoothRfcommSerialPort::Flags</a> <i>deviceFlags</i> = 0, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Converts a connected RFCOMM <i>socket</i> to an RFCOMM serial port.</p>
 <p>This constructor is useful in situations where you already have a connected RFCOMM socket and wish to convert it to a serial port. This is true of connections returned by <a href="qbluetoothabstractserver.html#nextPendingConnection">QBluetoothRfcommServer::nextPendingConnection</a>() or RFCOMM socket connections which require non-blocking connections.</p>
 <p>Note: The caller should call <a href="qbluetoothabstractsocket.html#close">QBluetoothRfcommSocket::close</a>() on <i>socket</i> immediately after calling this constructor. Before the created <a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a> device can be used, the <i>socket</i> should be closed. The <i>deviceFlags</i> parameter holds the optional flags that modify the serial port behavior.</p>
@@ -134,10 +133,10 @@
 <p>This method tries to establish a connection to the remote device with address <i>remote</i> on <i>channel</i>. The local device is given by <i>local</i>. This method will return true if the request could be started, and false otherwise. The <a href="qbluetoothrfcommserialport.html#connected">connected</a>() signal will be sent once the operation completes.</p>
 <p>You can cancel the connection process at any time by calling <a href="qbluetoothrfcommserialport.html#disconnect">disconnect</a>(). If the process is cancelled, the <a href="qbluetoothrfcommserialport.html#error">error</a>() signal will be sent with the <a href="qbluetoothrfcommserialport.html#Error-enum">QBluetoothRfcommSerialPort::ConnectionCancelled</a> error set.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#error">error</a>() and <a href="qbluetoothrfcommserialport.html#connected">connected</a>().</p>
-<h3 class="fn"><a name="connected"></a>void QBluetoothRfcommSerialPort::connected ( const <a href="qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="connected"></a>void QBluetoothRfcommSerialPort::connected ( const <a href="./qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the RFCOMM serial port is connected. The <i>device</i> parameter holds the device name of the created serial port.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#connect">connect</a>().</p>
-<h3 class="fn"><a name="device"></a><a href="qstring.html">QString</a> QBluetoothRfcommSerialPort::device () const</h3>
+<h3 class="fn"><a name="device"></a><a href="./qstring.html">QString</a> QBluetoothRfcommSerialPort::device () const</h3>
 <p>Returns the RFCOMM tty device which is being managed by the current instance of this class. If the instance is not managing a device, an empty string is returned.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#id">id</a>().</p>
 <h3 class="fn"><a name="disconnect"></a>bool QBluetoothRfcommSerialPort::disconnect ()</h3>
@@ -153,7 +152,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This signal is emitted whenever an error occurs. The <i>err</i> parameter holds the error that has occurred.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#connect">connect</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QBluetoothRfcommSerialPort::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QBluetoothRfcommSerialPort::errorString () const</h3>
 <p>Returns the human readable form of the last error that has occurred.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#error">error</a>().</p>
 <h3 class="fn"><a name="flags"></a><a href="qbluetoothrfcommserialport.html#Flag-enum">QBluetoothRfcommSerialPort::Flags</a> QBluetoothRfcommSerialPort::flags () const</h3>
@@ -161,10 +160,10 @@
 <h3 class="fn"><a name="id"></a>int QBluetoothRfcommSerialPort::id () const</h3>
 <p>Returns the device id of the associated RFCOMM device. If no device is found, returns -1. The device id is usually in the range of 0-31.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#device">device</a>().</p>
-<h3 class="fn"><a name="listDevices"></a><a href="qlist.html">QList</a>&lt;int&gt; QBluetoothRfcommSerialPort::listDevices ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="listDevices"></a><a href="./qlist.html">QList</a>&lt;int&gt; QBluetoothRfcommSerialPort::listDevices ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of all RFCOMM device bindings.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#releaseDevice">releaseDevice</a>().</p>
-<h3 class="fn"><a name="listDevices-2"></a><a href="qlist.html">QList</a>&lt;int&gt; QBluetoothRfcommSerialPort::listDevices ( const <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> &amp; <i>local</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="listDevices-2"></a><a href="./qlist.html">QList</a>&lt;int&gt; QBluetoothRfcommSerialPort::listDevices ( const <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> &amp; <i>local</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a list of all RFCOMM devices for a particular Bluetooth adapter given by <i>local</i>.</p>
 <p>See also <a href="qbluetoothrfcommserialport.html#releaseDevice">releaseDevice</a>().</p>
@@ -182,8 +181,8 @@
 <p>See also <a href="qbluetoothrfcommserialport.html#remoteAddress">remoteAddress</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

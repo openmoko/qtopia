@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,7 +42,7 @@ bool SizeUtils::isSufficientSpace(qlonglong size, QString &neededSpace)
 QString SizeUtils::getSizeString( qlonglong size )
 {
     double s = size;
-    double scaledSize;
+    double scaledSize = s;
     QString suffix;
     bool skip = false;
     if ( s < 0 ) s = 0;
@@ -102,4 +102,10 @@ qlonglong SizeUtils::parseInstalledSize( QString installedSize )
     if ( floor(d) == rounded )
         rounded = rounded + 0.5;
     return (qlonglong)(rounded * multiplier) ;
+}
+
+
+bool LidsUtils::isLidsEnabled()
+{
+    return QFile::exists("/proc/sys/lids/locks");
 }

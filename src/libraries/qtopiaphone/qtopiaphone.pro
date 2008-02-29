@@ -5,7 +5,6 @@ HEADERS	=   qphonecall.h \
             qphonecallmanager.h \
             qphonecallprovider.h \
 	    qcalllist.h \
-	    qphonesocket.h \
             qphonestatus.h \
             qtelephonyservice.h \
             qtelephonynamespace.h \
@@ -32,7 +31,6 @@ SOURCES	=   qphonecall.cpp \
             qphonecallmanager.cpp \
             qphonecallprovider.cpp \
 	    qcalllist.cpp \
-	    qphonesocket.cpp \
             qphonestatus.cpp \
             qtelephonyservice.cpp \
             qtelephonynamespace.cpp \

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1620,6 +1618,12 @@ GLuint QGLContext::bindTexture(const QString &fileName)
 */
 static void qt_gl_clean_cache(const QString &cacheKey)
 {
+    // ### remove for 4.4
+    // Temporary fix to avoid QImages created in a different thread
+    // cause crashes due to the fact that the QGLTextureCache isn't
+    // thread-safe.
+    if (qApp->thread() != QThread::currentThread())
+        return;
     const QList<QString> keys = qt_tex_cache->keys();
     for (int i = 0; i < keys.count(); ++i) {
         const QString &key = keys.at(i);
@@ -2540,6 +2544,16 @@ QGLWidget::~QGLWidget()
         glXReleaseBuffersMESA(x11Display(), winId());
 #endif
     d->cleanupColormaps();
+
+#ifdef Q_WS_MAC
+    QWidget *current = parentWidget();
+    while (current) {
+        qt_widget_private(current)->glWidgets.removeAll(QWidgetPrivate::GlWidgetInfo(this));
+        if (current->isWindow())
+            break;
+        current = current->parentWidget();
+    };
+#endif
 }
 
 /*!
@@ -3697,6 +3711,8 @@ void QGLExtensions::init_extensions()
         glExtensions |= StencilWrap;
     if (extensions.contains(QLatin1String("EXT_packed_depth_stencil")))
         glExtensions |= PackedDepthStencil;
+    if (extensions.contains(QLatin1String("GL_NV_float_buffer")))
+        glExtensions |= NVFloatBuffer;
 
     QGLContext cx(QGLFormat::defaultFormat());
     if (glExtensions & TextureCompression) {

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -173,7 +173,6 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
 
     setWindowTitle(tr("Asteroids"));
     QPalette p = buildPalette();
-    QApplication::setPalette(p);
     QWidget* mainWin = new QWidget(this);
     setCentralWidget(mainWin);
     mainWin->setPalette(p);
@@ -194,10 +193,11 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     vb->addWidget(view_,10);
     vb->addWidget(buildBottomRow(mainWin));
 
-    actions_.insert(Qt::Key_4,Populate_Rocks);
-    actions_.insert(Qt::Key_6,Populate_Powerups);
+    // These are for debugging purposes only
+    //actions_.insert(Qt::Key_4,Populate_Rocks);
+    //actions_.insert(Qt::Key_6,Populate_Powerups);
 
-    actions_.insert(Qt::Key_0,Launch);
+    //actions_.insert(Qt::Key_0,Launch);
     actions_.insert(Qt::Key_Up,Thrust);
     actions_.insert(Qt::Key_Left,RotateLeft);
     actions_.insert(Qt::Key_Right,RotateRight);
@@ -206,11 +206,11 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     actions_.insert(Qt::Key_NumberSign,Teleport);
     actions_.insert(Qt::Key_Asterisk,Pause);
     actions_.insert(Qt::Key_Select,Shoot);
-    //actions_.insert(Qt::Key_Context1,Shield);
-    QSoftMenuBar::setLabel(this,
+    actions_.insert(Qt::Key_0,Shield);
+    /*QSoftMenuBar::setLabel(this,
                            Qt::Key_0,
                            "qasteroids/ship/ship0000",
-                           tr("Launch"));
+                           tr("Launch"));*/
     contextMenu_ = QSoftMenuBar::menuFor(this);
 
     //QString s = tr("BOZO");

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,8 +22,6 @@
 #ifndef HELPBROWSER_H
 #define HELPBROWSER_H
 
-#include "bookmark.h"
-
 #include <qtopia/qsoftmenubar.h>
 #include <qtopiaabstractservice.h>
 
@@ -35,7 +33,6 @@
 
 class QAction;
 class QLabel;
-class BookmarksUI;
 
 class MagicTextBrowser : public QTextBrowser {
     Q_OBJECT
@@ -62,16 +59,10 @@ public:
 public slots:
     void setDocument( const QString &doc );
 
-    void bookmarkSelected(Bookmark);
-
 private slots:
     void goHome();
 
-    void bookmarks();
-
-    void addBookmark();
-
-    void textChanged();
+    void textChanged(QUrl);
 
 protected:
     void closeEvent( QCloseEvent* );
@@ -79,19 +70,12 @@ protected:
 private:
     void init();
 
-    BookmarksUI *getBookmarksUI();
-
     MagicTextBrowser *browser;
     QAction *backAction, *forwardAction;
 #ifdef DEBUG
     QLabel *location;
 #endif
     NavigationBar *navigationBar;
-
-
-    // The UI for displaying and selecting bookmarks. Created lazily. This data member
-    // should never be referenced directly, but should be fetched via getBookmarksUI().
-    BookmarksUI *bookmarksUI;
 
     QMenu *contextMenu;
 };

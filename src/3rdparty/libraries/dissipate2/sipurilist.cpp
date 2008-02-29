@@ -98,7 +98,10 @@ void SipUriList::removeHead( void )
 
 SipUri SipUriList::getHead( void ) const
 {
-	return urilist.first();
+        if ( !urilist.isEmpty() )
+	        return urilist.first();
+        else
+                return SipUri();
 }
 
 SipUriList &SipUriList::operator=( const SipUriList &u )
@@ -124,7 +127,9 @@ SipUriList &SipUriList::reverseList( void )
 SipUri SipUriList::getPriorContact( void )
 {
 	QList<SipUri>::Iterator it;
-	SipUri uri = urilist.first();
+        SipUri uri;
+        if ( !urilist.isEmpty() )
+	        uri = urilist.first();
 	int q = 0;
 	for( it = urilist.begin(); it != urilist.end(); ++it ) {
 		SipUri contact = SipUri(*it);

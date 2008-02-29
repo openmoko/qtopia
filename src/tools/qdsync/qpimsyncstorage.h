@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 #include <QString>
 #include <QUniqueId>
 #include "qpimxml_p.h"
+#include "qtopia4sync.h"
 
 class QDateTime;
 class QByteArray;
@@ -36,32 +37,32 @@ class QTaskModel;
 
 using namespace PIMXML_NAMESPACE;
 
-class QPimSyncStorage : public QObject
+class QPimSyncStorageFactory : public Qtopia4SyncPluginFactory {
+public:
+    QPimSyncStorageFactory( QObject *parent = 0 );
+    ~QPimSyncStorageFactory();
+    QStringList keys();
+    Qtopia4SyncPlugin *plugin( const QString &key );
+};
+
+class QPimSyncStorage : public Qtopia4SyncPlugin
 {
     Q_OBJECT
 public:
-    QPimSyncStorage(QObject *parent);
-    ~QPimSyncStorage();
+    QPimSyncStorage(const QString &dataset, QObject *parent);
+    virtual ~QPimSyncStorage();
 
-public slots:
-    virtual bool startSyncTransaction(const QDateTime &);
-    virtual bool abortSyncTransaction();
-    virtual bool commitSyncTransaction();
+    QString dataset() { return mDataset; }
 
-    virtual void addServerRecord(const QByteArray &) = 0;
+    virtual void beginTransaction(const QDateTime &);
+    virtual void abortTransaction();
+    virtual void commitTransaction();
+
+    virtual void createServerRecord(const QByteArray &) = 0;
     virtual void replaceServerRecord(const QByteArray &) = 0;
     virtual void removeServerRecord(const QString &) = 0;
 
-    virtual void performSync(const QDateTime &) = 0;
-
-signals:
-    void mappedId(const QString &, const QString &);
-
-    void addClientRecord(const QByteArray &);
-    void replaceClientRecord(const QByteArray &);
-    void removeClientRecord(const QString &);
-
-    void clientChangesCompleted();
+    virtual void fetchChangesSince(const QDateTime &) = 0;
 
 protected:
     QMap<QString, QUniqueId> idMap;
@@ -75,6 +76,7 @@ protected:
 private:
     QPimModel *m;
     QSet<QString> mUnmappedCategories;
+    QString mDataset;
 };
 
 class QAppointmentSyncStorage : public QPimSyncStorage
@@ -84,13 +86,12 @@ public:
     QAppointmentSyncStorage();
     ~QAppointmentSyncStorage();
 
-    virtual bool commitSyncTransaction();
+    void commitTransaction();
 
-    virtual void addServerRecord(const QByteArray &);
-    virtual void replaceServerRecord(const QByteArray &);
-    virtual void removeServerRecord(const QString &);
-
-    virtual void performSync(const QDateTime &);
+    void createServerRecord(const QByteArray &);
+    void replaceServerRecord(const QByteArray &);
+    void removeServerRecord(const QString &);
+    void fetchChangesSince(const QDateTime &);
 
 private:
     QList<QPimXmlException> convertExceptions(const QList<QAppointment::Exception> origList) const;
@@ -104,12 +105,11 @@ public:
     QTaskSyncStorage();
     ~QTaskSyncStorage();
 
-    virtual bool commitSyncTransaction();
-    virtual void addServerRecord(const QByteArray &);
-    virtual void replaceServerRecord(const QByteArray &);
-    virtual void removeServerRecord(const QString &);
-
-    virtual void performSync(const QDateTime &);
+    void commitTransaction();
+    void createServerRecord(const QByteArray &);
+    void replaceServerRecord(const QByteArray &);
+    void removeServerRecord(const QString &);
+    void fetchChangesSince(const QDateTime &);
 
 private:
     QTaskModel *model;
@@ -122,12 +122,11 @@ public:
     QContactSyncStorage();
     ~QContactSyncStorage();
 
-    virtual bool commitSyncTransaction();
-    virtual void addServerRecord(const QByteArray &);
-    virtual void replaceServerRecord(const QByteArray &);
-    virtual void removeServerRecord(const QString &);
-
-    virtual void performSync(const QDateTime &);
+    void commitTransaction();
+    void createServerRecord(const QByteArray &);
+    void replaceServerRecord(const QByteArray &);
+    void removeServerRecord(const QString &);
+    void fetchChangesSince(const QDateTime &);
 
 private:
     QContactModel *model;

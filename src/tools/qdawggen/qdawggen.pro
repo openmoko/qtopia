@@ -13,4 +13,4 @@ unix:SOURCES    += qmemoryfile_unix.cpp
     
 win32:SOURCES    += qmemoryfile_win.cpp
 pkg.desc=QDawg file generator
-pkg.domain=comm
+pkg.domain=trusted

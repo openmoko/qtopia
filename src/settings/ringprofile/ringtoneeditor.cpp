@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -293,6 +293,7 @@ void RingToneSelect::addFromDocuments()
     QDocumentSelectorDialog *dlg = new QDocumentSelectorDialog(this);
     dlg->setModal(true);
     dlg->setWindowTitle(dlgcaption);
+    dlg->setWindowState( dlg->windowState() | Qt::WindowMaximized );
     dlg->setSelectPermission( QDrmRights::Play );
     dlg->setMandatoryPermissions( QDrmRights::Play | QDrmRights::Automated );
 
@@ -479,7 +480,9 @@ void RingToneButton::init( bool video )
         connect(this, SIGNAL(clicked()), this, SLOT(selectTone()));
     dlg = new QDialog(this);
     dlg->setModal(true);
-    QtopiaApplication::setMenuLike(dlg, true);
+    dlg->setWindowState( dlg->windowState() | Qt::WindowMaximized );
+    if (!Qtopia::mousePreferred())
+        QtopiaApplication::setMenuLike(dlg, true);
     QVBoxLayout *vbl = new QVBoxLayout(dlg);
     vbl->setContentsMargins(0, 0, 0, 0);
     dlg->setWindowTitle(tr("Select Ringtone"));
@@ -487,7 +490,8 @@ void RingToneButton::init( bool video )
     rtl = new RingToneSelect(dlg, video);
     connect(rtl, SIGNAL(selected(QContent)),
             this, SIGNAL(selected(QContent)));
-    connect(rtl, SIGNAL(selected(QContent)), dlg, SLOT(accept()));
+    if (!Qtopia::mousePreferred())
+        connect(rtl, SIGNAL(selected(QContent)), dlg, SLOT(accept()));
     vbl->addWidget(rtl);
     if (aNone)
         rtl->setAllowNone(true);

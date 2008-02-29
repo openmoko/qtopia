@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,7 +23,8 @@
 
 
 #include <qapplication.h>
-
+#include <QStylePainter>
+#include <QStyleOptionProgressBar>
 
 TimeProgressBar::TimeProgressBar( QWidget *parent )
     : QProgressBar( parent ), prevValue( -1 )
@@ -52,32 +53,32 @@ void TimeProgressBar::setPlaying()
     setPalette( origPalette );
 }
 
-
-bool TimeProgressBar::setIndicator( QString& progress_str, int progress, int totalSteps )
+void TimeProgressBar::paintEvent( QPaintEvent * )
 {
-    if ( !totalSteps )
-        return false;
-    if ( progress < 0 ) {
-        progress_str = QString::fromLatin1( "" );
-        return true;
-    } else if ( progress != prevValue ) {
-        prevValue = progress;
-        if ( progress > 60 * 60 ) {
-            progress_str.sprintf( "%02d:%02d:%02d",
-                                  progress / (60 * 60),
-                                  (progress / 60) % 60,
-                                  progress % 60 );
-        } else {
-            progress_str.sprintf( "%02d:%02d",
-                                  progress / 60,
-                                  progress % 60 );
-        }
-        return true;
-    } else {
-        return false;
-    }
-}
+    QStylePainter paint(this);
+    QStyleOptionProgressBarV2 option;
+    initStyleOption(&option);
 
+    if( option.progress >= 0 )
+    {
+        if( option.progress > 60 * 60 )
+            option.text = QString( "%1:%2:%3" )
+                    .arg( option.progress / (60 * 60) )
+                    .arg( (option.progress / 60) % 60, 2, 10, QLatin1Char( '0' ) )
+                    .arg( option.progress % 60, 2, 10, QLatin1Char( '0' ) );
+        else
+            option.text = QString( "%1:%2" )
+                    .arg( option.progress / 60 )
+                    .arg( option.progress % 60, 2, 10, QLatin1Char( '0' ) );
+    }
+    else
+        option.progress = 0;
+
+    if( recording )
+        option.maximum = -1;
+
+    paint.drawControl(QStyle::CE_ProgressBar, option);
+}
 
 bool TimeProgressBar::event( QEvent *e )
 {

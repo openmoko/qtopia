@@ -84,8 +84,8 @@
 <li><a href="#qdns">QDns</a></li>
 <li><a href="#qdockarea">QDockArea</a></li>
 <li><a href="#qdockwindow">QDockWindow</a></li>
-</ul></td><td width="25%"><ul>
 <li><a href="#qdragobject">QDragObject</a></li>
+</ul></td><td width="25%"><ul>
 <li><a href="#qdropsite">QDropSite</a></li>
 <li><a href="#qeditorfactory">QEditorFactory</a></li>
 <li><a href="#qeventloop">QEventLoop</a></li>
@@ -130,9 +130,9 @@
 <li><a href="#qmultilineedit">QMultiLineEdit</a></li>
 <li><a href="#qnetworkprotocol">QNetworkProtocol</a></li>
 <li><a href="#qobject">QObject</a></li>
-</ul></td><td width="25%"><ul>
 <li><a href="#qobjectdictionary">QObjectDictionary</a></li>
 <li><a href="#qobjectlist">QObjectList</a></li>
+</ul></td><td width="25%"><ul>
 <li><a href="#qpaintdevice">QPaintDevice</a></li>
 <li><a href="#qpaintdevicemetrics">QPaintDeviceMetrics</a></li>
 <li><a href="#qpainter">QPainter</a></li>
@@ -176,10 +176,10 @@
 <li><a href="#qsqlpropertymap">QSqlPropertyMap</a></li>
 <li><a href="#qsqlquery">QSqlQuery</a></li>
 <li><a href="#qsqlrecord">QSqlRecord</a></li>
-</ul></td><td width="25%"><ul>
 <li><a href="#qsqlrecordinfo">QSqlRecordInfo</a></li>
 <li><a href="#qsqlselectcursor">QSqlSelectCursor</a></li>
 <li><a href="#qstoreddrag">QStoredDrag</a></li>
+</ul></td><td width="25%"><ul>
 <li><a href="#qstr-i-list">QStr(I)List</a></li>
 <li><a href="#qstr-i-vec">QStr(I)Vec</a></li>
 <li><a href="#qstring">QString</a></li>
@@ -191,6 +191,7 @@
 <li><a href="#qtabdialog">QTabDialog</a></li>
 <li><a href="#qtabwidget">QTabWidget</a></li>
 <li><a href="#qtable">QTable</a></li>
+<li><a href="#qtextcodec">QTextCodec</a></li>
 <li><a href="#qtextdrag">QTextDrag</a></li>
 <li><a href="#qtextedit">QTextEdit</a></li>
 <li><a href="#qtextistream">QTextIStream</a></li>
@@ -904,9 +905,9 @@
 <p>In Qt 3, <a href="#qcstring">QCString</a> inherited from <a href="qbytearray.html">QByteArray</a>. The main drawback of this approach is that the user had the responsibility of ensuring that the string is '\0'-terminated. Another important issue was that conversions between <tt>QCString</tt> and <a href="qbytearray.html">QByteArray</a> often gave confusing results. (See the <a href="http://doc.trolltech.com/qq/qq05-achtung.html#qcstringisastringofchars">Achtung! Binary and Character Data</a> article in <i>Qt Quarterly</i> for an overview of the pitfalls.)</p>
 <p>Qt 4 solves that problem by merging the <a href="qbytearray.html">QByteArray</a> and <tt>QCString</tt> classes into one class called <a href="qbytearray.html">QByteArray</a>. Most functions that were in <tt>QCString</tt> previously have been moved to <a href="qbytearray.html">QByteArray</a>. The '\0' issue is handled by having <a href="qbytearray.html">QByteArray</a> allocate one extra byte that it always sets to '\0'. For example:</p>
 <pre> QByteArray ba(&quot;Hello&quot;);
- ba.size();             <span class="comment">// returns 5 (the '\0' is not counted)</span>
- ba.length();           <span class="comment">// returns 5</span>
- ba.data()[5];          <span class="comment">// returns '\0'</span></pre>
+ ba.size();             <span class="comment">//</span> returns 5 (the '\0' is not counted)
+ ba.length();           <span class="comment">//</span> returns 5
+ ba.data()[5];          <span class="comment">//</span> returns '\0'</pre>
 <p>The <a href="qt3support.html">Qt3Support</a> library contains a class called Q3CString that inherits from the new <a href="qbytearray.html">QByteArray</a> class and that extends it to provide an API that is as close to the old <tt>QCString</tt> class as possible. Note that the following functions aren't provided by Q3CString:</p>
 <ul>
 <li>QCString::find(const <a href="qregexp.html">QRegExp</a> &amp;, int)</li>
@@ -1103,7 +1104,7 @@
 <p>Here's the equivalent <a href="qhashiterator.html">QHashIterator</a> loop:</p>
 <pre> QHashIterator&lt;QString, QWidget *&gt; i(hash);
  while (i.hasNext()) {
-     i.next();                   <span class="comment">// must come first</span>
+     i.next();                   <span class="comment">//</span> must come first
      do_something(i.key(), i.value());
  }</pre>
 <p>See <a href="containers.html#java-style-iterators">Java-style iterators</a> for details.</p>
@@ -2131,7 +2132,7 @@
 </li>
 <li><a href="qstring-qt3.html#latin1">QString::latin1</a>() and <a href="qstring-qt3.html#ascii">QString::ascii</a>() have been replaced with <a href="qstring.html#toLatin1">QString::toLatin1</a>() and <a href="qstring.html#toAscii">QString::toAscii</a>(), which return a <a href="qbytearray.html">QByteArray</a> instead of a (non-reentrant) <tt>const char *</tt>. For consistency, <a href="qstring-qt3.html#utf8">QString::utf8</a>() and <a href="qstring-qt3.html#local8Bit">QString::local8Bit</a>(), which already returned a <a href="qbytearray.html">QByteArray</a> (actually a <tt>QCString</tt>), have been renamed <a href="qstring.html#toUtf8">QString::toUtf8</a>() and <a href="qstring.html#toLocal8Bit">QString::toLocal8Bit</a>().<p>To obtain a <tt>const char *</tt> pointer to ASCII or Latin-1 data, use <a href="qstring.html#toAscii">QString::toAscii</a>() or <a href="qstring.html#toLatin1">QString::toLatin1</a>() to obtain a <a href="qbytearray.html">QByteArray</a> containing the data, then call <a href="qbytearray.html#constData">QByteArray::constData</a>() to access the character data directly. Note that the pointer returned by this function is only valid for the lifetime of the byte array; you should avoid taking a pointer to the data contained in temporary objects.</p>
 <pre>     QString greeting = &quot;Hello&quot;;
-     const char *badData = greeting.toAscii().constData(); <span class="comment">// data is invalid</span>
+     const char *badData = greeting.toAscii().constData(); <span class="comment">//</span> data is invalid
      QByteArray asciiData = greeting.toAscii();
      const char *goodData = asciiData.constData();</pre>
 <p>In the above example, the <tt>goodData</tt> pointer is valid for the lifetime of the <tt>asciiData</tt> byte array. If you need to keep a copy of the data in a non-Qt data structure, use standard C memory allocation and string copying functions to do so <i>before</i> destroying the byte array.</p>
@@ -2253,6 +2254,9 @@
 <p>The <tt>QTable</tt>, <tt>QTableItem</tt>, <tt>QComboTableItem</tt>, <tt>QCheckTableItem</tt>, and <tt>QTableSelection</tt> classes have been renamed Q3Table, Q3TableItem, Q3ComboTableItem, Q3CheckTableItem, and Q3TableSelection and moved to the <a href="qt3support.html">Qt3Support</a> library. New Qt applications should use the new <a href="qtablewidget.html">QTableWidget</a> or <a href="qtableview.html">QTableView</a> class instead.</p>
 <p>Some of these classes behave differently with respect to the way they handle <tt>NULL</tt> pointers. For example, Q3TableItem::setPixmap() no longer accepts <tt>NULL</tt> or 0 to indicate that the item should contain a null pixmap; in this case, a null pixmap should be constructed and passed explicitly to the function.</p>
 <p>See <a href="model-view-programming.html">Model/View Programming</a> for an overview of the new item view classes.</p>
+<a name="qtextcodec"></a>
+<h2>QTextCodec</h2>
+<p>The loadCharmap() and loadCharmapFromFile() functions are no longer available in Qt 4. You need to create your own codec if you want to create a codec based on a POSIX2 charmap definition.</p>
 <a name="qtextdrag"></a>
 <h2>QTextDrag</h2>
 <p>The <tt>QTextDrag</tt> class has been renamed Q3TextDrag and moved to the <a href="qt3support.html">Qt3Support</a> library. In Qt 4, use <a href="qmimedata.html">QMimeData</a> instead and call <a href="qmimedata.html#setText">QMimeData::setText</a>() to set the data.</p>
@@ -2336,7 +2340,7 @@
 <p>you can rewrite it as</p>
 <pre>     QLinkedList&lt;T&gt;::iterator i = list.end();
      while (i != list.begin()) {
-         --i; <span class="comment">// decrement i before using it</span>
+         --i; <span class="comment">//</span> decrement i before using it
          do_something(*i);
      }</pre>
 </li>
@@ -2489,6 +2493,7 @@
 <li>QWidget::setSizePolicy(<a href="qsizepolicy.html">QSizePolicy</a>)</li>
 <li>QWidget::setUpdatesEnabled(bool enable)</li>
 <li>QWidget::setWState(uint)</li>
+<li><a href="qwidget.html#show">QWidget::show</a>()</li>
 <li><a href="qwidget.html#showFullScreen">QWidget::showFullScreen</a>()</li>
 <li><a href="qwidget.html#showMaximized">QWidget::showMaximized</a>()</li>
 <li><a href="qwidget.html#showMinimized">QWidget::showMinimized</a>()</li>
@@ -3191,17 +3196,18 @@
 <tr valign="top" class="even"><td>void QWidget::setSizePolicy(<a href="qsizepolicy.html">QSizePolicy</a>)</td><td>Setter.</td></tr>
 <tr valign="top" class="odd"><td>void QWidget::setUpdatesEnabled(bool)</td><td>Setter.</td></tr>
 <tr valign="top" class="even"><td>void QWidget::setWFlags(WFlags)</td><td>Setter.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qwidget.html#showMaximized">QWidget::showMaximized</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
-<tr valign="top" class="even"><td>void <a href="qwidget.html#showMinimized">QWidget::showMinimized</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qwidget.html#showNormal">QWidget::showNormal</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
-<tr valign="top" class="even"><td>void QWidget::styleChange(<a href="qstyle.html">QStyle</a> &amp;)</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::StyleChange</a>.</td></tr>
-<tr valign="top" class="odd"><td>void <a href="qwidget.html#cursor-prop">QWidget::unsetCursor</a>()</td><td>Setter.</td></tr>
-<tr valign="top" class="even"><td>void QWidget::windowActivationChange(bool)</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::ActivationChange</a>.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qwidget.html#show">QWidget::show</a>()</td><td>Reimplement <a href="qwidget.html#showEvent">QWidget::showEvent</a>().</td></tr>
+<tr valign="top" class="even"><td>void <a href="qwidget.html#showMaximized">QWidget::showMaximized</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
+<tr valign="top" class="odd"><td>void <a href="qwidget.html#showMinimized">QWidget::showMinimized</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qwidget.html#showNormal">QWidget::showNormal</a>()</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::WindowStateChange</a>.</td></tr>
+<tr valign="top" class="odd"><td>void QWidget::styleChange(<a href="qstyle.html">QStyle</a> &amp;)</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::StyleChange</a>.</td></tr>
+<tr valign="top" class="even"><td>void <a href="qwidget.html#cursor-prop">QWidget::unsetCursor</a>()</td><td>Setter.</td></tr>
+<tr valign="top" class="odd"><td>void QWidget::windowActivationChange(bool)</td><td>Reimplement <a href="qwidget.html#changeEvent">QWidget::changeEvent</a>() and handle <a href="qevent.html#Type-enum">QEvent::ActivationChange</a>.</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

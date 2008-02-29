@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QObexFtpClient Class Reference</h1>
 <p>The QObexFtpClient class provides an implementation of the OBEX file-transfer mechanism. <a href="#details">More...</a></p>
-<pre>    #include &lt;QObexFtpClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QObexFtpClient&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qobexftpclient-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -55,7 +55,7 @@
 <li><div class="fn"/>QObexFtpClient::State <b><a href="qobexftpclient.html#state">state</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -63,7 +63,7 @@
 <li><div class="fn"/>void <b><a href="qobexftpclient.html#abort">abort</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -78,16 +78,15 @@
 <li><div class="fn"/>void <b><a href="qobexftpclient.html#stateChanged">stateChanged</a></b> ( QObexFtpClient::State <i>state</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -100,10 +99,10 @@
 <p>If an error occurs during the execution of one of the commands in a sequence of commands, all the pending commands (i.e&#x2e; scheduled, but not yet executed commands) are cleared and no signals are emitted for them.</p>
 <p>Some commands, e.g&#x2e; <a href="qobexftpclient.html#list">list</a>(), emit additional signals to report their results.</p>
 <p>An example of using this class is:</p>
-<pre>    ftp-&gt;connect();                             <span class="comment">// id == 1</span>
-    ftp-&gt;cd(&quot;foo&quot;);                             <span class="comment">// id == 2</span>
-    ftp-&gt;get(&quot;bar&quot;);                            <span class="comment">// id == 3</span>
-    ftp-&gt;disconnect();                          <span class="comment">// id == 4</span></pre>
+<pre>    ftp-&gt;connect();                             <span class="comment">//</span> id == 1
+    ftp-&gt;cd(&quot;foo&quot;);                             <span class="comment">//</span> id == 2
+    ftp-&gt;get(&quot;bar&quot;);                            <span class="comment">//</span> id == 3
+    ftp-&gt;disconnect();                          <span class="comment">//</span> id == 4</pre>
 <p><a href="qobexftpclient.html#get">get</a>() and <a href="qobexftpclient.html#put">put</a>() operations report the progress of the transfer using the <a href="qobexftpclient.html#dataTransferProgress">dataTransferProgress</a>() signal. If no IODevice is associated with a get, then the <a href="qobexftpclient.html#readyRead">readyRead</a>() signal is emitted. In this case the data can be obtained with the <a href="qobexftpclient.html#read">read</a>() or <a href="qobexftpclient.html#readAll">readAll</a>().</p>
 <p>You can then get details about the error with the <a href="qobexftpclient.html#error">error</a>() and <a href="qobexftpclient.html#errorString">errorString</a>() functions.</p>
 <p>The functions <a href="qobexftpclient.html#currentId">currentId</a>() and <a href="qobexftpclient.html#currentCommand">currentCommand</a>() provide more information about the currently executing command.</p>
@@ -151,7 +150,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QObexFtpClient"></a>QObexFtpClient::QObexFtpClient ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QObexFtpClient"></a>QObexFtpClient::QObexFtpClient ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new OBEX FTP Client object. The device to use is given by <i>device</i>. The device should already be opened in order to perform requests.</p>
 <p>The <i>parent</i> parameter specifies the <tt>QObject</tt> parent.</p>
 <p>See also <a href="qobexftpclient.html#state">state</a>().</p>
@@ -160,10 +159,10 @@
 <h3 class="fn"><a name="abort"></a>void QObexFtpClient::abort ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Attempts to abort the current operation. This will also clear all pending operations. If no operations are in progress or pending, then this function has no effect.</p>
 <p>See also <a href="qobexftpclient.html#clearPendingCommands">clearPendingCommands</a>().</p>
-<h3 class="fn"><a name="bytesAvailable"></a>qint64 QObexFtpClient::bytesAvailable () const</h3>
+<h3 class="fn"><a name="bytesAvailable"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QObexFtpClient::bytesAvailable () const</h3>
 <p>Returns the number of bytes available in the ftp stream.</p>
 <p>See also <a href="qobexftpclient.html#read">read</a>() and <a href="qobexftpclient.html#readAll">readAll</a>().</p>
-<h3 class="fn"><a name="cd"></a>int QObexFtpClient::cd ( const <a href="qstring.html">QString</a> &amp; <i>dir</i> = QString() )</h3>
+<h3 class="fn"><a name="cd"></a>int QObexFtpClient::cd ( const <a href="./qstring.html">QString</a> &amp; <i>dir</i> = QString() )</h3>
 <p>Change the current working directory to a directory given by <i>dir</i>. If <i>dir</i> is an empty string, then request the root directory to become the current working directory.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
@@ -190,13 +189,13 @@
 <h3 class="fn"><a name="currentCommand"></a><a href="qobexftpclient.html#Command-enum">QObexFtpClient::Command</a> QObexFtpClient::currentCommand () const</h3>
 <p>Returns the command type of the current operation in progress. If no operation is in progress, a <a href="qobexftpclient.html#Command-enum">QObexFtpClient::None</a> is returned.</p>
 <p>See also <a href="qobexftpclient.html#currentId">currentId</a>().</p>
-<h3 class="fn"><a name="currentDevice"></a><a href="qiodevice.html">QIODevice</a> * QObexFtpClient::currentDevice () const</h3>
-<p>Returns the current <a href="qiodevice.html">QIODevice</a> that is being used for a get / put operation. If no device is being used, a NULL is returned.</p>
+<h3 class="fn"><a name="currentDevice"></a><a href="./qiodevice.html">QIODevice</a> * QObexFtpClient::currentDevice () const</h3>
+<p>Returns the current <a href="./qiodevice.html">QIODevice</a> that is being used for a get / put operation. If no device is being used, a NULL is returned.</p>
 <p>See also <a href="qobexftpclient.html#put">put</a>() and <a href="qobexftpclient.html#get">get</a>().</p>
 <h3 class="fn"><a name="currentId"></a>int QObexFtpClient::currentId () const</h3>
 <p>Returns the id of the operation currently in progress. If no operation is in progress a 0 is returned.</p>
 <p>See also <a href="qobexftpclient.html#currentCommand">currentCommand</a>().</p>
-<h3 class="fn"><a name="dataTransferProgress"></a>void QObexFtpClient::dataTransferProgress ( qint64 <i>completed</i>, qint64 <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="dataTransferProgress"></a>void QObexFtpClient::dataTransferProgress ( <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>completed</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted reports the progress of the file send operation. The <i>completed</i> parameter reports how many bytes were sent, and <i>total</i> parameter reports the total number of bytes. If the total is not known, it will be reported as 0.</p>
 <p>See also <a href="qobexftpclient.html#get">get</a>() and <a href="qobexftpclient.html#put">put</a>().</p>
 <h3 class="fn"><a name="disconnect"></a>int QObexFtpClient::disconnect ()</h3>
@@ -210,11 +209,11 @@
 <h3 class="fn"><a name="error"></a><a href="qobexftpclient.html#Error-enum">Error</a> QObexFtpClient::error () const</h3>
 <p>Returns the last error that occurred. This is useful for finding out what happened when receiving an requestFinished() or <a href="qobexftpclient.html#done">done</a>() signal that has the <tt>error</tt> argument set to <tt>true</tt>.</p>
 <p>See also <a href="qobexftpclient.html#errorString">errorString</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QObexFtpClient::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QObexFtpClient::errorString () const</h3>
 <p>Returns a human-readable description of the last error that occurred.</p>
 <p>The error string is reset when a new request is started.</p>
 <p>See also <a href="qobexftpclient.html#error">error</a>().</p>
-<h3 class="fn"><a name="get"></a>int QObexFtpClient::get ( const <a href="qstring.html">QString</a> &amp; <i>file</i>, <a href="qiodevice.html">QIODevice</a> * <i>dev</i> = 0 )</h3>
+<h3 class="fn"><a name="get"></a>int QObexFtpClient::get ( const <a href="./qstring.html">QString</a> &amp; <i>file</i>, <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> = 0 )</h3>
 <p>Attempts to retrieve <i>file</i> from the server. If <i>dev</i> is NULL, then the <a href="qobexftpclient.html#readyRead">readyRead</a>() signal is emitted when there is data available to read. You can then read the data with the <a href="qobexftpclient.html#read">read</a>() or <a href="qobexftpclient.html#readAll">readAll</a>() functions.</p>
 <p>If <i>dev</i> is not 0, the data is written directly to the device <i>dev</i>. Make sure that the <i>dev</i> pointer is valid for the duration of the operation (it is safe to delete it when the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted). In this case the <a href="qobexftpclient.html#readyRead">readyRead</a>() signal is not emitted and you cannot read data with the <a href="qobexftpclient.html#read">read</a>() or <a href="qobexftpclient.html#readAll">readAll</a>() functions.</p>
 <p>If you don't read the data immediately it becomes available, i.e&#x2e; when the <a href="qobexftpclient.html#readyRead">readyRead</a>() signal is emitted, it is still available until the next command is started.</p>
@@ -222,7 +221,7 @@
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qobexftpclient.html#readyRead">readyRead</a>(), <a href="qobexftpclient.html#dataTransferProgress">dataTransferProgress</a>(), <a href="qobexftpclient.html#commandStarted">commandStarted</a>(), <a href="qobexftpclient.html#commandFinished">commandFinished</a>(), and <a href="qobexftpclient.html#getInfo">getInfo</a>().</p>
-<h3 class="fn"><a name="getInfo"></a>void QObexFtpClient::getInfo ( const <a href="qstring.html">QString</a> &amp; <i>mimetype</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="getInfo"></a>void QObexFtpClient::getInfo ( const <a href="./qstring.html">QString</a> &amp; <i>mimetype</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i>, const <a href="./qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Some OBEX servers can provide additional information about a file in the headers sent with the GET command response that might not appear in the directory listing. These attributes are returned in this signal. An empty, default-constructed value is given if the GET response did not specify any additional information.</p>
 <p>The <i>mimetype</i> parameter holds the contents of the Type header. The <i>description</i> parameter holds the contents of the Description header. The <i>lastModified</i> holds the contents of the Time header.</p>
 <p>See also <a href="qobexftpclient.html#get">get</a>() and <a href="qobexftpclient.html#listInfo">listInfo</a>().</p>
@@ -231,7 +230,7 @@
 <p>See also <a href="qobexftpclient.html#clearPendingCommands">clearPendingCommands</a>(), <a href="qobexftpclient.html#currentId">currentId</a>(), and <a href="qobexftpclient.html#currentCommand">currentCommand</a>().</p>
 <h3 class="fn"><a name="lastCommandResponse"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexFtpClient::lastCommandResponse () const</h3>
 <p>Returns the last response from the remote service. This could be used to find out the reason a command might have failed (e.g&#x2e; unauthorized, unsupported, etc)</p>
-<h3 class="fn"><a name="list"></a>int QObexFtpClient::list ( const <a href="qstring.html">QString</a> &amp; <i>dir</i> = QString() )</h3>
+<h3 class="fn"><a name="list"></a>int QObexFtpClient::list ( const <a href="./qstring.html">QString</a> &amp; <i>dir</i> = QString() )</h3>
 <p>Obtains the content listing of the directory given by <i>dir</i>. If <i>dir</i> is an empty string, then the contents of the current working directory are returned.</p>
 <p>The <a href="qobexftpclient.html#listInfo">listInfo</a>() signal will be sent for all contents of the directory being listed.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
@@ -240,12 +239,12 @@
 <h3 class="fn"><a name="listInfo"></a>void QObexFtpClient::listInfo ( const <a href="qobexfolderlistingentryinfo.html">QObexFolderListingEntryInfo</a> &amp; <i>info</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a directory listing information is obtained from the remote service. The directory entry is reported in <i>info</i>.</p>
 <p>See also <a href="qobexftpclient.html#list">list</a>().</p>
-<h3 class="fn"><a name="mkdir"></a>int QObexFtpClient::mkdir ( const <a href="qstring.html">QString</a> &amp; <i>dir</i> )</h3>
+<h3 class="fn"><a name="mkdir"></a>int QObexFtpClient::mkdir ( const <a href="./qstring.html">QString</a> &amp; <i>dir</i> )</h3>
 <p>Create a new directory on the server. The directory name is given by <i>dir</i>. If the command succeeds, the current working directory will be the directory just created.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
-<h3 class="fn"><a name="put"></a>int QObexFtpClient::put ( <a href="qiodevice.html">QIODevice</a> * <i>dev</i>, const <a href="qstring.html">QString</a> &amp; <i>file</i>, qint64 <i>size</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>description</i> = QString(), const <a href="qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> = QDateTime() )</h3>
+<h3 class="fn"><a name="put"></a>int QObexFtpClient::put ( <a href="./qiodevice.html">QIODevice</a> * <i>dev</i>, const <a href="./qstring.html">QString</a> &amp; <i>file</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>size</i> = 0, const <a href="./qstring.html">QString</a> &amp; <i>mimetype</i> = QString(), const <a href="./qstring.html">QString</a> &amp; <i>description</i> = QString(), const <a href="./qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> = QDateTime() )</h3>
 <p>Reads the data from <i>dev</i> and puts it in a file called <i>file</i> on the server. The data is read in chunks from the IO device, so this overload allows you to transmit large amounts of data without the need to read all the data into memory at once.</p>
 <p>If <i>size</i> is not 0, then it is used for OBEX Length header contents. If <i>mimetype</i> is not empty, it is used for OBEX Type header contents. If <i>description</i> is not empty, it is used for OBEX Description header contents. If <i>lastModified</i> is valid, it is used for OBEX Time header contents.</p>
 <p>Make sure that the dev pointer is valid for the duration of the operation (it is safe to delete it when the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() is emitted).</p>
@@ -253,31 +252,31 @@
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qobexftpclient.html#dataTransferProgress">dataTransferProgress</a>(), <a href="qobexftpclient.html#commandStarted">commandStarted</a>(), and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
-<h3 class="fn"><a name="put-2"></a>int QObexFtpClient::put ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qstring.html">QString</a> &amp; <i>file</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>description</i> = QString(), const <a href="qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> = QDateTime() )</h3>
+<h3 class="fn"><a name="put-2"></a>int QObexFtpClient::put ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="./qstring.html">QString</a> &amp; <i>file</i>, const <a href="./qstring.html">QString</a> &amp; <i>mimetype</i> = QString(), const <a href="./qstring.html">QString</a> &amp; <i>description</i> = QString(), const <a href="./qdatetime.html">QDateTime</a> &amp; <i>lastModified</i> = QDateTime() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is an overloaded member function provided for convenience. It is the same as the above function, except the data is obtained directory from <i>data</i> instead of an IO device. The size information is obtained from the size of the byte array. The <i>file</i>, <i>mimetype</i>, <i>description</i> and <i>lastModified</i> parameters have the same meaning as discussed previously.</p>
 <p>See also <a href="qobexftpclient.html#dataTransferProgress">dataTransferProgress</a>(), <a href="qobexftpclient.html#commandStarted">commandStarted</a>(), and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
-<h3 class="fn"><a name="read"></a>qint64 QObexFtpClient::read ( char * <i>data</i>, qint64 <i>maxlen</i> )</h3>
+<h3 class="fn"><a name="read"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QObexFtpClient::read ( char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )</h3>
 <p>Attempts to read <i>maxlen</i> bytes from the ftp stream and store them in a location pointed to by <i>data</i>.</p>
 <p>Returns the number of bytes read or -1 if an error occurred.</p>
 <p>See also <a href="qobexftpclient.html#readAll">readAll</a>() and <a href="qobexftpclient.html#bytesAvailable">bytesAvailable</a>().</p>
-<h3 class="fn"><a name="readAll"></a><a href="qbytearray.html">QByteArray</a> QObexFtpClient::readAll ()</h3>
+<h3 class="fn"><a name="readAll"></a><a href="./qbytearray.html">QByteArray</a> QObexFtpClient::readAll ()</h3>
 <p>Reads all the bytes available from the ftp stream and returns them as a byte array.</p>
 <p>See also <a href="qobexftpclient.html#read">read</a>() and <a href="qobexftpclient.html#bytesAvailable">bytesAvailable</a>().</p>
 <h3 class="fn"><a name="readyRead"></a>void QObexFtpClient::readyRead ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever data is ready to be read from the ftp stream.</p>
 <p>See also <a href="qobexftpclient.html#read">read</a>(), <a href="qobexftpclient.html#readAll">readAll</a>(), and <a href="qobexftpclient.html#bytesAvailable">bytesAvailable</a>().</p>
-<h3 class="fn"><a name="remove"></a>int QObexFtpClient::remove ( const <a href="qstring.html">QString</a> &amp; <i>file</i> )</h3>
+<h3 class="fn"><a name="remove"></a>int QObexFtpClient::remove ( const <a href="./qstring.html">QString</a> &amp; <i>file</i> )</h3>
 <p>Removes <i>file</i> from the server.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
-<h3 class="fn"><a name="rmdir"></a>int QObexFtpClient::rmdir ( const <a href="qstring.html">QString</a> &amp; <i>dir</i> )</h3>
+<h3 class="fn"><a name="rmdir"></a>int QObexFtpClient::rmdir ( const <a href="./qstring.html">QString</a> &amp; <i>dir</i> )</h3>
 <p>Remove the directory <i>dir</i> on the server. Some servers do not allow deletion of non-empty directories. The server should report a PreconditionFailed response code in this case. In general the client should recursively delete all contents of the directory before using this command.</p>
 <p>The function does not block and returns immediately. The command is scheduled, and its execution is performed asynchronously. The function returns a unique identifier which is passed by <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
 <p>When the command is started the <a href="qobexftpclient.html#commandStarted">commandStarted</a>() signal is emitted. When it is finished the <a href="qobexftpclient.html#commandFinished">commandFinished</a>() signal is emitted.</p>
 <p>See also <a href="qobexftpclient.html#commandStarted">commandStarted</a>() and <a href="qobexftpclient.html#commandFinished">commandFinished</a>().</p>
-<h3 class="fn"><a name="sessionDevice"></a><a href="qiodevice.html">QIODevice</a> * QObexFtpClient::sessionDevice () const</h3>
+<h3 class="fn"><a name="sessionDevice"></a><a href="./qiodevice.html">QIODevice</a> * QObexFtpClient::sessionDevice () const</h3>
 <p>Returns the device used by the Ftp Client, as provided in the constructor.</p>
 <h3 class="fn"><a name="state"></a><a href="qobexftpclient.html#State-enum">QObexFtpClient::State</a> QObexFtpClient::state () const</h3>
 <p>Returns the current state of the client.</p>
@@ -287,8 +286,8 @@
 <p>See also <a href="qobexftpclient.html#state">state</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

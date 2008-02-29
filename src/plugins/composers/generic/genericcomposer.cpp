@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -328,22 +328,25 @@ void GenericComposer::updateSmsLimitIndicator()
 
 void GenericComposer::textChanged()
 {
+    static bool rtl = QApplication::isRightToLeft();
+
     int charCount = m_textEdit->toPlainText().length();
+    int remaining = SMS_CHAR_LIMIT - charCount; 
 
 #ifndef QTOPIA_NO_SMS
     int numMessages = smsCountInfo();
 #else
     int numMessages = 1;
 #endif
-    m_smsLimitIndicator->setText( QString(tr("%1/%2","e.g. 5/7"))
-                                    .arg( SMS_CHAR_LIMIT - charCount )
-                                    .arg( numMessages ) + QLatin1String(" ")
-                                );
+
+    QString info = tr("%1/%2","e.g. 5/7").arg( rtl ? numMessages : remaining )
+                                         .arg( rtl ? remaining : numMessages );
+    m_smsLimitIndicator->setText( ' ' + info + ' ' );
 }
 
 void GenericComposer::templateText()
 {
-    TemplateTextDialog *templateTextDialog = new TemplateTextDialog();
+    TemplateTextDialog *templateTextDialog = new TemplateTextDialog( this, "template-text" );
     QtopiaApplication::execDialog( templateTextDialog );
 
     ComposerTextEdit *composer = qobject_cast<ComposerTextEdit *>( m_textEdit );
@@ -469,7 +472,7 @@ void GenericComposerInterface::addActions(QMenu* menu) const
     m_composer->addActions(menu);
 }
 
-void GenericComposerInterface::attach( const QContent & )
+void GenericComposerInterface::attach( const QContent &, QMailMessage::AttachmentsAction )
 {
     qWarning("Unimplemented function called %s %d, %s", __FILE__, __LINE__, __FUNCTION__ );
 }

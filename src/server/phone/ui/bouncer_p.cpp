@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,8 +23,10 @@
 #include "oscillator_p.h"
 #include "selecteditem.h"
 #include "griditem.h"
+#include "renderer.h"
 
 #include <QPainter>
+#include <QPixmap>
 
 /*!
   \internal
@@ -41,9 +43,9 @@
 
 
 const QString Bouncer::mDescription("Bounce");
-const qreal Bouncer::DEFAULT_MIN_VARIATION = -0.0001;
-const qreal Bouncer::DEFAULT_MAX_VARIATION = 0.5;
-const qreal Bouncer::SPEED_FACTOR = 0.14;
+const qreal Bouncer::DEFAULT_MIN_VARIATION = -0.3;
+const qreal Bouncer::DEFAULT_MAX_VARIATION = 0.4;
+const qreal Bouncer::SPEED_FACTOR = 0.3;
 
 
 /*!
@@ -78,6 +80,26 @@ Bouncer::Bouncer(qreal _minVariation,qreal _maxVariation,
 
 /*!
   \internal
+*/
+void Bouncer::initFromGridItem(GridItem *item)
+{
+    if (!item)
+        return;
+
+    int imageSize = item->selectedImageSize();
+    imageSize +=  imageSize * maxVariation;
+    Renderer *renderer = item->renderer();
+    if ( renderer ) {
+        bigpixmap = QPixmap(imageSize,imageSize);
+        bigpixmap.fill(QColor(0,0,0,0));
+        QPainter p(&bigpixmap);
+        renderer->render(&p,QRectF(0,0,imageSize,imageSize));
+        p.end();
+    }
+}
+
+/*!
+  \internal
   \fn void Bouncer::animate(QPainter *painter,SelectedItem *item,qreal percent)
 */
 void Bouncer::animate(QPainter *painter,SelectedItem *item,qreal percent)
@@ -101,6 +123,20 @@ void Bouncer::animate(QPainter *painter,SelectedItem *item,qreal percent)
     // Ask the oscillator to produce a suitable width/height value for this stage
     // of the animation.
     int y = qRound(oscillator(percent*frameMax));
+    if (((y-imageSize) % 2) != 0) {
+        y -= 1;
+    }
 
-    draw(painter,item,y,y);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
+
+    //lazy man's version of mipmapping
+    if (y > imageSize) {
+        if (!bigpixmap.isNull())
+            draw(painter,bigpixmap,item,y,y);
+    } else {
+        const QPixmap &pixmap = currentItem->selectedPic();
+        if ( !(pixmap.isNull()) ) {
+            draw(painter,pixmap,item,y,y);
+        }
+    }
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -58,6 +58,7 @@ void ProxyScreen::configure()
     physHeight = realScreen->physicalHeight();
 
     setOffset(realScreen->offset());
+    setPixelFormat(realScreen->pixelFormat());
 }
 
 static int getDisplayId(const QString &spec)
@@ -170,6 +171,14 @@ void ProxyScreen::disconnect()
         delete realScreen;
         realScreen = 0;
     }
+}
+
+void ProxyScreen::exposeRegion(QRegion region, int windowIndex)
+{
+    if (realScreen)
+        realScreen->exposeRegion(region, windowIndex);
+    else
+        QScreen::exposeRegion(region, windowIndex);
 }
 
 bool ProxyScreen::initDevice()

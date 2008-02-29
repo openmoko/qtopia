@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,10 +54,13 @@ public:
     void finishSync();
 
     // QDServerSyncPlugin
-    void performSync(const QDateTime &timestamp);
+    void fetchChangesSince(const QDateTime &timestamp);
     void createClientRecord(const QByteArray &record);
     void replaceClientRecord(const QByteArray &record);
     void removeClientRecord(const QString &identifier);
+    void beginTransaction(const QDateTime &timestamp);
+    void abortTransaction();
+    void commitTransaction();
 
     QString dateToString( const QDate &date );
     QDate stringToDate( const QString &string );
@@ -77,7 +80,7 @@ public:
     virtual void init_item( IDispatchPtr dispatch );
 
 signals:
-    void t_performSync(const QDateTime &timestamp);
+    void t_fetchChangesSince(const QDateTime &timestamp);
     void t_updateClientRecord(const QByteArray &record);
     void t_removeClientRecord(const QString &identifier);
 
@@ -111,7 +114,7 @@ signals:
 
 public slots:
     void logon();
-    void performSync( const QDateTime &timestamp );
+    void fetchChangesSince( const QDateTime &timestamp );
     void updateClientRecord(const QByteArray &record);
     void removeClientRecord(const QString &identifier);
     void waitForAbort();
@@ -257,8 +260,10 @@ public:
 
 #define DUMP_CUSTOM_MAP(qtopiaUserProps)\
     do {\
+        stream << "<CustomFields>\n";\
         for ( QMap<QString,QString>::const_iterator it = qtopiaUserProps.constBegin(); it != qtopiaUserProps.constEnd(); ++it )\
             stream << "<CustomField>\n<Key>" << escape(it.key()) << "</Key>\n<Value>" << escape(it.value()) << "</Value>\n</CustomField>\n";\
+        stream << "</CustomFields>\n";\
     } while ( 0 )
 
 #define PREPARE_MAPI(type)\

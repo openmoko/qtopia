@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -355,9 +355,18 @@ public:
         QSettings cfg("Trolltech","qpe");
         cfg.beginGroup("Appearance");
         QString theme = cfg.value("DecorationTheme", "qtopia/decorationrc").toString();
+        QString themeFile = Qtopia::qtopiaDir() + "etc/themes/" + theme;
 
-        QString themeDir = Qtopia::qtopiaDir() + "etc/themes/";
-        QString themeFile = themeDir + theme;
+        // Search for decoration config
+        QStringList instPaths = Qtopia::installPaths();
+        foreach (QString path, instPaths) {
+            QString themeDataPath(path + QLatin1String("etc/themes/") + theme);
+            if (QFile::exists(themeDataPath)) {
+                themeFile = themeDataPath;
+                break;
+            }
+        }
+
         QSettings dcfg(themeFile, QSettings::IniFormat);
         dcfg.beginGroup("Decoration");
         QString base = dcfg.value("Base").toString();
@@ -574,16 +583,9 @@ void PhoneDecoration::drawArea( Area a, QPainter *p, const WindowData *wd ) cons
                 else
                     p->setPen(d->data(wd).textColor(wd->palette));
                 QRect tr = d->data(wd).titleTextRect(r.width());
-
-                static const Qt::TextElideMode elideMode(QtopiaApplication::isLeftToRight() ? Qt::ElideRight : Qt::ElideLeft);
-
-                // Elide the text if it won't fit within the title bar width
-                QFontMetrics metrics(f);
-                QString renderText(metrics.elidedText(wd->caption, elideMode, tr.width()));
-
                 p->drawText( r.left()+tr.left(), r.top()-th+tr.top(),
                              tr.width(), tr.height(),
-                             d->data(wd).titleTextAlignment(), renderText );
+                             d->data(wd).titleTextAlignment(), wd->caption );
             }
             break;
         default:

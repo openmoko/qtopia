@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -179,7 +177,7 @@
 
      if (parent) {
 
-         <span class="comment">// Only count style items.</span>
+         <span class="comment">//</span> Only count style items.
          if (state == Qt::Checked)
              ++markedCount;
          else
@@ -187,7 +185,7 @@
 
          if (state == Qt::Checked &amp;&amp;
              parent-&gt;checkState(0) == Qt::Unchecked) {
-             <span class="comment">// Mark parent items when child items are checked.</span>
+             <span class="comment">//</span> Mark parent items when child items are checked.
              parent-&gt;setCheckState(0, Qt::Checked);
 
          } else if (state == Qt::Unchecked &amp;&amp;
@@ -200,7 +198,7 @@
                      break;
                  }
              }
-             <span class="comment">// Unmark parent items when all child items are unchecked.</span>
+             <span class="comment">//</span> Unmark parent items when all child items are unchecked.
              if (!marked)
                  parent-&gt;setCheckState(0, Qt::Unchecked);
          }
@@ -212,8 +210,8 @@
                  ++number;
          }
 
-         <span class="comment">// Mark/unmark all child items when marking/unmarking top-level</span>
-         <span class="comment">// items.</span>
+         <span class="comment">//</span> Mark/unmark all child items when marking/unmarking top-level
+         <span class="comment">//</span> items.
          if (state == Qt::Checked &amp;&amp; number == 0) {
              for (row = 0; row &lt; item-&gt;childCount(); ++row) {
                  if (item-&gt;child(row)-&gt;checkState(0) == Qt::Unchecked)
@@ -333,7 +331,7 @@
      QString family = pageMap.keys()[index];
      StyleItems items = pageMap[family];
 
-     <span class="comment">// Find the dimensions of the text on each page.</span>
+     <span class="comment">//</span> Find the dimensions of the text on each page.
      qreal width = 0.0;
      qreal height = 0.0;
      foreach (QTreeWidgetItem *item, items) {
@@ -341,7 +339,7 @@
          int weight = item-&gt;data(0, Qt::UserRole).toInt();
          bool italic = item-&gt;data(0, Qt::UserRole + 1).toBool();
 
-         <span class="comment">// Calculate the maximum width and total height of the text.</span>
+         <span class="comment">//</span> Calculate the maximum width and total height of the text.
          foreach (int size, sampleSizes) {
              QFont font(family, size, weight, italic);
              font = QFont(font, painter.device());
@@ -374,7 +372,7 @@
          int weight = item-&gt;data(0, Qt::UserRole).toInt();
          bool italic = item-&gt;data(0, Qt::UserRole + 1).toBool();
 
-         <span class="comment">// Draw each line of text.</span>
+         <span class="comment">//</span> Draw each line of text.
          foreach (int size, sampleSizes) {
              QFont font(family, size, weight, italic);
              font = QFont(font, painter.device());
@@ -394,8 +392,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

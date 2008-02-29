@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qhash.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/tools/qhash.cpp -->
 <head>
   <title>Qt 4.3: QMultiHash Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -57,13 +57,13 @@
 
  hash1.insert(&quot;plenty&quot;, 100);
  hash1.insert(&quot;plenty&quot;, 2000);
-<span class="comment"> // hash1.size() == 2</span>
+<span class="comment"> //</span> hash1.size() == 2
 
  hash2.insert(&quot;plenty&quot;, 5000);
-<span class="comment"> // hash2.size() == 1</span>
+<span class="comment"> //</span> hash2.size() == 1
 
  hash3 = hash1 + hash2;
-<span class="comment"> // hash3.size() == 3</span></pre>
+<span class="comment"> //</span> hash3.size() == 3</pre>
 <p>Unlike <a href="qhash.html">QHash</a>, QMultiHash provides no operator[]. Use <a href="qhash.html#value">value</a>() or <a href="qmultihash.html#replace">replace</a>() if you want to access the most recently inserted item with a certain key.</p>
 <p>If you want to retrieve all the values for a single key, you can use values(const Key &amp;key), which returns a <a href="qlist.html">QList</a>&lt;T&gt;:</p>
 <pre> QList&lt;int&gt; values = hash.values(&quot;plenty&quot;);
@@ -76,7 +76,7 @@
      cout &lt;&lt; i.value() &lt;&lt; endl;
      ++i;
  }</pre>
-<p>QMultiHash's key and value data types must be <a href="containers.html#assignable-data-types">assignable data types</a>. You cannot, for example, store a <a href="qwidget.html">QWidget</a> as a value; instead, store a <a href="qwidget.html">QWidget</a> *. In addition, QMultiHash's key type must provide operator==(), and there must also be a global <a href="qhash.html#qHashx">qHash</a>() function that returns a hash value for an argument of the key's type. See the <a href="qhash.html">QHash</a> documentation for details.</p>
+<p>QMultiHash's key and value data types must be <a href="containers.html#assignable-data-types">assignable data types</a>. You cannot, for example, store a <a href="qwidget.html">QWidget</a> as a value; instead, store a <a href="qwidget.html">QWidget</a> *. In addition, QMultiHash's key type must provide operator==(), and there must also be a global <a href="qhash.html#qHash">qHash</a>() function that returns a hash value for an argument of the key's type. See the <a href="qhash.html">QHash</a> documentation for details.</p>
 <p>See also <a href="qhash.html">QHash</a>, <a href="qhashiterator.html">QHashIterator</a>, <a href="qmutablehashiterator.html">QMutableHashIterator</a>, and <a href="qmultimap.html">QMultiMap</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -149,8 +149,8 @@
 <p>See also <a href="qmultihash.html#insert">insert</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

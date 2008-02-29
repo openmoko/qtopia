@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,11 +24,11 @@
 #include "qmailstore.h"
 #include "qmailstore_p.h"
 #include "qmailfolder.h"
-#include "qmailfolderkey.h"
-#include "qmailfoldersortkey.h"
 #include "qmailmessage.h"
 #include "qmailmessagekey.h"
 #include "qmailmessagesortkey.h"
+#include "qmailfolderkey.h"
+#include "qmailfoldersortkey.h"
 #include "qmailid.h"
 #include "qmailtimestamp.h"
 #include <qtopiasql.h>
@@ -69,6 +69,32 @@ QMailStore::QMailStore()
     //create the db and sql interfaces
     d = new QMailStorePrivate();
     d->database = QtopiaSql::instance()->applicationSpecificDatabase("qtmail");
+
+    connect(d,SIGNAL(messagesAdded(const QMailIdList&)),
+            this,
+            SIGNAL(messagesAdded(const QMailIdList&)));
+
+    connect(d,SIGNAL(messagesRemoved(const QMailIdList&)),
+            this,
+            SIGNAL(messagesRemoved(const QMailIdList&)));
+
+    connect(d,SIGNAL(messagesUpdated(const QMailIdList&)),
+            this,
+            SIGNAL(messagesUpdated(const QMailIdList&)));
+
+    connect(d,SIGNAL(foldersAdded(const QMailIdList&)),
+            this,
+            SIGNAL(foldersAdded(const QMailIdList&)));
+
+    connect(d,SIGNAL(foldersUpdated(const QMailIdList&)),
+            this,
+            SIGNAL(foldersUpdated(const QMailIdList&)));
+
+    connect(d,SIGNAL(foldersRemoved(const QMailIdList&)),
+            this,
+            SIGNAL(foldersRemoved(const QMailIdList&)));
+
+
 }
 
 /*!
@@ -77,6 +103,7 @@ QMailStore::QMailStore()
 
 QMailStore::~QMailStore()
 {
+    delete d; d = 0;
 }
 
 /*!
@@ -86,7 +113,7 @@ QMailStore::~QMailStore()
 */
 
 bool QMailStore::addFolder(QMailFolder* a)
-{    
+{   
 	d->database.transaction();
 
     //check that the parent folder actually exists
@@ -122,8 +149,15 @@ bool QMailStore::addFolder(QMailFolder* a)
 		a->setId(QMailId());
 		return false;
 	}
-	//_folderSync->notifyAdded(a.parentId(),a.id());
-	return true;
+   
+    //synchronize 
+    
+    QMailIdList ids;
+    ids.append(insertId);
+    d->notifyFoldersChange(QMailStorePrivate::Added,ids);
+    emit foldersAdded(ids);
+	
+    return true;
 }
 
 /*!
@@ -135,7 +169,10 @@ bool QMailStore::addFolder(QMailFolder* a)
 bool QMailStore::addMessage(QMailMessage* m)
 {
 	if(!m->parentFolderId().isValid())
+    {
+        qLog(Messaging) << "Unable to add folder. Invalid parent folder id";
 		return false;
+    }
 
 	d->database.transaction();
 
@@ -207,7 +244,12 @@ bool QMailStore::addMessage(QMailMessage* m)
 		return false;
 	}
 
-	//fire sync signals
+    //synchronize
+
+    QMailIdList ids;
+    ids.append(m->id());
+    d->notifyMessagesChange(QMailStorePrivate::Added,ids);
+    emit messagesAdded(ids);
 
 	return true;
 }
@@ -220,12 +262,41 @@ bool QMailStore::addMessage(QMailMessage* m)
 
 bool QMailStore::removeFolder(const QMailId& id)
 {
+    QMailIdList deletedFolders;
+    QMailIdList deletedMessages;
+
 	d->database.transaction();
-	d->deleteFolder(id);
+	if(!d->deleteFolder(id,deletedFolders,deletedMessages))
+    {
+        qLog(Messaging) << "Folder deletion failed";
+        return false;
+    }
 	if(!d->database.commit())
+    {
+        qLog(Messaging) << "Unable to commit folder deletion";
 		return false;
-	//_folderSync->notifyRemoved(f.parentId(),f.id());
-	return true;
+    }
+
+    //append target folder id for sync
+    
+    deletedFolders.append(id);
+
+    //delete mails from cache
+
+    foreach(QMailId id, deletedMessages)
+    {
+        if(d->headerCache.contains(id))
+            d->headerCache.remove(id);
+    }
+    
+    //synchronize
+
+    d->notifyMessagesChange(QMailStorePrivate::Removed,deletedMessages);
+    d->notifyFoldersChange(QMailStorePrivate::Removed,deletedFolders);
+    emit messagesRemoved(deletedMessages);
+    emit foldersRemoved(deletedFolders);
+	
+    return true;
 }
 
 /*!
@@ -274,6 +345,13 @@ bool QMailStore::removeMessage(const QMailId& id)
     if(d->headerCache.contains(id))
         d->headerCache.remove(id);
 
+    //synchronize
+
+    QMailIdList ids;
+    ids.append(id);
+    d->notifyMessagesChange(QMailStorePrivate::Removed, ids);
+    emit messagesRemoved(ids);
+
 	return true;
 
 }
@@ -285,7 +363,6 @@ bool QMailStore::removeMessage(const QMailId& id)
 
 bool QMailStore::updateFolder(QMailFolder* f)
 {
-
     //check for a valid folder
 
     if(!f->id().isValid())
@@ -328,8 +405,13 @@ bool QMailStore::updateFolder(QMailFolder* f)
 	if(!d->database.commit())
         return false;
 
-	//fire sync messages
+    //synchronize
 
+    QMailIdList ids;
+    ids.append(f->id());
+    d->notifyFoldersChange(QMailStorePrivate::Updated,ids);
+    emit foldersUpdated(ids);
+	
     return true;
 }
 
@@ -346,55 +428,30 @@ bool QMailStore::updateMessage(QMailMessage* m)
     if(!m->uncommittedChanges() && !m->uncommittedMetadataChanges())
         return true;
 
-    QString sql = "\
-UPDATE mailmessages SET type=?, \
-parentfolderid=?, \
-sender=?, \
-recipients=?, \
-subject=?, \
-stamp=?, \
-status=?, \
-fromaccount=?, \
-frommailbox=?, \
-serveruid=?, \
-size=? \
-WHERE id = ?";
+    QMailMessageKey idKey(QMailMessageKey::Id,m->id());
+    QString sql = "UPDATE mailmessages SET " + d->expandProperties(updatableProperties,true);
+    sql += " WHERE " + d->buildWhereClause(idKey);
 
     QSqlQuery query = d->prepare(sql);
 
     if(query.lastError().type() != QSqlError::NoError)
+    {
+        qLog(Messaging) << "Message update query prepare failed";
         return false;
-
-    query.addBindValue(static_cast<unsigned int>(m->messageType()));
-    query.addBindValue(m->parentFolderId().toULongLong());
-
-    // Ensure that any phone numbers are added in minimal form
-    QMailAddress from(m->from());
-    QString fromText(from.isPhoneNumber() ? from.minimalPhoneNumber() : from.toString());
-    query.addBindValue(fromText);
-
-    QStringList recipients;
-    foreach (const QMailAddress& address, m->to()) {
-        recipients.append(address.isPhoneNumber() ? address.minimalPhoneNumber() : address.toString());
     }
-    query.addBindValue(recipients.join(","));
 
-    query.addBindValue(m->subject());
-    query.addBindValue(QMailTimeStamp(m->date()).toLocalTime());
-    query.addBindValue(static_cast<unsigned int>(m->status()));
-    query.addBindValue(m->fromAccount());
-    query.addBindValue(m->fromMailbox());
-    query.addBindValue(m->serverUid());
-    query.addBindValue(m->size());
-    query.addBindValue(m->id().toULongLong());
+    d->bindUpdateData(updatableProperties,*m,query);
+    d->bindWhereData(idKey,query);
 
     if(!d->execute(query))
+    {
+        qLog(Messaging) << "Message update query execute failed";
         return false;
+    }
 
     //update the mail body
     //get the mailfile reference
 
-    //if(option == RetrieveHeadersAndBody)
     if(m->uncommittedChanges())
     {
         query = d->prepare("SELECT mailfile FROM mailmessages WHERE id=" + QString::number(m->id().toULongLong()));
@@ -416,48 +473,205 @@ WHERE id = ?";
     // The message is now up-to-date with data store
     m->changesCommitted();
 
+    //update the header cache
+
     if(d->headerCache.contains(m->id()))
-        d->headerCache.remove(m->id());
+    {
+        QMailMessage cachedHeader = d->headerCache.lookup(m->id());
+        d->bindUpdateData(updatableProperties,*m,cachedHeader);
+        cachedHeader.changesCommitted();
+        d->headerCache.insert(cachedHeader);
+    }
 
+    //synchronize
 
-    //fire sync functions
+    QMailIdList ids;
+    ids.append(m->id());
+    d->notifyMessagesChange(QMailStorePrivate::Updated,ids);
+    emit messagesUpdated(ids);
+
+    return true;
+}
+
+/*!
+    Updates the message properties defined in \a properties with data 
+    contained in the message \a data for all messages which pass the criteria defined 
+    by the QMailMessageKey \a key.
+    Returns \c true if the operation completed successfully, or \c false otherwise. 
+*/
+
+bool QMailStore::updateMessages(const QMailMessageKey& key,
+                                const QMailMessageKey::Properties& properties,
+                                const QMailMessage& data) 
+{
+    //do some checks first
+    
+    if(properties == QMailMessageKey::Id)
+    {
+        qLog(Messaging) << "Updating of messages id's is not supported";
+        return false;
+    }
+    
+    d->checkComparitors(key);
+
+    d->database.transaction();
+
+    if(properties & QMailMessageKey::ParentFolderId)
+        if(!d->folderExists(data.parentFolderId().toULongLong()))
+        {
+            qLog(Messaging) << "Update of messages failed. Parent folder does not exist";
+            return false;
+        }
+
+    //get the valid ids
+
+    QMailIdList validIds = queryMessages(key);
+
+    if(validIds.isEmpty())
+        return true;
+
+    QMailMessageKey validIdsKey(validIds);
+   
+    QString sql = "UPDATE mailmessages SET " + d->expandProperties(properties,true);
+    sql += " WHERE " + d->buildWhereClause(validIdsKey); 
+    
+    QSqlQuery query = d->prepare(sql);
+
+    if(query.lastError().type() != QSqlError::NoError)
+    {
+        qLog(Messaging) << "Could not prepare batch messages update query";
+        return false;
+    }
+
+    d->bindUpdateData(properties,data,query);
+    d->bindWhereData(validIdsKey,query);
+
+    if(!d->execute(query))
+    {
+        qLog(Messaging) << "Could not execute batch messages update query";
+        return false;
+    }
+
+    if(!d->database.commit())
+    {
+        qLog(Messaging) << "Could not commit batch messages update";
+        return false;
+    }
+
+    //update the cache
+
+    foreach(QMailId id,validIds)
+    {
+        if(d->headerCache.contains(id))
+        {
+            QMailMessage cachedHeader = d->headerCache.lookup(id);
+            d->bindUpdateData(properties,data,cachedHeader);
+            cachedHeader.changesCommitted();
+            d->headerCache.insert(cachedHeader);
+        }
+
+    }
+
+    //synchronize
+
+    d->notifyMessagesChange(QMailStorePrivate::Updated,validIds);
+    emit messagesUpdated(validIds);
+
+    return true;
+}
+
+/*!
+    Updates message status flags with \a status according to \a set
+    for messages which pass the criteria defined in the QMailMessageKey \a key.
+    Returns \c true if the operation completed successfully, or \c false otherwise. 
+*/
+
+bool QMailStore::updateMessages(const QMailMessageKey& key,
+                                const QMailMessage::Status status,
+                                bool set) 
+{
+    d->checkComparitors(key);
+
+    d->database.transaction();
+
+    //get the valid ids
+
+    QMailIdList validIds = queryMessages(key);
+
+    if(validIds.isEmpty())
+        return true;
+
+    QMailMessageKey validIdsKey(validIds);
+
+    QString sql = "UPDATE mailmessages SET status=status";
+    sql += set ? "|?" : "&?";
+    sql += " WHERE " + d->buildWhereClause(validIdsKey); 
+    
+    QSqlQuery query = d->prepare(sql);
+
+    if(query.lastError().type() != QSqlError::NoError)
+    {
+        qLog(Messaging) << "Could not prepare batch messages update query";
+        return false;
+    }
+
+    int statusInt = static_cast<int>(status);
+    query.addBindValue(set ? statusInt : ~statusInt);
+    d->bindWhereData(validIdsKey,query);
+
+    if(!d->execute(query))
+    {
+        qLog(Messaging) << "Could not execute batch messages update query";
+        return false;
+    }
+
+    if(!d->database.commit())
+    {
+        qLog(Messaging) << "Could not commit batch messages update";
+        return false;
+    }
+
+    //update the cache
+    foreach(QMailId id,validIds)
+    {
+        if(d->headerCache.contains(id))
+        {
+            QMailMessage cachedHeader = d->headerCache.lookup(id);
+            QMailMessage::Status newStatus = cachedHeader.status();
+            newStatus = set ? (newStatus | status) : (newStatus & ~status);
+            cachedHeader.setStatus(newStatus);
+            cachedHeader.changesCommitted();
+            d->headerCache.insert(cachedHeader);
+        }
+
+    }
+    //synchronize
+
+    d->notifyMessagesChange(QMailStorePrivate::Updated,validIds);
+    emit messagesUpdated(validIds);
+
     return true;
 }
 
 /*!
     Returns the count of the number of folders which pass the 
-    filtering criteria defined in QMailFolderKey \a key.        
+    filtering criteria defined in QMailFolderKey \a key. If 
+    key is empty a count of all folders is returned.
 */
 
 int QMailStore::countFolders(const QMailFolderKey& key) const
 {
-	QString sql = "SELECT COUNT(*) FROM mailfolders WHERE ";
-  	sql += d->buildWhereClause(key);	
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() == QSqlError::NoError)
-	{
-		d->bindWhereData(key,query);
-		if(d->execute(query) && query.next())
-			return query.value(0).toInt();
-	}
-    
-	return 0;
-}
-
-/*!
-    Returns the count of all the folders in the message store. 
-*/
-
-int QMailStore::countFolders() const
-{
 	QString sql = "SELECT COUNT(*) FROM mailfolders";
 
+    if(!key.isEmpty())
+        sql += " WHERE " + d->buildWhereClause(key);	
+
 	QSqlQuery query = d->prepare(sql);
 
 	if(query.lastError().type() == QSqlError::NoError)
 	{
+        if(!key.isEmpty())
+            d->bindWhereData(key,query);
 		if(d->execute(query) && query.next())
 			return query.value(0).toInt();
 	}
@@ -467,42 +681,22 @@ int QMailStore::countFolders() const
 
 /*!
     Returns the count of the number of messages which pass the 
-    filtering criteria defined in QMailMessageKey \a key.        
+    filtering criteria defined in QMailMessageKey \a key. If 
+    key is empty a count of all messages is returned.
 */
 
 int QMailStore::countMessages(const QMailMessageKey& key) const
 {
-    if (key.isEmpty())
-        return 0;
-
-	QString sql = "SELECT COUNT(*) FROM mailmessages WHERE ";
-  	sql += d->buildWhereClause(key);	
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() == QSqlError::NoError)
-	{
-		d->bindWhereData(key,query);
-		if(d->execute(query) && query.next())
-			return query.value(0).toInt();
-	}
-    
-	return 0;
-
-}
-
-/*!
-    Returns the count of all the messages in the message store 
-*/
-
-int QMailStore::countMessages() const
-{
 	QString sql = "SELECT COUNT(*) FROM mailmessages";
-	
+    if(!key.isEmpty())
+        sql += " WHERE " + d->buildWhereClause(key);	
+
 	QSqlQuery query = d->prepare(sql);
 
 	if(query.lastError().type() == QSqlError::NoError)
 	{
+        if(!key.isEmpty())
+            d->bindWhereData(key,query);
 		if(d->execute(query) && query.next())
 			return query.value(0).toInt();
 	}
@@ -511,108 +705,58 @@ int QMailStore::countMessages() const
 
 }
 
-
-
 /*!
-    Returns the QMailId's of all folders in the
-    message store	
+    Returns the total size of the messages which pass the 
+    filtering criteria defined in QMailMessageKey \a key. If 
+    key is empty the total size of all messages is returned.
 */
 
-QMailIdList QMailStore::queryFolders() const
+int QMailStore::sizeOfMessages(const QMailMessageKey& key) const
 {
-	QString sql = "SELECT id FROM mailfolders";
+	QString sql = "SELECT SUM(size) FROM mailmessages";
+    if(!key.isEmpty())
+        sql += " WHERE " + d->buildWhereClause(key);	
 
 	QSqlQuery query = d->prepare(sql);
 
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailFolder query failed";
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailFolder query failed";
-
-	QMailIdList results;
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
+	if(query.lastError().type() == QSqlError::NoError)
+	{
+        if(!key.isEmpty())
+            d->bindWhereData(key,query);
+		if(d->execute(query) && query.next())
+			return query.value(0).toInt();
+	}
+	return 0;
 }
 
 /*!
-    Returns the QMailId's of all folders in the
-    message store sorted by the QMailFolderSortKey \a sortKey.	
-*/
-
-QMailIdList QMailStore::queryFolders(const QMailFolderSortKey& sortKey) const
-{
-	QString sql = "SELECT id FROM mailfolders ";
-	sql += d->buildOrderClause(sortKey);
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailFolder query failed";
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailFolder query failed";
-
-	QMailIdList results;
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
-}
-
-
-
-/*!
-    Returns a list of QMailId's which pass the 
-    query criteria defined in QMailFolderKey \a key.        
-*/
-
-QMailIdList QMailStore::queryFolders(const QMailFolderKey& key) const
-{
-	QString sql = "SELECT id FROM mailfolders WHERE ";
-	sql += d->buildWhereClause(key);	
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailFolder query failed";
-
-	d->bindWhereData(key,query);
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailFolder query failed";
-
-	QMailIdList results;
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
-}
-
-/*!
-    Returns a list of QMailId's which pass the 
-    query criteria defined in QMailFolderKey \a key and the
-	QMailFolderSortKey \a sortKey.        
+    Returns the \l{QMailId}s of folders in the message store. If \a key is not empty 
+    only folders matching the parameters set by \a key will be returned, otherwise 
+    all folder identifiers will be returned.
+    If \a sortKey is not empty, the identifiers will be sorted by the parameters set 
+    by \a sortKey.
 */
 
 QMailIdList QMailStore::queryFolders(const QMailFolderKey& key,
-		                      const QMailFolderSortKey& sortKey) const
+                                     const QMailFolderSortKey& sortKey) const
 {
-	QString sql = "SELECT id FROM mailfolders WHERE ";
-	sql += d->buildWhereClause(key);
-	sql += d->buildOrderClause(sortKey);	
+    d->checkComparitors(key);
+
+	QString sql = "SELECT id FROM mailfolders";
+
+    if(!key.isEmpty())
+        sql += " WHERE " + d->buildWhereClause(key); 
+
+    if(!sortKey.isEmpty())
+        sql += " " + d->buildOrderClause(sortKey);
 
 	QSqlQuery query = d->prepare(sql);
 
 	if(query.lastError().type() != QSqlError::NoError)
 		qLog(Messaging) << "MailFolder query failed";
 
-	d->bindWhereData(key,query);
+    if(!key.isEmpty())
+        d->bindWhereData(key,query);
 
 	if(!d->execute(query))
 		qLog(Messaging) << "MailFolder query failed";
@@ -626,18 +770,33 @@ QMailIdList QMailStore::queryFolders(const QMailFolderKey& key,
 }
 
 /*!
-    Returns the QMailId's of all messages in the
-    message store	
+    Returns the \l{QMailId}s of messages in the message store. If \a key is not empty 
+    only messages matching the parameters set by \a key will be returned, otherwise 
+    all message identifiers will be returned.
+    If \a sortKey is not empty, the identifiers will be sorted by the parameters set 
+    by \a sortKey.
 */
 
-QMailIdList QMailStore::queryMessages() const
+QMailIdList QMailStore::queryMessages(const QMailMessageKey& key, 
+                                      const QMailMessageSortKey& sortKey) const
 {
+    d->checkComparitors(key);
+
 	QString sql = "SELECT id FROM mailmessages";
 
+    if(!key.isEmpty())
+        sql += " WHERE " + d->buildWhereClause(key);
+
+    if(!sortKey.isEmpty())
+        sql += " " + d->buildOrderClause(sortKey);
+
 	QSqlQuery query = d->prepare(sql);
 
 	if(query.lastError().type() != QSqlError::NoError)
 		qLog(Messaging) << "MailFolder query failed";
+
+    if(!key.isEmpty())
+        d->bindWhereData(key,query);
 
 	if(!d->execute(query))
 		qLog(Messaging) << "MailFolder query failed";
@@ -649,98 +808,6 @@ QMailIdList QMailStore::queryMessages() const
 
 	return results;	
 }
-
-/*!
-    Returns the QMailId's of all messages in the
-    message store sorted by the QMailMessageSortKey \a sortKey.	
-*/
-
-QMailIdList QMailStore::queryMessages(const QMailMessageSortKey& sortKey) const
-{
-	QString sql = "SELECT id FROM mailmessages ";
-	sql += d->buildOrderClause(sortKey);
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailFolder query failed";
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailFolder query failed";
-
-	QMailIdList results;
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
-}
-
-
-/*!
-    Returns a list of QMailId's which pass the 
-    query criteria defined in QMailMessageKey \a key. 
- */
-
-QMailIdList QMailStore::queryMessages(const QMailMessageKey& key) const
-{
-	QMailIdList results;
-    if (key.isEmpty())
-        return results;
-
-	QString sql = "SELECT id FROM mailmessages WHERE ";
-	sql += d->buildWhereClause(key);	
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailMessage id query failed";
-
-	d->bindWhereData(key,query);
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailMessage id query failed";
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
-}
-
-/*!
-    Returns a list of QMailId's which pass the 
-    query criteria defined in QMailFolderKey \a key and the
-	QMailFolderSortKey \a sortKey.        
-*/
-
-QMailIdList QMailStore::queryMessages(const QMailMessageKey& key,
-		                      const QMailMessageSortKey& sortKey) const
-{
-	QMailIdList results;
-    if (key.isEmpty())
-        return results;
-
-	QString sql = "SELECT id FROM mailmessages WHERE ";
-	sql += d->buildWhereClause(key);
-	sql += d->buildOrderClause(sortKey);	
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailMessage query failed";
-
-	d->bindWhereData(key,query);
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailMessage query  failed";
-
-	while(query.next())
-		results.append(QMailId(query.value(0).toULongLong()));
-
-	return results;	
-}
-
-
 
 /*!
    Returns the QMailFolder defined by a QMailId \a id from 
@@ -772,28 +839,53 @@ QMailFolder QMailStore::folder(const QMailId& id) const
    the message store.
 */
 
-
 QMailMessage QMailStore::message(const QMailId& id) const
 {
-	QString cols = "id, type, parentfolderid, sender, recipients, \
-						subject, stamp, status, fromaccount, frommailbox,\
-					    mailfile, serveruid, size";
+    //mailfile is not an exposed property, so add separately
+    QString sql = "SELECT " + d->expandProperties(allProperties) + ", mailfile";
+    sql += " FROM mailmessages WHERE id=?";
 
-	QString sql = "SELECT " + cols + " FROM mailmessages WHERE id=?";
-	QSqlQuery query = d->prepare(sql);
+    QSqlQuery query = d->prepare(sql);
 
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailMessage query failed";
+    if(query.lastError().type() != QSqlError::NoError)
+        qLog(Messaging) << "MailMessage query preparation failed";
 
-	query.addBindValue(id.toULongLong());
+    query.addBindValue(id.toULongLong());
 
-	if(!d->execute(query))
-		qLog(Messaging) << "MailMessage query failed";
+    if(!d->execute(query))
+        qLog(Messaging) << "MailMessage query execution failed";
 
-	if(!query.first())
-		return QMailMessage();
-	else
-		return d->buildQMailMessage(query.record());
+    if(!query.first())
+        return QMailMessage();
+    else
+        return d->buildQMailMessage(query.record());
+}
+
+/*!
+   Returns the QMailMessage defined by the unique identifier \a uid from the account \a account.
+*/
+
+QMailMessage QMailStore::message(const QString& uid, const QString& account) const
+{
+    //mailfile is not an exposed property, so add separately
+    QString sql = "SELECT " + d->expandProperties(allProperties) + ",mailfile"; 
+    sql += " FROM mailmessages WHERE serveruid = ? AND fromaccount = ? ";
+
+    QSqlQuery query = d->prepare(sql);
+
+    if(query.lastError().type() != QSqlError::NoError)
+        qLog(Messaging) << "MailMessage uid query preparation failed";
+
+    query.addBindValue(uid);
+    query.addBindValue(account);
+
+    if(!d->execute(query))
+        qLog(Messaging) << "MailMessage uid query execution failed";
+
+    if(!query.first())
+        return QMailMessage();
+    else
+        return d->buildQMailMessage(query.record());
 }
 
 /*!
@@ -803,230 +895,104 @@ QMailMessage QMailStore::message(const QMailId& id) const
 
 QMailMessage QMailStore::messageHeader(const QMailId& id) const
 {
-
     QMailMessage cachedHeader = d->headerCache.lookup(id);
 
     if(cachedHeader.id().isValid())
         return cachedHeader;
 
-	QString cols = "id, type, parentfolderid, sender, recipients, \
-						subject, stamp, status, fromaccount, frommailbox,\
-					    serveruid, size";
+    //query id batch
+    
+    QMailIdList idBatch;
+    for(int i = -QMailStorePrivate::lookAhead; i < QMailStorePrivate::lookAhead; ++i)
+        idBatch.append(QMailId(id.toULongLong()+i));
 
-    //retrieve the batch of records before and after this record
-    //and cache them. 
+    QMailMessageList results = messageHeaders(QMailMessageKey(idBatch), allProperties );
 
-	QString sql = "SELECT " + cols + " FROM mailmessages WHERE id IN (";
-
-    int max = QMailStorePrivate::lookAhead() * 2;
-
-    for(int i =0; i < max; ++i)
-    {
-        sql += '?';
-        if(i < max-1)
-            sql += ',';
-    }
-    sql += ")";
-
-	QSqlQuery query = d->prepare(sql);
-
-	if(query.lastError().type() != QSqlError::NoError)
-		qLog(Messaging) << "MailMessage query failed";
-
-    for(int i = -QMailStorePrivate::lookAhead(); i < QMailStorePrivate::lookAhead(); ++i)
-        query.addBindValue(id.toULongLong()+i);
-
-	if(!d->execute(query))
-		qLog(Messaging) << "MailMessage query failed";
-
-    while(query.next())
-    {
-		QMailMessage newMessage = d->buildQMailMessage(query.record());
-        if(newMessage.id().isValid())
-            d->headerCache.insert(newMessage);
-    }
+    foreach(QMailMessage header,results)
+        if(header.id().isValid())
+            d->headerCache.insert(header);
 
     return d->headerCache.lookup(id);
 }
 
+/*!
+   Returns the QMailMessage header defined by the unique identifier \a uid from the account \a account.
+*/
 
-// We will impose an upper limit on how many values we will include in a 
-// set constraint - otherwise, we may hit some buffer limit that we didn't
-// realise existed...
-static const int maxSetSize = 50;
-
-static QPair<QString, QPair<QMailIdList::const_iterator, QMailIdList::const_iterator> > describeSet(const QMailIdList& list, int count = -1, int offset = 0)
+QMailMessage QMailStore::messageHeader(const QString& uid, const QString& account) const
 {
-    int n = qMax(qMin(count, (list.count() - offset)), 0);
+    QMailMessageKey uidKey(QMailMessageKey::ServerUid,uid);
+    QMailMessageKey accountKey(QMailMessageKey::FromAccount,account);
 
-    QString result;
-    QMailIdList::const_iterator begin = list.begin() + offset, end = begin + n;
+    QMailMessageList results = messageHeaders(uidKey & accountKey,allProperties);
 
-    if (n > 0) {
-        result.append(" (?");
-        for (--n; n > 0; --n)
-            result.append(",?");
-        result.append(')');
-    }
-
-    return qMakePair(result, qMakePair(begin, end));
-}
-
-/*! \internal */
-QMailIdList QMailStore::parentFolderIds(const QMailIdList& list) const
-{
-    static const QString sql = 
-"SELECT DISTINCT parentfolderid "
-"FROM mailmessages "
-"WHERE id IN ";
-
-    QMailIdList result;
-
-    // Ensure that no single query exceeds the set size limit
-    int queryCount = list.count() / maxSetSize;
-    if (list.count() != queryCount)
-        ++queryCount;
-
-    // We should use evenly sized query sets
-    int setSize = list.count() / queryCount;
-
-    int offset = 0;
-    while (offset < list.count()) {
-        QPair<QString, QPair<QMailIdList::const_iterator, QMailIdList::const_iterator> > listProperties(describeSet(list, setSize, offset));
-        offset += setSize;
-
-        QSqlQuery query = d->prepare(sql + listProperties.first);
-        if(query.lastError().type() != QSqlError::NoError)
-            qLog(Messaging) << "MailMessage parentFolderIds query prepare failed";
-
-        QMailIdList::const_iterator it = listProperties.second.first;
-        for ( ; it != listProperties.second.second; ++it)
-            query.addBindValue((*it).toULongLong());
-
-        if (!d->execute(query))
-            qLog(Messaging) << "MailMessage parentFolderIds query execute failed";
-
-        while (query.next())
-            result.append(QMailId(query.value(0).toULongLong()));
-    }
-
-    // Ensure that we return a unique set
-    qSort(result.begin(), result.end());
-
-    QMailIdList::iterator uniqueEnd = std::unique(result.begin(), result.end());
-    result.erase(uniqueEnd, result.end());
-
-	return result;	
-}
-
-/*! \internal */
-bool QMailStore::updateParentFolderIds(const QMailIdList& list, const QMailId& id)
-{
-    static const QString sql =
-"UPDATE mailmessages "
-"SET parentfolderid = ? "
-"WHERE id IN ";
-
-	d->database.transaction();
-
-    // Ensure that no single query exceeds the set size limit
-    int queryCount = list.count() / maxSetSize;
-    if (list.count() != queryCount)
-        ++queryCount;
-
-    // We should use evenly sized query sets
-    int setSize = list.count() / queryCount;
-
-    int offset = 0;
-    while (offset < list.count()) {
-        QPair<QString, QPair<QMailIdList::const_iterator, QMailIdList::const_iterator> > listProperties(describeSet(list, setSize, offset));
-        offset += setSize;
-
-        QSqlQuery query = d->prepare(sql + listProperties.first);
-        if(query.lastError().type() != QSqlError::NoError) {
-            qLog(Messaging) << "MailMessage updateParentFolderIds query prepare failed";
-            return false;
-        }
+    if(!results.isEmpty())
+    {
+        if(results.count() > 1)
+            qLog(Messaging) << "Warning, messageHeader by uid returned more than 1 result";
         
-        query.addBindValue(id.toULongLong());
-
-        QMailIdList::const_iterator it = listProperties.second.first;
-        for ( ; it != listProperties.second.second; ++it)
-            query.addBindValue((*it).toULongLong());
-
-        if (!d->execute(query)) {
-            qLog(Messaging) << "MailMessage updateParentFolderIds query execute failed";
-            return false;
-        }
+        d->headerCache.insert(results.first());
+        return results.first();
     }
-    
-	if (!d->database.commit()) {
-		qLog(Messaging) << "MailMessage updateParentFolderIds query commit failed";
-		return false;
-    } else {
-        foreach (const QMailId& messageId, list) {
-            // Update any copies in the cache
-            if (d->headerCache.contains(messageId)) {
-                QMailMessage cachedHeader(d->headerCache.lookup(messageId));
-
-                // Change to the new folder
-                cachedHeader.setParentFolderId(id);
-                d->headerCache.insert(cachedHeader);
-            }
-        }
-    }
-
-    return true;
+    return QMailMessage();
 }
 
-/*! \internal */
-QList<QMailStore::DeletionProperties> QMailStore::deletionProperties(const QMailIdList& list) const
+/*!
+    \enum QMailStore::ReturnOption
+    This enum defines the message header return option for QMailStore::messageHeaders()
+
+    \value ReturnAll Return all message headers that match the selection criteria, including duplicates.
+    \value ReturnDistinct Return distinct message headers that match the selection criteria, excluding duplicates.
+*/
+
+/*!
+    Retrieves a list of message headers containing data defined by \a properties
+    for messages which pass the criteria defined by \a key. If \a option is 
+    \c ReturnAll then duplicate headers are included in the list; otherwise
+    duplicate headers are excluded from the returned list.
+
+    Returns a list of headers if successfully completed, or an empty list for 
+    an error or no data.
+*/
+
+QMailMessageList QMailStore::messageHeaders(const QMailMessageKey& key,
+                                            const QMailMessageKey::Properties& properties,
+                                            const ReturnOption& option) const
 {
-    static const QString sql = 
-"SELECT id, serveruid, fromaccount, frommailbox "
-"FROM mailmessages "
-"WHERE id IN ";
+    d->checkComparitors(key);
+    QString sql = "SELECT ";
+    if(option == ReturnDistinct)
+        sql += "DISTINCT ";
 
-    QList<DeletionProperties> result;
+    sql += d->expandProperties(properties) + " FROM mailmessages WHERE ";
+    sql += d->buildWhereClause(key);
 
-    // Ensure that no single query exceeds the set size limit
-    int queryCount = list.count() / maxSetSize;
-    if (list.count() != queryCount)
-        ++queryCount;
+    QSqlQuery query = d->prepare(sql);
 
-    // We should use evenly sized query sets
-    int setSize = list.count() / queryCount;
-
-    int offset = 0;
-    while (offset < list.count()) {
-        QPair<QString, QPair<QMailIdList::const_iterator, QMailIdList::const_iterator> > listProperties(describeSet(list, setSize, offset));
-        offset += setSize;
-
-        QSqlQuery query = d->prepare(sql + listProperties.first);
-        if(query.lastError().type() != QSqlError::NoError)
-            qLog(Messaging) << "MailMessage deletionProperties query prepare failed";
-
-        QMailIdList::const_iterator it = listProperties.second.first;
-        for ( ; it != listProperties.second.second; ++it)
-            query.addBindValue((*it).toULongLong());
-
-        if (!d->execute(query))
-            qLog(Messaging) << "MailMessage deletionProperties query execute failed";
-
-        while (query.next()) {
-            DeletionProperties properties;
-            properties.id = QMailId(query.value(0).toULongLong());
-            properties.serverUid = query.value(1).toString();
-            properties.fromAccount = query.value(2).toString();
-            properties.fromMailbox = query.value(3).toString();
-
-            result.append(properties);
-        }
+    if(query.lastError().type() != QSqlError::NoError)
+    {
+        qLog(Messaging) << "MailMessage header query preparation failed";
+        return QMailMessageList();
     }
 
-	return result;	
-}
+    d->bindWhereData(key,query);
 
+    if(!d->execute(query))
+    {
+        qLog(Messaging) << "MailMessage header query execution failed";
+        return QMailMessageList();
+    }
+
+    QMailMessageList headers;
+
+    while(query.next())
+    {
+        QMailMessage header = d->buildQMailMessage(query.record(),properties);
+        headers.append(header);
+    }
+
+    return headers;
+}
 
 Q_GLOBAL_STATIC(QMailStore,QMailStoreInstance);
 
@@ -1041,3 +1007,56 @@ QMailStore* QMailStore::instance()
     return QMailStoreInstance();
 }
 
+/*!
+    \fn void QMailStore::messagesAdded(const QMailIdList& ids)
+
+    Signal that is emitted when the messages in the list \a ids are
+    added to the mail store.
+
+    \sa messagesRemoved(), messagesUpdated()
+*/
+
+/*!
+    \fn void QMailStore::messagesRemoved(const QMailIdList& ids)
+
+    Signal that is emitted when the messages in the list \a ids are
+    removed from the mail store.
+
+    \sa messagesAdded(), messagesUpdated()
+*/
+
+/*!
+    \fn void QMailStore::messagesUpdated(const QMailIdList& ids)
+
+    Signal that is emitted when the messages in the list \a ids are
+    updated within the mail store.
+
+    \sa messagesAdded(), messagesRemoved()
+*/
+
+/*!
+    \fn void QMailStore::foldersAdded(const QMailIdList& ids)
+
+    Signal that is emitted when the folders in the list \a ids are
+    added to the mail store.
+
+    \sa foldersRemoved(), foldersUpdated()
+*/
+
+/*!
+    \fn void QMailStore::foldersRemoved(const QMailIdList& ids)
+
+    Signal that is emitted when the folders in the list \a ids are
+    removed from the mail store.
+
+    \sa foldersAdded(), foldersUpdated()
+*/
+
+/*!
+    \fn void QMailStore::foldersUpdated(const QMailIdList& ids)
+
+    Signal that is emitted when the folders in the list \a ids are
+    updated within the mail store.
+
+    \sa foldersAdded(), foldersRemoved()
+*/

@@ -18,6 +18,7 @@
 <li><a href="itemviews-spinboxdelegate-delegate-cpp.html">itemviews/spinboxdelegate/delegate.cpp</a></li>
 <li><a href="itemviews-spinboxdelegate-delegate-h.html">itemviews/spinboxdelegate/delegate.h</a></li>
 <li><a href="itemviews-spinboxdelegate-main-cpp.html">itemviews/spinboxdelegate/main.cpp</a></li>
+<li><a href="itemviews-spinboxdelegate-spinboxdelegate-pro.html">itemviews/spinboxdelegate/spinboxdelegate.pro</a></li>
 </ul>
 <p>The Spin Box Delegate example shows how to create an editor for a custom delegate in the model/view framework by reusing a standard Qt editor widget.</p>
 <p>The model/view framework provides a standard delegate that is used by default with the standard view classes. For most purposes, the selection of editor widgets available through this delegate is sufficient for editing text, boolean values, and other simple data types. However, for specific data types, it is sometimes necessary to use a custom delegate to either display the data in a specific way, or allow the user to edit it with a custom control.</p>
@@ -53,8 +54,8 @@
 <p>Since the delegate is a subclass of <a href="qitemdelegate.html">QItemDelegate</a>, the data it retrieves from the model is displayed in a default style, and we do not need to provide a custom <tt>paintEvent()</tt>.</p>
 <p>The <tt>createEditor()</tt> function returns an editor widget, in this case a spin box that restricts values from the model to integers from 0 to 100 inclusive.</p>
 <pre> QWidget *SpinBoxDelegate::createEditor(QWidget *parent,
-     const QStyleOptionViewItem &amp;/* option */,
-     const QModelIndex &amp;/* index */) const
+     const QStyleOptionViewItem &amp;<span class="comment">/* option */</span>,
+     const QModelIndex &amp;<span class="comment">/* index */</span>) const
  {
      QSpinBox *editor = new QSpinBox(parent);
      editor-&gt;setMinimum(0);
@@ -86,7 +87,7 @@
 <p>We call <a href="qabstractspinbox.html#interpretText">interpretText()</a> to make sure that we obtain the most up-to-date value in the spin box.</p>
 <p>The <tt>updateEditorGeometry()</tt> function updates the editor widget's geometry using the information supplied in the style option. This is the minimum that the delegate must do in this case.</p>
 <pre> void SpinBoxDelegate::updateEditorGeometry(QWidget *editor,
-     const QStyleOptionViewItem &amp;option, const QModelIndex &amp;/* index */</span>) const
+     const QStyleOptionViewItem &amp;option, const QModelIndex &amp;<span class="comment">/* index */</span>) const
  {
      editor-&gt;setGeometry(option.rect);
  }</pre>
@@ -121,8 +122,8 @@
 <p>Each of the cells in the table can now be edited in the usual way, but the spin box ensures that the data returned to the model is always constrained by the values allowed by the spin box delegate.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -213,8 +211,8 @@ struct QSslErrorList
 Q_GLOBAL_STATIC(QSslErrorList, _q_sslErrorList)
 static int q_X509Callback(int ok, X509_STORE_CTX *ctx)
 {
-    Q_UNUSED(ok);
-    _q_sslErrorList()->errors << ctx->error;
+    if (!ok)
+        _q_sslErrorList()->errors << ctx->error;
     return ctx->error;
 }
 
@@ -322,6 +320,7 @@ bool QSslSocketBackendPrivate::initSslContext()
 
     // Clear the session.
     q_SSL_clear(ssl);
+    errorList.clear();
 
     // Initialize memory BIOs for encryption and decryption.
     readBio = q_BIO_new(q_BIO_s_mem());
@@ -595,7 +594,7 @@ bool QSslSocketBackendPrivate::testConnection()
     _q_sslErrorList()->mutex.lock();
     _q_sslErrorList()->errors.clear();
     int result = (mode == QSslSocket::SslClientMode) ? q_SSL_connect(ssl) : q_SSL_accept(ssl);
-    QList<int> errorList = _q_sslErrorList()->errors;
+    errorList << _q_sslErrorList()->errors;
     _q_sslErrorList()->mutex.unlock();
 
     // Check if we're encrypted or not.

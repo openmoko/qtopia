@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,22 +50,16 @@ static void toggleScreenSaver( bool on )
 }
 #endif
 
-static void setRingPriority(bool v)
+void Alarm::setRingPriority(bool v)
 {
-    
-    QByteArray data;
-    {
-        QDataStream  stream(&data, QIODevice::WriteOnly);
-        stream << ((v)?QSoundControl::RingTone : QSoundControl::Default);
-    }    
-    QCopChannel::send("QPE/MediaServer","setPriority(int)", data);
-
+    QtopiaIpcEnvelope   e("QPE/MediaServer", "setPriority(int)");
+    e << ((v)?QSoundControl::RingTone : QSoundControl::Default);
 } 
 
 
 
 Alarm::Alarm( QWidget * parent, Qt::WFlags f )
-    : QWidget( parent, f ), init(false), m_changedPriority(false) // No tr
+    : QWidget( parent, f ), init(false) // No tr
 {
     setupUi(this);
     alarmDlg = 0;
@@ -108,6 +102,7 @@ Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     alarmDaysEdit->installEventFilter(this);
 
     init = true;
+    QtopiaApplication::instance()->registerRunningTask(QLatin1String("waitForTimer"), this);
 }
 
 Alarm::~Alarm()
@@ -132,7 +127,6 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
     if ( type == magic_daily ) {
         QString ts = QTimeString::localHM(theTime);
         QString msg = ts + "\n" + tr( "(Daily Alarm)" );
-        m_changedPriority = true;
         setRingPriority(true);
         Qtopia::soundAlarm();
         alarmCount = 0;
@@ -162,14 +156,13 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
         if ( !alarmDlg->isVisible() ) {
             QtopiaApplication::execDialog(alarmDlg);
             alarmt->stop();
-            if(m_changedPriority) {
-                setRingPriority(false);
-                m_changedPriority = false;
-            }    
+            setRingPriority(false);
         }
     } else if ( type == magic_countdown ) {
         // countdown
+        setRingPriority(true);
         Qtopia::soundAlarm();
+        setRingPriority(false);
     }
 }
 
@@ -182,17 +175,10 @@ void Alarm::setDailyEnabled(bool enableDaily)
 void Alarm::alarmTimeout()
 {
     if ( alarmCount < 20 ) {
-        if (!m_changedPriority) {
-            setRingPriority(true);
-            m_changedPriority = true;
-        }    
         Qtopia::soundAlarm();
         alarmCount++;
     } else {
-        if (m_changedPriority) {
-            setRingPriority(false);
-            m_changedPriority = false;
-        }    
+        setRingPriority(false);
         alarmCount = 0;
         alarmt->stop();
     }

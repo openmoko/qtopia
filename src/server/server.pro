@@ -15,146 +15,176 @@ enable_singleexec:qtopiatest {
 
 # DEFINES += QTOPIA_PHONEUI
 
+#this ensures that include path remain the same
+INCLUDEPATH+= core_server \
+              memory/base \
+              infrastructure/camera \
+              infrastructure/softmenubar \
+              processctrl/appmonitor \
+              processctrl/startup \
+              processctrl/taskmanagerentry \
+              processctrl/terminationhandler \
+              ui/abstractinterfaces/stdmessagebox \
+              ui/components/delayedwaitdialog \
+              ui/components/inputmethods \
+              ui/components/touchscreenlockdlg\
+              ui/launcherviews/base \
+              ui/launcherviews/contentsetview \
+              ui/launcherviews/documentview \
+              ui/launcherviews/hierarchdocumentview \
+              ui/launcherviews/taskmanagerview \
+              ui/taskmanager \
+              ui/shutdown \
+              ui/volumedlg \
+              media/volumemanagement \
+              comm/session \
+              bluetooth/audiovolumemgr \
+              bluetooth/serial \
+              pim/savetocontacts \
+              pim/servercontactmodel \
+              phone/telephony/phoneserver/dummyservice \
+              phone/telephony/callpolicymanager/abstract \
+              phone/telephony/callpolicymanager/cell \
+              phone/telephony/callpolicymanager/voip \
+              phone/telephony/dialercontrol
+
 SERVER_FORMS+=\
-    ui/shutdown.ui \
-    ui/volume.ui
+    ui/shutdown/shutdown.ui \
+    ui/volumedlg/volume.ui
 
 SERVER_HEADERS+=\
-    qabstractserverinterface.h \
-    systemsuspend.h \
-    ui/shutdownimpl.h \
-    ui/volumeimpl.h \
-    launcherview.h\
-    qcoprouter.h\
+    core_server/qabstractserverinterface.h \
+    core_server/systemsuspend.h \
+    ui/shutdown/shutdownimpl.h \
+    ui/volumedlg/volumeimpl.h \
+    ui/launcherviews/base/launcherview.h\
+    core_server/qcoprouter.h\
     dbusrouter.h\
-    alertservicetask.h\
-    qabstractdevicemanager.h\
-    applicationmonitor.h\
-    storagemonitor.h \
-    qtopiaserverapplication.h \
-    environmentsetuptask.h \
-    memorymonitor.h \
+    media/alertservice/alertservicetask.h\
+    comm/session/qabstractdevicemanager.h\
+    processctrl/appmonitor/applicationmonitor.h\
+    infrastructure/storagemonitor/storagemonitor.h \
+    core_server/qtopiaserverapplication.h \
+    core_server/environmentsetuptask.h \
+    memory/base/memorymonitor.h \
     ui/standarddialogs.h \
-    ui/delayedwaitdialog.h \
-    testmemorymonitor.h \
-    pressholdgate.h \
-    genericmemorymonitor.h \
-    applicationlauncher.h \
-    oommanager.h \
-    qterminationhandlerprovider.h \
-    qcopfile.h \
-    networkserver.h \
-    startupapps.h \
-    timemonitor.h \
-    timeupdateservice.h \
-    qdeviceindicatorsprovider.h \
-    shutdownsplash.h \
-    contentsetlauncherview.h \
-    stabmonitortask.h \
-    defaultsignal.h \
-    dbmigratetask.h \
-    defaultbattery.h\
-    apmbattery.h\
+    ui/components/delayedwaitdialog/delayedwaitdialog.h \
+    memory/testmonitor/testmemorymonitor.h \
+    core_server/pressholdgate.h \
+    memory/monitor/genericmemorymonitor.h \
+    core_server/applicationlauncher.h \
+    memory/base/oommanager.h \
+    processctrl/terminationhandler/qterminationhandlerprovider.h \
+    core_server/qcopfile.h \
+    net/netserver/networkserver.h \
+    processctrl/startup/startupapps.h \
+    core_server/timemonitor.h \
+    core_server/timeupdateservice.h \
+    core_server/qdeviceindicatorsprovider.h \
+    ui/shutdownsplash/shutdownsplash.h \
+    ui/launcherviews/contentsetview/contentsetlauncherview.h \
+    infrastructure/stabmonitor/stabmonitortask.h \
+    infrastructure/signalstrength/defaultsignal.h \
+    core_server/dbmigratetask.h \
+    core_server/defaultbattery.h\
+    infrastructure/apm/apmbattery.h\
     obexservicemanager.h \
-    keyclick.h \
-    devicebuttontask.h \
-    inputmethods.h \
-    inputdevicesettings.h \
-    lowmemorytask.h \
-    windowmanagement.h \
-    virtualkeyboardservice.h \
-    qtopiapowermanager.h\
-    qtopiapowermanagerservice.h \
+    media/keyclick/keyclick.h \
+    core_server/devicebuttontask.h \
+    ui/components/inputmethods/inputmethods.h \
+    infrastructure/inputdevice/inputdevicesettings.h \
+    memory/base/lowmemorytask.h \
+    core_server/windowmanagement.h \
+    core_server/virtualkeyboardservice.h \
+    core_server/qtopiapowermanager.h\
+    core_server/qtopiapowermanagerservice.h \
     standarddevicefeatures.h \
-    qtopiainputevents.h \
-    waitindicator.h
+    core_server/qtopiainputevents.h \
+    ui/waitindicator/waitindicator.h \
+    processctrl/appshutdown/applicationshutdowntask.h
 
 SERVER_SOURCES+=\
-    main.cpp \
-    qabstractserverinterface.cpp \
-    systemsuspend.cpp \
-    systemsuspendtasks.cpp \
-    ui/shutdownimpl.cpp \
-    ui/volumeimpl.cpp \
-    launcherview.cpp\
-    qcoprouter.cpp\
+    main/main.cpp \
+    core_server/qabstractserverinterface.cpp \
+    core_server/systemsuspend.cpp \
+    infrastructure/suspendtasks/systemsuspendtasks.cpp \
+    ui/shutdown/shutdownimpl.cpp \
+    ui/volumedlg/volumeimpl.cpp \
+    ui/launcherviews/base/launcherview.cpp\
+    core_server/qcoprouter.cpp\
     dbusrouter.cpp\
-    alertservicetask.cpp \
-    qabstractdevicemanager.cpp \
-    applicationmonitor.cpp \
-    storagemonitor.cpp \
-    qtopiaserverapplication.cpp \
-    environmentsetuptask.cpp \
-    memorymonitor.cpp \
+    media/alertservice/alertservicetask.cpp \
+    comm/session/qabstractdevicemanager.cpp \
+    processctrl/appmonitor/applicationmonitor.cpp \
+    infrastructure/storagemonitor/storagemonitor.cpp \
+    core_server/qtopiaserverapplication.cpp \
+    core_server/environmentsetuptask.cpp \
+    memory/base/memorymonitor.cpp \
     ui/standarddialogs.cpp \
-    ui/delayedwaitdialog.cpp \
-    testmemorymonitor.cpp \
-    pressholdgate.cpp \
-    genericmemorymonitor.cpp \
-    applicationlauncher.cpp \
-    oommanager.cpp \
-    qterminationhandlerprovider.cpp \
-    qcopfile.cpp \
-    networkserver.cpp \
-    shutdownsplash.cpp \
-    startupapps.cpp \
-    timemonitor.cpp \
-    timeupdateservice.cpp \
-    qdeviceindicatorsprovider.cpp \
+    ui/components/delayedwaitdialog/delayedwaitdialog.cpp \
+    memory/testmonitor/testmemorymonitor.cpp \
+    core_server/pressholdgate.cpp \
+    memory/monitor/genericmemorymonitor.cpp \
+    core_server/applicationlauncher.cpp \
+    memory/base/oommanager.cpp \
+    processctrl/terminationhandler/qterminationhandlerprovider.cpp \
+    core_server/qcopfile.cpp \
+    net/netserver/networkserver.cpp \
+    ui/shutdownsplash/shutdownsplash.cpp \
+    processctrl/startup/startupapps.cpp \
+    core_server/timemonitor.cpp \
+    core_server/timeupdateservice.cpp \
+    core_server/qdeviceindicatorsprovider.cpp \
     simplebuiltins.cpp \
-    contentsetlauncherview.cpp \
-    defaultbattery.cpp\
-    apmbattery.cpp\
-    qdsynctask.cpp\
+    ui/launcherviews/contentsetview/contentsetlauncherview.cpp \
+    core_server/defaultbattery.cpp\
+    infrastructure/apm/apmbattery.cpp\
+    processctrl/qdsync/qdsynctask.cpp\
     obexservicemanager.cpp\
-    dbmigratetask.cpp \
-    stabmonitortask.cpp \
-    applicationshutdowntask.cpp \
-    defaultsignal.cpp \
-    keyclick.cpp \
-    devicebuttontask.cpp \
-    inputmethods.cpp \
-    inputdevicesettings.cpp \
-    lowmemorytask.cpp \
-    virtualkeyboardservice.cpp \
-    qtopiapowermanager.cpp\
-    qtopiapowermanagerservice.cpp \
+    core_server/dbmigratetask.cpp \
+    infrastructure/stabmonitor/stabmonitortask.cpp \
+    processctrl/appshutdown/applicationshutdowntask.cpp \
+    infrastructure/signalstrength/defaultsignal.cpp \
+    media/keyclick/keyclick.cpp \
+    core_server/devicebuttontask.cpp \
+    ui/components/inputmethods/inputmethods.cpp \
+    infrastructure/inputdevice/inputdevicesettings.cpp \
+    memory/base/lowmemorytask.cpp \
+    core_server/virtualkeyboardservice.cpp \
+    core_server/qtopiapowermanager.cpp\
+    core_server/qtopiapowermanagerservice.cpp \
     standarddevicefeatures.cpp \
-    waitindicator.cpp
+    ui/waitindicator/waitindicator.cpp
 
 enable_vpn {
-    SERVER_HEADERS+=vpnmanager.h
-    SERVER_SOURCES+=vpnmanager.cpp
+    SERVER_HEADERS+=net/vpn/vpnmanager.h
+    SERVER_SOURCES+=net/vpn/vpnmanager.cpp
 }
 
 !x11 {
     SERVER_HEADERS+=\
-        screenclick.h \
-        qkeyboardlock.h
+        media/screenclick/screenclick.h \
+        infrastructure/keyboardlock/qkeyboardlock.h
     SERVER_SOURCES+=\
-        screenclick.cpp \
-        qkeyboardlock.cpp \
-        windowmanagement.cpp \
-        qtopiainputevents.cpp
+        media/screenclick/screenclick.cpp \
+        infrastructure/keyboardlock/qkeyboardlock.cpp \
+        core_server/windowmanagement.cpp \
+        core_server/qtopiainputevents.cpp
 } else {
     SERVER_SOURCES+=\
-        windowmanagement_x11.cpp \
-        qtopiainputevents_x11.cpp
+        core_server/windowmanagement_x11.cpp \
+        core_server/qtopiainputevents_x11.cpp
 
     LIBS += -lXtst
 }
 
 equals(LAUNCH_METHOD,quicklaunch) {
-    SERVER_SOURCES+=quickexeapplicationlauncher.cpp
-    SERVER_HEADERS+=quickexeapplicationlauncher.h
+    SERVER_SOURCES+=processctrl/quickexe/quickexeapplicationlauncher.cpp
+    SERVER_HEADERS+=processctrl/quickexe/quickexeapplicationlauncher.h
 }
 
-SXE_HEADERS=securitymonitor.h 
-SXE_SOURCES=securitymonitor.cpp 
-enable_cell {
-    SXE_HEADERS+=qsxemangle.h
-    SXE_SOURCES+=qsxemangle.cpp
-}
+SXE_HEADERS=security/monitor/securitymonitor.h 
+SXE_SOURCES=security/monitor/securitymonitor.cpp 
 
 TRANSLATABLES+=$$SXE_HEADERS $$SXE_SOURCES
 
@@ -163,17 +193,16 @@ enable_sxe {
     SERVER_SOURCES+=$$SXE_SOURCES
 }
 
-DOCAPI_HEADERS=contentserver.h
-DOCAPI_SOURCES=contentserver.cpp
+DOCAPI_HEADERS=core_server/contentserver.h
+DOCAPI_SOURCES=core_server/contentserver.cpp
 TRANSLATABLES+=$$DOCAPI_HEADERS $$DOCAPI_SOURCES
 
 SERVER_HEADERS+=$$DOCAPI_HEADERS
 SERVER_SOURCES+=$$DOCAPI_SOURCES
 
-VPATH+=$$QTOPIA_DEPOT_PATH/src/settings/calibrate
-INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/settings/calibrate
-CALIBRATE_HEADERS=calibrate.h
-CALIBRATE_SOURCES=calibrate.cpp
+CALIBRATE_HEADERS=ui/components/calibrate/calibrate.h
+CALIBRATE_SOURCES=ui/components/calibrate/calibrate.cpp \
+                  ui/components/calibrate/register.cpp
 
 !x11 {
     HEADERS+=$$CALIBRATE_HEADERS
@@ -190,23 +219,23 @@ enable_cell {
     SOURCES+=$$SIMAPP_SOURCES
 }
 
-BLUETOOTH_HEADERS=bluetooth/bluetoothservicemanager.h \
-		  bluetooth/btpinhelper.h \
-                  bluetooth/btpowerservice.h \
+BLUETOOTH_HEADERS=bluetooth/servicemgr/bluetoothservicemanager.h \
+		  bluetooth/pinhelper/btpinhelper.h \
+                  bluetooth/powermgr/btpowerservice.h \
                   bluetooth/hs/btheadsettask.h \
                   bluetooth/hs/qbluetoothhsagserver_p.h \
                   bluetooth/hs/qbluetoothhsservice_p.h \
                   bluetooth/scomisc_p.h \
-                  bluetooth/btaudiovolumemanager_p.h \
+                  bluetooth/audiovolumemgr/btaudiovolumemanager.h \
                   bluetooth/ftp/btftpservice.h
 
-BLUETOOTH_SOURCES=bluetooth/bluetoothservicemanager.cpp \
-                  bluetooth/btpinhelper.cpp \
-                  bluetooth/btpowerservice.cpp \
+BLUETOOTH_SOURCES=bluetooth/servicemgr/bluetoothservicemanager.cpp \
+                  bluetooth/pinhelper/btpinhelper.cpp \
+                  bluetooth/powermgr/btpowerservice.cpp \
                   bluetooth/hs/btheadsettask.cpp \
                   bluetooth/hs/qbluetoothhsagserver.cpp \
                   bluetooth/hs/qbluetoothhsservice.cpp \
-                  bluetooth/btaudiovolumemanager.cpp \
+                  bluetooth/audiovolumemgr/btaudiovolumemanager.cpp \
                   bluetooth/ftp/btftpservice.cpp
 
 # This is documented in src/build/doc/src/deviceprofiles.qdoc
@@ -215,37 +244,37 @@ isEmpty(DEVICE_CONFIG_PATH)|!exists($$DEVICE_CONFIG_PATH/server/scomisc.cpp) {
 }
 
 BLUETOOTH_PHONE_HEADERS+=bluetooth/dun/btdialupservice.h \
-                  bluetooth/bluetoothserialportservice.h \
+                  bluetooth/serial/bluetoothserialportservice.h \
                   bluetooth/hf/bthandsfreetask.h \
                   bluetooth/hf/qbluetoothhfagserver_p.h \
                   bluetooth/hf/qbluetoothhfservice_p.h
 
 BLUETOOTH_PHONE_SOURCES+=bluetooth/dun/btdialupservice.cpp \
-                         bluetooth/bluetoothserialportservice.cpp \
+                         bluetooth/serial/bluetoothserialportservice.cpp \
                   bluetooth/hf/bthandsfreetask.cpp \
                   bluetooth/hf/qbluetoothhfagserver.cpp \
                   bluetooth/hf/qbluetoothhfservice.cpp
 
 TRANSLATABLES+=$$BLUETOOTH_HEADERS $$BLUETOOTH_SOURCES $$BLUETOOTH_PHONE_HEADERS $$BLUETOOTH_PHONE_SOURCES
 
-INFRARED_HEADERS=irpowerservice.h
+INFRARED_HEADERS=infrared/powermgr/irpowerservice.h
 
-INFRARED_SOURCES=irpowerservice.cpp
+INFRARED_SOURCES=infrared/powermgr/irpowerservice.cpp
 
 TRANSLATABLES+=$$INFRARED_HEADERS $$INFRARED_SOURCES
 
 #begin media
 MEDIA_HEADERS=\
-    media/mediaserver.h \
-    media/audiovolumemanager.h \
-    media/mediakeyservice.h \
-    media/mediaservicestask.h
+    media/servercontrol/mediaserver.h \
+    media/volumemanagement/audiovolumemanager.h \
+    media/volumemanagement/mediakeyservice.h \
+    media/volumemanagement/mediaservicestask.h
 
 MEDIA_SOURCES=\
-    media/mediaserver.cpp \
-    media/audiovolumemanager.cpp \
-    media/mediakeyservice.cpp \
-    media/mediaservicestask.cpp  
+    media/servercontrol/mediaserver.cpp \
+    media/volumemanagement/audiovolumemanager.cpp \
+    media/volumemanagement/mediakeyservice.cpp \
+    media/volumemanagement/mediaservicestask.cpp  
 
 HEADERS+=$$MEDIA_HEADERS
 SOURCES+=$$MEDIA_SOURCES
@@ -257,130 +286,133 @@ UNPORTED_SOURCES=firstuse.cpp
 PHONE_HEADERS=\
     phone/contextlabel.h \
     phone/themecontrol.h \
-    phone/documentview.h \
+    ui/launcherviews/documentview/documentview.h \
     phone/phonebrowser.h \
-    phone/runningapplicationsviewitem.h \
-    phone/cameramonitor.h \
-    phone/alarmcontrol.h \
+    processctrl/taskmanagerentry/taskmanagerentry.h \
+    ui/launcherviews/taskmanagerview/taskmanagerlauncherview.h \
+    infrastructure/camera/cameramonitor.h \
+    core_server/alarmcontrol.h \
     phone/phonethemeview.h \
     phone/homescreencontrol.h \
     phone/qabstracthomescreen.h \
     phone/themedhomescreen.h \
     phone/themebackground_p.h \
-    phone/qphoneprofileprovider.h \
-    phone/messagebox.h \
+    phone/profileprovider/qphoneprofileprovider.h \
+    ui/abstractinterfaces/stdmessagebox/messagebox.h \
     phone/phoneheader.h\
     phone/phonelock.h\
-    phone/taskmanagerservice.h\
-    phone/qabstractmessagebox.h\
+    ui/taskmanager/taskmanagerservice.h\
+    core_server/qabstractmessagebox.h\
     phone/qabstractbrowserscreen.h\
     phone/phonelauncher.h \
     phone/qabstractsecondarydisplay.h \
-    phone/qsoftmenubarprovider.h \
+    infrastructure/softmenubar/qsoftmenubarprovider.h \
     phone/secondarythemeddisplay.h \
     phone/receivewindow.h \
     phone/homescreenwidgets.h \
     phone/phonepowermanager.h \
-    phone/gprsmonitor.h \
+    net/gprsmonitor/gprsmonitor.h \
     phone/qabstractthemewidgetfactory.h \
-    phone/touchscreenlockdlg.h
+    ui/components/touchscreenlockdlg/touchscreenlockdlg.h
 
 TELEPHONY_HEADERS=\
-    phone/externalaccess.h \
+    phone/telephony/atemulator/externalaccess.h \
     phone/messagecontrol.h \
-    phone/callhistory.h \
     phone/callcontactlist.h \
     phone/callscreen.h \
-    phone/dialercontrol.h \
-    phone/savetocontacts.h \
+    phone/telephony/dialercontrol/dialercontrol.h \
+    pim/savetocontacts/savetocontacts.h \
     phone/quickdial.h \
     phone/numberdisplay.h \
     phone/dialer.h \
     phone/dialerservice.h \
     phone/qabstractdialerscreen.h\
-    phone/phoneserver.h \
+    phone/telephony/phoneserver/base/phoneserver.h \
     phone/ringcontrol.h\
     phone/ringtoneservice.h\
-    phone/servercontactmodel.h \
-    phone/qabstractcallpolicymanager.h \
+    pim/servercontactmodel/servercontactmodel.h \
+    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.h \
     phone/videoringtone.h
 
 PHONE_SOURCES=\
     phone/contextlabel.cpp \
     phone/phonelauncher.cpp \
     phone/themecontrol.cpp \
-    phone/documentview.cpp \
+    ui/launcherviews/documentview/documentview.cpp \
     phone/phonebrowser.cpp \
-    phone/runningapplicationsviewitem.cpp \
-    phone/cameramonitor.cpp \
-    phone/alarmcontrol.cpp \
+    processctrl/taskmanagerentry/taskmanagerentry.cpp \
+    ui/launcherviews/taskmanagerview/taskmanagerlauncherview.cpp \
+    infrastructure/camera/cameramonitor.cpp \
+    core_server/alarmcontrol.cpp \
     phone/phonethemeview.cpp \
     phone/qabstracthomescreen.cpp \
     phone/themedhomescreen.cpp \
     phone/themebackground_p.cpp \
-    phone/qphoneprofileprovider.cpp \
-    phone/messagebox.cpp \
+    phone/profileprovider/qphoneprofileprovider.cpp \
+    ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
     phone/phoneheader.cpp\
     phone/phonelock.cpp\
-    phone/qabstractmessagebox.cpp\
-    phone/taskmanagerservice.cpp\
+    core_server/qabstractmessagebox.cpp\
+    ui/taskmanager/taskmanagerservice.cpp\
     phone/qabstractsecondarydisplay.cpp \
-    phone/qsoftmenubarprovider.cpp \
+    infrastructure/softmenubar/qsoftmenubarprovider.cpp \
     phone/secondarythemeddisplay.cpp \
     phone/phonepowermanager.cpp \
     phone/receivewindow.cpp \
     phone/homescreenwidgets.cpp \
-    phone/gprsmonitor.cpp \
-    phone/touchscreenlockdlg.cpp
+    net/gprsmonitor/gprsmonitor.cpp \
+    ui/components/touchscreenlockdlg/touchscreenlockdlg.cpp
 
 TELEPHONY_SOURCES=\
-    phone/externalaccess.cpp \
+    phone/telephony/atemulator/externalaccess.cpp \
     phone/messagecontrol.cpp \
-    phone/callhistory.cpp \
     phone/callcontactlist.cpp\
     phone/callscreen.cpp \
-    phone/dialercontrol.cpp \
-    phone/savetocontacts.cpp \
+    phone/telephony/dialercontrol/dialercontrol.cpp \
+    pim/savetocontacts/savetocontacts.cpp \
     phone/quickdial.cpp \
     phone/numberdisplay.cpp \
     phone/dialer.cpp \
     phone/dialerservice.cpp \
     phone/ringcontrol.cpp\
     phone/ringtoneservice.cpp\
-    phone/phoneserver.cpp \
-    phone/servercontactmodel.cpp \
-    phone/qabstractcallpolicymanager.cpp \
+    phone/telephony/phoneserver/base/phoneserver.cpp \
+    pim/servercontactmodel/servercontactmodel.cpp \
+    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.cpp \
     phone/videoringtone.cpp
 
-enable_modem {
-    PHONE_HEADERS+=phone/cellmodemmanager.h\
+enable_telephony {
+    TELEPHONY_HEADERS+=phone/callhistory.h
+    TELEPHONY_SOURCES+=phone/callhistory.cpp
+}
+
+enable_cell {
+    PHONE_HEADERS+=phone/telephony/callpolicymanager/cell/cellmodemmanager.h\
                    phone/cellbroadcastcontrol.h\
-                   phone/phoneserverdummymodem.h\
+                   phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.h\
                    phone/gsmkeyactions.h\
                    phone/gsmkeyfilter.h
-    PHONE_SOURCES+=phone/cellmodemmanager.cpp\
+    PHONE_SOURCES+=phone/telephony/callpolicymanager/cell/cellmodemmanager.cpp\
                    phone/cellbroadcastcontrol.cpp\
-                   phone/phoneserverdummymodem.cpp\
+                   phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.cpp\
                    phone/gsmkeyactions.cpp\
                    phone/gsmkeyfilter.cpp
 }
 
 enable_voip {
     PHONE_HEADERS+=\
-        phone/phoneservervoipsocket.h\
-        phone/voipmanager.h\
-        phone/asteriskmanager.h
+        phone/telephony/callpolicymanager/voip/voipmanager.h\
+        phone/telephony/callpolicymanager/asterisk/asteriskmanager.h
     PHONE_SOURCES+=\
-        phone/phoneservervoipsocket.cpp\
-        phone/voipmanager.cpp\
-        phone/asteriskmanager.cpp
+        phone/telephony/callpolicymanager/voip/voipmanager.cpp\
+        phone/telephony/callpolicymanager/asterisk/asteriskmanager.cpp
 }
 
 enable_hierarchicaldocumentview {
     PHONE_HEADERS+=\
-        phone/hierarchicaldocumentview.h
+        ui/launcherviews/hierarchdocumentview/hierarchicaldocumentview.h
     PHONE_SOURCES+=\
-        phone/hierarchicaldocumentview.cpp
+        ui/launcherviews/hierarchdocumentview/hierarchicaldocumentview.cpp
         
     DEFINES+=ENABLE_HIERARCHICAL_DOCUMENT_VIEW
 }
@@ -426,12 +458,12 @@ enable_phone_ui {
 }
 
 SAMPLES_SOURCES=\
-    phone/samples/slideinmessagebox.cpp \
+    ui/abstractinterfaces/slideinmessagebox/slideinmessagebox.cpp \
     phone/samples/wheelbrowser.cpp \
     phone/samples/qpixmapwheel.cpp
 
 SAMPLES_HEADERS=\
-    phone/samples/slideinmessagebox.h \
+    ui/abstractinterfaces/slideinmessagebox/slideinmessagebox.h \
     phone/samples/wheelbrowser.h \
     phone/samples/qpixmapwheel.h
 
@@ -546,8 +578,8 @@ equals(QTOPIA_SOUND_SYSTEM,alsa) {
 }
 
 isEmpty(DEVICE_CONFIG_PATH) {
-    PHONE_HEADERS+=phone/dummyvolumeservice.h
-    PHONE_SOURCES+=phone/dummyvolumeservice.cpp
+    PHONE_HEADERS+=media/dummyvolumeservice/dummyvolumeservice.h
+    PHONE_SOURCES+=media/dummyvolumeservice/dummyvolumeservice.cpp
 }
 
 HEADERS+=$$PHONE_HEADERS
@@ -583,8 +615,8 @@ enable_modem {
 enable_sxe:depends(libraries/qtopiasecurity)
 
 drmagent {
-    SERVER_HEADERS+=archiveviewer.h
-    SERVER_SOURCES+=archiveviewer.cpp
+    SERVER_HEADERS+=ui/launcherviews/archiveview/archiveviewer.h
+    SERVER_SOURCES+=ui/launcherviews/archiveview/archiveviewer.cpp
     archivesdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/archives.desktop
     archivesdesktop.path=/apps/Applications
     archivesdesktop.hint=desktop
@@ -720,7 +752,7 @@ settings.files=\
 settings.path=/etc/default/Trolltech
 INSTALLS+=settings
 
-# qpe.conf gets modified for Free builds
+# This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/qpe.conf):qpe_conf.files=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/qpe.conf
 else:qpe_conf.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/qpe.conf
 qpe_conf.path=/etc/default/Trolltech
@@ -840,19 +872,21 @@ defaultalerts.categories=SystemRingtones
 defaultalerts.trtarget=QtopiaRingTones
 INSTALLS+=defaultalerts
 
-callhistorydesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/callhistory.desktop
-callhistorydesktop.path=/apps/Applications
-callhistorydesktop.hint=desktop
-INSTALLS+=callhistorydesktop
+enable_telephony {
+    callhistorydesktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/callhistory.desktop
+    callhistorydesktop.path=/apps/Applications
+    callhistorydesktop.hint=desktop
+    INSTALLS+=callhistorydesktop
 
-callhistorypics.files=$$QTOPIA_DEPOT_PATH/pics/callhistory/*
-callhistorypics.path=/pics/callhistory
-callhistorypics.hint=pics
-INSTALLS+=callhistorypics
+    callhistorypics.files=$$QTOPIA_DEPOT_PATH/pics/callhistory/*
+    callhistorypics.path=/pics/callhistory
+    callhistorypics.hint=pics
+    INSTALLS+=callhistorypics
 
-callhistoryservice.files=$$QTOPIA_DEPOT_PATH/services/CallHistory/qpe
-callhistoryservice.path=/services/CallHistory
-INSTALLS+=callhistoryservice
+    callhistoryservice.files=$$QTOPIA_DEPOT_PATH/services/CallHistory/qpe
+    callhistoryservice.path=/services/CallHistory
+    INSTALLS+=callhistoryservice
+}
 
 taskmanagerservice.files=$$QTOPIA_DEPOT_PATH/services/TaskManager/qpe
 taskmanagerservice.path=/services/TaskManager
@@ -939,12 +973,16 @@ langfiles.commands=$$commands
 langfiles.CONFIG=no_path
 INSTALLS+=langfiles
 
+qdawggen=$$QPEDIR/bin/qdawggen
+!equals(QTOPIA_HOST_ENDIAN,$$QTOPIA_TARGET_ENDIAN):qdawggen+=-e
 commands=$$COMMAND_HEADER
 for(lang,INST_LANGUAGES) {
-    !equals(commands,$$COMMAND_HEADER):commands+=$$LINE_SEP
-    exists($$QTOPIA_DEPOT_PATH/etc/dict/$$lang/words):commands+=\
-        mkdir -p $(INSTALL_ROOT)$$resdir/etc/dict/$$lang $$LINE_SEP\
-        find $$QTOPIA_DEPOT_PATH/etc/dict/$$lang -maxdepth 1 -type f | xargs -r $$QPEDIR/bin/qdawggen $(INSTALL_ROOT)$$resdir/etc/dict/$$lang
+    exists($$QTOPIA_DEPOT_PATH/etc/dict/$$lang/words) {
+        !equals(commands,$$COMMAND_HEADER):commands+=$$LINE_SEP
+        commands+=\
+            mkdir -p $(INSTALL_ROOT)$$resdir/etc/dict/$$lang $$LINE_SEP\
+            find $$QTOPIA_DEPOT_PATH/etc/dict/$$lang -maxdepth 1 -type f | xargs -r $$qdawggen $(INSTALL_ROOT)$$resdir/etc/dict/$$lang
+    }
 }
 dicts.commands=$$commands
 dicts.CONFIG=no_path
@@ -989,7 +1027,7 @@ QMAKE_EXTRA_TARGETS+=nct_lupdate
 
 pkg.name=qpe-taskbar
 pkg.desc=Launcher for QPE
-pkg.domain=base,launcher,quicklauncher,key_manager,modem,policy,prefix,directvideo,directaudio,nice,kill,tmp_write,datetime,rfcomm,netadmin,clock
+pkg.domain=qpe
 
 # FIXME THIS SHOULD NOT BE HERE!!!
 dep(INCLUDEPATH+=$$PWD)

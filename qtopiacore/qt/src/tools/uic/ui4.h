@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -61,7 +59,7 @@ class QDomElement;
 #define QDESIGNER_UILIB_EXTERN Q_DECL_EXPORT
 #define QDESIGNER_UILIB_IMPORT Q_DECL_IMPORT
 
-#if defined(QT_DESIGNER_STATIC) || defined(QT_UIC)
+#if defined(QT_DESIGNER_STATIC) || defined(QT_UIC) ||defined(QT_UIC3)
 #  define QDESIGNER_UILIB_EXPORT
 #elif defined(QDESIGNER_UILIB_LIBRARY)
 #  define QDESIGNER_UILIB_EXPORT QDESIGNER_UILIB_EXTERN

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,12 +39,13 @@ class MediaVolumeControl : public QtopiaIpcAdaptor
 public:
     MediaVolumeControl(SessionManager* sessionManager);
     ~MediaVolumeControl();
-
+    
 public slots:
     void setVolume(int volume);
     void increaseVolume(int increment);
     void decreaseVolume(int decrement);
     void setMuted(bool mute);
+    void setCallDomain(bool active);
 
 private:
     MediaVolumeControlPrivate*  d;

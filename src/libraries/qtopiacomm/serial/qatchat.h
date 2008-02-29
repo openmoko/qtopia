@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -72,6 +72,8 @@ public:
 
     void registerErrorPrefix( const QString& type );
 
+    void registerWakeupCommand( const QString& cmd, int wakeupTime );
+
 signals:
     void pduNotification( const QString& type, const QByteArray& pdu );
     void callNotification( const QString& type );
@@ -82,6 +84,8 @@ private slots:
     void timeout();
     void failCommand();
     void retryTimeout();
+    void performWakeup();
+    void wakeupFinished();
 
 private:
     QAtChatPrivate *d;

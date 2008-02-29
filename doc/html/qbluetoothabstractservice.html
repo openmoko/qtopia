@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothAbstractService Class Reference</h1>
 <p>The QBluetoothAbstractService class provides a base interface class for Bluetooth services within Qtopia. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothAbstractService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothAbstractService&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="qbluetoothhandsfreeservice.html">QBluetoothHandsfreeService</a>, <a href="qbluetoothheadsetservice.html">QBluetoothHeadsetService</a>, and <a href="qbluetoothserialportservice.html">QBluetoothSerialPortService</a>.</p>
 <ul>
 <li><a href="qbluetoothabstractservice-members.html">List of all members, including inherited members</a></li>
@@ -30,7 +30,7 @@
 <li><div class="fn"/>virtual void <b><a href="qbluetoothabstractservice.html#stop">stop</a></b> () = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -39,7 +39,7 @@
 <li><div class="fn"/>void <b><a href="qbluetoothabstractservice.html#stopped">stopped</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -49,124 +49,40 @@
 <li><div class="fn"/>bool <b><a href="qbluetoothabstractservice.html#unregisterRecord">unregisterRecord</a></b> ( quint32 <i>handle</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QBluetoothAbstractService class provides a base interface class for Bluetooth services within Qtopia.</p>
-<p>This class makes it easier to implement Qtopia Bluetooth services. If you subclass QBluetoothAbstractService to create a Bluetooth service, the service is automatically registered and accessible as a system Bluetooth service within Qtopia. The service can then be accessed externally by programmers through the <a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a> class. It will also be listed in the system Bluetooth settings application, allowing end users to modify the service's settings.</p>
-<p>Following is an example of a Qtopia Bluetooth service that is created by subclassing QBluetoothAbstractService. The service will publish the Serial Port Profile, and the service name will be &quot;MySerialPortService&quot;.</p>
-<p>This is the interface for the class:</p>
-<pre>    class MyBluetoothService : public QBluetoothAbstractService
-    {
-        Q_OBJECT
-    public:
-        MyBluetoothService(QObject *parent = 0);
-        virtual void start();
-        virtual void stop();
-        virtual void setSecurityOptions(QBluetooth::SecurityOptions options);
-
-    private:
-        quint32 m_serviceRecordHandle;
-    };</pre>
-<p>Now, to the implementation. Firstly, the constructor might look something like this:</p>
-<pre>    MyBluetoothService::MyBluetoothService(QObject *parent)
-        : QBluetoothAbstractService(&quot;MySerialPortService&quot;, tr(&quot;Serial Port Service&quot;), parent)
-    {
-        m_serviceRecordHandle = 0;
-    }</pre>
-<p>This creates a service named &quot;MySerialPortService&quot;. The name must be unique among Qtopia Bluetooth services, as it is used internally to uniquely identify the service (for example, for storing service settings).</p>
-<p>The second string argument is an internationalized, human-readable name that can be displayed to the end user. This string will be used, for example, for listing local Bluetooth services in Qtopia's Bluetooth settings application.</p>
-<p>The <tt>m_serviceRecordHandle</tt> member will store the handle for the service's associated SDP service record, as you will see below in the <a href="qbluetoothabstractservice.html#start">start</a>() and <a href="qbluetoothabstractservice.html#stop">stop</a>() implementations.</p>
-<p>Then, to implement the <a href="qbluetoothabstractservice.html#start">start</a>() method:</p>
-<pre>    void MyBluetoothService::start()
-    {
-        <span class="comment">// Register an SDP service for this Bluetooth service</span>
-        quint32 handle = registerRecord(&quot;SerialPortService.xml&quot;);
-        if (handle == 0) {
-            <span class="comment">// registration failed</span>
-            emit started(true, tr(&quot;Error registering the SDP service&quot;));
-            return;
-        }
-
-        <span class="comment">// Call some method to start the service</span>
-        if (!startMyService()) {
-            <span class="comment">// The service failed to start, so unregister the SDP service</span>
-            <span class="comment">// that was previously registered</span>
-            unregisterRecord(handle);
-
-            <span class="comment">// notify the system that the service was not started</span>
-            emit started(true, tr(&quot;Unable to start MySerialPortService&quot;));
-            return;
-        }
-
-        <span class="comment">// The service was successfully started</span>
-        m_serviceRecordHandle = handle;
-        emit started(false, QString());
-    }</pre>
-<p>The <a href="qbluetoothabstractservice.html#start">start</a>() method is called by Qtopia when the service should be started. Note how the example emits the <a href="qbluetoothabstractservice.html#started">started</a>() signal when the service fails to start, and also when it does start successfully.</p>
-<p>The class also needs to have a <a href="qbluetoothabstractservice.html#stop">stop</a>() method:</p>
-<pre>    void MyBluetoothService::stop()
-    {
-        <span class="comment">// call some method to shut down the service</span>
-        stopMyService();
-
-        if (!unregisterRecord(m_serviceRecordHandle))
-            qWarning() &lt;&lt; &quot;Error unregistering the SDP service&quot;;
-
-        <span class="comment">// notify the system that the service has stopped</span>
-        emit stopped();
-    }</pre>
-<p>Finally, the class will need to implement the <a href="qbluetoothabstractservice.html#setSecurityOptions">setSecurityOptions</a>() method to provide the ability to modify the security settings for the service.</p>
+<p>To create a Qtopia Bluetooth service, subclass QBluetoothAbstractService and implement the <a href="qbluetoothabstractservice.html#start">start</a>(), <a href="qbluetoothabstractservice.html#stop">stop</a>() and <a href="qbluetoothabstractservice.html#setSecurityOptions">setSecurityOptions</a>() methods. Your service will automatically be registered and accessible as a Bluetooth service within Qtopia. This means the service will be accessible to external parties through <a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a>. It will also be shown in the list of local services in Qtopia's Bluetooth settings application, allowing end users to modify the service's settings.</p>
+<p>Naturally, it is possible to implement Bluetooth services outside of Qtopia by using the BlueZ libraries and standard Linux tools. However, such services will not be accessible through Qtopia.</p>
+<p>See also <a href="bluetooth-bluetoothservice.html">Tutorial: Creating a Bluetooth service</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothAbstractService"></a>QBluetoothAbstractService::QBluetoothAbstractService ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>displayName</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a Bluetooth service. The <i>name</i> is a unique name that identifies the service, and <i>displayName</i> is a user-friendly, internationalized name for this service that can be displayed to the end user. The <i>parent</i> is the <a href="qobject.html">QObject</a> parent for this service.</p>
+<h3 class="fn"><a name="QBluetoothAbstractService"></a>QBluetoothAbstractService::QBluetoothAbstractService ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>displayName</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a Bluetooth service. The <i>name</i> is a unique name that identifies the service, and <i>displayName</i> is a user-friendly, internationalized name for this service that can be displayed to the end user. The <i>parent</i> is the <a href="./qobject.html">QObject</a> parent for this service.</p>
 <h3 class="fn"><a name="dtor.QBluetoothAbstractService"></a>QBluetoothAbstractService::~QBluetoothAbstractService ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys a Bluetooth service.</p>
-<h3 class="fn"><a name="displayName"></a><a href="qstring.html">QString</a> QBluetoothAbstractService::displayName () const</h3>
+<h3 class="fn"><a name="displayName"></a><a href="./qstring.html">QString</a> QBluetoothAbstractService::displayName () const</h3>
 <p>Returns the user-friendly, internationalized name for this service that can be displayed to the end user.</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QBluetoothAbstractService::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QBluetoothAbstractService::name () const</h3>
 <p>Returns the unique name that identifies this service.</p>
-<h3 class="fn"><a name="registerRecord"></a>quint32 QBluetoothAbstractService::registerRecord ( const <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="registerRecord"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QBluetoothAbstractService::registerRecord ( const <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Registers the SDP service record <i>record</i> for this Bluetooth service and returns the service record handle of the newly registered service. Returns zero if the registration failed.</p>
 <p>See also <a href="qbluetoothabstractservice.html#unregisterRecord">unregisterRecord</a>().</p>
-<h3 class="fn"><a name="registerRecord-2"></a>quint32 QBluetoothAbstractService::registerRecord ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="registerRecord-2"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QBluetoothAbstractService::registerRecord ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Uses the XML data from the file <i>filename</i> to register the SDP service record for this Bluetooth service and returns the service record handle of the newly registered service. Returns zero if the registration failed.</p>
-<p>An example of the required XML data structure can be seen by running the <tt>sdptool get --xml</tt> command in a terminal shell. For example, this will add an Object Push service, look up the service to find its service record handle, and then use <tt>sdptool get --xml</tt> to show the XML structure:</p>
-<pre>    $&gt; sdptool add OPUSH
-    $&gt; sdptool browse local
-    Browsing FF:FF:FF:00:00:00 ...
-    Service Name: OBEX Object Push
-    Service RecHandle: 0x10000
-    Service Class ID List:
-    &quot;OBEX Object Push&quot; (0x1105)
-    Protocol Descriptor List:
-    &quot;L2CAP&quot; (0x0100)
-    &quot;RFCOMM&quot; (0x0003)
-        Channel: 9
-    &quot;OBEX&quot; (0x0008)
-    Profile Descriptor List:
-    &quot;OBEX Object Push&quot; (0x1105)
-        Version: 0x0100
-
-    $&gt; sdptool get --xml 0x10000</pre>
-<p><b>Note:</b> If you use <tt>sdptool get --xml</tt> to generate the SDP record XML file, you <b>must</b> remove the service record handle XML element from the generated output before passing it to this function. This element is usually near the start of the XML output and will look similar to this:</p>
-<pre>    &lt;attribute id=&quot;0x0000&quot;&gt;
-            &lt;uint32 value=&quot;...&quot; /&gt;
-    &lt;/attribute&gt;</pre>
-<p>If this element is not removed, the registration will fail, as the service record handle will be automatically generated by the SDP server and should not be provided by the programmer.</p>
+<p>See <a href="bluetooth-bluetoothservice.html#using-a-xml-formatted-sdp-record">Using a XML-formatted SDP record</a> for details on how to generate a XML-formatted SDP reord.</p>
 <p><b>Warning:</b> The given file must be UTF-8 encoded to be parsed correctly.</p>
 <p>See also <a href="qbluetoothabstractservice.html#unregisterRecord">unregisterRecord</a>().</p>
 <h3 class="fn"><a name="setSecurityOptions"></a>void QBluetoothAbstractService::setSecurityOptions ( <a href="qbluetooth.html#SecurityOption-enum">QBluetooth::SecurityOptions</a> <i>options</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -179,9 +95,9 @@
 <p>Subclasses must override this to start the service appropriately. The subclass must emit <a href="qbluetoothabstractservice.html#started">started</a>() when the service has started, or failed while trying to start, to announce the result of the start() invocation.</p>
 <p><b>Warning:</b> This function must be implementated in such a way that any intermediate objects (which have been created up to the point where the error occurred) are cleaned up before the error signal is emitted.</p>
 <p>See also <a href="qbluetoothabstractservice.html#started">started</a>() and <a href="qbluetoothabstractservice.html#stop">stop</a>().</p>
-<h3 class="fn"><a name="started"></a>void QBluetoothAbstractService::started ( bool <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="started"></a>void QBluetoothAbstractService::started ( bool <i>error</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>When implementing the <a href="qbluetoothabstractservice.html#start">start</a>() function, this signal must be emitted by the subclass when the service has started or failed while attempting to start, to announce the result of the <a href="qbluetoothabstractservice.html#start">start</a>() invocation.</p>
-<p>If the service failed to start, <i>error</i> should be true and <i>description</i> should be a human-readable description of the error. Otherwise, <i>error</i> should be false and <i>description</i> should be a null <a href="qstring.html">QString</a>.</p>
+<p>If the service failed to start, <i>error</i> should be true and <i>description</i> should be a human-readable description of the error. Otherwise, <i>error</i> should be false and <i>description</i> should be a null <a href="./qstring.html">QString</a>.</p>
 <p>See also <a href="qbluetoothabstractservice.html#start">start</a>() and <a href="qbluetoothabstractservice.html#stopped">stopped</a>().</p>
 <h3 class="fn"><a name="stop"></a>void QBluetoothAbstractService::stop ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Stops this service.</p>
@@ -191,14 +107,14 @@
 <h3 class="fn"><a name="stopped"></a>void QBluetoothAbstractService::stopped ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal must be emitted by the subclass inside the implementation of the <a href="qbluetoothabstractservice.html#stop">stop</a>() function, to announce that the service has stopped.</p>
 <p>See also <a href="qbluetoothabstractservice.html#started">started</a>() and <a href="qbluetoothabstractservice.html#stop">stop</a>().</p>
-<h3 class="fn"><a name="unregisterRecord"></a>bool QBluetoothAbstractService::unregisterRecord ( quint32 <i>handle</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="unregisterRecord"></a>bool QBluetoothAbstractService::unregisterRecord ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>handle</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Unregisters the SDP service record with the service record handle <i>handle</i>.</p>
 <p>Returns whether the record was successfully unregistered.</p>
 <p>See also <a href="qbluetoothabstractservice.html#registerRecord">registerRecord</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

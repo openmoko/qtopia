@@ -32,7 +32,7 @@
 <td align="right"><b>Q&nbsp;</b></td>
 <td><a href="qtopiaappservice.html">QtopiaApplicationService</a></td>
 <td align="right"></td>
-<td><a href="telephonyservice.html">Telephony</a></td>
+<td><a href="tasksservice.html">Tasks</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -44,7 +44,7 @@
 <td align="right"></td>
 <td><a href="qtopiapowermanagerservice.html">QtopiaPowerManager</a></td>
 <td align="right"></td>
-<td><a href="timeservice.html">Time</a></td>
+<td><a href="telephonyservice.html">Telephony</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -56,7 +56,7 @@
 <td align="right"><b>R&nbsp;</b></td>
 <td><a href="ringtoneservice.html">Ringtone</a></td>
 <td align="right"></td>
-<td><a href="timemonitorservice.html">TimeMonitor</a></td>
+<td><a href="timeservice.html">Time</a></td>
 </tr>
 <tr>
 <td align="right"><b>B&nbsp;</b></td>
@@ -68,7 +68,7 @@
 <td align="right"><b>S&nbsp;</b></td>
 <td><a href="settingsservice.html">Settings</a></td>
 <td align="right"></td>
-<td><a href="timeupdateservice.html">TimeUpdate</a></td>
+<td><a href="timemonitorservice.html">TimeMonitor</a></td>
 </tr>
 <tr>
 <td align="right"><b>C&nbsp;</b></td>
@@ -79,8 +79,8 @@
 <td><a href="bscidrmagentservice.html">OmaDrmAgent</a></td>
 <td align="right"></td>
 <td><a href="settingsmanagerservice.html">SettingsManager</a></td>
-<td align="right"><b>V&nbsp;</b></td>
-<td><a href="virtualkeyboardservice.html">VirtualKeyboard</a></td>
+<td align="right"></td>
+<td><a href="timeupdateservice.html">TimeUpdate</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -91,8 +91,8 @@
 <td><a href="packagemanagerservice.html">PackageManager</a></td>
 <td align="right"></td>
 <td><a href="smsservice.html">SMS</a></td>
-<td align="right"></td>
-<td><a href="voicerecordingservice.html">VoiceRecording</a></td>
+<td align="right"><b>V&nbsp;</b></td>
+<td><a href="virtualkeyboardservice.html">VirtualKeyboard</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -103,8 +103,8 @@
 <td><a href="photoeditservice.html">PhotoEdit</a></td>
 <td align="right"></td>
 <td><a href="suspendservice.html">Suspend</a></td>
-<td align="right"><b>W&nbsp;</b></td>
-<td><a href="webaccessservice.html">WebAccess</a></td>
+<td align="right"></td>
+<td><a href="voicerecordingservice.html">VoiceRecording</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -113,10 +113,10 @@
 <td><a href="helpservice.html">Help</a></td>
 <td align="right"></td>
 <td><a href="printservice.html">PrintServer</a></td>
-<td align="right"><b>T&nbsp;</b></td>
-<td><a href="taskmanagerservice.html">TaskManager</a></td>
-<td>
-</td>
+<td align="right"></td>
+<td><a href="sysmessagesservice.html">SystemMessages</a></td>
+<td align="right"><b>W&nbsp;</b></td>
+<td><a href="webaccessservice.html">WebAccess</a></td>
 </tr>
 <tr>
 <td align="right"></td>
@@ -125,8 +125,8 @@
 <td><a href="infraredbeamingservice.html">InfraredBeaming</a></td>
 <td align="right"></td>
 <td><a href="profilesservice.html">Profiles</a></td>
-<td align="right"></td>
-<td><a href="tasksservice.html">Tasks</a></td>
+<td align="right"><b>T&nbsp;</b></td>
+<td><a href="taskmanagerservice.html">TaskManager</a></td>
 <td>
 </td>
 </tr>
@@ -143,7 +143,7 @@
 <pre>    QtopiaServiceRequest srv(&quot;WebAccess&quot;, &quot;openURL(QString)&quot;);
     srv &lt;&lt; QString(&quot;www.trolltech.com&quot;);
     srv.send();</pre>
-<p><a href="qtopiaservicerequest.html#send">QtopiaServiceRequest::send</a>() returns a boolean value indicating whether the service is available. The next image demonstrates the service interaction if it is assumed that the mail application where to request the WebAccess service:</p>
+<p><a href="qtopiaservicerequest.html#send">QtopiaServiceRequest::send</a>() returns a boolean value indicating whether the service is available. The next image demonstrates the service interaction, assuming that the qtmail application is requesting the WebAccess service:</p>
 <p align="center"><img src="images/qtopiaservice-flowchart.png" alt="&quot;Qtopia Service execution&quot;" /></p><a name="responding-to-service-requests"></a>
 <h2>Responding to Service Requests</h2>
 <p>To respond to a service request, an application should use the <a href="qtopiaabstractservice.html">QtopiaAbstractService</a> class. The following example responds to the <tt>openURL(QString)</tt> request on the <tt>WebAccess</tt> service. It would typically be implemented by a Web browser application:</p>
@@ -214,7 +214,7 @@
     File=QtopiaServices
     Context=Calendar
     [Service]
-    Actions = raiseToday();newEvent()
+    Actions = &quot;raiseToday();newEvent()&quot;
     Icon = datebook_icon
     Name[]=Calendar
     [newEvent()]
@@ -231,8 +231,8 @@
 <p>Some services may be parameterised on the type of data to be processed. Different applications may handle different data types. The <a href="datasharing.html">Qtopia Data Sharing (QDS)</a> system should be used for these types of services.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

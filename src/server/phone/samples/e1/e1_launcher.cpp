@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@
 #include "phone/ringcontrol.h"
 #include "phone/dialer.h"
 #include <qtopiaipcenvelope.h>
-#include "phone/dialercontrol.h"
+#include "dialercontrol.h"
 #include "e1_popup.h"
 #include "e1_telephony.h"
 #include <QListWidget>

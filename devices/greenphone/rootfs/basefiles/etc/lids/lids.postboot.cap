@@ -1,7 +1,7 @@
 ### 0: In a system with the _POSIX_CHOWN_RESTRICTED option defined, this overrides the restriction
 ### 0: of changing file ownership and group ownership. 
 #
-#-0:CAP_CHOWN
++0:CAP_CHOWN
 
 ### 1: Override all DAC access, including ACL execute access if _POSIX_ACL is defined. Excluding
 ### 1: DAC access covered by CAP_LINUX_IMMUTABLE. 
@@ -12,13 +12,13 @@
 ### 2: ACL restrictions if _POSIX_ACL is defined. Excluding DAC access covered by
 ### 2: CAP_LINUX_IMMUTABLE. 
 #
-#-2:CAP_DAC_READ_SEARCH
++2:CAP_DAC_READ_SEARCH
 
 ### 3: Overrides all restrictions about allowed operations on files, where file owner ID must be equal
 ### 3: to the user ID, except where CAP_FSETID is applicable. It doesn't override MAC and DAC
 ### 3: restrictions. 
 #
-#-3:CAP_FOWNER
++3:CAP_FOWNER
 
 ### 4: Overrides the following restrictions that the effective user ID shall match the file owner ID
 ### 4: when setting the S_ISUID and S_ISGID bits on that file; that the effective group ID (or one of
@@ -26,12 +26,12 @@
 ### 4: that file; that the S_ISUID and S_ISGID bits are cleared on successful return from chown(2)
 ### 4: (not implemented). 
 #
-#-4:CAP_FSETID
++4:CAP_FSETID
 
 ### 5: Overrides the restriction that the real or effective user ID of a process sending a signal must
 ### 5: match the real or effective user ID of the process receiving the signal. 
 #
-#-5:CAP_KILL
++5:CAP_KILL
 
 ### 6: - Allows setgid(2) manipulation 
 ### 6: - Allows setgroups(2) 
@@ -47,19 +47,19 @@
 ### 8: Transfer any capability in your permitted set to any pid, remove any capability in your
 ### 8: permitted set from any pid. 
 #
-#-8:CAP_SETPCAP
++8:CAP_SETPCAP
 
 ### 9: Allow modification of S_IMMUTABLE and S_APPEND file attributes. 
 # 
-#-9:CAP_LINUX_IMMUTABLE
++9:CAP_LINUX_IMMUTABLE
 
 ### 10: Allows binding to TCP/UDP sockets below 1024. 
 # 
-#-10:CAP_NET_BIND_SERVICE
++10:CAP_NET_BIND_SERVICE
 
 ### 11: Allow broadcasting, listen to multicast.
 #  
-#-11:CAP_NET_BROADCAST
++11:CAP_NET_BROADCAST
 
 ### 12: - Allow interface configuration 
 ### 12: - Allow administration of IP firewall, masquerading and accounting 
@@ -73,35 +73,35 @@
 ### 12: - Allow multicasting 
 ### 12: - Allow read/write of device-specific registers 
 #
-#-12:CAP_NET_ADMIN
++12:CAP_NET_ADMIN
 
 ### 13: - Allow use of RAW sockets 
 ### 13: - Allow use of PACKET sockets 
 #
-#-13:CAP_NET_RAW
++13:CAP_NET_RAW
 
 ### 14: - Allow locking of shared memory segments 
 ### 14: - Allow mlock and mlockall (which doesn't really have anything to do with IPC) 
 #
-#-14:CAP_IPC_LOCK
++14:CAP_IPC_LOCK
 
 ### 15: Override IPC ownership checks. 
 #
-#-15:CAP_IPC_OWNER
++15:CAP_IPC_OWNER
 
 ### 16: Insert and remove kernel modules. 
 #
-#-16:CAP_SYS_MODULE
++16:CAP_SYS_MODULE
 
 ### 17: - Allow ioperm/iopl and /dev/port access 
 ### 17: - Allow /dev/mem and /dev/kmem acess 
 ### 17: - Allow raw block devices (/dev/[sh]d??) acess 
 #
-#-17:CAP_SYS_RAWIO
++17:CAP_SYS_RAWIO
 
 ### 18: Allow use of chroot() 
 #
-#-18:CAP_SYS_CHROOT
++18:CAP_SYS_CHROOT
 
 ### 19: Allow ptrace() of any process 
 #
@@ -109,7 +109,7 @@
 
 ### 20: Allow configuration of process accounting 
 #
-#-20:CAP_SYS_PACCT
++20:CAP_SYS_PACCT
 
 ### 21: 
 
@@ -148,17 +148,17 @@
 ### 21: - Allow enabling/disabling tagged queuing on SCSI controllers and sending arbitrary SCSI commands 
 ### 21: - Allow setting encryption key on loopback filesystem 
 # 
-#-21:CAP_SYS_ADMIN
++21:CAP_SYS_ADMIN
 
 ### 22: Allow use of reboot()
 #
-#-22:CAP_SYS_BOOT
++22:CAP_SYS_BOOT
 
 ### 23: - Allow raising priority and setting priority on other (different UID) processes 
 ### 23: - Allow use of FIFO and round-robin (realtime) scheduling on own processes and setting
 ### 23:   the scheduling algorithm used by another process. 
 #
-#-23:CAP_SYS_NICE
++23:CAP_SYS_NICE
 
 ### 24: - Override resource limits. Set resource limits. 
 ### 24: - Override quota limits. 
@@ -170,14 +170,14 @@
 ### 24: - Override max number of consoles on console allocation 
 ### 24: - Override max number of keymaps 
 #
-#-24:CAP_SYS_RESOURCE
++24:CAP_SYS_RESOURCE
 
 ### 25: - Allow manipulation of system clock 
 ### 25: - Allow irix_stime on mips 
 ### 25: - Allow setting the real-time clock 
 #
 # This is required for DRM
--25:CAP_SYS_TIME
++25:CAP_SYS_TIME
 
 ### 26: - Allow configuration of tty devices 
 ### 26: - Allow vhangup() of tty 
@@ -186,22 +186,22 @@
 
 ### 27: Allow the privileged aspects of mknod() 
 ###
-#-27:CAP_MKNOD
++27:CAP_MKNOD
 
 ### 28:Allow taking of leases on files */
 ###
-#-28:CAP_LEASE
++28:CAP_LEASE
 
 
 ### 29: Restricts viewable processes by a user. 
 #
-#-29:CAP_HIDDEN
++29:CAP_HIDDEN
 
 ### 30: Allow killing protected processes.
 #
-#-30:CAP_KILL_PROTECTED
++30:CAP_KILL_PROTECTED
 
 ### 31: Allow reading unprotected input without entering untrusted domain.
 #
--31:CAP_PROTECTED
++31:CAP_PROTECTED
 

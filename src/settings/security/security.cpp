@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -94,6 +94,7 @@ Security::Security( QWidget* parent, Qt::WFlags fl )
 #endif
     setupUi( this );
     valid=false;
+    reentryCheck=false;
     QSettings cfg("Trolltech","Security");
     cfg.beginGroup("Passcode");
     passcode = cfg.value("passcode").toString();
@@ -179,6 +180,8 @@ void Security::updateGUI()
 void Security::markProtected(bool b)
 {
 #ifdef QTOPIA_CELL
+    if (reentryCheck)
+        return;
     passcode_poweron->setEnabled(false);
     QString p;
     if (pinSelection->currentIndex() == 0) {
@@ -189,8 +192,10 @@ void Security::markProtected(bool b)
     if (!p.isNull()) {
         phonesec->markProtected(pinSelection->currentIndex(), b, p);
     } else {
+        reentryCheck = true;
         passcode_poweron->setEnabled( true );
         passcode_poweron->setChecked( !b );
+        reentryCheck = false;
     }
 
 #else

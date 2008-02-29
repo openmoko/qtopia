@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -151,12 +151,12 @@ void PluginManager::setupPlugins( bool safeMode )
         if ( safeMode || d->disabledPluginFiles.contains(name) )
             continue;
         loadedPluginFiles << name;
+        LOG() << "Loading external plugin file" << name;
         QObject *instance = d->pluginManager->instance(name);
         if ( !instance ) {
             WARNING() << name << "is not a Qt plugin!";
             continue;
         }
-        LOG() << "External plugin file" << name;
         instance->setObjectName( name.toLatin1().constData() );
         instances.append( instance );
     }
@@ -165,6 +165,7 @@ void PluginManager::setupPlugins( bool safeMode )
     foreach ( QObject *instance, instances ) {
         if ( QDPluginFactory *pf = qobject_cast<QDPluginFactory*>(instance) ) {
             foreach ( const QString &key, pf->keys() ) {
+                LOG() << "Constructing" << key;
                 QDPlugin *plugin = pf->create( key );
                 if ( plugin )
                     setupPlugin( plugin, safeMode );
@@ -202,13 +203,16 @@ void PluginManager::setupPlugins( bool safeMode )
 
 void PluginManager::setupPlugin( QDPlugin *plugin, bool safeMode )
 {
+    TRACE(PM) << "PluginManager::setupPlugin" << "plugin" << plugin << "safeMode" << safeMode;
     d->detectedPluginIds[plugin->id()] = plugin->displayName();
     if ( ( safeMode && plugin->id() != "com.trolltech.plugin.app.infopage" ) ||
          d->disabledPluginIds.contains(plugin->id()) ) {
+        LOG() << "Plugin" << plugin->id() << "disabled.";
         delete plugin;
         return;
     }
 
+    LOG() << "Setting up plugin" << plugin->id();
     QDPluginData *dta = 0;
     d->allPlugins.append( plugin );
     if ( QDAppPlugin *p = qobject_cast<QDAppPlugin*>(plugin) ) {
@@ -230,6 +234,9 @@ void PluginManager::setupPlugin( QDPlugin *plugin, bool safeMode )
     } else if ( QDSyncPlugin *p = qobject_cast<QDSyncPlugin*>(plugin) ) {
         // Sync plugins (eg. Outlook, Qtopia)
         d->syncPlugins.append(p);
+        dta = new QDPluginData;
+    } else {
+        // Any other plugins
         dta = new QDPluginData;
     }
     d->pluginData[plugin] = dta;

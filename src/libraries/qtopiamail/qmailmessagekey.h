@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,8 +25,8 @@
 #include <QList>
 #include <QVariant>
 #include <QSharedData>
+#include <QFlags>
 #include <qtopiaglobal.h>
-#include "qmailstore.h"
 #include "qmailmessage.h"
 
 class QMailMessageKeyPrivate;
@@ -47,27 +47,27 @@ public:
 
 	enum Property
     {
-        Id,
-        Type,
-        ParentFolderId,
-        Sender,
-        Recipients,
-        Subject,
-        TimeStamp,
-        Flags,
-        FromAccount,
-        FromMailbox,
-        ServerUid,      
-        Size
+        Id = 0x0001,
+        Type = 0x0002,
+        ParentFolderId = 0x0004,
+        Sender = 0x0008,
+        Recipients = 0x0010,
+        Subject = 0x0020,
+        TimeStamp = 0x0040, 
+        Status = 0x0080,
+        FromAccount = 0x0100,
+        FromMailbox = 0x0200,
+        ServerUid = 0x0400,      
+        Size = 0x0800,
     };
+    Q_DECLARE_FLAGS(Properties,Property)
 
 public:
     QMailMessageKey();
     QMailMessageKey(const Property& p, const QVariant& value, const Operand& c = Equal);
+    explicit QMailMessageKey(const QMailIdList& ids);
     QMailMessageKey(const QMailMessageKey& other);
     virtual ~QMailMessageKey();
-
-    bool isEmpty() const;
 
     QMailMessageKey operator~() const;
     QMailMessageKey operator&(const QMailMessageKey& other) const;
@@ -80,9 +80,7 @@ public:
 
     QMailMessageKey& operator=(const QMailMessageKey& other);
 
-private:
-    void init();
-    void init(const Property& p, const Operand& op, const QVariant& value);
+    bool isEmpty() const;
 
 private:
 	friend class QMailStore;
@@ -91,5 +89,7 @@ private:
 private:
     QSharedDataPointer<QMailMessageKeyPrivate> d;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QMailMessageKey::Properties)
 
 #endif

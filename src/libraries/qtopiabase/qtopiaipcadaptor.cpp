@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -254,7 +254,7 @@ bool QtopiaIpcAdaptor::publish( const QByteArray& member )
 {
     if ( member.size() >= 1 && member[0] == '1' ) {
         // Exporting a slot.
-        return connectRemoteToLocal( "2" + member.mid(1), this, member );
+        return connectRemoteToLocal( "3" + member.mid(1), this, member );
     } else {
         // Exporting a signal.
         return connectLocalToRemote( this, member, member );
@@ -295,12 +295,11 @@ void QtopiaIpcAdaptor::publishAll( QtopiaIpcAdaptor::PublishType type )
                  method.access() == QMetaMethod::Public &&
                  ( type == Slots || type == SignalsAndSlots ) ) {
                 QByteArray name = method.signature();
-                connectRemoteToLocal( "2" + name, this, "1" + name );
+                connectRemoteToLocal( "3" + name, this, "1" + name );
             } else if ( method.methodType() == QMetaMethod::Signal &&
                         ( type == Signals || type == SignalsAndSlots ) ) {
                 QByteArray name = method.signature();
-                name = "2" + name;
-                connectLocalToRemote( this, name, name );
+                connectLocalToRemote( this, "2" + name, "3" + name );
             }
         }
         d->publishedTo = meta;
@@ -479,6 +478,10 @@ bool QtopiaIpcAdaptor::connectLocalToRemote
     ( QObject *sender, const QByteArray& signal, const QByteArray& member )
 {
     QSignalIntercepter *intercepter;
+    if (!member.startsWith('3')) {
+        // Actually a local connection to a real signal on the adaptor.
+        return QObject::connect( sender, signal, this, member );
+    }
     QString name = memberToMessage( member );
     intercepter = new QtopiaIpcSignalIntercepter( sender, signal, this, name );
     if ( ! intercepter->isValid() ) {
@@ -493,6 +496,11 @@ bool QtopiaIpcAdaptor::connectLocalToRemote
 bool QtopiaIpcAdaptor::connectRemoteToLocal
     ( const QByteArray& signal, QObject *receiver, const QByteArray& member )
 {
+    if (!signal.startsWith('3')) {
+        // Actually a local connection from a real signal on the adaptor.
+        return QObject::connect( this, signal, receiver, member );
+    }
+
     // Make sure that we are actively monitoring the channel for messages.
     if ( ! d->connected ) {
         QString chan = receiveChannel( d->channelName );

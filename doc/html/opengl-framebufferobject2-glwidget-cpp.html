@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2005-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -88,8 +86,8 @@
  GLWidget::GLWidget(QWidget *parent)
    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
  {
-     <span class="comment">// create the framebuffer object - make sure to have a current</span>
-     <span class="comment">// context before creating it</span>
+     <span class="comment">//</span> create the framebuffer object - make sure to have a current
+     <span class="comment">//</span> context before creating it
      makeCurrent();
      fbo = new QGLFramebufferObject(512, 512);
      timerId = startTimer(20);
@@ -125,7 +123,7 @@
      {
          glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-         <span class="comment">// draw cube background</span>
+         <span class="comment">//</span> draw cube background
          glPushMatrix();
          glLoadIdentity();
          glTranslatef(0.5f, 0.5f, -2.0f);
@@ -138,14 +136,14 @@
          glEnable(GL_TEXTURE_2D);
          glPopMatrix();
 
-         <span class="comment">// draw cube</span>
+         <span class="comment">//</span> draw cube
          glTranslatef(0.5f, 0.5f, 0.5f);
          glRotatef(3.0f, 1.0f, 1.0f, 1.0f);
          glTranslatef(-0.5f, -0.5f, -0.5f);
          glColor4f(0.9f, 0.9f, 0.9f, 1.0f);
          glDrawArrays(GL_QUADS, 0, 24);
 
-         glPushMatrix(); <span class="comment">// this state is popped back in the paintGL() function</span>
+         glPushMatrix(); <span class="comment">//</span> this state is popped back in the paintGL() function
      }
      glEndList();
 
@@ -160,7 +158,7 @@
 
      cubeTexture = bindTexture(QImage(&quot;:res/cubelogo.png&quot;));
 
-     glPushMatrix(); <span class="comment">// push to avoid stack underflow in the first paintGL() call</span>
+     glPushMatrix(); <span class="comment">//</span> push to avoid stack underflow in the first paintGL() call
  }
 
  void GLWidget::resizeGL(int w, int h)
@@ -176,10 +174,10 @@
 
  void GLWidget::paintGL()
  {
-     glPopMatrix(); <span class="comment">// pop the matrix pushed in the pbuffer list</span>
+     glPopMatrix(); <span class="comment">//</span> pop the matrix pushed in the pbuffer list
 
-     <span class="comment">// push the projection matrix and the entire GL state before</span>
-     <span class="comment">// doing any rendering into our framebuffer object</span>
+     <span class="comment">//</span> push the projection matrix and the entire GL state before
+     <span class="comment">//</span> doing any rendering into our framebuffer object
      glPushAttrib(GL_ALL_ATTRIB_BITS);
      glMatrixMode(GL_PROJECTION);
      glPushMatrix();
@@ -191,14 +189,14 @@
      glTranslatef(-0.5f, -0.5f, 0.0f);
      glMatrixMode(GL_MODELVIEW);
 
-     <span class="comment">// render to the framebuffer object</span>
+     <span class="comment">//</span> render to the framebuffer object
      fbo-&gt;bind();
      glBindTexture(GL_TEXTURE_2D, cubeTexture);
      glCallList(pbufferList);
      fbo-&gt;release();
 
-     <span class="comment">// pop the projection matrix and GL state back for rendering</span>
-     <span class="comment">// to the actual widget</span>
+     <span class="comment">//</span> pop the projection matrix and GL state back for rendering
+     <span class="comment">//</span> to the actual widget
      glPopAttrib();
      glMatrixMode(GL_PROJECTION);
      glPopMatrix();
@@ -206,7 +204,7 @@
      glBindTexture(GL_TEXTURE_2D, fbo-&gt;texture());
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-     <span class="comment">// draw the background</span>
+     <span class="comment">//</span> draw the background
      glMatrixMode(GL_MODELVIEW);
      glPushMatrix();
      glLoadIdentity();
@@ -230,7 +228,7 @@
      glPopMatrix();
      glMatrixMode(GL_MODELVIEW);
 
-     <span class="comment">// draw the bouncing cubes</span>
+     <span class="comment">//</span> draw the bouncing cubes
      drawCube(0, 0.0f, 1.5f, 2.5f, 1.5f);
      drawCube(1, 1.0f, 2.0f, 2.5f, 2.0f);
      drawCube(2, 2.0f, 3.5f, 2.5f, 2.5f);
@@ -261,8 +259,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

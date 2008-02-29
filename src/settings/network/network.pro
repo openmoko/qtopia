@@ -42,5 +42,9 @@ service.path=/services/NetworkSetup
 INSTALLS+=service
 
 pkg.desc=Network configuration utility
-pkg.multi=plugins/network/dialup plugins/network/lan
-pkg.domain=window,net,netconfig,netadmin,doc_server,doc_write
+pkg.multi=\
+    plugins/network/lan\
+    plugins/network/bluetooth\
+    plugins/network/bluetoothpan\
+    plugins/network/dialing
+pkg.domain=trusted

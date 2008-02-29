@@ -1,15 +1,17 @@
 qtopia_project(qtopia app) # see buildsystem.html for more project keywords
 TARGET=example
 # main.cpp uses the QTOPIA_ADD_APPLICATION/QTOPIA_MAIN macros
-# It can also build without these macros if you disable this and change the define in main.cpp
 CONFIG+=qtopia_main
 # Despite using the QTOPIA_MAIN macro, do not build this app as a
 # quicklaunch plugin unless -force-quicklaunch was passed to configure
 CONFIG+=no_quicklaunch
 # Do not build this app into a singleexec binary
 CONFIG+=no_singleexec
-# Disable i18n support
-CONFIG+=no_tr
+
+# Specify the languages that make lupdate should produce .ts files for
+AVAILABLE_LANGUAGES=en_US
+# Specify the langauges we want to install translations for
+LANGUAGES=$$AVAILABLE_LANGUAGES
 
 # These are the source files that get built to create the application
 FORMS=examplebase.ui
@@ -42,4 +44,4 @@ pkg.desc=Example Application
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=Commercial
-pkg.domain=window
+pkg.domain=trusted

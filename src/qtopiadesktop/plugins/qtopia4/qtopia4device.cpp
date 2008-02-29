@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,6 +33,7 @@ public:
     QString id() { return "com.trolltech.plugin.dev.qtopia4"; }
     QString displayName() { return tr("Qtopia 4.3 Device"); }
 
+    QDConPlugin *connection() { return mConnection; }
     QString model() { return mModel; }
     QString system() { return mSystem; }
     quint32 version() { return mVersion; }
@@ -56,8 +57,7 @@ private slots:
     void message( const QString &message, const QByteArray &data );
 
 private:
-    QDConPlugin *connection;
-
+    QDConPlugin *mConnection;
     QString mModel;
     QString mSystem;
     quint32 mVersion;
@@ -74,20 +74,20 @@ void Qtopia4Device::probe( QDConPlugin *con )
             mSystem = con->conProperty("system");
             mVersionString = con->conProperty("version");
             mVersion = QVariant(con->conProperty("hexversion")).toUInt();
-            connection = con;
-            connect( connection, SIGNAL(receivedMessage(QString,QByteArray)),
+            mConnection = con;
+            connect( mConnection, SIGNAL(receivedMessage(QString,QByteArray)),
                     this, SLOT(message(QString,QByteArray)) );
-            connection->connected( this );
+            mConnection->connected( this );
         }
     }
 }
 
 void Qtopia4Device::disassociate( QDConPlugin *con )
 {
-    Q_ASSERT( connection == con );
-    disconnect( connection, SIGNAL(receivedMessage(QString,QByteArray)),
+    Q_ASSERT( mConnection == con );
+    disconnect( mConnection, SIGNAL(receivedMessage(QString,QByteArray)),
             this, SLOT(message(QString,QByteArray)) );
-    connection = 0;
+    mConnection = 0;
 }
 
 void Qtopia4Device::message( const QString &message, const QByteArray &data )

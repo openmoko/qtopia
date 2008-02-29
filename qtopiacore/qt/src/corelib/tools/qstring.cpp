@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -6545,7 +6543,8 @@ QString QString::fromRawData(const QChar *unicode, int size)
     converting the Latin-1 strings using QString::fromLatin1().
 
     Thanks to the QString(const QLatin1String &) constructor,
-    QLatin1String can be used everywhere a QString is expected. For example:
+    QLatin1String can be used everywhere a QString is expected. For
+    example:
 
     \code
         QLabel *label = new QLabel(QLatin1String("MOD"), this);
@@ -6556,7 +6555,9 @@ QString QString::fromRawData(const QChar *unicode, int size)
 
 /*! \fn QLatin1String::QLatin1String(const char *str)
 
-    Constructs a QLatin1String object that stores \a str.
+    Constructs a QLatin1String object that stores \a str. Note that if
+    \a str is 0, an empty string is created; this case is handled by
+    QString.
 
     The string data is \e not copied. The caller must be able to
     guarantee that \a str will not be deleted or modified as long as

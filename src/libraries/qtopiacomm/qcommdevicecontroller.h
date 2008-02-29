@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -49,6 +49,8 @@ public:
     void bringUpTimed(int secs);
     void bringUpOneItem();
     void bringDown();
+
+    bool sessionsActive() const;
 
     // This grabs the value of the device out of the QValueSpace
     bool isUp() const;

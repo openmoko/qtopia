@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,15 +23,23 @@
 #define DOMAININFO_H
 
 #include <QString>
+#include <QStringList>
 
 class DomainInfo
 {
-private:
-    static const char *domainStrings[];
+    private:
+        DomainInfo();
+        QStringList m_domainList;
+        QStringList m_sensitiveDomains;
+        QString m_defaultDomain;
+        static const char *domainStrings[];
+        static DomainInfo& getInstance();
 
 public:
+    static QString defaultDomain();
+    static bool isDomainValid( const QString & );
+    static bool hasSensitiveDomains( const QString & );
     static QString explain( const QString &dom, const QString &packageName );
-
     static QString getWarningResource( const QString & );
 };
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,6 +42,10 @@ public:
 
     AddAttDialog *addAttDialog();
 
+    using QTextEdit::setPlainText;
+
+    void setPlainText( const QString& text, const QString& signature );
+
     bool isEmpty() const;
 
 signals:
@@ -52,12 +56,14 @@ signals:
 protected slots:
     void selectAttachment();
     void updateLabel();
+    void setCursorPosition();
 
 protected:
     void keyPressEvent( QKeyEvent *e );
 
 private:
     AddAttDialog *m_addAttDialog;
+    int m_index;
 };
 
 class EmailComposerInterface : public QMailComposerInterface
@@ -79,7 +85,8 @@ public slots:
     void setMessage( const QMailMessage &mail );
     void setText( const QString &txt, const QString &type );
     void clear();
-    void attach( const QContent &lnk );
+    void attach( const QContent &lnk, QMailMessage::AttachmentsAction = QMailMessage::LinkToAttachments );
+    void setSignature( const QString &sig );
     void attachmentsChanged();
 
 private:
@@ -87,6 +94,7 @@ private:
     QLabel *m_label;
     QWidget *m_widget;
     QList<QContent> m_temporaries;
+    QString m_signature;
 };
 
 class EmailComposerPlugin : public QMailComposerPlugin

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qaxserver.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/qaxserver.qdoc -->
 <head>
   <title>Qt 4.3: QAxServer Module</title>
   <link rel="prev" href="qaxcontainer.html" />
@@ -279,7 +279,7 @@
  {
      QApplication app(argc, argv);
      if (!QAxFactory::isServer()) {
-         <span class="comment">// create and show main window</span>
+         <span class="comment">//</span> create and show main window
      }
      return app.exec();
  }</pre>
@@ -330,7 +330,7 @@
  if (DllRegisterServer)
      res = DllRegisterServer();
  if (res != S_OK)
-     <span class="comment">// error handling</span></pre>
+     <span class="comment">//</span> error handling</pre>
 <a name="distributing-servers-over-the-internet"></a>
 <h5>Distributing Servers over the Internet</h5>
 <p>If you want to use controls in your server in web-pages you need to make the server available to the browser used to view your page, and you need to specify the location of the server package in your page.</p>
@@ -461,10 +461,10 @@
 
      long queryInterface(const QUuid &amp;iid, void **iface);
 
-     <span class="comment">// IUnknown</span>
+     <span class="comment">//</span> IUnknown
      QAXAGG_IUNKNOWN
 
-     <span class="comment">// ISomeCOMInterface</span>
+     <span class="comment">//</span> ISomeCOMInterface
      ...
  }</pre>
 <p>Reimplement the <a href="qaxaggregated.html#queryInterface">QAxAggregated::queryInterface</a>() function to support the additional COM interfaces.</p>
@@ -507,8 +507,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

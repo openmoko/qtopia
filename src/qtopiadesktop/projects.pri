@@ -9,6 +9,9 @@ PROJECTS*=\
 # Documentation
 qtopia_depot:PROJECTS*=doc
 
+# TCP/IP comms
+PROJECTS*=plugins/lan
+
 # Serial comms
 PROJECTS*=plugins/serial
 

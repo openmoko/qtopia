@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -146,7 +146,13 @@ QString BSciDrmFileEngine::fileName( FileName file ) const
 }
 
 /*!
-    \reimp
+    Requests that a list of all the files matching the \a filters
+    list based on the \a filterNames in the file engine's directory
+    are returned.
+
+    Returns an empty list if the file engine refers to a file
+    rather than a directory, or if the directory is unreadable or does
+    not exist or if nothing matches the specifications.
 */
 QStringList BSciDrmFileEngine::entryList( QDir::Filters filters, const QStringList &filterNames ) const
 {
@@ -166,7 +172,9 @@ QStringList BSciDrmFileEngine::entryList( QDir::Filters filters, const QStringLi
 }
 
 /*!
-    \reimp
+    Returns the set of OR'd flags that are true
+    for the file engine's file, and that are in the \a type's OR'd
+    members.
 */
 QAbstractFileEngine::FileFlags BSciDrmFileEngine::fileFlags( FileFlags type ) const
 {

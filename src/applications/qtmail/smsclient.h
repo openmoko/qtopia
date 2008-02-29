@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -63,7 +63,7 @@ class SmsClient: public Client
 public:
         SmsClient();
         ~SmsClient();
-        void setAccount(MailAccount *_account);
+        void setAccount(QMailAccount *_account);
         void newConnection();
         bool addMail(const QMailMessage& mail);
         void clearList();
@@ -119,7 +119,7 @@ private:
         bool sawNewMessage;
         QStringList activeIds;
         QList<QDateTime> timeStamps;
-        MailAccount *account;
+        QMailAccount *account;
         QSimInfo *simInfo;
         static QRegExp *sSmsAddress, *sValidSmsAddress;
 };

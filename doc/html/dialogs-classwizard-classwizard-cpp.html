@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2007-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2007-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &lt;QtGui&gt;
 
@@ -84,9 +82,9 @@
      QByteArray block;
 
      if (field(&quot;comment&quot;).toBool()) {
-         block += &quot;/*\n&quot;;
+         block += &quot;<span class="comment">/*\n&quot;;
          block += &quot;    &quot; + header.toAscii() + &quot;\n&quot;;
-         block += &quot;*/\n&quot;;
+         block += &quot;*/</span>\n&quot;;
          block += &quot;\n&quot;;
      }
      if (field(&quot;protect&quot;).toBool()) {
@@ -105,7 +103,7 @@
      block += &quot;\n&quot;;
      block += &quot;{\n&quot;;
 
-     /* qmake ignore Q_OBJECT */
+     <span class="comment">/* qmake ignore Q_OBJECT */</span>
 
      if (field(&quot;qobjectMacro&quot;).toBool()) {
          block += &quot;    Q_OBJECT\n&quot;;
@@ -146,7 +144,7 @@
      block.clear();
 
      if (field(&quot;comment&quot;).toBool()) {
-         block += &quot;/*\n&quot;;
+         block += &quot;<span class="comment">/*\n&quot;;
          block += &quot;    &quot; + implementation.toAscii() + &quot;\n&quot;;
          block += &quot;*/</span>\n&quot;;
          block += &quot;\n&quot;;
@@ -167,7 +165,7 @@
      } else if (field(&quot;defaultCtor&quot;).toBool()) {
          block += className + &quot;::&quot; + className + &quot;()\n&quot;;
          block += &quot;{\n&quot;;
-         block += &quot;    <span class="comment">// missing code\n&quot;;</span>
+         block += &quot;    <span class="comment">//</span> missing code\n&quot;;
          block += &quot;}\n&quot;;
 
          if (field(&quot;copyCtor&quot;).toBool()) {
@@ -183,7 +181,7 @@
              block += &quot;{\n&quot;;
              if (!baseClass.isEmpty())
                  block += &quot;    &quot; + baseClass + &quot;::operator=(other);\n&quot;;
-             block += &quot;    <span class="comment">// missing code\n&quot;;</span>
+             block += &quot;    <span class="comment">//</span> missing code\n&quot;;
              block += &quot;    return *this;\n&quot;;
              block += &quot;}\n&quot;;
          }
@@ -413,8 +411,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

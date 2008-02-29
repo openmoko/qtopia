@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -52,7 +52,11 @@ MainWindow::MainWindow( QDAppPlugin *_plugin, QWidget *appWidget, QWidget *paren
     if ( !parent )
         setWindowIcon( plugin->icon() );
 #endif
-    setWindowTitle( tr("%1 - Qtopia Sync Agent", "1=plugin name").arg(plugin->displayName()) );
+    if ( DesktopSettings::debugMode() ) {
+        setWindowTitle( QString("%1 [DEBUG MODE]").arg(tr("%1 - Qtopia Sync Agent", "1=plugin name").arg(plugin->displayName())) );
+    } else {
+        setWindowTitle( tr("%1 - Qtopia Sync Agent", "1=plugin name").arg(plugin->displayName()) );
+    }
 
     QWidget *central = new QWidget;
     setCentralWidget( central );

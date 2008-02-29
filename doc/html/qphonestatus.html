@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPhoneStatus Class Reference</h1>
 <p>The QPhoneStatus class provides basic status information about the phone. <a href="#details">More...</a></p>
-<pre>    #include &lt;QPhoneStatus&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QPhoneStatus&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qphonestatus-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -30,7 +30,7 @@
 <li><div class="fn"/>QVariant <b><a href="qphonestatus.html#value">value</a></b> ( StatusItem <i>item</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -39,17 +39,16 @@
 <li><div class="fn"/>void <b><a href="qphonestatus.html#statusChanged">statusChanged</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -80,22 +79,22 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPhoneStatus"></a>QPhoneStatus::QPhoneStatus ( <a href="qobject.html">QObject</a> * <i>parent</i> )</h3>
+<h3 class="fn"><a name="QPhoneStatus"></a>QPhoneStatus::QPhoneStatus ( <a href="./qobject.html">QObject</a> * <i>parent</i> )</h3>
 <p>Constructs a <a href="qphonestatus.html">QPhoneStatus</a> object with parent <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QPhoneStatus"></a>QPhoneStatus::~QPhoneStatus ()</h3>
 <p>Destroys the <a href="qphonestatus.html">QPhoneStatus</a> object.</p>
-<h3 class="fn"><a name="incomingCall"></a>void QPhoneStatus::incomingCall ( const <a href="qstring.html">QString</a> &amp; <i>number</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="incomingCall"></a>void QPhoneStatus::incomingCall ( const <a href="./qstring.html">QString</a> &amp; <i>number</i>, const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when an incoming call arrives. The <i>number</i> and <i>name</i> parameters indicate the incoming call's known properties. They may be empty if the property is unknown (e.g&#x2e; caller-id information is not available).</p>
 <h3 class="fn"><a name="statusChanged"></a>void QPhoneStatus::statusChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever any of the status information changes.</p>
 <p>See also <a href="qphonestatus.html#value">value</a>().</p>
-<h3 class="fn"><a name="value"></a><a href="qvariant.html">QVariant</a> QPhoneStatus::value ( <a href="qphonestatus.html#StatusItem-enum">StatusItem</a> <i>item</i> )</h3>
+<h3 class="fn"><a name="value"></a><a href="./qvariant.html">QVariant</a> QPhoneStatus::value ( <a href="qphonestatus.html#StatusItem-enum">StatusItem</a> <i>item</i> )</h3>
 <p>Returns the value of status item <i>item</i>. If no status is available for the requested item an invalid value is returned.</p>
 <p>See also <a href="qphonestatus.html#statusChanged">statusChanged</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &quot;qscreenahigl_qws.h&quot;
  #include &quot;qwindowsurface_ahigl_p.h&quot;
@@ -102,14 +100,14 @@
      QScreenCursor::set(image, hotx, hoty);
  }
 
- /*!
+<span class="comment"> /*!
    \class QAhiGLScreenPrivate
    The QAhiGLScreenPrivate class contains state information for class QAhiGLScreen.
 
    An instance of this class points to the owning instance of
    class QAhiGLScreen. This class uses a QTimer to limit the
    update frequency.
-  */
+  */</span>
  class QAhiGLScreenPrivate : public QObject
  {
      Q_OBJECT
@@ -150,10 +148,10 @@
 
  static QMap&lt;QWSWindow*, WindowInfo*&gt; windowMap;
 
- /*!
+<span class="comment"> /*!
    Constructs the animation for the transition effect used
    when the window associated with \a screen is displayed.
-  */
+  */</span>
  ShowAnimation::ShowAnimation(QAhiGLScreenPrivate *screen)
      : QTimeLine(animationLength)
  {
@@ -175,7 +173,7 @@
      connect(&amp;updateTimer, SIGNAL(timeout()), this, SLOT(redrawScreen()));
  }
 
- /*!
+<span class="comment"> /*!
    This slot handles the \a event when the \l {QWSServer}
    {window server} emits a window event for the specified
    \a window.
@@ -192,7 +190,7 @@
    then the \c Show event is handled by creating a small
    \l {ShowAnimation} {animation} for use when the window
    is first shown.
-  */
+  */</span>
  void QAhiGLScreenPrivate::windowEvent(QWSWindow *window,
                                        QWSServer::WindowEvent event)
  {
@@ -213,17 +211,17 @@
      }
  }
 
- /*!
+<span class="comment"> /*!
    This function assumes the updateTimer is still counting down and stops it
    and then calls redrawScreen() in the public screen driver class QAhiGLScreen.
-  */
+  */</span>
  void QAhiGLScreenPrivate::redrawScreen()
  {
      updateTimer.stop();
      screen-&gt;redrawScreen();
  }
 
- /*!
+<span class="comment"> /*!
    \class QAhiGLScreen
 
    \brief The QAhiGLScreen class is the screen driver for the ATI handheld device interface.
@@ -262,13 +260,13 @@
    QWSWindowSurface * createSurface(QWidget * widget) const
    void exposeRegion(QRegion region, int windowIndex)
 
-  */
+  */</span>
 
- /*!
+<span class="comment"> /*!
    Constructs a new, ATI handheld device screen driver.
 
    The displayId identifies the Qtopia Core server to connect to.
-  */
+  */</span>
  QAhiGLScreen::QAhiGLScreen(int displayId) : QGLScreen(displayId)
  {
      d_ptr = new QAhiGLScreenPrivate(this);
@@ -276,20 +274,20 @@
      d_ptr-&gt;eglSurface = EGL_NO_SURFACE;
  }
 
- /*!
+<span class="comment"> /*!
    Destroys this ATI handheld device screen driver.
-  */
+  */</span>
  QAhiGLScreen::~QAhiGLScreen()
  {
      delete d_ptr;
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
-  */
+  */</span>
  bool QAhiGLScreen::connect(const QString &amp;displaySpec)
  {
-     // Hardcoded values for this device
+     <span class="comment">//</span> Hardcoded values for this device
      w = 480;
      h = 640;
      dw = w;
@@ -306,9 +304,9 @@
      return true;
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
-  */
+  */</span>
  bool QAhiGLScreen::initDevice()
  {
      EGLint version, subversion;
@@ -370,9 +368,9 @@
      return true;
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
-  */
+  */</span>
  void QAhiGLScreen::shutdownDevice()
  {
      delete d_ptr-&gt;cursor;
@@ -386,22 +384,22 @@
      eglTerminate(d_ptr-&gt;eglDisplay);
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
 
    In this case, the reimplimentation does nothing. It is
    required because the function is declared as pure virtual
    in the base class QScreen.
-  */
+  */</span>
  void QAhiGLScreen::disconnect()
  {
  }
 
- /*
+<span class="comment"> /*
    This internal function rounds up to the next power of
    two. If v is already a power of two, that same value is
    returned.
-  */
+  */</span>
  inline static uint nextPowerOfTwo(uint v)
  {
      v--;
@@ -414,7 +412,7 @@
      return v;
  }
 
- /*
+<span class="comment"> /*
    This internal function creates a texture from the image img
    and returns its texture identifier.
 
@@ -422,7 +420,7 @@
    to a pixmap constructed from an image by adding extra points
    of contrast to the otherwise plain color image. The texture
    has a, well, texture, that the original image doesn't have.
-  */
+  */</span>
  static GLuint createTexture(const QImage &amp;img)
  {
      if (img.isNull())
@@ -472,9 +470,9 @@
      return texture;
  }
 
- /*
+<span class="comment"> /*
    A helper function used by QAhiGLScreen::drawQuad().
-  */
+  */</span>
  static void drawQuad_helper(GLshort *coords, GLfloat *texCoords)
  {
      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -488,9 +486,9 @@
      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  }
 
- /*
+<span class="comment"> /*
    A helper function used by QAhiGLScreen::drawQuadWavyFlag().
-  */
+  */</span>
  static void drawQuad_helper(GLshort *coords, GLfloat *texCoords,
                              int arraySize, int numArrays)
  {
@@ -507,9 +505,9 @@
      glDisable(GL_TEXTURE_2D);
  }
 
- /*
+<span class="comment"> /*
    A convenience function used by QAhiGLScreen::drawQuad().
-  */
+  */</span>
  static void setRectCoords(GLshort *coords, QRect rect)
  {
      coords[0] = GLshort(rect.left());
@@ -525,10 +523,10 @@
      coords[7] = GLshort(rect.bottom());
  }
 
- /*!
+<span class="comment"> /*!
    A helper function used by QAhiGLScreen::drawWindow() and
    QAhiGLScreen::redrawScreen().
-  */
+  */</span>
  void QAhiGLScreen::drawQuad(const QRect &amp;textureGeometry,
                              const QRect &amp;subGeometry,
                              const QRect &amp;screenGeometry)
@@ -555,9 +553,9 @@
      drawQuad_helper(coords, texcoords);
  }
 
- /*
+<span class="comment"> /*
    My own sine function.
-  */
+  */</span>
  static qreal mySin(QFixed radians)
  {
      const QFixed twoPI = QFixed::fromReal(2*M_PI);
@@ -576,9 +574,9 @@
      return table[tableLookup.truncate()%tableSize]/16776960.0;
  }
 
- /*
+<span class="comment"> /*
    My own cosine function.
-  */
+  */</span>
  static qreal myCos(QFixed radians)
  {
      const int twoPI = qRound(2*M_PI);
@@ -597,14 +595,14 @@
      return table[tableLookup.truncate()%tableSize]/16776960.0;
  }
 
- // number of grid cells in wavy flag tesselation in x- and y-direction
+<span class="comment"> //</span> number of grid cells in wavy flag tesselation in x- and y-direction
  const int subdivisions = 10;
 
- /*
+<span class="comment"> /*
    A helper function used by drawQuadWavyFlag(). It computes
    coordinates for grid cells for a wavy flag tesselation and
    stores them in the array called coords.
-  */
+  */</span>
  static void setFlagCoords(GLshort *coords,
                            QRectF screenGeometry,
                            int frameNum,
@@ -738,9 +736,9 @@
                       drawRect, progress);
  }
 
- /*!
+<span class="comment"> /*!
    The window compositions are constructed here.
-  */
+  */</span>
  void QAhiGLScreen::redrawScreen()
  {
      glBindFramebufferOES(GL_FRAMEBUFFER_EXT, 0);
@@ -756,14 +754,14 @@
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
 
-     // Fill background color
+     <span class="comment">//</span> Fill background color
 
      QColor bgColor = QWSServer::instance()-&gt;backgroundBrush().color();
      glClearColor(bgColor.redF(), bgColor.greenF(),
                   bgColor.blueF(), bgColor.alphaF());
      glClear(GL_COLOR_BUFFER_BIT);
 
-     // Draw all windows
+     <span class="comment">//</span> Draw all windows
 
      glDisable(GL_CULL_FACE);
      glDisable(GL_DEPTH_TEST);
@@ -796,9 +794,9 @@
 
          glBindTexture(GL_TEXTURE_2D, info-&gt;texture);
          drawWindow(win, progress);
-     } // for i
+     } <span class="comment">//</span> for i
 
-     // Draw cursor
+     <span class="comment">//</span> Draw cursor
 
      const QAhiGLCursor *cursor = d_ptr-&gt;cursor;
      if (cursor-&gt;texture) {
@@ -816,10 +814,10 @@
      eglSwapBuffers(d_ptr-&gt;eglDisplay, d_ptr-&gt;eglSurface);
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
 
-  */
+  */</span>
  void QAhiGLScreen::exposeRegion(QRegion r, int windowIndex)
  {
      if ((r &amp; region()).isEmpty())
@@ -831,7 +829,7 @@
          d_ptr-&gt;updateTimer.start(frameSpan);
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
 
    This overloading of createSurface() is called on the client side to
@@ -847,7 +845,7 @@
    access to the OpenGL hardware, because of an implementation
    restyriction in the OpenGL libraries we are using. Thus only clients
    that are in the server process get to create OpenGL window surfaces.
-  */
+  */</span>
  QWSWindowSurface* QAhiGLScreen::createSurface(QWidget *widget) const
  {
      if (QApplication::type() == QApplication::GuiServer) {
@@ -870,7 +868,7 @@
      return QScreen::createSurface(widget);
  }
 
- /*!
+<span class="comment"> /*!
    \reimp
 
    This overloading of createSurface() is called on the server side
@@ -882,7 +880,7 @@
    the window surface it creates.
 
    See QScreen::createSurface().
-  */
+  */</span>
  QWSWindowSurface* QAhiGLScreen::createSurface(const QString &amp;key) const
  {
      if (key == QLatin1String(&quot;ahigl&quot;)) {
@@ -894,7 +892,7 @@
      return QScreen::createSurface(key);
  }
 
- /*!
+<span class="comment"> /*!
    This function would normally reset the frame buffer resolution
    according to \a width, \a height, and the bit \a depth. It would
    then notify other applications that their frame buffer size had
@@ -906,7 +904,7 @@
    because setMode() in QScreen is a pure virtual function.
 
    See QScreen::setMode()
-  */
+  */</span>
  void QAhiGLScreen::setMode(int width, int height, int depth)
  {
      Q_UNUSED(width);
@@ -914,20 +912,20 @@
      Q_UNUSED(depth);
  }
 
- /*!
+<span class="comment"> /*!
    This function would normally be reimplemented to prevent the
    screen driver from updating the screen if \a on is true. It is a
    no-op in this example, which means the screen driver can always
    update the screen.
 
    See QScreen::blank().
-  */
+  */</span>
  void QAhiGLScreen::blank(bool on)
  {
      Q_UNUSED(on);
  }
 
- /*!
+<span class="comment"> /*!
    This function always returns true, since the purpose of
    this screen driver class is to implement an OpenGL ES
    screen driver. In some other class designed to handle both
@@ -943,8 +941,8 @@
  #include &quot;qscreenahigl_qws.moc&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

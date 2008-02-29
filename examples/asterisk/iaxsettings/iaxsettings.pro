@@ -23,4 +23,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Asterisk IAX settings dialog for Qtopia.
-pkg.domain=window,phonecomm
+pkg.domain=trusted

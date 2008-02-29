@@ -12,16 +12,15 @@
 # into the image directory.
 #
 # For further details how this script is used 
-# see $QPEDIR/src/plugins/network/dialing/dialup.cpp.
+# see $QPEDIR/src/plugins/network/dialing/dialup.cpp and the Network Services documentation
+# Various sample implementations can be found in $QTOPIA_DEPOT_PATH/src/plugins/network/dialing
 
 
 ########## constants
 DEBUG=1
 LOG=0
 LOG_FILE="/tmp/qtopia-network.log"
-TMP_FILE="/tmp/ppp-intern-network.temp"
 PPPD="/usr/sbin/pppd";
-RESOLVCONF="/mnt/user/etc/resolv.conf"
 ####################
 
 
@@ -46,7 +45,7 @@ print_options()
     echo "start     <additional pppd command line parameter> -> starts pppd using the given parameter";
     echo "stop      <ppp interface name> -> stops pppd on given interface";
     echo "cleanup   peer <peer filename> -> deletes peer file";
-    echo "          peer dns -> delete dns details";
+    echo "          dns -> delete dns details";
     echo "route     <ppp interface name> -> the given interface becomes the default gateway for IP traffic";
         
     exit 1;
@@ -65,22 +64,12 @@ install()
             #install a new peer file
             print_debug "installing $2 to /etc/ppp/peers"
             ##ADD CODE HERE##
-            cp -f $2 /etc/ppp/peers
+            #cp -f $2 /etc/ppp/peers
             ;;
         dns)
             #install new dns server 
             print_debug "writing dns server details to /etc/ppp/resolv.conf";
-            shift;
-            rm -f $TMP_FILE
-            if [ $# -gt 0 ]; then
-                while [ $# -gt 0 ]; do
-                    echo "nameserver $1" >> $TMP_FILE 
-                    shift;
-                done
-                mv $TMP_FILE /etc/ppp/resolv.conf
-            fi
-            rm -f $RESOLVCONF
-            ln -s /etc/ppp/resolv.conf $RESOLVCONF
+            ##ADD CODE HERE##
             ;;    
         *)
             print_debug "Unknown option: $ACTION";
@@ -96,7 +85,8 @@ install()
 start()
 {
     print_debug "starting pppd using parameters: $*"
-    $PPPD $* &
+    ##ADD CODE HERE##
+    #$PPPD $* &
 }
 
 # Stops pppd
@@ -121,7 +111,8 @@ cleanup()
         peer)
             # delete peers file given as $2
             print_debug "deleting peer file /etc/ppp/peers/$1";
-            rm -f "/etc/ppp/peers/$1";
+            ##ADD CODE HERE##
+            #rm -f "/etc/ppp/peers/$1";
             ;;
         dns)
             # remove dns server details 
@@ -160,7 +151,10 @@ route()
 #Parse command line
 
 print_debug "Starting config script for dialup plugin"
-print_debug "$0 $*"
+print_debug "This script is a template script. A customized version must be provided."
+print_debug "Various sample implementations can be found in $QTOPIA_DEPOT_PATH/src/plugins/network/dialing."
+print_debug "Further script execution stopped."
+exit 1 ;
 
 ACTION=$1;
 shift;
@@ -185,4 +179,3 @@ case $ACTION in
         exit 1;
         ;;
 esac
-

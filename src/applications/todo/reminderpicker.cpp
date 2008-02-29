@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -131,8 +131,8 @@ int OtherReminderDialog::reminder()
 QList<ReminderPicker::ReminderEntry> ReminderPicker::reminderEntries;
 bool ReminderPicker::listInited;
 
-ReminderPicker::ReminderPicker(QObject *parent, QFormLayout *fl)
-    : QObject(parent), mAllDay(false), mTimeSet(false), mAllDayDefault(8,0)
+ReminderPicker::ReminderPicker(QObject *parent, QFormLayout *fl, QAppointment &appt)
+    : QObject(parent), mAppointment(appt)
 {
     if (!listInited) {
         listInited = true;
@@ -152,9 +152,6 @@ ReminderPicker::ReminderPicker(QObject *parent, QFormLayout *fl)
 // Unwanted complexity at the moment:
 //        reminderEntries.append(ReminderEntry(ReminderEntry::Both, -1, tr("Other...")));
     }
-    timeminutes = 0;
-    dayminutes = 0;
-
     comboReminder = new QComboBox();
     comboReminderDelay = new QComboBox();
 
@@ -169,7 +166,10 @@ ReminderPicker::ReminderPicker(QObject *parent, QFormLayout *fl)
     timeLabel->setText(tr("At", "At: 9:00am"));
     timeLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     timeLabel->setBuddy(timeEdit);
-    initCB();
+
+    mAllDay = mAppointment.isAllDay();
+
+    initCB(true);
 
     fl->addRow(tr("Reminder"), comboReminder);
     fl->addRow(timeLabel, timeEdit);
@@ -180,27 +180,50 @@ ReminderPicker::ReminderPicker(QObject *parent, QFormLayout *fl)
     connect( timeEdit, SIGNAL(timeChanged(QTime)), this, SLOT(reminderTimeChanged(QTime)));
 }
 
-void ReminderPicker::initCB()
+void ReminderPicker::initCB(bool force)
 {
-    int idx = 0;
-    comboReminderDelay->clear();
-    ReminderEntry::entry_type t = mAllDay ? ReminderEntry::AllDay : ReminderEntry::NotAllDay;
-    foreach (ReminderEntry re, reminderEntries) {
-        if (re.type & t)
-            comboReminderDelay->addItem(re.label, idx);
-        idx++;
+    if (force || mAllDay != mAppointment.isAllDay()) {
+        int idx = 0;
+        mAllDay = mAppointment.isAllDay();
+        comboReminderDelay->clear();
+        ReminderEntry::entry_type t = mAppointment.isAllDay() ? ReminderEntry::AllDay : ReminderEntry::NotAllDay;
+        foreach (ReminderEntry re, reminderEntries) {
+            if (re.type & t)
+                comboReminderDelay->addItem(re.label, idx);
+            idx++;
+        }
+    }
+}
+
+void ReminderPicker::splitReminderMinutes(int &dayminutes, int &timeminutes)
+{
+    int minutes = mAppointment.alarmDelay();
+
+    if (mAppointment.isAllDay()) {
+        if (minutes <= 0) {
+            timeminutes = -minutes;
+            dayminutes = 0;
+        } else {
+            timeminutes = minutes % (24 * 60);
+            if (timeminutes != 0)
+                timeminutes = (24*60) - timeminutes;
+            dayminutes = minutes + timeminutes;
+        }
+    } else {
+        dayminutes = minutes;
+        timeminutes = 0;
     }
 }
 
 void ReminderPicker::reminderChanged(int index)
 {
     if (index == 0) { // None
-        reminderFlag = QAppointment::NoAlarm;
+        mAppointment.setAlarm(mAppointment.alarmDelay(), QAppointment::NoAlarm);
         comboReminderDelay->setEnabled(false);
         timeEdit->setEnabled(false);
         timeLabel->setEnabled(false);
     } else {
-        reminderFlag = (index == 1) ? QAppointment::Audible : QAppointment::Visible;
+        mAppointment.setAlarm(mAppointment.alarmDelay(), (index == 1) ? QAppointment::Audible : QAppointment::Visible);
         comboReminderDelay->setEnabled(true);
         timeLabel->setEnabled(true);
         timeEdit->setEnabled(true);
@@ -211,98 +234,34 @@ void ReminderPicker::reminderDelayChanged(int index)
 {
     ReminderEntry re = reminderEntries.value(comboReminderDelay->itemData(index).toInt());
 
+    int dayminutes, timeminutes;
+    splitReminderMinutes(dayminutes, timeminutes);
+
     if (re.isOther()) {
-        OtherReminderDialog d(mAllDay, dayminutes);
+        OtherReminderDialog d(mAppointment.isAllDay(), dayminutes);
 
         if (QtopiaApplication::execDialog(&d)) {
             // save the delay
-            dayminutes = d.reminder();
+            mAppointment.setAlarm(d.reminder() - timeminutes, mAppointment.alarm());
         }
     } else {
-        dayminutes = re.minutes;
+        mAppointment.setAlarm(re.minutes - timeminutes, mAppointment.alarm());
     }
 }
 
 void ReminderPicker::reminderTimeChanged(const QTime&)
 {
-    mTimeSet = true;
     updateReminderMinutes();
 }
 
 void ReminderPicker::updateReminderMinutes()
 {
     ReminderEntry re = reminderEntries.value(comboReminderDelay->itemData(comboReminderDelay->currentIndex()).toInt());
-    timeminutes = (timeEdit->time().hour() * 60) + timeEdit->time().minute();
-    dayminutes = re.minutes;
+    int timeminutes = mAppointment.isAllDay() ? (timeEdit->time().hour() * 60) + timeEdit->time().minute() : 0;
+    mAppointment.setAlarm(re.minutes - timeminutes, mAppointment.alarm());
 }
 
-void ReminderPicker::setDefaultAllDayReminderTime(const QTime& defTime)
-{
-    mAllDayDefault = defTime;
-
-    if (!mTimeSet) {
-        timeEdit->setTime(defTime);
-        updateReminderMinutes();
-    }
-}
-
-void ReminderPicker::setAllDay(bool allDay)
-{
-    if (allDay != mAllDay) {
-        mAllDay = allDay;
-        initCB();
-    }
-
-    // Clear this.
-    dayminutes = 0;
-
-    // And maybe this, if the user hasn't set it
-    if (!mTimeSet) {
-        timeEdit->setTime(mAllDayDefault);
-        updateReminderMinutes();
-    }
-    updateUI();
-}
-
-void ReminderPicker::setReminderType(QAppointment::AlarmFlags flag)
-{
-    reminderFlag = flag;
-    updateUI();
-}
-
-int ReminderPicker::reminderMinutes() const {
-    if (mAllDay) {
-        return dayminutes - timeminutes;
-    }
-    return dayminutes;
-}
-
-void ReminderPicker::setReminderMinutes(int minutes)
-{
-    updateUI();
-
-    // Also set the time edit UI (for an all day event)
-    if (mAllDay) {
-        // Basically any reminders on the day will be a negative
-        // minutes value (since all day events are considered to
-        // start at 12:00am).
-        if (minutes <= 0) {
-            timeminutes = -minutes;
-            minutes = 0;
-        } else {
-            timeminutes = minutes % (24 * 60);
-            if (timeminutes != 0)
-                timeminutes = (24*60) - timeminutes;
-            minutes += timeminutes;
-        }
-        dayminutes = minutes - timeminutes;
-    } else
-        dayminutes = minutes;
-
-    timeEdit->setTime(QTime(timeminutes / 60, timeminutes %60));
-}
-
-void ReminderPicker::updateUI()
+void ReminderPicker::updateUI(bool enabled)
 {
     comboReminder->blockSignals(true);
     comboReminderDelay->blockSignals(true);
@@ -311,8 +270,13 @@ void ReminderPicker::updateUI()
     // now the alarm details
     int idx = 0;
     bool found = false;
+    int dayminutes = 0;
+    int timeminutes = 0;
+    splitReminderMinutes(dayminutes, timeminutes);
 
-    ReminderEntry::entry_type t = mAllDay ? ReminderEntry::AllDay : ReminderEntry::NotAllDay;
+    // Make sure the combo box has the right set of entries, if all day changed
+    initCB(false);
+    ReminderEntry::entry_type t = mAppointment.isAllDay() ? ReminderEntry::AllDay : ReminderEntry::NotAllDay;
     foreach(ReminderEntry re, reminderEntries) {
         if (re.type & t) {
             if (re.minutes == dayminutes) {
@@ -329,11 +293,13 @@ void ReminderPicker::updateUI()
         comboReminderDelay->setCurrentIndex(idx - 1);
     }
 
-    if (reminderFlag != QAppointment::NoAlarm) {
-        timeLabel->setEnabled(true);
-        timeEdit->setEnabled(true);
-        comboReminderDelay->setEnabled(true);
-        if (reminderFlag == QAppointment::Audible)
+    timeEdit->setTime(QTime(timeminutes / 60, timeminutes %60));
+
+    if (mAppointment.alarm() != QAppointment::NoAlarm) {
+        timeLabel->setEnabled(enabled);
+        timeEdit->setEnabled(enabled);
+        comboReminderDelay->setEnabled(enabled);
+        if (mAppointment.alarm() == QAppointment::Audible)
             comboReminder->setCurrentIndex(1);
         else
             comboReminder->setCurrentIndex(2);
@@ -343,8 +309,9 @@ void ReminderPicker::updateUI()
         comboReminderDelay->setEnabled(false);
         comboReminder->setCurrentIndex(0);
     }
+    comboReminder->setEnabled(enabled);
 
-    if (mAllDay) {
+    if (mAppointment.isAllDay()) {
         timeEdit->show();
         timeLabel->show();
     } else {

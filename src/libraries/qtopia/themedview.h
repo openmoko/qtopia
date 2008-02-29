@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -114,9 +114,13 @@ protected:
     QVariant getExpressionResult(QExpressionEvaluator *expression, const QVariant::Type &type);
 
     void setAttribute(const QString &key, const int &val, ThemeItem::State st = ThemeItem::Default);
+    void setAttribute(const QLatin1String &key, const int &val, ThemeItem::State st = ThemeItem::Default);
     int attribute(const QString &key, ThemeItem::State st = ThemeItem::Default) const;
+    int attribute(const QLatin1String &key, ThemeItem::State st = ThemeItem::Default) const;
     void setAttribute(const QString &key, const QString &val, ThemeItem::State st = ThemeItem::Default);
+    void setAttribute(const QLatin1String &key, const QString &val, ThemeItem::State st = ThemeItem::Default);
     QString strAttribute(const QString &key, ThemeItem::State st = ThemeItem::Default);
+    QString strAttribute(const QLatin1String &key, ThemeItem::State st = ThemeItem::Default);
 
     virtual void paint(QPainter *painter, const QRect &rect);
     virtual void layout();
@@ -291,11 +295,17 @@ public:
 
 protected:
     void setColor( const QString &key, const QColor &val, ThemeItem::State st = ThemeItem::Default );
+    void setColor( const QLatin1String &key, const QColor &val, ThemeItem::State st = ThemeItem::Default );
     QColor color( const QString &key, ThemeItem::State st = ThemeItem::Default ) const;
+    QColor color( const QLatin1String &key, ThemeItem::State st = ThemeItem::Default ) const;
     QFont font( const QString &key, ThemeItem::State st = ThemeItem::Default ) const;
+    QFont font( const QLatin1String &key, ThemeItem::State st = ThemeItem::Default ) const;
     void setFont( const QString &key, const QFont &val, ThemeItem::State st = ThemeItem::Default );
+    void setFont( const QLatin1String &key, const QFont &val, ThemeItem::State st = ThemeItem::Default );
     void setupColor( const QString &key, const QString &col, ThemeItem::State st = ThemeItem::Default );
+    void setupColor( const QLatin1String &key, const QLatin1String& roleKey, const QString &col, ThemeItem::State st = ThemeItem::Default );
     void setupAlpha( const QString &key, const QString &al, ThemeItem::State st = ThemeItem::Default );
+    void setupAlpha( const QLatin1String &key, const QString &al, ThemeItem::State st = ThemeItem::Default );
 
     QFont parseFont(const QFont &defFont, const QString &size, const QString &bold );
     int parseColor(const QString &val, QColor &col);
@@ -374,7 +384,9 @@ public:
 protected:
     QPixmap loadImage(const QString &imgName, int colorRole, const QColor &color, int alpha, int width = 0, int height = 0);
     void setPixmap( const QString &key, const QPixmap &val, ThemeItem::State st = ThemeItem::Default, const QString &filename = QString::null );
+    void setPixmap( const QLatin1String &key, const QPixmap &val, ThemeItem::State st = ThemeItem::Default, const QString &filename = QString::null );
     QPixmap pixmap( const QString &key, ThemeItem::State st = ThemeItem::Default ) const;
+    QPixmap pixmap( const QLatin1String &key, ThemeItem::State st = ThemeItem::Default ) const;
     void scaleImage( const QString &key, int width, int height );
     void scaleImages( int count );
     void setHorizontalScale( bool enable );

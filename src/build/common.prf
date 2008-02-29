@@ -61,28 +61,28 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
     QMAKE_EXTRA_TARGETS+=cinstall
 }
 
-# Test integration
-depotProject {
-    destProject=$$QPEDIR/tests/src/$$QTOPIA_ID
-    qtopiadesktop:destProject=$$QPEDIR/tests/src/qtopiadesktop/$$QTOPIA_ID
-    exists($$destProject) {
-        test.commands=$$MAKE -C $$destProject test TESTS=$$LITERAL_QUOTE$(TESTS)$$LITERAL_QUOTE
-        listtests.commands=$$MAKE -C $$destProject listtests
-    } else {
-        destProject~=s,$$QPEDIR,$$QTOPIA_DEPOT_PATH,q
-        test.commands=$$COMMAND_HEADER\
-            echo No tests exist for $${QTOPIA_ID}. $$LINE_SEP\
-            echo Please add some tests to $$destProject
-        listtests.commands=$$test.commands
-    }
-}
-QMAKE_EXTRA_TARGETS*=test listtests
-
 !subdirs {
+    # Test integration
+    !unittest:!systemtest {
+        destProject=$$OUT_PWD/tests
+        exists($$destProject) {
+            test.commands=$$MAKE -C $$destProject test TESTS=$$LITERAL_QUOTE$(TESTS)$$LITERAL_QUOTE
+            listtests.commands=$$MAKE -C $$destProject listtests
+            install_tests.commands=$$MAKE -C $$destProject install_tests
+        } else {
+            test.commands=$$COMMAND_HEADER\
+                echo No tests exist for $${QTOPIA_ID}. $$LINE_SEP\
+                echo Please add some tests to $$SRCDIR/tests
+            listtests.commands=$$test.commands
+            install_tests.commands=$$test.commands
+        }
+        QMAKE_EXTRA_TARGETS*=test listtests install_tests
+    }
+
     # checkp4 helps us to find not-checked-in files
     ALL_SRC_FILES=$$FORMS $$HEADERS $$SOURCES
     !isEmpty(ALL_SRC_FILES) {
-        runcheckp4.CONFIG=no_link no_dependencies no_build combine ignore_no_exist no_clean
+        runcheckp4.CONFIG=no_link no_dependencies explicit_dependencies no_build combine ignore_no_exist no_clean
         runcheckp4.commands=$$COMMAND_HEADER\
             $$fixpath($$QTOPIA_DEPOT_PATH/scripts/checkp4) $$PROJECT_ROOT/$$QTOPIA_ID/$$self ${QMAKE_FILE_IN}
         runcheckp4.input=ALL_SRC_FILES

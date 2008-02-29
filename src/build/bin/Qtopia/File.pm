@@ -137,6 +137,13 @@ sub resolveHeader
 	    return $file;
 	}
 	chomp $orig;
+        # Allow "symlink" header files to indicate that the include is not the first line
+        if ( $orig =~ /resolveHeader skip (\d+)/ ) {
+            my $skip = $1;
+            for ( my $i = 0; $i < $skip; $i++ ) {
+                $orig = <IN>;
+            }
+        }
 	close IN;
 	if ( $orig =~ /^#include "(.*)"\s*$/ ) {
             my $nf = $1;
@@ -210,7 +217,9 @@ sub unixpath
 sub cpR
 {
     my ( $srcfile, $dest ) = @_;
-    $dest = "$dest/".basename($srcfile);
+    if ( -d $dest ) {
+        $dest = "$dest/".basename($srcfile);
+    }
     if ( -f $srcfile ) {
 	if ( needCopy($srcfile, $dest) ) {
             #print "copy $srcfile $dest\n";

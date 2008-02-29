@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,17 +25,446 @@
 #include <private/qobexauthenticationchallenge_p.h>
 #include <private/qobexauthenticationresponse_p.h>
 
+#include <qtopialog.h>
+
 #include <QBuffer>
 #include <QMetaMethod>
 #include <QSet>
 #include <QApplication>
 
 
-//#define QOBEXSERVERSESSION_DEBUG
+QObexServerSessionPrivate::QObexServerSessionPrivate(QIODevice *device, QObexServerSession *parent)
+    : QObject(parent),
+      m_socket(new QObexSocket(device, this)),
+      m_parent(parent),
+      m_closed(false),
+      m_socketDisconnected(false)
+{
+    if (!m_socket || !m_socket->isValid()) {
+        qWarning("QObexServerSession: cannot initialise OBEX connection");
+        return;
+    }
 
-#ifdef QOBEXSERVERSESSION_DEBUG
-#   include <QDebug>
-#endif
+    m_socket->setObexServer(this);
+
+    QObject::connect(m_socket->device(), SIGNAL(aboutToClose()),
+                        this, SLOT(socketDisconnected()));
+    QObject::connect(m_socket->device(), SIGNAL(destroyed()),
+                        this, SLOT(socketDisconnected()));
+    QObject::connect(m_socket, SIGNAL(destroyed()),
+                        this, SLOT(socketDisconnected()));
+}
+
+QObexServerSessionPrivate::~QObexServerSessionPrivate()
+{
+    close();
+}
+
+void QObexServerSessionPrivate::close()
+{
+    if (m_closed)
+        return;
+
+    // Don't receive any more events from the obex socket
+    if (m_socket)
+        m_socket->setObexServer(0);
+
+    m_closed = true;
+}
+
+void QObexServerSessionPrivate::setNextResponseHeader(const QObexHeader &header)
+{
+    m_nextResponseHeader = header;
+
+    // Need to keep the nonce if sending an auth challenge, in order to match
+    // password when auth response is received.
+    if (header.contains(QObexHeader::AuthChallenge)) {
+        m_challengeNonce = QObexHeaderPrivate::getChallengeNonce(header);
+    }
+}
+
+//--------------------------------------------------
+
+void QObexServerSessionPrivate::resetOpData()
+{
+    m_invokedRequestSlot = false;
+
+    // Don't clear m_challengeNonce, otherwise can't match the password
+    // when a new request comes with an Auth Response. Can only clear
+    // the challenge nonce when a request finishes with Success.
+}
+
+/*
+    Called when a new request has been detected.
+*/
+QObex::ResponseCode QObexServerSessionPrivate::acceptIncomingRequest(QObex::Request request)
+{
+    qLog(Obex) << "QObexServerSession: incoming request" << request;
+
+    // reset data for the new request
+    resetOpData();
+
+    if (m_implementedCallbacks.empty())
+        initAvailableCallbacks();
+
+    if (m_implementedCallbacks.contains(getRequestSlot(request)))
+        return QObex::Success;
+        
+    qLog(Obex) << "QObexServerSession: request" << request 
+        << "callback not implemented, denying request";   
+    return QObex::NotImplemented;
+}
+
+/*
+    Called when the first packet of a request has been received and there
+    is more than 1 packet in the operation. This is only likely to be true
+    for Put requests.
+*/
+QObex::ResponseCode QObexServerSessionPrivate::receivedRequestFirstPacket(QObex::Request request, QObexHeader &header, QObexHeader *responseHeader)
+{
+    qLog(Obex) << "QObexServerSession: got 1st packet for request" 
+        << request << "with" << header.size() << "headers"; 
+
+    QObex::ResponseCode response =
+            processRequestHeader(request, header, QByteArray());
+
+    if (m_closed)
+        return QObex::InternalServerError;
+
+    // Subclass may have set some response headers.
+    *responseHeader = m_nextResponseHeader;
+    m_nextResponseHeader.clear();
+    return response;
+}
+
+/*
+    Called when final server response has been sent.
+    Not called for Aborts.
+*/
+void QObexServerSessionPrivate::requestDone(QObex::Request request)
+{
+    qLog(Obex) << "QObexServerSession: done request" << request;
+
+    if (request != QObex::NoRequest) {
+        if (m_implementedCallbacks.contains(getRequestSlot(request)))
+            emit m_parent->finalResponseSent(request);
+    }
+}
+
+/*
+    Called when all request packets for an operation have been received.
+*/
+QObex::ResponseCode QObexServerSessionPrivate::receivedRequest(QObex::Request request, QObexHeader &requestHeader, const QByteArray &nonHeaderData, QObexHeader *responseHeader)
+{
+    qLog(Obex) << "QObexServerSession: got all packets for request" << request;
+
+    // Invoke the appropriate subclass slot, unless it has already been called.
+    // (for a multi-packet Put, the slot would have been called at
+    // receivedRequestFirstPacket())
+    QObex::ResponseCode nextResponse = ( m_invokedRequestSlot ?
+            QObex::Success : processRequestHeader(request,
+                    requestHeader, nonHeaderData) );
+
+    if (m_closed)
+        return QObex::InternalServerError;
+
+    // Subclass may have set some response headers, either in the most recent
+    // callback or in a previous call (e.g. in dataAvailable()).
+    *responseHeader = m_nextResponseHeader;
+    m_nextResponseHeader.clear();
+    return nextResponse;
+}
+
+QObex::ResponseCode QObexServerSessionPrivate::bodyDataAvailable(const char *data, qint64 size)
+{
+    return m_parent->dataAvailable(data, size);
+}
+
+QObex::ResponseCode QObexServerSessionPrivate::bodyDataRequired(const char **data, qint64 *size)
+{
+    return m_parent->provideData(data, size);
+}
+
+
+//----------------------------------------------------------------
+
+QObex::ResponseCode QObexServerSessionPrivate::processRequestHeader(QObex::Request request, QObexHeader &requestHeader, const QByteArray &nonHeaderData)
+{
+    QObex::ResponseCode response = QObex::Success;
+
+    // Check for Authentication Response
+    if (requestHeader.contains(QObexHeader::AuthResponse)) {
+        // Emit authenticationResponse() with the received response.
+        response = readAuthenticationResponse(requestHeader.value(
+                QObexHeader::AuthResponse).toByteArray());
+        if (response != QObex::Success)
+            return response;
+
+        // don't pass raw auth response onto client
+        requestHeader.remove(QObexHeader::AuthResponse);
+    } else {
+        if (!m_challengeNonce.isEmpty()) {
+            errorOccurred(QObexServerSession::AuthenticationFailed,
+                    qApp->translate("QObexServerSession",
+                                  "Did not receive authentication response"));
+            return QObex::Unauthorized;
+        }
+    }
+
+    // If headers have an Authentication Challenge, parse it and remove it
+    // before calling the slot.
+    QObexAuthenticationChallenge challenge;
+    bool gotChallenge = false;
+    if (requestHeader.contains(QObexHeader::AuthChallenge)) {
+        gotChallenge = QObexAuthenticationChallengePrivate::parseRawChallenge(
+                requestHeader.value(QObexHeader::AuthChallenge).toByteArray(),
+                challenge);
+        if (!gotChallenge) {
+            errorOccurred(QObexServerSession::AuthenticationFailed,
+                    qApp->translate("QObexServerSession", "Cannot read authentication challenge"));
+            return QObex::BadRequest;
+        }
+        requestHeader.remove(QObexHeader::AuthChallenge);
+    }
+
+    bool invoked = false;
+    QString callback = getRequestSlot(request);
+    switch (request) {
+        // the callbacks for these slots only take a single QObexHeader argument
+        case QObex::Connect:
+        case QObex::Disconnect:
+        case QObex::Get:
+        case QObex::Put:
+        case QObex::PutDelete:
+            invoked = invokeSlot(callback, &response,
+                                        Q_ARG(QObexHeader, requestHeader));
+            break;
+        case QObex::SetPath:
+            invoked = invokeSlot(callback, &response,
+                    Q_ARG(QObexHeader, requestHeader),
+                    Q_ARG(QObex::SetPathFlags, getSetPathFlags(nonHeaderData)));
+            break;
+        default:
+            errorOccurred(QObexServerSession::InvalidRequest,
+                    qApp->translate("QObexServerSession",
+                                  "Received request of unknown type"));
+    }
+
+    // close() was called during invocation?
+    if (m_closed)
+        return QObex::InternalServerError;
+
+    if (invoked) {
+        if (gotChallenge && response == QObex::Success) {
+            // Emit authenticationRequired() with the received challenge.
+            response = processAuthenticationChallenge(challenge);
+        }
+    } else {
+        response = QObex::InternalServerError;
+    }
+
+    m_invokedRequestSlot = true;
+    return response;
+}
+
+QObex::ResponseCode QObexServerSessionPrivate::processAuthenticationChallenge(QObexAuthenticationChallenge &challenge)
+{
+    emit m_parent->authenticationRequired(&challenge);
+    const QObexAuthenticationChallengePrivate *priv =
+            QObexAuthenticationChallengePrivate::getPrivate(challenge);
+
+    if (!priv->m_modified) {
+        errorOccurred(QObexServerSession::AuthenticationFailed,
+                qApp->translate("QObexServerSession",
+                              "Server did not provide username or password for authentication"));
+        // any headers that have been set should be rendered invalid, since
+        // they are probably dependent on a successful operation
+        m_nextResponseHeader.clear();
+        return QObex::InternalServerError;
+    }
+
+    QByteArray bytes;
+    if (!priv->toRawResponse(bytes)) {
+        errorOccurred(QObexServerSession::AuthenticationFailed,
+                qApp->translate("QObexServerSession",
+                              "Error responding to authentication challenge"));
+        // any headers that have been set should be rendered invalid, since
+        // they are probably dependent on a successful operation
+        m_nextResponseHeader.clear();
+        return QObex::InternalServerError;
+    }
+
+    // add the Auth Response to the response headers
+    m_nextResponseHeader.setValue(QObexHeader::AuthResponse, bytes);
+    return QObex::Success;
+}
+
+QObex::ResponseCode QObexServerSessionPrivate::readAuthenticationResponse(const QByteArray &responseBytes)
+{
+    QObexAuthenticationResponse response =
+            QObexAuthenticationResponsePrivate::createResponse(m_challengeNonce);
+    if (!QObexAuthenticationResponsePrivate::parseRawResponse(
+            responseBytes, response)) {
+        errorOccurred(QObexServerSession::AuthenticationFailed,
+                qApp->translate("QObexServerSession",
+                              "Invalid client authentication response"));
+        return QObex::BadRequest;
+    }
+
+    bool accept = false;
+    emit m_parent->authenticationResponse(response, &accept);
+    if (!accept) {
+        errorOccurred(QObexServerSession::AuthenticationFailed,
+                qApp->translate("QObexServerSession", "Authentication failed"));
+        return QObex::Unauthorized;
+    }
+    return QObex::Success;
+}
+
+/*
+    Invoke a user callback to notify about a request.
+    Need to call the callbacks through invokeMethod() through Qt meta system
+    instead of calling the callbacks directly as methods, because the slots
+    are not virtual. (This is to be consistent within Qt/Qtopia APIs.)
+
+    (The request callbacks are slots because this allows us to reject an
+    request when a REQHINT is received if we can see that the subclass doesn't
+    implement the corresponding slot and thus is not interested in that request.)
+ */
+bool QObexServerSessionPrivate::invokeSlot(const QString &methodName, QObex::ResponseCode *responseCode, QGenericArgument arg1, QGenericArgument arg2)
+{
+    bool invoked;
+    QObex::ResponseCode tempResponse;
+    QPointer<QObexServerSessionPrivate> ptr(this);
+    if (responseCode) {
+        invoked = QMetaObject::invokeMethod(m_parent,
+                        methodName.toAscii().constData(),
+                        Q_RETURN_ARG(QObex::ResponseCode, tempResponse),
+                        arg1, arg2);
+    } else {
+        invoked = QMetaObject::invokeMethod(m_parent,
+                        methodName.toAscii().constData(),
+                        arg1, arg2);
+    }
+
+    // self deleted during invocation?
+    if (ptr.isNull())
+        return false;
+
+    if (m_closed)
+        return false;
+
+    if (invoked) {
+        if (responseCode)
+            *responseCode = tempResponse;
+        return true;
+    } else {
+        errorOccurred(QObexServerSession::UnknownError,
+                qApp->translate("QObexServerSession","Error invoking callback for %1").arg(methodName));
+        return false;
+    }
+}
+
+void QObexServerSessionPrivate::errorOccurred(QObexServerSession::Error error, const QString &errorString)
+{
+    if (m_closed) {
+        qLog(Obex) << "QObexServerSession: closed, ignoring error:" << error
+                << errorString;
+        return;
+    }
+
+    m_parent->error(error, errorString);
+}
+
+void QObexServerSessionPrivate::socketDisconnected()
+{
+    if (m_socketDisconnected)
+        return;
+
+    qLog(Obex) << "QObexServerSession: my socket was disconnected!";    
+
+    // Disconnect these signals so that we don't get any more calls
+    // to socketDisconnected()
+    if (m_socket) {
+        QObject::disconnect(m_socket->device(), SIGNAL(aboutToClose()),
+                            this, SLOT(socketDisconnected()));
+        QObject::disconnect(m_socket->device(), SIGNAL(destroyed()),
+                            this, SLOT(socketDisconnected()));
+        QObject::disconnect(m_socket, SIGNAL(destroyed()),
+                            this, SLOT(socketDisconnected()));
+    }
+
+    m_socketDisconnected = true;
+
+    errorOccurred(QObexServerSession::ConnectionError, qApp->translate(
+                "QObexServerSession", "Connection error"));
+}
+
+QObex::SetPathFlags QObexServerSessionPrivate::getSetPathFlags(const QByteArray &nonHeaderData)
+{
+    QObex::SetPathFlags flags = 0;
+
+    if (nonHeaderData.size() < 2)
+        return flags;
+
+    // 1st byte has flags, 2nd byte has constants (not used)
+    if (nonHeaderData.constData()[0] & 1)
+        flags |= QObex::BackUpOneLevel;
+    if (nonHeaderData.constData()[0] & 2)
+        flags |= QObex::NoPathCreation;
+    return flags;
+}
+
+/*
+    Looks at which protected slots have been reimplemented by the subclass.
+    Adds the name of each implemented slot to m_implementedCallbacks.
+*/
+void QObexServerSessionPrivate::initAvailableCallbacks()
+{
+    const QMetaObject superMetaObj = QObexServerSession::staticMetaObject;
+
+    // methodOffset is the index where the superclass methods end and
+    // this class's methods begin
+    const QMetaObject *metaObj = m_parent->metaObject();
+    int methodCount = metaObj->methodCount();
+    for (int i=metaObj->methodOffset(); i<methodCount; i++) {
+        const char *sig = metaObj->method(i).signature();
+
+        if (superMetaObj.indexOfMethod(sig) != -1) {
+            // superclass also has this method, therefore subclass is
+            // overriding/re-implementing this method
+            QString sigStr(sig);
+            QString methodName = sigStr.mid(0, sigStr.indexOf("("));
+            m_implementedCallbacks.insert(methodName);
+
+            qLog(Obex) << "QObexServerSession: subclass implements calbacks:"
+                << m_implementedCallbacks;
+        }
+    }
+}
+
+QLatin1String QObexServerSessionPrivate::getRequestSlot(QObex::Request request)
+{
+    switch (request) {
+        case QObex::Connect:
+            return QLatin1String("connect");
+        case QObex::Disconnect:
+            return QLatin1String("disconnect");
+        case QObex::Put:
+            return QLatin1String("put");
+        case QObex::PutDelete:
+            return QLatin1String("putDelete");
+        case QObex::Get:
+            return QLatin1String("get");
+        case QObex::SetPath:
+            return QLatin1String("setPath");
+        default:
+            return QLatin1String("");
+    }
+}
+
+
+//======================================================================
 
 /*!
     \class QObexServerSession
@@ -60,7 +489,7 @@
     In order to receive requests from an OBEX client, your QObexServerSession
     subclass must override the protected slots for the requests that it wants
     to receive. For example, if you want to receive \c Connect requests,
-    you must override the corresponding connect() slot, which will be called 
+    you must override the corresponding connect() slot, which will be called
     each time a \c Connect request is received:
 
     \code
@@ -193,7 +622,7 @@
         QObex::ResponseCode get(const QObexHeader &header)
         {
             QString requestedFilename = header.name();
-            if (!QFile::exists(requestedFilename)) 
+            if (!QFile::exists(requestedFilename))
                 return QObex::NotFound;
 
             m_requestedFile = new QFile(requestedFilename);
@@ -247,6 +676,32 @@
     any clean-up actions that might be necessary.
 
 
+    \section1 Handling socket disconnections
+
+    You should ensure that the QIODevice provided in the constructor emits
+    QIODevice::aboutToClose() or QObject::destroyed() when the associated
+    transport connection is disconnected. If one of these signals
+    are emitted, QObexServerSession will know the transport connection has
+    been lost, and will call error() with the argument set to ConnectionError.
+
+    This is particularly an issue for socket classes such as QTcpSocket that
+    do not emit QIODevice::aboutToClose() when a \c disconnected() signal is
+    emitted. In these cases, QObexServerSession will not know that the
+    transport has been disconnected. To avoid this, you can make the socket
+    emit QIODevice::aboutToClose() when it is disconnected:
+
+    \code
+    // make the socket emit aboutToClose() when disconnected() is emitted
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));
+    \endcode
+
+    Or, if the socket can be discarded as soon as it is disconnected:
+
+    \code
+    // delete the socket when the transport is disconnected
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    \endcode
+
     \ingroup qtopiaobex
     \sa QObexClientSession
 */
@@ -263,505 +718,9 @@
 */
 
 
-
-QObexServerSessionPrivate::QObexServerSessionPrivate(QIODevice *device, QObexServerSession *parent)
-    : QObject(parent),
-      m_socket(new QObexSocket(device, this)),
-      m_parent(parent),
-      m_closed(false),
-      m_socketDisconnected(false)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: constructing...";
-#endif
-
-    if (!m_socket || !m_socket->isValid()) {
-        qWarning("QObexServerSession: cannot initialise OBEX connection");
-        return;
-    }
-
-    m_socket->setObexServer(this);
-
-    QObject::connect(m_socket->device(), SIGNAL(aboutToClose()),
-                        this, SLOT(socketDisconnected()));
-    QObject::connect(m_socket->device(), SIGNAL(destroyed()),
-                        this, SLOT(socketDisconnected()));
-    QObject::connect(m_socket, SIGNAL(destroyed()),
-                        this, SLOT(socketDisconnected()));
-}
-
-QObexServerSessionPrivate::~QObexServerSessionPrivate()
-{
-    close();
-}
-
-void QObexServerSessionPrivate::close()
-{
-    if (m_closed)
-        return;
-
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession::close()";
-#endif
-
-    // Don't receive any more events from the obex socket
-    if (m_socket)
-        m_socket->setObexServer(0);
-
-    m_closed = true;
-}
-
-void QObexServerSessionPrivate::setNextResponseHeader(const QObexHeader &header)
-{
-    m_nextResponseHeader = header;
-
-    // Need to keep the nonce if sending an auth challenge, in order to match
-    // password when auth response is received.
-    if (header.contains(QObexHeader::AuthChallenge)) {
-        m_challengeNonce = QObexHeaderPrivate::getChallengeNonce(header);
-    }
-}
-
-//--------------------------------------------------
-
-void QObexServerSessionPrivate::resetOpData()
-{
-    m_invokedRequestSlot = false;
-
-    // Don't clear m_challengeNonce, otherwise can't match the password
-    // when a new request comes with an Auth Response. Can only clear
-    // the challenge nonce when a request finishes with Success.
-}
-
-/*
-    Called when a new request has been detected.
-*/
-QObex::ResponseCode QObexServerSessionPrivate::acceptIncomingRequest(QObex::Request request)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession::acceptIncomingRequest()" << request;
-#endif
-
-    // reset data for the new request
-    resetOpData();
-
-    if (m_implementedCallbacks.empty())
-        initAvailableCallbacks();
-
-    if (m_implementedCallbacks.contains(getRequestSlot(request)))
-        return QObex::Success;
-    return QObex::NotImplemented;
-}
-
-/*
-    Called when the first packet of a request has been received and there
-    is more than 1 packet in the operation. This is only likely to be true
-    for Put requests.
-*/
-QObex::ResponseCode QObexServerSessionPrivate::receivedRequestFirstPacket(QObex::Request request, QObexHeader &header, QObexHeader *responseHeader)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession::receivedRequestFirstPacket()" << request
-            << "with headers" << header;
-#endif
-
-    QObex::ResponseCode response =
-            processRequestHeader(request, header, QByteArray());
-
-    if (m_closed) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: closed during callback for" << request;
-#endif
-        return QObex::InternalServerError;
-    }
-
-    // Subclass may have set some response headers.
-    *responseHeader = m_nextResponseHeader;
-    m_nextResponseHeader.clear();
-    return response;
-}
-
-/*
-    Called when final server response has been sent.
-    Not called for Aborts.
-*/
-void QObexServerSessionPrivate::requestDone(QObex::Request request)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession::requestDone()" << request;
-#endif
-    if (request != QObex::NoRequest) {
-        if (m_implementedCallbacks.contains(getRequestSlot(request)))
-            emit m_parent->finalResponseSent(request);
-    }
-}
-
-/*
-    Called when all request packets for an operation have been received.
-*/
-QObex::ResponseCode QObexServerSessionPrivate::receivedRequest(QObex::Request request, QObexHeader &requestHeader, const QByteArray &nonHeaderData, QObexHeader *responseHeader)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession::receivedRequest()" << request
-            << "with headers" << requestHeader;
-#endif
-
-    // Invoke the appropriate subclass slot, unless it has already been called.
-    // (for a multi-packet Put, the slot would have been called at
-    // receivedRequestFirstPacket())
-    QObex::ResponseCode nextResponse = ( m_invokedRequestSlot ?
-            QObex::Success : processRequestHeader(request,
-                    requestHeader, nonHeaderData) );
-
-    if (m_closed) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: closed during callback for" << request;
-#endif
-        return QObex::InternalServerError;
-    }
-
-    // Subclass may have set some response headers, either in the most recent
-    // callback or in a previous call (e.g. in dataAvailable()).
-    *responseHeader = m_nextResponseHeader;
-    m_nextResponseHeader.clear();
-    return nextResponse;
-}
-
-QObex::ResponseCode QObexServerSessionPrivate::bodyDataAvailable(const char *data, qint64 size)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: calling parent dataAvailable() (OBEX_EV_STREAMAVAIL)";
-#endif
-    return m_parent->dataAvailable(data, size);
-}
-
-QObex::ResponseCode QObexServerSessionPrivate::bodyDataRequired(const char **data, qint64 *size)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: calling parent provideData() (OBEV_EV_STREAMEMPTY)()";
-#endif
-    return m_parent->provideData(data, size);
-}
-
-
-//----------------------------------------------------------------
-
-QObex::ResponseCode QObexServerSessionPrivate::processRequestHeader(QObex::Request request, QObexHeader &requestHeader, const QByteArray &nonHeaderData)
-{
-    QObex::ResponseCode response = QObex::Success;
-
-    // Check for Authentication Response
-    if (requestHeader.contains(QObexHeader::AuthResponse)) {
-        // Emit authenticationResponse() with the received response.
-        response = readAuthenticationResponse(requestHeader.value(
-                QObexHeader::AuthResponse).toByteArray());
-        if (response != QObex::Success)
-            return response;
-
-        // don't pass raw auth response onto client
-        requestHeader.remove(QObexHeader::AuthResponse);
-    } else {
-        if (!m_challengeNonce.isEmpty()) {
-            errorOccurred(QObexServerSession::AuthenticationFailed,
-                    qApp->translate("QObexServerSession",
-                                  "Did not receive authentication response"));
-            return QObex::Unauthorized;
-        }
-    }
-
-    // If headers have an Authentication Challenge, parse it and remove it
-    // before calling the slot.
-    QObexAuthenticationChallenge challenge;
-    bool gotChallenge = false;
-    if (requestHeader.contains(QObexHeader::AuthChallenge)) {
-        gotChallenge = QObexAuthenticationChallengePrivate::parseRawChallenge(
-                requestHeader.value(QObexHeader::AuthChallenge).toByteArray(),
-                challenge);
-        if (!gotChallenge) {
-            errorOccurred(QObexServerSession::AuthenticationFailed,
-                    qApp->translate("QObexServerSession", "Cannot read authentication challenge"));
-            return QObex::BadRequest;
-        }
-        requestHeader.remove(QObexHeader::AuthChallenge);
-    }
-
-    bool invoked = false;
-    QString callback = getRequestSlot(request);
-    switch (request) {
-        // the callbacks for these slots only take a single QObexHeader argument
-        case QObex::Connect:
-        case QObex::Disconnect:
-        case QObex::Get:
-        case QObex::Put:
-        case QObex::PutDelete:
-            invoked = invokeSlot(callback, &response,
-                                        Q_ARG(QObexHeader, requestHeader));
-            break;
-        case QObex::SetPath:
-            invoked = invokeSlot(callback, &response,
-                    Q_ARG(QObexHeader, requestHeader),
-                    Q_ARG(QObex::SetPathFlags, getSetPathFlags(nonHeaderData)));
-            break;
-        default:
-            errorOccurred(QObexServerSession::InvalidRequest,
-                    qApp->translate("QObexServerSession",
-                                  "Received request of unknown type"));
-    }
-
-    // close() was called during invocation?
-    if (m_closed) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: closed while calling invokeSlot() for"
-                << callback;
-#endif
-        return QObex::InternalServerError;
-    }
-
-    if (invoked) {
-        if (gotChallenge && response == QObex::Success) {
-            // Emit authenticationRequired() with the received challenge.
-            response = processAuthenticationChallenge(challenge);
-        }
-    } else {
-        response = QObex::InternalServerError;
-    }
-
-    m_invokedRequestSlot = true;
-    return response;
-}
-
-QObex::ResponseCode QObexServerSessionPrivate::processAuthenticationChallenge(QObexAuthenticationChallenge &challenge)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: emit authenticationRequired()";
-#endif
-    emit m_parent->authenticationRequired(&challenge);
-    const QObexAuthenticationChallengePrivate *priv =
-            QObexAuthenticationChallengePrivate::getPrivate(challenge);
-
-    if (!priv->m_modified) {
-        errorOccurred(QObexServerSession::AuthenticationFailed,
-                qApp->translate("QObexServerSession",
-                              "Server did not provide username or password for authentication"));
-        // any headers that have been set should be rendered invalid, since
-        // they are probably dependent on a successful operation
-        m_nextResponseHeader.clear();
-        return QObex::InternalServerError;
-    }
-
-    QByteArray bytes;
-    if (!priv->toRawResponse(bytes)) {
-        errorOccurred(QObexServerSession::AuthenticationFailed,
-                qApp->translate("QObexServerSession",
-                              "Error responding to authentication challenge"));
-        // any headers that have been set should be rendered invalid, since
-        // they are probably dependent on a successful operation
-        m_nextResponseHeader.clear();
-        return QObex::InternalServerError;
-    }
-
-    // add the Auth Response to the response headers
-    m_nextResponseHeader.setValue(QObexHeader::AuthResponse, bytes);
-    return QObex::Success;
-}
-
-QObex::ResponseCode QObexServerSessionPrivate::readAuthenticationResponse(const QByteArray &responseBytes)
-{
-    QObexAuthenticationResponse response =
-            QObexAuthenticationResponsePrivate::createResponse(m_challengeNonce);
-    if (!QObexAuthenticationResponsePrivate::parseRawResponse(
-            responseBytes, response)) {
-        errorOccurred(QObexServerSession::AuthenticationFailed,
-                qApp->translate("QObexServerSession",
-                              "Invalid client authentication response"));
-        return QObex::BadRequest;
-    }
-
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: emit authenticationResponse()";
-#endif
-    bool accept = false;
-    emit m_parent->authenticationResponse(response, &accept);
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: server accepted Authentication Response?"
-            << accept;
-#endif
-    if (!accept) {
-        errorOccurred(QObexServerSession::AuthenticationFailed,
-                qApp->translate("QObexServerSession", "Authentication failed"));
-        return QObex::Unauthorized;
-    }
-    return QObex::Success;
-}
-
-/*
-    Invoke a user callback to notify about a request.
-    Need to call the callbacks through invokeMethod() through Qt meta system
-    instead of calling the callbacks directly as methods, because the slots
-    are not virtual. (This is to be consistent within Qt/Qtopia APIs.)
-
-    (The request callbacks are slots because this allows us to reject an
-    request when a REQHINT is received if we can see that the subclass doesn't
-    implement the corresponding slot and thus is not interested in that request.)
- */
-bool QObexServerSessionPrivate::invokeSlot(const QString &methodName, QObex::ResponseCode *responseCode, QGenericArgument arg1, QGenericArgument arg2)
-{
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: Invoking" << methodName << "callback...";
-#endif
-    bool invoked;
-    QObex::ResponseCode tempResponse;
-    if (responseCode) {
-        invoked = QMetaObject::invokeMethod(m_parent,
-                        methodName.toAscii().constData(),
-                        Q_RETURN_ARG(QObex::ResponseCode, tempResponse),
-                        arg1, arg2);
-    } else {
-        invoked = QMetaObject::invokeMethod(m_parent,
-                        methodName.toAscii().constData(),
-                        arg1, arg2);
-    }
-
-    QPointer<QObexServerSessionPrivate> ptr(this);
-    if (ptr.isNull()) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: deleted while invoking " << methodName;
-#endif
-        return false;
-    }
-
-    if (m_closed) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: closed while invoking " << methodName;
-#endif
-        return false;
-    }
-
-    if (invoked) {
-        if (responseCode)
-            *responseCode = tempResponse;
-        return true;
-    } else {
-        errorOccurred(QObexServerSession::UnknownError,
-                qApp->translate("QObexServerSession","Error invoking callback for %1").arg(methodName));
-        return false;
-    }
-}
-
-void QObexServerSessionPrivate::errorOccurred(QObexServerSession::Error error, const QString &errorString)
-{
-    if (m_closed) {
-#ifdef QOBEXSERVERSESSION_DEBUG
-        qDebug() << "QObexServerSession: closed, ignoring error:" << error << errorString;
-#endif
-        return;
-    }
-
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: calling parent error():" << error << errorString;
-#endif
-    m_parent->error(error, errorString);
-}
-
-void QObexServerSessionPrivate::socketDisconnected()
-{
-    if (m_socketDisconnected)
-        return;
-
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: either my QObexSocket or its QIODevice transport has gone away";
-#endif
-
-    // Disconnect these signals so that we don't get any more calls
-    // to socketDisconnected()
-    if (m_socket) {
-        QObject::disconnect(m_socket->device(), SIGNAL(aboutToClose()),
-                            this, SLOT(socketDisconnected()));
-        QObject::disconnect(m_socket->device(), SIGNAL(destroyed()),
-                            this, SLOT(socketDisconnected()));
-        QObject::disconnect(m_socket, SIGNAL(destroyed()),
-                            this, SLOT(socketDisconnected()));
-    }
-
-    m_socketDisconnected = true;
-
-    errorOccurred(QObexServerSession::ConnectionError, qApp->translate(
-                "QObexServerSession", "Connection error"));
-}
-
-QObex::SetPathFlags QObexServerSessionPrivate::getSetPathFlags(const QByteArray &nonHeaderData)
-{
-    QObex::SetPathFlags flags = 0;
-
-    if (nonHeaderData.size() < 2)
-        return flags;
-
-    // 1st byte has flags, 2nd byte has constants (not used)
-    if (nonHeaderData.constData()[0] & 1)
-        flags |= QObex::BackUpOneLevel;
-    if (nonHeaderData.constData()[0] & 2)
-        flags |= QObex::NoPathCreation;
-    return flags;
-}
-
-/*
-    Looks at which protected slots have been reimplemented by the subclass.
-    Adds the name of each implemented slot to m_implementedCallbacks.
-*/
-void QObexServerSessionPrivate::initAvailableCallbacks()
-{
-    const QMetaObject superMetaObj = QObexServerSession::staticMetaObject;
-
-    // methodOffset is the index where the superclass methods end and
-    // this class's methods begin
-    const QMetaObject *metaObj = m_parent->metaObject();
-    int methodCount = metaObj->methodCount();
-    for (int i=metaObj->methodOffset(); i<methodCount; i++) {
-        const char *sig = metaObj->method(i).signature();
-        //qDebug() << "\tFound subclass method:" << sig;
-
-        if (superMetaObj.indexOfMethod(sig) != -1) {
-            // superclass also has this method, therefore subclass is
-            // overriding/re-implementing this method
-            QString sigStr(sig);
-            QString methodName = sigStr.mid(0, sigStr.indexOf("("));
-            m_implementedCallbacks.insert(methodName);
-        }
-    }
-
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: looks like subclass" << metaObj->className()
-            << "implements these slots:" << m_implementedCallbacks;
-#endif
-}
-
-QLatin1String QObexServerSessionPrivate::getRequestSlot(QObex::Request request)
-{
-    switch (request) {
-        case QObex::Connect:
-            return QLatin1String("connect");
-        case QObex::Disconnect:
-            return QLatin1String("disconnect");
-        case QObex::Put:
-            return QLatin1String("put");
-        case QObex::PutDelete:
-            return QLatin1String("putDelete");
-        case QObex::Get:
-            return QLatin1String("get");
-        case QObex::SetPath:
-            return QLatin1String("setPath");
-        default:
-            return QLatin1String("");
-    }
-}
-
-
-//======================================================================
-
-
 /*!
-    Constructs an OBEX server session that will communicate with OBEX
-    clients over \a device. The \a parent is the QObject parent.
+    Constructs an OBEX server session that uses \a device for the transport
+    connection. The \a parent is the QObject parent.
 
     The \a device must be opened, or else the service will be unable
     to receive any client requests.
@@ -844,9 +803,6 @@ void QObexServerSession::setNextResponseHeader(const QObexHeader &header)
 */
 QObex::ResponseCode QObexServerSession::dataAvailable(const char *, qint64)
 {
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: Put was allowed but subclass does not override dataAvailable(), responding InternalServerError";
-#endif
     return QObex::InternalServerError;
 }
 
@@ -870,9 +826,6 @@ QObex::ResponseCode QObexServerSession::dataAvailable(const char *, qint64)
 */
 QObex::ResponseCode QObexServerSession::provideData(const char **, qint64*)
 {
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexServerSession: Get was allowed but subclass does not override provideData(), responding InternalServerError";
-#endif
     return QObex::InternalServerError;
 }
 

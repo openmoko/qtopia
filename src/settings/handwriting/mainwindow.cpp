@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -94,7 +94,7 @@ QIMPenProfileEdit::QIMPenProfileEdit(QWidget *parent, Qt::WFlags f)
     : QDialog(parent, f), cdiag(0), gdiag(0)
 {
     setWindowTitle(tr("Handwriting"));
-    setObjectName( "handwriting" );
+    setObjectName( "hwsettings" );
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setContentsMargins(0, 0, 0, 0);

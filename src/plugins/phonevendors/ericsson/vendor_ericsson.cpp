@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,6 +25,7 @@
 #include <qatutils.h>
 #include <qvaluespace.h>
 #include <QTimer>
+#include <QDebug>
 
 EricssonCallProvider::EricssonCallProvider( QModemService *service )
     : QModemCallProvider( service )
@@ -137,6 +138,8 @@ EricssonModemService::EricssonModemService
         ( "*ECIND: 5,1,", this, SLOT(signalStrength(QString)) );
     primaryAtChat()->registerNotificationType
         ( "*ECIND: 5,5,", this, SLOT(smsMemoryFull(QString)) );
+    primaryAtChat()->registerNotificationType
+        ( "*TTZ: 2,", this, SLOT(ttzNotification(QString)), true );
 }
 
 EricssonModemService::~EricssonModemService()
@@ -185,6 +188,38 @@ void EricssonModemService::smsMemoryFull( const QString& msg )
     int value = msg.mid(12).toInt();
     indicators()->setSmsMemoryFull
         ( (QModemIndicators::SmsMemoryFullStatus)value );
+}
+
+void EricssonModemService::ttzNotification( const QString& msg )
+{
+    // Timezone information from the network.
+    uint posn = 8;
+    QString time = QAtUtils::nextString( msg, posn );
+    int dst = ((int)QAtUtils::parseNumber( msg, posn )) * 60;
+    int zoneIndex = time.length();
+    while ( zoneIndex > 0 && time[zoneIndex - 1] != QChar('-') &&
+            time[zoneIndex - 1] != QChar('+') )
+        --zoneIndex;
+    int zoneOffset;
+    if ( zoneIndex > 0 && time[zoneIndex - 1] == QChar('-') ) {
+        zoneOffset = time.mid(zoneIndex - 1).toInt() * 15;
+    } else if ( zoneIndex > 0 && time[zoneIndex - 1] == QChar('+') ) {
+        zoneOffset = time.mid(zoneIndex).toInt() * 15;
+    } else {
+        // Unknown timezone information.
+        return;
+    }
+    QString timeString;
+    if (zoneIndex > 0)
+        timeString = time.mid(0, zoneIndex - 1);
+    else
+        timeString = time;
+    QDateTime t = QDateTime::fromString(timeString, "MM/dd/yyyy, HH:mm:ss");
+    if ( t.isValid() ) {
+        QDateTime utc = QDateTime(t.date(), t.time(), Qt::UTC);
+        utc = utc.addSecs(-zoneOffset * 60);
+        indicators()->setNetworkTime( utc.toTime_t(), zoneOffset, dst );
+    }
 }
 
 TrolltechSimToolkit::TrolltechSimToolkit( QModemService *service )

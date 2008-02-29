@@ -27,7 +27,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -41,7 +41,7 @@
 <li><div class="fn"/>virtual void <b><a href="qadviceofcharge.html#setPricePerUnit">setPricePerUnit</a></b> ( const QString &amp; <i>currency</i>, const QString &amp; <i>unitPrice</i>, const QString &amp; <i>password</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -57,17 +57,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -82,7 +81,7 @@
 <p>See also <a href="qcomminterface.html">QCommInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAdviceOfCharge"></a>QAdviceOfCharge::QAdviceOfCharge ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QAdviceOfCharge"></a>QAdviceOfCharge::QAdviceOfCharge ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new advice of charge object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports advice of charge. If there is more than one service that supports advice of charge, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qadviceofcharge.html">QAdviceOfCharge</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
@@ -100,7 +99,7 @@
 <h3 class="fn"><a name="currentCallMeter"></a>void QAdviceOfCharge::currentCallMeter ( int <i>value</i>, bool <i>explicitRequest</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted to report the <i>value</i> of the current call meter in units (zero if not set). If <i>explicitRequest</i> is true, then the signal resulted because of a call to <a href="qadviceofcharge.html#requestCurrentCallMeter">requestCurrentCallMeter</a>(). If <i>explicitRequest</i> is false, then the signal resulted because of an unsolicited notification from the modem of a change in the call meter.</p>
 <p>See also <a href="qadviceofcharge.html#requestCurrentCallMeter">requestCurrentCallMeter</a>().</p>
-<h3 class="fn"><a name="pricePerUnit"></a>void QAdviceOfCharge::pricePerUnit ( const <a href="qstring.html">QString</a> &amp; <i>currency</i>, const <a href="qstring.html">QString</a> &amp; <i>unitPrice</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="pricePerUnit"></a>void QAdviceOfCharge::pricePerUnit ( const <a href="./qstring.html">QString</a> &amp; <i>currency</i>, const <a href="./qstring.html">QString</a> &amp; <i>unitPrice</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted to response to <a href="qadviceofcharge.html#requestPricePerUnit">requestPricePerUnit</a>(). The <i>currency</i> parameter will be a three-character currency code (for example, <tt>USD</tt>, <tt>EUR</tt>, <tt>AUD</tt>, <tt>GBP</tt> or <tt>DEM</tt>). The <i>unitPrice</i> parameter will be the price per unit, with a dot used as a decimal separator (for example, <tt>2.66</tt>).</p>
 <p>The price is reported as a string to give maximum flexibility to client applications to convert it into a fixed-point or floating-point value to perform unit calculations.</p>
 <p>If <i>currency</i> is an empty string, then the price per unit information could not be obtained.</p>
@@ -117,19 +116,19 @@
 <h3 class="fn"><a name="requestPricePerUnit"></a>void QAdviceOfCharge::requestPricePerUnit ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Request the price per unit information, which will be reported via the <a href="qadviceofcharge.html#pricePerUnit">pricePerUnit</a>() signal.</p>
 <p>See also <a href="qadviceofcharge.html#pricePerUnit">pricePerUnit</a>() and <a href="qadviceofcharge.html#setPricePerUnit">setPricePerUnit</a>().</p>
-<h3 class="fn"><a name="resetAccumulatedCallMeter"></a>void QAdviceOfCharge::resetAccumulatedCallMeter ( const <a href="qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="resetAccumulatedCallMeter"></a>void QAdviceOfCharge::resetAccumulatedCallMeter ( const <a href="./qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Reset the accumulated call meter, with <i>password</i> supplying the <tt>SIM PIN2</tt> value. The <a href="qadviceofcharge.html#resetAccumulatedCallMeterResult">resetAccumulatedCallMeterResult</a>() signal will be emitted to report the result of resetting the accumulated call meter.</p>
 <p>See also <a href="qadviceofcharge.html#accumulatedCallMeter">accumulatedCallMeter</a>(), <a href="qadviceofcharge.html#requestAccumulatedCallMeter">requestAccumulatedCallMeter</a>(), and <a href="qadviceofcharge.html#resetAccumulatedCallMeterResult">resetAccumulatedCallMeterResult</a>().</p>
 <h3 class="fn"><a name="resetAccumulatedCallMeterResult"></a>void QAdviceOfCharge::resetAccumulatedCallMeterResult ( <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to <a href="qadviceofcharge.html#resetAccumulatedCallMeter">resetAccumulatedCallMeter</a>() to report the <i>result</i> of the operation.</p>
 <p>See also <a href="qadviceofcharge.html#resetAccumulatedCallMeter">resetAccumulatedCallMeter</a>() and <a href="qadviceofcharge.html#requestAccumulatedCallMeter">requestAccumulatedCallMeter</a>().</p>
-<h3 class="fn"><a name="setAccumulatedCallMeterMaximum"></a>void QAdviceOfCharge::setAccumulatedCallMeterMaximum ( int <i>value</i>, const <a href="qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setAccumulatedCallMeterMaximum"></a>void QAdviceOfCharge::setAccumulatedCallMeterMaximum ( int <i>value</i>, const <a href="./qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the accumulated call meter maximum <i>value</i>, with <i>password</i> supplying the <tt>SIM PIN2</tt> value. The <a href="qadviceofcharge.html#setAccumulatedCallMeterMaximumResult">setAccumulatedCallMeterMaximumResult</a>() signal will be emitted to report the result of setting the accumulated call meter maximum value.</p>
 <p>See also <a href="qadviceofcharge.html#requestAccumulatedCallMeterMaximum">requestAccumulatedCallMeterMaximum</a>(), <a href="qadviceofcharge.html#accumulatedCallMeterMaximum">accumulatedCallMeterMaximum</a>(), <a href="qadviceofcharge.html#callMeterMaximumWarning">callMeterMaximumWarning</a>(), and <a href="qadviceofcharge.html#setAccumulatedCallMeterMaximumResult">setAccumulatedCallMeterMaximumResult</a>().</p>
 <h3 class="fn"><a name="setAccumulatedCallMeterMaximumResult"></a>void QAdviceOfCharge::setAccumulatedCallMeterMaximumResult ( <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to <a href="qadviceofcharge.html#setAccumulatedCallMeterMaximum">setAccumulatedCallMeterMaximum</a>() to report the <i>result</i> of the operation.</p>
 <p>See also <a href="qadviceofcharge.html#setAccumulatedCallMeterMaximum">setAccumulatedCallMeterMaximum</a>() and <a href="qadviceofcharge.html#requestAccumulatedCallMeterMaximum">requestAccumulatedCallMeterMaximum</a>().</p>
-<h3 class="fn"><a name="setPricePerUnit"></a>void QAdviceOfCharge::setPricePerUnit ( const <a href="qstring.html">QString</a> &amp; <i>currency</i>, const <a href="qstring.html">QString</a> &amp; <i>unitPrice</i>, const <a href="qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setPricePerUnit"></a>void QAdviceOfCharge::setPricePerUnit ( const <a href="./qstring.html">QString</a> &amp; <i>currency</i>, const <a href="./qstring.html">QString</a> &amp; <i>unitPrice</i>, const <a href="./qstring.html">QString</a> &amp; <i>password</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the price per unit information to <i>unitPrice</i> in <i>currency</i>, with <i>password</i> supplying the <tt>SIM PIN2</tt> value. The setPricePerUnit() signal will be emitted to report the result of setting the price per unit.</p>
 <p>See also <a href="qadviceofcharge.html#pricePerUnit">pricePerUnit</a>() and <a href="qadviceofcharge.html#setPricePerUnitResult">setPricePerUnitResult</a>().</p>
 <h3 class="fn"><a name="setPricePerUnitResult"></a>void QAdviceOfCharge::setPricePerUnitResult ( <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -137,8 +136,8 @@
 <p>See also <a href="qadviceofcharge.html#setPricePerUnit">setPricePerUnit</a>() and <a href="qadviceofcharge.html#requestPricePerUnit">requestPricePerUnit</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,7 +39,7 @@ public:
     inline int frameCount() const
     { return frames.size(); }
     inline QPixmap image(int frame) const
-    { return frames.isEmpty() ? QPixmap() : frames.at(frame % frames.size()).pixmap; }
+    { return frames.isEmpty() ? QPixmap() : frames.at(frame % frames.size()); }
     inline void setVelocity(qreal xvel, qreal yvel)
     { vx = xvel; vy = yvel; }
     inline qreal xVelocity() const
@@ -55,13 +55,9 @@ public:
     void setSequence(const QList<QPixmap> &animation);
 
 private:
-    struct Frame {
-        QPixmap pixmap;
-        QRectF boundingRect;
-    };
 
     int currentFrame;
-    QList<Frame> frames;
+    QList<QPixmap> frames;
     qreal vx, vy;
 };
 

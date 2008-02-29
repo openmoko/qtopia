@@ -33,4 +33,4 @@ help.hint=help
 INSTALLS+=help
 
 pkg.description=Security settings application
-pkg.domain=window,phonecomm,security
+pkg.domain=trusted

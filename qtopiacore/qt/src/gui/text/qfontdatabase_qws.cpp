@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -884,8 +882,8 @@ QFontDatabase::findFont(int script, const QFontPrivate *fp,
         }
     }
 
-    if (fp) {
-        fe->fontDef.pointSize = qreal(fe->fontDef.pixelSize); //####int(double(fe->fontDef.pixelSize) * 72.0 / 96.0);
+    if (fp && fp->dpi > 0) {
+        fe->fontDef.pointSize = qreal(double((fe->fontDef.pixelSize * 72) / fp->dpi));
     } else {
         fe->fontDef.pointSize = request.pointSize;
     }

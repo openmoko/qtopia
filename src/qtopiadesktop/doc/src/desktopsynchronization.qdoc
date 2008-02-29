@@ -1,0 +1,111 @@
+/*!
+
+\overview Desktop Synchronization
+\brief An overview of what Desktop Synchronization provides.
+
+\tableofcontents
+
+\section1 Intended Audience
+
+This documentation is aimed primarily at system integrators. A complete
+Desktop Synchronization solution will require some device-specific code
+and may involve writing device drivers.
+
+\section1 Overview
+
+From a high level, Desktop Synchronization is made up of client and server plugins
+that communicate their changes to the Sync Manager which handles conflicts and
+passes on the merged data. The reference implementation provides plugins for
+Qtopia PIM and Outlook. The components look like this.
+
+\image dsoverview.png Desktop Synchronization Overview
+
+The plugins are responsible for converting the data into a common format. This is
+defined separately for each dataset. See \l Datasets for the datasets that are supported
+by the reference implementation.
+
+See \l{Add a new device plugin} and \l{Add a new desktop plugin} for how to add a plugin.
+
+\section1 Remote Engine
+
+The remote engine is an abstract entity. It consists of a combination of
+hardware, software and drivers but these do not matter to the high level synchronization
+process. A simplified overview of these components is given below.
+
+\image dsremote.png Remote Engine Overview
+
+As you can see the components on each machine are roughly the same.
+The plugin interface is remoted using QCop messages which are serialized onto a stream.
+The underlying driver is exposed as a QIODevice which carries the messages.
+The components of the Remote Engine are examined in more detail below.
+
+\section1 Synchronization
+
+The Synchronization application runs on Qtopia.
+
+\image dssyncapp.png Synchronization Overview
+
+\section2 Qtopia PIM Plugins
+
+The PIM plugins are instaces of \l Qtopia4SyncPlugin. A \l Qtopia4SyncPluginFactory is used
+so that a single plugin file can contain all of the PIM plugins.
+
+\section2 Qtopia4Sync
+
+This class converts from QCop messages to the Qtopia4SyncPlugin API. It also performs
+device-specific house keeping such as recording the sync anchors.
+
+\section2 QCop Bridge
+
+This class serializes QCop messages for transmission. It uses the \l{qdsync Protocol}
+over a QIODevice.
+
+\section2 QSerialPort
+
+This class exposes the USB serial driver as a QIODevice for the QCop Bridge.
+See \l{Use a Serial Connection} for more information. Synchronization also contains
+support for TCP/IP. See \l{Use a TCP/IP Connection} for more information.
+
+\section2 USB Serial Gadget
+
+This is the Linux 2.4 serial_fd gadget. The Greenphone also supports the
+Linux 2.4 net_fd gadget which works well with Linux PCs.
+
+Note that Trolltech does not provide a Windows driver for the Linux net_fd gadget.
+
+\section1 Qtopia Sync Agent
+
+Qtopia Sync Agent runs on the Windows PC.
+
+\image dssyncagent.png Qtopia Sync Agent Overview
+
+\section2 Outlook Plugins
+
+The Outlook plugins are instaces of \l QDServerSyncPlugin. They communicate to Outlook
+via the Outlook Object Model (OOM) although the Messaging API (MAPI) is used in some
+places to avoid security dialogs.
+
+\section2 Qtopia4Sync
+
+This class implements \l QDClientSyncPlugin and converts to QCop messages. A
+QDClientSyncPluginFactory is used so that one Qtopia4Sync instance can be created for
+each dataset that the device supports.
+
+\section2 QCop Connection
+
+This class implements \l QDConPlugin and serializes QCop messages for transmission. It
+uses the \l{qdsync Protocol} over a QIODevice.
+
+\section2 Serial Link
+
+This class implements \l QDLinkPlugin and exposes the USB driver as a QIODevice to the
+QCop Connection. It supports proper COM ports and the broken COM port implementation
+used by the Greenphone USB serial driver. See \l{Use a Serial Connection} for more
+information. Qtopia Sync Agent also contains
+support for a TCP/IP link. See \l{Use a TCP/IP Connection} for more information.
+
+\section2 USB Serial Driver
+
+This is a Windows driver for the Greenphone's serial_fd gadget.
+
+*/

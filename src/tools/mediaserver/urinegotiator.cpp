@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,9 +20,11 @@
 ****************************************************************************/
 
 #include <QMap>
+#include <QMultiMap>
 #include <QUrl>
 #include <QMimeType>
 #include <QValueSpaceObject>
+#include <QDebug>
 
 #include <QMediaSessionRequest>
 #include <QMediaSessionBuilder>
@@ -38,8 +40,8 @@ namespace mediaserver
 {
 
 typedef QMap<QString, QStringList>              InfoMap;
-typedef QMap<QString, QMediaSessionBuilderList> UriBuilderInfo;
 typedef QMap<QMediaServerSession*, QMediaSessionBuilder*>  ActiveSessionMap;
+typedef QMultiMap<int, QMediaSessionBuilder*>   OrderedBuilders;
 
 // {{{ UriNegotiatorPrivate
 class UriNegotiatorPrivate
@@ -48,11 +50,8 @@ public:
     QValueSpaceObject*          info;
     InfoMap                     mimeTypes;
     InfoMap                     uriSchemes;
-    UriBuilderInfo              mimeTypeBuilders;
-    UriBuilderInfo              uriSchemeBuilders;
-    QMediaSessionBuilderList    builders;
     ActiveSessionMap            activeSessions;
-
+    OrderedBuilders             builders;
     QMediaSessionBuilder::Attributes    attributes;
 };
 // }}}
@@ -80,29 +79,21 @@ QMediaSessionBuilder::Attributes const& UriNegotiator::attributes() const
     return d->attributes;
 }
 
-void UriNegotiator::addBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder)
+void UriNegotiator::addBuilder
+(
+ QString const& tag,
+ int priority,
+ QMediaSessionBuilder* sessionBuilder
+)
 {
     QMediaSessionBuilder::Attributes const& attributes = sessionBuilder->attributes();
 
-    // Mime types
-    QStringList     mimeTypes = attributes["mimeTypes"].toStringList();
-    foreach (QString const& mimeType, mimeTypes)
-    {
-        d->mimeTypeBuilders[mimeType].append(sessionBuilder);
-    }
-    d->mimeTypes[tag] += mimeTypes;
-
-    // URI Schemes
-    QStringList     uriSchemes = attributes["uriSchemes"].toStringList();
-    foreach (QString const& uriScheme, uriSchemes)
-    {
-        d->uriSchemeBuilders[uriScheme].append(sessionBuilder);
-    }
-    d->uriSchemes[tag] += uriSchemes;
-
-    d->builders.push_back(sessionBuilder);
+    // Add Builder
+    d->builders.insert(priority, sessionBuilder);
 
     // Update valuespace
+    d->mimeTypes[tag] += attributes["mimeTypes"].toStringList();
+    d->uriSchemes[tag] += attributes["uriSchemes"].toStringList();
     d->info->setAttribute(tag + "/mimeTypes", d->mimeTypes[tag]);
     d->info->setAttribute(tag + "/uriSchemes", d->uriSchemes[tag]);
 }
@@ -110,9 +101,7 @@ void UriNegotiator::addBuilder(QString const& tag, QMediaSessionBuilder* session
 void UriNegotiator::removeBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder)
 {
     Q_UNUSED(tag);
-    // Remove from mimeTypes etc
-
-    d->builders.removeAll(sessionBuilder);
+    Q_UNUSED(sessionBuilder);
 }
 
 QMediaServerSession* UriNegotiator::createSession(QMediaSessionRequest sessionRequest)
@@ -127,68 +116,50 @@ QMediaServerSession* UriNegotiator::createSession(QMediaSessionRequest sessionRe
 
     if (url.isValid())
     {
-        QMediaSessionBuilderList    ubs = d->uriSchemeBuilders[url.scheme()];
+        QMediaSessionBuilderList    candidates;
 
-        if (ubs.size() > 0)
+        for (OrderedBuilders::iterator it = d->builders.begin(); it != d->builders.end(); ++it)
         {
-            QMediaSessionBuilderList    candidates(ubs);
-            QMimeType                   mimeType = QMimeType::fromFileName(url.path());
+            if ((*it)->attributes()["uriSchemes"].toStringList().contains(url.scheme()))
+                candidates.append(*it);
+        }
 
-            // Prune out ones that can't handle the mime type
-            if (!mimeType.isNull() &&
-                mimeType.id() != "application/octet-stream" /* i.e. - don't know */)
+        if (candidates.size() > 0)
+        {
+            QMimeType           mimeType = QMimeType::fromFileName(url.path());
+
+            // If we can id the mimetype, prune those that aren't registered
+            if (!mimeType.isNull())
             {
-                QMediaSessionBuilderList    mbs = d->mimeTypeBuilders[mimeType.id()];
+                QString     id = mimeType.id();
 
-                foreach (QMediaSessionBuilder* builder, ubs)
+                if (id != "application/octet-stream" /* i.e. - don't know */)
                 {
-                    if (!mbs.contains(builder))
-                        candidates.removeAll(builder);
+                    foreach (QMediaSessionBuilder* builder, candidates)
+                    {
+                        if (!builder->attributes()["mimeTypes"].toStringList().contains(id))
+                            candidates.removeAll(builder);
+                    }
                 }
             }
 
             if (candidates.size() > 0)
             {
-                QMediaSessionBuilder*   sessionBuilder = 0;
+                QMediaSessionBuilder*   sessionBuilder = candidates.front();
 
-                if (candidates.size() == 1)
+                mediaSession = sessionBuilder->createSession(sessionRequest);
+
+                if (mediaSession != 0)
                 {
-                    sessionBuilder = candidates.front();
-                }
-                else
-                {
-                    // Grab MRU
-                    foreach (QMediaSessionBuilder* builder, d->builders)
-                    {
-                        if (candidates.contains(builder))
-                        {
-                            sessionBuilder = builder;
-                            break;
-                        }
-                    }
-                }
+                    // NOTE: DRM is indicated by qtopia:// uri scheme so partly dealt with
+                    // here. Engines have their part in DRM, they must understand the uri
+                    // scheme if they wish to play DRM media. Here we just wrap the session
+                    // to provide a means to inform the DRM framework of different requests
+                    // - saves the engine doing it.
+                    if (url.scheme() == "qtopia")
+                        mediaSession = new DrmSession(url, mediaSession);
 
-                if (sessionBuilder != 0)
-                {
-                    // make MRU
-                    d->builders.removeAll(sessionBuilder);
-                    d->builders.prepend(sessionBuilder);
-
-                    // Actually create the session :)
-                    mediaSession = sessionBuilder->createSession(sessionRequest);
-
-                    if (mediaSession != 0)
-                    {
-                        // NOTE: DRM is indicated by qtopia:// uri scheme so partly dealt with
-                        // here. Engines have their part in DRM, they must understand the uri
-                        // scheme if they wish to play DRM media. Here we just wrap the session
-                        // to provide a means to inform the DRM framework of different requests
-                        // - saves the engine doing it.
-                        if (url.scheme() == "qtopia")
-                            mediaSession = new DrmSession(url, mediaSession);
-
-                        d->activeSessions.insert(mediaSession, sessionBuilder);
-                    }
+                    d->activeSessions.insert(mediaSession, sessionBuilder);
                 }
             }
         }
@@ -199,6 +170,8 @@ QMediaServerSession* UriNegotiator::createSession(QMediaSessionRequest sessionRe
 
 void UriNegotiator::destroySession(QMediaServerSession* mediaSession)
 {
+    qLog(Media) << "UriNegotiator::destroySession" << mediaSession->id();
+
     ActiveSessionMap::iterator it = d->activeSessions.find(mediaSession);
 
     if (it != d->activeSessions.end())

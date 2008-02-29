@@ -32,6 +32,10 @@ equals(register,1) {
     isEmpty(target.domain):target.domain=$$pkg.domain
 }
 
+# qdawggen needs the -e switch when installing for target systems that have a different endianness to the host
+qdawggen=$$fixpath($$QPEDIR/bin/qdawggen)
+equals(QTDIR,$$QTEDIR):!equals(QTOPIA_HOST_ENDIAN,$$QTOPIA_TARGET_ENDIAN):qdawggen+=-e
+
 # Process the hints (see also i18n.prf for hint=nct)
 for(it,INSTALLS) {
     hint=$$eval($${it}.hint)
@@ -87,7 +91,7 @@ for(it,INSTALLS) {
                 syncqtopia.depends+=syncqtopia_$$it
             } else {
                 # 'symlink' all the headers
-                eval(syncqtopia_$${it}.CONFIG=no_link no_dependencies no_build combine ignore_no_exist no_clean)
+                eval(syncqtopia_$${it}.CONFIG=no_link no_dependencies explicit_dependencies no_build combine ignore_no_exist no_clean)
                 commands=$$COMMAND_HEADER\
                     $$fixpath($$QBS_BIN/syncqtopia) $$qtheaders $$fixpath($$eval($${it}.path))\
                         $$ORIG_TARGET ${QMAKE_FILE_IN} $$LINE_SEP\
@@ -121,7 +125,7 @@ for(it,INSTALLS) {
                     sdk.depends+=sdk_syncqtopia_$$it
                 } else {
                     # 'symlink' all the headers
-                    eval(sdk_syncqtopia_$${it}.CONFIG=no_link no_dependencies no_build combine ignore_no_exist no_clean)
+                    eval(sdk_syncqtopia_$${it}.CONFIG=no_link no_dependencies explicit_dependencies no_build combine ignore_no_exist no_clean)
                     commands=$$COMMAND_HEADER\
                         $$fixpath($$QBS_BIN/syncqtopia) -sdk $(INSTALL_ROOT) $$qtheaders $$fixpath($$eval($${it}.path))\
                             $$ORIG_TARGET ${QMAKE_FILE_IN}
@@ -167,7 +171,7 @@ for(it,INSTALLS) {
         eval($${it}.files=)
         eval($${it}.path=)
         command=$$COMMAND_HEADER\
-            $$fixpath($$QPEDIR/bin/qdawggen) $$fixpath($(INSTALL_ROOT)$$path) $$fixpath($$files)
+            $$qdawggen $$fixpath($(INSTALL_ROOT)$$path) $$fixpath($$files)
         eval($${it}.commands=\$$command)
         eval($${it}.CONFIG=no_path)
         !isEmpty(files):INSTALLS+=$$it

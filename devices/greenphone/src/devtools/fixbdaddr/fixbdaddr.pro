@@ -13,7 +13,7 @@ desktop.hint=desktop
 INSTALLS+=desktop
 
 pkg.desc=Greenphone unique bdaddr fixer
-pkg.domain=window,phonecomm
+pkg.domain=trusted
 
 depends(libraries/qtopiaphone)
 # can't install the .desktop file before the .directory file has been processed

@@ -19,4 +19,4 @@ pics.hint=pics
 INSTALLS += pics
  
 pkg.name=qpe-keyboard
-pkg.domain=libs
+pkg.domain=trusted

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -502,8 +502,8 @@ void SelectedItem::updateImages()
     detachAnimation();
 
     // Get all the GridItem objects to rebuild their pixmaps.
-    for ( int row = 0; row < table.topRow(); row++ ) {
-        for ( int col = 0; col < table.topColumn(); col++ ) {
+    for ( int row = 0; row <= table.topRow(); row++ ) {
+        for ( int col = 0; col <= table.topColumn(); col++ ) {
             GridItem *item = table.item(row,col);
             if ( item ) {
                 item->updateImages();
@@ -628,6 +628,13 @@ void SelectedItem::keyPressEvent(QKeyEvent *event)
             return;
         setActive(true);
         pressed = true;
+        if ( destItem ) {
+            // User has chosen to move to a new destination already, so they want to select
+            // that one.
+            triggerItemPressed(destItem);
+        } else {
+            triggerItemPressed(currentItem);
+        }
         break;
     default:
         if ( event->isAutoRepeat())
@@ -732,6 +739,19 @@ void SelectedItem::triggerItemSelected(GridItem *item)
 
     // Cause connector to emit itemSelected(GridItem *) signal.
     mConnector->triggerItemSelected(item);
+}
+
+/*!
+  \internal
+  \fn void SelectedItem::triggerItemPressed(GridItem *)
+  Called when a press occurs as part of an item's
+  selection.
+  Emits SelectedItemConnector::itemPressed() signal.
+*/
+void SelectedItem::triggerItemPressed(GridItem *item)
+{
+    // Cause connector to emit itemPressed(GridItem *) signal.
+    mConnector->triggerItemPressed(item);
 }
 
 qreal SelectedItem::xDrift()

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,7 +29,7 @@
 #include "datebooksettings.h"
 #include "exceptiondialog.h"
 #include "entrydialog.h"
-#include "alarmdialog.h"
+#include "alarmview.h"
 #include "finddialog.h"
 #if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
 #include "accounteditor.h"
@@ -81,12 +81,12 @@ DateBook::DateBook(QWidget *parent, Qt::WFlags f)
   editorView(0),
   categoryDialog(0),
   exceptionDialog(0),
-  aPreset(false),
+  aPreset(QAppointment::NoAlarm),
   presetTime(-1),
   startTime(8), // an acceptable default
   compressDay(true),
   syncing(false),
-  closeAfterView(false),
+  closeAfterView(0),
   updateIconsTimer(0),
   prevOccurrences(),
   actionBeam(0)
@@ -193,19 +193,19 @@ void DateBook::showSettings()
 
     DateBookSettings frmSettings(whichclock, this);
     frmSettings.setStartTime(startTime);
-    frmSettings.setAlarmPreset(aPreset, presetTime);
-    frmSettings.setCompressDay(compressDay);
+    frmSettings.setPresetAlarm(aPreset, presetTime);
     frmSettings.setDefaultView(defaultView);
 
     if (QtopiaApplication::execDialog(&frmSettings)) {
-        aPreset = frmSettings.alarmPreset();
-        presetTime = frmSettings.presetTime();
+        aPreset = frmSettings.alarmType();
+        presetTime = frmSettings.alarmDelay();
         startTime = frmSettings.startTime();
-        compressDay = frmSettings.compressDay();
         defaultView = frmSettings.defaultView();
 
+        int endTime = qMin(qMax(startTime + 8, 17), 24);
+
         if (dayView)
-            dayView->setDaySpan( startTime, 17 );
+            dayView->setDaySpan( startTime, endTime );
 
         saveSettings();
     }
@@ -581,7 +581,12 @@ QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool )
         }
     }
 
-    editorView = new EntryDialog(onMonday, editedApp, QTime(startTime, 0), this);
+    int daysportion = (24 * 60) * (presetTime / (24 * 60));
+
+    if (editedApp.alarm() == QAppointment::NoAlarm)
+        editedApp.setAlarm( editedApp.isAllDay() ? (daysportion - (startTime * 60)) : presetTime, QAppointment::NoAlarm);
+
+    editorView = new EntryDialog(onMonday, editedApp, QTime(startTime, 0), presetTime, this);
     editorView->setModal(true);
     editorView->setWindowTitle(tr("Edit Event", "window title" ));
 
@@ -851,10 +856,6 @@ void DateBook::showAppointmentDetails()
 void DateBook::showAppointmentDetails(const QOccurrence &o)
 {
     bool showBuiltinDetails = true;
-    if( isHidden() ) // only close after view if hidden on first activation
-    {
-        closeAfterView = true;
-    }
 
     QUniqueId parentId = o.appointment().parentDependency();
 
@@ -880,6 +881,8 @@ void DateBook::showAppointmentDetails(const QOccurrence &o)
 
     if (showBuiltinDetails) {
         initAppointmentDetails();
+        if( isHidden() ) // only close after view if hidden on first activation
+            closeAfterView = appointmentDetails;
         appointmentDetails->init(o);
 
         if (viewStack->currentWidget() != appointmentDetails) {
@@ -923,7 +926,11 @@ void DateBook::updateIcons()
     actionToday->setVisible(!showingDetails);
     actionMonth->setVisible(!showingDetails && viewStack->currentWidget() != monthView);
     actionSettings->setVisible(!showingDetails);
-    actionAccounts->setVisible(!showingDetails);
+#if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
+    actionAccounts->setVisible(!showingDetails && AccountEditor::editableAccounts(model));
+#else
+    actionAccounts->setVisible(false);
+#endif
     actionCategory->setVisible(!showingDetails);
     actionShowSources->setVisible(!showingDetails);
 
@@ -953,20 +960,19 @@ void DateBook::updateIcons()
 
 void DateBook::closeView()
 {
-    if (viewStack->currentWidget() == appointmentDetails) {
-        if (closeAfterView) {
-            closeAfterView = false;
-            close();
-        }
-        else
-            hideAppointmentDetails();
+    if (closeAfterView && viewStack->currentWidget()==closeAfterView) {
+        closeAfterView = 0;
+        close();
+    } else if (viewStack->currentWidget() == appointmentDetails) {
+        hideAppointmentDetails();
+    } else if (defaultView == DateBookSettings::DayView &&
+                (viewStack->currentWidget() == monthView || viewStack->currentWidget() == alarmView)) {
+        viewDay();
+    } else if (defaultView == DateBookSettings::MonthView &&
+                (viewStack->currentWidget() == dayView || viewStack->currentWidget() == alarmView)) {
+        viewMonth();
     } else {
-        if ( defaultView == DateBookSettings::DayView && viewStack->currentWidget() == monthView )
-            viewDay();
-        else if ( defaultView == DateBookSettings::MonthView && viewStack->currentWidget() == dayView )
-            viewMonth();
-        else
-            close();
+        close();
     }
 }
 
@@ -998,6 +1004,7 @@ bool DateBook::eventFilter( QObject *o, QEvent *e)
 
 void DateBook::init()
 {
+    alarmView = 0;
     dayView = 0;
     monthView = 0;
     appointmentDetails = 0;
@@ -1153,12 +1160,22 @@ void DateBook::init()
              SLOT(updateIcons()) );
 }
 
+void DateBook::initAlarmView()
+{
+    if (!alarmView) {
+        alarmView = new AlarmView(0);
+        viewStack->addWidget(alarmView);
+        connect(alarmView, SIGNAL(showAlarmDetails(QOccurrence)), this, SLOT(showAppointmentDetails(QOccurrence)));
+        connect(alarmView, SIGNAL(closeView()), this, SLOT(closeView()));
+    }
+}
 void DateBook::initDayView()
 {
     if (!dayView) {
         dayView = new DayView(0, model->categoryFilter(), model->visibleSources());
         viewStack->addWidget(dayView);
-        dayView->setDaySpan(startTime, 17);
+        int endTime = qMin(qMax(startTime + 8, 17), 24);
+        dayView->setDaySpan(startTime, endTime);
         connect(dayView, SIGNAL(newAppointment()), this, SLOT(newAppointment()));
         connect(dayView, SIGNAL(removeOccurrence(QOccurrence)),
                 this, SLOT(removeOccurrence(QOccurrence)));
@@ -1237,7 +1254,7 @@ void DateBook::loadSettings()
         QSettings config("Trolltech","DateBook");
         config.beginGroup("Main");
         startTime = config.value("startviewtime", 8).toInt();
-        aPreset = config.value("alarmpreset").toBool();
+        aPreset = (QAppointment::AlarmFlags) config.value("alarmpreset").toInt();
         presetTime = config.value("presettime").toInt();
         defaultView = (DateBookSettings::ViewType) config.value("defaultview", DateBookSettings::DayView).toInt();
         compressDay = true;
@@ -1272,7 +1289,7 @@ void DateBook::saveSettings()
     QSettings configDB("Trolltech","DateBook");
     configDB.beginGroup("Main");
     configDB.setValue("startviewtime",startTime);
-    configDB.setValue("alarmpreset",aPreset);
+    configDB.setValue("alarmpreset", (int) aPreset);
     configDB.setValue("presettime",presetTime);
     configDB.setValue("compressday", compressDay);
     configDB.setValue("defaultview", defaultView);
@@ -1404,13 +1421,12 @@ bool DateBook::newAppointment(const QDateTime& dstart, const QDateTime& dend, co
     a.setStart(start);
     a.setEnd(end);
     a.setNotes(notes);
-    if (aPreset)
-        a.setAlarm(presetTime, QAppointment::Audible);
+    a.setAlarm(presetTime, aPreset);
 
     if (useCurrentCategory)
         a.setCategories(model->categoryFilter().requiredCategories());
 
-    editorView = new EntryDialog(onMonday, a, QTime(startTime, 0), this);
+    editorView = new EntryDialog(onMonday, a, QTime(startTime, 0), presetTime, this);
     editorView->setObjectName("edit-event");
     editorView->setModal(true);
     editorView->setWindowTitle(tr("New Event"));
@@ -1577,13 +1593,11 @@ void DateBook::showAlarms(const QDateTime &when, int warn)
     QOccurrenceModel *om = new QOccurrenceModel(alarmTime, alarmTime.addSecs(1), this);
 
     if (om->rowCount() > 0) {
-        AlarmDialog dlg(this->isVisible() ? this : 0);
-        dlg.setModal(true);
-        bool needShow = (dlg.exec(om, alarmTime, warn) == AlarmDialog::Details);
-
-        if (needShow && dlg.selectedOccurrence().isValid()) {
-            initDayView();
-            showAppointmentDetails(dlg.selectedOccurrence());
+        initAlarmView();
+        if (alarmView->showAlarms(om, alarmTime, warn)) {
+            if( isHidden() ) // only close after view if hidden on first activation
+                closeAfterView = alarmView;
+            raiseView(alarmView);
             showMaximized();
         }
 

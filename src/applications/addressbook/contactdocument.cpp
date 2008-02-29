@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -43,10 +43,9 @@
 #include <QPresence>
 #endif
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include "qcontent.h"
 #endif
-
 
 class ContactAnchorData {
     public:
@@ -59,7 +58,12 @@ class ContactAnchorData {
 ContactDocument::ContactDocument(QObject* parent)
     : QObject(parent)
 {
-    bDialer = !QtopiaService::channel( "Dialer" ).isEmpty();
+#if defined(QTOPIA_TELEPHONY)
+    bDialer = true;
+#else
+    bDialer = false;
+#endif
+
 #ifdef QTOPIA_VOIP
     mPresence = new QPresence(QString(), this);
     if ( mPresence->available() ) {
@@ -72,6 +76,7 @@ ContactDocument::ContactDocument(QObject* parent)
 #else
     voipDialer = false;
 #endif
+    mRtl = qApp->layoutDirection() == Qt::RightToLeft;
     mDocument = new QTextDocument(this);
     mDocument->setUndoRedoEnabled(false);
 }
@@ -97,7 +102,6 @@ void ContactDocument::init( QWidget *widget, const QContact& contact, ContactDoc
     cfItalic = cfNormal;
     cfSmall = cfNormal;
     cfSmallBold = cfNormal;
-    cfAnchor = cfNormal;
     cfBoldUnderline = cfNormal;
 
     cfItalic.setFontItalic(true);
@@ -112,17 +116,10 @@ void ContactDocument::init( QWidget *widget, const QContact& contact, ContactDoc
     cfSmallBold.setFontWeight(80);
     cfSmallBold.setFontPointSize(cfNormal.fontPointSize() * 0.8);
 
-    cfAnchor.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-    cfAnchor.setProperty(QTextFormat::IsAnchor, true);
-    cfAnchor.setForeground(thisPalette.color(QPalette::Link));
-
     bfCenter.setAlignment(Qt::AlignHCenter);
     bfNormal.setAlignment(Qt::AlignLeft);
 
-    tfNoBorder.setCellPadding(4);
-    tfNoBorder.setCellSpacing(0);
-    tfNoBorder.setBorder(0);
-    tfNoBorder.setAlignment(Qt::AlignHCenter);
+    mIconHeight = (int) (0.75 * widget->style()->pixelMetric(QStyle::PM_SmallIconSize));
 
     mDocument->clear();
     mFields.clear();
@@ -145,15 +142,13 @@ void ContactDocument::createContactDetailsDocument()
     QTextCursor curs(mDocument);
 
     QString value;
-    QTextBlockFormat bfHVCenter;
-    bfHVCenter.setAlignment(Qt::AlignCenter);
-    bfHVCenter.setNonBreakableLines(false);
 
     /* add thumbnail and name */
     curs.setBlockFormat(bfCenter);
 
     /* check if we need to have a thumbnail */
     QPixmap thumb = mContact.thumbnail();
+    QString name = nameFragment();
     if( !thumb.isNull() )
     {
         QVariant thumbV = thumb;
@@ -161,26 +156,15 @@ void ContactDocument::createContactDetailsDocument()
         mDocument->addResource(QTextDocument::ImageResource, QUrl("addressbookdetailthumbnail"), thumbV);
         img.setName("addressbookdetailthumbnail"); // No tr
 
-        QTextTable *tt = curs.insertTable(1, 2, tfNoBorder);
-
-        QTextCursor tCursor = tt->cellAt(0,0).firstCursorPosition();
-        tCursor.setBlockFormat(bfHVCenter);
-        tCursor.insertImage(img);
-
-        tCursor = tt->cellAt(0, 1).firstCursorPosition();
-        tCursor.setBlockFormat(bfHVCenter);
-        addNameFragment(tCursor);
-    } else {
-        addNameFragment(curs);
-    }
-    curs.movePosition(QTextCursor::NextBlock);
-
-    addTextBreak(curs);
+        if (mRtl)
+            curs.insertHtml("<table border=0 padding=4 spacing=0 align=center><tr><td valign=middle>" + name + "<td><img src='addressbookdetailthumbnail'></table>");
+        else
+            curs.insertHtml("<table border=0 padding=4 spacing=0 align=center><tr><td><img src='addressbookdetailthumbnail'><td valign=middle>"+ name +"</table>");
+    } else
+        curs.insertHtml(name);
 
     //  Job (if this is a business contact)
-    QCategoryManager c("addressbook", 0);
-    QString bcatid  = "Business"; // no tr
-    bool isBus = mContact.categories().contains( bcatid );
+    bool isBus = mContact.categories().contains( "Business" ); // no tr
 
     if( isBus )
     {
@@ -195,6 +179,8 @@ void ContactDocument::createContactDetailsDocument()
         }
         curs.movePosition(QTextCursor::NextBlock);
     }
+
+    curs.insertHtml("<br>");
 
     //
     //  Voice and messaging...
@@ -238,43 +224,54 @@ void ContactDocument::createContactDetailsDocument()
     }
 }
 
+void ContactDocument::addCachedPixmap(const QString& url, const QString& path)
+{
+    QPixmap pm = mCachedPixmaps.value(url);
+    if (pm.isNull()) {
+        QIcon icon(path);
+        pm = icon.pixmap(mIconHeight);
+        if (!pm.isNull()) {
+            mCachedPixmaps.insert(url, pm);
+        }
+    }
+
+    if (!pm.isNull() && mDocument->resource(QTextDocument::ImageResource, url).isNull())
+        mDocument->addResource(QTextDocument::ImageResource, url, pm);
+}
+
 void ContactDocument::addPhoneFragment( QTextCursor &curs, const QString& img, const QString& num, LinkType link, QContactModel::Field phoneType)
 {
     if ( ! num.isEmpty() ) {
         QString escnum = num;
         escnum = Qt::escape( escnum.replace( QRegExp(" "), "-" ) );
 
-        QTextCharFormat cfMyAnchor(cfAnchor);
-        QTextImageFormat cfMyAnchorImage;
-        ContactAnchorData *cfd = 0;
-        QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
+        curs.insertBlock(bfCenter);
 
-        switch (link)
-        {
-            case Dialer:
-                cfd = new ContactAnchorData;
-                cfd->type = DialLink;
-                cfd->field = phoneType;
-                cfd->number = escnum;
-                cfMyAnchor.setProperty(QTextFormat::AnchorHref, fieldKey);
-                mFields.insert(fieldKey, cfd);
-                break;
+        QString innerHtml = QString(mRtl ? "%2<img src='cached%1'>" : "<img src='cached%1'>%2").arg(img, num);
+        /* Use HTML for anchors to pick up stylesheet stuff */
+        if (link == Dialer) {
+            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
+            ContactAnchorData *cfd = 0;
+            cfd = new ContactAnchorData;
+            cfd->type = DialLink;
+            cfd->field = phoneType;
+            cfd->number = escnum;
+            mFields.insert(fieldKey, cfd);
 
-            default:
-                cfMyAnchor = cfNormal;
-                break;
+            QString text("<a href='%1'>%2</a>");
+            curs.insertHtml(text.arg(fieldKey).arg(innerHtml));
+        } else {
+            curs.insertHtml(innerHtml);
         }
-        cfMyAnchorImage.merge(cfMyAnchor);
-        cfMyAnchorImage.setName(img);
-
-        addImageAndTextLine(curs, cfMyAnchorImage, num,
-                            cfMyAnchor, bfCenter, Qtopia::mousePreferred() ? cfSmall : cfNormal);
+        curs.movePosition(QTextCursor::NextBlock);
+        addCachedPixmap(QString("cached") + img, img);
     }
 }
 
-void ContactDocument::addNameFragment( QTextCursor &curs )
+QString ContactDocument::nameFragment()
 {
     QString value;
+    QString ret;
 
     //  Name
     // attempt full name first.
@@ -292,21 +289,19 @@ void ContactDocument::addNameFragment( QTextCursor &curs )
 
     if (!nameList.isEmpty()) {
         value = nameList.join(QChar(' '));
-        curs.insertText(value, cfBold);
+        ret = "<b>" + value + "</b>";
     } else if ( !(value = mContact.label()).isEmpty() ) {
-       curs.insertText(value, cfBold);
+        ret = "<b>" + value + "</b>";
     }
 
     //  Also, name pronunciation
     if ( !mContact.firstNamePronunciation().isEmpty() || !mContact.lastNamePronunciation().isEmpty()) {
-        curs.insertText(QChar(QChar::LineSeparator));
-        curs.insertText("\"", cfItalic);
-        curs.insertText(mContact.firstNamePronunciation(), cfItalic);
+        value += "<br><i>\"" + mContact.firstNamePronunciation();
         if (!mContact.firstNamePronunciation().isEmpty() && !mContact.lastNamePronunciation().isEmpty())
-            curs.insertText(" ", cfItalic);
-        curs.insertText(mContact.lastNamePronunciation(), cfItalic);
-        curs.insertText("\"", cfItalic);
+            value += ' ';
+        value += mContact.lastNamePronunciation() + "\"</i>";
     }
+    return value;
 }
 
 void ContactDocument::addBusinessPhoneFragment( QTextCursor &curs )
@@ -335,28 +330,25 @@ void ContactDocument::addEmailFragment( QTextCursor &curs )
 {
     QStringList emails = mContact.emailList();
     QStringList::Iterator it;
+    if (emails.count() > 0)
+        addCachedPixmap("cachediconemail", ":icon/email");
     for( it = emails.begin() ; it != emails.end() ; ++it )
     {
         QString trimmed = (*it).trimmed();
         if(!trimmed.isEmpty())
         {
-            QTextCharFormat cfMyAnchor(cfAnchor);
-            QTextImageFormat cfMyImageAnchor;
-
+            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
             ContactAnchorData *cfd = new ContactAnchorData;
             cfd->type = EmailLink;
             cfd->number = Qt::escape(trimmed);
             cfd->field = QContactModel::Emails;
-            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
-
-            cfMyAnchor.setProperty(QTextFormat::AnchorHref, fieldKey);
-
             mFields.insert(fieldKey, cfd);
-            cfMyImageAnchor.merge(cfMyAnchor);
-            cfMyImageAnchor.setName(":icon/email");
 
-            addImageAndTextLine(curs, cfMyImageAnchor, trimmed,
-                    cfMyAnchor, bfCenter, Qtopia::mousePreferred() ? cfNormal : cfSmall);
+            curs.insertBlock(bfCenter);
+            QString innerHtml = QString(mRtl ? "%1<img src='cachediconemail'>" : "<img src='cachediconemail'>%1").arg(trimmed);
+            QString text("<a href='" + fieldKey + "'>" + innerHtml+ "</a>");
+            curs.insertHtml(text);
+            curs.movePosition(QTextCursor::NextBlock);
         }
     }
 }
@@ -364,37 +356,31 @@ void ContactDocument::addEmailFragment( QTextCursor &curs )
 void ContactDocument::addVoipFragment( QTextCursor &curs, const QString& img, const QString& num, LinkType link, QContactModel::Field phoneType)
 {
     if ( ! num.isEmpty() ) {
-        QTextCharFormat cfMyAnchor(cfAnchor);
-        ContactAnchorData *cfd = 0;
-        QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
+        curs.insertBlock(bfCenter);
+        QString innerHtml = QString(mRtl ? "%2<img src='%1'>" : "<img src='%1'>%2").arg(num + "addressbookvoipicon", num);
+        if (link == Dialer) {
+            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
+            ContactAnchorData *cfd = 0;
+            cfd = new ContactAnchorData;
+            cfd->type = DialLink;
+            cfd->field = phoneType;
+            cfd->number = num;
+            mFields.insert(fieldKey, cfd);
 
-        switch (link)
-        {
-            case Dialer:
-                cfd = new ContactAnchorData;
-                cfd->type = DialLink;
-                cfd->field = phoneType;
-                cfd->number = num;
-                cfMyAnchor.setProperty(QTextFormat::AnchorHref, fieldKey);
-                mFields.insert(fieldKey, cfd);
-                break;
-
-            default:
-                cfMyAnchor = cfNormal;
-                break;
+            QString text("<center><a href='%1'>%2</center><br>");
+            curs.insertHtml(text.arg(fieldKey).arg(innerHtml));
+        } else {
+            QString text("<center>" + innerHtml + "</center><br>");
+            curs.insertHtml(text);
+            addCachedPixmap(num + "addressbookvoipicon", img);
         }
-        QTextImageFormat cfMyAnchorImage;
-        cfMyAnchorImage.merge(cfMyAnchor);
-        cfMyAnchorImage.setName(img);
+        curs.movePosition(QTextCursor::NextBlock);
 
 #if defined(QTOPIA_VOIP)
         mMonitoredURIs += num;
         mPresence->startMonitoring(num);
         mDocument->addResource(QTextDocument::ImageResource, QUrl(num + "addressbookvoipicon"), *getPresencePixmap(mPresence->monitoredUriStatus(num) == QPresence::Available));
-        cfMyAnchorImage.setName(num + "addressbookvoipicon");
 #endif
-
-        addImageAndTextLine(curs, cfMyAnchorImage, num, cfMyAnchor, bfCenter, cfNormal);
     }
 }
 
@@ -434,8 +420,13 @@ void ContactDocument::addBusinessFragment( QTextCursor &curs )
 
     /* Add a header */
     curs.insertBlock(bfCenter);
-    curs.insertImage(":icon/addressbook/business");
-    curs.insertText(qApp->translate( "QtopiaPim", "Business Details"), cfBoldUnderline);
+    if (mRtl) {
+        curs.insertText(qApp->translate( "QtopiaPim", "Business Details"), cfBoldUnderline);
+        curs.insertImage(":icon/addressbook/business");
+    } else {
+        curs.insertImage(":icon/addressbook/business");
+        curs.insertText(qApp->translate( "QtopiaPim", "Business Details"), cfBoldUnderline);
+    }
     curs.movePosition(QTextCursor::NextBlock);
 
     /* and save the new position, so we can tell if we added anything */
@@ -511,8 +502,13 @@ void ContactDocument::addPersonalFragment( QTextCursor& curs )
 
     /* Add a header */
     curs.insertBlock(bfCenter);
-    curs.insertImage(":icon/home");
-    curs.insertText(qApp->translate( "QtopiaPim", "Personal Details"), cfBoldUnderline);
+    if (mRtl) {
+        curs.insertText(qApp->translate( "QtopiaPim", "Personal Details"), cfBoldUnderline);
+        curs.insertImage(":icon/home");
+    } else {
+        curs.insertImage(":icon/home");
+        curs.insertText(qApp->translate( "QtopiaPim", "Personal Details"), cfBoldUnderline);
+    }
     curs.movePosition(QTextCursor::NextBlock);
 
     /* and save the new position, so we can tell if we added anything */
@@ -540,11 +536,10 @@ void ContactDocument::addPersonalFragment( QTextCursor& curs )
     addTextNameValue(curs, qApp->translate( "QtopiaPim","Web Page: "), cfBold,
             mContact.homeWebpage(), cfNormal, bfNormal, cfNormal);
 
-    str = mContact.gender();
-    if ( !str.isEmpty() && str.toInt() != 0 ) {
-        if ( str.toInt() == 1 )
+    if ( mContact.gender() != QContact::UnspecifiedGender ) {
+        if ( mContact.gender() == QContact::Male )
             str = qApp->translate( "QtopiaPim", "Male" );
-        else if ( str.toInt() == 2 )
+        else if ( mContact.gender() == QContact::Female)
             str = qApp->translate( "QtopiaPim", "Female" );
         else
             str = QString();
@@ -596,8 +591,13 @@ void ContactDocument::addImageAndTextLine ( QTextCursor& curs, const QTextImageF
 {
     if (! text.isEmpty() ) {
         curs.insertBlock(bf, bcf);
-        curs.insertImage(imf);
-        curs.insertText(text, cf);
+        if (mRtl) {
+            curs.insertText(text, cf);
+            curs.insertImage(imf);
+        } else {
+            curs.insertImage(imf);
+            curs.insertText(text, cf);
+        }
         curs.movePosition(QTextCursor::NextBlock);
     }
 }

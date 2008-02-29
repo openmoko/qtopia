@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,7 +44,7 @@ public:
     PopClient();
     ~PopClient();
     void newConnection();
-    void setAccount(MailAccount *_account);
+    void setAccount(QMailAccount *_account);
     void headersOnly(bool headers, int limit);
     void setSelectedMails(MailList *list, bool connected);
     void quit();
@@ -56,7 +56,8 @@ signals:
     void unresolvedUidlList(QStringList &);
     void mailTransferred(int);
     void mailboxSize(int);
-    void downloadedSize(int);
+    void retrievalProgress(const QString&, uint);
+    void messageProcessed(const QString&);
     void allMessagesReceived();
 
 public slots:
@@ -72,6 +73,8 @@ private:
     int getSize(int pos);
     void uidlIntegrityCheck();
     void createMail();
+    void sendCommand(const QString& cmd);
+    QString readResponse();
 
 private:
     enum TransferStatus
@@ -80,10 +83,10 @@ private:
             Quit, Done, Ignore, Dele, Rset, Uidl, Guidl, Exit
     };
 
-    MailAccount *account;
+    QMailAccount *account;
     TransferStatus status;
     int messageCount, newMessages, mailSize, headerLimit;
-    int msgNum, mailDropSize;
+    int msgNum;
     QMailId internalId;
     bool receiving, preview, selected;
     bool awaitingData;
@@ -98,6 +101,9 @@ private:
     LongStream *d;
 
     MailTransport *transport;
+
+    QString retrieveUid;
+    uint retrieveLength;
 };
 
 #endif

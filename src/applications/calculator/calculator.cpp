@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -67,6 +67,7 @@ Calculator::Calculator( QWidget * p, Qt::WFlags fl) : QWidget (p, fl)
 
 #ifndef QT_NO_CLIPBOARD
     cb = qApp->clipboard();
+    connect( cb, SIGNAL(dataChanged()), this, SLOT(clipboardChanged()) );
 #endif
 
     connect(systemEngine,SIGNAL(stackChanged()),
@@ -145,11 +146,12 @@ Calculator::Calculator( QWidget * p, Qt::WFlags fl) : QWidget (p, fl)
     a_copy->setWhatsThis( tr("Copy the last result.") );
     connect( a_copy, SIGNAL(triggered()), this, SLOT(copy()) );
     cmenu->addAction(a_copy);
-    QAction * a_paste = new QAction(  QIcon( ":icon/paste" ),
+    a_paste = new QAction(  QIcon( ":icon/paste" ),
             tr( "Paste" ), this);
     a_copy->setWhatsThis( tr("Paste clipboard.") );
     connect( a_paste, SIGNAL(triggered()), this, SLOT(paste()) );
     cmenu->addAction(a_paste);
+    a_paste->setVisible( !cb->text().isEmpty() );
 #endif
 }
 
@@ -260,6 +262,10 @@ void Calculator::paste() {
             }
         }
     }
+}
+void Calculator::clipboardChanged()
+{
+    a_paste->setVisible( !cb->text().isEmpty() );
 }
 #endif //QT_NO_CLIPBOARD
 

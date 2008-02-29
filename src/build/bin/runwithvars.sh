@@ -12,9 +12,22 @@ getvar()
     done
 }
 
-DEVICE_CONFIG_PATH=$(getvar DEVICE_CONFIG_PATH "$@")
+# NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+#
+# The environment file handling logic is duplicated in configure
+#
+# NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 
-[ -n "$DEVICE_CONFIG_PATH" ] && [ -f "$DEVICE_CONFIG_PATH/environment" ] && . "$DEVICE_CONFIG_PATH/environment"
+DEVICE_CONFIG_PATH=$(getvar DEVICE_CONFIG_PATH "$@")
+DEFAULT_DEVICE_PATH=$(getvar DEFAULT_DEVICE_PATH "$@")
+DEVICE_BIN=$(getvar DEVICE_BIN "$@")
+
+# Only pull in these files if we're actually building for a device
+if [ -n "$DEVICE_CONFIG_PATH" ]; then
+    . "$DEFAULT_DEVICE_PATH/environment"
+    [ -f "$DEVICE_CONFIG_PATH/environment" ] && . "$DEVICE_CONFIG_PATH/environment"
+    setup_path
+fi
 
 exec env "$@"
 

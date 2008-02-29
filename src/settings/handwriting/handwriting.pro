@@ -24,4 +24,4 @@ INSTALLS+=help
 EXTRA_TS_FILES=QtopiaHandwriting
 
 pkg.description=Settings for handwriting recognition
-pkg.domain=window,handwriting
+pkg.domain=trusted

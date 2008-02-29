@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,7 +31,7 @@
 #include <QDesktopWidget>
 
 // For releases, this define gets replaced with the appropriate year by the packaging scripts
-#define QTOPIA_COPYRIGHT_YEAR	2007
+#define QTOPIA_COPYRIGHT_YEAR	2008
 
 VersionInfo::VersionInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )

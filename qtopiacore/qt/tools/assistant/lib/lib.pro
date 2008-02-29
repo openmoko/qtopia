@@ -56,6 +56,10 @@ TARGET = $$qtLibraryTarget($$TARGET) #done towards the end
 
 target.path=$$[QT_INSTALL_LIBS]
 INSTALLS        += target
+win32 {
+    dlltarget.path=$$[QT_INSTALL_BINS]
+    INSTALLS += dlltarget
+}
 
 qt_install_headers {
     assistant_headers.files = $$SYNCQT.HEADER_FILES $$SYNCQT.HEADER_CLASSES

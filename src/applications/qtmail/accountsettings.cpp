@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,9 +22,11 @@
 #include "accountsettings.h"
 #include "accountlist.h"
 #include "editaccount.h"
+#include "emailclient.h"
 #ifndef QTOPIA_NO_MMS
 #  include "mmseditaccount.h"
 #endif
+#include "statusdisplay.h"
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
 #include <qsoftmenubar.h>
@@ -36,7 +38,7 @@
 #include <qlayout.h>
 
 
-AccountSettings::AccountSettings(AccountList *al, QWidget *parent, const char *name, bool modal)
+AccountSettings::AccountSettings(AccountList *al, EmailClient *parent, const char *name, bool modal)
     : QDialog(parent), accountList(al)
 {
     setObjectName( name );
@@ -55,10 +57,18 @@ AccountSettings::AccountSettings(AccountList *al, QWidget *parent, const char *n
     connect(removeAccountAction, SIGNAL(triggered()), this, SLOT(removeAccount()));
     context->addAction(removeAccountAction);
     populateAccountList();
+
+    statusDisplay = new StatusDisplay(this);
+    statusDisplay->setVisible(false);
+    vb->addWidget(statusDisplay);
+
     connect(accountListBox, SIGNAL(itemActivated(QListWidgetItem*)),
                                 this, SLOT(accountSelected(QListWidgetItem*)) );
     connect(accountListBox, SIGNAL(currentRowChanged(int)),
             this, SLOT(accountHighlighted(int)));
+
+    connect(parent, SIGNAL(updateProgress(uint, uint)), 
+            this, SLOT(displayProgress(uint, uint)));
 }
 
 void AccountSettings::populateAccountList()
@@ -68,13 +78,13 @@ void AccountSettings::populateAccountList()
     int idx = -1;
     accountListBox->clear();
     listToAccountIdx.clear();
-    QListIterator<MailAccount*> it = accountList->accountIterator();
+    QListIterator<QMailAccount*> it = accountList->accountIterator();
     while ( it.hasNext() ) {
         ++idx;
-        MailAccount *account = it.next();
+        QMailAccount *account = it.next();
         if( account->hasSettings() ) {
-            if (account->accountType() == MailAccount::SMS
-                || account->accountType() == MailAccount::System) {
+            if (account->accountType() == QMailAccount::SMS
+                || account->accountType() == QMailAccount::System) {
                 continue; // Don't show SMS or System accounts
             }
             listToAccountIdx[accountListBox->count()] = idx;
@@ -92,7 +102,7 @@ void AccountSettings::populateAccountList()
 
 void AccountSettings::addAccount()
 {
-    MailAccount *newAccount = new MailAccount;
+    QMailAccount *newAccount = new QMailAccount;
     newAccount->setUserName(accountList->getUserName());
     editAccount(newAccount, true);
 }
@@ -106,11 +116,15 @@ void AccountSettings::editAccount()
 void AccountSettings::removeAccount()
 {
     int idx = listToAccountIdx[ accountListBox->currentRow() ];
-    MailAccount *account = accountList->at(idx);
+    QMailAccount *account = accountList->at(idx);
 
     QString message = tr("<qt>Delete account: %1</qt>").arg(Qt::escape(account->accountName()));
     if (QMessageBox::warning( this, tr("Email"), message, tr("Yes"), tr("No"), 0, 0, 1 ) == 0) {
+        // Display any progress signals from the parent
+        statusDisplay->setVisible(true);
         emit deleteAccount(account);
+        statusDisplay->setVisible(false);
+
         populateAccountList();
     }
 }
@@ -124,8 +138,8 @@ void AccountSettings::accountSelected( QListWidgetItem *si )
 
 void AccountSettings::accountSelected(int idx)
 {
-    MailAccount *account = accountList->at(listToAccountIdx[idx]);
-    if (account->accountType() != MailAccount::SMS)
+    QMailAccount *account = accountList->at(listToAccountIdx[idx]);
+    if (account->accountType() != QMailAccount::SMS)
         editAccount( account );
 }
 
@@ -136,18 +150,18 @@ void AccountSettings::accountHighlighted(int idx)
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
         return;
     }
-    MailAccount *account = accountList->at( listToAccountIdx[idx] );
-    bool isSms = (account->accountType() == MailAccount::SMS);
-    bool isMms = (account->accountType() == MailAccount::MMS);
+    QMailAccount *account = accountList->at( listToAccountIdx[idx] );
+    bool isSms = (account->accountType() == QMailAccount::SMS);
+    bool isMms = (account->accountType() == QMailAccount::MMS);
     removeAccountAction->setVisible(!isSms && !isMms);
     QSoftMenuBar::setLabel(this, Qt::Key_Select, isSms ? QSoftMenuBar::NoLabel : QSoftMenuBar::Select);
 }
 
-void AccountSettings::editAccount(MailAccount *account, bool newAccount)
+void AccountSettings::editAccount(QMailAccount *account, bool newAccount)
 {
     QDialog *editAccountView;
 #ifndef QTOPIA_NO_MMS
-    if (account->accountType() == MailAccount::MMS) {
+    if (account->accountType() == QMailAccount::MMS) {
         MmsEditAccount *e = new MmsEditAccount(this);
         e->setModal(true);
         e->setAccount(account);
@@ -188,6 +202,16 @@ void AccountSettings::editAccount(MailAccount *account, bool newAccount)
         if (newAccount) { //don't touch existing account
             delete account;
         }
+    }
+}
+
+void AccountSettings::displayProgress(uint value, uint range)
+{
+    if (statusDisplay->isVisible()) {
+        statusDisplay->displayProgress(value, range);
+
+        if (value == 0) 
+            statusDisplay->displayStatus(tr("Deleting messages"));
     }
 }
 

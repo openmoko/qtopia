@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -114,6 +114,7 @@ SnakeGame::SnakeGame(QWidget* parent, Qt::WFlags)
 
     (void)QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+    QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Back );
 
     // Seed the random number generator for randomly positioning the targets
     QTime midnight(0, 0, 0);
@@ -134,8 +135,8 @@ void SnakeGame::resizeEvent(QResizeEvent *event)
 
     // Calculate the number of tiles on the board for use in laying out the board.
     int tilesize = SpriteDB::tileSize();
-    screenwidth = sceneRect.width() / tilesize;
-    screenheight = sceneRect.height() / tilesize;
+    screenwidth = int(sceneRect.width() / tilesize);
+    screenheight = int(sceneRect.height() / tilesize);
 
     // End any running game and layout the board ready to start again.
     newGame(false);
@@ -318,10 +319,10 @@ void SnakeGame::showMessage(const QString &text)
     while( ( gamemessage->boundingRect().width() > (scene->width()-15) ||
         gamemessage->boundingRect().height() > (scene->height()-15) ) && --size );
 
-    int w = gamemessage->boundingRect().width();
-    int h = gamemessage->boundingRect().height();
+    int w = int(gamemessage->boundingRect().width());
+    int h = int(gamemessage->boundingRect().height());
     gamemessage->setPos(scene->width()/2 -w/2, scene->height()/2 -h/2);
-    gamemessagebkg->setRect(QRect(QPoint(scene->width()/2 -w/2 - 5, scene->height()/2 -h/2 - 5), QSize(w+10, h+10)));
+    gamemessagebkg->setRect(QRect(QPoint(int(scene->width()/2 -w/2 - 5), int(scene->height()/2 -h/2 - 5)), QSize(w+10, h+10)));
     gamemessagebkg->show();
     gamemessage->show();
     scene->update();

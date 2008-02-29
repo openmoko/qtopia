@@ -16,6 +16,7 @@
 <p>Files:</p>
 <ul>
 <li><a href="threads-waitconditions-waitconditions-cpp.html">threads/waitconditions/waitconditions.cpp</a></li>
+<li><a href="threads-waitconditions-waitconditions-pro.html">threads/waitconditions/waitconditions.pro</a></li>
 </ul>
 <p>The Wait Conditions example shows how to use <a href="qwaitcondition.html">QWaitCondition</a> and <a href="qmutex.html">QMutex</a> to control access to a circular buffer shared by a producer thread and a consumer thread.</p>
 <p>The producer writes data to the buffer until it reaches the end of the buffer, at which point it restarts from the beginning, overwriting existing data. The consumer thread reads the data as it is produced and writes it to standard error.</p>
@@ -112,8 +113,8 @@
 <p>Be aware though that these benefits aren't always realized. Locking and unlocking a <a href="qmutex.html">QMutex</a> has a cost. In practice, it would probably be worthwhile to divide the buffer into chunks and to operate on chunks instead of individual bytes. The buffer size is also a parameter that must be selected carefully, based on experimentation.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

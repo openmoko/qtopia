@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -91,10 +91,6 @@ public:
     QDAppPlugin( QObject *parent = 0 );
     virtual ~QDAppPlugin();
 
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
-
     virtual QIcon icon() = 0;
     virtual QWidget *initApp() = 0;
     virtual QWidget *initSettings();
@@ -110,10 +106,6 @@ class QD_EXPORT QDLinkPlugin : public QDPlugin
 public:
     QDLinkPlugin( QObject *parent = 0 );
     virtual ~QDLinkPlugin();
-
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
 
     virtual bool tryConnect( QDConPlugin *con ) = 0;
     virtual void stop() = 0;
@@ -147,10 +139,6 @@ public:
     QDConPlugin( QObject *parent = 0 );
     virtual ~QDConPlugin();
 
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
-
     // This is for TCP/IP based connections
     virtual int port() = 0;
 
@@ -183,36 +171,18 @@ public:
     QDDevPlugin( QObject *parent = 0 );
     virtual ~QDDevPlugin();
 
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
-
     virtual QString model() = 0;
     // This is typically "Qtopia" but a fork could use their own name (eg. OPIE)
     virtual QString system() = 0;
     virtual quint32 version() = 0;
     virtual QString versionString() = 0;
     virtual QPixmap icon() = 0;
+    virtual QDConPlugin *connection() = 0;
 
     // Doers
 
     virtual void probe( QDConPlugin *con ) = 0;
     virtual void disassociate( QDConPlugin *con ) = 0;
-
-#if 0
-    // This one is discouraged because it doesn't work if you don't have QCop
-    //virtual void sendMessage( const QString &message, const QByteArray &data ) = 0;
-
-    virtual void requestCardInfo() = 0;
-    virtual void requestInstallLocations() = 0;
-    virtual void requestAllDocLinks() = 0;
-    virtual void installPackage() = 0;
-    virtual void removePackage() = 0;
-    virtual void setSyncDate() = 0;
-
-//signals:
-//    void receivedMessage( const QString &message, const QByteArray &data );
-#endif
 };
 
 
@@ -225,10 +195,6 @@ class QD_EXPORT QDSyncPlugin : public QDPlugin
 public:
     QDSyncPlugin( QObject *parent = 0 );
     virtual ~QDSyncPlugin();
-
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
 
     virtual QString dataset() = 0;
     virtual QByteArray referenceSchema();
@@ -251,13 +217,6 @@ public:
     QDClientSyncPlugin( QObject *parent = 0 );
     virtual ~QDClientSyncPlugin();
 
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
-
-    // QDSyncPlugin
-    virtual QString dataset() = 0;
-
 public slots:
     virtual void serverSyncRequest(const QString &source) = 0;
     virtual void serverIdentity(const QString &server) = 0;
@@ -272,17 +231,32 @@ public slots:
     virtual void serverEnd() = 0;
 
 signals:
-    void clientSyncRequest(const QString &source);
     void clientIdentity(const QString &id);
     void clientVersion(int major, int minor, int patch);
     void clientSyncAnchors(const QDateTime &clientLastSync, const QDateTime &clientNextSync);
     void createClientRecord(const QByteArray &record);
     void replaceClientRecord(const QByteArray &record);
     void removeClientRecord(const QString &clientId);
-    void mapId(const QString &serverId, const QString &clientId);
+    void mappedId(const QString &serverId, const QString &clientId);
     void clientError();
     void clientEnd();
 };
+
+
+// ====================================================================
+
+
+class QD_EXPORT QDClientSyncPluginFactory : public QDPlugin
+{
+    Q_OBJECT
+public:
+    QDClientSyncPluginFactory( QObject *parent = 0 );
+    virtual ~QDClientSyncPluginFactory();
+
+    virtual QStringList datasets() = 0;
+    virtual QDClientSyncPlugin *pluginForDataset( const QString &dataset ) = 0;
+};
+
 
 
 // ====================================================================
@@ -295,27 +269,22 @@ public:
     QDServerSyncPlugin( QObject *parent = 0 );
     virtual ~QDServerSyncPlugin();
 
-    // QDPlugin
-    virtual QString id() = 0;
-    virtual QString displayName() = 0;
-
-    // QDSyncPlugin
-    virtual QString dataset() = 0;
-
-    // Get data (emit signals below)
-    virtual void performSync(const QDateTime &timestamp) = 0;
-
-    // Apply diff
+    virtual void fetchChangesSince(const QDateTime &timestamp) = 0;
     virtual void createClientRecord(const QByteArray &record) = 0;
     virtual void replaceClientRecord(const QByteArray &record) = 0;
     virtual void removeClientRecord(const QString &identifier) = 0;
 
+    virtual void beginTransaction(const QDateTime &timestamp) = 0;
+    virtual void abortTransaction() = 0;
+    virtual void commitTransaction() = 0;
+
 signals:
-    void mappedId(const QString &serverId, const QString &clientId);
+    void mappedId(const QString &clientId, const QString &serverId);
     void createServerRecord(const QByteArray &record);
     void replaceServerRecord(const QByteArray &record);
     void removeServerRecord(const QString &identifier);
     void serverChangesCompleted();
+    void serverError();
 };
 
 

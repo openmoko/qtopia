@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -63,7 +61,7 @@ public:
           rowSectionAnchor(-1), columnSectionAnchor(-1),
           columnResizeTimerID(0), rowResizeTimerID(0),
           horizontalHeader(0), verticalHeader(0),
-          sortingEnabled(false)
+          sortingEnabled(false), geometryRecursionBlock(false)
  {
     wrapItemText = true;
 #ifndef QT_NO_DRAGANDDROP
@@ -113,6 +111,7 @@ public:
     QHeaderView *verticalHeader;
     QWidget *cornerWidget;
     bool sortingEnabled;
+    bool geometryRecursionBlock;
 
     struct Span
     {

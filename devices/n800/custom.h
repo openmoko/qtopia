@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,5 +35,5 @@
 #define QPE_NEED_CALIBRATION
 #define V4L_RADIO_DEVICE "/dev/radio0"
 #define V4L_VIDEO_DEVICE "/dev/video0"
-#define HAVE_V4L2
+
 

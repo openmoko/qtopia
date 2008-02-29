@@ -231,6 +231,7 @@ gp_install()
 
 gp_run()
 {
+
   gp_source
   TARGET=`grep TARGET *.pro|awk 'BEGIN{FS="="}{print $2}'`
   if [ "$ARCH" = "x86" ] ; then
@@ -243,11 +244,11 @@ gp_run()
     fi
 if [ "$QDEBUG" = "-debug" ] ; then
 
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "killall gdbserver $TARGET; cd /; binary=\$(find . -name $TARGET 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; gdbserver hostpc:22222 \$binary 2>&1 | logger -t 'DEBUGGER' &"
 
 else
   
-  ssh root@$PHONEIP "cd /; binary=\$(find . -name example 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; \$binary 2>&1 | logger -t 'DEBUGGER' &"
+  ssh root@$PHONEIP "cd /; binary=\$(find . -name $TARGET 2>/dev/null | while read file; do if [ -x \$file ] && [ -f \$file ]; then echo \$file; exit; fi; done); . /opt/Qtopia/qpe.env; \$binary 2>&1 | logger -t 'DEBUGGER' &"
  
   fi
 fi

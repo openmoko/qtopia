@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,10 @@ void Rotator::animate(QPainter *painter,SelectedItem *item,qreal percent)
     painter->translate(-(item->rect().width()/2) - item->rect().x() ,-(item->rect().height()/2)-item->rect().y());
 
     int imageSize = item->current()->selectedImageSize();
-    draw(painter,item,imageSize,imageSize);
+    const QPixmap &pixmap = item->current()->selectedPic();
+    if ( !(pixmap.isNull()) ) {
+        painter->setRenderHint(QPainter::SmoothPixmapTransform);
+        draw(painter,pixmap,item,imageSize,imageSize);
+    }
 }
 

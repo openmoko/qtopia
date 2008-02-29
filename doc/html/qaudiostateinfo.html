@@ -45,7 +45,7 @@
 <p>See also <a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAudioStateInfo"></a>QAudioStateInfo::QAudioStateInfo ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>domain</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>profile</i>, const <a href="qstring.html">QString</a> &amp; <i>displayName</i>, int <i>priority</i> )</h3>
+<h3 class="fn"><a name="QAudioStateInfo"></a>QAudioStateInfo::QAudioStateInfo ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>domain</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>profile</i>, const <a href="./qstring.html">QString</a> &amp; <i>displayName</i>, int <i>priority</i> )</h3>
 <p>Constructs a new valid Audio State Info. The Audio Domain is set to <i>domain</i>. The profile name is given by <i>profile</i>. The display name is set to <i>displayName</i>. The priority is given by <i>priority</i>.</p>
 <p>See also <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="QAudioStateInfo-2"></a>QAudioStateInfo::QAudioStateInfo ()</h3>
@@ -56,10 +56,10 @@
 <p>See also <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="dtor.QAudioStateInfo"></a>QAudioStateInfo::~QAudioStateInfo ()</h3>
 <p>Destroys an Audio State Info.</p>
-<h3 class="fn"><a name="displayName"></a><a href="qstring.html">QString</a> QAudioStateInfo::displayName () const</h3>
+<h3 class="fn"><a name="displayName"></a><a href="./qstring.html">QString</a> QAudioStateInfo::displayName () const</h3>
 <p>Returns a translated string that describes this audio state suitable for display. E.g&#x2e; for instance &quot;Bluetooth Headset&quot; or &quot;Headphones&quot;.</p>
 <p>See also <a href="qaudiostateinfo.html#setDisplayName">setDisplayName</a>().</p>
-<h3 class="fn"><a name="domain"></a><a href="qbytearray.html">QByteArray</a> QAudioStateInfo::domain () const</h3>
+<h3 class="fn"><a name="domain"></a><a href="./qbytearray.html">QByteArray</a> QAudioStateInfo::domain () const</h3>
 <p>Returns the Audio Domain Info for this state.</p>
 <p>See also <a href="qaudiostateinfo.html#setDomain">setDomain</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QAudioStateInfo::isValid () const</h3>
@@ -68,14 +68,14 @@
 <p>Returns the priority for this Audio State. The value of 0 has the highest priority, while the value of MAX_INT has the lowest priority.</p>
 <p>If the object is not valid, returns -1.</p>
 <p>See also <a href="qaudiostateinfo.html#setPriority">setPriority</a>() and <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="profile"></a><a href="qbytearray.html">QByteArray</a> QAudioStateInfo::profile () const</h3>
+<h3 class="fn"><a name="profile"></a><a href="./qbytearray.html">QByteArray</a> QAudioStateInfo::profile () const</h3>
 <p>Returns the profile name for this state.</p>
 <p>See also <a href="qaudiostateinfo.html#setProfile">setProfile</a>().</p>
-<h3 class="fn"><a name="setDisplayName"></a>void QAudioStateInfo::setDisplayName ( const <a href="qstring.html">QString</a> &amp; <i>displayName</i> )</h3>
+<h3 class="fn"><a name="setDisplayName"></a>void QAudioStateInfo::setDisplayName ( const <a href="./qstring.html">QString</a> &amp; <i>displayName</i> )</h3>
 <p>Sets the translated display name for this state to <i>displayName</i>.</p>
 <p>If you call this function for an invalid audio state, this function turns it into a valid one.</p>
 <p>See also <a href="qaudiostateinfo.html#displayName">displayName</a>() and <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="setDomain"></a>void QAudioStateInfo::setDomain ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>domain</i> )</h3>
+<h3 class="fn"><a name="setDomain"></a>void QAudioStateInfo::setDomain ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>domain</i> )</h3>
 <p>Sets the Audio Domain for this state to <i>domain</i>.</p>
 <p>If you call this function for an invalid audio state, this function turns it into a valid one.</p>
 <p>See also <a href="qaudiostateinfo.html#domain">domain</a>() and <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
@@ -83,7 +83,7 @@
 <p>Sets the priority of the audio state to <i>priority</i>.</p>
 <p>If you call this function for an invalid audio state, this function turns it into a valid one.</p>
 <p>See also <a href="qaudiostateinfo.html#priority">priority</a>().</p>
-<h3 class="fn"><a name="setProfile"></a>void QAudioStateInfo::setProfile ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>profile</i> )</h3>
+<h3 class="fn"><a name="setProfile"></a>void QAudioStateInfo::setProfile ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>profile</i> )</h3>
 <p>Sets the profile name for this state to <i>profile</i>.</p>
 <p>If you call this function for an invalid audio state, this function turns it into a valid one.</p>
 <p>See also <a href="qaudiostateinfo.html#profile">profile</a>() and <a href="qaudiostateinfo.html#isValid">isValid</a>().</p>
@@ -98,8 +98,8 @@
 <p>See also <a href="qaudiostateinfo.html#operator-not-eq">operator!=</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

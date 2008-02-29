@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,15 +46,23 @@ class MailboxList;
 class FolderListItem : public QTreeWidgetItem
 {
 public:
-    FolderListItem(QTreeWidget *parent, Folder *in, const QString& mailboxName = QString::null);
-    FolderListItem(QTreeWidgetItem *parent, Folder *in, const QString& mailboxName = QString::null);
-    Folder* folder();
+    FolderListItem(QTreeWidget *parent, Folder *in);
+    FolderListItem(QTreeWidget *parent, QTreeWidgetItem *predecessor, Folder *in);
+    FolderListItem(QTreeWidgetItem *parent, Folder *in);
+    FolderListItem(QTreeWidgetItem *parent, QTreeWidgetItem *predecessor, Folder *in);
+
+    Folder* folder() const;
+
+    void setName(const QString& name);
+    QString name() const;
+
     void setStatusText( const QString &str, bool highlight, IconType type );
     void statusText( QString *str, bool *highlight, IconType *type );
-    int depth();
+
+    int depth() const;
 
 protected:
-    void init(QString name);
+    void init();
 
 #ifdef QTOPIA4_TODO
     void paintCell( QPainter *p, const QColorGroup &cg, int column, int width, int alignment );
@@ -76,19 +84,24 @@ public:
     FolderListView(MailboxList *list, QWidget *parent, const char *name);
     virtual ~FolderListView();
     void setupFolders(AccountList *list);
-    QModelIndex next(QModelIndex mi, bool nextParent = false);
-    QTreeWidgetItem* next(QTreeWidgetItem *item);
-    void updateAccountFolder(MailAccount *account);
-    void deleteAccountFolder(MailAccount *account);
+    QModelIndex next(QModelIndex mi, bool nextParent = false) const;
+    QTreeWidgetItem* next(QTreeWidgetItem *item) const;
+    void updateAccountFolder(QMailAccount *account);
+    void deleteAccountFolder(QMailAccount *account);
 
     Folder* currentFolder() const;
     bool setCurrentFolder(const Folder* folder);
 
-    MailAccount* currentAccount() const;
+    Folder* systemFolder(const QString& identifier) const;
+
+    Folder* accountFolder(const Folder* account, const QString& mailbox = QString()) const;
+    const QTreeWidgetItem* accountFolderItem(const Folder* account, const QString& mailbox = QString()) const;
+
+    QMailAccount* currentAccount() const;
 
     void changeToSystemFolder(const QString &str);
     void updateFolderStatus(const QString &mailbox, const QString &txt, bool highlight, IconType type);
-    void updateAccountStatus(const Folder *account, const QString &txt, bool highlight, IconType type);
+    void updateAccountStatus(const Folder *account, const QString &txt, bool highlight, IconType type, const QString& mailbox = QString());
 
     QSize sizeHint() const;
     QSize minimumSizeHint() const;
@@ -98,9 +111,12 @@ public:
     void restoreCurrentFolder();
     void rememberCurrentFolder();
 
+    static QString excessIndicator();
+
 signals:
     void emptyFolder();
     void folderSelected(Folder *);
+    void folderModified(Folder *);
     void viewMessageList();
     void finished();
 
@@ -114,13 +130,16 @@ protected slots:
     void itemClicked(QTreeWidgetItem *);
 
 private:
-    bool selectedChildOf(FolderListItem *folder);
-    void buildImapFolder(FolderListItem* item, MailAccount* account);
+    void synchroniseFolderStructure(FolderListItem* item, QMailAccount* account);
     FolderListItem* getParent(FolderListItem *parent, QString name, QString delimiter);
+    QTreeWidgetItem* getPredecessor(FolderListItem *parent, QString name);
+    QModelIndex systemFolderIndex(const QString& identifier) const;
+    QModelIndex accountFolderIndex(const Folder* account, const QString& mailbox = QString()) const;
 
 private:
     MailboxList *_mailboxList;
     QModelIndex currentIndex;
+    QMap<QString, SystemFolder*> systemFolders;
 };
 
 class FolderListItemDelegate : public QtopiaItemDelegate
@@ -137,6 +156,7 @@ public:
 
 private:
     FolderListView *mParent;
+    QScrollBar* mScrollBar;
     mutable QString statusText;
     mutable IconType type;
 };

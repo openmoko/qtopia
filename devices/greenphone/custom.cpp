@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,10 +44,12 @@ QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 
 QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
-    int lcdFd = ::open("/dev/lcdctrl", O_RDWR);
-    if(lcdFd >= 0) {
-        ::ioctl(lcdFd, _LCDCTRL_IOCTL_BRIGHTNESS, 10*b/qpe_sysBrightnessSteps());
-        ::close(lcdFd);
+    if (b > 0) {
+        int lcdFd = ::open("/dev/lcdctrl", O_RDWR);
+        if (lcdFd >= 0) {
+            ::ioctl(lcdFd, _LCDCTRL_IOCTL_BRIGHTNESS, b-1);
+            ::close(lcdFd);
+        }
     }
 
     int ipmcFd = ::open("/dev/ipmc", O_RDWR);

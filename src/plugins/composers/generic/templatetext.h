@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,7 +33,7 @@ class TemplateTextDialog : public QDialog
 {
     Q_OBJECT
 public:
-    TemplateTextDialog(QWidget *parent = 0);
+    TemplateTextDialog(QWidget *parent, const char* name);
     virtual ~TemplateTextDialog();
     QString text();
     void loadTexts();

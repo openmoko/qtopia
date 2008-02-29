@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -123,6 +123,11 @@ void QCommDeviceSession_Private::endSession()
 
     m_isOpen = false;
     emit m_parent->sessionClosed();
+
+    // ensure new socket is created for next session, or else won't
+    // work after device is suspended
+    delete m_socket;
+    m_socket = 0;
 }
 
 QCommDeviceSession * QCommDeviceSession_Private::session(const QByteArray &devId,
@@ -180,6 +185,11 @@ void QCommDeviceSession_Private::readyRead()
         // The server will only send this to us on a forced close
         m_isOpen = false;
         emit m_parent->sessionClosed();
+
+        // ensure new socket is created for next session, or else won't
+        // work after device is suspended
+        delete m_socket;
+        m_socket = 0;
     }
 }
 

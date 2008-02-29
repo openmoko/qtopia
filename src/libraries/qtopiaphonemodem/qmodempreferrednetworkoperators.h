@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,6 +50,12 @@ private slots:
     void cpolQuery( bool ok, const QAtResult& result );
     void cpolSet( bool ok, const QAtResult& result );
     void cpolSet2( bool ok, const QAtResult& result );
+
+protected:
+    bool deleteBeforeUpdate() const;
+    void setDeleteBeforeUpdate( bool value );
+    bool quoteOperatorNumber() const;
+    void setQuoteOperatorNumber( bool value );
 
 private:
     QModemPreferredNetworkOperatorsPrivate *d;

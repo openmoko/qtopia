@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include "detailspage.h"
 #include "addresslist.h"
+#include "accountlist.h"
 
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
@@ -204,6 +205,7 @@ void RecipientEdit::editRecipients()
             m_picker->resetFilterFlags();
 
         m_pickerDialog = new QDialog;
+        m_pickerDialog->setObjectName("select-contact");
 
         QVBoxLayout *vbl = new QVBoxLayout;
         vbl->addWidget(m_picker);
@@ -299,14 +301,12 @@ private:
     static QIcon s_icon;
 };
 
-QIcon RecipientSelectorButton::s_icon(":icon/addressbook/AddressBook");
-
 RecipientSelectorButton::RecipientSelectorButton(QWidget *parent, QLayout *layout, RecipientEdit* sibling)
     : QToolButton(parent)
 {
     setFocusPolicy( Qt::NoFocus );
     setText( tr( "..." ) );
-    setIcon( s_icon );
+    setIcon(QIcon(":icon/addressbook/AddressBook"));
 
     connect( this, SIGNAL(clicked()), sibling, SLOT(setFocus()) );
     connect( this, SIGNAL(clicked()), sibling, SLOT(editRecipients()) );
@@ -321,7 +321,7 @@ RecipientSelectorButton::RecipientSelectorButton(QWidget *parent, QLayout *layou
 static const int MaximumDefaultSubjectLength = 40;
 
 DetailsPage::DetailsPage( QWidget *parent, const char *name )
-    : QWidget( parent ), m_type( -1 )
+    : QWidget( parent ), m_type( -1 ), m_accountList( 0 )
 {
     m_ignoreFocus = true;
     setObjectName( name );
@@ -455,6 +455,21 @@ DetailsPage::DetailsPage( QWidget *parent, const char *name )
     }
 }
 
+void DetailsPage::setAccountList( AccountList *list )
+{
+    m_accountList = list;
+
+    m_fromField->clear();
+    m_fromField->addItems( m_accountList->emailAccounts() );
+    if ((m_fromField->count() < 2) || (m_type != QMailMessage::Email)) {
+        m_fromField->hide();
+        m_fromFieldLabel->hide();
+    } else {
+        m_fromField->show();
+        m_fromFieldLabel->show();
+    }
+}
+
 void DetailsPage::editRecipients()
 {
     RecipientEdit *edit = 0;
@@ -546,7 +561,10 @@ void DetailsPage::setType( int t )
             imHint = QtopiaApplication::Words;
 
         foreach (RecipientEdit* field, (QList<RecipientEdit*>() << m_toField << m_ccField << m_bccField)) {
-            QtopiaApplication::setInputMethodHint( field, imHint);
+            if (imHint == QtopiaApplication::Words)
+                QtopiaApplication::setInputMethodHint(field, QtopiaApplication::Named, "email noautocapitalization");
+            else
+                QtopiaApplication::setInputMethodHint(field, imHint);
 
             field->setMultipleAllowed(true);
             field->setPhoneNumbersAllowed(m_allowPhoneNumbers);
@@ -599,7 +617,13 @@ void DetailsPage::getDetails( QMailMessage &mail )
         }
         mail.setSubject(subjectText);
     }
-    mail.setFrom( QMailAddress( from() ) );
+    QString fromAddress( from() );
+    if ( !fromAddress.isEmpty() ) {
+        if ( QMailAccount* account = fromAccount() )
+            mail.setFrom( QMailAddress( account->userName(), account->emailAddress() ) );
+        else
+            mail.setFrom( QMailAddress( fromAddress ) );
+    }
     if( m_type == QMailMessage::Mms ) {
         if ( m_deliveryReportField->isChecked() )
             mail.setHeaderField( "X-Mms-Delivery-Report", "Yes" );
@@ -686,31 +710,22 @@ QString DetailsPage::from() const
     return m_fromField->currentText();
 }
 
+QMailAccount* DetailsPage::fromAccount() const
+{
+    if (m_accountList)
+        return m_accountList->getSmtpRefByMail( from() );
+
+    return 0;
+}
+
 void DetailsPage::setFrom( const QString &from )
 {
     int i = 0;
-    for( const int n = static_cast<int>(m_fromField->count()) ; i < n; ++i )
-    {
-        if( m_fromField->itemText( i ) == from )
-        {
+    for( const int n = static_cast<int>(m_fromField->count()) ; i < n; ++i ) {
+        if( m_fromField->itemText( i ) == from ) {
             m_fromField->setCurrentIndex( i );
             break;
         }
-    }
-    if( i < m_fromField->count() )
-    {
-        m_fromField->insertItem( 0, from );
-        m_fromField->setCurrentIndex( 0 );
-    }
-}
-
-void DetailsPage::setFromFields( const QStringList &from )
-{
-    m_fromField->clear();
-    m_fromField->addItems( from );
-    if (m_fromField->count() < 2) {
-        m_fromField->hide();
-        m_fromFieldLabel->hide();
     }
 }
 

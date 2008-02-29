@@ -39,4 +39,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=A simple clock and stop-watch for the Qtopia environment.
-pkg.domain=window,alarm,datetime,launcher,mediasession
+pkg.domain=trusted

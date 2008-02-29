@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,6 +42,7 @@ public:
     void bringDown();
     void bringUpTimed(int secs);
     void bringUpOneItem();
+    bool sessionsActive() const;
 
     QCommDeviceController::PowerState powerState() const;
 
@@ -50,6 +51,7 @@ public:
 
     QValueSpaceItem *m_upDown;
     QValueSpaceItem *m_state;
+    QValueSpaceItem *m_sessionsActive;
     QByteArray m_devId;
     QByteArray m_path;
 
@@ -87,6 +89,11 @@ QCommDeviceController_Private::QCommDeviceController_Private(const QByteArray &d
     connect(m_state, SIGNAL(contentsChanged()),
             this, SLOT(powerStateChanged()));
 
+    // ValueSpaceItem for whether there are any active sessions
+    QByteArray sessionsActive(p);
+    sessionsActive.append("/ActiveSessions");
+    m_sessionsActive = new QValueSpaceItem(sessionsActive);
+
     m_sock = new QUnixSocket();
 
     if (!m_sock->connect(m_path)) {
@@ -103,6 +110,9 @@ QCommDeviceController_Private::~QCommDeviceController_Private()
 
     if (m_upDown)
         delete m_upDown;
+
+    if (m_sessionsActive)
+        delete m_sessionsActive;
 
     if (m_sock) {
         m_sock->close();
@@ -171,6 +181,11 @@ void QCommDeviceController_Private::bringDown()
         return;
 
     m_sock->write("DOWN\r\n");
+}
+
+bool QCommDeviceController_Private::sessionsActive() const
+{
+    return m_sessionsActive->value().toBool();
 }
 
 void QCommDeviceController_Private::bringUpTimed(int secs)
@@ -295,6 +310,14 @@ void QCommDeviceController::bringUpOneItem()
 void QCommDeviceController::bringDown()
 {
     m_data->bringDown();
+}
+
+/*!
+    Returns true if there are applications using this device.
+*/
+bool QCommDeviceController::sessionsActive() const
+{
+    return m_data->sessionsActive();
 }
 
 /*!

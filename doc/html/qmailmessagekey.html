@@ -21,6 +21,7 @@
 <h3>Public Types</h3>
 <ul>
 <li><div class="fn"/>enum <b><a href="qmailmessagekey.html#Operand-enum">Operand</a></b> { LessThan, LessThanEqual, GreaterThan, GreaterThanEqual, ..., Contains }</li>
+<li><div class="fn"/>flags <b><a href="qmailmessagekey.html#Property-enum">Properties</a></b></li>
 <li><div class="fn"/>enum <b><a href="qmailmessagekey.html#Property-enum">Property</a></b> { Id, Type, ParentFolderId, Sender, ..., Size }</li>
 </ul>
 <a name="public-functions"></a>
@@ -28,7 +29,8 @@
 <ul>
 <li><div class="fn"/><b><a href="qmailmessagekey.html#QMailMessageKey">QMailMessageKey</a></b> ()</li>
 <li><div class="fn"/><b><a href="qmailmessagekey.html#QMailMessageKey-2">QMailMessageKey</a></b> ( const Property &amp; <i>p</i>, const QVariant &amp; <i>value</i>, const Operand &amp; <i>c</i> = Equal )</li>
-<li><div class="fn"/><b><a href="qmailmessagekey.html#QMailMessageKey-3">QMailMessageKey</a></b> ( const QMailMessageKey &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="qmailmessagekey.html#QMailMessageKey-3">QMailMessageKey</a></b> ( const QMailIdList &amp; <i>idList</i> )</li>
+<li><div class="fn"/><b><a href="qmailmessagekey.html#QMailMessageKey-4">QMailMessageKey</a></b> ( const QMailMessageKey &amp; <i>other</i> )</li>
 <li><div class="fn"/>virtual <b><a href="qmailmessagekey.html#dtor.QMailMessageKey">~QMailMessageKey</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qmailmessagekey.html#isEmpty">isEmpty</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmailmessagekey.html#operator-not-eq">operator!=</a></b> ( const QMailMessageKey &amp; <i>other</i> ) const</li>
@@ -54,7 +56,7 @@
 <pre>    \\assuming parent has been retrieved from the mail store.
     QMailFolder parent;
     QMailMessageKey parentFolderKey(QMailMessageKey::ParentFolderId,parent.id())
-    QMailMessageKey readKey(QMailMessageKey::Flags,QMailMessage::Read,QMailMessageKey::Contains);
+    QMailMessageKey readKey(QMailMessageKey::Status,QMailMessage::Read,QMailMessageKey::Contains);
     QMailIdList results = QMailStore::query(parentFolderKey &amp; ~readKey);</pre>
 <p>See also <a href="qmailstore.html">QMailStore</a> and <a href="qmailfolderkey.html">QMailFolderKey</a>.</p>
 <hr />
@@ -69,35 +71,38 @@
 <tr><td valign="top"><tt>QMailMessageKey::GreaterThanEqual</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">represents the '&gt;= operator'.</td></tr>
 <tr><td valign="top"><tt>QMailMessageKey::Equal</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">represents the '=' operator.</td></tr>
 <tr><td valign="top"><tt>QMailMessageKey::NotEqual</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">represents the '!=' operator.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Contains</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">represents an operation in which an associated property is checked to see if it contains a provided value. For most property types this will perform a string based check. For Flag type properties this will perform a check to see if a flag bit value is set.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Contains</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">represents an operation in which an associated property is checked to see if it contains a provided value. For most property types this will perform a string based check. For Status type properties this will perform a check to see if a status bit value is set.</td></tr>
 </table></p>
-<h3 class="fn"><a name="Property-enum"></a>enum QMailMessageKey::Property</h3>
+<h3 class="flags"><a name="Property-enum"></a>enum QMailMessageKey::Property<br />flags QMailMessageKey::Properties</h3>
 <p>This enum type describes the data query properties of a <a href="qmailmessage.html">QMailMessage</a>.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Id</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The ID of the message.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Type</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The type of the message.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::ParentFolderId</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The parent folder ID this message is contained in.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Sender</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The message sender address string.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Recipients</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The message recipient address string.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Subject</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The message subject string.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::TimeStamp</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">The message timestamp</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Flags</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">The message status flags.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::FromAccount</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The name of the account the mesasge was downloaded from.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::FromMailbox</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The imap mailbox the message was downloaded from.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::ServerUid</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The IMAP server UID of the message.</td></tr>
-<tr><td valign="top"><tt>QMailMessageKey::Size</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top">The size of the message.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Id</tt></td><td align="center" valign="top"><tt>0x0001</tt></td><td valign="top">The ID of the message.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Type</tt></td><td align="center" valign="top"><tt>0x0002</tt></td><td valign="top">The type of the message.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::ParentFolderId</tt></td><td align="center" valign="top"><tt>0x0004</tt></td><td valign="top">The parent folder ID this message is contained in.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Sender</tt></td><td align="center" valign="top"><tt>0x0008</tt></td><td valign="top">The message sender address string.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Recipients</tt></td><td align="center" valign="top"><tt>0x0010</tt></td><td valign="top">The message recipient address string.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Subject</tt></td><td align="center" valign="top"><tt>0x0020</tt></td><td valign="top">The message subject string.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::TimeStamp</tt></td><td align="center" valign="top"><tt>0x0040</tt></td><td valign="top">The message timestamp</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Status</tt></td><td align="center" valign="top"><tt>0x0080</tt></td><td valign="top">The message status flags.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::FromAccount</tt></td><td align="center" valign="top"><tt>0x0100</tt></td><td valign="top">The name of the account the mesasge was downloaded from.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::FromMailbox</tt></td><td align="center" valign="top"><tt>0x0200</tt></td><td valign="top">The imap mailbox the message was downloaded from.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::ServerUid</tt></td><td align="center" valign="top"><tt>0x0400</tt></td><td valign="top">The IMAP server UID of the message.</td></tr>
+<tr><td valign="top"><tt>QMailMessageKey::Size</tt></td><td align="center" valign="top"><tt>0x0800</tt></td><td valign="top">The size of the message.</td></tr>
 </table></p>
+<p>The Properties type is a typedef for <a href="qflags.html">QFlags</a>&lt;Property&gt;. It stores an OR combination of Property values.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailMessageKey"></a>QMailMessageKey::QMailMessageKey ()</h3>
-<p>Create a <a href="qmailmessagekey.html">QMailMessageKey</a> with specifying matching parameters.</p>
-<p>A default-constructed key (one for which <a href="qmailmessagekey.html#isEmpty">isEmpty</a>() returns true) matches no messages. The logical negation of an empty key also matches no messages.</p>
+<p>Create a <a href="qmailfolderkey.html">QMailFolderKey</a> with specifying matching parameters.</p>
+<p>A default-constructed key (one for which <a href="qmailmessagekey.html#isEmpty">isEmpty</a>() returns true) matches all messages. The logical negation of an empty key also matches all messages.</p>
 <p>The result of combining an empty key with a non-empty key is the same as the original non-empty key. This is true regardless of whether the combination is formed by a logical AND or a logical OR operation.</p>
 <p>The result of combining two empty keys is an empty key.</p>
-<h3 class="fn"><a name="QMailMessageKey-2"></a>QMailMessageKey::QMailMessageKey ( const <a href="qmailmessagekey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailmessagekey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
+<h3 class="fn"><a name="QMailMessageKey-2"></a>QMailMessageKey::QMailMessageKey ( const <a href="qmailmessagekey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailmessagekey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
 <p>Construct a <a href="qmailmessagekey.html">QMailMessageKey</a> which defines a query parameter where QMailMessage::Property <i>p</i> is compared using comparison operator <i>c</i> with a value <i>value</i>.</p>
-<h3 class="fn"><a name="QMailMessageKey-3"></a>QMailMessageKey::QMailMessageKey ( const QMailMessageKey &amp; <i>other</i> )</h3>
+<h3 class="fn"><a name="QMailMessageKey-3"></a>QMailMessageKey::QMailMessageKey ( const QMailIdList &amp; <i>idList</i> )</h3>
+<p>Construct a <a href="qmailmessagekey.html">QMailMessageKey</a> which defines a query parameter where message id's matching those in <i>idList</i> are returned.</p>
+<h3 class="fn"><a name="QMailMessageKey-4"></a>QMailMessageKey::QMailMessageKey ( const QMailMessageKey &amp; <i>other</i> )</h3>
 <p>Create a copy of the <a href="qmailmessagekey.html">QMailMessageKey</a> <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QMailMessageKey"></a>QMailMessageKey::~QMailMessageKey ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qmailmessagekey.html">QMailMessageKey</a></p>
@@ -121,8 +126,8 @@
 <p>Returns a key that is the logical NOT of the value of this key.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

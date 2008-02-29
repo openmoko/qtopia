@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,6 +42,16 @@
 #include <QSystemMutex>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <unistd.h>
+
+static QString comparitorWarning = "Warning!! Queries with many comparitors can cause problems. " \
+                    "Prefer multiple calls with smaller keys when possible."; //no tr 
+static QString messageAddedSig = "messageAdded(int,quint64)";
+static QString messageRemovedSig = "messageRemoved(int,quint64)";
+static QString messageUpdatedSig = "messageUpdated(int,quint64)";
+static QString folderAddedSig = "folderAdded(int,quint64)";
+static QString folderRemovedSig = "folderRemoved(int,quint64)";
+static QString folderUpdatedSig = "folderUpdated(int,quint64)";
 
 MailMessageCache::MailMessageCache(unsigned int headerCacheSize)
 :
@@ -84,16 +94,18 @@ void MailMessageCache::remove(const QMailId& id)
     mCache.remove(id.toULongLong());
 }
 
-QMailStorePrivate::QMailStorePrivate()
+QMailStorePrivate::QMailStorePrivate(QObject* parent)
 :
-    QSharedData()
+    QObject(parent)
 {
+    QtopiaChannel* ipcChannel = new QtopiaChannel("QPE/Qtopiamail",this);
+    connect(ipcChannel,
+            SIGNAL(received(const QString&, const QByteArray&)),
+            this,
+            SLOT(ipcMessage(const QString&,const QByteArray&)));
 }
 
-QMailStorePrivate::QMailStorePrivate(const QMailStorePrivate& other)
-:
-    QSharedData(other),
-    database(other.database)
+QMailStorePrivate::~QMailStorePrivate()
 {
 }
 
@@ -103,7 +115,9 @@ QMailStorePrivate::QMailStorePrivate(const QMailStorePrivate& other)
     completed successfully, \c false otherwise. 
 */
 
-bool QMailStorePrivate::deleteFolder(const QMailId& p)
+bool QMailStorePrivate::deleteFolder(const QMailId& p, 
+                                     QMailIdList& deletedSubFolders, 
+                                     QMailIdList& deletedMessages)
 {
 	//delete the child folders
 	QSqlQuery query = prepare("SELECT id FROM mailfolders WHERE parentid = ?");
@@ -118,18 +132,22 @@ bool QMailStorePrivate::deleteFolder(const QMailId& p)
 
 	//get the list of id's
 
-	QList<quint64> idList;
+    QMailIdList idList;
 
 	while(query.next())
-		idList.append(query.value(0).toULongLong());	
+		idList.append(QMailId(query.value(0).toULongLong()));	
 
-	foreach(quint64 id, idList)
-		if(!deleteFolder(QMailId(id)))
+	foreach(QMailId id, idList)
+		if(!deleteFolder(id,deletedSubFolders,deletedMessages))
 			return false;
+
+    //record deleted sub folders
+    
+    deletedSubFolders += idList;
 
 	//delete the mails for this folder
 
-	if(!deleteMailsFromFolder(p))
+	if(!deleteMailsFromFolder(p,deletedMessages))
 		return false;
 
 	//delete this folder
@@ -144,8 +162,6 @@ bool QMailStorePrivate::deleteFolder(const QMailId& p)
 	if(!execute(query))
 		return false;
 
-	//_folderSync->notifyRemoved(p.parentId(),p.id());
-
 	return true;
 
 }
@@ -156,11 +172,11 @@ bool QMailStorePrivate::deleteFolder(const QMailId& p)
     completed successfully, \c false otherwise. 
 */
 
-bool QMailStorePrivate::deleteMailsFromFolder(const QMailId& f)
+bool QMailStorePrivate::deleteMailsFromFolder(const QMailId& f, QMailIdList& deletedMessages)
 {
 	//get the list of mail files to delete
 
-	QSqlQuery query = prepare("SELECT mailfile FROM mailmessages WHERE parentfolderid = ?");
+	QSqlQuery query = prepare("SELECT id, mailfile FROM mailmessages WHERE parentfolderid = ?");
 	
 	if(query.lastError().type() != QSqlError::NoError)
 		return false;
@@ -175,8 +191,8 @@ bool QMailStorePrivate::deleteMailsFromFolder(const QMailId& f)
 
 	while(query.next())
     {
-		mailfiles.append(query.value(0).toString());
-        mailIds.append(QMailId(query.value(1).toULongLong()));
+        mailIds.append(QMailId(query.value(0).toULongLong()));
+		mailfiles.append(query.value(1).toString());
     }
 
 	query = prepare("DELETE FROM mailmessages WHERE parentfolderid = ?");
@@ -197,10 +213,8 @@ bool QMailStorePrivate::deleteMailsFromFolder(const QMailId& f)
 			qLog(Messaging) << "Could not remove the mail body " << mailfile;
 	}
 
-    //delete any cached id's
-
-    foreach(QMailId id, mailIds)
-        headerCache.remove(id);
+    //record deleted ids
+    deletedMessages += mailIds;
 
 	return true;
 }
@@ -258,55 +272,118 @@ bool QMailStorePrivate::folderExists(const quint64& id)
 	return (query.first());
 }
 
-QMailMessage QMailStorePrivate::buildQMailMessage(const QSqlRecord& r) const
+QMailMessage QMailStorePrivate::buildQMailMessage(const QSqlRecord& r,
+                                                  const QMailMessageKey::Properties& properties) const
 {
-	//build a mailmessage from a retrieved sql record
-	QMailId id(r.value("id").toULongLong());
-	QMailMessage::MessageType t = QMailMessage::MessageType(r.value("type").toInt());
-	QMailId parentfolderid(r.value("parentfolderid").toULongLong());
-	QString sender = r.value("sender").toString();
-	QStringList recipients(r.value("recipients").toString());
-	QString subject = r.value("subject").toString();
-	QDateTime timestamp = r.value("stamp").toDateTime();
-	QMailMessage::Status flags(r.value("status").toInt());
-	QString fromAccount = r.value("fromaccount").toString();
-	QString fromMailbox = r.value("frommailbox").toString();
-	QString serveruid = r.value("serveruid").toString();
-	int size = r.value("size").toInt();
+    const MessagePropertyMap& map = messagePropertyMap();
+    const QList<QMailMessageKey::Property> keys = map.keys();
 
 	QMailMessage newMessage;
-	QString mailfile = r.value("mailfile").toString();
 
-	if(!mailfile.isEmpty())
+	QString mailfile = r.value("mailfile").toString();
+    bool hasMailfile = !mailfile.isEmpty(); 
+
+	if(hasMailfile)
     {
 		if(!mailBodyStore.load(mailfile,&newMessage))
 			qLog(Messaging) << "Could not load message body " << mailfile;
     }
-    else
+
+    foreach(QMailMessageKey::Property p,keys)
     {
-        static const QString smsTag("@sms");
+        switch(properties & p)
+        {
+            case QMailMessageKey::Id:
+                {
+                    QMailId id(r.value("id").toULongLong());
+                    newMessage.setId(id);
+                }
+                break;
+            case QMailMessageKey::Type:
+                {
+                    QMailMessage::MessageType t = QMailMessage::MessageType(r.value("type").toInt());
+                    newMessage.setMessageType(t);
+                }
+                break;
+            case QMailMessageKey::ParentFolderId:
+                {
+                    QMailId parentfolderid(r.value("parentfolderid").toULongLong());
+                    newMessage.setParentFolderId(parentfolderid);
+                }
+                break;
+            case QMailMessageKey::Sender:
+                {
+                    if(hasMailfile) continue; //sender from message has precedence
+                    
+                    QString sender = r.value("sender").toString();
 
-        // Remove sms-origin tag, if present - the SMS client previously appended
-        // "@sms" to the from address, which is no longer necesary
-        if (sender.endsWith(smsTag))
-            sender.chop(smsTag.length());
+                    static const QString smsTag("@sms");
 
-        //values in mail take precedence over valus in DB.
-        newMessage.setFrom(QMailAddress(sender));
-        newMessage.setSubject(subject);
-        newMessage.setDate(QMailTimeStamp(timestamp));
-        newMessage.setTo(QMailAddress::fromStringList(recipients));
+                    // Remove sms-origin tag, if present - the SMS client previously appended
+                    // "@sms" to the from address, which is no longer necesary
+                    if (sender.endsWith(smsTag))
+                        sender.chop(smsTag.length());
+
+                    newMessage.setFrom(QMailAddress(sender));
+                }
+                break;
+            case QMailMessageKey::Recipients:
+                {
+                    if(hasMailfile) continue;//recipients from message has precedence
+
+                    QStringList recipients(r.value("recipients").toString());
+                    newMessage.setTo(QMailAddress::fromStringList(recipients));
+                }
+                break;
+            case QMailMessageKey::Subject:
+                {
+                    if(hasMailfile) continue;//subject from message has precedence
+
+                    QString subject = r.value("subject").toString();
+                    newMessage.setSubject(subject);
+                }
+                break;
+            case QMailMessageKey::TimeStamp:
+                {
+                    if(hasMailfile) continue;//timestamp from message has precedence
+
+                    QDateTime timestamp = r.value("stamp").toDateTime();
+                    newMessage.setDate(QMailTimeStamp(timestamp));
+                }
+                break;
+            case QMailMessageKey::Status:
+                {
+                    QMailMessage::Status flags(r.value("status").toInt());
+                    newMessage.setStatus(flags);
+                }
+                break;
+            case QMailMessageKey::FromAccount:
+                {
+                    QString fromAccount = r.value("fromaccount").toString();
+                    newMessage.setFromAccount(fromAccount);
+                } 
+                break;
+            case QMailMessageKey::FromMailbox:
+                {
+                    QString fromMailbox = r.value("frommailbox").toString();
+                    newMessage.setFromMailbox(fromMailbox);
+                }
+                break;
+            case QMailMessageKey::ServerUid:
+                {
+                    QString serveruid = r.value("serveruid").toString();
+                    newMessage.setServerUid(serveruid);
+                }
+                break;
+            case QMailMessageKey::Size:
+                {
+                    int size = r.value("size").toInt();
+                    newMessage.setSize(size);
+                }
+                break;
+        }
     }
-
-	newMessage.setId(id);
-	newMessage.setParentFolderId(parentfolderid);
-	newMessage.setStatus(flags);
-	newMessage.setSize(size);
-	newMessage.setFromAccount(fromAccount);
-	newMessage.setFromMailbox(fromMailbox);
-	newMessage.setServerUid(serveruid);
-    newMessage.setMessageType(t);
-
+    
     newMessage.changesCommitted();
 
 	return newMessage;
@@ -390,8 +467,8 @@ QString QMailStorePrivate::buildOrderClause(const QMailMessageSortKey& key) cons
 			case QMailMessageSortKey::TimeStamp:
 				sortClause += "stamp";
 				break;
-			case QMailMessageSortKey::Flags:
-				sortClause += "flags";
+			case QMailMessageSortKey::Status:
+				sortClause += "status";
 				break;
 			case QMailMessageSortKey::FromAccount:
 				sortClause += "fromaccount";
@@ -440,8 +517,11 @@ QString QMailStorePrivate::buildWhereClause(const QMailMessageKey& key) const
 				compareOpString = " > ";
 				break;
 			case QMailMessageKey::Equal:
-                // When matching addreses, we will force equality to actually use a content match
-				compareOpString = (addressRelated ? " LIKE " : " = ");
+                if(a.valueList.count() > 1)
+                    compareOpString = " IN ";
+                else
+                    // When matching addreses, we will force equality to actually use a content match
+                    compareOpString = (addressRelated ? " LIKE " : " = ");
 				break;
 			case QMailMessageKey::LessThanEqual:
 				compareOpString = " <= ";
@@ -457,59 +537,49 @@ QString QMailStorePrivate::buildWhereClause(const QMailMessageKey& key) const
 				break;
 		}
 
-		//TODO provide a  more elegant solution to this.
-
-		QVariant var = a.value;
-
 		switch(a.property)
 		{
 			case QMailMessageKey::Id:
-				{
-					QMailId id = var.value<QMailId>();
-					q << op << "id " << compareOpString << '?'; 
-				}
+					q << op << "id " << compareOpString << expandValueList(a.valueList); 
 				break;
 			case QMailMessageKey::Type:
                 if(a.op == QMailMessageKey::Contains)
                     q << op << "type & " << '?'; 
                 else
-                    q << op << "type " << compareOpString << '?'; 
+                    q << op << "type " << compareOpString << expandValueList(a.valueList); 
 				break;
 			case QMailMessageKey::ParentFolderId:
-				{
-					QMailId id = var.value<QMailId>();
-					q << op << "parentfolderid " << compareOpString << '?'; 
-				}
+					q << op << "parentfolderid " << compareOpString << expandValueList(a.valueList); 
 				break;
 			case QMailMessageKey::Sender:
-				q << op << "sender " << compareOpString << '?'; 
+				q << op << "sender " << compareOpString << expandValueList(a.valueList); 
 				break;
 			case QMailMessageKey::Recipients:
-				q << op << "recipients " << compareOpString << '?'; 
+				q << op << "recipients " << compareOpString << expandValueList(a.valueList); 
 				break;    
 			case QMailMessageKey::Subject:
-				q << op << "subject " << compareOpString << '?'; 
+				q << op << "subject " << compareOpString << expandValueList(a.valueList); 
 				break;    
 			case QMailMessageKey::TimeStamp:
-				q << op << "timestamp " << compareOpString << '?';
+				q << op << "timestamp " << compareOpString << expandValueList(a.valueList);
 				break;    
-			case QMailMessageKey::Flags:
+			case QMailMessageKey::Status:
                 if(a.op == QMailMessageKey::Contains)
                     q << op << "status & " << '?';
                 else
-				    q << op << "status " << compareOpString << '?'; 
+				    q << op << "status " << compareOpString << expandValueList(a.valueList); 
 				break;    
 			case QMailMessageKey::FromAccount:
-				q << op << "fromaccount " << compareOpString << '?'; 
+				q << op << "fromaccount " << compareOpString << expandValueList(a.valueList); 
 				break;    
 			case QMailMessageKey::FromMailbox:
-				q << op << "frommailbox " << compareOpString << '?'; 
+				q << op << "frommailbox " << compareOpString << expandValueList(a.valueList); 
 				break;    
 			case QMailMessageKey::ServerUid:
-				q << op << "serveruid " << compareOpString << '?'; 
+				q << op << "serveruid " << compareOpString << expandValueList(a.valueList); 
 				break;   
 			case QMailMessageKey::Size:
-				q << op << "size " << compareOpString << '?'; 
+				q << op << "size " << compareOpString << expandValueList(a.valueList); 
 				break;     
 		}
 		op = logicalOpString;
@@ -537,90 +607,88 @@ void QMailStorePrivate::bindWhereData(const QMailMessageKey& key, QSqlQuery& que
 {
 	foreach(QMailMessageKeyPrivate::Argument a,key.d->arguments)
 	{
-		QVariant var = a.value;
-        QString stringData = var.toString();
+        foreach(QVariant var,a.valueList)
+        {
+            QString stringData = var.toString();
 
-        if ((a.property == QMailMessageKey::Sender) || (a.property == QMailMessageKey::Recipients)) {
-            // If the query argument is a phone number, ensure it is in minimal form
-            QMailAddress address(stringData);
-            if (address.isPhoneNumber()) {
-                stringData = address.minimalPhoneNumber();
+            if ((a.property == QMailMessageKey::Sender) || (a.property == QMailMessageKey::Recipients)) {
+                // If the query argument is a phone number, ensure it is in minimal form
+                QMailAddress address(stringData);
+                if (address.isPhoneNumber()) {
+                    stringData = address.minimalPhoneNumber();
 
-                // Rather than compare exact numbers, we will only use the trailing
-                // digits to compare phone numbers - otherwise, slightly different 
-                // forms of the same number will not be matched
-                static const int significantDigits = 8;
+                    // Rather than compare exact numbers, we will only use the trailing
+                    // digits to compare phone numbers - otherwise, slightly different 
+                    // forms of the same number will not be matched
+                    static const int significantDigits = 8;
 
-                int extraneous = stringData.length() - significantDigits;
-                if (extraneous > 0)
-                    stringData.remove(0, extraneous);
+                    int extraneous = stringData.length() - significantDigits;
+                    if (extraneous > 0)
+                        stringData.remove(0, extraneous);
+                }
             }
-        }
 
-        //delimit data for sql "LIKE" operator
-        bool addressRelated(a.property == QMailMessageKey::Sender || a.property == QMailMessageKey::Recipients);
-        if((a.op == QMailMessageKey::Contains) || 
-           ((a.op == QMailMessageKey::Equal) && addressRelated)) {
-            if (stringData.isEmpty()) {
-                // Is there any point in matching everything, because this comparator 
-                // is empty?  It looks wrong to me...
-            } else {
-                stringData = "\%" + stringData + "\%";
+            //delimit data for sql "LIKE" operator
+            //if valuelist > 1; dont delimit for "IN" operator
+            bool addressRelated(a.property == QMailMessageKey::Sender || a.property == QMailMessageKey::Recipients);
+            if((a.op == QMailMessageKey::Contains) || 
+               ((a.op == QMailMessageKey::Equal) && addressRelated && a.valueList.count() == 1)) { 
+                if(!stringData.isEmpty())
+                    stringData = "\%" + stringData + "\%";
             }
-        }
 
-		switch(a.property)
-		{
-			case QMailMessageKey::Id:
-				{
-					QMailId id = var.value<QMailId>();
-					query.addBindValue(id.toULongLong());
-				}
-				break;
-			case QMailMessageKey::Type:
-				query.addBindValue(var.toInt());
-				break;
-			case QMailMessageKey::ParentFolderId:
-				{
-					QMailId id = var.value<QMailId>();
-					query.addBindValue(id.toULongLong());
-				}
-				break;
-			case QMailMessageKey::Sender:
-				query.addBindValue(stringData);
-				break;
-			case QMailMessageKey::Recipients:
-				query.addBindValue(stringData);
-				break;    
-			case QMailMessageKey::Subject:
-				query.addBindValue(stringData);
-				break;    
-			case QMailMessageKey::TimeStamp:
-				query.addBindValue(stringData);
-				break;    
-			case QMailMessageKey::Flags:
-				query.addBindValue(var.toUInt());
-				break;    
-			case QMailMessageKey::FromAccount:
-				query.addBindValue(stringData);
-				break;    
-			case QMailMessageKey::FromMailbox:
-				query.addBindValue(stringData);
-				break;    
-			case QMailMessageKey::ServerUid:
-				query.addBindValue(stringData);
-				break;   
-			case QMailMessageKey::Size:
-				query.addBindValue(var.toInt());
-				break;     
-		}
+            switch(a.property)
+            { 
+                case QMailMessageKey::Id:
+                    {
+                        QMailId id = var.value<QMailId>();
+                        query.addBindValue(id.toULongLong());
+                    }
+                    break;
+                case QMailMessageKey::Type:
+                    query.addBindValue(var.toInt());
+                    break;
+                case QMailMessageKey::ParentFolderId:
+                    {
+                        QMailId id = var.value<QMailId>();
+                        query.addBindValue(id.toULongLong());
+                    }
+                    break;
+                case QMailMessageKey::Sender:
+                    query.addBindValue(stringData);
+                    break;
+                case QMailMessageKey::Recipients:
+                    query.addBindValue(stringData);
+                    break;    
+                case QMailMessageKey::Subject:
+                    query.addBindValue(stringData);
+                    break;    
+                case QMailMessageKey::TimeStamp:
+                    query.addBindValue(stringData);
+                    break;    
+                case QMailMessageKey::Status:
+                    query.addBindValue(var.toUInt());
+                    break;    
+                case QMailMessageKey::FromAccount:
+                    query.addBindValue(stringData);
+                    break;    
+                case QMailMessageKey::FromMailbox:
+                    query.addBindValue(stringData);
+                    break;    
+                case QMailMessageKey::ServerUid:
+                    query.addBindValue(stringData);
+                    break;   
+                case QMailMessageKey::Size:
+                    query.addBindValue(var.toInt());
+                    break;     
+            }
+        }    
 	}
 
 	//subkeys
 
 	foreach(QMailMessageKey subkey,key.d->subKeys)
 		bindWhereData(subkey,query);
-
 }
 
 QString QMailStorePrivate::buildWhereClause(const QMailFolderKey& key) const
@@ -644,7 +712,10 @@ QString QMailStorePrivate::buildWhereClause(const QMailFolderKey& key) const
 				compareOpString = " > ";
 				break;
 			case QMailFolderKey::Equal:
-				compareOpString = " = ";
+                if(a.valueList.count() > 1)
+                    compareOpString = " IN ";
+                else
+                    compareOpString = " = ";
 				break;
 			case QMailFolderKey::LessThanEqual:
 				compareOpString = " <= ";
@@ -659,23 +730,16 @@ QString QMailStorePrivate::buildWhereClause(const QMailFolderKey& key) const
 				compareOpString = " LIKE ";
 				break;
 		}
-		QVariant var = a.value;
 		switch(a.property)
 		{
 			case QMailFolderKey::Id:
-				{
-					QMailId id = var.value<QMailId>();
-					q << op << "id " << compareOpString << '?';            
-				}
+					q << op << "id " << compareOpString << expandValueList(a.valueList);            
 				break;
 			case QMailFolderKey::Name:
-				q << op << "name " << compareOpString << '?'; 
+				q << op << "name " << compareOpString << expandValueList(a.valueList); 
 				break;
 			case QMailFolderKey::ParentId:
-				{
-					QMailId id = var.value<QMailId>();
-					q << op << "parentid " << compareOpString << '?';
-				}
+					q << op << "parentid " << compareOpString << expandValueList(a.valueList);
 				break;
 		}
 		op = logicalOpString;
@@ -704,38 +768,143 @@ void QMailStorePrivate::bindWhereData(const QMailFolderKey& key, QSqlQuery& quer
 {
 	foreach(QMailFolderKeyPrivate::Argument a,key.d->arguments)
 	{
-		QVariant var = a.value;
-        switch(a.property)
-		{
+        foreach(QVariant var, a.valueList)
+        {
+            switch(a.property)
+            {
 
-			case QMailFolderKey::Id:
-				{
-					QMailId id = var.value<QMailId>();
-					query.addBindValue(id.toULongLong());
-				}
-				break;
-			case QMailFolderKey::Name:
-                {
-                    //delimit data for sql "LIKE" operator 
+                case QMailFolderKey::Id:
+                    {
+                        QMailId id = var.value<QMailId>();
+                        query.addBindValue(id.toULongLong());
+                    }
+                    break;
+                case QMailFolderKey::Name:
+                    {
+                        //delimit data for sql "LIKE" operator 
 
-                    QString stringData = var.toString();
-                    if(a.op == QMailFolderKey::Contains)
-                        stringData = "\%" + stringData + "\%";
-                    query.addBindValue(stringData);
-                }
-				break;
-                
-			case QMailFolderKey::ParentId:
-				{
-					QMailId id = var.value<QMailId>();
-					query.addBindValue(id.toULongLong());
-				}
-				break;
-		}
+                        QString stringData = var.toString();
+                        if(a.op == QMailFolderKey::Contains)
+                            if(!stringData.isEmpty())
+                                stringData = "\%" + stringData + "\%";
+                        query.addBindValue(stringData);
+                    }
+                    break;
+
+                case QMailFolderKey::ParentId:
+                    {
+                        QMailId id = var.value<QMailId>();
+                        query.addBindValue(id.toULongLong());
+                    }
+                    break;
+            }
+        }
 	}
 
 	foreach(QMailFolderKey subkey,key.d->subKeys)
 		bindWhereData(subkey,query);
+}
+
+void QMailStorePrivate::bindUpdateData(const QMailMessageKey::Properties& properties,
+                                       const QMailMessage& data,
+                                       QSqlQuery& query) const
+{
+    const MessagePropertyMap& map = messagePropertyMap();
+    const QList<QMailMessageKey::Property> keys = map.keys();
+
+    foreach(QMailMessageKey::Property p,keys)
+    {
+        switch(properties & p)
+        {
+            case QMailMessageKey::Id:
+                query.addBindValue(data.id().toULongLong());
+                break;
+            case QMailMessageKey::Type:
+                query.addBindValue(static_cast<int>(data.messageType()));
+                break;
+            case QMailMessageKey::ParentFolderId:
+                query.addBindValue(data.parentFolderId().toULongLong());
+                break;
+            case QMailMessageKey::Sender:
+                query.addBindValue(data.from().toString());
+                break;
+            case QMailMessageKey::Recipients:
+                query.addBindValue(QMailAddress::toStringList(data.to()).join(","));
+                break;
+            case QMailMessageKey::Subject:
+                query.addBindValue(data.subject());
+                break;
+            case QMailMessageKey::TimeStamp:
+                query.addBindValue(data.date().toLocalTime());
+                break;
+            case QMailMessageKey::Status:
+                query.addBindValue(static_cast<int>(data.status()));
+                break;
+            case QMailMessageKey::FromAccount:
+                query.addBindValue(data.fromAccount());
+                break;
+            case QMailMessageKey::FromMailbox:
+                query.addBindValue(data.fromMailbox());
+                break;
+            case QMailMessageKey::ServerUid:
+                query.addBindValue(data.serverUid());
+                break;
+            case QMailMessageKey::Size:
+                query.addBindValue(data.size());
+                break;
+        }
+    }
+}
+
+void QMailStorePrivate::bindUpdateData(const QMailMessageKey::Properties& properties,
+                                       const QMailMessage& fromMessage,
+                                       QMailMessage& toMessage) const
+{
+    const MessagePropertyMap& map = messagePropertyMap();
+    const QList<QMailMessageKey::Property> keys = map.keys();
+
+    foreach(QMailMessageKey::Property p,keys)
+    {
+        switch(properties & p)
+        {
+            case QMailMessageKey::Id:
+                toMessage.setId(fromMessage.id());
+                break;
+            case QMailMessageKey::Type:
+                toMessage.setMessageType(fromMessage.messageType());
+                break;
+            case QMailMessageKey::ParentFolderId:
+                toMessage.setParentFolderId(fromMessage.parentFolderId());
+                break;
+            case QMailMessageKey::Sender:
+                toMessage.setFrom(fromMessage.from());
+                break;
+            case QMailMessageKey::Recipients:
+                toMessage.setTo(fromMessage.to());
+                break;
+            case QMailMessageKey::Subject:
+                toMessage.setSubject(fromMessage.subject());
+                break;
+            case QMailMessageKey::TimeStamp:
+                toMessage.setDate(fromMessage.date());
+                break;
+            case QMailMessageKey::Status:
+                toMessage.setStatus(fromMessage.status());
+                break;
+            case QMailMessageKey::FromAccount:
+                toMessage.setFromAccount(fromMessage.fromAccount());
+                break;
+            case QMailMessageKey::FromMailbox:
+                toMessage.setFromMailbox(fromMessage.fromMailbox());
+                break;
+            case QMailMessageKey::ServerUid:
+                toMessage.setServerUid(fromMessage.serverUid());
+                break;
+            case QMailMessageKey::Size:
+                toMessage.setSize(fromMessage.size());
+                break;
+        }
+    }
 }
 
 bool QMailStorePrivate::initStore()
@@ -748,7 +917,9 @@ bool QMailStorePrivate::initStore()
     sMutex.lock(100);
 
 	if(!db.isOpenError())
-        result = setupTables(QStringList() << "mailfolders" << "mailmessages",db);
+        result = setupTables(QStringList() << 
+                             "mailfolders" << 
+                             "mailmessages",db);
 
     sMutex.unlock();
 
@@ -815,3 +986,219 @@ QString QMailStorePrivate::parseSql(QTextStream& ts)
     return qry;
 }
 
+QString QMailStorePrivate::expandValueList(const QVariantList& valueList) const
+{
+    Q_ASSERT(!valueList.isEmpty());
+
+    if(valueList.count() == 1)
+        return "(?)";
+    else
+    {
+        QString inList = " (?";
+        for(int i = 1; i < valueList.count(); ++i)
+            inList += ",?";
+        inList += ")";
+        return inList;
+    }
+}
+
+const MessagePropertyMap& QMailStorePrivate::messagePropertyMap() const
+{
+    static MessagePropertyMap map; 
+    if(map.isEmpty())
+    {
+        map.insert(QMailMessageKey::Id,"id");
+        map.insert(QMailMessageKey::Type,"type");
+        map.insert(QMailMessageKey::ParentFolderId,"parentfolderid");
+        map.insert(QMailMessageKey::Sender,"sender");
+        map.insert(QMailMessageKey::Recipients,"recipients");
+        map.insert(QMailMessageKey::Subject,"subject");
+        map.insert(QMailMessageKey::TimeStamp,"stamp");
+        map.insert(QMailMessageKey::Status,"status");
+        map.insert(QMailMessageKey::FromAccount,"fromaccount");
+        map.insert(QMailMessageKey::FromMailbox,"frommailbox");
+        map.insert(QMailMessageKey::ServerUid,"serveruid");
+        map.insert(QMailMessageKey::Size,"size");
+    }
+    return map;
+}
+
+QString QMailStorePrivate::expandProperties(const QMailMessageKey::Properties& p, bool update) const 
+{
+    const MessagePropertyMap& map = messagePropertyMap();
+    const QList<QMailMessageKey::Property> keys = map.keys();
+    QString out;
+
+    for(int i = 0 ; i < keys.count(); ++i)
+    {
+        QMailMessageKey::Property prop = keys[i];
+        if(p & prop)
+        {
+            if(!out.isEmpty())
+                out += ",";                     
+            out += map.value(prop);
+            if(update)
+                out += "=?";
+        }
+    }
+
+    return out;
+}
+
+int QMailStorePrivate::numComparitors(const QMailMessageKey& key) const
+{
+    int total = 0;
+    foreach(QMailMessageKeyPrivate::Argument a, key.d->arguments)
+        total += a.valueList.count();
+    foreach(QMailMessageKey k,key.d->subKeys)
+        total += numComparitors(k);
+    return total;
+}
+
+int QMailStorePrivate::numComparitors(const QMailFolderKey& key) const
+{
+    int total = 0;
+    foreach(QMailFolderKeyPrivate::Argument a, key.d->arguments)
+        total += a.valueList.count();
+    foreach(QMailFolderKey k,key.d->subKeys)
+        total += numComparitors(k);
+    return total;
+
+}
+
+
+void QMailStorePrivate::checkComparitors(const QMailMessageKey& key) const
+{
+    if(numComparitors(key) > maxComparitorsCutoff) 
+        qLog(Messaging) << comparitorWarning; 
+}
+
+void QMailStorePrivate::checkComparitors(const QMailFolderKey& key) const
+{
+    if(numComparitors(key) > maxComparitorsCutoff) 
+        qLog(Messaging) << comparitorWarning;
+
+}
+
+void QMailStorePrivate::notifyMessagesChange(const ChangeType& changeType,
+                                             const QMailIdList& ids)
+{
+    SegmentList segments = createSegments(ids.count(),maxNotifySegmentSize);
+
+    QString funcSig;
+    switch(changeType)
+    {
+        case Added:
+            funcSig = messageAddedSig; 
+            break;
+        case Removed:
+            funcSig = messageRemovedSig;
+            break;
+        case Updated:
+            funcSig = messageUpdatedSig; 
+            break;
+    }
+
+    foreach(Segment segment, segments)
+    {
+        QMailIdList idSegment;
+        for(int i = segment.first; i < segment.second; ++i)
+            idSegment.append(ids[i]);
+
+        QtopiaIpcEnvelope e("QPE/Qtopiamail",funcSig); 
+        e << getpid();
+        e << idSegment; 
+    }
+
+}
+
+void QMailStorePrivate::notifyFoldersChange(const ChangeType& changeType,
+                                            const QMailIdList& ids)
+{
+    SegmentList segments = createSegments(ids.count(),maxNotifySegmentSize);
+    
+    QString funcSig;
+
+    switch(changeType)
+    {
+        case Added:
+            funcSig = folderAddedSig; 
+            break;
+        case Removed:
+            funcSig = folderRemovedSig;
+            break;
+        case Updated:
+            funcSig = folderUpdatedSig; 
+            break;
+    }
+
+    foreach(Segment segment,segments)
+    {
+        QMailIdList idSegment;
+        for(int i = segment.first; i < segment.second; ++i)
+            idSegment.append(ids[i]);
+
+        QtopiaIpcEnvelope e("QPE/Qtopiamail",funcSig); 
+        e << getpid();
+        e << ids; 
+    }
+}
+
+
+void QMailStorePrivate::ipcMessage(const QString& message, const QByteArray& data) 
+{
+    QDataStream ds(data);
+
+    int pid;
+    ds >> pid;
+
+    if(getpid() == pid) //dont notify ourselves 
+        return;
+
+    QMailIdList ids;
+    ds >> ids;
+
+    //for update and remove, clear header cache
+    if(message == messageAddedSig)
+        emit messagesAdded(ids);
+    else if(message == messageRemovedSig)
+    {
+        foreach(QMailId id,ids)
+            if(headerCache.contains(id))
+                headerCache.remove(id);
+        emit messagesRemoved(ids);
+    }
+    else if(message == messageUpdatedSig)
+    {
+        foreach(QMailId id,ids)
+            if(headerCache.contains(id))
+                headerCache.remove(id);
+        emit messagesUpdated(ids);
+    }
+    else if(message == folderAddedSig)
+        emit foldersAdded(ids);
+    else if(message == folderUpdatedSig)
+        emit foldersUpdated(ids);
+    else if(message == folderRemovedSig)
+        emit foldersRemoved(ids);
+}
+
+SegmentList QMailStorePrivate::createSegments(int numItems, int segmentSize)
+{
+    Q_ASSERT(segmentSize > 0);
+
+    if(numItems <= 0)
+        return SegmentList();
+
+    int segmentCount = numItems % segmentSize ? 1 : 0;
+    segmentCount += numItems / segmentSize;
+
+    SegmentList segments;
+    for(int i = 0; i < segmentCount ; ++i)
+    {
+        int start = segmentSize * i;
+        int end = (i+1) == segmentCount ? numItems : (i+1) * segmentSize;
+        segments.append(Segment(start,end)); 
+    }
+    return segments;
+}

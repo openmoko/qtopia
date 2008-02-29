@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -93,7 +91,7 @@ QSize Skin::screenSize(const QString &skinFile)
     QRect rect;
     parseSkinFileHeader(ts,
             &rect, 0, 0,
-            0, 0, 0, 0, 0, 0, 0);
+            0, 0, 0, 0, 0, 0, 0, 0, 0);
     return rect.size();
 }
 
@@ -109,7 +107,7 @@ QSize Skin::secondaryScreenSize(const QString &skinFile)
     QRect crect;
     parseSkinFileHeader(ts,
             0, &rect, &crect,
-            0, 0, 0, 0, 0, 0, 0);
+            0, 0, 0, 0, 0, 0, 0, 0, 0);
     return (rect.isNull() ? crect.size() : rect.size());
 }
 
@@ -156,7 +154,9 @@ bool Skin::parseSkinFileHeader(QTextStream& ts,
 		    QString* skinImageClosedFileName,
 		    QString* skinCursorFileName,
 		    QPoint* cursorHot,
-                    QStringList* closedAreas)
+                    QStringList* closedAreas,
+		    QStringList *toggleAreas,
+		    QStringList *toggleActiveAreas)
 {
     QString mark;
     ts >> mark;
@@ -184,6 +184,14 @@ bool Skin::parseSkinFileHeader(QTextStream& ts,
 		    } else if ( key == "ClosedAreas" ) {
 			if ( closedAreas ) {
                             *closedAreas = value.split(" ");
+                        }
+		    } else if ( key == "ToggleAreas" ) {
+			if ( toggleAreas ) {
+                            *toggleAreas = value.split(" ");
+                        }
+		    } else if ( key == "ToggleActiveAreas" ) {
+			if ( toggleActiveAreas ) {
+                            *toggleActiveAreas = value.split(" ");
                         }
 		    } else if ( key == "Screen" ) {
                         if ( screen ) parseRect( value, screen );
@@ -238,12 +246,15 @@ Skin::Skin( QVFb *p, const QString &skinFile, int &viewW, int &viewH ) :
     QFile f( _skinFileName );
     f.open( QIODevice::ReadOnly );
     QStringList closedAreas;
+    QStringList toggleAreas;
+    QStringList toggleActiveAreas;
     QTextStream ts( &f );
     parseSkinFileHeader(ts,
             &screenRect, &backScreenRect, &closedScreenRect,
             &numberOfAreas,
 	&skinImageUpFileName, &skinImageDownFileName, &skinImageClosedFileName,
-	&skinCursorFileName, &cursorHot, &closedAreas);
+	&skinCursorFileName, &cursorHot, &closedAreas,
+	&toggleAreas, &toggleActiveAreas);
 
     viewW = screenRect.width();
     viewH = screenRect.height();
@@ -313,6 +324,11 @@ Skin::Skin( QVFb *p, const QString &skinFile, int &viewW, int &viewH ) :
 		    joystick = i;
 		areas[i].activeWhenClosed = closedAreas.contains(areas[i].name)
                     || areas[i].keyCode == Qt::Key_Flip; // must be to work
+		areas[i].toggleArea = toggleAreas.contains(areas[i].name);
+		areas[i].toggleActiveArea =
+		    toggleActiveAreas.contains(areas[i].name);
+		if ( areas[i].toggleArea )
+		    toggleAreaList += i;
 		i++;
 	    }
 	}
@@ -477,8 +493,19 @@ void Skin::paintEvent( QPaintEvent * )
     } else {
 	p.drawPixmap( 0, 0, skinImageClosed );
     }
+    QList<int> toDraw;
     if (buttonPressed == true) {
-        ButtonAreas *ba = &areas[buttonIndex];
+	toDraw += buttonIndex;
+    }
+    foreach (int toggle, toggleAreaList) {
+        ButtonAreas *ba = &areas[toggle];
+	if ( flipped_open || ba->activeWhenClosed ) {
+	    if ( ba->toggleArea && ba->toggleActiveArea )
+		toDraw += toggle;
+	}
+    }
+    foreach (int button, toDraw ) {
+        ButtonAreas *ba = &areas[button];
         QRect r = ba->region.boundingRect();
         if ( ba->area.count() > 2 )
             p.setClipRegion(ba->region);
@@ -543,6 +570,13 @@ void Skin::startPress(int i)
     if (view) {
 	if ( areas[buttonIndex].keyCode == Qt::Key_Flip ) {
 	    flip(!flipped_open);
+	} else if ( areas[buttonIndex].toggleArea ) {
+	    bool active = !areas[buttonIndex].toggleActiveArea;
+	    areas[buttonIndex].toggleActiveArea = active;
+	    if ( active )
+		view->skinKeyPressEvent( areas[buttonIndex].keyCode, areas[buttonIndex].text );
+	    else
+		view->skinKeyReleaseEvent( areas[buttonIndex].keyCode, areas[buttonIndex].text );
 	} else {
 	    view->skinKeyPressEvent( areas[buttonIndex].keyCode, areas[buttonIndex].text );
 	    t_skinkey->start(key_repeat_delay);
@@ -554,7 +588,8 @@ void Skin::startPress(int i)
 
 void Skin::endPress()
 {
-    if (view && areas[buttonIndex].keyCode != Qt::Key_Flip )
+    if (view && areas[buttonIndex].keyCode != Qt::Key_Flip &&
+        !areas[buttonIndex].toggleArea)
 	view->skinKeyReleaseEvent( areas[buttonIndex].keyCode, areas[buttonIndex].text );
     t_skinkey->stop();
     buttonPressed = false;

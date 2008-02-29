@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,11 +56,15 @@ public:
     bool event(QEvent *e);
 
     enum PhoneStyleHint {
+        SH_FormLayoutWrapPolicy = QStyle::SH_Menu_Mask + 5, // ### Defined in Qt/4.4
+        SH_FormLayoutFieldGrowthPolicy = QStyle::SH_Menu_Mask + 8,
+        SH_FormLayoutFormAlignment, // QStyle::SH_Menu_Mask + 9
+        SH_FormLayoutLabelAlignment, // QStyle::SH_Menu_Mask + 10
+
         SH_ExtendedFocusHighlight = 0x10000000+1,   //future QtopiaBase + 1
-        SH_FormStyle,
         SH_PopupShadows,
         SH_HideMenuIcons,
-        SH_FullWidthMenus,
+        SH_FullWidthMenu,
         SH_ScrollbarLineStepButtons
     };
 

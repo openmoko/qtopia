@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,7 @@
 #include <QLabel>
 #include <QFormLayout>
 #include <QScrollArea>
+#include <QPushButton>
 
 #include <qtopianamespace.h>
 #include <qtopia/pim/qphonenumber.h>
@@ -228,6 +229,7 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     : QWidget( parent, fl ), mHaveFocus( false ), mHaveContact( false ),
       mPhoneType( QContactModel::Invalid ), deleteMsg(0), addContactMsg(0)
 {
+    setObjectName( "callhistory-view" );
     mMenu = QSoftMenuBar::menuFor( this );
 
     QIcon addressbookIcon( ":icon/addressbook/AddressBook" );
@@ -293,6 +295,11 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     h = new QHBoxLayout();
     h->addWidget( mNumber );
     h->addWidget( mPhoneTypePic );
+    if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
+        QPushButton *dialBtn = new QPushButton( tr( "Dial", "dial highlighted number" ), container );
+        h->addWidget( dialBtn );
+        connect( dialBtn, SIGNAL(released()), this, SLOT(dialNumber()) );
+    }
     h->addStretch();
     l->addRow( tr("Number:"), h );
     l->addRow( tr("Date:"), mStartDate );
@@ -562,16 +569,20 @@ void CallHistoryView::update()
 void CallHistoryView::keyPressEvent( QKeyEvent *ke )
 {
     // if Select or Call key pressed and the phone number is known, dial the number.
-    if( ke->key() == Qt::Key_Call || ke->key() == Qt::Key_Select ) {
-        if ( !mCallListItem.number().trimmed().isEmpty() ) {
-            QtopiaServiceRequest request( "Dialer", "dial(QString,QUniqueId)" );
-            request << mCallListItem.number() << mContact.uid();
-            request.send();
-            emit externalLinkActivated();
-            close();
-        }
-    }
+    if( ke->key() == Qt::Key_Call || ke->key() == Qt::Key_Select )
+        dialNumber();
     QWidget::keyPressEvent( ke );
+}
+
+void CallHistoryView::dialNumber()
+{
+    if ( !mCallListItem.number().trimmed().isEmpty() ) {
+        QtopiaServiceRequest request( "Dialer", "dial(QString,QUniqueId)" );
+        request << mCallListItem.number() << mContact.uid();
+        request.send();
+        emit externalLinkActivated();
+        close();
+    }
 }
 
 // -------------------------------------------------------------
@@ -581,6 +592,7 @@ CallHistoryClearList::CallHistoryClearList( QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
     setModal( true );
+    showMaximized();
     QVBoxLayout *l = new QVBoxLayout( this );
     mList = new QListWidget( this );
     l->addWidget( mList );
@@ -650,6 +662,7 @@ CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
     mView = 0;
 
     mTabs = new QTabWidget( this );
+    mTabs->setElideMode(Qt::ElideRight);
     connect( mTabs, SIGNAL(currentChanged(int)), this, SLOT(refreshOnFirstShow(int)) );
     connect( mTabs, SIGNAL(currentChanged(int)), this, SLOT(pageChanged(int)));
     if (!style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
@@ -1020,6 +1033,9 @@ void CallHistory::clearList( QCallList::ListType type )
     foreach(CallHistoryListView* list, changedLists) {
         list->refreshModel();
         list->updateMenu();
+        CallHistoryModel *chm = qobject_cast<CallHistoryModel*>(list->model());
+        if ( chm && !chm->filter().isEmpty() )
+            chm->setFilter( QString() );
     }
 }
 
@@ -1041,18 +1057,6 @@ void CallHistory::showEvent( QShowEvent *e )
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
     } else if (Qtopia::mousePreferred())
         focusFindLE(mTabs->currentIndex());
-}
-
-/*!
-  \internal
-  */
-void CallHistory::closeEvent( QCloseEvent *e )
-{
-    QWidget::closeEvent(e);
-    // cleanup views with a single shot, as closeEvent can occur
-    // during a key event on the views and therefore deleting the views
-    // here directly would result in a crash
-    QTimer::singleShot( 0, this, SLOT(cleanup()) );
 }
 
 /*!
@@ -1291,6 +1295,14 @@ bool CallHistory::eventFilter( QObject *o, QEvent *e )
     }
     else if ( o == mView )
     {
+        // Need to force update on first paint
+        // because the sizeHint of mName is not correctly calculated
+        // because of the pixmap next to it.
+        static bool forceUpdateOnFirstPaint = true;
+        if ( forceUpdateOnFirstPaint && e->type() == QEvent::Paint ) {
+            mView->update();
+            forceUpdateOnFirstPaint = false;
+        }
         if (e->type() == QEvent::WindowActivate)
             mView->update();
     }
@@ -1318,6 +1330,8 @@ void CallHistory::reset()
         mReceivedFindProxy->clear();
         mMissedFindProxy->clear();
     }
+
+    cleanup();
 }
 
 /*!

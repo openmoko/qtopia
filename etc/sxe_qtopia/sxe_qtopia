@@ -1,33 +1,13 @@
 #!/bin/sh
 
-echo "EXECUTING QTOPIA STANDARD IMAGE RULES"
+echo "RUNNING SXE QTOPIA SETUP"
 
 test -z $QTOPIA_DIR && { echo "\$QTOPIA_DIR not defined!"; exit 1; }
 
-# Qtopia specific LIDS rules
-lidsconf -A -o $QTOPIA_DIR -j READONLY
-lidsconf -A -o $QTOPIA_DIR/etc -j READONLY
-lidsconf -A -o $QTOPIA_DIR/etc/sxe_domains -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/sxe_qtopia -j DENY
+# Set up SXE database
+$QTOPIA_DIR/bin/sxe_policy_runner $QTOPIA_DIR $QTOPIA_DIR
 
-# only qpe is allowed to launch things
-lidsconf -A -o $QTOPIA_DIR/bin -j DENY
+# must have this rule so packagemanager can be given write rule
+# to installed application binaries otherwise it can't delete them
+lidsconf -A -o $QTOPIA_DIR/plugins/application/libpackagemanager.so -j READONLY
 
-lidsconf -A -o $QTOPIA_DIR/etc/sxe.policy -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/sxe.profiles -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/installs -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/manifest -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/keyfile -j DENY
-lidsconf -A -o $QTOPIA_DIR/etc/keyfile.sequence -j DENY
-
-lidsconf -A -s $QTOPIA_DIR/bin/qpe -o $QTOPIA_DIR/bin -j WRITE
-lidsconf -A -s $QTOPIA_DIR/bin/qpe -o /proc -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/qpe -o /proc/lids/locks -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/qpe -o / -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/qpe -o /var/tmp -j WRITE
-
-lidsconf -A -o $QTOPIA_DIR/bin/sxe_policy_runner -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/sxe_policy_runner -o $QTOPIA_DIR/etc/manifest -j WRITE
-lidsconf -A -s $QTOPIA_DIR/bin/sxe_policy_runner -o $QTOPIA_DIR/etc/installs -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/sxe_policy_runner -o $QTOPIA_DIR/etc/sxe.policy -j READONLY
-lidsconf -A -s $QTOPIA_DIR/bin/sxe_policy_runner -o $QTOPIA_DIR/etc/sxe_domains -j READONLY

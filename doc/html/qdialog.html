@@ -101,6 +101,7 @@
 <h3>Modeless Dialogs</h3>
 <p>A <b>modeless</b> dialog is a dialog that operates independently of other windows in the same application. Find and replace dialogs in word-processors are often modeless to allow the user to interact with both the application's main window and with the dialog.</p>
 <p>Modeless dialogs are displayed using <a href="qwidget.html#show">show</a>(), which returns control to the caller immediately.</p>
+<p>If you invoke the <a href="qwidget.html#show">show()</a> function after hiding a dialog, the dialog will be displayed in its original position. This is because the window manager decides the position for windows that have no been explicitly placed by the programmer. To preserve the position of a dialog that has been moved by the user, save its position in your <a href="qwidget.html#closeEvent">closeEvent()</a> handler and then move the dialog to that position, before showing it again.</p>
 <a name="default"></a><a name="default-button"></a>
 <h3>Default Button</h3>
 <p>A dialog's <i>default</i> button is the button that's pressed when the user presses Enter (Return). This button is used to signify that the user accepts the dialog's settings and wants to close the dialog. Use <a href="qpushbutton.html#default-prop">QPushButton::setDefault</a>(), <a href="qpushbutton.html#default-prop">QPushButton::isDefault</a>() and <a href="qpushbutton.html#autoDefault-prop">QPushButton::autoDefault</a>() to set and control the dialog's default button.</p>
@@ -210,13 +211,10 @@
 <h3 class="fn"><a name="setResult"></a>void QDialog::setResult ( int <i>i</i> )</h3>
 <p>Sets the modal dialog's result code to <i>i</i>.</p>
 <p>See also <a href="qdialog.html#result">result</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDialog-2"></a>QDialog::QDialog ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, bool <i>modal</i> = false, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

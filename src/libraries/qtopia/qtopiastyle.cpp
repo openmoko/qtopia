@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -231,7 +231,7 @@ void QtopiaStyle::drawRoundRect(QPainter *painter, const QRectF &r, int xRnd, in
         return;
 
     int dpi = QApplication::desktop()->screen()->logicalDpiY();
-    painter->drawRoundRect(r, xRnd * dpi / (r.width()*2), yRnd * dpi / (r.height()*2));
+    painter->drawRoundRect(r, static_cast<int>(xRnd * dpi / (r.width()*2)), static_cast<int>(yRnd * dpi / (r.height()*2)));
 }
 
 /*!

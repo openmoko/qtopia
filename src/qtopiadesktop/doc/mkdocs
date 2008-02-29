@@ -66,6 +66,12 @@ if ( -f $qtopia_index_in ) {
 
         s/^(<INDEX.*url=")[^"]+/${1}../;
 
+        # These pages conflict with Qtopia Desktop's pages.
+        if ( /<page.*\"(Functions)\"/ ) {
+            $skipto = "<\/page>";
+            next;
+        }
+
         push(@data, $_);
     }
 
@@ -110,9 +116,30 @@ if ( $isWindows ) {
 }
 my $cmd = "$qdocpp $vars{GENDIR} ".join(" ", @files);
 system($cmd);
+if ( configopt("depot") ) {
+    # Rebuild the .png files if they're out of date
+    for my $file ( glob("$vars{SOURCEDIR}/*.dia") ) {
+        my $outfile = "$vars{SOURCEDIR}/images/".basename($file);
+        $outfile =~ s/\.dia$/.png/;
+        if ( needCopy($file, $outfile) ) {
+            if ( ! -e $outfile || -w $outfile ) {
+                $cmd = "dia -e $outfile $file";
+                system($cmd);
+            } else {
+                # The file exists but it's not writeable.
+                # You need to p4 edit it to stop the warning.
+                print "WARNING: $outfile is out of date.\n";
+            }
+        }
+    }
+}
 $cmd = "$vars{qdoc} ".fixpath("$vars{SOURCEDIR}/$vars{CONF}.qdocconf");
 system($cmd);
 Qtopia::File::cpR(fixpath("$vars{SOURCEDIR}/images"), $vars{DESTDIR});
+
+# Copy into the Qtopia docs area
+rmrf("$vars{QPEDIR}/doc/html/$vars{CONF}");
+Qtopia::File::cpR("$vars{DESTDIR}", fixpath("$vars{QPEDIR}/doc/html/$vars{CONF}"));
 
 exit 0;
 

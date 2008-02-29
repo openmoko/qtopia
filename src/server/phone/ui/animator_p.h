@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -41,8 +41,8 @@ class QRectF;
 class QGraphicsRectItem;
 class Renderer;
 class SelectedItem;
+class GridItem;
 class QPixmap;
-
 
 class Animator
 {
@@ -52,14 +52,16 @@ public:
 
     virtual void animate(QPainter *,SelectedItem *,qreal percent) = 0;
 
+    virtual void initFromGridItem(GridItem *);
+
 protected:
 
     void draw(QPainter *,SelectedItem *,int w,int h);
+    void draw(QPainter *,const QPixmap &,QGraphicsRectItem *,int w,int h);
 
 private:
 
     void draw(QPainter *,Renderer *,QGraphicsRectItem *,int w,int h);
-    void draw(QPainter *,const QPixmap &,QGraphicsRectItem *,int w,int h);
 
     QRectF renderingBounds(QGraphicsRectItem *item,int w,int h);
 };

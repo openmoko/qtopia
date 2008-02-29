@@ -57,20 +57,20 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="Template"></a>Template::Template ()</h3>
 <p>Constructs a new empty Template.</p>
-<h3 class="fn"><a name="Template-2"></a>Template::Template ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="Template-2"></a>Template::Template ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>Constructs a new Template for a list of filters with the FilterType <i>type</i> and specialization <i>scope</i>.</p>
 <p>By default no template <i>options</i> will be set.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="Template-3"></a>Template::Template ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="Template-3"></a>Template::Template ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>Constructs a new Template for a list of filters for selecting from the property <i>property</i>.</p>
 <p>By default no template <i>options</i> will be set.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="Template-4"></a>Template::Template ( const Template &amp; <i>target</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="Template-4"></a>Template::Template ( const Template &amp; <i>target</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>Constructs a new Template for a list of filters with the FilterType <i>type</i> and specialization <i>scope</i>.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
 <p>By default no template <i>options</i> will be set.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="Template-5"></a>Template::Template ( const Template &amp; <i>target</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="Template-5"></a>Template::Template ( const Template &amp; <i>target</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = NoTemplateOptions, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>Constructs a new Template for a list of filters for selecting from the property <i>property</i>.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
 <p>By default no template <i>options</i> will be set.</p>
@@ -79,50 +79,50 @@
 <p>Creates a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.Template"></a>Template::~Template ()</h3>
 <p>Destroys a Template.</p>
-<h3 class="fn"><a name="addLabel"></a>void Template::addLabel ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, bool <i>checked</i> = false )</h3>
+<h3 class="fn"><a name="addLabel"></a>void Template::addLabel ( const <a href="./qstring.html">QString</a> &amp; <i>title</i>, bool <i>checked</i> = false )</h3>
 <p>Adds a label with the text <i>title</i> to the template, if <i>checked</i> is true the label will be checked by default.</p>
-<h3 class="fn"><a name="addLabel-2"></a>void Template::addLabel ( const Template &amp; <i>target</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, bool <i>checked</i> = false )</h3>
+<h3 class="fn"><a name="addLabel-2"></a>void Template::addLabel ( const Template &amp; <i>target</i>, const <a href="./qstring.html">QString</a> &amp; <i>title</i>, bool <i>checked</i> = false )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a label with the text <i>title</i> to the template, if <i>checked</i> is true the label will be checked by default.</p>
 <p>The label will parent a sub list defined by the Template <i>target</i>.</p>
-<h3 class="fn"><a name="addLabel-3"></a>void Template::addLabel ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, bool <i>checked</i> = false )</h3>
+<h3 class="fn"><a name="addLabel-3"></a>void Template::addLabel ( const <a href="./qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, bool <i>checked</i> = false )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a label with the text <i>title</i> which selects the <a href="qcontentfilter.html">QContentFilter</a> <i>filter</i> to the template, if <i>checked</i> is true the label will be checked by default.</p>
-<h3 class="fn"><a name="addLabel-4"></a>void Template::addLabel ( const Template &amp; <i>target</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, bool <i>checked</i> = false )</h3>
+<h3 class="fn"><a name="addLabel-4"></a>void Template::addLabel ( const Template &amp; <i>target</i>, const <a href="./qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, bool <i>checked</i> = false )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a label with the text <i>title</i> which selects the <a href="qcontentfilter.html">QContentFilter</a> <i>filter</i> to the template, if <i>checked</i> is true the label will be checked by default.</p>
 <p>The label will parent a sub list defined by the Template <i>target</i>.</p>
-<h3 class="fn"><a name="addList"></a>void Template::addList ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList"></a>void Template::addList ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>Adds a list of filters of type <i>type</i> within the given <i>scope</i> to the template.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-2"></a>void Template::addList ( const Template &amp; <i>target</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-2"></a>void Template::addList ( const Template &amp; <i>target</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters of type <i>type</i> within the given <i>scope</i> to the template.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-3"></a>void Template::addList ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-3"></a>void Template::addList ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters of type <i>type</i> within the given <i>scope</i> and filtered by <i>filter</i> to the template.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-4"></a>void Template::addList ( const Template &amp; <i>target</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-4"></a>void Template::addList ( const Template &amp; <i>target</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters of type <i>type</i> within the given <i>scope</i> and filtered by <i>filter</i> to the template.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-5"></a>void Template::addList ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-5"></a>void Template::addList ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters based on the property <i>property</i> to the template.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-6"></a>void Template::addList ( const Template &amp; <i>target</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-6"></a>void Template::addList ( const Template &amp; <i>target</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters based on the property <i>property</i> to the template.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-7"></a>void Template::addList ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-7"></a>void Template::addList ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters filtered by <i>filter</i> and based on the property <i>property</i> to the template.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="addList-8"></a>void Template::addList ( const Template &amp; <i>target</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
+<h3 class="fn"><a name="addList-8"></a>void Template::addList ( const Template &amp; <i>target</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a list of filters filtered by <i>filter</i> and based on the property <i>property</i> to the template.</p>
 <p>Each filter in the list will parent a sub list defined by the Template <i>target</i>.</p>
@@ -145,8 +145,8 @@
 <p>Assigns <i>other</i> a Template.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

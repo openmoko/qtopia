@@ -20,11 +20,13 @@
 <tr valign="top" class="even"><th><a href="analogclockhswidget.html">AnalogClockHSWidget</a></th><td>Displays the current time</td></tr>
 <tr valign="top" class="odd"><th><a href="applicationipcrouter.html">ApplicationIpcRouter</a></th><td>Interface through which ApplicationTypeLauncher instances to control IPC message routing</td></tr>
 <tr valign="top" class="even"><th><a href="applicationlauncher.html">ApplicationLauncher</a></th><td>Responsible for fundamental application management and IPC routing within Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="applicationterminationhandler.html">ApplicationTerminationHandler</a></th><td>Allows tasks to be notified, and possibly filter, when an application terminates</td></tr>
-<tr valign="top" class="even"><th><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></th><td>Interface to control a particular application type in the system</td></tr>
-<tr valign="top" class="odd"><th><a href="appointmentshswidget.html">AppointmentsHSWidget</a></th><td>Information about the next or current appointment</td></tr>
-<tr valign="top" class="even"><th><a href="archiveviewer.html">ArchiveViewer</a></th></tr>
-<tr valign="top" class="odd"><th><a href="asteriskmanager.html">AsteriskManager</a></th><td>Maintains information about the active Asterisk telephony service</td></tr>
+<tr valign="top" class="odd"><th><a href="applicationshutdowntask.html">ApplicationShutdownTask</a></th><td>Way of terminating all running Qtopia applications before the Qtopia server itself terminates</td></tr>
+<tr valign="top" class="even"><th><a href="applicationterminationhandler.html">ApplicationTerminationHandler</a></th><td>Allows tasks to be notified, and possibly filter, when an application terminates</td></tr>
+<tr valign="top" class="odd"><th><a href="applicationtypelauncher.html">ApplicationTypeLauncher</a></th><td>Interface to control a particular application type in the system</td></tr>
+<tr valign="top" class="even"><th><a href="appointmentshswidget.html">AppointmentsHSWidget</a></th><td>Information about the next or current appointment</td></tr>
+<tr valign="top" class="odd"><th><a href="archiveviewer.html">ArchiveViewer</a></th></tr>
+<tr valign="top" class="even"><th><a href="asteriskmanager.html">AsteriskManager</a></th><td>Maintains information about the active Asterisk telephony service</td></tr>
+<tr valign="top" class="odd"><th><a href="atparseutils.html">AtParseUtils</a></th><td>Several utility functions that assist with parsing AT commands</td></tr>
 <tr valign="top" class="even"><th><a href="bluetoothpasskeyagenttask.html">BluetoothPasskeyAgentTask</a></th><td>Default passkey agent for performing Bluetooth passkey authentications</td></tr>
 <tr valign="top" class="odd"><th><a href="bluetoothservicemanager.html">BluetoothServiceManager</a></th><td>Controls Qtopia's Bluetooth services</td></tr>
 <tr valign="top" class="even"><th><a href="btdialupservicetask.html">BtDialupServiceTask</a></th><td>Server side support for the Bluetooth DUN profile</td></tr>
@@ -55,182 +57,180 @@
 <tr valign="top" class="odd"><th><a href="gsmkeyactions.html">GsmKeyActions</a></th><td>Handles special GSM actions for requesting and controlling supplementary services</td></tr>
 <tr valign="top" class="even"><th><a href="gsmkeyfilter.html">GsmKeyFilter</a></th><td>Filters key sequences looking for GSM control actions</td></tr>
 <tr valign="top" class="odd"><th><a href="homescreenwidgets.html">HomeScreenWidgets</a></th><td>Factory for homescreen widgets</td></tr>
-<tr valign="top" class="even"><th><a href="idmangler.html">IdMangler</a></th><td>Servers to randomize key generation for SXE</td></tr>
-<tr valign="top" class="odd"><th><a href="inputdevicesettings.html">InputDeviceSettings</a></th><td>Allows keyboard and mouse configuration to be adjusted at runtime</td></tr>
-<tr valign="top" class="even"><th><a href="inputmethodselector.html">InputMethodSelector</a></th></tr>
-<tr valign="top" class="odd"><th><a href="inputmethods.html">InputMethods</a></th><td>Implementation of Qtopia server input method handling</td></tr>
-<tr valign="top" class="even"><th><a href="irpowerservice.html">IrPowerService</a></th><td>The Qtopia Infrared Power service</td></tr>
-<tr valign="top" class="odd"><th><a href="irpowerservicetask.html">IrPowerServiceTask</a></th><td>The IrPowerService as a server task</td></tr>
-<tr valign="top" class="even"><th><a href="keyclick.html">KeyClick</a></th><td>Enables an audible clicking sound whenever keys are pressed</td></tr>
-<tr valign="top" class="odd"><th><a href="launcherhswidget.html">LauncherHSWidget</a></th><td>Launches applications</td></tr>
-<tr valign="top" class="even"><th><a href="lowmemorytask.html">LowMemoryTask</a></th><td>Responds to low memory situations by closing applications</td></tr>
-<tr valign="top" class="odd"><th><a href="mediaservercontroltask.html">MediaServerControlTask</a></th><td>Launcher for the Media Server</td></tr>
-<tr valign="top" class="even"><th><a href="mediaservicestask.html">MediaServicesTask</a></th><td>Task that manages services related to Media in Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="memorymonitor.html">MemoryMonitor</a></th><td>Interface determines the available amount of available memory</td></tr>
-<tr valign="top" class="even"><th><a href="mmscomms.html">MmsComms</a></th><td>The base class for MMS communications</td></tr>
-<tr valign="top" class="odd"><th><a href="obexservicemanager.html">ObexServiceManager</a></th><td>Responsible for managing OBEX related services over Bluetooth and Infrared</td></tr>
-<tr valign="top" class="even"><th><a href="oommanager.html">OomManager</a></th><td>Manages low and out of memory situations</td></tr>
-<tr valign="top" class="odd"><th><a href="phonebrowserscreen.html">PhoneBrowserScreen</a></th><td>The main launcher grid for Qtopia Phone</td></tr>
-<tr valign="top" class="even"><th><a href="phoneheader.html">PhoneHeader</a></th><td>Dockable, themeable phone header</td></tr>
-<tr valign="top" class="odd"><th><a href="phonelauncher.html">PhoneLauncher</a></th><td>Implments the main UI widget for the Qtopia Phone Edition</td></tr>
-<tr valign="top" class="even"><th><a href="phonelauncherview.html">PhoneLauncherView</a></th><td>View onto a scene, which is a grid of objects</td></tr>
-<tr valign="top" class="odd"><th><a href="phonemessagebox.html">PhoneMessageBox</a></th><td>Implements the Qtopia Phone message box</td></tr>
-<tr valign="top" class="even"><th><a href="phonepowermanager.html">PhonePowerManager</a></th><td>Implements phone specific power management functionality in Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="phonequickdialerscreen.html">PhoneQuickDialerScreen</a></th><td>Implements a keypad based dialer UI</td></tr>
-<tr valign="top" class="even"><th><a href="phoneserver.html">PhoneServer</a></th><td>Represents the central dispatch server for phone requests</td></tr>
-<tr valign="top" class="odd"><th><a href="phonetouchdialerscreen.html">PhoneTouchDialerScreen</a></th><td>Implements a touchscreen dialer</td></tr>
-<tr valign="top" class="even"><th><a href="pkim.html">PkIM</a></th><td>Input method based on a standard telephone keypad. Also provides full screen handwriting input</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a></th><td>Allows developers to replace the &quot;application browser screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractbutton.html">QAbstractButton</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractcallpolicymanager.html">QAbstractCallPolicyManager</a></th><td>Interface for the management of calls across multiple call types</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a></th><td>Manages power state of a communications device</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractdialerscreen.html">QAbstractDialerScreen</a></th><td>Allows developers to replace the &quot;dialer screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractextensionmanager.html">QAbstractExtensionManager</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractfileengine.html">QAbstractFileEngine</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractfileengineiterator.html">QAbstractFileEngineIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractfontengine.html">QAbstractFontEngine</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractformbuilder.html">QAbstractFormBuilder</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractgraphicsshapeitem.html">QAbstractGraphicsShapeItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstracthomescreen.html">QAbstractHomeScreen</a></th><td>Allows developers to replace the &quot;home screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractipcinterface.html">QAbstractIpcInterface</a></th><td>Facilities for implementing the client and server sides of IPC communications paths</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a></th><td>Convenient wrapper to create the interfaces within a server group</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a></th><td>Method to discover the active IPC interfaces and server interface groups</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractitemdelegate.html">QAbstractItemDelegate</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractitemmodel.html">QAbstractItemModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractitemview.html">QAbstractItemView</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractlistmodel.html">QAbstractListModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractmessagebox.html">QAbstractMessageBox</a></th><td>Allows developers to replace the message box portion of the Qtopia server UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractprintdialog.html">QAbstractPrintDialog</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractproxymodel.html">QAbstractProxyModel</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractscrollarea.html">QAbstractScrollArea</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractsecondarydisplay.html">QAbstractSecondaryDisplay</a></th><td>Allows developers to replace the &quot;secondary screen&quot; portion of the Phone UI</td></tr>
-<tr valign="top" class="even"><th><a href="qabstractserverinterface.html">QAbstractServerInterface</a></th><td>Allows the Qtopia Server UI to be replaced</td></tr>
-<tr valign="top" class="odd"><th><a href="qabstractslider.html">QAbstractSlider</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstractsocket.html">QAbstractSocket</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstractspinbox.html">QAbstractSpinBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="qabstracttablemodel.html">QAbstractTableModel</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qabstracttextdocumentlayout.html">QAbstractTextDocumentLayout</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessible.html">QAccessible</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessiblebridge.html">QAccessibleBridge</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessiblebridgeplugin.html">QAccessibleBridgePlugin</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessibleevent.html">QAccessibleEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessibleinterface.html">QAccessibleInterface</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessibleobject.html">QAccessibleObject</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaccessibleplugin.html">QAccessiblePlugin</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaccessiblewidget.html">QAccessibleWidget</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaction.html">QAction</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qactionevent.html">QActionEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qactiongroup.html">QActionGroup</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qadviceofcharge.html">QAdviceOfCharge</a></th><td>Advice of charge information about a user's phone account</td></tr>
-<tr valign="top" class="even"><th><a href="qanalogclock.html">QAnalogClock</a></th><td>Displays an analog clock face</td></tr>
-<tr valign="top" class="odd"><th><a href="qapplication.html">QApplication</a></th></tr>
-<tr valign="top" class="even"><th><a href="qappointment.html">QAppointment</a></th><td>Holds the data of a calendar appointment</td></tr>
-<tr valign="top" class="odd"><th><a href="qappointmentcontext.html">QAppointmentContext</a></th><td>Represents a storage context of appointment data</td></tr>
-<tr valign="top" class="even"><th><a href="qappointmentdelegate.html">QAppointmentDelegate</a></th><td>Drawing of QAppointmentModel items (</td></tr>
-<tr valign="top" class="odd"><th><a href="qappointmentmodel.html">QAppointmentModel</a></th><td>Access to the Calendar data</td></tr>
-<tr valign="top" class="even"><th><a href="qassistantclient.html">QAssistantClient</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qatchat.html">QAtChat</a></th><td>Communication with AT-command-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qatchatscript.html">QAtChatScript</a></th><td>Mechanism to run pppd chat scripts</td></tr>
-<tr valign="top" class="odd"><th><a href="qatresult.html">QAtResult</a></th><td>Access to the results of AT modem commands and unsolicited notifications</td></tr>
-<tr valign="top" class="even"><th><a href="qatresultparser.html">QAtResultParser</a></th><td>Support for parsing the response to AT modem commands and unsolicited notifications</td></tr>
-<tr valign="top" class="odd"><th><a href="qatutils.html">QAtUtils</a></th><td>Several utility functions that assist with interfacing to AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qaudio.html">QAudio</a></th><td>Container for miscellaneous Audio functionality</td></tr>
-<tr valign="top" class="odd"><th><a href="qaudioinput.html">QAudioInput</a></th><td>Interface to read raw audio data from a microphone input</td></tr>
-<tr valign="top" class="even"><th><a href="qaudiooutput.html">QAudioOutput</a></th><td>Interface for sending live audio samples to the default audio output device</td></tr>
-<tr valign="top" class="odd"><th><a href="qaudiosourceselectordialog.html">QAudioSourceSelectorDialog</a></th><td>Allows the user to select an audio document from a variety of sources</td></tr>
-<tr valign="top" class="even"><th><a href="qaudiostate.html">QAudioState</a></th><td>Encapsulates an audio device state</td></tr>
-<tr valign="top" class="odd"><th><a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a></th><td>Defines a read-only view to the current audio device configuration</td></tr>
-<tr valign="top" class="even"><th><a href="qaudiostateinfo.html">QAudioStateInfo</a></th><td>Point of access to information about an audio state</td></tr>
-<tr valign="top" class="odd"><th><a href="qaudiostatemanager.html">QAudioStateManager</a></th><td>Manages QAudioStatePlugin objects</td></tr>
-<tr valign="top" class="even"><th><a href="qaudiostateplugin.html">QAudioStatePlugin</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qauthenticator.html">QAuthenticator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaxaggregated.html">QAxAggregated</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaxbase.html">QAxBase</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaxbindable.html">QAxBindable</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaxfactory.html">QAxFactory</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaxobject.html">QAxObject</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaxscript.html">QAxScript</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaxscriptengine.html">QAxScriptEngine</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qaxscriptmanager.html">QAxScriptManager</a></th></tr>
-<tr valign="top" class="even"><th><a href="qaxwidget.html">QAxWidget</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbandselection.html">QBandSelection</a></th><td>Interface to select a GSM band for the phone to operate on</td></tr>
-<tr valign="top" class="even"><th><a href="qbasictimer.html">QBasicTimer</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbinarysimfile.html">QBinarySimFile</a></th><td>Interface to access binary files on a SIM</td></tr>
-<tr valign="top" class="even"><th><a href="qbitarray.html">QBitArray</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbitmap.html">QBitmap</a></th></tr>
-<tr valign="top" class="even"><th><a href="qbluetooth.html">QBluetooth</a></th><td>Miscellaneous Bluetooth functionality</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a></th><td>Represents an abstract Bluetooth server socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a></th><td>Base interface class for Bluetooth services within Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a></th><td>Represents an abstract Bluetooth client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothaddress.html">QBluetoothAddress</a></th><td>Represents a bluetooth address</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a></th><td>Interface to a Bluetooth Audio Gateway</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothhandsfreeaudiogatewayserver.html">QBluetoothHandsfreeAudioGatewayServer</a></th><td>Implements the Bluetooth handsfree service Audio Gateway interface</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothhandsfreecomminterface.html">QBluetoothHandsfreeCommInterface</a></th><td>Qtopia IPC interface to the Handsfree Audio Gateway profile implementation</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothhandsfreeservice.html">QBluetoothHandsfreeService</a></th><td>Implements Bluetooth Handsfree Audio Gateway profile</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothheadsetaudiogatewayserver.html">QBluetoothHeadsetAudioGatewayServer</a></th><td>Implements the Bluetooth headset service Audio Gateway interface</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothheadsetcomminterface.html">QBluetoothHeadsetCommInterface</a></th><td>Qtopia IPC interface to the Headset Audio Gateway profile implementation</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothheadsetservice.html">QBluetoothHeadsetService</a></th><td>Implements Bluetooth Headset Audio Gateway profile</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothl2capdatagramsocket.html">QBluetoothL2CapDatagramSocket</a></th><td>Represents an L2CAP Datagram Socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothl2capserver.html">QBluetoothL2CapServer</a></th><td>Represents an L2CAP server socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothl2capsocket.html">QBluetoothL2CapSocket</a></th><td>Represents an L2CAP client socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></th><td>Represents a local bluetooth device</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothlocaldevicemanager.html">QBluetoothLocalDeviceManager</a></th><td>Access to local Bluetooth devices</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a></th><td>Represents a passkey entry proxy</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a></th><td>Encapsulates a Bluetooth PIN request</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a></th><td>Represents a remote bluetooth device</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothremotedevicedialog.html">QBluetoothRemoteDeviceDialog</a></th><td>Allows the user to perform a bluetooth device discovery and select a particular device</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a></th><td>Filter on the devices that are displayed by a QBluetoothRemoteDeviceDialog</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothreply.html">QBluetoothReply</a></th><td>Wrapper object that contains a reply, and an error indicator</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a></th><td>Represents a RFCOMM serial port device</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a></th><td>Represents an RFCOMM server socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a></th><td>Represents an RFCOMM client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothscoserver.html">QBluetoothScoServer</a></th><td>Represents a SCO server socket</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothscosocket.html">QBluetoothScoSocket</a></th><td>Represents an SCO client socket</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothsdpalternative.html">QBluetoothSdpAlternative</a></th><td>Convenience wrapper used in QBluetoothSdpRecord</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a></th><td>Encapsulates operations performed by the SDAP profile</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a></th><td>Encapsulates a result of an SDAP query</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a></th><td>Represents a bluetooth SDP record</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothsdpsequence.html">QBluetoothSdpSequence</a></th><td>Convenience wrapper used in QBluetoothSdpRecord</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a></th><td>Encapsulates Unique Identifiers defined and used by the Bluetooth Service Discovery Protocol</td></tr>
-<tr valign="top" class="even"><th><a href="qbluetoothserialportservice.html">QBluetoothSerialPortService</a></th><td>Bluetooth service implementation for the Bluetooth Serial Port Profile</td></tr>
-<tr valign="top" class="odd"><th><a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a></th><td>Means to control and access information for Qtopia Bluetooth services</td></tr>
-<tr valign="top" class="even"><th><a href="qbootsourceaccessory.html">QBootSourceAccessory</a></th><td>Interface for querying the event which triggered the last boot sequence</td></tr>
-<tr valign="top" class="odd"><th><a href="qbootsourceaccessoryprovider.html">QBootSourceAccessoryProvider</a></th><td>Interface for integrating device specific boot source detection code into Qtopia</td></tr>
-<tr valign="top" class="even"><th><a href="qboxlayout.html">QBoxLayout</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbrush.html">QBrush</a></th></tr>
-<tr valign="top" class="even"><th><a href="qbuffer.html">QBuffer</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbuttongroup.html">QButtonGroup</a></th></tr>
-<tr valign="top" class="even"><th><a href="qbytearray.html">QByteArray</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qbytearraymatcher.html">QByteArrayMatcher</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcbsmessage.html">QCBSMessage</a></th><td>The contents of a cell broadcast message</td></tr>
-<tr valign="top" class="odd"><th><a href="qcdestyle.html">QCDEStyle</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcache.html">QCache</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcacheoperationreader.html">QCacheOperationReader</a></th><td>Reads WAP Cache Operation (CO) documents</td></tr>
-<tr valign="top" class="even"><th><a href="qcalendarwidget.html">QCalendarWidget</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcallbarring.html">QCallBarring</a></th><td>Access to the call barring settings on a GSM phone</td></tr>
-<tr valign="top" class="even"><th><a href="qcallforwarding.html">QCallForwarding</a></th><td>Access to the call forwarding settings on a GSM phone</td></tr>
-<tr valign="top" class="odd"><th><a href="qcalllist.html">QCallList</a></th><td>Interface for recording the details of dialed, received, and missed calls</td></tr>
-<tr valign="top" class="even"><th><a href="qcalllistitem.html">QCallListItem</a></th><td>Information about a single dialed, received or missed call in a QCallList set</td></tr>
-<tr valign="top" class="odd"><th><a href="qcallsettings.html">QCallSettings</a></th><td>Access to auxiliary settings in a GSM phone related to calls</td></tr>
-<tr valign="top" class="even"><th><a href="qcallvolume.html">QCallVolume</a></th><td>Access to GSM call volume control</td></tr>
-<tr valign="top" class="odd"><th><a href="qcategorydialog.html">QCategoryDialog</a></th><td>Allows users to select Categories with a dialog interface</td></tr>
-<tr valign="top" class="even"><th><a href="qcategoryfilter.html">QCategoryFilter</a></th><td>Allows consistent filtering of records or objects that have a set of categories assigned</td></tr>
-<tr valign="top" class="odd"><th><a href="qcategorymanager.html">QCategoryManager</a></th><td>Set of functions to create, modify, and remove categories</td></tr>
-<tr valign="top" class="even"><th><a href="qcategoryselector.html">QCategorySelector</a></th><td>Allows users to select categories for filtering or for applying to an item</td></tr>
-<tr valign="top" class="odd"><th><a href="qcellbroadcast.html">QCellBroadcast</a></th><td>Access to cell broadcast messages on GSM networks according to 3GPP TS 03.41</td></tr>
-<tr valign="top" class="even"><th><a href="qchar.html">QChar</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcheckbox.html">QCheckBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="qchildevent.html">QChildEvent</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcleanlooksstyle.html">QCleanlooksStyle</a></th></tr>
-<tr valign="top" class="even"><th><a href="qclipboard.html">QClipboard</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcloseevent.html">QCloseEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcolor.html">QColor</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcolorbutton.html">QColorButton</a></th><td>Allows users to select a color</td></tr>
-<tr valign="top" class="even"><th><a href="qcolordialog.html">QColorDialog</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcolorgroup.html">QColorGroup</a></th></tr>
+<tr valign="top" class="even"><th><a href="inputdevicesettings.html">InputDeviceSettings</a></th><td>Allows keyboard and mouse configuration to be adjusted at runtime</td></tr>
+<tr valign="top" class="odd"><th><a href="inputmethodselector.html">InputMethodSelector</a></th><td>Provides the user-visible aspects of the Input Method system</td></tr>
+<tr valign="top" class="even"><th><a href="inputmethods.html">InputMethods</a></th><td>Implementation of Qtopia server input method handling</td></tr>
+<tr valign="top" class="odd"><th><a href="irpowerservice.html">IrPowerService</a></th><td>The Qtopia Infrared Power service</td></tr>
+<tr valign="top" class="even"><th><a href="irpowerservicetask.html">IrPowerServiceTask</a></th><td>The IrPowerService as a server task</td></tr>
+<tr valign="top" class="odd"><th><a href="keyclick.html">KeyClick</a></th><td>Enables an audible clicking sound whenever keys are pressed</td></tr>
+<tr valign="top" class="even"><th><a href="launcherhswidget.html">LauncherHSWidget</a></th><td>Launches applications</td></tr>
+<tr valign="top" class="odd"><th><a href="lowmemorytask.html">LowMemoryTask</a></th><td>Responds to low memory situations by closing applications</td></tr>
+<tr valign="top" class="even"><th><a href="mediaservercontroltask.html">MediaServerControlTask</a></th><td>Launcher for the Media Server</td></tr>
+<tr valign="top" class="odd"><th><a href="mediaservicestask.html">MediaServicesTask</a></th><td>Task that manages services related to Media in Qtopia</td></tr>
+<tr valign="top" class="even"><th><a href="memorymonitor.html">MemoryMonitor</a></th><td>Interface determines the available amount of available memory</td></tr>
+<tr valign="top" class="odd"><th><a href="mmscomms.html">MmsComms</a></th><td>The base class for MMS communications</td></tr>
+<tr valign="top" class="even"><th><a href="obexservicemanager.html">ObexServiceManager</a></th><td>Responsible for managing OBEX related services over Bluetooth and Infrared</td></tr>
+<tr valign="top" class="odd"><th><a href="oommanager.html">OomManager</a></th><td>Manages low and out of memory situations</td></tr>
+<tr valign="top" class="even"><th><a href="phonebrowserscreen.html">PhoneBrowserScreen</a></th><td>The main launcher grid for Qtopia Phone</td></tr>
+<tr valign="top" class="odd"><th><a href="phoneheader.html">PhoneHeader</a></th><td>Dockable, themeable phone header</td></tr>
+<tr valign="top" class="even"><th><a href="phonelauncher.html">PhoneLauncher</a></th><td>Implments the main UI widget for the Qtopia Phone Edition</td></tr>
+<tr valign="top" class="odd"><th><a href="phonelauncherview.html">PhoneLauncherView</a></th><td>View onto a scene, which is a grid of objects</td></tr>
+<tr valign="top" class="even"><th><a href="phonemessagebox.html">PhoneMessageBox</a></th><td>Implements the Qtopia Phone message box</td></tr>
+<tr valign="top" class="odd"><th><a href="phonepowermanager.html">PhonePowerManager</a></th><td>Implements phone specific power management functionality in Qtopia</td></tr>
+<tr valign="top" class="even"><th><a href="phonequickdialerscreen.html">PhoneQuickDialerScreen</a></th><td>Implements a keypad based dialer UI</td></tr>
+<tr valign="top" class="odd"><th><a href="phoneserver.html">PhoneServer</a></th><td>Represents the central dispatch server for phone requests</td></tr>
+<tr valign="top" class="even"><th><a href="phonetouchdialerscreen.html">PhoneTouchDialerScreen</a></th><td>Implements a touchscreen dialer</td></tr>
+<tr valign="top" class="odd"><th><a href="pkim.html">PkIM</a></th><td>Input method based on a standard telephone keypad. Also provides full screen handwriting input</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a></th><td>Allows developers to replace the &quot;application browser screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractbutton.html">QAbstractButton</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractcallpolicymanager.html">QAbstractCallPolicyManager</a></th><td>Interface for the management of calls across multiple call types</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a></th><td>Manages power state of a communications device</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractdialerscreen.html">QAbstractDialerScreen</a></th><td>Allows developers to replace the &quot;dialer screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstracteventdispatcher.html">QAbstractEventDispatcher</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractextensionfactory.html">QAbstractExtensionFactory</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractextensionmanager.html">QAbstractExtensionManager</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractfileengine.html">QAbstractFileEngine</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractfileenginehandler.html">QAbstractFileEngineHandler</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractfileengineiterator.html">QAbstractFileEngineIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractfontengine.html">QAbstractFontEngine</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractformbuilder.html">QAbstractFormBuilder</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractgraphicsshapeitem.html">QAbstractGraphicsShapeItem</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstracthomescreen.html">QAbstractHomeScreen</a></th><td>Allows developers to replace the &quot;home screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractipcinterface.html">QAbstractIpcInterface</a></th><td>Facilities for implementing the client and server sides of IPC communications paths</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a></th><td>Convenient wrapper to create the interfaces within a server group</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractipcinterfacegroupmanager.html">QAbstractIpcInterfaceGroupManager</a></th><td>Method to discover the active IPC interfaces and server interface groups</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractitemdelegate.html">QAbstractItemDelegate</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractitemmodel.html">QAbstractItemModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractitemview.html">QAbstractItemView</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractlistmodel.html">QAbstractListModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractmessagebox.html">QAbstractMessageBox</a></th><td>Allows developers to replace the message box portion of the Qtopia server UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractprintdialog.html">QAbstractPrintDialog</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractproxymodel.html">QAbstractProxyModel</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractscrollarea.html">QAbstractScrollArea</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractsecondarydisplay.html">QAbstractSecondaryDisplay</a></th><td>Allows developers to replace the &quot;secondary screen&quot; portion of the Phone UI</td></tr>
+<tr valign="top" class="odd"><th><a href="qabstractserverinterface.html">QAbstractServerInterface</a></th><td>Allows the Qtopia Server UI to be replaced</td></tr>
+<tr valign="top" class="even"><th><a href="qabstractslider.html">QAbstractSlider</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstractsocket.html">QAbstractSocket</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstractspinbox.html">QAbstractSpinBox</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qabstracttablemodel.html">QAbstractTableModel</a></th></tr>
+<tr valign="top" class="even"><th><a href="qabstracttextdocumentlayout.html">QAbstractTextDocumentLayout</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessible.html">QAccessible</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessiblebridge.html">QAccessibleBridge</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessiblebridgeplugin.html">QAccessibleBridgePlugin</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessibleevent.html">QAccessibleEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessibleinterface.html">QAccessibleInterface</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessibleobject.html">QAccessibleObject</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaccessibleplugin.html">QAccessiblePlugin</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaccessiblewidget.html">QAccessibleWidget</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaction.html">QAction</a></th></tr>
+<tr valign="top" class="even"><th><a href="qactionevent.html">QActionEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qactiongroup.html">QActionGroup</a></th></tr>
+<tr valign="top" class="even"><th><a href="qadviceofcharge.html">QAdviceOfCharge</a></th><td>Advice of charge information about a user's phone account</td></tr>
+<tr valign="top" class="odd"><th><a href="qanalogclock.html">QAnalogClock</a></th><td>Displays an analog clock face</td></tr>
+<tr valign="top" class="even"><th><a href="qapplication.html">QApplication</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qappointment.html">QAppointment</a></th><td>Holds the data of a calendar appointment</td></tr>
+<tr valign="top" class="even"><th><a href="qappointmentcontext.html">QAppointmentContext</a></th><td>Represents a storage context of appointment data</td></tr>
+<tr valign="top" class="odd"><th><a href="qappointmentdelegate.html">QAppointmentDelegate</a></th><td>Drawing of QAppointmentModel items (</td></tr>
+<tr valign="top" class="even"><th><a href="qappointmentmodel.html">QAppointmentModel</a></th><td>Access to the Calendar data</td></tr>
+<tr valign="top" class="odd"><th><a href="qassistantclient.html">QAssistantClient</a></th></tr>
+<tr valign="top" class="even"><th><a href="qatchat.html">QAtChat</a></th><td>Communication with AT-command-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qatchatscript.html">QAtChatScript</a></th><td>Mechanism to run pppd chat scripts</td></tr>
+<tr valign="top" class="even"><th><a href="qatresult.html">QAtResult</a></th><td>Access to the results of AT modem commands and unsolicited notifications</td></tr>
+<tr valign="top" class="odd"><th><a href="qatresultparser.html">QAtResultParser</a></th><td>Support for parsing the response to AT modem commands and unsolicited notifications</td></tr>
+<tr valign="top" class="even"><th><a href="qatutils.html">QAtUtils</a></th><td>Several utility functions that assist with interfacing to AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qaudio.html">QAudio</a></th><td>Container for miscellaneous Audio functionality</td></tr>
+<tr valign="top" class="even"><th><a href="qaudioinput.html">QAudioInput</a></th><td>Interface to read raw audio data from a microphone input</td></tr>
+<tr valign="top" class="odd"><th><a href="qaudiooutput.html">QAudioOutput</a></th><td>Interface for sending live audio samples to the default audio output device</td></tr>
+<tr valign="top" class="even"><th><a href="qaudiosourceselectordialog.html">QAudioSourceSelectorDialog</a></th><td>Allows the user to select an audio document from a variety of sources</td></tr>
+<tr valign="top" class="odd"><th><a href="qaudiostate.html">QAudioState</a></th><td>Encapsulates an audio device state</td></tr>
+<tr valign="top" class="even"><th><a href="qaudiostateconfiguration.html">QAudioStateConfiguration</a></th><td>Defines a read-only view to the current audio device configuration</td></tr>
+<tr valign="top" class="odd"><th><a href="qaudiostateinfo.html">QAudioStateInfo</a></th><td>Point of access to information about an audio state</td></tr>
+<tr valign="top" class="even"><th><a href="qaudiostatemanager.html">QAudioStateManager</a></th><td>Manages QAudioStatePlugin objects</td></tr>
+<tr valign="top" class="odd"><th><a href="qaudiostateplugin.html">QAudioStatePlugin</a></th></tr>
+<tr valign="top" class="even"><th><a href="qauthenticator.html">QAuthenticator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaxaggregated.html">QAxAggregated</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaxbase.html">QAxBase</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaxbindable.html">QAxBindable</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaxfactory.html">QAxFactory</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaxobject.html">QAxObject</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaxscript.html">QAxScript</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaxscriptengine.html">QAxScriptEngine</a></th></tr>
+<tr valign="top" class="even"><th><a href="qaxscriptmanager.html">QAxScriptManager</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qaxwidget.html">QAxWidget</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbandselection.html">QBandSelection</a></th><td>Interface to select a GSM band for the phone to operate on</td></tr>
+<tr valign="top" class="odd"><th><a href="qbasictimer.html">QBasicTimer</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbinarysimfile.html">QBinarySimFile</a></th><td>Interface to access binary files on a SIM</td></tr>
+<tr valign="top" class="odd"><th><a href="qbitarray.html">QBitArray</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbitmap.html">QBitmap</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qbluetooth.html">QBluetooth</a></th><td>Miscellaneous Bluetooth functionality</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a></th><td>Represents an abstract Bluetooth server socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothabstractservice.html">QBluetoothAbstractService</a></th><td>Base interface class for Bluetooth services within Qtopia</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a></th><td>Represents an abstract Bluetooth client socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothaddress.html">QBluetoothAddress</a></th><td>Represents a bluetooth address</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothaudiogateway.html">QBluetoothAudioGateway</a></th><td>Interface to a Bluetooth Audio Gateway</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothhandsfreeaudiogatewayserver.html">QBluetoothHandsfreeAudioGatewayServer</a></th><td>Implements the Bluetooth handsfree service Audio Gateway interface</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothhandsfreecomminterface.html">QBluetoothHandsfreeCommInterface</a></th><td>Qtopia IPC interface to the Handsfree Audio Gateway profile implementation</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothhandsfreeservice.html">QBluetoothHandsfreeService</a></th><td>Implements Bluetooth Handsfree Audio Gateway profile</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothheadsetaudiogatewayserver.html">QBluetoothHeadsetAudioGatewayServer</a></th><td>Implements the Bluetooth headset service Audio Gateway interface</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothheadsetcomminterface.html">QBluetoothHeadsetCommInterface</a></th><td>Qtopia IPC interface to the Headset Audio Gateway profile implementation</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothheadsetservice.html">QBluetoothHeadsetService</a></th><td>Implements Bluetooth Headset Audio Gateway profile</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothl2capdatagramsocket.html">QBluetoothL2CapDatagramSocket</a></th><td>Represents an L2CAP Datagram Socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothl2capserver.html">QBluetoothL2CapServer</a></th><td>Represents an L2CAP server socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothl2capsocket.html">QBluetoothL2CapSocket</a></th><td>Represents an L2CAP client socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></th><td>Represents a local bluetooth device</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothlocaldevicemanager.html">QBluetoothLocalDeviceManager</a></th><td>Access to local Bluetooth devices</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a></th><td>Represents a passkey entry proxy</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a></th><td>Encapsulates a Bluetooth PIN request</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a></th><td>Represents a remote bluetooth device</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothremotedevicedialog.html">QBluetoothRemoteDeviceDialog</a></th><td>Allows the user to perform a bluetooth device discovery and select a particular device</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a></th><td>Filter on the devices that are displayed by a QBluetoothRemoteDeviceDialog</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothreply.html">QBluetoothReply</a></th><td>Wrapper object that contains a reply, and an error indicator</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothrfcommserialport.html">QBluetoothRfcommSerialPort</a></th><td>Represents a RFCOMM serial port device</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a></th><td>Represents an RFCOMM server socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a></th><td>Represents an RFCOMM client socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothscoserver.html">QBluetoothScoServer</a></th><td>Represents a SCO server socket</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothscosocket.html">QBluetoothScoSocket</a></th><td>Represents an SCO client socket</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothsdpalternative.html">QBluetoothSdpAlternative</a></th><td>Convenience wrapper used in QBluetoothSdpRecord</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a></th><td>Encapsulates operations performed by the SDAP profile</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a></th><td>Encapsulates a result of an SDAP query</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a></th><td>Represents a bluetooth SDP record</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothsdpsequence.html">QBluetoothSdpSequence</a></th><td>Convenience wrapper used in QBluetoothSdpRecord</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothsdpuuid.html">QBluetoothSdpUuid</a></th><td>Encapsulates Unique Identifiers defined and used by the Bluetooth Service Discovery Protocol</td></tr>
+<tr valign="top" class="odd"><th><a href="qbluetoothserialportservice.html">QBluetoothSerialPortService</a></th><td>Bluetooth service implementation for the Bluetooth Serial Port Profile</td></tr>
+<tr valign="top" class="even"><th><a href="qbluetoothservicecontroller.html">QBluetoothServiceController</a></th><td>Means to control and access information for Qtopia Bluetooth services</td></tr>
+<tr valign="top" class="odd"><th><a href="qbootsourceaccessory.html">QBootSourceAccessory</a></th><td>Interface for querying the event which triggered the last boot sequence</td></tr>
+<tr valign="top" class="even"><th><a href="qbootsourceaccessoryprovider.html">QBootSourceAccessoryProvider</a></th><td>Interface for integrating device specific boot source detection code into Qtopia</td></tr>
+<tr valign="top" class="odd"><th><a href="qboxlayout.html">QBoxLayout</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbrush.html">QBrush</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qbuffer.html">QBuffer</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbuttongroup.html">QButtonGroup</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qbytearray.html">QByteArray</a></th></tr>
+<tr valign="top" class="even"><th><a href="qbytearraymatcher.html">QByteArrayMatcher</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcbsmessage.html">QCBSMessage</a></th><td>The contents of a cell broadcast message</td></tr>
+<tr valign="top" class="even"><th><a href="qcdestyle.html">QCDEStyle</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcache.html">QCache</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcacheoperationreader.html">QCacheOperationReader</a></th><td>Reads WAP Cache Operation (CO) documents</td></tr>
+<tr valign="top" class="odd"><th><a href="qcalendarwidget.html">QCalendarWidget</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcallbarring.html">QCallBarring</a></th><td>Access to the call barring settings on a GSM phone</td></tr>
+<tr valign="top" class="odd"><th><a href="qcallforwarding.html">QCallForwarding</a></th><td>Access to the call forwarding settings on a GSM phone</td></tr>
+<tr valign="top" class="even"><th><a href="qcalllist.html">QCallList</a></th><td>Interface for recording the details of dialed, received, and missed calls</td></tr>
+<tr valign="top" class="odd"><th><a href="qcalllistitem.html">QCallListItem</a></th><td>Information about a single dialed, received or missed call in a QCallList set</td></tr>
+<tr valign="top" class="even"><th><a href="qcallsettings.html">QCallSettings</a></th><td>Access to auxiliary settings in a GSM phone related to calls</td></tr>
+<tr valign="top" class="odd"><th><a href="qcallvolume.html">QCallVolume</a></th><td>Access to GSM call volume control</td></tr>
+<tr valign="top" class="even"><th><a href="qcategorydialog.html">QCategoryDialog</a></th><td>Allows users to select Categories with a dialog interface</td></tr>
+<tr valign="top" class="odd"><th><a href="qcategoryfilter.html">QCategoryFilter</a></th><td>Allows consistent filtering of records or objects that have a set of categories assigned</td></tr>
+<tr valign="top" class="even"><th><a href="qcategorymanager.html">QCategoryManager</a></th><td>Set of functions to create, modify, and remove categories</td></tr>
+<tr valign="top" class="odd"><th><a href="qcategoryselector.html">QCategorySelector</a></th><td>Allows users to select categories for filtering or for applying to an item</td></tr>
+<tr valign="top" class="even"><th><a href="qcellbroadcast.html">QCellBroadcast</a></th><td>Access to cell broadcast messages on GSM networks according to 3GPP TS 03.41</td></tr>
+<tr valign="top" class="odd"><th><a href="qchar.html">QChar</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcheckbox.html">QCheckBox</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qchildevent.html">QChildEvent</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcleanlooksstyle.html">QCleanlooksStyle</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qclipboard.html">QClipboard</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcloseevent.html">QCloseEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcolor.html">QColor</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcolorbutton.html">QColorButton</a></th><td>Allows users to select a color</td></tr>
+<tr valign="top" class="odd"><th><a href="qcolordialog.html">QColorDialog</a></th></tr>
 <tr valign="top" class="even"><th><a href="qcolorselectordialog.html">QColorSelectorDialog</a></th><td>Allows users to select a color</td></tr>
 <tr valign="top" class="odd"><th><a href="qcolormap.html">QColormap</a></th></tr>
 <tr valign="top" class="even"><th><a href="qcolumnview.html">QColumnView</a></th></tr>
@@ -242,35 +242,33 @@
 <tr valign="top" class="even"><th><a href="qcommonstyle.html">QCommonStyle</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qcompleter.html">QCompleter</a></th></tr>
 <tr valign="top" class="even"><th><a href="qconicalgradient.html">QConicalGradient</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qconststring.html">QConstString</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcontact.html">QContact</a></th><td>Holds the data of an address book entry</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontactaddress.html">QContactAddress</a></th><td>Address of a QContact</td></tr>
-<tr valign="top" class="even"><th><a href="qcontactanniversarycontext.html">QContactAnniversaryContext</a></th><td>QAppointments based on the QContact anniversaries</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontactbirthdaycontext.html">QContactBirthdayContext</a></th><td>QAppointments based on the QContact birthdays</td></tr>
-<tr valign="top" class="even"><th><a href="qcontactcontext.html">QContactContext</a></th><td>Represents a storage context of contact data</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontactdelegate.html">QContactDelegate</a></th><td>Drawing of QContactModel items (</td></tr>
-<tr valign="top" class="even"><th><a href="qcontactitem.html">QContactItem</a></th><td>QStandardItem based class representing a </td></tr>
-<tr valign="top" class="odd"><th><a href="qcontactitemmodel.html">QContactItemModel</a></th><td>QStandardItemModel based class representing a list of </td></tr>
-<tr valign="top" class="even"><th><a href="qcontactlistview.html">QContactListView</a></th><td>List view widget for use with QContactModel</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontactmodel.html">QContactModel</a></th><td>Access to the Contacts data</td></tr>
-<tr valign="top" class="even"><th><a href="qcontactselector.html">QContactSelector</a></th><td>Way of selecting a single contact from a QContactModel</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontent.html">QContent</a></th><td>Represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage</td></tr>
-<tr valign="top" class="even"><th><a href="qcontentfilter.html">QContentFilter</a></th><td>Defines criteria for defining a sub-set of all available content</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontentfilterdialog.html">QContentFilterDialog</a></th><td>Dialog box for selecting content filters</td></tr>
-<tr valign="top" class="even"><th><a href="qcontentfiltermodel.html">QContentFilterModel</a></th><td>Defines a model for displaying and selecting possible content filters</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontentfilterselector.html">QContentFilterSelector</a></th><td>Allows the user to select filters to refine the visible selection of content on a device</td></tr>
-<tr valign="top" class="even"><th><a href="qcontentplugin.html">QContentPlugin</a></th><td>Provide an interface for the Qtopia Document System to discover detailed information about a file</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontentset.html">QContentSet</a></th><td>Represents a filtered view of all content on a device</td></tr>
-<tr valign="top" class="even"><th><a href="qcontentsetmodel.html">QContentSetModel</a></th><td>Data model to represent the items in a QContentSet</td></tr>
-<tr valign="top" class="odd"><th><a href="qcontentsortcriteria.html">QContentSortCriteria</a></th><td>Defines the attributes and order a QContentSet should be sorted by</td></tr>
-<tr valign="top" class="even"><th><a href="qcontextmenuevent.html">QContextMenuEvent</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcopchannel.html">QCopChannel</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcopenvelope.html">QCopEnvelope</a></th><td>Encapsulates and sends QCop messages</td></tr>
-<tr valign="top" class="odd"><th><a href="qcoprouter.html">QCopRouter</a></th><td>Application ipc router for the QCop transport</td></tr>
-<tr valign="top" class="even"><th><a href="qcoreapplication.html">QCoreApplication</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcryptographichash.html">QCryptographicHash</a></th></tr>
-<tr valign="top" class="even"><th><a href="qcursor.html">QCursor</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qcustomevent.html">QCustomEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcontact.html">QContact</a></th><td>Holds the data of an address book entry</td></tr>
+<tr valign="top" class="even"><th><a href="qcontactaddress.html">QContactAddress</a></th><td>Address of a QContact</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontactanniversarycontext.html">QContactAnniversaryContext</a></th><td>QAppointments based on the QContact anniversaries</td></tr>
+<tr valign="top" class="even"><th><a href="qcontactbirthdaycontext.html">QContactBirthdayContext</a></th><td>QAppointments based on the QContact birthdays</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontactcontext.html">QContactContext</a></th><td>Represents a storage context of contact data</td></tr>
+<tr valign="top" class="even"><th><a href="qcontactdelegate.html">QContactDelegate</a></th><td>Drawing of QContactModel items (</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontactitem.html">QContactItem</a></th><td>QStandardItem based class representing a </td></tr>
+<tr valign="top" class="even"><th><a href="qcontactitemmodel.html">QContactItemModel</a></th><td>QStandardItemModel based class representing a list of </td></tr>
+<tr valign="top" class="odd"><th><a href="qcontactlistview.html">QContactListView</a></th><td>List view widget for use with QContactModel</td></tr>
+<tr valign="top" class="even"><th><a href="qcontactmodel.html">QContactModel</a></th><td>Access to the Contacts data</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontactselector.html">QContactSelector</a></th><td>Way of selecting a single contact from a QContactModel</td></tr>
+<tr valign="top" class="even"><th><a href="qcontent.html">QContent</a></th><td>Represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontentfilter.html">QContentFilter</a></th><td>Defines criteria for defining a sub-set of all available content</td></tr>
+<tr valign="top" class="even"><th><a href="qcontentfilterdialog.html">QContentFilterDialog</a></th><td>Dialog box for selecting content filters</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontentfiltermodel.html">QContentFilterModel</a></th><td>Defines a model for displaying and selecting possible content filters</td></tr>
+<tr valign="top" class="even"><th><a href="qcontentfilterselector.html">QContentFilterSelector</a></th><td>Allows the user to select filters to refine the visible selection of content on a device</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontentplugin.html">QContentPlugin</a></th><td>Provide an interface for the Qtopia Document System to discover detailed information about a file</td></tr>
+<tr valign="top" class="even"><th><a href="qcontentset.html">QContentSet</a></th><td>Represents a filtered view of all content on a device</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontentsetmodel.html">QContentSetModel</a></th><td>Data model to represent the items in a QContentSet</td></tr>
+<tr valign="top" class="even"><th><a href="qcontentsortcriteria.html">QContentSortCriteria</a></th><td>Defines the attributes and order a QContentSet should be sorted by</td></tr>
+<tr valign="top" class="odd"><th><a href="qcontextmenuevent.html">QContextMenuEvent</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcopchannel.html">QCopChannel</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcopenvelope.html">QCopEnvelope</a></th><td>Encapsulates and sends QCop messages</td></tr>
+<tr valign="top" class="even"><th><a href="qcoprouter.html">QCopRouter</a></th><td>Application ipc router for the QCop transport</td></tr>
+<tr valign="top" class="odd"><th><a href="qcoreapplication.html">QCoreApplication</a></th></tr>
+<tr valign="top" class="even"><th><a href="qcryptographichash.html">QCryptographicHash</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qcursor.html">QCursor</a></th></tr>
 <tr valign="top" class="even"><th><a href="qcustomrasterpaintdevice.html">QCustomRasterPaintDevice</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></th></tr>
 <tr valign="top" class="even"><th><a href="qdbusabstractinterface.html">QDBusAbstractInterface</a></th></tr>
@@ -403,7 +401,7 @@
 <tr valign="top" class="odd"><th><a href="qfontmetrics.html">QFontMetrics</a></th></tr>
 <tr valign="top" class="even"><th><a href="qfontmetricsf.html">QFontMetricsF</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qformbuilder.html">QFormBuilder</a></th></tr>
-<tr valign="top" class="even"><th><a href="qformlayout.html">QFormLayout</a></th><td>Manages forms of input widgets with associated labels</td></tr>
+<tr valign="top" class="even"><th><a href="qformlayout.html">QFormLayout</a></th><td>Manages forms of input widgets and their associated labels</td></tr>
 <tr valign="top" class="odd"><th><a href="qframe.html">QFrame</a></th></tr>
 <tr valign="top" class="even"><th><a href="qftp.html">QFtp</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qglcolormap.html">QGLColormap</a></th></tr>
@@ -503,79 +501,79 @@
 <tr valign="top" class="odd"><th><a href="qkbddriverplugin.html">QKbdDriverPlugin</a></th></tr>
 <tr valign="top" class="even"><th><a href="qkeyevent.html">QKeyEvent</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qkeysequence.html">QKeySequence</a></th></tr>
-<tr valign="top" class="even"><th><a href="qkeypadlightaccessory.html">QKeypadLightAccessory</a></th><td>Access to the keypad light on a phone</td></tr>
-<tr valign="top" class="odd"><th><a href="qkeypadlightaccessoryprovider.html">QKeypadLightAccessoryProvider</a></th><td>Interface for keypad light devices to integrate into Qtopia</td></tr>
-<tr valign="top" class="even"><th><a href="qlcdnumber.html">QLCDNumber</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlabel.html">QLabel</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlatin1char.html">QLatin1Char</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlatin1string.html">QLatin1String</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlayout.html">QLayout</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlayoutitem.html">QLayoutItem</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlibrary.html">QLibrary</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlibraryinfo.html">QLibraryInfo</a></th></tr>
-<tr valign="top" class="even"><th><a href="qline.html">QLine</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlineedit.html">QLineEdit</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlinef.html">QLineF</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlineargradient.html">QLinearGradient</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlinkedlist.html">QLinkedList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlinkedlistiterator.html">QLinkedListIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlist.html">QList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlistiterator.html">QListIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlistview.html">QListView</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlistwidget.html">QListWidget</a></th></tr>
-<tr valign="top" class="even"><th><a href="qlistwidgetitem.html">QListWidgetItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qlocale.html">QLocale</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmacpasteboardmime.html">QMacPasteboardMime</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmacstyle.html">QMacStyle</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmailaddress.html">QMailAddress</a></th><td>Interface for manipulating message address strings</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailbase64codec.html">QMailBase64Codec</a></th><td>Encodes or decodes between 8-bit data and 7-bit ASCII, using the Base64 character mapping scheme</td></tr>
-<tr valign="top" class="even"><th><a href="qmailcodec.html">QMailCodec</a></th><td>Mechanisms for encoding and decoding between 7-bit ASCII strings and arbitrary octet sequences</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailcomposerfactory.html">QMailComposerFactory</a></th><td>Creates objects implementing the QMailComposerInterface interface</td></tr>
-<tr valign="top" class="even"><th><a href="qmailcomposerinterface.html">QMailComposerInterface</a></th><td>Defines the interface to objects that can compose a mail message</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailcomposerplugin.html">QMailComposerPlugin</a></th><td>Defines a base class for implementing mail message composer plug-ins</td></tr>
-<tr valign="top" class="even"><th><a href="qmailcomposerplugininterface.html">QMailComposerPluginInterface</a></th><td>Defines the interface to plug-ins that provide mail message composers</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailfolder.html">QMailFolder</a></th><td>Represents a folder for mail messages on the message store</td></tr>
-<tr valign="top" class="even"><th><a href="qmailfolderkey.html">QMailFolderKey</a></th><td>Defines the parameters used for querying a subset of all available mail folders from the mail store</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailfoldersortkey.html">QMailFolderSortKey</a></th><td>Defines the parameters used for sorting a subset of queried folders from the mail store</td></tr>
-<tr valign="top" class="even"><th><a href="qmailid.html">QMailId</a></th><td>Defines the 64bit database ID's for message store elements</td></tr>
-<tr valign="top" class="odd"><th><a href="qmaillineendingcodec.html">QMailLineEndingCodec</a></th><td>Encodes textual data to use CR/LF line endings required for SMTP transmission</td></tr>
-<tr valign="top" class="even"><th><a href="qmailmessage.html">QMailMessage</a></th><td>Convenient interface for working with messages</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailmessagebody.html">QMailMessageBody</a></th><td>The body element of a message or message part</td></tr>
-<tr valign="top" class="even"><th><a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a></th><td>Encapsulates the parsing of the RFC 2822 'Content-Disposition' header field</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailmessagecontenttype.html">QMailMessageContentType</a></th><td>Encapsulates the parsing of the RFC 2822 'Content-Type' header field</td></tr>
-<tr valign="top" class="even"><th><a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a></th><td>Encapsulates the parsing of message header fields</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailmessagekey.html">QMailMessageKey</a></th><td>Defines the parameters used for querying a subset of all available mail messages from the mail store</td></tr>
-<tr valign="top" class="even"><th><a href="qmailmessagepart.html">QMailMessagePart</a></th><td>Convenient interface for working with message attachments</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailmessagepartcontainer.html">QMailMessagePartContainer</a></th><td>Access to a collection of message parts</td></tr>
-<tr valign="top" class="even"><th><a href="qmailmessagesortkey.html">QMailMessageSortKey</a></th><td>Defines the parameters used for sorting a subset of queried messages from the mail store</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailpassthroughcodec.html">QMailPassThroughCodec</a></th><td>Uses the QMailCodec interface to move data between streams without coding or decoding</td></tr>
-<tr valign="top" class="even"><th><a href="qmailquotedprintablecodec.html">QMailQuotedPrintableCodec</a></th><td>Encodes or decodes between 8-bit data and 7-bit ASCII, using the 'quoted printable' character mapping scheme</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailstore.html">QMailStore</a></th><td>Represents the main interface for storage and retrieval of messages and folders on the message store</td></tr>
-<tr valign="top" class="even"><th><a href="qmailtimestamp.html">QMailTimeStamp</a></th><td>Manages message time stamps</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailviewerfactory.html">QMailViewerFactory</a></th><td>Creates objects implementing the QMailViewerInterface interface</td></tr>
-<tr valign="top" class="even"><th><a href="qmailviewerinterface.html">QMailViewerInterface</a></th><td>Defines the interface to objects that can display a mail message</td></tr>
-<tr valign="top" class="odd"><th><a href="qmailviewerplugin.html">QMailViewerPlugin</a></th><td>Defines a base class for implementing mail message viewer plug-ins</td></tr>
-<tr valign="top" class="even"><th><a href="qmailviewerplugininterface.html">QMailViewerPluginInterface</a></th><td>Defines the interface to plug-ins that provide mail message viewers</td></tr>
-<tr valign="top" class="odd"><th><a href="qmainwindow.html">QMainWindow</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmallocpool.html">QMallocPool</a></th><td>Allows management of allocations within a designated memory region</td></tr>
-<tr valign="top" class="odd"><th><a href="qmap.html">QMap</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmapiterator.html">QMapIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmatrix.html">QMatrix</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmdiarea.html">QMdiArea</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmdisubwindow.html">QMdiSubWindow</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmediaabstractcontrolserver.html">QMediaAbstractControlServer</a></th><td>Used as a base class for media server control classes to make then available to clients</td></tr>
+<tr valign="top" class="even"><th><a href="qkeyboardlock.html">QKeyboardLock</a></th><td>Convenient way of blocking any keyboard input</td></tr>
+<tr valign="top" class="odd"><th><a href="qkeypadlightaccessory.html">QKeypadLightAccessory</a></th><td>Access to the keypad light on a phone</td></tr>
+<tr valign="top" class="even"><th><a href="qkeypadlightaccessoryprovider.html">QKeypadLightAccessoryProvider</a></th><td>Interface for keypad light devices to integrate into Qtopia</td></tr>
+<tr valign="top" class="odd"><th><a href="qlcdnumber.html">QLCDNumber</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlabel.html">QLabel</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlatin1char.html">QLatin1Char</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlatin1string.html">QLatin1String</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlayout.html">QLayout</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlayoutitem.html">QLayoutItem</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlibrary.html">QLibrary</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlibraryinfo.html">QLibraryInfo</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qline.html">QLine</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlineedit.html">QLineEdit</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlinef.html">QLineF</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlineargradient.html">QLinearGradient</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlinkedlist.html">QLinkedList</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlinkedlistiterator.html">QLinkedListIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlist.html">QList</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlistiterator.html">QListIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlistview.html">QListView</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlistwidget.html">QListWidget</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qlistwidgetitem.html">QListWidgetItem</a></th></tr>
+<tr valign="top" class="even"><th><a href="qlocale.html">QLocale</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmacpasteboardmime.html">QMacPasteboardMime</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmacstyle.html">QMacStyle</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmailaddress.html">QMailAddress</a></th><td>Interface for manipulating message address strings</td></tr>
+<tr valign="top" class="even"><th><a href="qmailbase64codec.html">QMailBase64Codec</a></th><td>Encodes or decodes between 8-bit data and 7-bit ASCII, using the Base64 character mapping scheme</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailcodec.html">QMailCodec</a></th><td>Mechanisms for encoding and decoding between 7-bit ASCII strings and arbitrary octet sequences</td></tr>
+<tr valign="top" class="even"><th><a href="qmailcomposerfactory.html">QMailComposerFactory</a></th><td>Creates objects implementing the QMailComposerInterface interface</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailcomposerinterface.html">QMailComposerInterface</a></th><td>Defines the interface to objects that can compose a mail message</td></tr>
+<tr valign="top" class="even"><th><a href="qmailcomposerplugin.html">QMailComposerPlugin</a></th><td>Defines a base class for implementing mail message composer plug-ins</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailcomposerplugininterface.html">QMailComposerPluginInterface</a></th><td>Defines the interface to plug-ins that provide mail message composers</td></tr>
+<tr valign="top" class="even"><th><a href="qmailfolder.html">QMailFolder</a></th><td>Represents a folder for mail messages on the message store</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailfolderkey.html">QMailFolderKey</a></th><td>Defines the parameters used for querying a subset of all available mail folders from the mail store</td></tr>
+<tr valign="top" class="even"><th><a href="qmailfoldersortkey.html">QMailFolderSortKey</a></th><td>Defines the parameters used for sorting a subset of queried folders from the mail store</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailid.html">QMailId</a></th><td>Defines the 64bit database ID's for message store elements</td></tr>
+<tr valign="top" class="even"><th><a href="qmaillineendingcodec.html">QMailLineEndingCodec</a></th><td>Encodes textual data to use CR/LF line endings required for SMTP transmission</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailmessage.html">QMailMessage</a></th><td>Convenient interface for working with messages</td></tr>
+<tr valign="top" class="even"><th><a href="qmailmessagebody.html">QMailMessageBody</a></th><td>The body element of a message or message part</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a></th><td>Encapsulates the parsing of the RFC 2822 'Content-Disposition' header field</td></tr>
+<tr valign="top" class="even"><th><a href="qmailmessagecontenttype.html">QMailMessageContentType</a></th><td>Encapsulates the parsing of the RFC 2822 'Content-Type' header field</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a></th><td>Encapsulates the parsing of message header fields</td></tr>
+<tr valign="top" class="even"><th><a href="qmailmessagekey.html">QMailMessageKey</a></th><td>Defines the parameters used for querying a subset of all available mail messages from the mail store</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailmessagepart.html">QMailMessagePart</a></th><td>Convenient interface for working with message attachments</td></tr>
+<tr valign="top" class="even"><th><a href="qmailmessagepartcontainer.html">QMailMessagePartContainer</a></th><td>Access to a collection of message parts</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailmessagesortkey.html">QMailMessageSortKey</a></th><td>Defines the parameters used for sorting a subset of queried messages from the mail store</td></tr>
+<tr valign="top" class="even"><th><a href="qmailpassthroughcodec.html">QMailPassThroughCodec</a></th><td>Uses the QMailCodec interface to move data between streams without coding or decoding</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailquotedprintablecodec.html">QMailQuotedPrintableCodec</a></th><td>Encodes or decodes between 8-bit data and 7-bit ASCII, using the 'quoted printable' character mapping scheme</td></tr>
+<tr valign="top" class="even"><th><a href="qmailstore.html">QMailStore</a></th><td>Represents the main interface for storage and retrieval of messages and folders on the message store</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailtimestamp.html">QMailTimeStamp</a></th><td>Manages message time stamps</td></tr>
+<tr valign="top" class="even"><th><a href="qmailviewerfactory.html">QMailViewerFactory</a></th><td>Creates objects implementing the QMailViewerInterface interface</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailviewerinterface.html">QMailViewerInterface</a></th><td>Defines the interface to objects that can display a mail message</td></tr>
+<tr valign="top" class="even"><th><a href="qmailviewerplugin.html">QMailViewerPlugin</a></th><td>Defines a base class for implementing mail message viewer plug-ins</td></tr>
+<tr valign="top" class="odd"><th><a href="qmailviewerplugininterface.html">QMailViewerPluginInterface</a></th><td>Defines the interface to plug-ins that provide mail message viewers</td></tr>
+<tr valign="top" class="even"><th><a href="qmainwindow.html">QMainWindow</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmallocpool.html">QMallocPool</a></th><td>Allows management of allocations within a designated memory region</td></tr>
+<tr valign="top" class="even"><th><a href="qmap.html">QMap</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmapiterator.html">QMapIterator</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmatrix.html">QMatrix</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmdiarea.html">QMdiArea</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmdisubwindow.html">QMdiSubWindow</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmediaabstractcontrolserver.html">QMediaAbstractControlServer</a></th><td>Used as a base class for media server control classes to make then available to clients</td></tr>
+<tr valign="top" class="even"><th><a href="qmediacodecplugin.html">QMediaCodecPlugin</a></th><td>Represents a codec factory in Qtopia's media engine</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediacontent.html">QMediaContent</a></th><td>Used to prepare a media resource for playing in Qtopia</td></tr>
 <tr valign="top" class="even"><th><a href="qmediacontentcontext.html">QMediaContentContext</a></th><td>Allows multiple related player objects to be grouped together</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediacontentplayer.html">QMediaContentPlayer</a></th><td>Used to immediately, without further intervention, play media</td></tr>
-<tr valign="top" class="even"><th><a href="qmediacontrol.html">QMediaControl</a></th><td>Used to manipulate a media resource in the Qtopia media system</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediacontrolnotifier.html">QMediaControlNotifier</a></th><td>Watches a media content object for the availability of a given media control</td></tr>
-<tr valign="top" class="even"><th><a href="qmediadecoder.html">QMediaDecoder</a></th><td>Abstraction for decoders written for Qtopia's media engine</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediadevice.html">QMediaDevice</a></th><td>Abstraction for Audio devices written for Qtopia'a media engine</td></tr>
-<tr valign="top" class="even"><th><a href="qmediaengine.html">QMediaEngine</a></th><td>Base class to be used in the creation of a Media Engine</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediaenginefactory.html">QMediaEngineFactory</a></th><td>Factory used by the Media Server to construct Media Engines loaded from libraries</td></tr>
-<tr valign="top" class="even"><th><a href="qmediaengineinformation.html">QMediaEngineInformation</a></th><td>Base class used to provide information about a Media Engine</td></tr>
-<tr valign="top" class="odd"><th><a href="qmediahelixsettingscontrol.html">QMediaHelixSettingsControl</a></th><td>Used to alter settings of the helix engine</td></tr>
-<tr valign="top" class="even"><th><a href="qmediapipe.html">QMediaPipe</a></th><td>Connects QMediaDevices in media processing chain</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediacontrol.html">QMediaControl</a></th><td>Used to manipulate a media resource in the Qtopia media system</td></tr>
+<tr valign="top" class="even"><th><a href="qmediacontrolnotifier.html">QMediaControlNotifier</a></th><td>Watches a media content object for the availability of a given media control</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediadecoder.html">QMediaDecoder</a></th><td>Abstraction for decoders written for Qtopia's media engine</td></tr>
+<tr valign="top" class="even"><th><a href="qmediadevice.html">QMediaDevice</a></th><td>Abstraction for Audio devices written for Qtopia'a media engine</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediaengine.html">QMediaEngine</a></th><td>Base class to be used in the creation of a Media Engine</td></tr>
+<tr valign="top" class="even"><th><a href="qmediaenginefactory.html">QMediaEngineFactory</a></th><td>Factory used by the Media Server to construct Media Engines loaded from libraries</td></tr>
+<tr valign="top" class="odd"><th><a href="qmediaengineinformation.html">QMediaEngineInformation</a></th><td>Base class used to provide information about a Media Engine</td></tr>
+<tr valign="top" class="even"><th><a href="qmediahelixsettingscontrol.html">QMediaHelixSettingsControl</a></th><td>Used to alter settings of the helix engine</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediaprogresslabel.html">QMediaProgressLabel</a></th><td>Displays the current progress of a playing media content as a text label</td></tr>
 <tr valign="top" class="even"><th><a href="qmediaprogresswidget.html">QMediaProgressWidget</a></th><td>Displays the current progress of a playing media content as a progress bar</td></tr>
 <tr valign="top" class="odd"><th><a href="qmediaseekwidget.html">QMediaSeekWidget</a></th><td>Allows the user to seek within a media content object</td></tr>
@@ -589,122 +587,120 @@
 <tr valign="top" class="odd"><th><a href="qmediavolumewidget.html">QMediaVolumeWidget</a></th><td>Displays the current volume level of a media content object as a progress bar</td></tr>
 <tr valign="top" class="even"><th><a href="qmenu.html">QMenu</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qmenubar.html">QMenuBar</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmenuitem.html">QMenuItem</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmessagebox.html">QMessageBox</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmetaclassinfo.html">QMetaClassInfo</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmetaenum.html">QMetaEnum</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmetamethod.html">QMetaMethod</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmetaobject.html">QMetaObject</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmetaproperty.html">QMetaProperty</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmetatype.html">QMetaType</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmimedata.html">QMimeData</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmimesource.html">QMimeSource</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmimetype.html">QMimeType</a></th><td>MIME type information</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodelindex.html">QModelIndex</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmodemadviceofcharge.html">QModemAdviceOfCharge</a></th><td>Advice of charge information on AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemcall.html">QModemCall</a></th><td>Implements phone call functionality for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemcallbarring.html">QModemCallBarring</a></th><td>Implements the call barring settings for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemcallforwarding.html">QModemCallForwarding</a></th><td>Implements the call forwarding settings for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemcallprovider.html">QModemCallProvider</a></th><td>Implements a mechanism for AT-based phone call providers to hook into the telephony system</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemcallsettings.html">QModemCallSettings</a></th><td>Implements access to auxiliary call settings for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemcallvolume.html">QModemCallVolume</a></th><td>Implements call volume functionality for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemcellbroadcast.html">QModemCellBroadcast</a></th><td>Implements cell broadcast functionality for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemconfiguration.html">QModemConfiguration</a></th><td>Information about the modem such as its manufacturer and serial number</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemdatacall.html">QModemDataCall</a></th><td>Implements data call functionality for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemgprsnetworkregistration.html">QModemGprsNetworkRegistration</a></th><td>Information about GPRS network registration on AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemindicators.html">QModemIndicators</a></th><td>Supports indicators for signal quality, battery charge, etc</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemnetworkregistration.html">QModemNetworkRegistration</a></th><td>Access to network registration features of AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemphonebook.html">QModemPhoneBook</a></th><td>Implements SIM phone book operations for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodempinmanager.html">QModemPinManager</a></th><td>Method for the modem to query the user interface for pin values</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodempreferrednetworkoperators.html">QModemPreferredNetworkOperators</a></th><td>Implements the preferred operator list functions for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemrffunctionality.html">QModemRfFunctionality</a></th><td>Method to get or set the level of RF activity on an AT-based modem</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemsmsreader.html">QModemSMSReader</a></th><td>SMS reading facilities for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemsmssender.html">QModemSMSSender</a></th><td>SMS sending facilities for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemservice.html">QModemService</a></th><td>Implements telephony functionality for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemservicenumbers.html">QModemServiceNumbers</a></th><td>Access to GSM service numbers such as voice mail and SMS service center for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemserviceplugin.html">QModemServicePlugin</a></th><td>Defines a base class for implementing vendor-specific modem plug-ins</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemserviceplugininterface.html">QModemServicePluginInterface</a></th><td>Defines the interface to vendor-specific modem plug-ins</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemsimfiles.html">QModemSimFiles</a></th><td>Implements SIM file access for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemsimgenericaccess.html">QModemSimGenericAccess</a></th><td>Implements SIM generic access for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemsiminfo.html">QModemSimInfo</a></th><td>SIM identity information for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemsimtoolkit.html">QModemSimToolkit</a></th><td>Access to SIM toolkit functionality for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmodemsupplementaryservices.html">QModemSupplementaryServices</a></th><td>Access to structured and unstructured supplementary services for AT-based modems</td></tr>
-<tr valign="top" class="even"><th><a href="qmodemvibrateaccessory.html">QModemVibrateAccessory</a></th><td>Vibrate accessory support for AT-based modems</td></tr>
-<tr valign="top" class="odd"><th><a href="qmotifstyle.html">QMotifStyle</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmousedriverfactory.html">QMouseDriverFactory</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmousedriverplugin.html">QMouseDriverPlugin</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmouseevent.html">QMouseEvent</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmoveevent.html">QMoveEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmovie.html">QMovie</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmultihash.html">QMultiHash</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmultimap.html">QMultiMap</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmultiportmultiplexer.html">QMultiPortMultiplexer</a></th><td>Multiplexing across several serial ports</td></tr>
-<tr valign="top" class="even"><th><a href="qmutablehashiterator.html">QMutableHashIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmutablelinkedlistiterator.html">QMutableLinkedListIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmutablelistiterator.html">QMutableListIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmutablemapiterator.html">QMutableMapIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmutablesetiterator.html">QMutableSetIterator</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmutablevectoriterator.html">QMutableVectorIterator</a></th></tr>
-<tr valign="top" class="even"><th><a href="qmutex.html">QMutex</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qmutexlocker.html">QMutexLocker</a></th></tr>
-<tr valign="top" class="even"><th><a href="qnetworkaddressentry.html">QNetworkAddressEntry</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkconnection.html">QNetworkConnection</a></th><td>Monitoring of network connections</td></tr>
-<tr valign="top" class="even"><th><a href="qnetworkconnectionmanager.html">QNetworkConnectionManager</a></th><td>Allows applications to receive notifications when network connections are added and/or removed from Qtopia</td></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkdevice.html">QNetworkDevice</a></th><td>Information about the connectivity state of a network device</td></tr>
-<tr valign="top" class="even"><th><a href="qnetworkinterface.html">QNetworkInterface</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkproxy.html">QNetworkProxy</a></th></tr>
-<tr valign="top" class="even"><th><a href="qnetworkregistration.html">QNetworkRegistration</a></th><td>Information about network operators</td></tr>
-<tr valign="top" class="odd"><th><a href="qnetworkregistrationserver.html">QNetworkRegistrationServer</a></th><td>Server-side support for updating the network registration state</td></tr>
-<tr valign="top" class="even"><th><a href="qnetworkstate.html">QNetworkState</a></th><td>Very generic information about the connectivity state of the Qtopia device</td></tr>
-<tr valign="top" class="odd"><th><a href="qnullserialiodevice.html">QNullSerialIODevice</a></th><td>Null implementation of serial device functionality</td></tr>
-<tr valign="top" class="even"><th><a href="qnullserialiodevicemultiplexer.html">QNullSerialIODeviceMultiplexer</a></th><td>Null implementation of multiplexing</td></tr>
-<tr valign="top" class="odd"><th><a href="qobex.html">QObex</a></th><td>Miscellaneous OBEX functionality</td></tr>
-<tr valign="top" class="even"><th><a href="qobexauthenticationchallenge.html">QObexAuthenticationChallenge</a></th><td>Received OBEX authentication challenge and allows the receiver to set a username and password that should be used for authentication</td></tr>
-<tr valign="top" class="odd"><th><a href="qobexauthenticationresponse.html">QObexAuthenticationResponse</a></th><td>Received OBEX authentication response</td></tr>
-<tr valign="top" class="even"><th><a href="qobexclientsession.html">QObexClientSession</a></th><td>Implementation of the client side of the OBEX protocol</td></tr>
-<tr valign="top" class="odd"><th><a href="qobexfolderlistingentryinfo.html">QObexFolderListingEntryInfo</a></th><td>Information about an item in an OBEX folder listing object</td></tr>
-<tr valign="top" class="even"><th><a href="qobexftpclient.html">QObexFtpClient</a></th><td>Implementation of the OBEX file-transfer mechanism</td></tr>
-<tr valign="top" class="odd"><th><a href="qobexheader.html">QObexHeader</a></th><td>Header information for an OBEX request or response</td></tr>
-<tr valign="top" class="even"><th><a href="qobexpushclient.html">QObexPushClient</a></th><td>Encapsulates an OBEX PUSH client</td></tr>
-<tr valign="top" class="odd"><th><a href="qobexpushservice.html">QObexPushService</a></th><td>OBEX Push service</td></tr>
-<tr valign="top" class="even"><th><a href="qobexserversession.html">QObexServerSession</a></th><td>Abstract base class for implementing an OBEX server</td></tr>
-<tr valign="top" class="odd"><th><a href="qobject.html">QObject</a></th></tr>
-<tr valign="top" class="even"><th><a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qoccurrence.html">QOccurrence</a></th><td>Holds the data of an occurrence of a calendar appointment</td></tr>
-<tr valign="top" class="even"><th><a href="qoccurrencemodel.html">QOccurrenceModel</a></th><td>Access to the Calendar data</td></tr>
-<tr valign="top" class="odd"><th><a href="qotacharacteristic.html">QOtaCharacteristic</a></th><td>Encapsulates characteristics from an Over-The-Air (OTA) network configuration message</td></tr>
-<tr valign="top" class="even"><th><a href="qotacharacteristiclist.html">QOtaCharacteristicList</a></th><td>Encapsulates a list of characteristics from an OTA network configuration message</td></tr>
-<tr valign="top" class="odd"><th><a href="qotareader.html">QOtaReader</a></th><td>Support for parsing Over-The-Air (OTA) network configuration messages</td></tr>
-<tr valign="top" class="even"><th><a href="qpackageregistry.html">QPackageRegistry</a></th><td>Mechanism for managing software installed on the qtopia device</td></tr>
-<tr valign="top" class="odd"><th><a href="qpacket.html">QPacket</a></th><td>Encapsulates an unfragmentable packet of data to be transmitted by QPacketProtocol</td></tr>
-<tr valign="top" class="even"><th><a href="qpacketprotocol.html">QPacketProtocol</a></th><td>Encapsulates communicating discrete packets across fragmented IO channels, such as TCP sockets</td></tr>
-<tr valign="top" class="odd"><th><a href="qpagesetupdialog.html">QPageSetupDialog</a></th></tr>
-<tr valign="top" class="even"><th><a href="qpaintdevice.html">QPaintDevice</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qpaintengine.html">QPaintEngine</a></th></tr>
-<tr valign="top" class="even"><th><a href="qpaintenginestate.html">QPaintEngineState</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qpaintevent.html">QPaintEvent</a></th></tr>
-<tr valign="top" class="even"><th><a href="qpainter.html">QPainter</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qpainterpath.html">QPainterPath</a></th></tr>
-<tr valign="top" class="even"><th><a href="qpainterpathstroker.html">QPainterPathStroker</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qpair.html">QPair</a></th></tr>
-<tr valign="top" class="even"><th><a href="qpalette.html">QPalette</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qpassworddialog.html">QPasswordDialog</a></th><td>Dialog widget for inputting a password</td></tr>
-<tr valign="top" class="even"><th><a href="qpen.html">QPen</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qperformancelog.html">QPerformanceLog</a></th><td>Implements a performance logging mechanism available to all Qtopia applications. It provides a similar behaviour to qDebug() and qLog(), but every message automatically contains two timestamps: milliseconds since the current application has started, and milliseconds since the Qtopia Core window server has started. Messages are output via qLog(Performance), respecting the qLog() settings</td></tr>
-<tr valign="top" class="even"><th><a href="qpersistentmodelindex.html">QPersistentModelIndex</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qphonebook.html">QPhoneBook</a></th><td>Interface to the SIM phone books of a device</td></tr>
-<tr valign="top" class="even"><th><a href="qphonebookentry.html">QPhoneBookEntry</a></th><td>The contents of a single entry in a device's phone book</td></tr>
-<tr valign="top" class="odd"><th><a href="qphonebooklimits.html">QPhoneBookLimits</a></th><td>The limits of a phone book's storage capacity</td></tr>
-<tr valign="top" class="even"><th><a href="qphonecall.html">QPhoneCall</a></th><td>Interface for managing individual incoming and outgoing phone calls</td></tr>
-<tr valign="top" class="odd"><th><a href="qphonecallimpl.html">QPhoneCallImpl</a></th><td>Base class for specific phone call implementations</td></tr>
-<tr valign="top" class="even"><th><a href="qphonecallmanager.html">QPhoneCallManager</a></th><td>Access to the phone's call list</td></tr>
-<tr valign="top" class="odd"><th><a href="qphonecallprovider.html">QPhoneCallProvider</a></th><td>Implements a mechanism for phone call providers to hook into the telephony system</td></tr>
-<tr valign="top" class="even"><th><a href="qphonenumber.html">QPhoneNumber</a></th><td>Utility functions to manipulate telephone numbers</td></tr>
-<tr valign="top" class="odd"><th><a href="qphoneprofile.html">QPhoneProfile</a></th><td>Encapsulates a single phone profile configuration</td></tr>
-<tr valign="top" class="even"><th><a href="qphoneprofilemanager.html">QPhoneProfileManager</a></th><td>Allows applications to control phone profiles</td></tr>
-<tr valign="top" class="odd"><th><a href="qphoneprofileprovider.html">QPhoneProfileProvider</a></th><td>The backend functionality for phone profiles</td></tr>
-<tr valign="top" class="even"><th><a href="qphonerffunctionality.html">QPhoneRfFunctionality</a></th><td>Method to get or set the level of RF activity on a phone</td></tr>
-<tr valign="top" class="odd"><th><a href="qphonesocket.html">QPhoneSocket</a></th><td>Socket functionality for phone call handlers</td></tr>
+<tr valign="top" class="even"><th><a href="qmessagebox.html">QMessageBox</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmetaclassinfo.html">QMetaClassInfo</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmetaenum.html">QMetaEnum</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmetamethod.html">QMetaMethod</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmetaobject.html">QMetaObject</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmetaproperty.html">QMetaProperty</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmetatype.html">QMetaType</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmimedata.html">QMimeData</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmimesource.html">QMimeSource</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmimetype.html">QMimeType</a></th><td>MIME type information</td></tr>
+<tr valign="top" class="even"><th><a href="qmodelindex.html">QModelIndex</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmodemadviceofcharge.html">QModemAdviceOfCharge</a></th><td>Advice of charge information on AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemcall.html">QModemCall</a></th><td>Implements phone call functionality for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemcallbarring.html">QModemCallBarring</a></th><td>Implements the call barring settings for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemcallforwarding.html">QModemCallForwarding</a></th><td>Implements the call forwarding settings for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemcallprovider.html">QModemCallProvider</a></th><td>Implements a mechanism for AT-based phone call providers to hook into the telephony system</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemcallsettings.html">QModemCallSettings</a></th><td>Implements access to auxiliary call settings for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemcallvolume.html">QModemCallVolume</a></th><td>Implements call volume functionality for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemcellbroadcast.html">QModemCellBroadcast</a></th><td>Implements cell broadcast functionality for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemconfiguration.html">QModemConfiguration</a></th><td>Information about the modem such as its manufacturer and serial number</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemdatacall.html">QModemDataCall</a></th><td>Implements data call functionality for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemgprsnetworkregistration.html">QModemGprsNetworkRegistration</a></th><td>Information about GPRS network registration on AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemindicators.html">QModemIndicators</a></th><td>Supports indicators for signal quality, battery charge, etc</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemnetworkregistration.html">QModemNetworkRegistration</a></th><td>Access to network registration features of AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemphonebook.html">QModemPhoneBook</a></th><td>Implements SIM phone book operations for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodempinmanager.html">QModemPinManager</a></th><td>Method for the modem to query the user interface for pin values</td></tr>
+<tr valign="top" class="even"><th><a href="qmodempreferrednetworkoperators.html">QModemPreferredNetworkOperators</a></th><td>Implements the preferred operator list functions for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemrffunctionality.html">QModemRfFunctionality</a></th><td>Method to get or set the level of RF activity on an AT-based modem</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemsmsreader.html">QModemSMSReader</a></th><td>SMS reading facilities for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemsmssender.html">QModemSMSSender</a></th><td>SMS sending facilities for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemservice.html">QModemService</a></th><td>Implements telephony functionality for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemservicenumbers.html">QModemServiceNumbers</a></th><td>Access to GSM service numbers such as voice mail and SMS service center for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemserviceplugin.html">QModemServicePlugin</a></th><td>Defines a base class for implementing vendor-specific modem plug-ins</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemserviceplugininterface.html">QModemServicePluginInterface</a></th><td>Defines the interface to vendor-specific modem plug-ins</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemsimfiles.html">QModemSimFiles</a></th><td>Implements SIM file access for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemsimgenericaccess.html">QModemSimGenericAccess</a></th><td>Implements SIM generic access for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemsiminfo.html">QModemSimInfo</a></th><td>SIM identity information for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemsimtoolkit.html">QModemSimToolkit</a></th><td>Access to SIM toolkit functionality for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmodemsupplementaryservices.html">QModemSupplementaryServices</a></th><td>Access to structured and unstructured supplementary services for AT-based modems</td></tr>
+<tr valign="top" class="odd"><th><a href="qmodemvibrateaccessory.html">QModemVibrateAccessory</a></th><td>Vibrate accessory support for AT-based modems</td></tr>
+<tr valign="top" class="even"><th><a href="qmotifstyle.html">QMotifStyle</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmousedriverfactory.html">QMouseDriverFactory</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmousedriverplugin.html">QMouseDriverPlugin</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmouseevent.html">QMouseEvent</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmoveevent.html">QMoveEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmovie.html">QMovie</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmultihash.html">QMultiHash</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmultimap.html">QMultiMap</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmultiportmultiplexer.html">QMultiPortMultiplexer</a></th><td>Multiplexing across several serial ports</td></tr>
+<tr valign="top" class="odd"><th><a href="qmutablehashiterator.html">QMutableHashIterator</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmutablelinkedlistiterator.html">QMutableLinkedListIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmutablelistiterator.html">QMutableListIterator</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmutablemapiterator.html">QMutableMapIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmutablesetiterator.html">QMutableSetIterator</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmutablevectoriterator.html">QMutableVectorIterator</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qmutex.html">QMutex</a></th></tr>
+<tr valign="top" class="even"><th><a href="qmutexlocker.html">QMutexLocker</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkaddressentry.html">QNetworkAddressEntry</a></th></tr>
+<tr valign="top" class="even"><th><a href="qnetworkconnection.html">QNetworkConnection</a></th><td>Monitoring of network connections</td></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkconnectionmanager.html">QNetworkConnectionManager</a></th><td>Allows applications to receive notifications when network connections are added and/or removed from Qtopia</td></tr>
+<tr valign="top" class="even"><th><a href="qnetworkdevice.html">QNetworkDevice</a></th><td>Information about the connectivity state of a network device</td></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkinterface.html">QNetworkInterface</a></th></tr>
+<tr valign="top" class="even"><th><a href="qnetworkproxy.html">QNetworkProxy</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkregistration.html">QNetworkRegistration</a></th><td>Information about network operators</td></tr>
+<tr valign="top" class="even"><th><a href="qnetworkregistrationserver.html">QNetworkRegistrationServer</a></th><td>Server-side support for updating the network registration state</td></tr>
+<tr valign="top" class="odd"><th><a href="qnetworkstate.html">QNetworkState</a></th><td>Very generic information about the connectivity state of the Qtopia device</td></tr>
+<tr valign="top" class="even"><th><a href="qnullserialiodevice.html">QNullSerialIODevice</a></th><td>Null implementation of serial device functionality</td></tr>
+<tr valign="top" class="odd"><th><a href="qnullserialiodevicemultiplexer.html">QNullSerialIODeviceMultiplexer</a></th><td>Null implementation of multiplexing</td></tr>
+<tr valign="top" class="even"><th><a href="qobex.html">QObex</a></th><td>Miscellaneous OBEX functionality</td></tr>
+<tr valign="top" class="odd"><th><a href="qobexauthenticationchallenge.html">QObexAuthenticationChallenge</a></th><td>Received OBEX authentication challenge and allows the receiver to set a username and password that should be used for authentication</td></tr>
+<tr valign="top" class="even"><th><a href="qobexauthenticationresponse.html">QObexAuthenticationResponse</a></th><td>Received OBEX authentication response</td></tr>
+<tr valign="top" class="odd"><th><a href="qobexclientsession.html">QObexClientSession</a></th><td>Implementation of the client side of the OBEX protocol</td></tr>
+<tr valign="top" class="even"><th><a href="qobexfolderlistingentryinfo.html">QObexFolderListingEntryInfo</a></th><td>Information about an item in an OBEX folder listing object</td></tr>
+<tr valign="top" class="odd"><th><a href="qobexftpclient.html">QObexFtpClient</a></th><td>Implementation of the OBEX file-transfer mechanism</td></tr>
+<tr valign="top" class="even"><th><a href="qobexheader.html">QObexHeader</a></th><td>Header information for an OBEX request or response</td></tr>
+<tr valign="top" class="odd"><th><a href="qobexpushclient.html">QObexPushClient</a></th><td>Encapsulates an OBEX PUSH client</td></tr>
+<tr valign="top" class="even"><th><a href="qobexpushservice.html">QObexPushService</a></th><td>OBEX Push service</td></tr>
+<tr valign="top" class="odd"><th><a href="qobexserversession.html">QObexServerSession</a></th><td>Abstract base class for implementing an OBEX server</td></tr>
+<tr valign="top" class="even"><th><a href="qobject.html">QObject</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qobjectcleanuphandler.html">QObjectCleanupHandler</a></th></tr>
+<tr valign="top" class="even"><th><a href="qoccurrence.html">QOccurrence</a></th><td>Holds the data of an occurrence of a calendar appointment</td></tr>
+<tr valign="top" class="odd"><th><a href="qoccurrencemodel.html">QOccurrenceModel</a></th><td>Access to the Calendar data</td></tr>
+<tr valign="top" class="even"><th><a href="qotacharacteristic.html">QOtaCharacteristic</a></th><td>Encapsulates characteristics from an Over-The-Air (OTA) network configuration message</td></tr>
+<tr valign="top" class="odd"><th><a href="qotacharacteristiclist.html">QOtaCharacteristicList</a></th><td>Encapsulates a list of characteristics from an OTA network configuration message</td></tr>
+<tr valign="top" class="even"><th><a href="qotareader.html">QOtaReader</a></th><td>Support for parsing Over-The-Air (OTA) network configuration messages</td></tr>
+<tr valign="top" class="odd"><th><a href="qpackageregistry.html">QPackageRegistry</a></th><td>Mechanism for managing software installed on the qtopia device</td></tr>
+<tr valign="top" class="even"><th><a href="qpacket.html">QPacket</a></th><td>Encapsulates an unfragmentable packet of data to be transmitted by QPacketProtocol</td></tr>
+<tr valign="top" class="odd"><th><a href="qpacketprotocol.html">QPacketProtocol</a></th><td>Encapsulates communicating discrete packets across fragmented IO channels, such as TCP sockets</td></tr>
+<tr valign="top" class="even"><th><a href="qpagesetupdialog.html">QPageSetupDialog</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qpaintdevice.html">QPaintDevice</a></th></tr>
+<tr valign="top" class="even"><th><a href="qpaintengine.html">QPaintEngine</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qpaintenginestate.html">QPaintEngineState</a></th></tr>
+<tr valign="top" class="even"><th><a href="qpaintevent.html">QPaintEvent</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qpainter.html">QPainter</a></th></tr>
+<tr valign="top" class="even"><th><a href="qpainterpath.html">QPainterPath</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qpainterpathstroker.html">QPainterPathStroker</a></th></tr>
+<tr valign="top" class="even"><th><a href="qpair.html">QPair</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qpalette.html">QPalette</a></th></tr>
+<tr valign="top" class="even"><th><a href="qpassworddialog.html">QPasswordDialog</a></th><td>Dialog widget for entering a PIN code</td></tr>
+<tr valign="top" class="odd"><th><a href="qpen.html">QPen</a></th></tr>
+<tr valign="top" class="even"><th><a href="qperformancelog.html">QPerformanceLog</a></th><td>Implements a performance logging mechanism available to all Qtopia applications. It provides a similar behaviour to qDebug() and qLog(), but every message automatically contains two timestamps: milliseconds since the current application has started, and milliseconds since the Qtopia Core window server has started</td></tr>
+<tr valign="top" class="odd"><th><a href="qpersistentmodelindex.html">QPersistentModelIndex</a></th></tr>
+<tr valign="top" class="even"><th><a href="qphonebook.html">QPhoneBook</a></th><td>Interface to the SIM phone books of a device</td></tr>
+<tr valign="top" class="odd"><th><a href="qphonebookentry.html">QPhoneBookEntry</a></th><td>The contents of a single entry in a device's phone book</td></tr>
+<tr valign="top" class="even"><th><a href="qphonebooklimits.html">QPhoneBookLimits</a></th><td>The limits of a phone book's storage capacity</td></tr>
+<tr valign="top" class="odd"><th><a href="qphonecall.html">QPhoneCall</a></th><td>Interface for managing individual incoming and outgoing phone calls</td></tr>
+<tr valign="top" class="even"><th><a href="qphonecallimpl.html">QPhoneCallImpl</a></th><td>Base class for specific phone call implementations</td></tr>
+<tr valign="top" class="odd"><th><a href="qphonecallmanager.html">QPhoneCallManager</a></th><td>Access to the phone's call list</td></tr>
+<tr valign="top" class="even"><th><a href="qphonecallprovider.html">QPhoneCallProvider</a></th><td>Implements a mechanism for phone call providers to hook into the telephony system</td></tr>
+<tr valign="top" class="odd"><th><a href="qphonenumber.html">QPhoneNumber</a></th><td>Utility functions to manipulate telephone numbers</td></tr>
+<tr valign="top" class="even"><th><a href="qphoneprofile.html">QPhoneProfile</a></th><td>Encapsulates a single phone profile configuration</td></tr>
+<tr valign="top" class="odd"><th><a href="qphoneprofilemanager.html">QPhoneProfileManager</a></th><td>Allows applications to control phone profiles</td></tr>
+<tr valign="top" class="even"><th><a href="qphoneprofileprovider.html">QPhoneProfileProvider</a></th><td>The backend functionality for phone profiles</td></tr>
+<tr valign="top" class="odd"><th><a href="qphonerffunctionality.html">QPhoneRfFunctionality</a></th><td>Method to get or set the level of RF activity on a phone</td></tr>
 <tr valign="top" class="even"><th><a href="qphonestatus.html">QPhoneStatus</a></th><td>Basic status information about the phone</td></tr>
 <tr valign="top" class="odd"><th><a href="qphonestyle.html">QPhoneStyle</a></th><td>Phone look and feel</td></tr>
 <tr valign="top" class="even"><th><a href="qphonetypeselector.html">QPhoneTypeSelector</a></th><td>Way of selecting a single type of phone number</td></tr>
@@ -961,15 +957,13 @@
 <tr valign="top" class="odd"><th><a href="qtextfragment.html">QTextFragment</a></th></tr>
 <tr valign="top" class="even"><th><a href="qtextframe.html">QTextFrame</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qtextframeformat.html">QTextFrameFormat</a></th></tr>
-<tr valign="top" class="even"><th><a href="qtextistream.html">QTextIStream</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qtextimageformat.html">QTextImageFormat</a></th></tr>
-<tr valign="top" class="even"><th><a href="qtextinlineobject.html">QTextInlineObject</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qtextlayout.html">QTextLayout</a></th></tr>
-<tr valign="top" class="even"><th><a href="qtextlength.html">QTextLength</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qtextline.html">QTextLine</a></th></tr>
-<tr valign="top" class="even"><th><a href="qtextlist.html">QTextList</a></th></tr>
-<tr valign="top" class="odd"><th><a href="qtextlistformat.html">QTextListFormat</a></th></tr>
-<tr valign="top" class="even"><th><a href="qtextostream.html">QTextOStream</a></th></tr>
+<tr valign="top" class="even"><th><a href="qtextimageformat.html">QTextImageFormat</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qtextinlineobject.html">QTextInlineObject</a></th></tr>
+<tr valign="top" class="even"><th><a href="qtextlayout.html">QTextLayout</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qtextlength.html">QTextLength</a></th></tr>
+<tr valign="top" class="even"><th><a href="qtextline.html">QTextLine</a></th></tr>
+<tr valign="top" class="odd"><th><a href="qtextlist.html">QTextList</a></th></tr>
+<tr valign="top" class="even"><th><a href="qtextlistformat.html">QTextListFormat</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qtextobject.html">QTextObject</a></th></tr>
 <tr valign="top" class="even"><th><a href="qtextoption.html">QTextOption</a></th></tr>
 <tr valign="top" class="odd"><th><a href="qtextstream.html">QTextStream</a></th></tr>
@@ -1099,33 +1093,35 @@
 <tr valign="top" class="odd"><th><a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a></th><td>Encapsulates and sends QCop messages</td></tr>
 <tr valign="top" class="even"><th><a href="qtopiaipcsendenvelope.html">QtopiaIpcSendEnvelope</a></th><td>Mechanism to send Qtopia IPC messages with an argument number of arguments</td></tr>
 <tr valign="top" class="odd"><th><a href="qtopiaitemdelegate.html">QtopiaItemDelegate</a></th><td>Display and editing facilities for data items from a model</td></tr>
-<tr valign="top" class="even"><th><a href="qtopianetwork.html">QtopiaNetwork</a></th><td>Functions for starting/stopping of network devices/interfaces</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopianetworkconfiguration.html">QtopiaNetworkConfiguration</a></th><td>Defines the interface to network interface configurations</td></tr>
-<tr valign="top" class="even"><th><a href="qtopianetworkfactoryiface.html">QtopiaNetworkFactoryIface</a></th><td>Defines the interface to network plug-ins</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a></th><td>Describes the minimum interface that a network plug-in must provide</td></tr>
-<tr valign="top" class="even"><th><a href="qtopianetworkplugin.html">QtopiaNetworkPlugin</a></th><td>Abstract base class for all network plug-ins</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopianetworkproperties.html">QtopiaNetworkProperties</a></th><td>Reflects the content of a network interface configuration</td></tr>
-<tr valign="top" class="even"><th><a href="qtopianetworkserver.html">QtopiaNetworkServer</a></th><td>Manages all network interfaces</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a></th><td>Keeps track of power management constraints set by Qtopia applications</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiapowermanager.html">QtopiaPowerManager</a></th><td>Implements default device power management behaviour</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiaprinterinterface.html">QtopiaPrinterInterface</a></th><td>The minimum interface to various printers</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiaprinterplugin.html">QtopiaPrinterPlugin</a></th><td>Abstract base for QtopiaPrinterInterface plug-ins</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiasendvia.html">QtopiaSendVia</a></th><td>Easy way of sending files via communications services</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiaserverapplication.html">QtopiaServerApplication</a></th><td>Additional QtopiaApplication functionality</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiaserverapplicationlauncher.html">QtopiaServerApplicationLauncher</a></th><td>Acts as a proxy for the Qtopia Server within the application launcher framework</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiaservice.html">QtopiaService</a></th><td>Allows applications to query the services provided by other applications</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiaservicedescription.html">QtopiaServiceDescription</a></th><td>Describes a service request in user terms</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a></th><td>Allows applications to request services from other applications</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiaserviceselector.html">QtopiaServiceSelector</a></th><td>Implements a list dialog for selecting a service</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiasql.html">QtopiaSql</a></th><td>Collection of methods for setting up and managing database connections</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiastyle.html">QtopiaStyle</a></th><td>Encapsulates the common Look and Feel of a Qtopia GUI</td></tr>
-<tr valign="top" class="even"><th><a href="qtopiatimer.html">QtopiaTimer</a></th><td>Timers that can pause automatically when the screen is off</td></tr>
-<tr valign="top" class="odd"><th><a href="qtopiavpnmanager.html">QtopiaVpnManager</a></th><td>Management functionality for virtual private network sessions regardless of their type</td></tr>
-<tr valign="top" class="even"><th><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></th><td>Supports launching quicklaunched Qtopia applications</td></tr>
-<tr valign="top" class="odd"><th><a href="ringcontrol.html">RingControl</a></th><td>Controls the system ring for incoming calls and messages</td></tr>
-<tr valign="top" class="even"><th><a href="sxepolicymanager.html">SXEPolicyManager</a></th><td>Management interface for Qtopia Safe Execution Environment policies</td></tr>
-<tr valign="top" class="odd"><th><a href="screenclick.html">ScreenClick</a></th><td>Enables an audible clicking sound whenever the stylus is used</td></tr>
-<tr valign="top" class="even"><th><a href="securitymonitortask.html">SecurityMonitorTask</a></th><td>Manages the lifetime of the SXE monitor process</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiamedia.html">QtopiaMedia</a></th><td>Container for general media types</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopianetwork.html">QtopiaNetwork</a></th><td>Functions for starting/stopping of network devices/interfaces</td></tr>
+<tr valign="top" class="even"><th><a href="qtopianetworkconfiguration.html">QtopiaNetworkConfiguration</a></th><td>Defines the interface to network interface configurations</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopianetworkfactoryiface.html">QtopiaNetworkFactoryIface</a></th><td>Defines the interface to network plug-ins</td></tr>
+<tr valign="top" class="even"><th><a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a></th><td>Describes the minimum interface that a network plug-in must provide</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopianetworkplugin.html">QtopiaNetworkPlugin</a></th><td>Abstract base class for all network plug-ins</td></tr>
+<tr valign="top" class="even"><th><a href="qtopianetworkproperties.html">QtopiaNetworkProperties</a></th><td>Reflects the content of a network interface configuration</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopianetworkserver.html">QtopiaNetworkServer</a></th><td>Manages all network interfaces</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiapowerconstraintmanager.html">QtopiaPowerConstraintManager</a></th><td>Keeps track of power management constraints set by Qtopia applications</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiapowermanager.html">QtopiaPowerManager</a></th><td>Implements default device power management behaviour</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiaprinterinterface.html">QtopiaPrinterInterface</a></th><td>The minimum interface to various printers</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiaprinterplugin.html">QtopiaPrinterPlugin</a></th><td>Abstract base for QtopiaPrinterInterface plug-ins</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiasendvia.html">QtopiaSendVia</a></th><td>Easy way of sending files via communications services</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiaserverapplication.html">QtopiaServerApplication</a></th><td>Additional QtopiaApplication functionality</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiaserverapplicationlauncher.html">QtopiaServerApplicationLauncher</a></th><td>Acts as a proxy for the Qtopia Server within the application launcher framework</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiaservice.html">QtopiaService</a></th><td>Allows applications to query the services provided by other applications</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiaservicedescription.html">QtopiaServiceDescription</a></th><td>Describes a service request in user terms</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a></th><td>Allows applications to request services from other applications</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiaserviceselector.html">QtopiaServiceSelector</a></th><td>Implements a list dialog for selecting a service</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiasql.html">QtopiaSql</a></th><td>Collection of methods for setting up and managing database connections</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiastyle.html">QtopiaStyle</a></th><td>Encapsulates the common Look and Feel of a Qtopia GUI</td></tr>
+<tr valign="top" class="odd"><th><a href="qtopiatimer.html">QtopiaTimer</a></th><td>Timers that can pause automatically when the screen is off</td></tr>
+<tr valign="top" class="even"><th><a href="qtopiavpnmanager.html">QtopiaVpnManager</a></th><td>Management functionality for virtual private network sessions regardless of their type</td></tr>
+<tr valign="top" class="odd"><th><a href="quickexeapplicationlauncher.html">QuickExeApplicationLauncher</a></th><td>Supports launching quicklaunched Qtopia applications</td></tr>
+<tr valign="top" class="even"><th><a href="ringcontrol.html">RingControl</a></th><td>Controls the system ring for incoming calls and messages</td></tr>
+<tr valign="top" class="odd"><th><a href="sxepolicymanager.html">SXEPolicyManager</a></th><td>Management interface for Qtopia Safe Execution Environment policies</td></tr>
+<tr valign="top" class="even"><th><a href="screenclick.html">ScreenClick</a></th><td>Enables an audible clicking sound whenever the stylus is used</td></tr>
+<tr valign="top" class="odd"><th><a href="securitymonitortask.html">SecurityMonitorTask</a></th><td>Manages the lifetime of the SXE monitor process</td></tr>
+<tr valign="top" class="even"><th><a href="servercontactmodel.html">ServerContactModel</a></th><td>Access to a singleton instance of a QContactModel</td></tr>
 <tr valign="top" class="odd"><th><a href="shutdownsplashscreen.html">ShutdownSplashScreen</a></th><td>Displays a static splash screen while the system is restarting</td></tr>
 <tr valign="top" class="even"><th><a href="simpleexeapplicationlauncher.html">SimpleExeApplicationLauncher</a></th><td>Supports launching regular QtopiaApplication executables</td></tr>
 <tr valign="top" class="odd"><th><a href="stabmonitor.html">StabMonitor</a></th><td>Supports monitoring of stab changes</td></tr>
@@ -1135,44 +1131,45 @@
 <tr valign="top" class="odd"><th><a href="systemshutdownhandler.html">SystemShutdownHandler</a></th><td>Notifies tasks when the system is shutting down or restarting</td></tr>
 <tr valign="top" class="even"><th><a href="systemsuspend.html">SystemSuspend</a></th><td>Manages entering and leaving system suspend</td></tr>
 <tr valign="top" class="odd"><th><a href="systemsuspendhandler.html">SystemSuspendHandler</a></th><td>Interface for tasks that provide system suspension or resumption functionality</td></tr>
-<tr valign="top" class="even"><th><a href="testmemorymonitor.html">TestMemoryMonitor</a></th><td>Instrumented implementation of MemoryMonitor for testing</td></tr>
-<tr valign="top" class="odd"><th><a href="themeanimationitem.html">ThemeAnimationItem</a></th><td>Represents a pixmap-based animation in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themecontrol.html">ThemeControl</a></th><td>Manages the registered theme views</td></tr>
-<tr valign="top" class="odd"><th><a href="themeexclusiveitem.html">ThemeExclusiveItem</a></th><td>Allows only one of its children to be active in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themegraphicitem.html">ThemeGraphicItem</a></th><td>Common functionality for graphics based items in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themegroupitem.html">ThemeGroupItem</a></th><td>Groups its children into a single item in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themeimageitem.html">ThemeImageItem</a></th><td>Represents an image in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themeitem.html">ThemeItem</a></th><td>The base class of all items in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themelayoutitem.html">ThemeLayoutItem</a></th><td>Positions and resizes its child items in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themelevelitem.html">ThemeLevelItem</a></th><td>Represents a level indicator in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themelineitem.html">ThemeLineItem</a></th><td>Represents a visual line in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themelistitem.html">ThemeListItem</a></th><td>Represents a graphical list in a themed view</td></tr>
-<tr valign="top" class="even"><th><a href="themelistmodel.html">ThemeListModel</a></th><td>List model that is used for list functionality in Qtopia theming</td></tr>
-<tr valign="top" class="odd"><th><a href="themelistmodelentry.html">ThemeListModelEntry</a></th><td>Implements a single theme list entry in a ThemeListModel</td></tr>
-<tr valign="top" class="even"><th><a href="themepageitem.html">ThemePageItem</a></th><td>The root item in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themepixmapitem.html">ThemePixmapItem</a></th><td>Common functionality for image based items in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themepluginitem.html">ThemePluginItem</a></th><td>Manages the interaction between a ThemedItemInterface implementation and a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themerectitem.html">ThemeRectItem</a></th><td>Represents a visual rectangle in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themestatusitem.html">ThemeStatusItem</a></th><td>Represents a status indicator in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a></th><td>Represents a template instance in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themetemplateitem.html">ThemeTemplateItem</a></th><td>Represents a theme template in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themetextitem.html">ThemeTextItem</a></th><td>Represents a text in a ThemedView</td></tr>
-<tr valign="top" class="even"><th><a href="themewidgetitem.html">ThemeWidgetItem</a></th><td>Represents a widget in a ThemedView</td></tr>
-<tr valign="top" class="odd"><th><a href="themedhomescreen.html">ThemedHomeScreen</a></th><td>The home screen for Qtopia Phone</td></tr>
-<tr valign="top" class="even"><th><a href="themedsecondarydisplay.html">ThemedSecondaryDisplay</a></th><td>Implements the secondary display for Qtopia Phone</td></tr>
-<tr valign="top" class="odd"><th><a href="themedview.html">ThemedView</a></th><td>Constructs, manages and displays themed views in Qtopia</td></tr>
-<tr valign="top" class="even"><th><a href="timemonitortask.html">TimeMonitorTask</a></th><td>Required for the TimeMonitor service to be supported. This class is part of the Qtopia server and cannot be used by other Qtopia applications</td></tr>
-<tr valign="top" class="odd"><th><a href="uiapplicationmonitor.html">UIApplicationMonitor</a></th><td>Monitors the running state of UI applications</td></tr>
-<tr valign="top" class="even"><th><a href="vobjectlegal.html">VObjectLegal</a></th><td>Placeholder for licensing information</td></tr>
+<tr valign="top" class="even"><th><a href="taskmanagerentry.html">TaskManagerEntry</a></th><td>Used to insert non-application items into Qtopia's Running Applications/TaskManager window</td></tr>
+<tr valign="top" class="odd"><th><a href="testmemorymonitor.html">TestMemoryMonitor</a></th><td>Instrumented implementation of MemoryMonitor for testing</td></tr>
+<tr valign="top" class="even"><th><a href="themeanimationitem.html">ThemeAnimationItem</a></th><td>Represents a pixmap-based animation in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themecontrol.html">ThemeControl</a></th><td>Manages the registered theme views</td></tr>
+<tr valign="top" class="even"><th><a href="themeexclusiveitem.html">ThemeExclusiveItem</a></th><td>Allows only one of its children to be active in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themegraphicitem.html">ThemeGraphicItem</a></th><td>Common functionality for graphics based items in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themegroupitem.html">ThemeGroupItem</a></th><td>Groups its children into a single item in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themeimageitem.html">ThemeImageItem</a></th><td>Represents an image in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themeitem.html">ThemeItem</a></th><td>The base class of all items in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themelayoutitem.html">ThemeLayoutItem</a></th><td>Positions and resizes its child items in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themelevelitem.html">ThemeLevelItem</a></th><td>Represents a level indicator in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themelineitem.html">ThemeLineItem</a></th><td>Represents a visual line in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themelistitem.html">ThemeListItem</a></th><td>Represents a graphical list in a themed view</td></tr>
+<tr valign="top" class="odd"><th><a href="themelistmodel.html">ThemeListModel</a></th><td>List model that is used for list functionality in Qtopia theming</td></tr>
+<tr valign="top" class="even"><th><a href="themelistmodelentry.html">ThemeListModelEntry</a></th><td>Implements a single theme list entry in a ThemeListModel</td></tr>
+<tr valign="top" class="odd"><th><a href="themepageitem.html">ThemePageItem</a></th><td>The root item in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themepixmapitem.html">ThemePixmapItem</a></th><td>Common functionality for image based items in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themepluginitem.html">ThemePluginItem</a></th><td>Manages the interaction between a ThemedItemInterface implementation and a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themerectitem.html">ThemeRectItem</a></th><td>Represents a visual rectangle in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themestatusitem.html">ThemeStatusItem</a></th><td>Represents a status indicator in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a></th><td>Represents a template instance in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themetemplateitem.html">ThemeTemplateItem</a></th><td>Represents a theme template in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themetextitem.html">ThemeTextItem</a></th><td>Represents a text in a ThemedView</td></tr>
+<tr valign="top" class="odd"><th><a href="themewidgetitem.html">ThemeWidgetItem</a></th><td>Represents a widget in a ThemedView</td></tr>
+<tr valign="top" class="even"><th><a href="themedhomescreen.html">ThemedHomeScreen</a></th><td>The home screen for Qtopia Phone</td></tr>
+<tr valign="top" class="odd"><th><a href="themedsecondarydisplay.html">ThemedSecondaryDisplay</a></th><td>Implements the secondary display for Qtopia Phone</td></tr>
+<tr valign="top" class="even"><th><a href="themedview.html">ThemedView</a></th><td>Constructs, manages and displays themed views in Qtopia</td></tr>
+<tr valign="top" class="odd"><th><a href="timemonitortask.html">TimeMonitorTask</a></th><td>Required for the TimeMonitor service to be supported. This class is part of the Qtopia server and cannot be used by other Qtopia applications</td></tr>
+<tr valign="top" class="even"><th><a href="uiapplicationmonitor.html">UIApplicationMonitor</a></th><td>Monitors the running state of UI applications</td></tr>
 <tr valign="top" class="odd"><th><a href="videoringtone.html">VideoRingtone</a></th><td>Interface to the Qtopia media system to play the video tones for incoming calls</td></tr>
 <tr valign="top" class="even"><th><a href="voipmanager.html">VoIPManager</a></th><td>Maintains information about the active VoIP telephony service</td></tr>
-<tr valign="top" class="odd"><th><a href="windowmanagement.html">WindowManagement</a></th><td>Allows you to monitor and control the application windows in the system</td></tr>
-<tr valign="top" class="even"><th><a href="worldmaphswidget.html">WorldmapHSWidget</a></th><td>Displays a worldmap</td></tr>
+<tr valign="top" class="odd"><th><a href="waitindicator.html">WaitIndicator</a></th><td>Widget that is shown while an application starts</td></tr>
+<tr valign="top" class="even"><th><a href="windowmanagement.html">WindowManagement</a></th><td>Allows you to monitor and control the application windows in the system</td></tr>
+<tr valign="top" class="odd"><th><a href="worldmaphswidget.html">WorldmapHSWidget</a></th><td>Displays a worldmap</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

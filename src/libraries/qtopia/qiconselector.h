@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,7 +34,8 @@ public:
     explicit QIconSelector( const QIcon &icn, QWidget *parent = 0 );
     ~QIconSelector();
 
-    uint count();
+    uint count() const;
+
     void insertItem( const QIcon &icn, const QString &text = QString() );
     void removeIndex( int index );
     void clear();

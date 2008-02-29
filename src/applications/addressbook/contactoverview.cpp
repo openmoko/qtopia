@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,8 @@
 #include <QScrollArea>
 #include <QResizeEvent>
 
+#include <QtopiaService>
+
 // -------------------------------------------------------------
 // ContactOverview
 // -------------------------------------------------------------
@@ -49,6 +51,21 @@ ContactOverview::ContactOverview( QWidget *parent )
         QSoftMenuBar::Back, QSoftMenuBar::AnyFocus);
     QSoftMenuBar::setLabel(this, Qt::Key_Select,
         QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
+
+    // XXX for 4.4, this should be more dynamic
+#if defined(QTOPIA_CELL)
+    bSMS = true;
+#else
+    bSMS = false;
+#endif
+
+#if defined(QTOPIA_TELEPHONY)
+    bDialer = true;
+#else
+    bDialer = false;
+#endif
+
+    bEmail = QtopiaService::apps("Email").count() > 0;
 }
 
 ContactOverview::~ContactOverview()
@@ -74,9 +91,9 @@ void ContactOverview::updateCommands()
         numbers.remove(QContact::VOIP);
 #endif
 
-        mCall->setVisible( numbers.count() > 0 );
-        mEmail->setVisible( !ent.defaultEmail().isEmpty() );
-        mText->setVisible( numbers.count() > 0 );
+        mCall->setVisible( bDialer && numbers.count() > 0 );
+        mEmail->setVisible(bEmail && !ent.defaultEmail().isEmpty() );
+        mText->setVisible( bSMS && numbers.count() > 0 );
 
         if (numbers.count() > 1) {
             mCall->setText(tr("Call..."));

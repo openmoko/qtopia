@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAtChatScript Class Reference</h1>
 <p>The QAtChatScript class provides a mechanism to run pppd chat scripts. <a href="#details">More...</a></p>
-<pre>    #include &lt;QAtChatScript&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QAtChatScript&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qatchatscript-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <li><div class="fn"/>int <b><a href="qatchatscript.html#totalCommands">totalCommands</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -37,7 +37,7 @@
 <li><div class="fn"/>void <b><a href="qatchatscript.html#stop">stop</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -45,16 +45,15 @@
 <li><div class="fn"/>void <b><a href="qatchatscript.html#done">done</a></b> ( bool <i>ok</i>, const QAtResult &amp; <i>result</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -66,22 +65,22 @@
 <p>See also <a href="qatchat.html">QAtChat</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAtChatScript"></a>QAtChatScript::QAtChatScript ( <a href="qatchat.html">QAtChat</a> * <i>atchat</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QAtChatScript"></a>QAtChatScript::QAtChatScript ( <a href="qatchat.html">QAtChat</a> * <i>atchat</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a chat script object that sends AT commands from the script on <i>atchat</i>. The new object will be attached to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QAtChatScript"></a>QAtChatScript::~QAtChatScript ()</h3>
 <p>Destruct this chat script object.</p>
 <h3 class="fn"><a name="done"></a>void QAtChatScript::done ( bool <i>ok</i>, const <a href="qatresult.html">QAtResult</a> &amp; <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the chat script is done. The <i>ok</i> flag indicates whether the script succeeded or failed, and <i>result</i> indicates more information about the failure (busy, no carrier, etc).</p>
 <p>See also <a href="qatchatscript.html#runChat">runChat</a>(), <a href="qatchatscript.html#runChatFile">runChatFile</a>(), and <a href="qatchatscript.html#successfulCommands">successfulCommands</a>().</p>
-<h3 class="fn"><a name="runChat"></a>void QAtChatScript::runChat ( const <a href="qstring.html">QString</a> &amp; <i>chatScript</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="runChat"></a>void QAtChatScript::runChat ( const <a href="./qstring.html">QString</a> &amp; <i>chatScript</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Run a literal <i>chatScript</i>. The <a href="qatchatscript.html#done">done</a>() signal will be emitted when the script completes.</p>
 <p>The chat script format is based on that used by the Unix <tt>chat(8)</tt> utility.</p>
 <p>See also <a href="qatchatscript.html#runChatFile">runChatFile</a>() and <a href="qatchatscript.html#done">done</a>().</p>
-<h3 class="fn"><a name="runChat-2"></a>void QAtChatScript::runChat ( const <a href="qstringlist.html">QStringList</a> &amp; <i>commands</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="runChat-2"></a>void QAtChatScript::runChat ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>commands</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Run a list of <i>commands</i> which have already been parsed from a chat script. The <a href="qatchatscript.html#done">done</a>() signal will be emitted when the script completes.</p>
 <p>See also <a href="qatchatscript.html#runChatFile">runChatFile</a>() and <a href="qatchatscript.html#done">done</a>().</p>
-<h3 class="fn"><a name="runChatFile"></a>void QAtChatScript::runChatFile ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="runChatFile"></a>void QAtChatScript::runChatFile ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Run the chat script within <i>filename</i>. The <a href="qatchatscript.html#done">done</a>() signal will be emitted when the script completes.</p>
 <p>The chat script format is based on that used by the Unix <tt>chat(8)</tt> utility.</p>
 <p>See also <a href="qatchatscript.html#runChat">runChat</a>() and <a href="qatchatscript.html#done">done</a>().</p>
@@ -96,8 +95,8 @@
 <p>See also <a href="qatchatscript.html#successfulCommands">successfulCommands</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

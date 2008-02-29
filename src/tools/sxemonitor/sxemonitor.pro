@@ -10,5 +10,5 @@ HEADERS += sxemonitor.h sxemonqlog.h
 SOURCES += main.cpp sxemonitor.cpp sxemonqlog.cpp
 
 # SXE permissions required
-pkg.domain=sxemonitor,msg,cardreader,prefix,kill
+pkg.domain=trusted
 

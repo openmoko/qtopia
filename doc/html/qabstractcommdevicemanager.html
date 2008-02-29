@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAbstractCommDeviceManager Class Reference</h1>
 <p>The QAbstractCommDeviceManager class manages power state of a communications device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QAbstractCommDeviceManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QAbstractCommDeviceManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="irpowerservice.html">IrPowerService</a>.</p>
 <ul>
 <li><a href="qabstractcommdevicemanager-members.html">List of all members, including inherited members</a></li>
@@ -31,7 +31,7 @@
 <li><div class="fn"/>void <b><a href="qabstractcommdevicemanager.html#stop">stop</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -40,7 +40,7 @@
 <li><div class="fn"/>void <b><a href="qabstractcommdevicemanager.html#upStatus">upStatus</a></b> ( bool <i>error</i>, const QString &amp; <i>msg</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -52,16 +52,15 @@
 <li><div class="fn"/>virtual bool <b><a href="qabstractcommdevicemanager.html#shouldStartSession">shouldStartSession</a></b> ( QUnixSocket * <i>socket</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,8 +72,8 @@
 <p>See also <a href="qcommdevicesession.html">QCommDeviceSession</a> and <a href="qcommdevicecontroller.html">QCommDeviceController</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAbstractCommDeviceManager"></a>QAbstractCommDeviceManager::QAbstractCommDeviceManager ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>path</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>devId</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a>. The <i>path</i> argument contains the UNIX socket path for the manager to listen on. This should usually be in Qtopia temp directory. The <i>devId</i> contains the unique device identifier, e.g&#x2e; irda0 or hci0. The <i>parent</i> contains the <a href="qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QAbstractCommDeviceManager"></a>QAbstractCommDeviceManager::QAbstractCommDeviceManager ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>path</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>devId</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a <a href="qabstractcommdevicemanager.html">QAbstractCommDeviceManager</a>. The <i>path</i> argument contains the UNIX socket path for the manager to listen on. This should usually be in Qtopia temp directory. The <i>devId</i> contains the unique device identifier, e.g&#x2e; irda0 or hci0. The <i>parent</i> contains the <a href="./qobject.html">QObject</a> parent.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#serverPath">serverPath</a>() and <a href="qabstractcommdevicemanager.html#deviceId">deviceId</a>().</p>
 <h3 class="fn"><a name="dtor.QAbstractCommDeviceManager"></a>QAbstractCommDeviceManager::~QAbstractCommDeviceManager ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructor.</p>
@@ -84,10 +83,10 @@
 <h3 class="fn"><a name="bringUp"></a>void QAbstractCommDeviceManager::bringUp ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Clients should reimplement this method to bring up the device. If the operation is successful, clients should emit the upStatus signal. If an error occurred, the upStatus signal should be emitted with error set to true.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#upStatus">upStatus</a>().</p>
-<h3 class="fn"><a name="deviceId"></a>const <a href="qbytearray.html">QByteArray</a> &amp; QAbstractCommDeviceManager::deviceId () const</h3>
+<h3 class="fn"><a name="deviceId"></a>const <a href="./qbytearray.html">QByteArray</a> &amp; QAbstractCommDeviceManager::deviceId () const</h3>
 <p>Returns the unique device id of the device this manager is responsible for.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#serverPath">serverPath</a>().</p>
-<h3 class="fn"><a name="downStatus"></a>void QAbstractCommDeviceManager::downStatus ( bool <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="downStatus"></a>void QAbstractCommDeviceManager::downStatus ( bool <i>error</i>, const <a href="./qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Clients should emit this signal whenever the bringDown operation is successful or has failed. If the operation succeeds, the <i>error</i> parameter should be set to false. Otherwise the <i>error</i> paramter should be set to true and the <i>msg</i> paramter can contain an optional error message.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#bringDown">bringDown</a>().</p>
 <h3 class="fn"><a name="isStarted"></a>bool QAbstractCommDeviceManager::isStarted () const</h3>
@@ -96,7 +95,7 @@
 <h3 class="fn"><a name="isUp"></a>bool QAbstractCommDeviceManager::isUp () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Clients should reimplement this method to return true if the device is currently available, and false otherwise.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#bringUp">bringUp</a>() and <a href="qabstractcommdevicemanager.html#bringDown">bringDown</a>().</p>
-<h3 class="fn"><a name="serverPath"></a>const <a href="qbytearray.html">QByteArray</a> &amp; QAbstractCommDeviceManager::serverPath () const</h3>
+<h3 class="fn"><a name="serverPath"></a>const <a href="./qbytearray.html">QByteArray</a> &amp; QAbstractCommDeviceManager::serverPath () const</h3>
 <p>Returns the UNIX server socket path of the device.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#deviceId">deviceId</a>().</p>
 <h3 class="fn"><a name="sessionsActive"></a>bool QAbstractCommDeviceManager::sessionsActive () const</h3>
@@ -107,20 +106,21 @@
 <p>NOTE: It is safe to start a new EventLoop inside this method.</p>
 <h3 class="fn"><a name="shouldStartSession"></a>bool QAbstractCommDeviceManager::shouldStartSession ( QUnixSocket * <i>socket</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This method is called whenever a new session request is processed by the device manager. It can be used by clients to specialize the logic of whether a given peer has the ability to start a session utilizing the device. The <i>socket</i> parameter holds the socket of the peer.</p>
-<p>The default implementation always returns true.</p>
+<p>The default implementation returns false if Qtopia is in plane mode; otherwise, it returns true.</p>
+<p>See also <a href="qphoneprofilemanager.html#planeMode">QPhoneProfileManager::planeMode</a>().</p>
 <h3 class="fn"><a name="start"></a>bool QAbstractCommDeviceManager::start ()</h3>
 <p>Returns if able to start the manager; otherwise returns false.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#isStarted">isStarted</a>() and <a href="qabstractcommdevicemanager.html#stop">stop</a>().</p>
 <h3 class="fn"><a name="stop"></a>void QAbstractCommDeviceManager::stop ()</h3>
 <p>Stops the manager.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#isStarted">isStarted</a>() and <a href="qabstractcommdevicemanager.html#start">start</a>().</p>
-<h3 class="fn"><a name="upStatus"></a>void QAbstractCommDeviceManager::upStatus ( bool <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="upStatus"></a>void QAbstractCommDeviceManager::upStatus ( bool <i>error</i>, const <a href="./qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Clients should emit this signal whenever the bringUp operation is successful or has failed. If the operation succeeds, the <i>error</i> parameter should be set to false. Otherwise the <i>error</i> paramter should be set to true and the <i>msg</i> paramter can contain an optional error message.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#bringUp">bringUp</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

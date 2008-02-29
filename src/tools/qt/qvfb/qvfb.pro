@@ -37,6 +37,3 @@ symlink_skins.commands=$$commands
 QMAKE_EXTRA_TARGETS+=symlink_skins
 ALL_DEPS+=symlink_skins
 
-depends(libraries/qt/opengl)
-depends(libraries/qt/gui)
-depends(libraries/qt/corelib)

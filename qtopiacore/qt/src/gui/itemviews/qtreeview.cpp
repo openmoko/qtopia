@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -410,6 +408,9 @@ void QTreeView::setRootIsDecorated(bool show)
   This property should only be set to true if it is guaranteed that all items
   in the view has the same height. This enables the view to do some
   optimizations.
+
+  The height is obtained from the first item in the view.  It is updated
+  when the data changes on that item.
 */
 bool QTreeView::uniformRowHeights() const
 {
@@ -542,7 +543,6 @@ void QTreeView::setRowHidden(int row, const QModelIndex &parent, bool hide)
     if (!index.isValid())
         return;
 
-    d->executePostedLayout();
     if (hide) {
         QPersistentModelIndex persistent(index);
         if (!d->hiddenIndexes.contains(persistent))
@@ -571,6 +571,7 @@ void QTreeView::setRowHidden(int row, const QModelIndex &parent, bool hide)
                     i += count;
                 }
             }
+            d->executePostedLayout();
             updateGeometries();
             d->viewport->update();
         } else {
@@ -656,6 +657,8 @@ void QTreeView::dataChanged(const QModelIndex &topLeft, const QModelIndex &botto
                       ? topLeft
                       : d->model->sibling(topLeft.row(), 0, topLeft);
     int topViewIndex = d->viewIndex(top);
+    if (topViewIndex == 0)
+        d->defaultItemHeight = indexRowSizeHint(top);
     bool sizeChanged = false;
     if (topViewIndex != -1) {
         if (topLeft == bottomRight) {
@@ -683,7 +686,11 @@ void QTreeView::dataChanged(const QModelIndex &topLeft, const QModelIndex &botto
 
 /*!
   Hides the \a column given.
-
+  
+  \note This function should only be called after the model has been
+  initialized, as the view needs to know the number of columns in order to
+  hide \a column.
+  
   \sa showColumn(), setColumnHidden()
 */
 void QTreeView::hideColumn(int column)
@@ -1011,7 +1018,7 @@ QRect QTreeView::visualRect(const QModelIndex &index) const
     bool firstColumnMoved = (d->header && d->header->logicalIndex(0) != 0);
 
     // if we have a spanning item, make the selection stretch from left to right
-    int x = (spanning || firstColumnMoved ? 0 : columnViewportPosition(index.column()));
+    int x = (spanning ? 0 : columnViewportPosition(index.column()));
     int w = (spanning ? d->header->length() : columnWidth(index.column()));
     // handle indentation
     if (index.column() == 0 && !firstColumnMoved && !spanning) {
@@ -1757,8 +1764,6 @@ void QTreeView::doItemsLayout()
     d->viewItems.clear(); // prepare for new layout
     QModelIndex parent = d->root;
     if (d->model->hasChildren(parent)) {
-        QModelIndex index = d->model->index(0, 0, parent);
-        d->defaultItemHeight = indexRowSizeHint(index);
         d->layout(-1);
         d->reexpandChildren(parent);
     }
@@ -2102,14 +2107,19 @@ void QTreeView::reexpand()
 /*!
   \internal
 */
-static bool treeViewItemLessThan(const QTreeViewItem &i1,
-                                 const QTreeViewItem &i2)
+static bool treeViewItemLessThan(const QTreeViewItem &left,
+                                 const QTreeViewItem &right)
 {
-    if (i1.level < i2.level)
-        return false;
-    else if (i2.level < i1.level)
-        return true;
-    return (i1.index.row() < i2.index.row());
+    if (left.level != right.level) {
+        Q_ASSERT(left.level > right.level);
+        QModelIndex leftParent = left.index.parent();
+        QModelIndex rightParent = right.index.parent();
+        // computer parent, don't get
+        while (leftParent.parent() != rightParent)
+            leftParent = leftParent.parent();
+        return (leftParent.row() < right.index.row());
+    }
+    return (left.index.row() < right.index.row());
 }
 
 /*!
@@ -2145,6 +2155,8 @@ void QTreeView::rowsInserted(const QModelIndex &parent, int start, int end)
             insertedItems[i].index = d->model->index(i + start, firstColumn, parent);
             insertedItems[i].level = childLevel;
         }
+        if (d->viewItems.isEmpty())
+            d->defaultItemHeight = indexRowSizeHint(insertedItems[0].index);
 
         int insertPos;
         if (lastChildItem < firstChildItem) { // no children
@@ -2164,6 +2176,15 @@ void QTreeView::rowsInserted(const QModelIndex &parent, int start, int end)
                 //Q_ASSERT(modelIndex.parent() == parent);
                 d->viewItems[item].index = d->model->index(
                     modelIndex.row() + delta, modelIndex.column(), parent);
+
+                if(!d->viewItems[item].index.isValid()) {
+                    // Something really bad is happening, a bad model is
+                    // often the cause.  We can't optimize in this case :(
+                    // qWarning() << "QTreeView::rowsInserted internal representation of the model has been corrupted, resetting.";
+                    doItemsLayout();
+                    return;
+                }
+
                 item += d->viewItems.at(item).total + 1;
             }
         }
@@ -2175,7 +2196,8 @@ void QTreeView::rowsInserted(const QModelIndex &parent, int start, int end)
         }
 
         d->updateChildCount(parentItem, delta);
-        d->doDelayedItemsLayout();
+        updateGeometries();
+        viewport()->update();
     } else if ((parentItem != -1) && d->viewItems.at(parentItem).expanded) {
         d->doDelayedItemsLayout();
     }
@@ -2249,7 +2271,7 @@ void QTreeView::sortByColumn(int column)
 /*!
   \since 4.2
 
-  Sorts the model by the values in the given \a column in the given \a order.
+  Sets the model up for sorting by the values in the given \a column and \a order.
 
   \sa sortingEnabled
 */
@@ -2359,6 +2381,9 @@ void QTreeView::updateGeometries()
 {
     Q_D(QTreeView);
     if (d->header) {
+        if (d->geometryRecursionBlock)
+            return;
+        d->geometryRecursionBlock = true;
         QSize hint = d->header->isHidden() ? QSize(0, 0) : d->header->sizeHint();
         setViewportMargins(0, hint.height(), 0, 0);
         QRect vg = d->viewport->geometry();
@@ -2367,6 +2392,7 @@ void QTreeView::updateGeometries()
         //d->header->setOffset(horizontalScrollBar()->value()); // ### bug ???
         QMetaObject::invokeMethod(d->header, "updateGeometries");
         d->updateScrollBars();
+        d->geometryRecursionBlock = false;
     }
     QAbstractItemView::updateGeometries();
 }
@@ -2604,6 +2630,7 @@ void QTreeViewPrivate::prepareAnimatedOperation(int item, AnimatedOperation::Typ
     }
     rect.moveTop(top);
     animatedOperation.top = top;
+    animatedOperation.before = renderTreeToPixmap(rect);
 }
 
 void QTreeViewPrivate::beginAnimatedOperation()
@@ -2731,6 +2758,10 @@ void QTreeViewPrivate::layout(int i)
         count = model->rowCount(parent);
 
     if (i == -1) {
+        if (uniformRowHeights) {
+            QModelIndex index = model->index(0, 0, parent);
+            defaultItemHeight = q->indexRowSizeHint(index);
+        }
         viewItems.resize(count);
     } else {
         if (viewItems[i].total != (uint)count)
@@ -2983,6 +3014,9 @@ int QTreeViewPrivate::firstVisibleItem(int *offset) const
     }
     // ScrollMode == ScrollPerPixel
     if (uniformRowHeights) {
+        if (!defaultItemHeight)
+            return -1;
+
         if (offset)
             *offset = -(value % defaultItemHeight);
         return value / defaultItemHeight;
@@ -3245,6 +3279,13 @@ void QTreeViewPrivate::rowsRemoved(const QModelIndex &parent,
                                    int start, int end, bool after)
 {
     Q_Q(QTreeView);
+
+    // if we are going to do a complete relayout anyway, there is no need to update
+    if (delayedLayout.isActive()) {
+        _q_rowsRemoved(parent, start, end);
+        return;
+    }
+
     const int parentItem = viewIndex(parent);
     if ((parentItem != -1) || (parent == root)) {
 

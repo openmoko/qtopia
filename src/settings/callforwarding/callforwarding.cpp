@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -250,8 +250,8 @@ CallForwardItem::CallForwardItem( QTelephony::CallClass c, QCallForwarding::Reas
         connect( this, SIGNAL(toggled(bool)), parent, SLOT(alwaysChecked(bool)));
 
     connect( this, SIGNAL(toggled(bool)), this, SLOT(checked(bool)) );
-    connect( this, SIGNAL(sendRequest(CallForwardItem*,QCallForwarding::Reason,QString)),
-        parent, SLOT(receiveRequest(CallForwardItem*,QCallForwarding::Reason,QString)) );
+    connect( this, SIGNAL(sendRequest(QCallForwarding::Reason,QString)),
+        parent, SLOT(receiveRequest(QCallForwarding::Reason,QString)) );
 }
 
 void CallForwardItem::init()
@@ -288,7 +288,7 @@ void CallForwardItem::checked( bool on )
             if ( !number.isNull() && number != "0" ) {
                 newNumber = number;
                 newStatus = true;
-                emit sendRequest( this, reason, newNumber );
+                emit sendRequest( reason, newNumber );
             } else { // no number selected
                 abort = true;
                 setChecked( !on ); // go back to previous status, i.e. inactive
@@ -301,7 +301,7 @@ void CallForwardItem::checked( bool on )
             int result = selectOperationType();
             if ( result == 1 ) { // deactivate
                 newStatus = false;
-                emit sendRequest( this, reason, "0" );
+                emit sendRequest( reason, "0" );
             } else if ( result == 0 ) { // use other number
                 ContactSelectDialog *dlg = new ContactSelectDialog( this );
                 dlg->setModal( true );
@@ -312,7 +312,7 @@ void CallForwardItem::checked( bool on )
                 if ( !number.isNull() && number != "0" ) {
                     newNumber = number;
                     newStatus = true;
-                    emit sendRequest( this, reason, newNumber );
+                    emit sendRequest( reason, newNumber );
                 }
                 abort = true;
                 setChecked( !on );
@@ -326,11 +326,11 @@ void CallForwardItem::checked( bool on )
     }
 }
 
-void CallForwardItem::setForwardingResult( bool success )
+void CallForwardItem::setForwardingResult( QTelephony::Result result )
 {
     statusUpdate = true;
 
-    if ( success ) {
+    if ( result == QTelephony::OK ) {
         currentStatus = newStatus;
         // if activation update number, if not, keep previous number.
         if ( currentStatus )
@@ -529,7 +529,7 @@ QString CallClassTab::typeName()
     else if( classX == QTelephony::CallClassFax )
         type = tr( "FAX calls" );
     else if( classX == QTelephony::CallClassSMS )
-        type = tr( "SMS calls" );
+        type = tr( "SMS" );
     return type;
 }
 
@@ -548,12 +548,21 @@ void CallClassTab::deactivateAll()
     unavailableItem->deactivate();
 }
 
-void CallClassTab::receiveRequest( CallForwardItem *sender, const QCallForwarding::Reason reason, const QString number )
+void CallClassTab::receiveRequest( const QCallForwarding::Reason reason, const QString number )
 {
-    // avoid multiple signals delivered
-    disconnect( this, SIGNAL(setForwardingResult(bool)), sender, SLOT(setForwardingResult(bool)) );
-    connect( this, SIGNAL(setForwardingResult(bool)), sender, SLOT(setForwardingResult(bool)) );
     emit sendRequest( reason, number, classX );
+}
+
+void CallClassTab::setForwardingResult( QCallForwarding::Reason reason, QTelephony::Result result )
+{
+    if ( reason == QCallForwarding::Unconditional )
+        alwaysItem->setForwardingResult( result );
+    else if ( reason == QCallForwarding::MobileBusy )
+        busyItem->setForwardingResult( result );
+    else if ( reason == QCallForwarding::NoReply )
+        unansweredItem->setForwardingResult( result );
+    else if ( reason == QCallForwarding::NotReachable )
+        unavailableItem->setForwardingResult( result );
 }
 
 QTelephony::CallClass CallClassTab::callClassX()
@@ -731,7 +740,7 @@ void CallForwarding::receiveRequest( QCallForwarding::Reason reason, QString num
 
     if ( isStatusView ) {
         // update status at the item level
-        emit qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(true);
+        qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(reason, QTelephony::OK);
         if ( isFromActiveProfile ) // save to activate on exit
             forwardItemList.append(currentItem);
     } else { // for normal operation, activate immediately
@@ -794,17 +803,17 @@ void CallForwarding::setForwardingResult( QCallForwarding::Reason reason, QTelep
     if ( result == QTelephony::Error ) {
         QMessageBox::information( this, tr("Forwarding failed"),
                             tr("<qt>The operation is not allowed. Please consult your network operator.</qt>") );
-        emit qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(false);
+        qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(reason, result);
         return;
     } else if ( result == QTelephony::OperationNotAllowed ) {
         QMessageBox::information( this, tr("Forwarding failed"),
                             tr("<qt>Please check if the number is correct.</qt>") );
-        emit qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(false);
+        qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(reason, result);
         return;
     }
 
     // update status at the item level
-    emit qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(true);
+    qobject_cast<CallClassTab *>(tabWidget->currentWidget())->setForwardingResult(reason, result);
 
     // if successful, update config
     QSettings setting( "Trolltech", "Phone" );

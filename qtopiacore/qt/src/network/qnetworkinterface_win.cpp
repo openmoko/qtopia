@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -235,13 +233,8 @@ static QList<QNetworkInterfacePrivate *> interfaceListingWinXP()
             if (pprefix) {
                 if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
                     entry.setNetmask(ipv4netmasks[entry.ip()]);
-                    if (entry.ip() != QHostAddress::LocalHost) {
-                        // calculate the broadcast address
-                        quint32 ip = entry.ip().toIPv4Address();
-                        quint32 mask = entry.netmask().toIPv4Address();
-                        quint32 broadcast = (ip & mask) | (0xFFFFFFFFU & ~mask);
-                        entry.setBroadcast(QHostAddress((broadcast)));
-                    }
+
+                    // broadcast address is set on postProcess()
                 } else { //IPV6
                     entry.setNetmask(netmaskFromPrefixLength(pprefix->PrefixLength, addr->Address.lpSockaddr->sa_family));
                 }
@@ -298,13 +291,7 @@ static QList<QNetworkInterfacePrivate *> interfaceListingWin2k()
             QNetworkAddressEntry entry;
             entry.setIp(QHostAddress(QLatin1String(addr->IpAddress.String)));
             entry.setNetmask(QHostAddress(QLatin1String(addr->IpMask.String)));
-
-            // calculate the broadcast address
-            quint32 ip = entry.ip().toIPv4Address();
-            quint32 mask = entry.netmask().toIPv4Address();
-            quint32 broadcast = (ip & mask) | (0xFFFFFFFFU & ~mask);
-
-            entry.setBroadcast(QHostAddress((broadcast)));
+            // broadcast address is set on postProcess()
 
             iface->addressEntries << entry;
         }

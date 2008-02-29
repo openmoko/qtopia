@@ -151,6 +151,7 @@ make_x86_sdk()
 
   EXTRA_OPTIONS="-no-drm"   # Current default is to specify no-drm to match with the greenphone default
   test "$DRM" = "1" && EXTRA_OPTIONS="-drm"
+  test "$SXE" = "0" && EXTRA_OPTIONS=$EXTRA_OPTIONS" -no-sxe"
   test "$SXE" = "1" && EXTRA_OPTIONS=$EXTRA_OPTIONS" -sxe"
 
   if [ $CLEAN = "1" ]; then      

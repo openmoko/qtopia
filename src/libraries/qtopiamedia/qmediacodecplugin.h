@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -43,8 +43,6 @@ public:
 
     virtual bool canEncode() const = 0;
     virtual bool canDecode() const = 0;
-    virtual bool supportsVideo() const = 0;
-    virtual bool supportsAudio() const = 0;
 
     virtual QMediaEncoder* encoder(QString const& mimeType) = 0;
     virtual QMediaDecoder* decoder(QString const& mimeType) = 0;

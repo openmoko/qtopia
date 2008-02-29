@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -136,7 +136,6 @@ void GridItem::setContent(QContent *_content)
 {
     mContent = _content;
     updateImages();
-    mSelectedPixmap = QPixmap();
 }
 
 /*!
@@ -167,6 +166,7 @@ void GridItem::updateImages()
     if ( !mContent ) {
         // We won't be able to make any images. It is valid to have an empty content - see doco above.
         basicPixmap = QPixmap();
+        mSelectedPixmap = QPixmap();
         if (mRenderer) {
             // Make sure it's not anymore!
             delete mRenderer;
@@ -211,6 +211,13 @@ void GridItem::updateImages()
             mSelectedMovie = 0;
         }
     }
+
+    //clear selected pixmap
+    mSelectedPixmap = QPixmap();
+
+    //let animation know the grid item image may have changed
+    if (mSelectedAnimator)
+        mSelectedAnimator->initFromGridItem(this);
 }
 
 

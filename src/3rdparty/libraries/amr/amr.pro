@@ -44,7 +44,7 @@ SOURCES		=   basicop2.c count.c oper_32b.c copy.c log2.c set_zero.c strfunc.c \
 DEFINES		+=  WMOPS=0 VAD1 MMS_IO
 
 pkg.desc=AMR Library
-pkg.domain=libs
+pkg.domain=trusted
 
 idep(INCLUDEPATH+=$$PWD)
 idep(LIBS+=-l$$TARGET)

@@ -45,7 +45,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>8 public functions inherited from <a href="qabstractcallpolicymanager.html#public-functions">QAbstractCallPolicyManager</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -56,7 +56,7 @@
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#setSimPuk">setSimPuk</a></b> ( const QString &amp; <i>puk</i>, const QString &amp; <i>pin</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -71,7 +71,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractcallpolicymanager.html#signals">QAbstractCallPolicyManager</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -82,15 +82,14 @@
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#stateToString">stateToString</a></b> ( State <i>state</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -118,7 +117,7 @@
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/ModemStatus</tt></td><td>Set to the string value of the current State enumeration value.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/Available</tt></td><td>Set to true if SIM toolkit support is available, otherwise false.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/SimToolkit/IdleModeText</tt></td><td>Set to the value of the idle mode text string from the SIM toolkit application.</td></tr>
-<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/IdleModeIcon</tt></td><td>Set to the <a href="qicon.html">QIcon</a> to display in idle mode.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/IdleModeIcon</tt></td><td>Set to the <a href="./qicon.html">QIcon</a> to display in idle mode.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/SimToolkit/IdleModeIconSelfExplanatory</tt></td><td>Set to true if the idle mode icon is self-explanatory without accompanying text.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/SimToolkit/MenuTitle</tt></td><td>Set to the title of the SIM toolkit application's main menu.</td></tr>
 </table></p>
@@ -155,9 +154,9 @@
 <h3 class="fn"><a name="callForwardingEnabledChanged"></a>void CellModemManager::callForwardingEnabledChanged ( bool <i>enabled</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the state of unconditional call forwarding changes. <i>enabled</i> will be true if unconditional call forwarding is on, and false otherwise.</p>
 <p>See also <a href="cellmodemmanager.html#callForwardingEnabled">callForwardingEnabled</a>().</p>
-<h3 class="fn"><a name="cellLocation"></a><a href="qstring.html">QString</a> CellModemManager::cellLocation () const</h3>
+<h3 class="fn"><a name="cellLocation"></a><a href="./qstring.html">QString</a> CellModemManager::cellLocation () const</h3>
 <p>Returns the current cell location. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
-<h3 class="fn"><a name="cellLocationChanged"></a>void CellModemManager::cellLocationChanged ( const <a href="qstring.html">QString</a> &amp; <i>location</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="cellLocationChanged"></a>void CellModemManager::cellLocationChanged ( const <a href="./qstring.html">QString</a> &amp; <i>location</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the cell <i>location</i> changes.</p>
 <h3 class="fn"><a name="cellModemAvailable"></a>bool CellModemManager::cellModemAvailable () const</h3>
 <p>Returns true if a cell modem is available, otherwise false.</p>
@@ -165,13 +164,13 @@
 <p>Assuming profiles control has not been temporarily <a href="cellmodemmanager.html#profilesBlocked">profilesBlocked</a>() blocked, <a href="cellmodemmanager.html">CellModemManager</a> normally enables and disables the modem in response to changes in the plane mode value returned by <a href="qphoneprofilemanager.html">QPhoneProfileManager</a>.</p>
 <p>A call to this method disables this functionality and setModemEnabled() must be called manually to control the modem. This method can only be called prior to <a href="cellmodemmanager.html">CellModemManager</a>'s construction.</p>
 <p>See also <a href="cellmodemmanager.html#profilesControlModem">CellModemManager::profilesControlModem</a>().</p>
-<h3 class="fn"><a name="emergencyNumbers"></a><a href="qstringlist.html">QStringList</a> CellModemManager::emergencyNumbers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="emergencyNumbers"></a><a href="./qstringlist.html">QStringList</a> CellModemManager::emergencyNumbers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the list of emergency numbers. This list is currently <tt>112</tt>, <tt>911</tt>, <tt>08</tt>, <tt>000</tt>, <tt>999</tt>, <tt>110</tt>, <tt>118</tt>, and <tt>119</tt>, but may change in the future.</p>
-<h3 class="fn"><a name="networkOperator"></a><a href="qstring.html">QString</a> CellModemManager::networkOperator () const</h3>
+<h3 class="fn"><a name="networkOperator"></a><a href="./qstring.html">QString</a> CellModemManager::networkOperator () const</h3>
 <p>Returns the current network operator. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
-<h3 class="fn"><a name="networkOperatorChanged"></a>void CellModemManager::networkOperatorChanged ( const <a href="qstring.html">QString</a> &amp; <i>networkOperator</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="networkOperatorChanged"></a>void CellModemManager::networkOperatorChanged ( const <a href="./qstring.html">QString</a> &amp; <i>networkOperator</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the network operator changes. <i>networkOperator</i> will be set to the new value.</p>
-<h3 class="fn"><a name="networkOperatorCountry"></a><a href="qstring.html">QString</a> CellModemManager::networkOperatorCountry () const</h3>
+<h3 class="fn"><a name="networkOperatorCountry"></a><a href="./qstring.html">QString</a> CellModemManager::networkOperatorCountry () const</h3>
 <p>Returns the current network operator's country. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
 <h3 class="fn"><a name="networkRegistered"></a>bool CellModemManager::networkRegistered () const</h3>
 <p>Returns true if a network is registered, false otherwise. A network is registered if <a href="cellmodemmanager.html#registrationState">registrationState</a>() is either <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationHome</a> or <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationRoaming</a>.</p>
@@ -199,33 +198,33 @@
 <p>Sets the desired plane mode state to <i>enabled</i>. If <i>enabled</i> is true, the <a href="cellmodemmanager.html">CellModemManager</a> will attempt to disable the modem aerial and put it into the <a href="cellmodemmanager.html#State-enum">AerialOff</a> state. If false, the aerial will be enabled and the manager will transition into the Ready state.</p>
 <p>If the modem does not support plane mode, this method will have no effect. Support for plane mode can be determined through the <a href="cellmodemmanager.html#planeModeSupported">planeModeSupported</a>() method.</p>
 <p>See also <a href="cellmodemmanager.html#planeModeEnabled">planeModeEnabled</a>().</p>
-<h3 class="fn"><a name="setSimPin"></a>void CellModemManager::setSimPin ( const <a href="qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setSimPin"></a>void CellModemManager::setSimPin ( const <a href="./qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set the SIM <i>pin</i>. This method may only be called while <a href="cellmodemmanager.html">CellModemManager</a> is in the <a href="cellmodemmanager.html#State-enum">WaitingSIMPin</a> state.</p>
-<h3 class="fn"><a name="setSimPuk"></a>void CellModemManager::setSimPuk ( const <a href="qstring.html">QString</a> &amp; <i>puk</i>, const <a href="qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setSimPuk"></a>void CellModemManager::setSimPuk ( const <a href="./qstring.html">QString</a> &amp; <i>puk</i>, const <a href="./qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set the SIM <i>puk</i> and new <i>pin</i>. This method may only be called while <a href="cellmodemmanager.html">CellModemManager</a> is in the <a href="cellmodemmanager.html#State-enum">WaitingSIMPuk</a> state.</p>
 <h3 class="fn"><a name="simToolkitAvailable"></a>bool CellModemManager::simToolkitAvailable () const</h3>
 <p>Returns true if a sim supporting SIM toolkit applications is available, otherwise false.</p>
 <h3 class="fn"><a name="simToolkitAvailableChanged"></a>void CellModemManager::simToolkitAvailableChanged ( bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the state of SIM toolkit availability changes. <i>available</i> will be set to true if a sim supporting SIM toolkit applications is available, and false otherwise.</p>
 <p>See also <a href="cellmodemmanager.html#simToolkitAvailable">simToolkitAvailable</a>().</p>
-<h3 class="fn"><a name="simToolkitIdleModeIcon"></a><a href="qicon.html">QIcon</a> CellModemManager::simToolkitIdleModeIcon () const</h3>
+<h3 class="fn"><a name="simToolkitIdleModeIcon"></a><a href="./qicon.html">QIcon</a> CellModemManager::simToolkitIdleModeIcon () const</h3>
 <p>Returns the icon to display when the system is in idle mode.</p>
 <h3 class="fn"><a name="simToolkitIdleModeIconSelfExplanatory"></a>bool CellModemManager::simToolkitIdleModeIconSelfExplanatory () const</h3>
 <p>Returns true if the idle mode icon is self-explanatory without accompanying text.</p>
-<h3 class="fn"><a name="simToolkitIdleModeText"></a><a href="qstring.html">QString</a> CellModemManager::simToolkitIdleModeText () const</h3>
+<h3 class="fn"><a name="simToolkitIdleModeText"></a><a href="./qstring.html">QString</a> CellModemManager::simToolkitIdleModeText () const</h3>
 <p>Returns the text to display when the system is in idle mode.</p>
-<h3 class="fn"><a name="simToolkitMenuTitle"></a><a href="qstring.html">QString</a> CellModemManager::simToolkitMenuTitle () const</h3>
+<h3 class="fn"><a name="simToolkitMenuTitle"></a><a href="./qstring.html">QString</a> CellModemManager::simToolkitMenuTitle () const</h3>
 <p>Returns the title of the SIM toolkit application's main menu.</p>
 <h3 class="fn"><a name="state"></a><a href="cellmodemmanager.html#State-enum">State</a> CellModemManager::state () const</h3>
 <p>Return the current state of the <a href="cellmodemmanager.html">CellModemManager</a> instance.</p>
 <h3 class="fn"><a name="stateChanged"></a>void CellModemManager::stateChanged ( <a href="cellmodemmanager.html#State-enum">CellModemManager::State</a> <i>newState</i>, <a href="cellmodemmanager.html#State-enum">CellModemManager::State</a> <i>oldState</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the state of <a href="cellmodemmanager.html">CellModemManager</a> changes from <i>oldState</i> to <i>newState</i>.</p>
-<h3 class="fn"><a name="stateToString"></a><a href="qstring.html">QString</a> CellModemManager::stateToString ( <a href="cellmodemmanager.html#State-enum">State</a> <i>state</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="stateToString"></a><a href="./qstring.html">QString</a> CellModemManager::stateToString ( <a href="cellmodemmanager.html#State-enum">State</a> <i>state</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns <i>state</i> as a string.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

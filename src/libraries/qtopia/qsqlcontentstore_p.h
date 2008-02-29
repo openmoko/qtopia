@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -113,11 +113,15 @@ private:
     QString convertRole( QContent::Role role ) const;
 
     int mimeId( const QString &type, QtopiaDatabaseId dbId );
+    int queryMimeId( const QString &type, QtopiaDatabaseId dbId );
     int locationId( const QString &location, QtopiaDatabaseId dbId );
+    int queryLocationId( const QString &location, QtopiaDatabaseId dbId );
 
     QContent desktopContent( const QString &fileName );
     QContent executableContent( const QString &fileName );
 
+    void logError( const char *signature, const char *query, const QContent &content, QtopiaDatabaseId databaseId, const QSqlError &error );
+    void logError( const char *signature, const char *query, const QContentEngine &content, QtopiaDatabaseId databaseId, const QSqlError &error );
     void logError( const char *signature, const char *query, QtopiaDatabaseId databaseId, const QSqlError &error );
     void logError( const char *signature, const QString &error );
 

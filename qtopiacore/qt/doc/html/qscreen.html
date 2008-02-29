@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/embedded/qscreen_qws.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/embedded/qscreen_qws.cpp -->
 <head>
   <title>Qt 4.3: QScreen Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -107,10 +107,10 @@
 </ul>
 <a name="framebuffer-management"></a>
 <h3>Framebuffer Management</h3>
-<p>When a <a href="qtopiacore.html">Qtopia Core</a> application starts running, it calls the screen driver's <a href="qscreen.html#connect">connect</a>() function to map into the framebuffer and the accelerated drivers that the graphics card control registers. Note that if the application acts as the server, the application will call the <a href="qscreen.html#initDevice">initDevice</a>() function prior to the <a href="qscreen.html#connect">connect</a>() function, to initialize the framebuffer. The <a href="qscreen.html#initDevice">initDevice</a>() function can be reimplemented to set up the graphics card (note that the default implementation does nothing).</p>
+<p>When a <a href="qtopiacore.html">Qtopia Core</a> application starts running, it calls the screen driver's <a href="qscreen.html#connect">connect</a>() function to map into the framebuffer and the accelerated drivers that the graphics card control registers. Note that if the application acts as the server, the application will call the <a href="qscreen.html#initDevice">initDevice</a>() function prior to the <a href="qscreen.html#connect">connect</a>() function, to initialize the framebuffer. The <a href="qscreen.html#initDevice">initDevice</a>() function can be reimplemented to set up the graphics card.</p>
 <p>Likewise, just before a <a href="qtopiacore.html">Qtopia Core</a> application exits, it calls the screen driver's <a href="qscreen.html#disconnect">disconnect</a>() function. The server application will in addition call the <a href="qscreen.html#shutdownDevice">shutdownDevice</a>() function before it calls <a href="qscreen.html#disconnect">disconnect</a>(). Note that the default implementation of the <a href="qscreen.html#shutdownDevice">shutdownDevice</a>() function only hides the mouse cursor.</p>
-<p>QScreen also provides the <a href="qscreen.html#save">save</a>() and <a href="qscreen.html#restore">restore</a>() functions, making it possible to save and restore the state of the graphics card. Note that the default implementations do nothing. Hardware screen drivers should reimplement these functions to save (and restore) its registers, enabling swintching between virtual consoles.</p>
-<p>In additon, you can use the <a href="qscreen.html#base">base</a>() function to retrieve a pointer to the beginning of the framebuffer, and the <a href="qscreen.html#region">region</a>() function to retrieve the framebuffer's region. Use the <a href="qscreen.html#onCard">onCard</a>() function to determine whether the framebuffer is within the graphics card's memory, and the <a href="qscreen.html#totalSize">totalSize</a>() function to determine the size of the available graphics card memory (including the screen). Finally, you can use the <a href="qscreen.html#offset">offset</a>() function to retrieve the offset between the framebuffer's coordinates and the application's coordinate system.</p>
+<p>QScreen also provides the <a href="qscreen.html#save">save</a>() and <a href="qscreen.html#restore">restore</a>() functions, making it possible to save and restore the state of the graphics card. Note that the default implementations do nothing. Hardware screen drivers should reimplement these functions to save (and restore) its registers, enabling switching between virtual consoles.</p>
+<p>In addition, you can use the <a href="qscreen.html#base">base</a>() function to retrieve a pointer to the beginning of the framebuffer, and the <a href="qscreen.html#region">region</a>() function to retrieve the framebuffer's region. Use the <a href="qscreen.html#onCard">onCard</a>() function to determine whether the framebuffer is within the graphics card's memory, and the <a href="qscreen.html#totalSize">totalSize</a>() function to determine the size of the available graphics card memory (including the screen). Finally, you can use the <a href="qscreen.html#offset">offset</a>() function to retrieve the offset between the framebuffer's coordinates and the application's coordinate system.</p>
 <a name="palette-management"></a>
 <h3>Palette Management</h3>
 <p>QScreen provides several functions to retrieve information about the color palette: The <a href="qscreen.html#clut">clut</a>() function returns a pointer to the color lookup table (i.e&#x2e; its color palette). Use the <a href="qscreen.html#numCols">numCols</a>() function to determine the number of entries in this table, and the <a href="qscreen.html#alloc">alloc</a>() function to retrieve the palette index of the color that is the closest match to a given RGB value.</p>
@@ -363,8 +363,8 @@
 <p>See also <a href="qscreen.html#deviceWidth">deviceWidth</a>(), <a href="qscreen.html#physicalWidth">physicalWidth</a>(), and <a href="qscreen.html#height">height</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

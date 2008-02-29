@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -156,6 +156,7 @@ static const QLatin1String t_OriginalDate("OriginalDate");
 
 static const QLatin1String t_DateFormat("yyyy-MM-dd");
 static const QLatin1String t_DateTimeFormat("yyyy-MM-ddThh:mm:ss");
+static const QLatin1String t_DateTimeFormatUTC("yyyy-MM-ddThh:mm:ssZ");
 
 
 
@@ -234,10 +235,10 @@ void QPimXmlStreamWriter::writeDateElement(const QString &qualifiedName, const Q
 
 }
 
-void QPimXmlStreamWriter::writeDateTimeElement(const QString &qualifiedName, const QDateTime &value)
+void QPimXmlStreamWriter::writeDateTimeElement(const QString &qualifiedName, const QDateTime &value, bool utc)
 {
     if (value.isValid())
-        QXmlStreamWriter::writeTextElement(qualifiedName, value.toString(t_DateTimeFormat));
+        QXmlStreamWriter::writeTextElement(qualifiedName, value.toString(utc?t_DateTimeFormatUTC:t_DateTimeFormat));
     else
         QXmlStreamWriter::writeTextElement(qualifiedName, QString());
 }
@@ -331,22 +332,8 @@ QString QPimXmlStreamReader::readTextElement(const QString &qualifiedName)
 {
     QString t;
     if (readStartElement(qualifiedName)) {
-        uint unknownDepth = 0;
-        while (!atEnd()) {
-            readNext();
-            if (!unknownDepth && isCharacters()) {
-                break;
-            } else if (isStartElement()) {
-                unknownDepth++;
-            } else if (isEndElement()) {
-                if (unknownDepth)
-                    unknownDepth--;
-                else
-                    break;
-            }
-        }
-        t = text().toString();
-        readEndElement(); // e.g. get past it.
+        t = readElementText();
+        readNext(); // Skip over the EndElement
     }
     return t;
 }
@@ -357,16 +344,16 @@ QDate QPimXmlStreamReader::readDateElement(const QString &qualifiedName)
     if (text.isEmpty())
         return QDate();
     else
-        return QDate::fromString(t_DateFormat, text);
+        return QDate::fromString(text, t_DateFormat);
 }
 
-QDateTime QPimXmlStreamReader::readDateTimeElement(const QString &qualifiedName)
+QDateTime QPimXmlStreamReader::readDateTimeElement(const QString &qualifiedName, bool utc)
 {
     QString text = readTextElement(qualifiedName);
     if (text.isEmpty())
         return QDateTime();
     else
-        return QDateTime::fromString(t_DateTimeFormat, text);
+        return QDateTime::fromString(text, utc?t_DateTimeFormatUTC:t_DateTimeFormat);
 }
 
 QUniqueId QPimXmlStreamReader::readIdentifierElement(QString &serverId)
@@ -755,15 +742,18 @@ void QPimXmlStreamReader::readBaseAppointmentFields(QAppointment &appointment)
     appointment.setDescription(readTextElement(t_Description));
     appointment.setLocation(readTextElement(t_Location));
     QString tzText = readTextElement(t_TimeZone);
-    if (!tzText.isEmpty())
+    bool utc = false;
+    if (!tzText.isEmpty()) {
         appointment.setTimeZone(QTimeZone(tzText.toLatin1()));
+        utc = true;
+    }
     if (readStartElement(t_When)) {
         readNext();
         // will either be 'Start' or 'StartDate'
-        QDateTime startTime = readDateTimeElement(t_Start);
+        QDateTime startTime = readDateTimeElement(t_Start, utc);
         if (startTime.isValid()) {
             appointment.setStart(startTime);
-            appointment.setEnd(readDateTimeElement(t_End));
+            appointment.setEnd(readDateTimeElement(t_End, utc));
         } else {
             appointment.setAllDay(true);
             appointment.setStart(QDateTime(readDateElement(t_StartDate), QTime(0,0)));
@@ -773,15 +763,23 @@ void QPimXmlStreamReader::readBaseAppointmentFields(QAppointment &appointment)
     }
     if (readStartElement(t_Alarm)) {
         readNext();
-        // must have an type and delay if an alarm specified.. no defaults.
-        QAppointment::AlarmFlags f;
-        if (readTextElement(t_Type) == t_Visible)
-            f = QAppointment::Visible;
-        else
-            f = QAppointment::Audible;
-        int delay = readTextElement(t_Delay).toInt();
-        appointment.setAlarm(delay, f);
-        readEndElement();
+        if ( tokenType() == QXmlStreamReader::EndElement ) {
+            appointment.clearAlarm();
+        } else {
+            // must have an type and delay if an alarm specified.. no defaults.
+            QAppointment::AlarmFlags f;
+            QString type = readTextElement(t_Type);
+            if ( type == t_Visible )
+                f = QAppointment::Visible;
+            else
+                f = QAppointment::Audible;
+            int delay = readTextElement(t_Delay).toInt();
+            if ( type.isEmpty() )
+                appointment.clearAlarm();
+            else
+                appointment.setAlarm(delay, f);
+            readEndElement();
+        }
     }
 }
 
@@ -816,19 +814,22 @@ QAppointment QPimXmlStreamReader::readAppointment(QString &serverId, QList<QPimX
             appointment.setRepeatRule(QAppointment::Weekly);
         else if (rtype == t_MonthlyDate)
             appointment.setRepeatRule(QAppointment::MonthlyDate);
-        else if (rtype == t_MonthlyDate)
+        else if (rtype == t_MonthlyDay)
             appointment.setRepeatRule(QAppointment::MonthlyDay);
         else if (rtype == t_MonthlyEndDay)
             appointment.setRepeatRule(QAppointment::MonthlyEndDay);
         else if (rtype == t_Yearly)
             appointment.setRepeatRule(QAppointment::Yearly);
 
-        appointment.setFrequency(
-                readTextElement(t_Frequency).toInt());
-        readDateElement(t_Until);
+        appointment.setFrequency(readTextElement(t_Frequency).toInt());
+        QDate dt = readDateElement(t_Until);
+        if ( dt.isValid() )
+            appointment.setRepeatUntil( dt );
+        else
+            appointment.setRepeatForever();
         if (readStartElement(t_Nearest))
             appointment.setShowOnNearest(readBooleanElement(t_Nearest));
-        QAppointment::WeekFlags f;
+        QAppointment::WeekFlags f = 0;
         QStringList wlist = readTextElement(t_WeekMask).split(QLatin1String(" "));
         foreach(const QString &day, wlist) {
             if (day == t_Monday)
@@ -1081,8 +1082,9 @@ void QPimXmlStreamWriter::writeBaseAppointmentFields(const QAppointment &appoint
         writeDateElement(t_StartDate, appointment.start().date());
         writeDateElement(t_EndDate, appointment.end().date());
     } else {
-        writeDateTimeElement(t_Start, appointment.start());
-        writeDateTimeElement(t_End, appointment.end());
+        bool utc = !appointment.timeZone().id().isEmpty();
+        writeDateTimeElement(t_Start, appointment.start(), utc);
+        writeDateTimeElement(t_End, appointment.end(), utc);
     }
     writeEndElement();
     writeStartElement(t_Alarm);

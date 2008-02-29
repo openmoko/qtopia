@@ -51,7 +51,7 @@
 </ul>
 <p>If you include the &lt;QtDebug&gt; header file, the <tt>qDebug()</tt> function can also be used as an output stream. For example:</p>
 <pre> qDebug() &lt;&lt; &quot;Widget&quot; &lt;&lt; widget &lt;&lt; &quot;at position&quot; &lt;&lt; widget-&gt;pos();</pre>
-<p>The Qt implementation of these functions prints the text to the <tt>stderr</tt> output under Unix/X11 and Mac OS X, and to the debugger under Windows. You can take over these functions by installing a message handler using <a href="qtglobal.html#qInstallMsgHandler">qInstallMsgHandler</a>().</p>
+<p>The Qt implementation of these functions prints the text to the <tt>stderr</tt> output under Unix/X11 and Mac OS X. With Windows, if it is a console application, the text is sent to console; otherwise, it is sent to the debugger. You can take over these functions by installing a message handler using <a href="qtglobal.html#qInstallMsgHandler">qInstallMsgHandler</a>().</p>
 <p>If the <tt>QT_FATAL_WARNINGS</tt> environment variable is set, <a href="qtglobal.html#qWarning">qWarning</a>() exits after printing the warning message. This makes it easy to obtain a backtrace in the debugger.</p>
 <p>Both <a href="qtglobal.html#qDebug">qDebug</a>() and <a href="qtglobal.html#qWarning">qWarning</a>() are debugging tools. They can be compiled away by defining <tt>QT_NO_DEBUG_OUTPUT</tt> and <tt>QT_NO_WARNING_OUTPUT</tt> during compilation.</p>
 <p>The debugging functions <a href="qobject.html#dumpObjectTree">QObject::dumpObjectTree</a>() and <a href="qobject.html#dumpObjectInfo">QObject::dumpObjectInfo</a>() are often useful when an application looks or acts strangely. More useful if you use <a href="qobject.html#objectName-prop">object names</a> than not, but often useful even without names.</p>
@@ -85,7 +85,7 @@
 <pre> char *alloc(int size)
  {
      char *ptr;
-     Q_CHECK_PTR(ptr = new char[size]);  <span class="comment">// WRONG</span>
+     Q_CHECK_PTR(ptr = new char[size]);  <span class="comment">//</span> WRONG
      return ptr;
  }</pre>
 <p>If this code is compiled with <tt>QT_NO_DEBUG</tt> defined, the code in the <a href="qtglobal.html#Q_CHECK_PTR">Q_CHECK_PTR</a>() expression is not executed and <i>alloc</i> returns an unitialized pointer.</p>
@@ -95,8 +95,8 @@
 <p>There is one bug that is so common that it deserves mention here: If you include the <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> macro in a class declaration and run <a href="moc.html">the meta-object compiler</a> (<tt>moc</tt>), but forget to link the <tt>moc</tt>-generated object code into your executable, you will get very confusing error messages. Any link error complaining about a lack of <tt>vtbl</tt>, <tt>_vtbl</tt>, <tt>__vtbl</tt> or similar is likely to be a result of this problem.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

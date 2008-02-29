@@ -53,6 +53,7 @@
 <ul>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#addCharacters">addCharacters</a></b> ( const QString &amp; <i>characters</i> )</li>
 <li><div class="fn"/>int <b><a href="themeitem.html#attribute">attribute</a></b> ( const QString &amp; <i>key</i>, ThemeItem::State <i>state</i> = ThemeItem::Default ) const</li>
+<li><div class="fn"/>int <b><a href="themeitem.html#attribute-2">attribute</a></b> ( const QLatin1String &amp; <i>key</i>, ThemeItem::State <i>state</i> = ThemeItem::Default ) const</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#clickedEvent">clickedEvent</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#constructionComplete">constructionComplete</a></b> ()</li>
 <li><div class="fn"/>QExpressionEvaluator * <b><a href="themeitem.html#createExpression">createExpression</a></b> ( const QString &amp; <i>data</i> )</li>
@@ -62,9 +63,12 @@
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#layout">layout</a></b> ()</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#paint">paint</a></b> ( QPainter * <i>painter</i>, const QRect &amp; <i>rect</i> )</li>
 <li><div class="fn"/>void <b><a href="themeitem.html#setAttribute">setAttribute</a></b> ( const QString &amp; <i>key</i>, const int &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
-<li><div class="fn"/>void <b><a href="themeitem.html#setAttribute-2">setAttribute</a></b> ( const QString &amp; <i>key</i>, const QString &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
+<li><div class="fn"/>void <b><a href="themeitem.html#setAttribute-2">setAttribute</a></b> ( const QLatin1String &amp; <i>key</i>, const int &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
+<li><div class="fn"/>void <b><a href="themeitem.html#setAttribute-3">setAttribute</a></b> ( const QString &amp; <i>key</i>, const QString &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
+<li><div class="fn"/>void <b><a href="themeitem.html#setAttribute-4">setAttribute</a></b> ( const QLatin1String &amp; <i>key</i>, const QString &amp; <i>value</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
 <li><div class="fn"/>virtual void <b><a href="themeitem.html#stateChanged">stateChanged</a></b> ( const ThemeItem::State &amp; <i>state</i> )</li>
 <li><div class="fn"/>QString <b><a href="themeitem.html#strAttribute">strAttribute</a></b> ( const QString &amp; <i>key</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
+<li><div class="fn"/>QString <b><a href="themeitem.html#strAttribute-2">strAttribute</a></b> ( const QLatin1String &amp; <i>key</i>, ThemeItem::State <i>state</i> = ThemeItem::Default )</li>
 <li><div class="fn"/>QString <b><a href="themeitem.html#stripStringExpression">stripStringExpression</a></b> ( const QString &amp; <i>str</i> )</li>
 <li><div class="fn"/>void <b><a href="themeitem.html#update">update</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="themeitem.html#update-2">update</a></b> ( int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i> )</li>
@@ -97,62 +101,74 @@
 <h3 class="fn"><a name="active"></a>bool ThemeItem::active () const</h3>
 <p>Returns true if this item is currently active, otherwise returns false.</p>
 <p>See also <a href="themeitem.html#setActive">setActive</a>().</p>
-<h3 class="fn"><a name="addCharacters"></a>void ThemeItem::addCharacters ( const <a href="qstring.html">QString</a> &amp; <i>characters</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="addCharacters"></a>void ThemeItem::addCharacters ( const <a href="./qstring.html">QString</a> &amp; <i>characters</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Adds the characters <i>characters</i> to this item. Normally overridden by subclasses.</p>
-<h3 class="fn"><a name="attribute"></a>int ThemeItem::attribute ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="attribute"></a>int ThemeItem::attribute ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns an integer value for state <i>state</i> based on the given storage <i>key</i>.</p>
 <p>See also <a href="themeitem.html#setAttribute">setAttribute</a>().</p>
-<h3 class="fn"><a name="children"></a><a href="qlist.html">QList</a>&lt;ThemeItem *&gt; ThemeItem::children () const</h3>
+<h3 class="fn"><a name="attribute-2"></a>int ThemeItem::attribute ( const <a href="./qlatin1string.html">QLatin1String</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns an integer value for state <i>state</i> based on the given storage <i>key</i>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<h3 class="fn"><a name="children"></a><a href="./qlist.html">QList</a>&lt;ThemeItem *&gt; ThemeItem::children () const</h3>
 <p>Returns the children of this item.</p>
 <h3 class="fn"><a name="clickedEvent"></a>void ThemeItem::clickedEvent ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called by <a href="themedview.html">ThemedView</a> when this item has been clicked. A click is a mouse press followed by a mouse release.</p>
 <h3 class="fn"><a name="constructionComplete"></a>void ThemeItem::constructionComplete ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called by <a href="themedview.html">ThemedView</a> when the item has finished being constructed from the themed view XML. This call-back allows an item to perform any required calculations on its data with the knowledge that the data it has is complete. Subclasses should always call the base class version of this function so that proper construction occurs at all levels.</p>
-<h3 class="fn"><a name="createExpression"></a><a href="qexpressionevaluator.html">QExpressionEvaluator</a> * ThemeItem::createExpression ( const <a href="qstring.html">QString</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="createExpression"></a><a href="qexpressionevaluator.html">QExpressionEvaluator</a> * ThemeItem::createExpression ( const <a href="./qstring.html">QString</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Creates a new <a href="qexpressionevaluator.html">QExpressionEvaluator</a> instance based on <i>data</i>. Any valuespace keys are expanded based on this item's <a href="themeitem.html#fullVSPath">fullVSPath</a>(). Performs error checking to ensure the expression given by <i>data</i> is valid. If no error occurs, registers the expression with <a href="themedview.html">ThemedView</a> by calling <a href="themedview.html#registerExpression">ThemedView::registerExpression</a>() and returns a pointer to the new expression, otherwise returns 0.</p>
 <h3 class="fn"><a name="expressionChanged"></a>void ThemeItem::expressionChanged ( <a href="qexpressionevaluator.html">QExpressionEvaluator</a> * <i>expression</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called by <a href="themedview.html">ThemedView</a> for a <a href="qexpressionevaluator.html">QExpressionEvaluator</a> instance when it emits the Expression::termsChanged() signal. <i>expression</i> is an expression registered through a call to <a href="themedview.html#registerExpression">ThemedView::registerExpression</a>(). The Expression <i>expression</i> will be an expression that belongs to this item. Subclasses should make sure they call the base class version of this function should they not know about <i>expression</i>.</p>
-<h3 class="fn"><a name="fullVSPath"></a><a href="qstring.html">QString</a> ThemeItem::fullVSPath ()</h3>
+<h3 class="fn"><a name="fullVSPath"></a><a href="./qstring.html">QString</a> ThemeItem::fullVSPath ()</h3>
 <p>Returns the full vspath for this item. The full vspath is this item's vspath appended to the parent item's full vspath. A trailing slash is always included.</p>
-<h3 class="fn"><a name="geometry"></a><a href="qrect.html">QRect</a> ThemeItem::geometry () const</h3>
+<h3 class="fn"><a name="geometry"></a><a href="./qrect.html">QRect</a> ThemeItem::geometry () const</h3>
 <p>Returns the geometry of this item, relative to its parent.</p>
 <p>See also <a href="themeitem.html#setGeometry">setGeometry</a>().</p>
-<h3 class="fn"><a name="geometryHint"></a><a href="qrectf.html">QRectF</a> ThemeItem::geometryHint () const</h3>
+<h3 class="fn"><a name="geometryHint"></a><a href="./qrectf.html">QRectF</a> ThemeItem::geometryHint () const</h3>
 <p>Returns the rect for this item as literally specified in the themed view XML.</p>
-<h3 class="fn"><a name="getExpressionResult"></a><a href="qvariant.html">QVariant</a> ThemeItem::getExpressionResult ( <a href="qexpressionevaluator.html">QExpressionEvaluator</a> * <i>expression</i>, const <a href="qvariant.html#Type-enum">QVariant::Type</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Retreives a <a href="qvariant.html">QVariant</a> from <i>expression</i> that can be converted to the specified type <i>type</i>. It performs error checking to ensure <i>expression</i> is a valid expression and <tt>expression-&gt;result()</tt> returns a type that can be converted to <i>type</i>. If an error occurs, returns a <a href="qvariant.html">QVariant</a> that cannot be converted to type <i>type</i>. Returns a <a href="qvariant.html">QVariant</a> that can be converted to type <i>type</i> otherwise.</p>
+<h3 class="fn"><a name="getExpressionResult"></a><a href="./qvariant.html">QVariant</a> ThemeItem::getExpressionResult ( <a href="qexpressionevaluator.html">QExpressionEvaluator</a> * <i>expression</i>, const <a href="./qvariant.html#type-enum">QVariant::Type</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Retreives a <a href="./qvariant.html">QVariant</a> from <i>expression</i> that can be converted to the specified type <i>type</i>. It performs error checking to ensure <i>expression</i> is a valid expression and <tt>expression-&gt;result()</tt> returns a type that can be converted to <i>type</i>. If an error occurs, returns a <a href="./qvariant.html">QVariant</a> that cannot be converted to type <i>type</i>. Returns a <a href="./qvariant.html">QVariant</a> that can be converted to type <i>type</i> otherwise.</p>
 <h3 class="fn"><a name="hasFocus"></a>bool ThemeItem::hasFocus () const</h3>
 <p>Returns true if the item currently has focus, otherwise returns false.</p>
 <h3 class="fn"><a name="isInteractive"></a>bool ThemeItem::isInteractive () const</h3>
 <p>Returns true if this item has the themed view XML attribute interactive=&quot;yes&quot;, otherwise returns false.</p>
-<h3 class="fn"><a name="isStringExpression"></a>bool ThemeItem::isStringExpression ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="isStringExpression"></a>bool ThemeItem::isStringExpression ( const <a href="./qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns true if <i>str</i> is an expression from the themed view XML, false otherwise.</p>
 <h3 class="fn"><a name="isVisible"></a>bool ThemeItem::isVisible () const</h3>
 <p>Returns true if the item is currently visible, otherwise returns false.</p>
-<h3 class="fn"><a name="itemName"></a><a href="qstring.html">QString</a> ThemeItem::itemName () const</h3>
+<h3 class="fn"><a name="itemName"></a><a href="./qstring.html">QString</a> ThemeItem::itemName () const</h3>
 <p>Returns the name attribute for this item. This is the value given for the name attribute in the themed view XML.</p>
 <h3 class="fn"><a name="layout"></a>void ThemeItem::layout ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Lays out the item. The item calcuates its actual position and size based on the abstract geometry information specified for the rect attribute in the themed view XML.</p>
-<h3 class="fn"><a name="paint"></a>void ThemeItem::paint ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="paint"></a>void ThemeItem::paint ( <a href="./qpainter.html">QPainter</a> * <i>painter</i>, const <a href="./qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Paints the <i>rect</i> portion of the item using the painter <i>painter</i>. Normally overridden by sub-classes.</p>
 <h3 class="fn"><a name="parentItem"></a>ThemeItem * ThemeItem::parentItem () const</h3>
 <p>Returns the parent item of this item. Should always return an item, except for the <a href="themepageitem.html">ThemePageItem</a> which will return 0.</p>
 <h3 class="fn"><a name="pressed"></a>bool ThemeItem::pressed () const</h3>
 <p>Returns true if the item is currently pressed, otherwise returns false.</p>
-<h3 class="fn"><a name="rect"></a><a href="qrect.html">QRect</a> ThemeItem::rect () const</h3>
+<h3 class="fn"><a name="rect"></a><a href="./qrect.html">QRect</a> ThemeItem::rect () const</h3>
 <p>Returns the geometry of this item relative to the parent <a href="themedview.html">ThemedView</a>. rect().x() and rect.y() are the <a href="themedview.html">ThemedView</a> widget coordinates where this item is currently positioned.</p>
 <h3 class="fn"><a name="rtti"></a>int ThemeItem::rtti () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Run-time type information. Returns <a href="themedview.html#Type-enum">ThemedView::Item</a>.</p>
 <h3 class="fn"><a name="setActive"></a>void ThemeItem::setActive ( bool <i>active</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets this item to be active if <i>active</i> is true, otherwise sets the item to be inactive.</p>
 <p>See also <a href="themeitem.html#active">active</a>().</p>
-<h3 class="fn"><a name="setAttribute"></a>void ThemeItem::setAttribute ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const int &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setAttribute"></a>void ThemeItem::setAttribute ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, const int &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Stores the integer <i>value</i> for the state <i>state</i> based on the given storage <i>key</i>.</p>
 <p>See also <a href="themeitem.html#attribute">attribute</a>().</p>
-<h3 class="fn"><a name="setAttribute-2"></a>void ThemeItem::setAttribute ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setAttribute-2"></a>void ThemeItem::setAttribute ( const <a href="./qlatin1string.html">QLatin1String</a> &amp; <i>key</i>, const int &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Stores the integer <i>value</i> for the state <i>state</i> based on the given storage <i>key</i>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<h3 class="fn"><a name="setAttribute-3"></a>void ThemeItem::setAttribute ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Stores the string <i>value</i> for state <i>state</i> based on the given storage <i>key</i>.</p>
-<h3 class="fn"><a name="setGeometry"></a>void ThemeItem::setGeometry ( const <a href="qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="setAttribute-4"></a>void ThemeItem::setAttribute ( const <a href="./qlatin1string.html">QLatin1String</a> &amp; <i>key</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Stores the string <i>value</i> for state <i>state</i> based on the given storage <i>key</i>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<h3 class="fn"><a name="setGeometry"></a>void ThemeItem::setGeometry ( const <a href="./qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets this item's run-time geometry to <i>rect</i>. This controls the position and size of the item in the <a href="themedview.html">ThemedView</a>.</p>
 <p>See also <a href="themeitem.html#geometry">geometry</a>().</p>
 <h3 class="fn"><a name="setVisible"></a>void ThemeItem::setVisible ( bool <i>visible</i> )</h3>
@@ -163,9 +179,13 @@
 <p>See also <a href="themeitem.html#State-enum">ThemeItem::State</a>.</p>
 <h3 class="fn"><a name="stateChanged"></a>void ThemeItem::stateChanged ( const <a href="themeitem.html#State-enum">ThemeItem::State</a> &amp; <i>state</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called when an item's state is changed to <i>state</i>. The default implementation does nothing.</p>
-<h3 class="fn"><a name="strAttribute"></a><a href="qstring.html">QString</a> ThemeItem::strAttribute ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="strAttribute"></a><a href="./qstring.html">QString</a> ThemeItem::strAttribute ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Returns the string value for state <i>state</i> based on the given storage <i>key</i>.</p>
-<h3 class="fn"><a name="stripStringExpression"></a><a href="qstring.html">QString</a> ThemeItem::stripStringExpression ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="strAttribute-2"></a><a href="./qstring.html">QString</a> ThemeItem::strAttribute ( const <a href="./qlatin1string.html">QLatin1String</a> &amp; <i>key</i>, <a href="themeitem.html#State-enum">ThemeItem::State</a> <i>state</i> = ThemeItem::Default )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns the string value for state <i>state</i> based on the given storage <i>key</i>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<h3 class="fn"><a name="stripStringExpression"></a><a href="./qstring.html">QString</a> ThemeItem::stripStringExpression ( const <a href="./qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Strips the expression indicators from the expression <i>str</i>. isStringExpression(str) must return true, or this function will abort.</p>
 <h3 class="fn"><a name="transient"></a>bool ThemeItem::transient () const</h3>
 <p>Returns true if this item has the themed view XML attribute transient=&quot;yes&quot;, otherwise returns false.</p>
@@ -176,13 +196,13 @@
 <p>Causes the area given by <i>x</i>, <i>y</i>, <i>w</i>, <i>h</i> of this item to be repainted immediately.</p>
 <h3 class="fn"><a name="view"></a><a href="themedview.html">ThemedView</a> * ThemeItem::view () const</h3>
 <p>Returns the <a href="themedview.html">ThemedView</a> this item belongs to.</p>
-<h3 class="fn"><a name="vsPath"></a><a href="qstring.html">QString</a> ThemeItem::vsPath ()</h3>
+<h3 class="fn"><a name="vsPath"></a><a href="./qstring.html">QString</a> ThemeItem::vsPath ()</h3>
 <p>Returns the <tt>vspath</tt> attribute for this item. This can be the attribute as it was specified for this item in the themed view XML, or in the case of <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a>, it will be a dynamically assigned uid.</p>
 <p>See also <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,8 +19,11 @@
 **
 ****************************************************************************/
 
+#include <QStringList>
 #include <QValueSpaceObject>
+#include <QDebug>
 #include <QMediaSessionRequest>
+
 
 #include "urinegotiator.h"
 
@@ -38,6 +41,7 @@ typedef QMap<QMediaServerSession*, QMediaSessionBuilder*>  ActiveSessionMap;
 class BuilderManagerPrivate
 {
 public:
+    QStringList         orderedEngines;
     QValueSpaceObject*  info;
     NegotiatorMap       negotiators;
     BuilderMap          builders;
@@ -52,6 +56,10 @@ BuilderManager::BuilderManager():
 
     // Hard coded
     d->negotiators.insert("com.trolltech.qtopia.uri", new UriNegotiator);
+
+    // Sort out priorities of media engines the system was configured with
+    foreach (QString const& engine , QString(CONFIGURED_ENGINES).split(' '))
+        d->orderedEngines.append(engine.toLower());
 }
 
 BuilderManager::~BuilderManager()
@@ -73,8 +81,13 @@ void BuilderManager::addBuilders
 
         if (it != d->negotiators.end())
         {
+            int pri = d->orderedEngines.indexOf(engineName.toLower());
+
+            if (pri == -1)
+                pri = 1000000;  // yeah
+
             // Known builder type, let negotiator deal with it
-            (*it)->addBuilder(engineName, sessionBuilder);
+            (*it)->addBuilder(engineName, pri, sessionBuilder);
         }
         else
         {
@@ -83,7 +96,7 @@ void BuilderManager::addBuilders
         }
 
         // Add builder info
-        QString buildDir = engineName + "/Builders/" + sessionBuilder->type() + "/";
+        QString buildDir = engineName + "/Builders/" + type + "/";
         QMediaSessionBuilder::Attributes const& attributes = sessionBuilder->attributes();
 
         for (QMediaSessionBuilder::Attributes::const_iterator it = attributes.begin();

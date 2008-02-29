@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,7 +47,7 @@ class EntryDialog : public QDialog
 
 public:
     EntryDialog( bool startOnMonday, const QAppointment &appointment, const QTime& defaultAllDayTime,
-                 QWidget *parent = 0, Qt::WFlags f = 0 );
+                 int defaultTimedReminder, QWidget *parent = 0, Qt::WFlags f = 0 );
     ~EntryDialog();
 
     QAppointment appointment( const bool includeQdlLinks = true);
@@ -75,6 +75,7 @@ private:
     QAppointment mOrigAppointment;
     bool startWeekOnMonday;
     QTime allDayReminder;
+    int timedReminder;
     DateBookCategorySelector *comboCategory;
     RecurrenceDetails *recurDetails;
     ReminderPicker *reminderPicker;

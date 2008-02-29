@@ -1,6 +1,6 @@
 /***************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,8 @@
 #include <QToolButton>
 #include <QAbstractScrollArea>
 #include <QPoint>
+#include <QDesktopWidget>
+#include <QPixmapCache>
 
 // Qtopia includes
 #include <qtimestring.h>
@@ -50,10 +52,12 @@
 // Constants
 static const char* const QWORLDMAP_IMAGEFILE   = "worldtime/simple_grid_400";
 
-static const int  QWORLDMAP_LABELOFFSET = 8;
-static const int  QWORLDMAP_CITYSIZE    = 3;
+static const int  QWORLDMAP_LABELOFFSET = 15;
+static const int  QWORLDMAP_CITYSIZE    = 4;
 static const int  QWORLDMAP_CITYOFFSET  = 2;
 static const int  QWORLDMAP_ACCELRATE   = 5;
+static const int  QWORLDMAP_ZOOM   = 4;
+static const int  QWORLDMAP_CITYLABEL_TIMEOUT   = 60000;
 
 // Function declarations
 static void darken( QImage *pImage, int start, int stop, int row );
@@ -223,6 +227,7 @@ public:
     ZoomButton*  cancelButton;
 
     QTimer*      tHide;  // the timer to hide the "tool tip"
+    QTimer * lblCityTimer; //clock timer for tooltip
     QTimeZone    m_last;   // the last known good city that was found...
     QTimeZone    m_repaint; // save the location to maximize the repaint...
 
@@ -412,18 +417,21 @@ QWorldmap::QWorldmap( QWidget *parent )
 :   QAbstractScrollArea( parent ),
     d( 0 )
 {
+
     setProperty("updateOnEditFocus", true); // We want an update when we gain/lose edit focus.
     d = new QWorldmapPrivate();
 
     d->cursorTimer = new QTimer(this);
+    d->lblCityTimer = new QTimer(this);
 
     if( !Qtopia::mousePreferred())  {
         connect( d->cursorTimer, SIGNAL(timeout()),
                  this, SLOT(cursorTimeout()));
     } else {
-       setMouseTracking ( true);
-       setFocusPolicy( Qt::NoFocus );
+              setFocusPolicy( Qt::NoFocus );
     }
+       connect( d->lblCityTimer, SIGNAL(timeout()),
+                 this, SLOT(cityLabelTimeout()));
 
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -434,17 +442,24 @@ QWorldmap::QWorldmap( QWidget *parent )
 
     QIcon pixZoom( QPixmap(":image/worldtime/mag"));
 
+    float dpi = QApplication::desktop()->screen()->logicalDpiY();
+
     d->cmdZoom = new ZoomButton( this );
     d->cmdZoom->setIcon( pixZoom );
     d->cmdZoom->setDown( false );
 
-    if( !Qtopia::mousePreferred())  {
-        d->cmdZoom->resize( 20,20);
-        d->cmdZoom->setMaximumSize( d->cmdZoom->sizeHint() );
+    int buttonSizeW;
+    int buttonSizeH;
+
+    if(dpi < 200 ) {
+        buttonSizeW = 25;
+        buttonSizeH = 25;
     } else {
-        d->cmdZoom->resize( 40, 40 );
-        d->cmdZoom->setMaximumSize( d->cmdZoom->sizeHint() );
+        buttonSizeW = d->cmdZoom->sizeHint().width();
+        buttonSizeH = d->cmdZoom->sizeHint().height();
     }
+
+    d->cmdZoom->resize( buttonSizeW, buttonSizeH );
 
     QIcon pixSelect( QPixmap(":icon/select"));
     d->selecButton = new ZoomButton( this );
@@ -455,8 +470,8 @@ QWorldmap::QWorldmap( QWidget *parent )
         // not needed on keypad
         d->selecButton->hide();
     } else {
-        d->selecButton->resize( 40, 40 );
-        d->selecButton->setMaximumSize(  d->selecButton->sizeHint());
+        d->selecButton->resize( buttonSizeW, buttonSizeH);
+
     }
 
     QIcon pixCancel( QPixmap(":icon/cancel"));
@@ -468,8 +483,7 @@ QWorldmap::QWorldmap( QWidget *parent )
         // not needed on keypad
         d->cancelButton->hide();
     } else {
-        d->cancelButton->resize( 40, 40 );
-        d->cancelButton->setMaximumSize( d->cancelButton->sizeHint());
+        d->cancelButton->resize(  buttonSizeW, buttonSizeH);
     }
 
 
@@ -478,7 +492,8 @@ QWorldmap::QWorldmap( QWidget *parent )
     d->lblCity->setFrameStyle( QFrame::Plain | QFrame::Box );
     d->lblCity->setFont( QApplication::font() );
     QPalette pal( d->lblCity->palette() );
-    QColor col(Qt::yellow);
+
+    QColor col = pal.color( QPalette::Highlight);
     col.setAlpha(192);
     pal.setColor(QPalette::Background, col);
     pal.setColor(QPalette::WindowText, Qt::black);
@@ -516,13 +531,13 @@ QWorldmap::QWorldmap( QWidget *parent )
 
     d->cities.clear();
 
-    QSoftMenuBar::setLabel( this,
+     if( !Qtopia::mousePreferred())
+         QSoftMenuBar::setLabel( this,
                             Qt::Key_Back,
                             QSoftMenuBar::Cancel,
                             QSoftMenuBar::EditFocus );
 
     selectionMode = true;
-
     QTimer::singleShot( 0, this, SLOT(initCities()));
 }
 
@@ -537,6 +552,8 @@ QWorldmap::~QWorldmap()
 /*!
     \internal
 */
+
+
 void QWorldmap::mousePressEvent( QMouseEvent* event )
 {
     if ( d->readOnly ) {
@@ -568,19 +585,18 @@ void QWorldmap::mouseMoveEvent( QMouseEvent* event )
         d->norm.start();
         d->norm.addEvent( event->pos() );
 
-        if( Qtopia::mousePreferred() && selectionMode) {
+        if( selectionMode) {
         d->norm.stop();
         QString line = "";
-        if ( d->m_last.isValid() ) {
+        //     if ( d->m_last.isValid() ) {
             line = d->m_last.id();
             stopSelecting();
-            qLog(Time) <<"mouseMoveEvent" << "emit newZone()" <<  line.toLatin1();
-            emit newZone( QTimeZone( line.toLatin1() ) );
-            d->m_last = QTimeZone();
-        }
-        d->tHide->start( 120000);
+            d->m_last = QTimeZone( line.toLatin1() );
+            //      }
+        d->tHide->start( QWORLDMAP_CITYLABEL_TIMEOUT);
         }
     }
+    event->accept();
 }
 
 /*!
@@ -594,23 +610,18 @@ void QWorldmap::mouseReleaseEvent( QMouseEvent* event )
     }
 
     QString line = "";
-    if( Qtopia::mousePreferred()) {
-        setMouseTracking ( false);
-        setEditFocus( false);
-    }
 
     // get the averaged points in case a timeout hasn't occurred,
     // more for "mouse clicks"
     d->norm.stop();
     if ( d->m_last.isValid() ) {
         line = d->m_last.id();
-        qLog(Time) << "emit newZone()" <<  line.toLatin1();
-        stopSelecting();
+         stopSelecting();
         emit newZone( QTimeZone( line.toLatin1() ) );
-        d->m_last = QTimeZone();
+        d->m_last = QTimeZone( line.toLatin1() );
     }
 
-        d->tHide->start( 120000);
+        d->tHide->start( QWORLDMAP_CITYLABEL_TIMEOUT);
 }
 
 /*!
@@ -655,9 +666,7 @@ void QWorldmap::startSelecting()
 
         d->cmdZoom->setFocusPolicy( Qt::NoFocus );
 
-    if( Qtopia::mousePreferred() && selectionMode) {
-        setMouseTracking ( true);
-    }
+
     emit selecting();
 }
 
@@ -666,7 +675,7 @@ void QWorldmap::startSelecting()
 */
 void QWorldmap::stopSelecting()
 {
-    if( Qtopia::mousePreferred())
+     if( Qtopia::mousePreferred())
         return;
 
     d->cmdZoom->setFocusPolicy( Qt::StrongFocus );
@@ -674,8 +683,6 @@ void QWorldmap::stopSelecting()
 
 void QWorldmap::selectCanceled()
 {
-    //    if(isZoom() )
-    //    toggleZoom();
     emit selectZoneCanceled();
 }
 
@@ -846,6 +853,33 @@ void QWorldmap::cursorTimeout()
 /*!
     \internal
 */
+void QWorldmap::cityLabelTimeout()
+{
+    if(  d->lblCity->isVisible()) {
+        setCityLabelText();
+    } else {
+        d->lblCityTimer->stop();
+    }
+}
+
+
+/*!
+    \internal
+*/
+void QWorldmap::setCityLabelText()
+{
+    QDateTime cityTime = d->m_cursor.fromUtc(QTimeZone::utcDateTime());
+
+    d->lblCity->setText( d->m_cursor.city().replace(QRegExp("_"), " ") +
+                         "\n" + QTimeString::localHM( cityTime.time() ) );
+    int ms = 1000 - QTime::currentTime().msec();
+    ms += (60-QTime::currentTime().second())*1000;
+    d->lblCityTimer->setInterval( ms);
+}
+
+/*!
+    \internal
+*/
 void QWorldmap::updateCursor()
 {
     // accellerate timer after first one..
@@ -1009,11 +1043,9 @@ void QWorldmap::setCursorPoint( int ox, int oy, QString city )
                   viewport() );
 
     d->m_last = d->m_cursor;
-    QDateTime cityTime = d->m_cursor.fromUtc(QTimeZone::utcDateTime());
+    setCityLabelText();
+    d->lblCityTimer->start();
 
-    d->lblCity->setText( d->m_cursor.city().replace(QRegExp("_"), " ") +
-                         "\n" +
-                         QTimeString::localHM( cityTime.time() ) );
     d->lblCity->setMinimumSize( d->lblCity->sizeHint() );
     d->lblCity->resize( qMax( d->lblCity->sizeHint().width(), 80 ),
                         qMax( d->lblCity->sizeHint().height(), 40 ) );
@@ -1105,7 +1137,7 @@ void QWorldmap::setZone( const QTimeZone& zone )
                               viewport() );
             }
             setCursorPoint( olwx, olwy, zone.id() );
-        }
+}
     }
 }
 
@@ -1115,6 +1147,8 @@ void QWorldmap::setZone( const QTimeZone& zone )
 */
 void QWorldmap::setReadOnly( const bool readOnly )
 {
+    if( isZoom())
+        toggleZoom();
     d->cmdZoom->setVisible( !readOnly );
 
     if( Qtopia::mousePreferred())  {
@@ -1126,6 +1160,7 @@ void QWorldmap::setReadOnly( const bool readOnly )
         setFocusPolicy( Qt::NoFocus );
        d->tHide->start( 1);
     } else {
+            if( Qtopia::mousePreferred())
         setFocusPolicy( Qt::StrongFocus );
     }
 }
@@ -1147,12 +1182,35 @@ void QWorldmap::showCity( const QTimeZone &city )
 void QWorldmap::resizeEvent( QResizeEvent *e )
 {
     QSize _size = e->size();
-    d->cmdZoom->move( _size.width() - d->cmdZoom->width(),
+
+    // if RTL mode is activated the buttons are displayed in a reverse order
+    if(qApp->isRightToLeft()) {
+        // move the buttons of a scrollbar width when zoomed
+        if(d->bZoom){
+           d->cmdZoom->move(verticalScrollBar()->width(),
+                            _size.height() - d->cmdZoom->height());
+           d->selecButton->move(_size.width() - d->selecButton->width()
+                                + verticalScrollBar()->width(),
+                              _size.height() - d->cmdZoom->height());
+           d->cancelButton->move(_size.width() - d->selecButton->width()
+                                     - d->cancelButton->width()
+                                     + verticalScrollBar()->width(),
+                              _size.height() -d->cancelButton->height());
+        } else {
+            d->cmdZoom->move(0, _size.height() - d->cmdZoom->height());
+            d->selecButton->move(_size.width() - d->selecButton->width(),
+                                 _size.height() - d->cmdZoom->height());
+             d->cancelButton->move(_size.width() - d->selecButton->width()
+                                        - d->cancelButton->width(),
+                                   _size.height() -d->cancelButton->height());
+        }
+    } else {
+        d->cmdZoom->move( _size.width() - d->cmdZoom->width(),
                       _size.height() - d->cmdZoom->height() );
 
-    d->selecButton->move( 0, _size.height() - d->selecButton->height() );
-    d->cancelButton->move( d->selecButton->width(), _size.height() - d->cancelButton->height() );
-
+        d->selecButton->move( 0, _size.height() - d->selecButton->height() );
+        d->cancelButton->move( d->selecButton->width(), _size.height() - d->cancelButton->height() );
+    }
 
     d->drawableW = viewport()->width() - 2 * frameWidth();
     d->drawableH = viewport()->height() - 2 * frameWidth();
@@ -1274,6 +1332,9 @@ void QWorldmap::makeMap( int w, int h )
 {
     QImage imgOrig;
     QString imgName = QWORLDMAP_IMAGEFILE;
+    QPixmap pm;
+
+// if (!QPixmapCache::find("worldmap_big_image", pm)) {
 
     imgOrig = QImage( ":image/" + imgName );
     if ( imgOrig.isNull() ) {
@@ -1303,13 +1364,20 @@ void QWorldmap::makeMap( int w, int h )
         d->OriginX = ( d->wImg / 4 ) - int( d->wImg * 0.0275/2 );
         d->OriginY = d->hImg / 4;
     }
-    *d->pixCurr = QPixmap::fromImage(
+
+    pm = QPixmap::fromImage(
         imgOrig.scaled( w,
                         h,
                         Qt::IgnoreAspectRatio,
                         Qt::SmoothTransformation ),
         Qt::ThresholdDither );
 
+    //   if( !QPixmapCache::insert("worldmap_big_image", pm) )
+    //       qWarning()<<"pixmap insertfailed";
+
+// }
+
+  *d->pixCurr = pm;
     // should also work out max accell, or accell rates for this zoom.
     d->maxMovement = viewport()->width() / 25;
 }
@@ -1320,49 +1388,14 @@ void QWorldmap::makeMap( int w, int h )
 void QWorldmap::zoneToZoomedWin( int zoneX, int zoneY, int &winX, int &winY )
 {
     d->zoneToWin(zoneX, zoneY, winX, winY, viewport(), !d->bZoom );
-
     if ( d->bZoom ) {
-        int totalWidth = viewport()->width() * 2;
-        int totalHeight = viewport()->height() * 2;
 
         // Adjust the zoomed width
         QScrollBar* hscrollbar = horizontalScrollBar();
-        if ( winX < ( totalWidth / 4 ) ) {
-            hscrollbar->setSliderPosition( hscrollbar->minimum() );
-        } else if ( winX <= ( 3 * ( totalWidth / 4 ) ) ) {
-            int diff = winX - ( totalWidth / 4 );
-            winX = totalWidth / 4;
-            float pos = static_cast<float>( diff ) / viewport()->width();
-            pos *= hscrollbar->maximum() - hscrollbar->minimum();
-            pos += hscrollbar->minimum();
-            hscrollbar->setSliderPosition( static_cast<int>( pos ) );
-        } else if ( winX <= totalWidth ) {
-            winX -= totalWidth / 2;
-            hscrollbar->setSliderPosition( hscrollbar->maximum() );
-        } else {
-            // Some bizaar case, default to the middle of the map
-            winX = viewport()->width() / 2;
-            hscrollbar->setSliderPosition( hscrollbar->maximum() / 2 );
-        }
-
         QScrollBar* vscrollbar = verticalScrollBar();
-        if ( winY < ( totalHeight / 4 ) ) {
-            vscrollbar->setSliderPosition( vscrollbar->minimum() );
-        } else if ( winY <= ( 3 * ( totalHeight / 4 ) ) ) {
-            int diff = winY - ( totalHeight / 4 );
-            winY = totalHeight / 4;
-            float pos = static_cast<float>( diff ) / viewport()->height();
-            pos *= vscrollbar->maximum() - vscrollbar->minimum();
-            pos += vscrollbar->minimum();
-            vscrollbar->setSliderPosition( static_cast<int>( pos ) );
-        } else if ( winY <= totalHeight ) {
-            winY -= totalHeight / 2;
-            vscrollbar->setSliderPosition( vscrollbar->maximum() );
-        } else {
-            // Some bizaar case, default to the middle of the map
-            winY = viewport()->height() / 2;
-            vscrollbar->setSliderPosition( vscrollbar->maximum() / 2 );
-        }
+
+        hscrollbar->setSliderPosition( static_cast<int>( winX - (viewport()->width() / 2 ) ));
+        vscrollbar->setSliderPosition( static_cast<int>( winY - (viewport()->height() / 2 ) ));
     }
 }
 
@@ -1372,16 +1405,23 @@ void QWorldmap::zoneToZoomedWin( int zoneX, int zoneY, int &winX, int &winY )
 void QWorldmap::drawCity( QPainter *p, const QTimeZone &city )
 {
     int x, y;
-
     p->setPen( Qt::red );
     d->zoneToWin( city.longitude(), city.latitude(), x, y,viewport() );
 
     if (d->m_cursor_x != -1 && d->m_cursor_y != -1) {
+
+
         p->drawLine( d->m_cursor_x, d->m_cursor_y, x, y);
-        p->drawRect( d->m_cursor_x - QWORLDMAP_CITYOFFSET,
-                     d->m_cursor_y - QWORLDMAP_CITYOFFSET,
-                     QWORLDMAP_CITYSIZE,
-                     QWORLDMAP_CITYSIZE );
+        p->drawEllipse( d->m_cursor_x - QWORLDMAP_CITYOFFSET,
+                          d->m_cursor_y - QWORLDMAP_CITYOFFSET,
+                          QWORLDMAP_CITYSIZE,
+                          QWORLDMAP_CITYSIZE );
+
+        //draw cross hairs
+        p->setPen( Qt::magenta );
+        p->drawLine(x,0, x, viewport()->height());
+        p->drawLine(0,y, viewport()->width(),y);
+
     }
 }
 
@@ -1402,6 +1442,7 @@ void QWorldmap::paintEvent( QPaintEvent * )
     {
         makeMap( d->drawableW, d->drawableH );
     }
+
     if( d->bZoom ) {
         p.drawPixmap( -horizontalScrollBar()->sliderPosition(), -verticalScrollBar()->sliderPosition(), *d->pixCurr );
     } else {
@@ -1409,7 +1450,7 @@ void QWorldmap::paintEvent( QPaintEvent * )
     }
 
     // Draw that city!
-    if ( d->m_last.isValid() )
+      if ( d->m_last.isValid() )
         drawCity( &p, d->m_last );
 
     if ( QApplication::keypadNavigationEnabled() && hasFocus() && !hasEditFocus() ) {
@@ -1465,9 +1506,9 @@ void QWorldmap::toggleZoom( )
     if ( d->bZoom ) {
         setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
         setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
-        verticalScrollBar()->setRange( 0, d->hImg );
-        horizontalScrollBar()->setRange( 0, d->wImg );
-        makeMap( 2 * d->wImg , 2 * d->hImg );
+        verticalScrollBar()->setRange( 0,  ( QWORLDMAP_ZOOM - 1) * d->hImg );
+        horizontalScrollBar()->setRange( 0, ( QWORLDMAP_ZOOM - 1) * d->wImg );
+        makeMap( QWORLDMAP_ZOOM * d->wImg , QWORLDMAP_ZOOM * d->hImg );
     } else {
         setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
         setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -1482,6 +1523,7 @@ void QWorldmap::toggleZoom( )
     d->zoneToWin( d->m_cursor.longitude(), d->m_cursor.latitude(), lx, ly, viewport() );
     d->lblCity->hide();
     viewport()->update();
+
 }
 
 /*!

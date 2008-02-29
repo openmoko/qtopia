@@ -25,9 +25,11 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qmailmessagesortkey.html#QMailMessageSortKey">QMailMessageSortKey</a></b> ( const Property &amp; <i>p</i>, const Qt::SortOrder &amp; <i>order</i> = Qt::AscendingOrder )</li>
-<li><div class="fn"/><b><a href="qmailmessagesortkey.html#QMailMessageSortKey-2">QMailMessageSortKey</a></b> ( const QMailMessageSortKey &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="qmailmessagesortkey.html#QMailMessageSortKey">QMailMessageSortKey</a></b> ()</li>
+<li><div class="fn"/><b><a href="qmailmessagesortkey.html#QMailMessageSortKey-2">QMailMessageSortKey</a></b> ( const Property &amp; <i>p</i>, const Qt::SortOrder &amp; <i>order</i> = Qt::AscendingOrder )</li>
+<li><div class="fn"/><b><a href="qmailmessagesortkey.html#QMailMessageSortKey-3">QMailMessageSortKey</a></b> ( const QMailMessageSortKey &amp; <i>other</i> )</li>
 <li><div class="fn"/>virtual <b><a href="qmailmessagesortkey.html#dtor.QMailMessageSortKey">~QMailMessageSortKey</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qmailmessagesortkey.html#isEmpty">isEmpty</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmailmessagesortkey.html#operator-not-eq">operator!=</a></b> ( const QMailMessageSortKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailMessageSortKey <b><a href="qmailmessagesortkey.html#operator-and">operator&amp;</a></b> ( const QMailMessageSortKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailMessageSortKey &amp; <b><a href="qmailmessagesortkey.html#operator-and-eq">operator&amp;=</a></b> ( const QMailMessageSortKey &amp; <i>other</i> )</li>
@@ -56,7 +58,7 @@
 <tr><td valign="top"><tt>QMailMessageSortKey::Recipients</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The message recipient address string.</td></tr>
 <tr><td valign="top"><tt>QMailMessageSortKey::Subject</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The message subject string.</td></tr>
 <tr><td valign="top"><tt>QMailMessageSortKey::TimeStamp</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">The message timestamp</td></tr>
-<tr><td valign="top"><tt>QMailMessageSortKey::Flags</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">The message status flags.</td></tr>
+<tr><td valign="top"><tt>QMailMessageSortKey::Status</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">The message status flags.</td></tr>
 <tr><td valign="top"><tt>QMailMessageSortKey::FromAccount</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The name of the account the mesasge was downloaded from.</td></tr>
 <tr><td valign="top"><tt>QMailMessageSortKey::FromMailbox</tt></td><td align="center" valign="top"><tt>9</tt></td><td valign="top">The imap mailbox the message was downloaded from.</td></tr>
 <tr><td valign="top"><tt>QMailMessageSortKey::ServerUid</tt></td><td align="center" valign="top"><tt>10</tt></td><td valign="top">The IMAP server UID of the message.</td></tr>
@@ -64,12 +66,19 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailMessageSortKey"></a>QMailMessageSortKey::QMailMessageSortKey ( const <a href="qmailmessagesortkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> &amp; <i>order</i> = Qt::AscendingOrder )</h3>
-<p>Construct a <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> which sorts a set of results based on the <a href="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Property</a> <i>p</i> and the <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i></p>
-<h3 class="fn"><a name="QMailMessageSortKey-2"></a>QMailMessageSortKey::QMailMessageSortKey ( const QMailMessageSortKey &amp; <i>other</i> )</h3>
+<h3 class="fn"><a name="QMailMessageSortKey"></a>QMailMessageSortKey::QMailMessageSortKey ()</h3>
+<p>Create a <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> with specifying matching parameters.</p>
+<p>A default-constructed key (one for which <a href="qmailmessagesortkey.html#isEmpty">isEmpty</a>() returns true) sorts no messages.</p>
+<p>The result of combining an empty key with a non-empty key is the same as the original non-empty key.</p>
+<p>The result of combining two empty keys is an empty key.</p>
+<h3 class="fn"><a name="QMailMessageSortKey-2"></a>QMailMessageSortKey::QMailMessageSortKey ( const <a href="qmailmessagesortkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> &amp; <i>order</i> = Qt::AscendingOrder )</h3>
+<p>Construct a <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> which sorts a set of results based on the <a href="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Property</a> <i>p</i> and the <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i></p>
+<h3 class="fn"><a name="QMailMessageSortKey-3"></a>QMailMessageSortKey::QMailMessageSortKey ( const QMailMessageSortKey &amp; <i>other</i> )</h3>
 <p>Create a copy of the <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QMailMessageSortKey"></a>QMailMessageSortKey::~QMailMessageSortKey ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys this <a href="qmailmessagesortkey.html">QMailMessageSortKey</a>.</p>
+<h3 class="fn"><a name="isEmpty"></a>bool QMailMessageSortKey::isEmpty () const</h3>
+<p>Returns true if the key remains empty after default construction; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QMailMessageSortKey::operator!= ( const QMailMessageSortKey &amp; <i>other</i> ) const</h3>
 <p>Returns <tt>true</tt> if the value of this key is not the same as the key <i>other</i>. Returns <tt>false</tt> otherwise.</p>
 <h3 class="fn"><a name="operator-and"></a>QMailMessageSortKey QMailMessageSortKey::operator&amp; ( const QMailMessageSortKey &amp; <i>other</i> ) const</h3>
@@ -82,8 +91,8 @@
 <p>Returns <tt>true</tt> if the value of this key is the same as the key <i>other</i>. Returns <tt>false</tt> otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

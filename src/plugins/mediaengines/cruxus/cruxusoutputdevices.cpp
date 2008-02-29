@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,10 @@
 namespace cruxus
 {
 
+
+int OutputDevices::created = 0;
+OutputThread* OutputDevices::output = 0;
+
 /*!
     \class cruxus::OutputDevices
     \internal
@@ -34,16 +38,21 @@ namespace cruxus
 
 QMediaDevice* OutputDevices::createOutputDevice()
 {
-    static OutputThread*    output;
-
     if (output == 0)
         output = new OutputThread;
+
+    created++;
 
     return output;
 }
 
 void OutputDevices::destroyOutputDevice(QMediaDevice* )
 {
+    if (--created == 0)
+    {
+        delete output;
+        output = 0;
+    }
 }
 
 }   // ns cruxus

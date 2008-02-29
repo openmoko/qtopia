@@ -1,10 +1,10 @@
 /*!
 
 \page chlog_4.3.0_1.html
-\title Changes for 4.3.0
+\title Qtopia Sync Agent changes for 4.3.0
 \ingroup changes
 \sa {What's New?}
-\brief Changes for the Qtopia Sync Agent 4.3.0
+\brief Changes for Qtopia Sync Agent 4.3.0
 
 \section1 Overview
 
@@ -24,6 +24,9 @@ between Qtopia Desktop 2.2 and Qtopia Sync Agent.
 
 \list
 \o Appointments starting and ending at midnight are mis-reported as all day events.
+\o Data corruption occurs when transferring data to Qtopia because it cannot store
+   and return the data correctly. Upgrade to \l{Qtopia Sync Agent changes for 4.3.1}{4.3.1} to avoid
+   this.
 \endlist
 
 */

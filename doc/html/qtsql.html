@@ -127,7 +127,7 @@
      if (defaultDB.driver()-&gt;hasFeature(QSqlDriver::QuerySize)) {
          numRows = query.size();
      } else {
-         <span class="comment">// this can be very slow</span>
+         <span class="comment">//</span> this can be very slow
          query.last();
          numRows = query.at() + 1;
      }</pre>
@@ -289,7 +289,7 @@
      return flags;
  }
 
- bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int /* role */</span>)
+ bool EditableSqlModel::setData(const QModelIndex &amp;index, const QVariant &amp;value, int <span class="comment">/* role */</span>)
  {
      if (index.column() &lt; 1 || index.column() &gt; 2)
          return false;
@@ -334,8 +334,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

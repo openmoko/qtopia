@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,9 +54,24 @@ void AtOptions::factoryDefaults()
     qsq = false;
     qbc = false;
     creg = 0;
+    cr = false;
+    colp = false;
+    clae = false;
+    cssi = false;
+    cssu = false;
+    ccwv = false;
+    cccm = false;
+    lastTimeCCCM = QDateTime::currentDateTime();
+
+    cusd = false;
+    cmod = 0;
+    csns = 0;
 
     contextSet = false;
     apn = "internet";
+
+    csgt = false;
+    greetingText = "";
 
     phoneStore = "EN";
     //phoneStorePw = "";
@@ -64,6 +79,19 @@ void AtOptions::factoryDefaults()
     cbstSpeed = -1;
     cbstName = -1;
     cbstCe = -1;
+
+    cpls = 0;
+    cpolFormat = 2;
+    //cpolLastIndex = 0;
+    dateFormat = 1;
+    auxDateFormat = 1;
+    timeFormat = 1;
+    mtDateTimeOffset = 0;
+    mtTimeZoneSeconds = 0;
+
+    csvm = false;
+    ignore_ath = false;
+    ignore_drop_dtr = true;
 
     smsService = 0;
     messageFormat = false;
@@ -101,4 +129,11 @@ void AtOptions::clearDataOptions()
     cbstSpeed = -1;
     cbstName = -1;
     cbstCe = -1;
+}
+
+ 
+// Parse the next string from a parameter list and convert according to codecs.
+QString AtOptions::nextString( const QString& buf, uint& posn )
+{
+    return QAtUtils::decode( QAtUtils::nextString( buf, posn ), codec );
 }

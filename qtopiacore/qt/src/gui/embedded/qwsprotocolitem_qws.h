@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -86,7 +84,7 @@ struct QWSProtocolItem
 // changing the API of this apparently public header
 // size = (int)type + (int)rawLenSize + simpleLen + rawLen
 #define QWS_PROTOCOL_ITEM_SIZE( item ) \
-    sizeof(int) + sizeof(int) + (item).simpleLen + (item).rawLen
+    (2 * sizeof(int)) + ((item).simpleDataPtr ? (item).simpleLen : 0) + ((item).rawDataPtr ? (item).rawLen : 0)
 
 QT_END_HEADER
 

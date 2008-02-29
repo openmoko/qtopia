@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,8 +44,6 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
@@ -73,8 +71,8 @@
  #include &lt;qdebug.h&gt;
  #include &lt;stdlib.h&gt;
 
-<span class="comment"> // We use a global variable to save memory - all the brushes and pens in</span>
-<span class="comment"> // the mesh are shared.</span>
+<span class="comment"> //</span> We use a global variable to save memory - all the brushes and pens in
+<span class="comment"> //</span> the mesh are shared.
  static QBrush *tb = 0;
  static QPen *tp = 0;
 
@@ -118,8 +116,8 @@
 
  void ImageItem::paint( QPainter *p, const QStyleOptionGraphicsItem *option, QWidget * )
  {
-<span class="comment"> // On Qt/Embedded, we can paint a QImage as fast as a QPixmap,</span>
-<span class="comment"> // but on other platforms, we need to use a QPixmap.</span>
+<span class="comment"> //</span> On Qt/Embedded, we can paint a QImage as fast as a QPixmap,
+<span class="comment"> //</span> but on other platforms, we need to use a QPixmap.
  #if defined(Q_WS_QWS)
      p-&gt;drawImage( option-&gt;exposedRect, image, option-&gt;exposedRect, Qt::OrderedAlphaDither );
  #else
@@ -139,7 +137,7 @@
  protected:
      QVariant itemChange(GraphicsItemChange change, const QVariant &amp;value);
 
-     <span class="comment">//    QPoint center() { return boundingRect().center(); }</span>
+     <span class="comment">//</span>    QPoint center() { return boundingRect().center(); }
  private:
      Q3PtrList&lt;EdgeItem&gt; inList;
      Q3PtrList&lt;EdgeItem&gt; outList;
@@ -262,7 +260,7 @@
          double vy = yvel;
 
          if ( vx == 0.0 &amp;&amp; vy == 0.0 ) {
-             <span class="comment">// stopped last turn</span>
+             <span class="comment">//</span> stopped last turn
              initSpeed();
              vx = xvel;
              vy = yvel;
@@ -294,7 +292,7 @@
                          vx = -vx;
                          break;
                        case 3:
-                         <span class="comment">// Stop for this turn</span>
+                         <span class="comment">//</span> Stop for this turn
                          vx = 0;
                          vy = 0;
                          break;
@@ -421,7 +419,7 @@
 
  void Main::newView()
  {
-     <span class="comment">// Open a new view... have it delete when closed.</span>
+     <span class="comment">//</span> Open a new view... have it delete when closed.
      Main *m = new Main(canvas, 0, 0, Qt::WDestructiveClose);
      m-&gt;show();
  }
@@ -722,7 +720,7 @@
  #ifndef QT_NO_PROGRESSDIALOG
      progress.setProgress( rows );
  #endif
-     <span class="comment">// qDebug( &quot;%d nodes, %d edges&quot;, nodecount, EdgeItem::count() );</span>
+     <span class="comment">//</span> qDebug( &quot;%d nodes, %d edges&quot;, nodecount, EdgeItem::count() );
  }
 
  void Main::addRectangle()
@@ -739,8 +737,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

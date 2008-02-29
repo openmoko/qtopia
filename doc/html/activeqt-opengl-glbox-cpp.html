@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,21 +44,19 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
- /****************************************************************************
+<span class="comment"> /****************************************************************************
  **
  ** This is a simple QGLWidget displaying an openGL wireframe box
  **
  ** The OpenGL code is mostly borrowed from Brian Pauls &quot;spin&quot; example
  ** in the Mesa distribution
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &quot;glbox.h&quot;
  #include &lt;QAxAggregated&gt;
@@ -66,24 +64,24 @@
  #include &lt;objsafe.h&gt;
 
  #if defined(Q_CC_MSVC)
- #pragma warning(disable:4305) // init: truncation from const double to float
+ #pragma warning(disable:4305) <span class="comment">//</span> init: truncation from const double to float
  #endif
 
- /*!
+<span class="comment"> /*!
    Create a GLBox widget
- */
+ */</span>
 
  GLBox::GLBox( QWidget* parent, const char* name )
      : QGLWidget( parent )
  {
-     xRot = yRot = zRot = 0.0;           // default object rotation
-     scale = 1.25;                       // default object scale
+     xRot = yRot = zRot = 0.0;           <span class="comment">//</span> default object rotation
+     scale = 1.25;                       <span class="comment">//</span> default object scale
      object = 0;
  }
 
- /*!
+<span class="comment"> /*!
    Release allocated resources
- */
+ */</span>
 
  GLBox::~GLBox()
  {
@@ -91,10 +89,10 @@
      glDeleteLists( object, 1 );
  }
 
- /*!
+<span class="comment"> /*!
    Paint the box. The actual openGL commands for drawing the box are
    performed here.
- */
+ */</span>
 
  void GLBox::paintGL()
  {
@@ -111,20 +109,20 @@
      glCallList( object );
  }
 
- /*!
+<span class="comment"> /*!
    Set up the OpenGL rendering state, and define display list
- */
+ */</span>
 
  void GLBox::initializeGL()
  {
-     qglClearColor(Qt::black);           // Let OpenGL clear to black
-     object = makeObject();              // Generate an OpenGL display list
+     qglClearColor(Qt::black);           <span class="comment">//</span> Let OpenGL clear to black
+     object = makeObject();              <span class="comment">//</span> Generate an OpenGL display list
      glShadeModel( GL_FLAT );
  }
 
- /*!
+<span class="comment"> /*!
    Set up the OpenGL view port, matrix mode, etc.
- */
+ */</span>
 
  void GLBox::resizeGL( int w, int h )
  {
@@ -135,9 +133,9 @@
      glMatrixMode( GL_MODELVIEW );
  }
 
- /*!
+<span class="comment"> /*!
    Generate an OpenGL display list for the object to be shown, i.e. the box
- */
+ */</span>
 
  GLuint GLBox::makeObject()
  {
@@ -147,7 +145,7 @@
 
      glNewList( list, GL_COMPILE );
 
-     qglColor(Qt::white);                      // Shorthand for glColor3f or glIndex
+     qglColor(Qt::white);                      <span class="comment">//</span> Shorthand for glColor3f or glIndex
 
      glLineWidth( 2.0 );
 
@@ -177,9 +175,9 @@
      return list;
  }
 
- /*!
+<span class="comment"> /*!
    Set the rotation angle of the object to \e degrees around the X axis.
- */
+ */</span>
 
  void GLBox::setXRotation( int degrees )
  {
@@ -187,9 +185,9 @@
      updateGL();
  }
 
- /*!
+<span class="comment"> /*!
    Set the rotation angle of the object to \e degrees around the Y axis.
- */
+ */</span>
 
  void GLBox::setYRotation( int degrees )
  {
@@ -197,7 +195,7 @@
      updateGL();
  }
 
- /*!
+<span class="comment"> /*!
    Set the rotation angle of the object to \e degrees around the Z axis.
  */</span>
 
@@ -245,8 +243,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

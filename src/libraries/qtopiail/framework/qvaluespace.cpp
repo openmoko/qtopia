@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -963,9 +963,9 @@ struct QValueSpaceItemPrivateWrite : public QValueSpaceItemPrivate
   For example, 
 
   \code
-  QValueSpaceItem buttons("/Device/Buttons");
-  qWarning() << "There are" << buttons.value().toUInt() << "buttons";
-  QObject::connect(&buttons, SIGNAL(contentsChanged()),
+  QValueSpaceItem *buttons = new QValueSpaceItem("/Device/Buttons");
+  qWarning() << "There are" << buttons->value().toUInt() << "buttons";
+  QObject::connect(buttons, SIGNAL(contentsChanged()),
                    this, SLOT(buttonInfoChanged()));
   \endcode
 

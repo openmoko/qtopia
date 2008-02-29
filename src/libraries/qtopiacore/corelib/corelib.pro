@@ -13,3 +13,4 @@ dir=src/$$TARGET
 depends(libraries/qtopiacore/tools/moc)
 depends(libraries/qtopiacore/tools/uic)
 depends(libraries/qtopiacore/tools/rcc)
+unix:depends(3rdparty/libraries/pthread)

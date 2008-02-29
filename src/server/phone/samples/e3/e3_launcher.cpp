@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,10 +54,10 @@
 #endif
 #include "phone/qabstractbrowserscreen.h"
 #include "phone/qabstractdialerscreen.h"
-#include "phone/qabstractmessagebox.h"
-#include "phone/cellmodemmanager.h"
+#include "qabstractmessagebox.h"
+#include "cellmodemmanager.h"
 #include "phone/callscreen.h"
-#include "phone/dialercontrol.h"
+#include "dialercontrol.h"
 #include "applicationlauncher.h"
 #include "phone/callhistory.h"
 #include "phone/qabstractthemewidgetfactory.h"
@@ -197,7 +197,7 @@ E3ListDelegate::E3ListDelegate(QObject *parent)
 {
 }
 
-QSize E3ListDelegate::sizeHint(const QStyleOptionViewItem &option, 
+QSize E3ListDelegate::sizeHint(const QStyleOptionViewItem &,
                                const QModelIndex &) const
 {
     return QSize(40, 40);
@@ -631,7 +631,7 @@ public:
 
 E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
 : QAbstractServerInterface(parent, flags), m_view(0), m_header(0), m_context(0),
-  m_theme(0), m_browser(0), m_dialer(0), m_callscreen(0), m_today(0), m_cell(0)
+  m_browser(0), m_dialer(0), m_callscreen(0), m_today(0), m_theme(0), m_cell(0)
 {
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());

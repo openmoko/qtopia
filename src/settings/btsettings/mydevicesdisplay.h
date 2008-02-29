@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,8 +46,11 @@ public:
     MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent = 0);
     ~MyDevicesDisplay();
 
+protected:
+    void showEvent(QShowEvent *e);
+
 public slots:
-    void initDisplay();
+    void populateDeviceList();
 
 private slots:
     void refreshNextDevice();
@@ -65,8 +68,9 @@ private slots:
 
     void foundServices(const QBluetoothSdpQueryResult &);
 
+    void init();
+
 private:
-    void initActions();
     void resetDisplay();
     void createPairing(const QBluetoothAddress &addr);
     void doneAddDevice(bool error, const QString &errorString);

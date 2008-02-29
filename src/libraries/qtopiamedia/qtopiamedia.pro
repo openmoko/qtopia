@@ -1,17 +1,11 @@
 qtopia_project(qtopia lib)
 TARGET=qtopiamedia
-CONFIG+=no_pkg qtopia_visibility no_tr
+CONFIG+=qtopia_visibility no_tr
 
 HEADERS += media.h
 
 PRIVATE_HEADERS += mediastyle_p.h \
-            servicerequest_p.h \
-            requesthandler_p.h \
-            menumodel_p.h \
-            menuview_p.h \
-            browser_p.h \
             activitymonitor_p.h \
-            keyhold_p.h \
             observer_p.h \
             qmediahandle_p.h \
             qmediacontentplayer_p.h
@@ -25,14 +19,10 @@ HEADERS += \
             qmediavideocontrol.h \
             qmediaseekcontrol.h \
             qmediacontent.h \
-            qmediapipe.h \
             qmediadevice.h \
             qmediaencoder.h \
             qmediadecoder.h \
             qmediacodecplugin.h
-
-HEADERS +=  qaudiodomain.h \
-            qdomainmanagerconfiguration.h
 
 HEADERS +=  private/mediaserverproxy_p.h
 
@@ -53,12 +43,7 @@ SOURCES = media.cpp
 SOURCES += mediastyle.cpp \
             qmediatools.cpp \
             qmediawidgets.cpp \
-            requesthandler.cpp \
-            menumodel.cpp \
-            menuview.cpp \
-            browser.cpp \
-            activitymonitor.cpp \
-            keyhold.cpp
+            activitymonitor.cpp
 
 SOURCES += \
             qmediaabstractcontrol.cpp \
@@ -67,13 +52,9 @@ SOURCES += \
             qmediaseekcontrol.cpp \
             qmediacontent.cpp \
             qmediacontentplayer.cpp \
-            qmediapipe.cpp \
             qmediacodecplugin.cpp \
             qmediadecoder.cpp \
             qmediaencoder.cpp
-
-SOURCES +=  qaudiodomain.cpp \
-            qdomainmanagerconfiguration.cpp
 
 SOURCES += private/mediaserverproxy.cpp
 

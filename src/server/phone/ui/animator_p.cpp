@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,7 +29,6 @@
 #include <QImage>
 #include <QGraphicsRectItem>
 #include <QDebug>
-
 
 static const qreal gradientWidth = 0.1;
 
@@ -94,41 +93,35 @@ void Animator::draw(QPainter *painter,SelectedItem *item,int w,int h)
 /*!
   \internal
   \fn void Animator::draw(QPainter *painter,const QPixmap &pixmap,QGraphicsRectItem *item,int width,int height)
-   Draws the SelectedItem's pixmap, for the given width and height.
+   
+  Draws the SelectedItem's pixmap, for the given width and height. This method should be called 
+  by derived classes if they want to always use pixmaps for the animation (usually for performance reasons). 
 */
 void Animator::draw(QPainter *painter,const QPixmap &pixmap,QGraphicsRectItem *item,int w,int h)
 {
     // Find out if we have to scale the image to fit the given width/height parameters.
     if ( pixmap.width() != w || pixmap.height() != h ) {
-        QImage image = pixmap.toImage();
-        image = image.scaled(w,h);
-
+        painter->translate(static_cast<int>(item->rect().x() + (item->rect().width() - w)/2),
+                           static_cast<int>(item->rect().y() + (item->rect().height() - h)/2));
+        painter->scale((float)w/pixmap.width(), (float)h/pixmap.height());
+        
         // The graphical item contains the pixmap. If the pixmap is too large for it, we will
         // need to temporarily enlarge the graphical item, so that the pixmap will display
         // completely, without being clipped.
-        qreal oldWidth = item->rect().width();
-        qreal oldHeight = item->rect().height();
-        if ( w > oldWidth || h > oldHeight ) {
-            qreal oldX = item->rect().x();
-            qreal oldY = item->rect().y();
-            qreal x = oldX - (w-oldWidth)/2;
-            qreal y = oldY - (h-oldHeight)/2;
-            item->setRect(QRectF(x,y,w+2,h+2));
-            painter->drawPixmap(static_cast<int>(item->rect().x() + (item->rect().width() - image.width())/2),
-
-                                static_cast<int>(item->rect().y() + (item->rect().height() - image.height())/2),
-                                QPixmap::fromImage(image));
+        QRectF oldRect = item->rect();
+        if ( w > oldRect.width() || h > oldRect.height() ) {
+            QRectF bounds = renderingBounds(item,w,h);
+            item->setRect(bounds);
+            painter->drawPixmap(0,0,pixmap);
             // After drawing the pixmap, put the grahical item's dimensions back the way they were.
-            item->setRect(QRectF(oldX,oldY,oldWidth,oldHeight));
+            item->setRect(oldRect);
         } else {
-            painter->drawPixmap(static_cast<int>(item->rect().x() + (item->rect().width() - image.width())/2),
-                                static_cast<int>(item->rect().y() + (item->rect().height() - image.height())/2),
-                                QPixmap::fromImage(image));
+            painter->drawPixmap(0,0,pixmap);
         }
     } else {
         // No scaling involved.
-        painter->drawPixmap(static_cast<int>(item->rect().x() + (item->rect().width() - pixmap.width())/2),
-                            static_cast<int>(item->rect().y() + (item->rect().height() - pixmap.height())/2),
+        painter->drawPixmap(static_cast<int>(item->rect().x() + (item->rect().width() - w)/2),
+                            static_cast<int>(item->rect().y() + (item->rect().height() - h)/2),
                             pixmap);
     }
 }
@@ -184,4 +177,17 @@ QRectF Animator::renderingBounds(QGraphicsRectItem *item,int w,int h)
     }
 
     return QRectF(x,y,w,h);
+}
+
+/*!
+  \internal
+  Allows animations to do any needed initialization (such as caching) based on \a item.
+  This function is also called when a grid item's image needs to be updated (so, for exmaple,
+  the animation's cache could be updated).
+
+  The default implementation does nothing.
+*/
+void Animator::initFromGridItem(GridItem *item)
+{
+   Q_UNUSED(item);
 }

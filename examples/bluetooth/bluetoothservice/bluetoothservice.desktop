@@ -1,0 +1,10 @@
+[Translation]
+File=bluetoothservice-nct
+Context=bluetoothservice
+
+[Desktop Entry]
+Comment[]=An example Bluetooth service
+Exec=bluetoothservice
+Icon=bluetoothservice/bluetoothservice
+Type=Application
+Name[]=Bluetooth Service

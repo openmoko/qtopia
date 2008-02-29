@@ -3,7 +3,7 @@ TARGET=qtopiamail
 
 CONFIG+=qtopia_visibility
 
-enable_modem:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
+enable_cell:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
 else:DEFINES+=QTOPIA_NO_SMS QTOPIA_NO_MMS
 
 RESOURCES = qtopiamail.qrc
@@ -31,7 +31,9 @@ HEADERS+=\
     qmailviewer.h\
     qmailviewerplugin.h\
     qmailid.h\
-	mailbodystore_p.h
+	mailbodystore_p.h\
+    qprivateimplementation_p.h\
+    qprivateimplementationdef_p.h
 
 SOURCES+=\
     qmailaddress.cpp\
@@ -52,7 +54,8 @@ SOURCES+=\
     qmailviewer.cpp\
     qmailviewerplugin.cpp\
     qmailid.cpp\
-	mailbodystore.cpp
+	mailbodystore.cpp\
+    qprivateimplementation.cpp
 
 depends(libraries/qtopiapim)
 

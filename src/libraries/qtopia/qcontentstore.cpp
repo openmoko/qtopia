@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -326,6 +326,39 @@ void QContentCache::remove( QContentId contentId )
     QWriteLocker locker( &m_lock );
 
     m_cache.remove( contentId );
+}
+
+void QContentCache::cacheMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType, int key )
+{
+    m_mimeIdCache.insert( qMakePair( mimeType, databaseId ), new int( key ) );
+}
+
+void QContentCache::cacheLocationKey( QtopiaDatabaseId databaseId, const QString &location, int key )
+{
+    m_locationIdCache.insert( qMakePair( location, databaseId ), new int( key ) );
+}
+
+int QContentCache::lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType )
+{
+    int *key = m_mimeIdCache.object( qMakePair( mimeType, databaseId ) );
+
+    return key ? *key : -1;
+}
+
+int QContentCache::lookupLocationKey( QtopiaDatabaseId databaseId, const QString &location )
+{
+    int *key = m_locationIdCache.object( qMakePair( location, databaseId ) );
+
+    return key ? *key : -1;
+}
+
+void QContentCache::clear()
+{
+    QWriteLocker locker( &m_lock );
+
+    m_cache.clear();
+    m_mimeIdCache.clear();
+    m_locationIdCache.clear();
 }
 
 QContentCache *QContentCache::instance()

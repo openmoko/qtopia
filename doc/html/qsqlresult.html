@@ -178,9 +178,9 @@
 <pre> QSqlQuery query = ...
  QVariant v = query.result()-&gt;handle();
  if (v.isValid() &amp;&amp; qstrcmp(v.typeName(), &quot;sqlite3_stmt*&quot;)) {
-     <span class="comment">// v.data() returns a pointer to the handle</span>
+     <span class="comment">//</span> v.data() returns a pointer to the handle
      sqlite3_stmt *handle = *static_cast&lt;sqlite3_stmt **&gt;(v.data());
-     if (handle != 0) { <span class="comment">// check that it is not NULL</span>
+     if (handle != 0) { <span class="comment">//</span> check that it is not NULL
          ...
      }
  }</pre>
@@ -261,8 +261,8 @@
 <p>See also <a href="qsqlresult.html#numRowsAffected">numRowsAffected</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

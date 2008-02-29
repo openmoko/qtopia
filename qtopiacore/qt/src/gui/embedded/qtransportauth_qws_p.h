@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -180,7 +178,6 @@ inline QByteArray &QAuthDevice::buffer()
 
 #define QSXE_KEY_LEN 16
 #define QSXE_MAGIC_BYTES 4
-#define QSXE_MAX_PROG_ID 255
 
 // Number of bytes of each message to authenticate.  Just need to ensure
 // that the command at the beginning hasn't been tampered with.  This value

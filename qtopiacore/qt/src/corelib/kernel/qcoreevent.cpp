@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -94,12 +92,14 @@
     \value ActionRemoved                    An action has been removed (QActionEvent).
     \value ActivationChange                 A widget's top-level window activation state has changed.
     \value ApplicationActivate              The application has been made available to the user.
+    \value ApplicationActivated             This enum has been deprecated. Use ApplicationActivate instead.
     \value ApplicationDeactivate            The application has been suspended, and is unavailable to the user.
     \value ApplicationFontChange            The default application font has changed.
     \value ApplicationLayoutDirectionChange The default application layout direction has changed.
     \value ApplicationPaletteChange         The default application palette has changed.
     \value ApplicationWindowIconChange      The application's icon has changed.
     \value ChildAdded                       An object gets a child (QChildEvent).
+    \value ChildInserted                    An object gets a child (QChildEvent). Qt3Support only, use ChildAdded instead.
     \value ChildPolished                    A widget child gets polished (QChildEvent).
     \value ChildRemoved                     An object loses a child (QChildEvent).
     \value Clipboard                        The clipboard contents have changed (QClipboardEvent).

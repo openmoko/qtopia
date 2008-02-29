@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,22 +22,22 @@
 #ifndef HARDWAREMANIPULATOR_H
 #define HARDWAREMANIPULATOR_H
 
-#include <qwidget.h>
+#include <QObject>
 
 #include "qsmsmessagelist.h"
 
-class HardwareManipulator : public QWidget
+class HardwareManipulator : public QObject
 {
 Q_OBJECT
 
 public:
-    HardwareManipulator(QWidget *parent=0);
+    HardwareManipulator(QObject *parent=0);
     QSMSMessageList & getSMSList();
-    virtual bool shouldShow() const;
 
 public slots:
     virtual void handleFromData( const QString& );
     virtual void handleToData( const QString& );
+    virtual void setPhoneNumber( const QString& );
 
 signals:
     void unsolicitedCommand(const QString &cmd);
@@ -47,14 +47,14 @@ signals:
     void startIncomingCall(const QString &number);
 
 protected:
-    virtual void closeEvent(QCloseEvent *e);
-
     virtual QString constructCBMessage(const QString &messageCode, int geographicalScope, const QString &updateNumber, const QString &channel,
     const QString &scheme, int language, const QString &numPages, const QString &page, const QString &content);
     virtual void constructSMSMessage(const QString &sender, const QString &serviceCenter, const QString &text);
     virtual void constructSMSDatagram(int port, const QString &sender,  const QByteArray &data, const QByteArray &contentType);
 
-    int convertString(const QString &number, int maxValue, int numChar, int base, bool *ok);
+    virtual void warning(const QString &title, const QString &message);
+
+    virtual int convertString(const QString &number, int maxValue, int numChar, int base, bool *ok);
 
 private:
     QSMSMessageList SMSList;
@@ -64,7 +64,7 @@ class HardwareManipulatorFactory
 {
 public:
     virtual ~HardwareManipulatorFactory() {};
-    inline virtual HardwareManipulator *create(QWidget *p) { Q_UNUSED(p); return 0; }
+    inline virtual HardwareManipulator *create(QObject *p) { Q_UNUSED(p); return 0; }
 
     QString ruleFile() const { return ruleFilename; }
     void setRuleFile(const QString& filename) { ruleFilename = filename; }

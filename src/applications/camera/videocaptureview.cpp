@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,8 @@
 #include <qpainter.h>
 #include <qevent.h>
 
+#include <QDebug>
+
 VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     QWidget(parent, fl),
     m_cleared(false),
@@ -53,24 +55,44 @@ VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     m_minZoom = 0;
     m_maxZoom = 2;
 
-
+    m_force = false;
+#ifdef QT_QWS_GREENPHONE
+    m_still = false;
+    syncNotifier = new QSocketNotifier(m_capture->getFD(), QSocketNotifier::Read, parent);
+    connect(syncNotifier, SIGNAL(activated(int)), this, SLOT(imageReady(int)));  
+#endif    
 }
 
 VideoCaptureView::~VideoCaptureView()
 {
     delete m_capture;
+#ifdef QT_QWS_GREENPHONE    
+    delete syncNotifier;
+#endif    
 }
 
 void VideoCaptureView::setLive(int period)
 {
     if (m_tidUpdate)
         killTimer(m_tidUpdate);
-    if (period == 0)
+    if (period == 0) {
         m_tidUpdate = startTimer(m_capture->minimumFramePeriod());
-    else if ( period > 0 )
+#ifdef QT_QWS_GREENPHONE        
+        m_still = false;
+#endif        
+    }    
+    else if ( period > 0 ) {
         m_tidUpdate = startTimer(period);
-    else
+#ifdef QT_QWS_GREENPHONE        
+        m_still =false;
+#endif        
+    }    
+    else {
         m_tidUpdate = 0;
+#ifdef QT_QWS_GREENPHONE        
+        m_still = true;
+#endif        
+     }
 }
 
 void VideoCaptureView::setStill(const QImage& i)
@@ -161,9 +183,13 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
     }
     else
     {
-        if (m_tidUpdate > 0)
+
+        if (m_tidUpdate > 0 || m_force)
         {
-            m_capture->getCameraImage(m_image);
+#ifdef QT_QWS_GREENPHONE
+        if(!m_still)
+#endif        
+                m_capture->getCameraImage(m_image);
             if (m_doZoom)
             {
                 //Crop
@@ -198,7 +224,7 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
                 w = width();
             }
 
-            QPainter(this).drawImage(QRect((width() - w) / 2, (height() - h) / 2, w, h),
+            painter.drawImage(QRect((width() - w) / 2, (height() - h) / 2, w, h),
                                      m_image,
                                      QRect(0, 0, m_image.width(), m_image.height()));
         }
@@ -247,5 +273,16 @@ void VideoCaptureView::doZoom(void)
 
     repaint();
 }
+
+#ifdef QT_QWS_GREENPHONE
+void VideoCaptureView::imageReady(int fd)
+{
+    //NOTE: update() does not repaint immediatly, use repaint() instead
+    Q_UNUSED(fd);
+    m_force = true;
+    repaint();
+    m_force = false;
+}
+#endif
 
 

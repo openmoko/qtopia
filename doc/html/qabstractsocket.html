@@ -137,7 +137,7 @@
      forever {
          numRead  = socket.read(buffer, 50);
 
-         <span class="comment">// do whatever with array</span>
+         <span class="comment">//</span> do whatever with array
 
          numReadTotal += numRead;
          if (numRead == 0 &amp;&amp; !socket.waitForReadyRead())
@@ -382,57 +382,13 @@
 <p>See also <a href="qabstractsocket.html#disconnectFromHost">disconnectFromHost</a>() and <a href="qabstractsocket.html#close">close</a>().</p>
 <h3 class="fn"><a name="waitForReadyRead"></a>bool QAbstractSocket::waitForReadyRead ( int <i>msecs</i> = 30000 )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function blocks until data is available for reading and the <a href="qiodevice.html#readyRead">readyRead()</a> signal has been emitted. The function will timeout after <i>msecs</i> milliseconds; the default timeout is 3000 milliseconds.</p>
-<p>The function returns true if data is available for reading; otherwise it returns false (if an error occurred or the operation timed out).</p>
+<p>The function returns true if the <a href="qiodevice.html#readyRead">readyRead</a>() signal is emitted and there is data available for reading; otherwise it returns false (if an error occurred or the operation timed out).</p>
 <p>Reimplemented from <a href="qiodevice.html#waitForReadyRead">QIODevice</a>.</p>
 <p>See also <a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="Error-enum"></a>enum QAbstractSocket::Error</h3>
-<p>Use <a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::SocketError</a> instead.</p>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QAbstractSocket::ErrConnectionRefused</tt></td><td align="center" valign="top"><tt>ConnectionRefusedError</tt></td><td valign="top">Use <a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::ConnectionRefusedError</a> instead.</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::ErrHostNotFound</tt></td><td align="center" valign="top"><tt>HostNotFoundError</tt></td><td valign="top">Use <a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::HostNotFoundError</a> instead.</td></tr>
-<tr><td valign="top"><tt>QAbstractSocket::ErrSocketRead</tt></td><td align="center" valign="top"><tt>UnknownSocketError</tt></td><td valign="top">Use <a href="qabstractsocket.html#SocketError-enum">QAbstractSocket::UnknownSocketError</a> instead.</td></tr>
-</table></p>
-<h3 class="fn"><a name="State-typedef"></a>typedef QAbstractSocket::State</h3>
-<p>Use <a href="qabstractsocket.html#SocketState-enum">QAbstractSocket::SocketState</a> instead.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Qt 3 enum value</th><th>Qt 4 enum value</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>Idle</tt></td><td><a href="qabstractsocket.html#SocketState-enum">UnconnectedState</a></td></tr>
-<tr valign="top" class="even"><td><tt>HostLookup</tt></td><td><a href="qabstractsocket.html#SocketState-enum">HostLookupState</a></td></tr>
-<tr valign="top" class="odd"><td><tt>Connecting</tt></td><td><a href="qabstractsocket.html#SocketState-enum">ConnectingState</a></td></tr>
-<tr valign="top" class="even"><td><tt>Connected</tt></td><td><a href="qabstractsocket.html#SocketState-enum">ConnectedState</a></td></tr>
-<tr valign="top" class="odd"><td><tt>Closing</tt></td><td><a href="qabstractsocket.html#SocketState-enum">ClosingState</a></td></tr>
-<tr valign="top" class="even"><td><tt>Connection</tt></td><td><a href="qabstractsocket.html#SocketState-enum">ConnectedState</a></td></tr>
-</table></p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="connectionClosed"></a>void QAbstractSocket::connectionClosed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Use closed() instead.</p>
-<h3 class="fn"><a name="delayedCloseFinished"></a>void QAbstractSocket::delayedCloseFinished ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Use closed() instead.</p>
-<h3 class="fn"><a name="setSocket"></a>void QAbstractSocket::setSocket ( int <i>socket</i> )</h3>
-<p>Use <a href="qabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a>() instead.</p>
-<p>See also <a href="qabstractsocket-qt3.html#socket">socket</a>().</p>
-<h3 class="fn"><a name="socket"></a>int QAbstractSocket::socket () const</h3>
-<p>Use <a href="qabstractsocket.html#socketDescriptor">socketDescriptor</a>() instead.</p>
-<p>See also <a href="qabstractsocket-qt3.html#setSocket">setSocket</a>().</p>
-<h3 class="fn"><a name="waitForMore"></a><a href="qtglobal.html#qulonglong-typedef">qulonglong</a> QAbstractSocket::waitForMore ( int <i>msecs</i>, bool * <i>timeout</i> = 0 ) const</h3>
-<p>Use <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool timeout;
- Q_ULONG numBytes = socket-&gt;waitForMore(30000, &amp;timeout);</font></pre>
-<p>you can rewrite it as</p>
-<pre> qint64 numBytes = 0;
- if (socket-&gt;waitForReadyRead(msecs))
-     numBytes = socket-&gt;bytesAvailable();
- bool timeout = (error() == QAbstractSocket::SocketTimeoutError);</pre>
-<p>See also <a href="qabstractsocket.html#waitForReadyRead">waitForReadyRead</a>(), <a href="qabstractsocket.html#bytesAvailable">bytesAvailable</a>(), <a href="qabstractsocket.html#error">error</a>(), and <a href="qabstractsocket.html#SocketError-enum">SocketTimeoutError</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

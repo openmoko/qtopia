@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,7 +39,7 @@ public:
 
     void triggerAlarm(const QDateTime &when, int type);
     bool eventFilter(QObject *o, QEvent *e);
-
+    void setRingPriority(bool);
 public slots:
     void setDailyEnabled(bool);
 
@@ -64,7 +64,6 @@ private:
     QLabel* alarmDlgLabel;
     bool init;
     QHash<int, bool> daysSettings;
-    bool m_changedPriority;
 };
 
 #endif

@@ -20,6 +20,7 @@
 <li><a href="linguist-trollprint-printpanel-cpp.html">linguist/trollprint/printpanel.cpp</a></li>
 <li><a href="linguist-trollprint-printpanel-h.html">linguist/trollprint/printpanel.h</a></li>
 <li><a href="linguist-trollprint-main-cpp.html">linguist/trollprint/main.cpp</a></li>
+<li><a href="linguist-trollprint-trollprint-pro.html">linguist/trollprint/trollprint.pro</a></li>
 </ul>
 <p>Troll Print is an example application that lets the user choose printer settings. It comes in two versions: English and Portuguese.</p>
 <p align="center"><img src="images/linguist-trollprint_10_en.png" /></p><p>We've included a translation file, <tt>trollprint_pt.ts</tt>, which contains some Portuguese translations for this example.</p>
@@ -36,10 +37,10 @@
 <pre> PrintPanel::PrintPanel(QWidget *parent)
      : QWidget(parent)
  {
- /*
+<span class="comment"> /*
      QLabel *label = new QLabel(tr(&quot;&lt;b&gt;TROLL PRINT&lt;/b&gt;&quot;));
      label-&gt;setAlignment(Qt::AlignCenter);
- */</pre>
+ */</span></pre>
 <p>Some of the code is commented out in Troll Print 1.0; you will uncomment it later, for Troll Print 1.1&#x2e;</p>
 <pre>     twoSidedGroupBox = new QGroupBox(tr(&quot;2-sided&quot;));
      twoSidedEnabledRadio = new QRadioButton(tr(&quot;Enabled&quot;));
@@ -156,8 +157,8 @@
 <p>Now set <tt>LANG=en</tt> to get the original English version:</p>
 <p align="center"><img src="images/linguist-trollprint_11_en.png" /></p><p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

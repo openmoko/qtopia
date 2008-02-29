@@ -124,15 +124,14 @@
 <a name="taming-the-configuration-explosion"></a>
 <h2>Taming the Configuration Explosion</h2>
 <p>Qtopia has many configuration options. Qtopia Core has its own set of options. If you are building on a PC you will probably not need to use many of them but they are required when building for a device. Determining which options are required can be difficult.</p>
-<p>For convenience, the help output for <a href="buildsystem/over-configure-options-1.html">Qtopia</a> and <a href="buildsystem/over-configure-options-qtopia-core-1.html">Qtopia Core</a> is part of the Qtopia documentation. Those pages were generated when the source package was created. If you want to be sure of the available options it is advisable to check the scripts themselves. The following table indicates how to obtain configuration help from the build configuration scripts:</p>
+<p>The following table indicates how to obtain configuration help from the build configuration scripts. Click the links to see the output.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Software</th><th>Command</th></tr></thead>
-<tr valign="top" class="odd"><td>Qt</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -help</tt></td></tr>
-<tr valign="top" class="even"><td>Qtopia Core</td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -embedded -help</tt></td></tr>
-<tr valign="top" class="odd"><td>Qtopia</td><td><tt>$QTOPIA_DEPOT_PATH/configure -help</tt></td></tr>
+<tr valign="top" class="odd"><td><a href="buildsystem/over-configure-options-qt-1.html">Qt</a></td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -help</tt></td></tr>
+<tr valign="top" class="even"><td><a href="buildsystem/over-configure-options-qtopia-core-1.html">Qtopia Core</a></td><td><tt>$QTOPIA_DEPOT_PATH/qtopiacore/qt/configure -embedded -help</tt></td></tr>
+<tr valign="top" class="odd"><td><a href="buildsystem/over-configure-options-1.html">Qtopia</a></td><td><tt>$QTOPIA_DEPOT_PATH/configure -help</tt></td></tr>
 </table></p>
-<p><b>Note:</b> These commands will output large amounts of information so it is advisable to use a pager command such as <tt>less</tt> or <tt>more</tt>. You can also pipe the output into a file for use with a text editor using a command such as: <tt>configure -help &gt; output.txt</tt>.</p>
-<p>The following are some common items to set:</p>
+<p>Here are a few of the configure options that are commonly used. For a complete reference you should see the links above.</p>
 <ul>
 <li><tt>-debug</tt><ul>
 <li>The default is to build in <i>release</i> mode. Building in <i>debug</i> mode allows you to debug your application, however it also results in larger files and you will need to NFS mount the files if you are running on a device.</li>
@@ -142,12 +141,8 @@
 <li>Building normally results in a large amount of output because every compile job is printed. Using <tt>-silent</tt> suppresses the compile job printing and makes it easier to identify build problems. If you have used <tt>-silent</tt> and you need to see more output you can run <tt>make loud</tt>. This is not quite the same as building without <tt>-silent</tt> but it can come in handy when you need to see compiler commandlines.</li>
 </ul>
 </li>
-<li><tt>-extra-qtopiacore-config</tt><ul>
-<li>This is an important option when building for devices. It is the mechanism by which <tt>configure</tt> arguments are passed to Qtopia Core. There is a similar option for passing arguments to Qt. For example, <tt>configure -extra-qtopiacore-config -system-libjpeg</tt>.</li>
-</ul>
-</li>
 <li><tt>-I &lt;path&gt;</tt> and <tt>-L &lt;path&gt;</tt><ul>
-<li>If the external dependencies are not located in a location that your compiler searches, you will need these arguments to locate the headers. Typically, it is Qtopia Core that requires them so you will need to wrap them in <tt>-extra-qtopiacore-config</tt>. For example, <tt>configure -extra-qtopiacore-config '-I /path/to/libjpeg/include' -extra-qtopiacore-config '-L /path/libjpeg/lib'</tt>.</li>
+<li>If the external dependencies are not located in a location that your compiler searches, you will need these arguments to locate the headers.</li>
 </ul>
 </li>
 <li><tt>-image &lt;path&gt;</tt><ul>
@@ -159,31 +154,15 @@
 </ul>
 </li>
 <li><tt>-R &lt;path&gt;</tt><ul>
-<li>Define a run time search path for shared libraries. For example, you might pass <tt>-R /opt/Qtopia/lib -extra-qtopiacore-config '-R /opt/Qtopia/lib'</tt> to allow Qtopia to run without an <tt>LD_LIBRARY_PATH</tt>.</li>
+<li>Define a run time search path for shared libraries. This is in addition to <tt>&lt;prefix&gt;/lib</tt>, which is added automatically unless you pass <tt>-no-rpath</tt>.</li>
 </ul>
 </li>
 <li><tt>-device &lt;device&gt;</tt><ul>
 <li>See <a href="buildsystem/over-device-profiles-1.html">Device Profiles</a> for details.</li>
 </ul>
 </li>
-<li><tt>-xplatform &lt;target&gt;</tt><ul>
-<li>This is required when building for devices. It specifies the <tt>mkspec</tt> to use when building code for the device. A <tt>mkspec</tt> that is suitable for you may be available, but generally you will require one that is specific to your compiler and device.</li>
-</ul>
-</li>
-<li><tt>-defaultbuttons &lt;arg&gt;</tt><ul>
-<li>Every device needs a suitable defaultbuttons.conf file. If you don't create a file, one of the default ones will be used. See <a href="syscust-keypadbutt.html">Keypad Button Behavior</a> for information about defaultbuttons.conf.</li>
-</ul>
-</li>
 <li><tt>-singleexec</tt><ul>
-<li>If your device does not need installable applications, enabling single-exec buiding is a great way to improve application startup times. This will also save on disk space needed. See <a href="single-exec.html">Qtopia Single Exec</a> for mode information about single-exec building.</li>
-</ul>
-</li>
-<li><tt>-displaysize &lt;WxH&gt;</tt><ul>
-<li>It is a good idea to specify the screen size as theme backgrounds are scaled to this size and some images are included or excluded based on the screen size.</li>
-</ul>
-</li>
-<li><tt>-dislayrot &lt;angles&gt;</tt><ul>
-<li>To reduce the size of your image, you can skip installing fonts for additional rotations by specifying <tt>displayrot 0</tt>. You should also remove <tt>settings/rotation</tt> from the build if you do this.</li>
+<li>If your device does not need installable applications, enabling single-exec building is a great way to improve application startup times. This will also save on disk space needed. See <a href="single-exec.html">Qtopia Single Exec</a> for mode information about single-exec building.</li>
 </ul>
 </li>
 </ul>
@@ -202,14 +181,16 @@
 <a name="make-install"></a>
 <h3>make install</h3>
 <p><tt>make install</tt> does not really install Qtopia, it sets up the <tt>image</tt> directory. This directory contains everything required to run Qtopia (except for external dependencies).</p>
-<p>If you have used previous versions of Qtopia, the handling of <tt>-image</tt> and <tt>-prefix</tt> may be different. Please refer to <a href="buildsystem/chlog-4-2-0-1.html#image-prefix-and-sdk-location">Changes for 4.2&#x2e;0</a> for an overview of how these parameters are handled in Qtopia.</p>
+<p>If you did not specify a suitable <tt>-image</tt> location to configure, you can redirect where the image is placed now by specifying <tt>make install IMAGE=/over/there</tt>. A complete discussion on how the image, prefix and SDK locations are handled can be found in <a href="buildsystem/over-image-prefix-and-sdk-location-1.html">Image, prefix and SDK location</a>.</p>
+<p>Note that Qtopia 4.2 changed how <tt>-image</tt> and <tt>-prefix</tt> are handled. Please refer to <a href="buildsystem/over-image-prefix-and-sdk-location-1.html">Image, prefix and SDK location</a> for an overview of how these parameters are handled in Qtopia 4.2 and above.</p>
 <a name="now-what"></a>
 <h2>Now What?</h2>
 <p>For information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.</p>
+<p>For application development, you may find the documentation on <a href="buildsystem/over-creating-and-using-binary-sdks-1.html">Creating and using binary SDKs</a> to be helpful.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

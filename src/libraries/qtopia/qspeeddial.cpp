@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -153,6 +153,7 @@ static void writeReqs(const QString& changed)
             cfg.setValue(QLatin1String("Icon"),rec->iconName());
             cfg.setValue(QLatin1String("OptionalProperties"), rec->optionalProperties());
             found = true;
+            cfg.endGroup();
         }
     }
 
@@ -162,10 +163,9 @@ static void writeReqs(const QString& changed)
         cfg.remove(QLatin1String("Dial") + changed);
     }
 
-    cfg.endGroup();
-
     cfg.beginGroup(QLatin1String("Dial"));
     cfg.setValue(QLatin1String("Defined"), strList.join(QString(',')));
+    cfg.endGroup();
 
     if ( !recs_filename.isEmpty() )
         recs_ts = QFileInfo(recs_filename).lastModified();
@@ -212,15 +212,17 @@ class QSpeedDialDialog : public QDialog
 public:
     QSpeedDialDialog(const QString& l, const QString& ic, const QtopiaServiceRequest& a,
         QWidget* parent);
+    QSpeedDialDialog(QWidget* parent);
     QString choice();
-
+    void setBlankSetEnabled(bool on) { list->setBlankSetEnabled(on); }
 private slots:
-    void store(const int item);
+    void store(const int row);
 
 private:
+    void init();
     QtopiaServiceRequest action;
     QString label, icon;
-    QLineEdit *inputle;
+    QLineEdit *inputle; // non-integer speeddials no supported yet
     QWidget *currinfo;
     QLabel *curricon;
     QLabel *currlabel;
@@ -280,6 +282,8 @@ public:
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const;
 
     void setSelectionDetails(QString label, QString icon);
+    void setBlankSetEnabled(bool on) { showSet = on; }
+    bool isBlankSetEnabled() const { return showSet; }
 
 private:
     QListView* parentList;
@@ -289,6 +293,8 @@ private:
 
     QIcon selIcon;
     QString selText;
+    bool showInput;
+    bool showSet;
 };
 
 
@@ -302,7 +308,9 @@ public:
         delegate(parent),
         model(parent),
         parentList(parent),
-        a_del(0)
+        a_edit(0),
+        a_del(0),
+	recentChange(-1)
     {
         parent->setItemDelegate(&delegate);
         parent->setModel(&model);
@@ -330,18 +338,20 @@ public:
     QtopiaServiceSelector* actionChooser;
     bool allowActionChooser;
 
+    QAction *a_edit;
     QAction *a_del;
 
     QString seltext, selicon;
     int sel;
     int sel_tid;
+    int recentChange;
 
 private slots:
     void updateActions()
     {
         QSpeedDialItem* i = item(parentList->currentRow());
         if (a_del)
-            a_del->setEnabled(i && !i->description().request().isNull());
+            a_del->setVisible(i && !i->description().request().isNull());
     }
 };
 
@@ -368,7 +378,7 @@ void QSpeedDialItem::changeRecord(QtopiaServiceDescription* src)
 
 
 /*!
-  Constructs a QSpeedDialDialog object.
+  Constructs a QSpeedDialDialog object for storing the given action.
 */
 QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
     const QtopiaServiceRequest& a, QWidget* parent) :
@@ -377,16 +387,35 @@ QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
     label(l),
     icon(ic)
 {
+    init();
+}
+
+/*!
+  Constructs a QSpeedDialDialog object for selecting a speed dial action.
+*/
+QSpeedDialDialog::QSpeedDialDialog(QWidget* parent) :
+    QDialog(parent)
+{
+    init();
+}
+
+void QSpeedDialDialog::init()
+{
     setModal(true);
     setWindowState(windowState() | Qt::WindowMaximized);
 
     QVBoxLayout *vb = new QVBoxLayout(this);
     vb->setMargin(0);
 
-    list = new QSpeedDialList(l, ic, this);
+    if ( action.isNull() ) {
+        list = new QSpeedDialList(this);
+        list->setActionChooserEnabled(false);
+    } else {
+        list = new QSpeedDialList(label, icon, this);
+    }
     list->setFrameStyle(QFrame::NoFrame);
     if (list->count() > 0) {
-        int currentRow = firstAvailableSlot() - 1;
+        int currentRow = action.isNull() ? 0 : firstAvailableSlot() - 1;
         list->setCurrentRow(currentRow);
         // scroll to the row above the current row to indicate this row is the next available slot.
         list->scrollTo(list->model()->index( currentRow > 0 ? currentRow - 1 : currentRow, 0, QModelIndex()));
@@ -414,10 +443,24 @@ QString QSpeedDialDialog::choice()
 /*!
   Saves the service description at the input slot selected by the user.
 */
-void QSpeedDialDialog::store(const int item)
+void QSpeedDialDialog::store(const int row)
 {
-    userChoice = list->rowInput(item);
-    QSpeedDial::set(userChoice, QtopiaServiceDescription(action, label, icon));
+    if(list->d->recentChange==row){
+	    list->d->recentChange=-1;
+	    return;
+    }
+    list->d->recentChange=-1;
+
+    userChoice = QString("%1").arg(row+1);//Row 0 has speed dial 1
+    if ( !action.isNull() ){
+        QSpeedDial::set(userChoice, QtopiaServiceDescription(action, label, icon));
+    }else if ( list->isBlankSetEnabled() ) {
+        QtopiaServiceDescription* desc = QSpeedDial::find(userChoice);
+        if ( !desc || desc->request().isNull() ) {
+            //list->editItem(row);
+            return; // no accept yet
+        }
+    }
     accept();
 }
 
@@ -454,9 +497,16 @@ void QSpeedDialDialog::store(const int item)
 /*!
   \fn QSpeedDialList::rowClicked(int row)
 
-  This signals is emitted whenever the user
+  This signal is emitted whenever the user
   either clicks on a different \a row with the mouse, or presses the keypad
   Select key while a row is selected.
+*/
+
+/*!
+  \fn QSpeedDialList::itemSelected(QString input)
+
+  This signal is emitted whenever the user selects the item with
+  the specified \a input string.
 */
 
 /*!
@@ -468,22 +518,58 @@ QSpeedDialList::QSpeedDialList(QWidget* parent) :
     updateReqs();
     init(QString());
 
-    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+    setActionChooserEnabled(true);
 
-    QAction *a_edit = new QAction( QIcon( ":icon/edit" ), tr("Set...", "set action"), this);
-    connect( a_edit, SIGNAL(triggered()), this, SLOT(editItem()) );
-    contextMenu->addAction(a_edit);
-
-    d->a_del = new QAction( QIcon( ":icon/trash" ), tr("Delete"), this);
-    connect( d->a_del, SIGNAL(triggered()), this, SLOT(clearItem()) );
-    contextMenu->addAction(d->a_del);
-
-    d->allowActionChooser = true;
     connect(this, SIGNAL(rowClicked(int)), this, SLOT(editItem(int)));
     connect(selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(sendRowChanged()));
 
     setWindowTitle( tr( "Speed Dial" ) );
+}
+
+/*!
+    If \a on, makes blank items have a "Set..." option, even if
+    setActionChooserEnabled() has been called with the inverse
+    of \a on as its parameter.
+
+    \sa isBlankSetEnabled()
+*/
+void QSpeedDialList::setBlankSetEnabled(bool on)
+{
+    d->delegate.setBlankSetEnabled(on);
+}
+
+/*!
+    Returns true if blank items have a "Set..." option, even if
+    setActionChooserEnabled() has been called.
+
+    \sa setBlankSetEnabled()
+*/
+bool QSpeedDialList::isBlankSetEnabled() const
+{
+    return d->delegate.isBlankSetEnabled();
+}
+
+void QSpeedDialList::setActionChooserEnabled(bool on)
+{
+    d->allowActionChooser = on;
+    if ( on ) {
+        QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+
+        d->a_edit = new QAction( QIcon( ":icon/edit" ), tr("Set...", "set action"), this);
+        connect( d->a_edit, SIGNAL(triggered()), this, SLOT(editItem()) );
+        contextMenu->addAction(d->a_edit);
+
+        d->a_del = new QAction( QIcon( ":icon/trash" ), tr("Delete"), this);
+        connect( d->a_del, SIGNAL(triggered()), this, SLOT(clearItem()) );
+        contextMenu->addAction(d->a_del);
+    } else {
+        delete d->a_edit;
+        d->a_edit = 0;
+        delete d->a_del;
+        d->a_del = 0;
+    }
+    d->delegate.setBlankSetEnabled(on);
 }
 
 /*!
@@ -546,24 +632,30 @@ void QSpeedDialList::clearItem()
 */
 void QSpeedDialList::editItem(int row)
 {
-    if ( d->allowActionChooser && !d->actionChooser ) {
+    if ( (d->allowActionChooser || isBlankSetEnabled()) && !d->actionChooser ) {
         d->actionChooser = new QtopiaServiceSelector(this);
+        d->actionChooser->addApplications();
         QtopiaApplication::setMenuLike( d->actionChooser, true );
     }
     QSpeedDialItem* item = d->item(row);
-    if( item && d->actionChooser ) {
+    if( item && (d->allowActionChooser || isBlankSetEnabled()) ) {
         QtopiaServiceDescription desc = item->description();
-        if ( d->actionChooser->edit(item->input(),desc) ) {
-            if ( desc.request().isNull() ) {
-                QSpeedDial::remove(item->input());
-            } else {
-                QSpeedDial::set(item->input(), desc);
+        if ( d->allowActionChooser || desc.request().isNull() ) {
+            d->recentChange=row;
+            if ( d->actionChooser->edit(item->input(),desc) ) {
+                if ( desc.request().isNull() ) {
+                    QSpeedDial::remove(item->input());
+                } else {
+                    QSpeedDial::set(item->input(), desc);
+                }
+                reload(item->input());
+                // force a reload of the context menu
+                //emit activated(currentIndex());
+                return;
             }
-            reload(item->input());
-            // force a reload of the context menu
-            emit activated(currentIndex());
         }
     }
+    emit itemSelected(rowInput(row));
 }
 
 /*!
@@ -860,11 +952,10 @@ int QSpeedDialList::currentRow() const
 
 /*!
   Provides a dialog that allows the user to select an input for action \a action,
-  using \a label and \a icon as the display label and icon respectively. \a parent
-  will be used as the dialog's parent.
+  using \a label and \a icon as the display label and icon respectively.
+  The dialog has the given \a parent.
 
-  Returns the input that the user selected; it is up to you to use set() to
-  assign the selection.
+  Returns the input that the user selected, and assigns the input to the action. 
 
   If the user cancels the dialog, a null string is returned.
 
@@ -874,11 +965,34 @@ QString QSpeedDial::addWithDialog(const QString& label, const QString& icon,
     const QtopiaServiceRequest& action, QWidget* parent)
 {
     QSpeedDialDialog dlg(label, icon, action, parent);
+    dlg.setObjectName("speeddial");
     if ( QtopiaApplication::execDialog(&dlg) )
         return dlg.choice();
     else
         return QString();
 }
+
+/*!
+  Provides a dialog that allows the user to select an existing speed dial item.
+  The dialog has the given \a parent.
+
+  This dialog may be useful for example to provide a list of "Favourites".
+
+  Returns the speed dial selected.
+
+  If the user cancels the dialog, a null pointer is returned.
+*/
+QString QSpeedDial::selectWithDialog(QWidget* parent)
+{
+    QSpeedDialDialog dlg(parent);
+    dlg.setObjectName("speeddial");
+    dlg.setBlankSetEnabled(true);
+    if ( QtopiaApplication::execDialog(&dlg) )
+        return dlg.choice();
+    else
+        return 0;
+}
+
 
 /*!
   Returns a QtopiaServiceDescription for the given Speed Dial \a input.
@@ -955,6 +1069,8 @@ QSpeedDialItemDelegate::QSpeedDialItemDelegate(QListView* parent)
     parentList = parent;
 
     iconSize = QApplication::style()->pixelMetric(QStyle::PM_ListViewIconSize);
+    showInput = !QApplication::style()->inherits("QThumbStyle");
+    showSet = false;
 
     QFontMetrics fm(parent->font());
     textHeight = fm.height();
@@ -1024,17 +1140,25 @@ void QSpeedDialItemDelegate::paint(QPainter * painter,
                     Qt::AlignLeft) | Qt::AlignVCenter);
         bool rtl = qApp->layoutDirection() == Qt::RightToLeft;
 
-        painter->drawText(QRect(x, y+1, width, height), input, to);
-        if ( rtl )
-            width -= fm.width(input);
-        else
-            x += fm.width(input);
+        if ( showInput ) {
+            painter->drawText(QRect(x, y+1, width, height), input, to);
+            if ( rtl )
+                width -= fm.width(input);
+            else
+                x += fm.width(input);
 
-        painter->drawText(QRect(x,y+1,width,height), QLatin1String(":"), to);
-        if ( rtl )
-            width -= fm.width(QLatin1String(": "));
-        else
-            x += fm.width(QLatin1String(": "));
+            painter->drawText(QRect(x,y+1,width,height), QLatin1String(":"), to);
+            if ( rtl )
+                width -= fm.width(QLatin1String(": "));
+            else
+                x += fm.width(QLatin1String(": "));
+        }
+
+        if ( showSet && pixmap.isNull() && label.isEmpty() ) {
+            pixmap = QIcon(":icon/reset").pixmap(option.decorationSize);
+            label = QSpeedDialList::tr("Set...", "set action");
+        }
+
         if(!pixmap.isNull())
         {
             if ( rtl ) {
@@ -1045,7 +1169,6 @@ void QSpeedDialItemDelegate::paint(QPainter * painter,
                 x += pixmap.width() + fm.width(QLatin1String(" "));
             }
         }
-
         label = elidedText( fm, width, Qt::ElideRight, label );
         painter->drawText(QRect(x, y+1, width, height), label, to);
     }

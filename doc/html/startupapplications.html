@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">StartupApplications Class Reference</h1>
 <p>The StartupApplications class launches applications preemptively at startup. <a href="#details">More...</a></p>
-<pre>    #include &lt;StartupApplications&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;StartupApplications&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="startupapplications-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -23,7 +23,7 @@
 <li><div class="fn"/><b><a href="startupapplications.html#StartupApplications">StartupApplications</a></b> ( QObject * <i>parent</i> = 0 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -31,17 +31,16 @@
 <li><div class="fn"/>void <b><a href="startupapplications.html#preloadCrashed">preloadCrashed</a></b> ( const QString &amp; <i>application</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -82,7 +81,7 @@
 <tr valign="top" class="odd"><td><tt>ApplicationName</tt></td><td>The name of the application to send the QCop messages to.</td></tr>
 <tr valign="top" class="even"><td><tt>ServiceName</tt></td><td>A name of a service to send QCop messages to. The default provider of the service will be used. If both <tt>ApplicationName</tt> and <tt>ServiceName</tt> are specified, the <tt>ServiceName</tt> option is ignored.</td></tr>
 <tr valign="top" class="odd"><td><tt>TaskGroup</tt></td><td>The name of the group to which the background application belogs. Group names allow a collection of applications to be started together at startup by inserting the group name into the <tt>Tasks.cfg</tt> Qtopia startup file. Task groups are not optional.</td></tr>
-<tr valign="top" class="even"><td><tt>Silent</tt></td><td>If true, warning messages about this application will be suppressed. For example, if the application or service cannot be found a qWarning() will only appear if <tt>Silent</tt> is false or omitted.</td></tr>
+<tr valign="top" class="even"><td><tt>Silent</tt></td><td>If true, warning messages about this application will be suppressed. For example, if the application or service cannot be found a <a href="./qtglobal.html#qWarning">qWarning</a>() will only appear if <tt>Silent</tt> is false or omitted.</td></tr>
 <tr valign="top" class="odd"><td><tt>StartupMessage</tt></td><td>A message to send when the application is started.</td></tr>
 <tr valign="top" class="even"><td><tt>RestartMessage</tt></td><td>A message to send when the application exits. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>.</td></tr>
 <tr valign="top" class="odd"><td><tt>ShutdownMessage</tt></td><td>A message to send at system shutdown. This message is optional and will only be sent if the application had previously been started with <tt>StartupMessage</tt>. Following this message, the application is expected to exit within 5 seconds.</td></tr>
@@ -90,15 +89,15 @@
 <p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="StartupApplications"></a>StartupApplications::StartupApplications ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="StartupApplications"></a>StartupApplications::StartupApplications ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create the <a href="startupapplications.html">StartupApplications</a> class with the specified <i>parent</i>.</p>
-<h3 class="fn"><a name="preloadCrashed"></a>void StartupApplications::preloadCrashed ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="preloadCrashed"></a>void StartupApplications::preloadCrashed ( const <a href="./qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever a preloaded <i>application</i> crashes. A crashing preloaded application will be automatically removed from the preloaded application list.</p>
 <p>The PreloadApplication class filter crashes, using the <a href="applicationterminationhandler.html">ApplicationTerminationHandler</a> interface.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

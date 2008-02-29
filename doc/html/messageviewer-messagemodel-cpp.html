@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -33,6 +33,7 @@
     #include &lt;QMailMessage&gt;
     #include &lt;QMailMessageKey&gt;
     #include &lt;QMailMessageSortKey&gt;
+    #include &lt;QMailStore&gt;
     #include &lt;QPhoneNumber&gt;
     #include &lt;QStandardItem&gt;
     #include &lt;QTimeString&gt;
@@ -59,10 +60,10 @@
         static QIcon mmsIcon(&quot;:icon/multimedia&quot;);
         static QIcon emailIcon(&quot;:icon/email&quot;);
 
-        <span class="comment">// Load the header for this message</span>
+        <span class="comment">//</span> Load the header for this message
         QMailMessage message(id, QMailMessage::Header);
 
-        <span class="comment">// Determine the properties we want to display</span>
+        <span class="comment">//</span> Determine the properties we want to display
         QIcon* messageIcon = &amp;smsIcon;
         if (message.messageType() == QMailMessage::Mms)
             messageIcon = &amp;mmsIcon;
@@ -78,7 +79,7 @@
         QString time(QTimeString::localHM(messageTime.time(), QTimeString::Short));
         QString sublabel(QString(&quot;%1 %2 %3&quot;).arg(action).arg(date).arg(time));
 
-        <span class="comment">// Configure this item</span>
+        <span class="comment">//</span> Configure this item
         setIcon(sent ? sentMessageIcon : receivedMessageIcon);
         setText(message.subject());
         setData(sublabel, MessageDelegate::SubLabelRole);
@@ -107,31 +108,31 @@
     {
         clear();
 
-        <span class="comment">// Locate messages whose sender is this contact</span>
+        <span class="comment">//</span> Locate messages whose sender is this contact
         QMailMessageKey msgsFrom;
 
-        <span class="comment">// Locate messages whose recipients list contains this contact</span>
+        <span class="comment">//</span> Locate messages whose recipients list contains this contact
         QMailMessageKey msgsTo;
 
-        <span class="comment">// Match on any of contact's phone numbers</span>
+        <span class="comment">//</span> Match on any of contact's phone numbers
         foreach(const QString&amp; number, contact.phoneNumbers().values()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, number);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, number, QMailMessageKey::Contains);
         }
 
-        <span class="comment">// Match on any of contact's email addresses</span>
+        <span class="comment">//</span> Match on any of contact's email addresses
         foreach(const QString&amp; address, contact.emailList()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, address);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, address, QMailMessageKey::Contains);
         }
 
-        <span class="comment">// Sort messages by timestamp, newest to oldest</span>
+        <span class="comment">//</span> Sort messages by timestamp, newest to oldest
         QMailMessageSortKey sort(QMailMessageSortKey::TimeStamp, Qt::DescendingOrder);
 
-        <span class="comment">// Fetch the messages matching either of our queries, and return them sorted</span>
+        <span class="comment">//</span> Fetch the messages matching either of our queries, and return them sorted
         QMailIdList matches(QMailStore::instance()-&gt;queryMessages(msgsFrom | msgsTo, sort));
 
-        <span class="comment">// Add each returned message to our data model</span>
+        <span class="comment">//</span> Add each returned message to our data model
         foreach (const QMailId&amp; id, matches)
             appendRow(new MessageItem(id));
     }
@@ -146,8 +147,8 @@
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

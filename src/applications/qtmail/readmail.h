@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,12 +47,15 @@ class QStackedWidget;
 class QContactModel;
 class QMailViewerInterface;
 class AccountList;
+class QContactModel;
 
 class ReadMail : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    enum ResendAction { Reply = 1, ReplyToAll = 2, Forward = 3 };
+
     ReadMail( QWidget* parent = 0, const QString name = QString(), Qt::WFlags fl = 0 );
     ~ReadMail();
 
@@ -61,7 +64,7 @@ public:
     void viewSelectedMail(MailListView *view);
     void mailUpdated(const QMailId& message);
 
-private:
+private slots:
     void updateView();
 
 signals:
@@ -79,7 +82,6 @@ public slots:
     void cleanup();
     void isSending(bool);
     void isReceiving(bool);
-    void setProgressText(const QString &txt);
 
 protected slots:
     void linkClicked(const QUrl &lnk);
@@ -99,6 +101,8 @@ protected slots:
     void setStatus(int);
     void getThisMail();
     void sendThisMail();
+
+    void storeContact();
 
 protected:
     void keyPressEvent(QKeyEvent *);
@@ -124,6 +128,7 @@ private:
 
 private slots:
     void mmsFinished();
+    void contactModelReset();
 
 private:
     QStackedWidget *views;
@@ -151,8 +156,10 @@ private:
     QAction *getThisMailButton;
     QAction *sendThisMailButton;
     QAction *modifyButton;
-    QLabel *progressLabel;
+    QAction *storeButton;
     AccountList *accountList;
+    QContactModel *contactModel;
+    bool modelUpdatePending;
 };
 
 #endif // READMAIL_H

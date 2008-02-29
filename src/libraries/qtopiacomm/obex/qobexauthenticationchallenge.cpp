@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,9 +26,7 @@
 #include <QFile>
 #include <QCryptographicHash>
 #include <QTextCodec>
-#include <QDebug>
 
-#undef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
 
 /*!
     \class QObexAuthenticationChallenge
@@ -156,14 +154,16 @@ QString QObexAuthenticationChallenge::realm() const
 
     The \a size is the size of \a data.
 */
-static void readRealm(const uchar *data, uint size, QString &dest)
+static bool readRealm(const uchar *data, uint size, QString &dest)
 {
     if (size <= 1 )      // no data to read other than charset code
-        return;
+        return false;
 
     QTextCodec *codec = 0;
 
     switch (data[0]) {
+
+    // some codecs have built in support:
     case QObexAuth::CharSetAscii:
         dest = QString::fromAscii(reinterpret_cast<const char*>(&data[1]), size-1);
         break;
@@ -204,10 +204,9 @@ static void readRealm(const uchar *data, uint size, QString &dest)
     if (codec)
         dest = codec->toUnicode(reinterpret_cast<const char*>(&data[1]), size-1);
 
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
     if (dest.isEmpty())
-        qDebug() << "readRealm() error: encoding" << data[0] << "not supported";
-#endif
+        return false;
+    return true;        
 }
 
 
@@ -274,11 +273,6 @@ bool QObexAuthenticationChallengePrivate::parseRawChallenge(const QByteArray &by
         if ((i + tagSize) > size)
             return false;
 
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug() << "parseRawChallenge(): Reading challenge tag:"
-         << tagId << tagSize;
-#endif
-
         // read tag value
         switch (tagId) {
         case (QObexAuth::ChallengeNonceTag):
@@ -293,13 +287,10 @@ bool QObexAuthenticationChallengePrivate::parseRawChallenge(const QByteArray &by
             options = static_cast<QObex::AuthChallengeOptions>(data[i]);
             break;
         case (QObexAuth::RealmTag):
-            readRealm(&data[i], tagSize, realm);
+            if (!readRealm(&data[i], tagSize, realm))
+                return false;
             break;
         default:
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-            qDebug() << "parseRawChallenge(): Got unknown challenge header:"
-                    << tagId;
-#endif
             break;
         };
 
@@ -308,17 +299,8 @@ bool QObexAuthenticationChallengePrivate::parseRawChallenge(const QByteArray &by
     }
 
     // if no valid nonce was provided, the whole challenge is invalid
-    if (nonce.size() != int(QObexAuth::NonceSize)) {
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug() << "parseRawChallenge(): Invalid nonce!";
-#endif
+    if (nonce.size() != int(QObexAuth::NonceSize)) 
         return false;
-    }
-
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-    qDebug() << "parseRawChallenge(): Read nonce:" << nonce.size()
-            << "options:" << options << "realm:" << realm;
-#endif
 
     challenge.m_data->m_nonce = nonce;
     challenge.m_data->m_options = options;
@@ -361,9 +343,6 @@ void QObexAuthenticationChallengePrivate::writeRawChallenge(const QByteArray &no
 
     // insert options (0x01, 1 byte)
     if (options != 0) {
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug() << "writeRawChallenge(): Inserting options...";
-#endif
         buf[i++] = QObexAuth::OptionsTag;
         buf[i++] = QObexAuth::OptionsSize;
         buf[i++] = options;
@@ -371,9 +350,6 @@ void QObexAuthenticationChallengePrivate::writeRawChallenge(const QByteArray &no
 
     // insert options (0x02, n bytes)
     if (!realmBytes.isEmpty()) {
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug() << "writeRawChallenge(): Inserting realm...";
-#endif
         buf[i++] = QObexAuth::RealmTag;
         buf[i++] = realmBytes.size() + 1;      // +1 for charset
         buf[i++] = charSetEncoding;
@@ -392,20 +368,11 @@ bool QObexAuthenticationChallengePrivate::toRawResponse(QByteArray &dest, const 
         return false;
 
     QByteArray userBytes = m_user.toLatin1();
-    if (userBytes.size() > 20) {
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug() << "toRawResponse(): user ID exceeds max length of 20 bytes";
-#endif
+    if (userBytes.size() > 20) 
         return false;
-    }
 
-    if (!nonce.isEmpty() && nonce.size() != QObexAuth::NonceSize) {
-#ifdef QOBEXAUTHENTICATIONCHALLENGE_DEBUG
-        qDebug()<< "toRawResponse(): nonce has wrong length, should be"
-                << QObexAuth::NonceSize;
-#endif
+    if (!nonce.isEmpty() && nonce.size() != QObexAuth::NonceSize)
         return false;
-    }
 
     int len = 0;
     len += (1 + 1 + QObexAuth::RequestDigestSize);   // request digest is mandatory

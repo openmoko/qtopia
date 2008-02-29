@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -73,8 +73,13 @@ TaskDialog::TaskDialog( const QTask& task, QWidget *parent,
     if (!id.isNull()) {
         QAppointmentModel am;
         todoAppt = am.appointment(id);
+
+        // Preload this, since alarm minutes for NoAlarm aren't stored in the db
+        if (todoAppt.alarm() == QAppointment::NoAlarm)
+            todoAppt.setAlarm(-(defaultReminderTime.hour() * 60 + defaultReminderTime.minute()), QAppointment::NoAlarm);
     } else {
         todoAppt.setAlarm(-(defaultReminderTime.hour() * 60 + defaultReminderTime.minute()), setAlarm ? QAppointment::Audible : QAppointment::NoAlarm);
+        todoAppt.setAllDay();
     }
 
     init();
@@ -110,6 +115,7 @@ TaskDialog::TaskDialog(QList<QString> categories, QWidget* parent,  Qt::WFlags f
         defaultReminderTime = QTime(config.value("startviewtime", 8).toInt(), 0);
         todoAppt.setAlarm(-(config.value("startviewtime", 8).toInt() * 60), config.value("alarmpreset").toBool() ? QAppointment::Audible : QAppointment::NoAlarm);
     }
+    todoAppt.setAllDay();
 
     /* may have to set up the 'empty' task. */
     init();
@@ -178,7 +184,7 @@ void TaskDialog::initTaskTab(QScrollArea *scrollArea)
     QFormLayout *duelayout = new QFormLayout;
     dueEdit = new QDateEdit;
     duelayout->addRow(tr("Due:"), dueEdit);
-    reminderPicker = new ReminderPicker(this, duelayout);
+    reminderPicker = new ReminderPicker(this, duelayout, todoAppt);
     dueCheck->setLayout(duelayout);
 
     fl->addRow(tr("Desc."), inputDescription);
@@ -190,19 +196,15 @@ void TaskDialog::initTaskTab(QScrollArea *scrollArea)
     /* initialize */
     inputDescription->setText(todo.description());
     comboPriority->setCurrentIndex( todo.priority() - 1 );
-    if (!todo.dueDate().isNull()) {
+    if (todo.dueDate().isValid()) {
         dueCheck->setChecked(true);
         dueEdit->setDate(todo.dueDate());
     } else {
-        dueCheck->setChecked(true);
+        dueCheck->setChecked(false);
         dueEdit->setDate(QDate::currentDate());
     }
 
-    reminderPicker->setDefaultAllDayReminderTime(defaultReminderTime);
-    reminderPicker->setAllDay(true);
-    reminderPicker->setReminderType(todoAppt.alarm());
-    if (!newTask)
-        reminderPicker->setReminderMinutes(todoAppt.alarmDelay());
+    reminderPicker->updateUI(todo.dueDate().isValid());
 
     /* connect */
     connect( dueEdit, SIGNAL(dateChanged(QDate)),
@@ -451,12 +453,8 @@ void TaskDialog::updateFromTask()
         recurStack->setCurrentIndex(todo.dueDate().isValid() ? 0 : 1);
     if (recurDetails)
         recurDetails->updateUI();
-    if(reminderPicker) {
-        reminderPicker->setAllDay(true);
-        reminderPicker->setReminderType(todoAppt.alarm());
-        if (!newTask)
-            reminderPicker->setReminderMinutes(todoAppt.alarmDelay());
-    }
+    if(reminderPicker)
+        reminderPicker->updateUI(todo.dueDate().isValid());
 }
 
 /*
@@ -545,8 +543,6 @@ const QAppointment &TaskDialog::todoAppointment() const
 {
     if (recurDetails)
         recurDetails->updateAppointment();
-    if (reminderPicker)
-        todoAppt.setAlarm(reminderPicker->reminderMinutes(), reminderPicker->reminderType());
     return todoAppt;
 }
 

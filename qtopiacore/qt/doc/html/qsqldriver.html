@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/sql/kernel/qsqldriver.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/sql/kernel/qsqldriver.cpp -->
 <head>
   <title>Qt 4.3: QSqlDriver Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -155,9 +155,9 @@
 <pre> QSqlDatabase db = ...;
  QVariant v = db.driver()-&gt;handle();
  if (v.isValid() &amp;&amp; qstrcmp(v.typeName(), &quot;sqlite3*&quot;)) {
-     <span class="comment">// v.data() returns a pointer to the handle</span>
+     <span class="comment">//</span> v.data() returns a pointer to the handle
      sqlite3 *handle = *static_cast&lt;sqlite3 **&gt;(v.data());
-     if (handle != 0) { <span class="comment">// check that it is not NULL</span>
+     if (handle != 0) { <span class="comment">//</span> check that it is not NULL
          ...
      }
  }</pre>
@@ -209,25 +209,10 @@
 <h3 class="fn"><a name="tables"></a><a href="qstringlist.html">QStringList</a> QSqlDriver::tables ( <a href="qsql.html#TableType-enum">QSql::TableType</a> <i>tableType</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns a list of the names of the tables in the database. The default implementation returns an empty list.</p>
 <p>The <i>tableType</i> argument describes what types of tables should be returned. Due to binary compatibility, the string contains the value of the enum QSql::TableTypes as text. An empty string should be treated as <a href="qsql.html#TableType-enum">QSql::Tables</a> for backward compatibility.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="formatValue-2"></a><a href="qstring.html">QString</a> QSqlDriver::formatValue ( const <a href="qsqlfield.html">QSqlField</a> * <i>field</i>, bool <i>trimStrings</i> = false ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the other <a href="qsqldriver.html#formatValue">formatValue</a>() overload instead.</p>
-<h3 class="fn"><a name="nullText"></a><a href="qstring.html">QString</a> QSqlDriver::nullText () const</h3>
-<p><a href="qsqldriver.html#sqlStatement">sqlStatement</a>() is now used to generate SQL. Use tr(&quot;NULL&quot;) for example, instead.</p>
-<h3 class="fn"><a name="record-2"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDriver::record ( const <a href="qsqlquery.html">QSqlQuery</a> &amp; <i>query</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use query.<a href="qsqldriver.html#record">record</a>() instead.</p>
-<h3 class="fn"><a name="recordInfo"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDriver::recordInfo ( const <a href="qstring.html">QString</a> &amp; <i>tablename</i> ) const</h3>
-<p>Use <a href="qsqldriver.html#record">record</a>() instead.</p>
-<h3 class="fn"><a name="recordInfo-2"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDriver::recordInfo ( const <a href="qsqlquery.html">QSqlQuery</a> &amp; <i>query</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use query.<a href="qsqldriver.html#record">record</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

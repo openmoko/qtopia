@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,7 +53,6 @@ public:
     bool simLocked() const;
 #endif
     void setKeyLocked(bool) const;
-    virtual void applyHomeScreenImage();
     virtual void updateBackground();
     virtual void updateHomeScreenInfo();
     virtual void activatePinbox(bool enable);
@@ -108,12 +107,16 @@ protected:
     void loadPlugins();
     void setLockLevel(int);
 
+public Q_SLOTS:
+    virtual void applyHomeScreenImage();
+
 protected Q_SLOTS:
     void showLockInformation();
-    void setContextBarLocked(bool locked);
+    void setContextBarLocked(bool locked, bool waiting = false);
     void activateSpeedDial();
     void specialButton(int keycode, bool held);
     void showProfileSelector();
+    void lockScreen();
 
 #ifdef QTOPIA_PHONEUI
     void phoneStateChanged();

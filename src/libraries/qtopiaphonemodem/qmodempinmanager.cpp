@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -196,6 +196,19 @@ void QModemPinManager::enterPin( const QString& type, const QString& pin )
                       this, SLOT(cpinResponse(bool,QAtResult)) );
 }
 
+// Encode a PUK or PIN according to the rules in 3GPP TS 11.11, section 9.3.
+static QByteArray encodePukOrPin( const QString& value )
+{
+    static char const padding[8] =
+        {(char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF,
+         (char)0xFF, (char)0xFF, (char)0xFF, (char)0xFF};
+    QByteArray data = value.toUtf8();
+    if ( data.size() >= 8 )
+        return data.left(8);
+    else
+        return data + QByteArray( padding, 8 - data.size() );
+}
+
 /*!
     \reimp
 */
@@ -215,6 +228,27 @@ void QModemPinManager::enterPuk
         d->service->chat( "AT+CPIN=\"" + QAtUtils::quote( puk ) + "\",\"" +
                           QAtUtils::quote( newPin ) + "\"",
                           this, SLOT(cpukResponse(bool)) );
+    } else if ( d->expectedPin.isEmpty() ) {
+        // We were not expecting a PUK in answer to a AT+CPIN query,
+        // so we cannot use AT+CPIN to send the PUK.  We therefore
+        // send the PUK and new PIN using a low-level "UNBLOCK CHV"
+        // command, as described in 3GPP TS 11.11.
+        QByteArray data;
+        data += (char)0xA0;
+        data += (char)0x2C;
+        data += (char)0x00;
+        if ( type.contains( QChar('2') ) )
+            data += (char)0x02;
+        else
+            data += (char)0x00;
+        data += (char)0x10;
+        data += encodePukOrPin( puk );
+        data += encodePukOrPin( newPin );
+        d->currentPin = newPin;
+        d->expectedPin = type;
+        d->service->chat( "AT+CSIM=" + QString::number( data.size() * 2 ) + "," +
+                          QAtUtils::toHex( data ),
+                          this, SLOT(csimResponse(bool,QAtResult)) );
     } else {
         d->currentPin = newPin;
         d->expectedPin = type;
@@ -377,8 +411,10 @@ void QModemPinManager::cpinQuery( bool ok, const QAtResult& result )
             QPinManager::Status status;
             if ( pin.contains( "PUK" ) )
                 status = QPinManager::NeedPuk;
-            else
+            else {
                 status = QPinManager::NeedPin;
+                d->service->post( "simpinrequired" );
+            }
             QPinOptions options;
             options.setMaxLength( pinMaximum() );
             emit pinStatus( d->expectedPin, status, options );
@@ -411,6 +447,7 @@ void QModemPinManager::cpinResponse( bool ok, const QAtResult& result )
             d->lastPinTimer->start( 5000 ); // Clear it after 5 seconds.
         }
         d->expectedPin = QString();
+        d->service->post( "simpinentered" );
     }
     d->currentPin = QString();
 
@@ -423,6 +460,35 @@ void QModemPinManager::cpinResponse( bool ok, const QAtResult& result )
         cpinQuery( true, result );
     } else {
         sendQuery();
+    }
+}
+
+// Process the response to an "UNBLOCK CHV" command sent via AT+CSIM.
+void QModemPinManager::csimResponse( bool ok, const QAtResult& result )
+{
+    QAtResultParser parser( result );
+    if ( !ok ) {
+        cpinResponse( ok, result );
+    } else if ( parser.next( "+CSIM:" ) ) {
+        QString line = parser.line();
+        uint posn = 0;
+        QAtUtils::parseNumber( line, posn );    // Skip length.
+        QString data;
+        if ( ((int)posn) < line.length() && line[posn] == ',' )
+            data = line.mid( posn + 1 );
+        else
+            data = line.mid( posn );
+        if ( data.contains( QChar('"') ) )
+            data = data.remove( QChar('"') );
+        if ( data.length() <= 4 ) {
+            // Need at least sw1 and sw2 on the end of the command.
+            cpinResponse( false, result );
+            return;
+        }
+        QByteArray sw = QAtUtils::fromHex( data.right(4) );
+        cpinResponse( ( sw.size() > 0 && sw[0] != (char)0x98 ), result );
+    } else {
+        cpinResponse( false, result );
     }
 }
 

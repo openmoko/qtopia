@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,6 +20,7 @@
 ****************************************************************************/
 #include <qtopia/private/qtopiaresource_p.h>
 #include <qtopianamespace.h>
+#include <qtopiaservices.h>
 #include <qtopialog.h>
 #include <QImageIOHandler>
 #include <QImageIOPlugin>
@@ -52,6 +53,21 @@ static bool fileExists(const QByteArray &filename)
     return false;
 }
 
+static void expandService(QString& path)
+{
+    static const QString service(QLatin1String("service/"));
+    if ( path.startsWith(service) ) {
+        /* 8 == ::strlen("service/") */
+        int slash = path.indexOf(QChar('/'),8);
+        if ( slash >= 0 ) {
+            QString serv = path.mid(8,slash-8);
+            QString appname = QtopiaService::app(serv);
+            if ( !appname.isEmpty() )
+                path.replace(0,slash,appname);
+        }
+    }
+}
+
 QFileResourceFileEngineHandler::QFileResourceFileEngineHandler()
     : QAbstractFileEngineHandler()
 {
@@ -65,8 +81,26 @@ QFileResourceFileEngineHandler::~QFileResourceFileEngineHandler()
 void QFileResourceFileEngineHandler::setIconPath(const QStringList& p)
 {
     if (!p.isEmpty()) {
-        foreach (QString ip, p)
-            iconpath.append(ip.toLocal8Bit());
+        foreach (QString ip, p) {
+            QByteArray ipath = ip.toLocal8Bit();
+            if (ipath[0] == '/' && fileExists(ipath)) {
+                if (!ipath.endsWith('/'))
+                    ipath += '/';
+                iconpath.append(ipath);
+                qLog(Resource) << "Add pic search path" << ipath;
+            } else {
+                QStringList p = Qtopia::installPaths();
+                foreach (QString s, p) {
+                    QByteArray t = s.toLocal8Bit() + ipath;
+                    if (fileExists(t)) {
+                        if (!t.endsWith('/'))
+                            t += '/';
+                        iconpath.append(t);
+                        qLog(Resource) << "Add pic search path" << t;
+                    }
+                }
+            }
+        }
     }
     imagedirs.clear();
     sounddirs.clear();
@@ -121,6 +155,7 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   \code
   QPixmap pix1("/opt/Qtopia/pics/addressbook/email.png");
   QPixmap pix2(":image/addressbook/email");
+  QPixmap pix2(":image/service/Contacts/email");
   \endcode
 
   When Qtopia detects the use of the special ":" prefix, searches in various
@@ -152,12 +187,16 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   Resource databases are only supported in the Qtopia 4.2 series and later.
 
-  The specifics for each resource type are outlined below.
+  The specifics for each resource type are outlined below. Note that
+  the \c {<app name>} may also be specified by refering to a service rather
+  than the application which might provide the service - for example
+  "service/Contacts/" rather than "addressbook/".
 
   \section1 Images
 
   When requesting an image, applications use a "filename" of the form
-  \c {<path> := :image/[i18n/][<app name>/]<image>}.  For each search directory
+  \c {<path> := :image/[i18n/][<app name>/]<image>}.
+  For each search directory
   listed in the $QTOPIA_PATHS environment variable as well as Qtopia's install
   location, the following sub-locations are tried:
 
@@ -187,7 +226,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   In the listing above, \c {<language>} corresponds to Qtopia's configured
   language and \c {<locale>} its configured locale.  The supported
-  <image extensions> are currently "png", "jpg", "mng" and no extension.
+  <image extensions> are currently "pic", "svg", "png", "jpg", "mng" and no
+  extension.
 
   For example, in the "addressbook" application
 
@@ -195,10 +235,14 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   // /opt/Qtopia/pics/addressbook/qtopia.rdb#email
   // /opt/Qtopia/pics/qtopia.rdb#addressbook/email
   // /opt/Qtopia/pics/qtopia.rdb#email
+  // /opt/Qtopia/pics/addressbook/email.pic
+  // /opt/Qtopia/pics/addressbook/email.svg
   // /opt/Qtopia/pics/addressbook/email.png
   // /opt/Qtopia/pics/addressbook/email.jpg
   // /opt/Qtopia/pics/addressbook/email.mng
   // /opt/Qtopia/pics/addressbook/email
+  // /opt/Qtopia/pics/email.pic
+  // /opt/Qtopia/pics/email.svg
   // /opt/Qtopia/pics/email.png
   // /opt/Qtopia/pics/email.jpg
   // /opt/Qtopia/pics/email.mng
@@ -208,6 +252,11 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   More information on image translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
 
+  Themes can override images by specifying an \c{IconPath}. See
+  \l{Images and Icons#installing-custom-icons}.
+
+  See \l{Images and Icons} for more information on images in Qtopia.
+
   \section1 Icons
 
   When requesting an icon, applications use a "filename" of the form
@@ -215,37 +264,42 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   listed in the $QTOPIA_PATHS environment variable as well as Qtopia's install
   location, the following sub-locations are tried:
 
-  \c {pics/<QApplication::applicationName()>/qtopia.rdb#<app name>/icons/<icon size>/<icon>}
+  \c {pics/<QApplication::applicationName()>/qtopia.rdb#<app name>/icons/<icon>}
 
-  \c {pics/qtopia.rdb#<QApplication::applicationName()>/<app name>/icons/<icon size>/<icon>}
+  \c {pics/qtopia.rdb#<QApplication::applicationName()>/<app name>/icons/<icon>}
 
-  \c {pics/<app name>/qtopia.rdb#icons/<icon size>/icon}
+  \c {pics/<app name>/qtopia.rdb#icons/icon}
 
-  \c {pics/qtopia.rdb#<app name>/icons/<icon size>/icon}
+  \c {pics/qtopia.rdb#<app name>/icons/icon}
 
-  \c {pics/<QApplication::applicationName()>/<app name>/icons/<icon size>/i18n/<language>_<locale>/icon.<icon extension>}
+  \c {pics/<QApplication::applicationName()>/<app name>/icons/i18n/<language>_<locale>/icon.<icon extension>}
 
-  \i {i18n only:} \c {pics/<app name>/icons/<icon size>/i18n/<language>_<locale>/icon.<icon extension>}
+  \i {i18n only:} \c {pics/<app name>/icons/i18n/<language>_<locale>/icon.<icon extension>}
 
-  \i {i18n only:} \c {pics/<QApplication::applicationName()>/<app name>/icons/<icon size>/i18n/<language>/icon.<icon extension>}
+  \i {i18n only:} \c {pics/<QApplication::applicationName()>/<app name>/icons/i18n/<language>/icon.<icon extension>}
 
-  \i {i18n only:} \c {pics/<app name>/icons/<icon size>/i18n/<language>/icon.<icon extension>}
+  \i {i18n only:} \c {pics/<app name>/icons/i18n/<language>/icon.<icon extension>}
 
-  \i {i18n only:} \c {pics/<QApplication::applicationName()>/<app name>/icons/<icon size>/i18n/en_US/icon.<icon extension>}
+  \i {i18n only:} \c {pics/<QApplication::applicationName()>/<app name>/icons/i18n/en_US/icon.<icon extension>}
 
-  \i {i18n only:} \c {pics/<app name>/icons/<icon size>/i18n/en_US/icon.<icon extension>}
+  \i {i18n only:} \c {pics/<app name>/icons/i18n/en_US/icon.<icon extension>}
 
-  \c {pics/<QApplication::applicationName()>/icons/<icon size>/<app name>/icon>.<icon extension>}
+  \c {pics/<QApplication::applicationName()>/icons/<app name>/icon>.<icon extension>}
 
-  \c {pics/<app name>/icons/<icon size>/<icon>.<icon extension>}
+  \c {pics/<app name>/icons/<icon>.<icon extension>}
 
   \i {If none found, search for :image/[i18n/][<app name>/]<icon> as though the icon was requested as an image}
 
   In the listing above, \c {<language>} corresponds to Qtopia's configured
   language and \c {<locale>} its configured locale.  The supported
-  <icon extensions> are currently "png", "jpg", "mng" and no extension.
+  <icon extensions> are currently "pic", "svg", "png", "jpg", "mng" and no extension.
 
   More information on icon translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
+
+  Themes can override images by specifying an \c{IconPath}. See
+  \l{Images and Icons#installing-custom-icons}.
+
+  See \l{Images and Icons} for more information on icons in Qtopia.
 
   \section1 Sounds
 
@@ -426,11 +480,13 @@ QString QFileResourceFileEngineHandler::findDiskResourceFile(const QString &path
     if (path.startsWith(image)) {
 
         QString p1 = path.mid(7 /* ::strlen(:image/") */);
+        expandService(p1);
         r = findDiskImage(p1, QString());
 
     } else if (path.startsWith(icon)) {
 
         QString p1 = path.mid(6 /* ::strlen(":icon/") */);
+        expandService(p1);
         static const QString icons(QLatin1String("icons/"));
         r = findDiskImage(p1, icons);
         if ( r.isEmpty() )
@@ -590,13 +646,13 @@ QString QFileResourceFileEngineHandler::findDiskSound(const QString &path) const
     QByteArray p1 = path.toLocal8Bit();
     p1 += ".wav";
     foreach (QByteArray s, sounddirs) {
-        QByteArray r = s + p1;
+        QByteArray r = s + "/" + myApp + "/" + p1; 
         if (fileExists(r)) {
             qLog(Resource) << "WAV Sound Resource" << path << "->" << r;
             return QString::fromLocal8Bit(r);
         }
 
-        r = s + "/" + myApp + "/" + p1;
+        r = s + p1;
         if (fileExists(r)) {
             qLog(Resource) << "WAV Sound Resource" << path << "->" << r;
             return QString::fromLocal8Bit(r);

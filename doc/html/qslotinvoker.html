@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSlotInvoker Class Reference</h1>
 <p>The QSlotInvoker class provides an interface for invoking slots with explicit arguments <a href="#details">More...</a></p>
-<pre>    #include &lt;QSlotInvoker&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QSlotInvoker&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qslotinvoker-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -30,7 +30,7 @@
 <li><div class="fn"/>QObject * <b><a href="qslotinvoker.html#receiver">receiver</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -38,17 +38,16 @@
 <li><div class="fn"/>QVariant <b><a href="qslotinvoker.html#invoke">invoke</a></b> ( const QList&lt;QVariant&gt; &amp; <i>args</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -59,16 +58,16 @@
 <p>See also <a href="qsignalintercepter.html">QSignalIntercepter</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSlotInvoker"></a>QSlotInvoker::QSlotInvoker ( <a href="qobject.html">QObject</a> * <i>receiver</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>member</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSlotInvoker"></a>QSlotInvoker::QSlotInvoker ( <a href="./qobject.html">QObject</a> * <i>receiver</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>member</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a slot invoker that can invoke <i>member</i> on <i>receiver</i>. The object will be attached to <i>parent</i>, if present.</p>
 <h3 class="fn"><a name="dtor.QSlotInvoker"></a>QSlotInvoker::~QSlotInvoker ()</h3>
 <p>Destroy a slot invoker.</p>
 <h3 class="fn"><a name="canInvoke"></a>bool QSlotInvoker::canInvoke ( int <i>numArgs</i> ) const</h3>
 <p>Returns true if the member can be invoked with <i>numArgs</i> arguments. That is, the receiver has not been destroyed, the member is present, and it requires <i>numArgs</i> or less arguments.</p>
-<h3 class="fn"><a name="invoke"></a><a href="qvariant.html">QVariant</a> QSlotInvoker::invoke ( const <a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt; &amp; <i>args</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Invokes the slot represented by this object with the argument list <i>args</i>. The slot's return value is returned from this method. If the slot's return type is &quot;void&quot;, then a <a href="qvariant.html">QVariant</a> instance of type <a href="qvariant.html#Type-enum">QVariant::Invalid</a> will be returned.</p>
+<h3 class="fn"><a name="invoke"></a><a href="./qvariant.html">QVariant</a> QSlotInvoker::invoke ( const <a href="./qlist.html">QList</a>&lt;<a href="./qvariant.html">QVariant</a>&gt; &amp; <i>args</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Invokes the slot represented by this object with the argument list <i>args</i>. The slot's return value is returned from this method. If the slot's return type is &quot;void&quot;, then a <a href="./qvariant.html">QVariant</a> instance of type <a href="./qvariant.html#type-enum">QVariant::Invalid</a> will be returned.</p>
 <p>If it is possible that the slot may throw an exception, it is the responsibility of the caller to catch and handle the exception.</p>
-<h3 class="fn"><a name="member"></a><a href="qbytearray.html">QByteArray</a> QSlotInvoker::member () const</h3>
+<h3 class="fn"><a name="member"></a><a href="./qbytearray.html">QByteArray</a> QSlotInvoker::member () const</h3>
 <p>Returns the member that will receiver slot invocations.</p>
 <h3 class="fn"><a name="memberPresent"></a>bool QSlotInvoker::memberPresent () const</h3>
 <p>Returns true if the member is present on the object.</p>
@@ -76,12 +75,12 @@
 <p>Returns the parameter types associated with this member.</p>
 <h3 class="fn"><a name="parameterTypesCount"></a>int QSlotInvoker::parameterTypesCount () const</h3>
 <p>Returns the number of parameter types associated with this member.</p>
-<h3 class="fn"><a name="receiver"></a><a href="qobject.html">QObject</a> * QSlotInvoker::receiver () const</h3>
+<h3 class="fn"><a name="receiver"></a><a href="./qobject.html">QObject</a> * QSlotInvoker::receiver () const</h3>
 <p>Returns the object that will receive slot invocations.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

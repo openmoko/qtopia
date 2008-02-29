@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,6 +50,8 @@ class AtCallManagerPrivate
 public:
     AtCallManagerPrivate()
     {
+        gprs = false;
+        incoming_call = false;
         calls = 0;
         ringTimer = 0;
         handler = 0;
@@ -79,6 +81,10 @@ public:
     bool haveMultiple( QPhoneCall::State state );
     bool didStateChange( int id, AtCallManager::CallState state );
     void setWaiting( int id );
+
+    
+    bool incoming_call;  // whether the call is incoming (or outgoing)
+    bool gprs;           // whether the call is a GPRS call
 };
 
 QPhoneCall AtCallManagerPrivate::callForId( int id )
@@ -255,6 +261,7 @@ QAtResult::ResultCode AtCallManager::dial( const QString& _dialString )
     if ( !_dialString.endsWith( ";" ) ) {
         //TODO fax calls -> assuming data call only at this stage
         QPhoneCall dataCall = d->callManager->create( "Data" );
+        if ( dataCall.isNull() ) return QAtResult::NoCarrier;
         AtOptions *options = d->handler->options();
         QDialOptions opts;
         opts.setNumber( dialString );
@@ -271,6 +278,11 @@ QAtResult::ResultCode AtCallManager::dial( const QString& _dialString )
             opts.setTransparentMode
                 ( (QDialOptions::TransparentMode)options->cbstCe );
         }
+        if ( opts.contextId() != 0 )
+        {
+            d->gprs = true;
+        }
+
         dataCall.dial( opts );
         newCall( dataCall );
 
@@ -283,40 +295,44 @@ QAtResult::ResultCode AtCallManager::dial( const QString& _dialString )
         return AtCallManager::Defer;
     }
 
-    // Strip off the ';', and then check for the 'g' and 'i' modifiers.
-    int len = dialString.length() - 1;
-    QDialOptions::CallerId callerid;
-    bool closedUserGroup;
-    if ( len > 0 &&
-         ( dialString[len - 1] == 'g' || dialString[len - 1] == 'G' ) ) {
-        dialString = dialString.left( len - 1 );
-        closedUserGroup = true;
-    } else {
-        closedUserGroup = false;
-    }
-    if ( len > 0 && dialString[len - 1] == 'i' ) {
-        dialString = dialString.left( len - 1 );
-        callerid = QDialOptions::SendCallerId;
-    } else if ( len > 0 && dialString[len - 1] == 'I' ) {
-        dialString = dialString.left( len - 1 );
-        callerid = QDialOptions::SuppressCallerId;
-    } else {
-        callerid = QDialOptions::DefaultCallerId;
-    }
-    dialString = dialString.left( len );
-    if ( dialString.isEmpty() )
-        return QAtResult::Error;
-
     // Determine the call type to use.
+    int len = dialString.length() - 1;
+    QDialOptions::CallerId callerid = QDialOptions::DefaultCallerId;
+    bool closedUserGroup = false;
     QString callType;
     if ( dialString.startsWith( "sip:", Qt::CaseInsensitive ) ) {
         callType = "VoIP";      // No tr
     } else {
         callType = "Voice";     // No tr
+
+        // check for the 'g' and 'i' modifiers.
+        if ( len > 0 &&
+             ( dialString[len - 1] == 'g' || dialString[len - 1] == 'G' ) ) {
+            dialString = dialString.left( len - 1 );
+            closedUserGroup = true;
+        } else {
+            closedUserGroup = false;
+        }
+
+        if ( len > 0 && dialString[len - 1] == 'i' ) {
+            dialString = dialString.left( len - 1 );
+            callerid = QDialOptions::SendCallerId;
+        } else if ( len > 0 && dialString[len - 1] == 'I' ) {
+            dialString = dialString.left( len - 1 );
+            callerid = QDialOptions::SuppressCallerId;
+        } else {
+            callerid = QDialOptions::DefaultCallerId;
+        }
     }
 
-    // Create a new call and dial it.
+    // Strip off the ';'
+    dialString = dialString.left( len );
+    if ( dialString.isEmpty() )
+        return QAtResult::Error;
+
+    // Create a new call and dial it if it is valid.
     QPhoneCall call = d->callManager->create( callType );
+    if ( call.isNull() ) return QAtResult::NoCarrier;
     QDialOptions opts;
     opts.setNumber( dialString );
     opts.setCallerId( callerid );
@@ -421,6 +437,15 @@ QAtResult::ResultCode AtCallManager::transfer()
     return QAtResult::OK;
 }
 
+QAtResult::ResultCode AtCallManager::transferIncoming( const QString& number )
+{
+    QPhoneCall call = d->callForState( QPhoneCall::Incoming );
+    if ( ! call.isNull() ) {
+        call.transfer( number );
+    }
+    return QAtResult::OK;
+}
+
 QAtResult::ResultCode AtCallManager::tone( const QString& value )
 {
     QPhoneCall call = d->callForState( QPhoneCall::Connected );
@@ -464,6 +489,7 @@ void AtCallManager::callStateChanged( const QPhoneCall& call )
 
         case QPhoneCall::Incoming:
         {
+            d->incoming_call = true;
             reportState = CallWaiting;
             if ( newCall ) {
                 // If there are connected or held calls, then this
@@ -491,6 +517,7 @@ void AtCallManager::callStateChanged( const QPhoneCall& call )
         case QPhoneCall::Dialing:
         case QPhoneCall::Alerting:
         {
+            d->incoming_call = false;
             reportState = CallCalling;
         }
         break;
@@ -498,12 +525,29 @@ void AtCallManager::callStateChanged( const QPhoneCall& call )
         case QPhoneCall::Connected:
         {
             reportState = CallActive;
+
+            // first, do any +COLP we may need to present.
+            if ( !d->incoming_call ) {
+                // we have a new outgoing connection.
+                emit outgoingConnected( call.number() );
+            }
+
             if ( call.callType() == "Data" ) {
+                // do service reporting control +CR - note that this is for data calls only (automatic at this stage)
+                AtOptions *options = d->handler->options();
+                bool asynchronous = ( (QDialOptions::Bearer)options->cbstName == QDialOptions::DataCircuitAsyncUDI ||
+                                      (QDialOptions::Bearer)options->cbstName == QDialOptions::PadAccessUDI ||
+                                      (QDialOptions::Bearer)options->cbstName == QDialOptions::DataCircuitAsyncRDI ||
+                                      (QDialOptions::Bearer)options->cbstName == QDialOptions::PadAccessRDI );
+                bool transparent = ( (QDialOptions::TransparentMode)options->cbstCe == QDialOptions::NonTransparent );
+                emit dialingOut( asynchronous, transparent, d->gprs );
+
                 //a data call is always deferred
                 QIODevice* dev = call.device();
                 d->handler->frontEnd()->setDataSource( dev );
                 emit deferredResult( d->handler, QAtResult::Connect );
             }
+
         }
         break;
 

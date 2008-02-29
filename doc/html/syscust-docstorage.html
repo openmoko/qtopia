@@ -116,7 +116,7 @@
     Path=Updates</pre>
 <a name=""></a>
 <h4><tt>Packages</tt></h4>
-<p>The <tt>Packages</tt> group specifies where downloaded packages are installed to:</p>
+<a name="package-storage-conf"></a><p>The <tt>Packages</tt> group specifies where downloaded packages are installed to:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Purpose</th><th>Value Type</th><th>Example</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>MountPoint</tt></td><td>Specifies the group key of the mount point Qtopia packages are installed to.</td><td>string</td><td><tt>HOME</tt></td></tr>
@@ -148,10 +148,10 @@
 <a name="explicit-mount-unmount-notifications"></a>
 <h3>Explicit Mount/Unmount Notifications</h3>
 <p>If monitoring mtab/stab or lazy unmounting in unsuitable, Qtopia can also be explicitly informed of a mount or pending unmount. This is done by sending messages to the <tt>QPE/QStorage</tt> QCop channel.</p>
-<p>The <tt>mounting(QString)</tt> message notifies Qtopia that a storage device has been mounted, the <a href="qstring.html">QString</a> argument is the device path of the storage device mounted. In response to this Qtopia will add the storage device to the list of connected devices, load it's content database if it has one, and start a document scan.</p>
+<p>The <tt>mounting(QString)</tt> message notifies Qtopia that a storage device has been mounted, the <a href="./qstring.html">QString</a> argument is the device path of the storage device mounted. In response to this Qtopia will add the storage device to the list of connected devices, load it's content database if it has one, and start a document scan.</p>
 <p><b>Example</b>: Sending a notification that the storage device with the device path <tt>/dev/mmca</tt> has been mounted:</p>
 <pre>    QtopiaChannel::send( &quot;QPE/QStorage&quot;, &quot;mounting(QString)&quot;, &quot;/dev/mmca&quot; );</pre>
-<p>The <tt>unmounting(QString)</tt> message notifies Qtopia that a storage device is about to be unmounted, the <a href="qstring.html">QString</a> argument is the device path of the storage device to be unmounted. In response to this Qtopia will remove the storage device from the list of connected devices, and close the content database if it has one.</p>
+<p>The <tt>unmounting(QString)</tt> message notifies Qtopia that a storage device is about to be unmounted, the <a href="./qstring.html">QString</a> argument is the device path of the storage device to be unmounted. In response to this Qtopia will remove the storage device from the list of connected devices, and close the content database if it has one.</p>
 <p><b>Example</b>: Sending a notification that the storage device with the device path <tt>/dev/mmca</tt> is about to be unmounted:</p>
 <pre>    QtopiaChannel::send( &quot;QPE/QStorage&quot;, &quot;unmounting(QString)&quot;, &quot;/dev/mmca&quot; );</pre>
 <a name="using-read-only-file-systems"></a>
@@ -163,8 +163,8 @@
 </ul>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

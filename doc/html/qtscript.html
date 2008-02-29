@@ -76,6 +76,7 @@
 <a name="language-overview"></a>
 <h3>Language Overview</h3>
 <p>Qt Script is based on the ECMAScript scripting language, as defined in standard <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">ECMA-262</a>. Microsoft's JScript, and Netscape's JavaScript are also based on the ECMAScript standard. For an overview of ECMAScript, see the <a href="ecmascript.html">ECMAScript reference</a>. If you are not familiar with the ECMAScript language, there are several existing tutorials and books that cover this subject, such as <a href="http://www.davidflanagan.com/javascript5/">JavaScript: The Definitive Guide</a>.</p>
+<p>Existing users of <a href="http://trolltech.com/products/qt/addon/qsa">Qt Script for Applications (QSA)</a> may find the <a href="porting-qsa.html">Moving from QSA to Qt Script</a> document useful when porting QSA scripts to Qt Script.</p>
 <a name="basic-usage"></a>
 <h3>Basic Usage</h3>
 <p>To evaluate script code, you create a <a href="qscriptengine.html">QScriptEngine</a> and call its evaluate() function, passing the script code (text) to evaluate as argument.</p>
@@ -148,11 +149,11 @@
 <a name="overloaded-signals-and-slots"></a>
 <h5>Overloaded Signals and Slots</h5>
 <p>When a signal or slot is overloaded, QtScript will attempt to pick the right overload based on the actual types of the <a href="qscriptvalue.html">QScriptValue</a> arguments involved in the function invocation. For example, if your class has slots <tt>myOverloadedSlot(int)</tt> and <tt>myOverloadedSlot(QString)</tt>, the following script code will behave reasonably:</p>
-<pre> myQObject.myOverloadedSlot(10);   <span class="comment">// will call the int overload</span>
- myQObject.myOverloadedSlot(&quot;10&quot;); <span class="comment">// will call the QString overload</span></pre>
+<pre> myQObject.myOverloadedSlot(10);   <span class="comment">//</span> will call the int overload
+ myQObject.myOverloadedSlot(&quot;10&quot;); <span class="comment">//</span> will call the QString overload</pre>
 <p>You can specify a particular overload by using array-style property access with the <a href="qmetaobject.html#normalizedSignature">normalized signature</a> of the C++ function as the property name:</p>
-<pre> myQObject['myOverloadedSlot(int)'](&quot;10&quot;);   <span class="comment">// call int overload; the argument is converted to an int</span>
- myQObject['myOverloadedSlot(QString)'](10); <span class="comment">// call QString overload; the argument is converted to a string</span></pre>
+<pre> myQObject['myOverloadedSlot(int)'](&quot;10&quot;);   <span class="comment">//</span> call int overload; the argument is converted to an int
+ myQObject['myOverloadedSlot(QString)'](10); <span class="comment">//</span> call QString overload; the argument is converted to a string</pre>
 <p>If the overloads have different number of arguments, QtScript will pick the overload with the argument count that best matches the actual number of arguments passed to the slot.</p>
 <p>For overloaded signals, QtScript will connect to the most general overload, unless you refer to the signal with its full normalized signature.</p>
 <a name="accessing-properties"></a>
@@ -171,17 +172,17 @@
 <pre> myDialog.okButton</pre>
 <p>Since <tt>objectName</tt> is itself a Q_PROPERTY, you can manipulate the name in script code to, for example, rename an object:</p>
 <pre> myDialog.okButton.objectName = &quot;cancelButton&quot;;
-<span class="comment"> // from now on, myDialog.cancelButton references the button</span></pre>
+<span class="comment"> //</span> from now on, myDialog.cancelButton references the button</pre>
 <p>You can also use the functions <tt>findChild()</tt> and <tt>findChildren()</tt> to find children. These two functions behave identically to <a href="qobject.html#findChild">QObject::findChild</a>() and <a href="qobject.html#findChildren">QObject::findChildren</a>(), respectively.</p>
 <p>For example, we can use these functions to find objects using strings and regular expressions:</p>
 <pre> var okButton = myDialog.findChild(&quot;okButton&quot;);
  if (okButton != null) {
-    <span class="comment">// do something with the OK button</span>
+    <span class="comment">//</span> do something with the OK button
  }
 
  var buttons = myDialog.findChildren(RegExp(&quot;button[0-9]+&quot;));
  for (var i = 0; i &lt; buttons.length; ++i) {
-    <span class="comment">// do something with buttons[i]</span>
+    <span class="comment">//</span> do something with buttons[i]
  }</pre>
 <p>You typically want to use <tt>findChild()</tt> when manipulating a form that uses nested layouts; that way the script is isolated from the details about which particular layout a widget is located in.</p>
 <a name="controlling-qobject-ownership"></a>
@@ -191,7 +192,7 @@
 <p>For example, a constructor function that constructs QObjects only to be used in the script environment is a good candidate:</p>
 <pre> QScriptValue myQObjectConstructor(QScriptContext *context, QScriptEngine *engine)
  {
-   <span class="comment">// let the engine manage the new object's lifetime.</span>
+   <span class="comment">//</span> let the engine manage the new object's lifetime.
    return engine-&gt;newQObject(new MyQObject(), QScriptEngine::ScriptOwnership);
  }</pre>
 <p>Another ownership mode is <a href="qscriptengine.html#ValueOwnership-enum">QScriptEngine::AutoOwnership</a>, where the ownership is based on whether the <a href="qobject.html">QObject</a> has a parent or not. If the QtScript garbage collector finds that the <a href="qobject.html">QObject</a> is no longer referenced within the script environment, the <a href="qobject.html">QObject</a> will be deleted <b>only</b> if it does not have a parent.</p>
@@ -290,7 +291,7 @@
 
        void aNonScriptableFunction();
 
-   public slots: <span class="comment">// these functions (slots) will be available in Qt Script</span>
+   public slots: <span class="comment">//</span> these functions (slots) will be available in Qt Script
        void calculate( ... );
        void setEnabled( bool enabled );
        bool isEnabled() const;
@@ -326,7 +327,7 @@
 <pre>   class MyObject : public QObject
    {
        Q_OBJECT
-       <span class="comment">// define the enabled property</span>
+       <span class="comment">//</span> define the enabled property
        Q_PROPERTY( bool enabled WRITE setEnabled READ isEnabled )
 
    public:
@@ -334,7 +335,7 @@
 
        void aNonScriptableFunction();
 
-   public slots: <span class="comment">// these functions (slots) will be available in Qt Script</span>
+   public slots: <span class="comment">//</span> these functions (slots) will be available in Qt Script
        void calculate( ... );
        void setEnabled( bool enabled );
        bool isEnabled() const;
@@ -353,7 +354,7 @@
 <pre>   class MyObject : public QObject
    {
        Q_OBJECT
-       <span class="comment">// define the enabled property</span>
+       <span class="comment">//</span> define the enabled property
        Q_PROPERTY( bool enabled WRITE setEnabled READ isEnabled )
 
    public:
@@ -361,12 +362,12 @@
 
        void aNonScriptableFunction();
 
-   public slots: <span class="comment">// these functions (slots) will be available in Qt Script</span>
+   public slots: <span class="comment">//</span> these functions (slots) will be available in Qt Script
        void calculate( ... );
        void setEnabled( bool enabled );
        bool isEnabled() const;
 
-   signals: <span class="comment">// the signals</span>
+   signals: <span class="comment">//</span> the signals
        void enabledChanged( bool newState );
 
    private:
@@ -382,7 +383,7 @@
    function init()
    {
        var obj = new MyObject();
-       <span class="comment">// connect a script function to the signal</span>
+       <span class="comment">//</span> connect a script function to the signal
        obj[&quot;enabledChanged(bool)&quot;].connect(enabledChangedHandler);
        obj.enabled = true;
        print( &quot;obj is enabled: &quot; + obj.enabled );
@@ -402,9 +403,9 @@
 <p>For example, when you create a new object by the expression <tt>new Object()</tt>, the resulting object will have as its prototype the standard <tt>Object</tt> prototype, <tt>Object.prototype</tt>; through this prototype relation, the new object inherits a set of properties, including the <tt>hasOwnProperty()</tt> function and <tt>toString()</tt> function:</p>
 <pre> var o = new Object();
  o.foo = 123;
- print(o.hasOwnProperty('foo')); <span class="comment">// true</span>
- print(o.hasOwnProperty('bar')); <span class="comment">// false</span>
- print(o); <span class="comment">// calls o.toString(), which returns &quot;[object Object]&quot;</span></pre>
+ print(o.hasOwnProperty('foo')); <span class="comment">//</span> true
+ print(o.hasOwnProperty('bar')); <span class="comment">//</span> false
+ print(o); <span class="comment">//</span> calls o.toString(), which returns &quot;[object Object]&quot;</pre>
 <p>The <tt>toString()</tt> function itself is not defined in <tt>o</tt> (since we did not assign anything to <tt>o.toString</tt>), so instead the <tt>toString()</tt> function in the standard <tt>Object</tt> prototype is called, which returns a highly generic string representation of <tt>o</tt> (&quot;[object Object]&quot;).</p>
 <p>Note that the properties of the prototype object are not <i>copied</i> to the new object; only a <i>link</i> from the new object to the prototype object is maintained. This means that changes done to the prototype object will immediately be reflected in the behavior of all objects that have the modified object as their prototype.</p>
 <a name="defining-classes-in-a-prototype-based-universe"></a>
@@ -427,33 +428,33 @@
 <p>This resembles the process of reimplementing a virtual function in C++. Henceforth, when the property named <tt>toString</tt> is looked up in a <tt>Person</tt> object, it will be resolved in <tt>Person.prototype</tt>, not in <tt>Object.prototype</tt> as before:</p>
 <pre> var p1 = new Person(&quot;John Doe&quot;);
  var p2 = new Person(&quot;G.I. Jane&quot;);
- print(p1); <span class="comment">// &quot;Person(name: John Doe)&quot;</span>
- print(p2); <span class="comment">// &quot;Person(name: G.I. Jane)&quot;</span></pre>
+ print(p1); <span class="comment">//</span> &quot;Person(name: John Doe)&quot;
+ print(p2); <span class="comment">//</span> &quot;Person(name: G.I. Jane)&quot;</pre>
 <p>There are also some other interesting things we can learn about a <tt>Person</tt> object:</p>
-<pre> print(p1.hasOwnProperty('name')); <span class="comment">// 'name' is an instance variable, so this returns true</span>
- print(p1.hasOwnProperty('toString')); <span class="comment">// returns false; inherited from prototype</span>
- print(p1 instanceof Person); <span class="comment">// true</span>
- print(p1 instanceof Object); <span class="comment">// true</span></pre>
+<pre> print(p1.hasOwnProperty('name')); <span class="comment">//</span> 'name' is an instance variable, so this returns true
+ print(p1.hasOwnProperty('toString')); <span class="comment">//</span> returns false; inherited from prototype
+ print(p1 instanceof Person); <span class="comment">//</span> true
+ print(p1 instanceof Object); <span class="comment">//</span> true</pre>
 <p>The <tt>hasOwnProperty()</tt> function is not inherited from <tt>Person.prototype</tt>, but rather from <tt>Object.prototype</tt>, which is the prototype of <tt>Person.prototype</tt> itself; i.e&#x2e;, the prototype chain of <tt>Person</tt> objects is <tt>Person.prototype</tt> followed by <tt>Object.prototype</tt>. This prototype chain establishes a <i>class hierarchy</i>, as demonstrated by applying the <tt>instanceof</tt> operator; <tt>instanceof</tt> checks if the value of the public <tt>prototype</tt> property of the constructor function on the right-hand side is reached by following the prototype chain of the object on the left-hand side.</p>
 <p>When defining subclasses, there's a general pattern you can use. The following example shows how one can create a subclass of <tt>Person</tt> called <tt>Employee</tt>:</p>
 <pre> function Employee(name, salary)
  {
-   Person.call(this, name); <span class="comment">// call base constructor</span>
+   Person.call(this, name); <span class="comment">//</span> call base constructor
 
    this.salary = salary;
  }
 
-<span class="comment"> // set the prototype to be an instance of the base class</span>
+<span class="comment"> //</span> set the prototype to be an instance of the base class
  Employee.prototype = new Person();
 
-<span class="comment"> // initialize prototype</span>
+<span class="comment"> //</span> initialize prototype
  Employee.prototype.toString = function() { ... }</pre>
 <p>Again, you can use the <tt>instanceof</tt> to verify that the class relationship between <tt>Employee</tt> and <tt>Person</tt> has been correctly established:</p>
 <pre> var e = new Employee(&quot;Johnny Bravo&quot;, 5000000);
- print(e instanceof Employee); <span class="comment">// true</span>
- print(e instanceof Person);   <span class="comment">// true</span>
- print(e instanceof Object);   <span class="comment">// true</span>
- print(e instanceof Array);    <span class="comment">// false</span></pre>
+ print(e instanceof Employee); <span class="comment">//</span> true
+ print(e instanceof Person);   <span class="comment">//</span> true
+ print(e instanceof Object);   <span class="comment">//</span> true
+ print(e instanceof Array);    <span class="comment">//</span> false</pre>
 <p>This shows that the prototype chain of <tt>Employee</tt> objects is the same as that of <tt>Person</tt> objects, but with <tt>Employee.prototype</tt> added to the front of the chain.</p>
 <a name="prototype-based-programming-with-the-qtscript-c-api"></a>
 <h4>Prototype-Based Programming with the QtScript C++ API</h4>
@@ -470,15 +471,15 @@
 <h3>Qt Script Extensions to ECMAScript</h3>
 <ul>
 <li><tt>__proto__</tt> <br /> The prototype of an object (<a href="qscriptvalue.html#prototype">QScriptValue::prototype</a>()) can be accessed through its <tt>__proto__</tt> property in script code. This property has the <a href="qscriptvalue.html#PropertyFlag-enum">QScriptValue::Undeletable</a> flag set. For example:<pre>   var o = new Object();
-   (o.__proto__ === Object.prototype); <span class="comment">// this evaluates to true</span></pre>
+   (o.__proto__ === Object.prototype); <span class="comment">//</span> this evaluates to true</pre>
 </li>
 <li><tt>Object.prototype.__defineGetter__</tt> <br /> This function installs a getter function for a property of an object. The first argument is the property name, and the second is the function to call to get the value of that property. When the function is invoked, the <tt>this</tt> object will be the object whose property is accessed. For example:<pre>   var o = new Object();
    o.__defineGetter__(&quot;x&quot;, function() { return 123; });
-   var y = o.x; <span class="comment">// 123</span></pre>
+   var y = o.x; <span class="comment">//</span> 123</pre>
 </li>
 <li><tt>Object.prototype.__defineSetter__</tt> <br /> This function installs a setter function for a property of an object. The first argument is the property name, and the second is the function to call to set the value of that property. When the function is invoked, the <tt>this</tt> object will be the object whose property is accessed. For example:<pre>   var o = new Object();
    o.__defineSetter__(&quot;x&quot;, function(v) { print(&quot;and the value is:&quot;, v); });
-   o.x = 123; <span class="comment">// will print &quot;and the value is: 123&quot;</span></pre>
+   o.x = 123; <span class="comment">//</span> will print &quot;and the value is: 123&quot;</pre>
 </li>
 <li><tt>Function.prototype.connect</tt> <br /> This function connects a signal to a slot. Usage of this function is described in the section <a href="#using-signals-and-slots">Using Signals and Slots</a>.</li>
 <li><tt>Function.prototype.disconnect</tt> <br /> This function disconnects a signal from a slot. Usage of this function is described in the section <a href="#using-signals-and-slots">Using Signals and Slots</a>.</li>
@@ -506,8 +507,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

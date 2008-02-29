@@ -32,9 +32,21 @@
         -home home .............  Use HOME &lt;home&gt;, defaults to $QPEHOME if set;
                                   otherwise defaults to $QPEDIR/home.
                                   Default: /home/qt/tmp/qtopia/qtopia-opensource-4.3
-                                  .0/home
+                                  .1/home
         -qvfb arguments ........  Extra arguments for QVFb.
         -qvfb-only .............  Only run QVFb.
+        -phonesim arguments ....  Extra arguments for phonesim.
+        -phonesim-port num .....  Use phonesim port number &lt;num&gt;.
+                                  Default: 12345
+
+      * -run-phonesim ..........  Run phonesim (QTOPIA_PHONE_DEVICE must be unset or
+                                  set to sim:localhost).
+        -no-run-phonesim .......  Do not run phonesim.
+
+        -restart-phonesim ......  Restart phonesim if it is running (kill any
+                                  processes using the phonesim port).
+      * -no-restart-phonesim ...  Do not restart phonesim if it is running.
+
         -performance ...........  Run Qtopia in performance test mode (not
                                   compatible with -exec or -runmode).
         -test ..................  Enable test hooks in Qtopia.
@@ -56,6 +68,10 @@
         -exec shell code .......  Specify the command(s) to run. The argument is
                                   interpreted by the shell so any shell code is
                                   valid here.
+
+      * -rpath .................  Qtopia was built with an RPATH.
+        -no-rpath ..............  Qtopia was not built with an RPATH. Set
+                                  LD_LIBRARY_PATH so that it can work.
 
     Run mode details:
 

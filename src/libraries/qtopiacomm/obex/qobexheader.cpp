@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,17 +22,14 @@
 #include <private/qobexauthenticationchallenge_p.h>
 #include <private/qobexauthentication_p.h>
 
-#include <QDebug>
 #include <QList>
 #include <QDataStream>
+#include <QDebug>
 
 #include <openobex/obex.h>
 #include <netinet/in.h>
 
 #include <typeinfo>
-
-
-#undef QOBEXHEADER_DEBUG
 
 
 // the format for the Time header as defined in spec (IrOBEX 1.3, section 2.2.5)
@@ -54,6 +51,8 @@ QObexHeaderPrivate::~QObexHeaderPrivate()
 
 void QObexHeaderPrivate::setValue(int headerId, const QVariant &data)
 {
+    if (!m_hash.contains(headerId))
+        m_ids.append(headerId);
     m_hash[headerId] = data;
 }
 
@@ -66,7 +65,15 @@ bool QObexHeaderPrivate::remove(int headerId)
 {
     if (headerId == QObexHeader::AuthChallenge && m_hash.contains(headerId))
         m_challengeNonce.clear();
-    return (m_hash.remove(headerId) > 0);
+
+    if (m_hash.contains(headerId)) {
+        int index = m_ids.indexOf(headerId);
+        Q_ASSERT(index != -1);
+        m_ids.removeAt(index);
+        m_hash.remove(headerId);
+        return true;
+    }
+    return false;
 }
 
 bool QObexHeaderPrivate::contains(int headerId) const
@@ -76,13 +83,14 @@ bool QObexHeaderPrivate::contains(int headerId) const
 
 void QObexHeaderPrivate::clear()
 {
+    m_ids.clear();
     m_hash.clear();
     m_challengeNonce.clear();
 }
 
 QList<int> QObexHeaderPrivate::keys() const
 {
-    return m_hash.keys();
+    return m_ids;
 }
 
 int QObexHeaderPrivate::size() const
@@ -229,12 +237,6 @@ bool QObexHeaderPrivate::readOpenObexHeaders(QObexHeader &header, obex_t* handle
     unsigned int hv_size;
 
     while (OBEX_ObjectGetNextHeader(handle, obj, &hi, &hv, &hv_size))   {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader::readObexHeader()"
-            << headerIdToString(static_cast<QObexHeader::HeaderId>(hi))
-            << "size:" << hv_size;
-#endif
-
         /*
         For each case, check whether the value is empty (e.g. name might
         be empty) otherwise it'll blow up...
@@ -295,10 +297,6 @@ bool QObexHeaderPrivate::readOpenObexHeaders(QObexHeader &header, obex_t* handle
                 break;
 
             default:
-#ifdef QOBEXHEADER_DEBUG
-                qDebug() << "readOpenObexHeaders() parse error: unknown encoding"
-                        << (hi & QObexHeaderPrivate::HeaderEncodingMask);
-#endif
                 return false;
         }
     }
@@ -318,11 +316,6 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
 {
     if (!handle || !obj)
         return false;
-
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writeOpenObexHeaders(). Fit one packet?:"
-                << fitOnePacket;
-#endif
 
     int flags = ( fitOnePacket ? OBEX_FL_FIT_ONE_PACKET : 0 );
     obex_headerdata_t hv;
@@ -349,26 +342,6 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
         }
     }
 
-    // Handle Type header separately because it must be null terminated ascii.
-    if (header.contains(QObexHeader::Type)) {
-        // +1 when adding header to add a null terminator byte
-        QByteArray bytes = header.type().toAscii();
-        hv.bs = reinterpret_cast<const uint8_t*>(bytes.constData());
-        if (OBEX_ObjectAddHeader(handle, obj, OBEX_HDR_TYPE, hv,
-                             bytes.size() + 1, flags) < 0) {
-            return false;
-        }
-
-        // Add PalmOS-style application id header
-        if (!bytes.isEmpty() &&
-                (bytes.mid(0, bytes.size()-1) == "text/x-vCalendar")) {
-            hv.bq4 = 0x64617465;
-            if (OBEX_ObjectAddHeader(handle, obj, 0xcf, hv, 4, flags) < 0) {
-                return false;
-            }
-        }
-    }
-
     // now go through all the other headers
     QList<int> headerIds = header.headerIds();
 
@@ -377,22 +350,14 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
 
         // skip the previously handled headers
         if (headerId == QObexHeader::ConnectionId ||
-                headerId == QObexHeader::Target ||
-                    headerId == QObexHeader::Type) {
+                headerId == QObexHeader::Target) {
             continue;
         }
-
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writing header:" << headerId;
-#endif
 
         switch (headerId & QObexHeaderPrivate::HeaderEncodingMask) {
 
             case QObexHeaderPrivate::HeaderUnicodeEncoding:
             {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writing unicode header";
-#endif
                 QByteArray bytes;
                 QObexHeaderPrivate::unicodeBytesFromString(bytes,
                         header.value(headerId).toString());
@@ -407,23 +372,37 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
 
             case QObexHeaderPrivate::HeaderByteSequenceEncoding:
             {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writing byte sequence header";
-#endif
-                QByteArray bytes = header.value(headerId).toByteArray();
-                hv.bs = reinterpret_cast<const uchar *>(bytes.constData());
-                if (OBEX_ObjectAddHeader(handle, obj, headerId, hv, bytes.size(),
-                                     flags) < 0) {
-                    return false;
+                if (headerId == QObexHeader::Type) {
+                    // Handle Type header separately because it must be null terminated
+                    // ascii. Use +1 when adding header to add a null terminator byte.
+                    QByteArray bytes = header.type().toAscii();
+                    hv.bs = reinterpret_cast<const uint8_t*>(bytes.constData());
+                    if (OBEX_ObjectAddHeader(handle, obj, OBEX_HDR_TYPE, hv,
+                                        bytes.size() + 1, flags) < 0) {
+                        return false;
+                    }
+
+                    // Add PalmOS-style application id header
+                    if (!bytes.isEmpty() && header.type().compare("text/x-vCalendar",
+                                Qt::CaseInsensitive) == 0) {
+                        hv.bq4 = 0x64617465;
+                        if (OBEX_ObjectAddHeader(handle, obj, 0xcf, hv, 4, flags) < 0) {
+                            return false;
+                        }
+                    }
+                } else {
+                    QByteArray bytes = header.value(headerId).toByteArray();
+                    hv.bs = reinterpret_cast<const uchar *>(bytes.constData());
+                    if (OBEX_ObjectAddHeader(handle, obj, headerId, hv, bytes.size(),
+                                        flags) < 0) {
+                        return false;
+                    }
                 }
                 break;
             }
 
             case QObexHeaderPrivate::HeaderByteEncoding:
             {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writing byte header";
-#endif
                 QVariant v = header.value(headerId);
                 if (v.canConvert<quint8>()) {
                     hv.bq1 = v.value<quint8>();
@@ -433,9 +412,6 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
                     }
                 } else {
                     // this shouldn't happen since setValue() does a check
-#ifdef QOBEXHEADER_DEBUG
-                    qDebug() << "QObexHeader: writeOpenObexHeaders() error: header with ID" << headerId << "should have quint8 value, but was" << v;
-#endif
                     return false;
                 }
                 break;
@@ -443,9 +419,6 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
 
             case QObexHeaderPrivate::HeaderIntEncoding:
             {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: writing int header";
-#endif
                 QVariant v = header.value(headerId);
                 if (v.canConvert<quint32>()) {
                     hv.bq4 = v.value<quint32>();
@@ -454,26 +427,15 @@ bool QObexHeaderPrivate::writeOpenObexHeaders(obex_t* handle, obex_object_t *obj
                         return false;
                     }
                 } else {
-#ifdef QOBEXHEADER_DEBUG
                     // this shouldn't happen since setValue() does a check
-                    qDebug() << "QObexHeader: writeOpenObexHeaders() error: header with ID" << headerId << "should have quint32 value, but was" << v;
-#endif
                     return false;
                 }
                 break;
             }
 
             default:
-#ifdef QOBEXHEADER_DEBUG
-                qDebug() << "QObexHeader: writeOpenObexHeaders() error: unknown encoding"
-                        << (headerId & QObexHeaderPrivate::HeaderEncodingMask);
-#endif
                 return false;
         }
-
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader: headers written OK";
-#endif
     }
 
     return true;
@@ -500,10 +462,6 @@ bool QObexHeaderPrivate::requestShouldFitOnePacket(QObex::Request request)
         case QObex::NoRequest:
             break;
     }
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader: requestShouldFitOnePacket() bad argument:"
-            << request;
-#endif
     return true;
 }
 
@@ -643,6 +601,7 @@ QObexHeader &QObexHeader::operator=(const QObexHeader &other)
     if (this == &other)
         return *this;
 
+    m_data->m_ids = other.m_data->m_ids;
     m_data->m_hash = other.m_data->m_hash;
     m_data->m_challengeNonce = other.m_data->m_challengeNonce;
 
@@ -650,8 +609,8 @@ QObexHeader &QObexHeader::operator=(const QObexHeader &other)
 }
 
 /*!
-    Returns \c true if \a other is equal to this header; otherwise returns
-    \c false.
+    Returns \c true if \a other contains the same values as this header;
+    otherwise returns \c false.
 
     \sa operator!=()
 */
@@ -660,6 +619,8 @@ bool QObexHeader::operator==(const QObexHeader &other) const
     if (this == &other)
         return true;
 
+    // The header ordering is not checked - only the header values. As long
+    // as the values are the same, we will consider the headers to be the same.
     return (m_data->m_hash == other.m_data->m_hash);
 }
 
@@ -684,8 +645,6 @@ bool QObexHeader::contains(int headerId) const
 
 /*!
     Returns a list of the header identifiers in this set of headers.
-
-    The list is not sorted in any particular order.
 
     \sa contains()
  */
@@ -729,9 +688,6 @@ quint32 QObexHeader::count() const
     if (c.canConvert<quint32>())
         return c.value<quint32>();
 
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader::count() can't convert count to quint32!";
-#endif
     return 0;
 }
 
@@ -823,26 +779,19 @@ quint32 QObexHeader::length() const
     if (len.canConvert<quint32>())
         return len.value<quint32>();
 
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader::length() can't convert length to quint32!";
-#endif
     return 0;
 }
 
 /*!
-    Sets the value of the OBEX header field \c Time to \a dateTime, if
-    \a dateTime is a valid QDateTime object.
+    If \a dateTime is a valid QDateTime object, sets the value of the OBEX 
+    header field \c Time to \a dateTime.
 
     \sa time()
  */
 void QObexHeader::setTime(const QDateTime &dateTime)
 {
-    if (!dateTime.isValid()) {
-#ifdef QOBEXHEADER_DEBUG
-        qDebug() << "QObexHeader::setTime() given invalid dateTime, it won't be added!";
-#endif
+    if (!dateTime.isValid()) 
         return;
-    }
     QString s;
     QObexHeaderPrivate::stringFromDateTime(s, dateTime);
     setValue(Time, s);
@@ -1011,9 +960,6 @@ quint32 QObexHeader::connectionId() const
     if (headerId.canConvert<quint32>())
         return headerId.value<quint32>();
 
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader::connectionId() can't convert length to quint32!";
-#endif
     return 0;
 }
 
@@ -1070,9 +1016,6 @@ quint32 QObexHeader::creatorId() const
     if (headerId.canConvert<quint32>())
         return headerId.value<quint32>();
 
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader::creatorId() can't convert creatorId to quint32!";
-#endif
     return 0;
 }
 
@@ -1192,9 +1135,6 @@ quint8 QObexHeader::sessionSequenceNumber() const
     if (num.canConvert<quint8>())
         return num.value<quint8>();
 
-#ifdef QOBEXHEADER_DEBUG
-    qDebug() << "QObexHeader::sessionSequenceNumber() can't convert num to quint8!";
-#endif
     return 0;
 }
 
@@ -1265,10 +1205,6 @@ bool QObexHeader::setValue(int headerId, const QVariant &variant)
                 return false;
             break;
         default:
-#ifdef QOBEXHEADER_DEBUG
-            qDebug() << "QObexHeader::setValue() Unknown header encoding:"
-                    << (headerId & QObexHeaderPrivate::HeaderEncodingMask);
-#endif
             return false;
     }
 

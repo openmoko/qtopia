@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -41,10 +41,16 @@
 #include <QDateTime>
 #include <QItemDelegate>
 #include <QCache>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QEvent>
+#include <QScrollBar>
 
 class ThumbnailRequest
 {
 public:
+    ThumbnailRequest() : index_( QModelIndex() ){}
     ThumbnailRequest( const QModelIndex& index, const QString& filename, const QSize& size, const QDateTime &time )
         : index_( index ), filename_( filename ), size_( size ), time_( time )
     { }
@@ -64,6 +70,8 @@ private:
     QDateTime time_;
 };
 
+Q_DECLARE_METATYPE(ThumbnailRequest)
+
 class ThumbnailCache : public QObject
 {
     Q_OBJECT
@@ -73,13 +81,14 @@ public:
         : QObject( parent )
     { }
 
-    // Add thumbnail to cache
-    void insert( const ThumbnailRequest& request, const QPixmap& pixamp );
-
     // Return thumbnail if in cache
     QPixmap retrieve( const ThumbnailRequest& request );
 
     bool contains( const ThumbnailRequest &request ) const;
+
+public slots:
+    // Add thumbnail to cache
+    void insert( const ThumbnailRequest& request, const QPixmap& pixamp );
 
 private:
     static QString key( const ThumbnailRequest& request );
@@ -117,40 +126,75 @@ private:
     ThumbnailCache *cache_;
 };
 
-class ThumbnailLoader : public QObject
+class ThumbnailRequestHandler;
+
+class ThumbnailLoader : public QThread
 {
     Q_OBJECT
 public:
-    ThumbnailLoader( ThumbnailCache* cache, QObject* parent );
-    virtual ~ThumbnailLoader(){}
+    ThumbnailLoader( QObject *parent = 0 );
 
-    // Add request to load queue
     void load( const ThumbnailRequest& );
 
     // ### TODO: could be generalized into load rule
-    void setVisibleRule( const VisibleRule& rule ) { visible_rule = rule; }
+    void setVisibleRule( const VisibleRule& rule ) { QMutexLocker l( &m_initMutex ); visible_rule = rule; }
 
     // ### TODO: could be generalized into load rule
-    void setCacheRule( const CacheRule& rule ) { cache_rule = rule; }
+    void setCacheRule( const CacheRule& rule ) { QMutexLocker l( &m_initMutex ); cache_rule = rule; }
+
+    QImage loadThumbnail( const QString &filename, const QSize &size );
 
 signals:
-    // Thumbnail request loaded into cache
-    void loaded( const ThumbnailRequest& request, const QPixmap& thumbnail );
+    void loaded( const ThumbnailRequest &request, const QPixmap &thumbnail );
 
 private slots:
-    // Load thumbnail item at front of queue into cache
-    void loadFront();
+    void thumbnailLoaded( const QImage &thumbnail );
+    void thumbnailLoaded( const QPixmap &thumbnail );
 
 protected:
-    virtual QPixmap loadThumbnail( const QString &filename, const QSize &size );
+    void run();
 
 private:
-    bool running;
-    QTimer load_timer;
+    QMutex m_initMutex;
+    QWaitCondition m_initCondition;
+    ThumbnailRequestHandler *m_requestHandler;
+    QList< ThumbnailRequest > requests;
     CacheRule cache_rule;
     VisibleRule visible_rule;
-    QQueue<ThumbnailRequest> queue;
-    ThumbnailCache *cache_;
+};
+
+class ThumbnailRequestHandler : public QObject
+{
+    Q_OBJECT
+public:
+    ThumbnailRequestHandler( ThumbnailLoader *loader );
+protected:
+    bool event( QEvent *event );
+
+signals:
+    void thumbnailLoaded( const QImage &thumbnail );
+
+private:
+    ThumbnailLoader *m_loader;
+
+};
+
+class ThumbnailRequestEvent : public QEvent
+{
+public:
+    ThumbnailRequestEvent( const QString &fileName, const QSize &size )
+        : QEvent( User )
+        , m_fileName( fileName )
+        , m_size( size )
+    {
+    }
+
+    const QString &fileName() const{ return m_fileName; }
+    const QSize &size() const{ return m_size; }
+
+private:
+    QString m_fileName;
+    QSize m_size;
 };
 
 class ThumbnailRepository : public QObject
@@ -202,6 +246,10 @@ signals:
 
 public slots:
     void repaintThumbnail( const ThumbnailRequest& request );
+
+protected slots:
+    void rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end );
+    void rowsInserted( const QModelIndex &parent, int start, int end );
 
 private slots:
     void emitSelected( const QModelIndex& index );

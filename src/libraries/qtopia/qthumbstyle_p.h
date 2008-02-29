@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,7 +44,11 @@ public:
     QThumbStyle();
     virtual ~QThumbStyle();
 
+    using QPhoneStyle::polish; // Don't hide these symbols!
     void polish(QWidget *);
+
+    QRect subControlRect(ComplexControl cc, const QStyleOptionComplex *opt, SubControl sc,
+                        const QWidget *w = 0) const;
     QSize sizeFromContents(ContentsType type, const QStyleOption* opt,
                             const QSize &csz, const QWidget *widget ) const;
     int pixelMetric(PixelMetric metric, const QStyleOption *option = 0, const QWidget *widget = 0) const;

@@ -160,19 +160,19 @@
 <h2>Widgets inside C++ namespaces</h2>
 <p>The Type Selector can be used to style widgets of a particular type. For example,</p>
 <pre> class MyPushButton : public QPushButton {
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> ...
  }
 
-<span class="comment"> // ...</span>
+<span class="comment"> //</span> ...
  qApp-&gt;setStyleSheet(&quot;MyPushButton { background: yellow; }&quot;);</pre>
 <p>Qt Style Sheet uses <a href="qobject-qt3.html#className">QObject::className</a>() of the widget to determine when to apply the Type Selector. When custom widgets are inside namespaces, the <a href="qobject-qt3.html#className">QObject::className</a>() returns &lt;namespace&gt;::&lt;classname&gt;. This conflicts with the syntax for <a href="stylesheet-customizing.html#sub-controls">Sub-Controls</a>. To overcome this problem, when using the Type Selector for widgets inside namespaces, we must replace the &quot;::&quot; with &quot;--&quot;. For example,</p>
 <pre> namespace ns {
      class MyPushButton : public QPushButton {
-         <span class="comment">// ...</span>
+         <span class="comment">//</span> ...
      }
  }
 
-<span class="comment"> // ...</span>
+<span class="comment"> //</span> ...
  qApp-&gt;setSytleSheet(&quot;ns--MyPushButton { background: yellow; }&quot;);</pre>
 <a name="setting-qobject-properties"></a>
 <h2>Setting QObject properties</h2>
@@ -188,8 +188,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

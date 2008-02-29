@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &quot;qwindowsurface_ahigl_p.h&quot;
  #include &quot;qscreenahigl_qws.h&quot;
@@ -60,7 +58,7 @@
  #include &lt;QtOpenGL/private/qglpaintdevice_qws_p.h&gt;
  #include &lt;QtOpenGL/private/qgl_p.h&gt;
 
- /*!
+<span class="comment"> /*!
    \class QAhiGLWindowSurfacePrivate
    \internal
 
@@ -68,7 +66,7 @@
    class for class QAhiGLWindowSurface.
 
    This class contains only state variables.
-   */
+   */</span>
  class QAhiGLWindowSurfacePrivate
  {
  public:
@@ -90,10 +88,10 @@
      EGLContext context;
  };
 
- /*!
+<span class="comment"> /*!
    The construct just sets statwe variables using the ones
    provided.
-  */
+  */</span>
  QAhiGLWindowSurfacePrivate::QAhiGLWindowSurfacePrivate(EGLDisplay eglDisplay,
                                                         EGLSurface eglSurface,
                                                         EGLContext eglContext)
@@ -114,7 +112,7 @@
      return v;
  }
 
- /*!
+<span class="comment"> /*!
      \class QAhiGLWindowSurface
      \preliminary
      \internal
@@ -170,11 +168,11 @@
      by the OpenGL library for painting operations. Likewise, the
      endPaint() function is automatically called when the painting is
      done, but it isn't implemented for this example.
- */
+ */</span>
 
- /*!
+<span class="comment"> /*!
    This is the client side constructor.
-  */
+  */</span>
  QAhiGLWindowSurface::QAhiGLWindowSurface(QWidget *widget,
                                           EGLDisplay eglDisplay,
                                           EGLSurface eglSurface,
@@ -187,9 +185,9 @@
      setSurfaceFlags(QWSWindowSurface::Buffered);
  }
 
- /*!
+<span class="comment"> /*!
    This is the server side constructor.
-  */
+  */</span>
  QAhiGLWindowSurface::QAhiGLWindowSurface(EGLDisplay eglDisplay,
                                           EGLSurface eglSurface,
                                           EGLContext eglContext)
@@ -198,11 +196,11 @@
      setSurfaceFlags(QWSWindowSurface::Buffered);
  }
 
- /*!
+<span class="comment"> /*!
    The destructor deletes the OpenGL structures held by the
    private implementation class, and then it deletes the
    private implementation class.
-  */
+  */</span>
  QAhiGLWindowSurface::~QAhiGLWindowSurface()
  {
      if (d_ptr-&gt;texture)
@@ -215,14 +213,14 @@
      delete d_ptr;
  }
 
- /*!
+<span class="comment"> /*!
    This function changes the geometry of the frame buffer
    to the geometry in \a rect. It is called whenever the
    geometry of the associated top-level window changes. It
    also rebuilds the window surface's texture and binds
    the OpenGL identifier to the texture for use by the
    OpenGL library.
-  */
+  */</span>
  void QAhiGLWindowSurface::setGeometry(const QRect &amp;rect)
  {
      QSize size = rect.size();
@@ -236,9 +234,9 @@
 
      if (geometry().size() != size) {
 
-         // Driver specific limitations:
-         //   FBO maximimum size of 256x256
-         //   Depth buffer required
+         <span class="comment">//</span> Driver specific limitations:
+         <span class="comment">//</span>   FBO maximimum size of 256x256
+         <span class="comment">//</span>   Depth buffer required
 
          d_ptr-&gt;textureWidth = qMin(256, nextPowerOfTwo(size.width()));
          d_ptr-&gt;textureHeight = qMin(256, nextPowerOfTwo(size.height()));
@@ -278,9 +276,9 @@
      QWSGLWindowSurface::setGeometry(rect);
  }
 
- /*!
+<span class="comment"> /*!
    Returns the window  surface's texture as a QByteArray.
-  */
+  */</span>
  QByteArray QAhiGLWindowSurface::permanentState() const
  {
      QByteArray array;
@@ -291,37 +289,37 @@
      return array;
  }
 
- /*!
+<span class="comment"> /*!
    Sets the window surface's texture to \a data.
-  */
+  */</span>
  void QAhiGLWindowSurface::setPermanentState(const QByteArray &amp;data)
  {
      const char *ptr = data.constData();
      d_ptr-&gt;texture = reinterpret_cast&lt;const GLuint*&gt;(ptr)[0];
  }
 
- /*!
+<span class="comment"> /*!
    Returns the paint device being used for this window surface.
-  */
+  */</span>
  QPaintDevice *QAhiGLWindowSurface::paintDevice()
  {
      return d_ptr-&gt;device;
  }
 
- /*!
+<span class="comment"> /*!
    Returns the window surface's texture.
-  */
+  */</span>
  GLuint QAhiGLWindowSurface::textureId() const
  {
      return d_ptr-&gt;texture;
  }
 
- /*!
+<span class="comment"> /*!
    The \l {QWSServer} {window system} always calls this function
    before any painting operations begin for this window surface.
    It ensures that the correct frame buffer will be used by the
    OpenGL library for painting operations.
-  */
+  */</span>
  void QAhiGLWindowSurface::beginPaint(const QRegion &amp;region)
  {
      QWSGLWindowSurface::beginPaint(region);
@@ -330,7 +328,7 @@
          glBindFramebufferOES(GL_FRAMEBUFFER_EXT, d_ptr-&gt;frameBufferObject);
  }
 
- /*!
+<span class="comment"> /*!
    This function returns true if the window associated with
    this window surface can still rendered using this window
    surface class. Either the window's top-level widget must
@@ -348,8 +346,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

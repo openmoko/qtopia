@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -1196,6 +1196,8 @@ QVariant QOccurrenceModel::data(const QModelIndex &index, int role) const
                         QList<QVariant> icons;
                         QPimContext *pc = od->appointmentModel->context(item.id);
                         if (pc) {
+                            if (!pc->editable(item.id))
+                                icons.append( QVariant( QAppointmentModelData::getCachedIcon( ":icon/readonly" ) ) );
                             QIcon contextIcon = pc->icon();
                             if (!contextIcon.isNull())
                                 icons.append(contextIcon);
@@ -1595,7 +1597,7 @@ void QOccurrenceModel::rebuildCache() const
             return;
         }
 
-        QList<QAppointment> candidates = access->fastRange(od->start.addDays(-1), od->end.addDays(1), od->requestedCount);
+        QList<QAppointment> candidates = access->fastRange(od->start.addDays(-1), od->end.isNull() ? od->end : od->end.addDays(1), od->requestedCount);
 
         foreach (QAppointment a, candidates) {
 
@@ -1617,6 +1619,8 @@ void QOccurrenceModel::rebuildCache() const
                     item.appointment = a;
                     item.minimal = true;
                     result.insert(start, item);
+                    if (od->requestedCount > 0 && individualCount >= od->requestedCount)
+                        break;
                 }
                 // escape for forever events going past end range.
                 else if (!od->end.isNull() && start > od->end)

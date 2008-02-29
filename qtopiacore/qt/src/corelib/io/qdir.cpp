@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1165,8 +1163,7 @@ QDir::Filters QDir::filter() const
     \value Hidden  List hidden files (on Unix, files starting with a .).
     \value System  List system files (on Unix, FIFOs, sockets and
                    device files)
-    \value CaseSensitive  The filter should be case sensitive if the file system
-                          is case sensitive.
+    \value CaseSensitive  The filter should be case sensitive.
 
     \omitvalue DefaultFilter
     \omitvalue TypeMask
@@ -1818,8 +1815,9 @@ bool QDir::rename(const QString &oldName, const QString &newName)
 }
 
 /*!
-    Returns true if the directory called \a name exists; otherwise returns
-    false.
+    Returns true if the file called \a name exists; otherwise returns
+    false. Unless \a name contains an absolute file path, the file
+    name is assumed to be relative to the current directory.
 
     \sa QFileInfo::exists(), QFile::exists()
 */
@@ -2486,7 +2484,7 @@ QDebug operator<<(QDebug debug, QDir::SortFlags sorting)
 
         QStringList flags;
         if (sorting & QDir::DirsFirst) flags << QLatin1String("DirsFirst");
-        if (sorting & QDir::DirsLast) flags << QLatin1String("DirsLars");
+        if (sorting & QDir::DirsLast) flags << QLatin1String("DirsLast");
         if (sorting & QDir::IgnoreCase) flags << QLatin1String("IgnoreCase");
         if (sorting & QDir::LocaleAware) flags << QLatin1String("LocaleAware");
         if (sorting & QDir::Type) flags << QLatin1String("Type");

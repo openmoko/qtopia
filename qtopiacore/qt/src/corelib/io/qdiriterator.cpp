@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -527,7 +525,7 @@ QString QDirIterator::filePath() const
 */
 QFileInfo QDirIterator::fileInfo() const
 {
-    if (d->fileInfo.path() != d->currentFilePath)
+    if (d->fileInfo.filePath() != d->currentFilePath)
         d->fileInfo.setFile(d->currentFilePath);
     return d->fileInfo;
 }

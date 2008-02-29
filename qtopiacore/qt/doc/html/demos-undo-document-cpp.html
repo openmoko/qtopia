@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2005-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the demonstration applications of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &lt;math.h&gt;
  #include &lt;qevent.h&gt;
@@ -61,9 +59,9 @@
 
  static const int resizeHandleWidth = 6;
 
- /******************************************************************************
+<span class="comment"> /******************************************************************************
  ** Shape
- */
+ */</span>
 
  const QSize Shape::minSize(80, 50);
 
@@ -134,7 +132,7 @@
      return Rectangle;
  }
 
- /******************************************************************************
+<span class="comment"> /******************************************************************************
  ** Document
  */</span>
 
@@ -377,7 +375,7 @@
          QRect rect = shape.rect();
          rect.adjust(1, 1, -resizeHandleWidth/2, -resizeHandleWidth/2);
 
-         <span class="comment">// paint the shape</span>
+         <span class="comment">//</span> paint the shape
          switch (shape.type()) {
              case Shape::Rectangle:
                  painter.drawRect(rect);
@@ -394,12 +392,12 @@
                  break;
          }
 
-         <span class="comment">// paint the resize handle</span>
+         <span class="comment">//</span> paint the resize handle
          painter.setPen(pal.text().color());
          painter.setBrush(Qt::white);
          painter.drawRect(shape.resizeHandle().adjusted(0, 0, -1, -1));
 
-         <span class="comment">// paint the shape name</span>
+         <span class="comment">//</span> paint the shape name
          painter.setBrush(pal.text());
          if (shape.type() == Shape::Triangle)
              rect.adjust(0, rect.height()/2, 0, 0);
@@ -457,8 +455,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

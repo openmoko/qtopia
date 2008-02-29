@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,7 @@
 #include <gst/gst.h>
 
 #include <QMediaVideoControlServer>
+#include <QDebug>
 
 #include <qmediahandle_p.h>
 
@@ -114,8 +115,12 @@ bool PlaybinSession::isValid() const
 
 void PlaybinSession::start()
 {
-    if (d->playbin != 0)
-        gst_element_set_state(d->playbin, GST_STATE_PLAYING);
+    if (d->playbin != 0) {
+        if (gst_element_set_state(d->playbin, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
+            qWarning() << "GStreamer; Unable to play -" << d->url.toString();
+            emit playerStateChanged(QtopiaMedia::Error);
+        }
+    }
 }
 
 void PlaybinSession::pause()
@@ -132,10 +137,12 @@ void PlaybinSession::stop()
 
 void PlaybinSession::suspend()
 {
+    pause();
 }
 
 void PlaybinSession::resume()
 {
+    start();
 }
 
 void PlaybinSession::seek(quint32 ms)
@@ -245,7 +252,7 @@ void PlaybinSession::busMessage(Message const& msg)
             }
         }
     }
-    else
+    else if (GST_MESSAGE_SRC(gm) == GST_OBJECT_CAST(d->playbin))
     {
         switch (GST_MESSAGE_TYPE(gm))
         {
@@ -265,14 +272,12 @@ void PlaybinSession::busMessage(Message const& msg)
                     case GST_STATE_VOID_PENDING:
                     case GST_STATE_NULL:
                     case GST_STATE_READY:
-                        break;
-
                     case GST_STATE_PAUSED:
-                        if (oldState == GST_STATE_READY)
-                            getStreamsInfo();
                         break;
-
                     case GST_STATE_PLAYING:
+                        if (oldState == GST_STATE_PAUSED)
+                            getStreamsInfo();
+
                         if (d->state != QtopiaMedia::Playing)
                             emit playerStateChanged(d->state = QtopiaMedia::Playing);
                         break;
@@ -394,8 +399,7 @@ void PlaybinSession::readySession()
 
         d->busHelper = new BusHelper(d->bus, this);
 
-        connect(d->busHelper, SIGNAL(message(Message)),
-                this, SLOT(busMessage(Message)));
+        connect(d->busHelper, SIGNAL(message(Message)), SLOT(busMessage(Message)));
 
         g_object_get(G_OBJECT(d->playbin), "volume", &d->volume, NULL);
     }

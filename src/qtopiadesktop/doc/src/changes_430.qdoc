@@ -20,6 +20,9 @@ between Qtopia Desktop 2.2 and Qtopia Sync Agent.
 
 \list
 \o Appointments starting and ending at midnight are mis-reported as all day events.
+\o Data corruption occurs when transferring data to Qtopia because it cannot store
+   and return the data correctly. Upgrade to \l{Qtopia Sync Agent changes for 4.3.1}{4.3.1} to avoid
+   this.
 \endlist
 
 */

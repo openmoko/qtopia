@@ -181,19 +181,12 @@
 <p>Returns the clipboard text in subtype <i>subtype</i>, or an empty string if the clipboard does not contain any text. If <i>subtype</i> is null, any subtype is acceptable, and <i>subtype</i> is set to the chosen subtype.</p>
 <p>The <i>mode</i> argument is used to control which part of the system clipboard is used. If <i>mode</i> is <a href="qclipboard.html#Mode-enum">QClipboard::Clipboard</a>, the text is retrieved from the global clipboard. If <i>mode</i> is <a href="qclipboard.html#Mode-enum">QClipboard::Selection</a>, the text is retrieved from the global mouse selection.</p>
 <p>Common values for <i>subtype</i> are &quot;plain&quot; and &quot;html&quot;.</p>
+<p>Note that calling this function repeatedly, for instance from a key event handler, may be slow. In such cases, you should use the <tt>dataChanged()</tt> signal instead.</p>
 <p>See also <a href="qclipboard.html#setText">setText</a>() and <a href="qclipboard.html#mimeData">mimeData</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="data"></a><a href="qmimesource.html">QMimeSource</a> * QClipboard::data ( <a href="qclipboard.html#Mode-enum">Mode</a> <i>mode</i> = Clipboard ) const</h3>
-<p>Use <a href="qclipboard.html#mimeData">mimeData</a>() instead.</p>
-<p>See also <a href="qclipboard-qt3.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="setData"></a>void QClipboard::setData ( <a href="qmimesource.html">QMimeSource</a> * <i>src</i>, <a href="qclipboard.html#Mode-enum">Mode</a> <i>mode</i> = Clipboard )</h3>
-<p>Use <a href="qclipboard.html#setMimeData">setMimeData</a>() instead.</p>
-<p>See also <a href="qclipboard-qt3.html#data">data</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

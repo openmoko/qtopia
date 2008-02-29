@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright ( C ) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright ( C ) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,7 +30,6 @@
 #include <QXmlSimpleReader>
 #include <QXmlInputSource>
 
-#include <QDebug>
 
 QSdpXmlHandler::QSdpXmlHandler()
 {
@@ -447,7 +446,7 @@ bool QSdpXmlHandler::endElement(const QString &,
             alt->push_back(var);
         }
         else {
-            qWarning() << "Unknown type in the QVariant, should be either a sequence or an alternative";
+            qWarning("Unknown type in the QVariant, should be either a sequence or an alternative");
             m_errorString = "Stack size more than 1 and we're not inside an alt or seq";
             return false;
         }

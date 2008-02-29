@@ -136,17 +136,17 @@
 <p>Your application may also depend on one or more Qt plugins, such as the JPEG image format plugin or a SQL driver plugin. Be sure to distribute any Qt plugins that you need with your application.</p>
 <p>The search path for Qt plugins (as well as a few other paths) is hard-coded into the <a href="qtcore.html">QtCore</a> library. By default, the first plugin search path will be hard-coded as <tt>/path/to/Qt/plugins</tt>. As mentioned above, using pre-determined paths has certain disadvantages, so you need to examine various alternatives to make sure that the Qt plugins are found:</p>
 <ul>
+<li><a href="qt-conf.html">Using <tt>qt.conf</tt></a>. This is the recommended approach since it provides the most flexibility.</li>
 <li>Using <a href="qcoreapplication.html#addLibraryPath">QApplication::addLibraryPath</a>() or <a href="qcoreapplication.html#setLibraryPaths">QApplication::setLibraryPaths</a>().</li>
 <li>Using a third party installation utility or the target system's package manager to change the hard-coded paths in the <a href="qtcore.html">QtCore</a> library.</li>
-<li><a href="qt-conf.html">Using <tt>qt.conf</tt></a>. This is the recommended approach since it provides the most flexibility.</li>
 </ul>
 <p>
 [<a href="deployment.html">Deploying Qt Applications</a>]
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

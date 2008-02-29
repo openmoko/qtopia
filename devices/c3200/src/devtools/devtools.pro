@@ -45,10 +45,8 @@ pics.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/*.png\
 pics.path=/pics/devtools
 pics.hint=pics
 
-# TODO Devtools can't install help files because there are no files.
-# Either this code should be removed or the missing files should be added.
-#help.source=$$QTOPIA_DEPOT_PATH/help
-#help.files=devtools*
-#help.hint=help
+help.source=$$DEVICE_CONFIG_PATH/help
+help.files=qpe-devtools*
+help.hint=help
 
 INSTALLS+=f_dir desktop pics script startup help

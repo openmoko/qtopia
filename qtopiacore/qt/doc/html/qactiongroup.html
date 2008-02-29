@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qactiongroup.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qactiongroup.cpp -->
 <head>
   <title>Qt 4.3: QActionGroup Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -156,29 +156,10 @@
 <p>This signal is emitted when the given <i>action</i> in the action group is activated by the user; for example, when the user clicks a menu option, toolbar button, or presses an action's shortcut key combination.</p>
 <p>Connect to this signal for command actions.</p>
 <p>See also <a href="qaction.html#activate">QAction::activate</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="add"></a>void QActionGroup::add ( <a href="qaction.html">QAction</a> * <i>a</i> )</h3>
-<p>Use <a href="qactiongroup.html#addAction">addAction</a>() instead.</p>
-<h3 class="fn"><a name="addSeparator"></a>void QActionGroup::addSeparator ()</h3>
-<p>Normally you add a separator to the menus or widgets to which actions are added, so this function is very rarely needed.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> actionGroup-&gt;addSeparator();</font></pre>
-<p>you can rewrite it as</p>
-<pre> QAction *separator = new QAction(this);
- separator-&gt;setSeparator(true);
- actionGroup-&gt;addAction(separator);</pre>
-<h3 class="fn"><a name="addTo"></a>bool QActionGroup::addTo ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> actionGroup-&gt;addTo(widget);</font></pre>
-<p>you can rewrite it as</p>
-<pre> widget-&gt;addActions(actionGroup-&gt;actions());</pre>
-<h3 class="fn"><a name="selected"></a>void QActionGroup::selected ( <a href="qaction.html">QAction</a> * <i>action</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Use <a href="qactiongroup.html#triggered">triggered</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

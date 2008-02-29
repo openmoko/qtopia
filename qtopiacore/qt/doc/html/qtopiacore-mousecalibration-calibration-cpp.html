@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -110,7 +108,7 @@
 
      QPoint point = data.screenPoints[pressCount];
 
-     <span class="comment">// Map to logical coordinates in case the screen is transformed</span>
+     <span class="comment">//</span> Map to logical coordinates in case the screen is transformed
      QSize screenSize(qt_screen-&gt;deviceWidth(), qt_screen-&gt;deviceHeight());
      point = qt_screen-&gt;mapFromDevice(point, screenSize);
 
@@ -120,7 +118,7 @@
 
  void Calibration::mouseReleaseEvent(QMouseEvent *event)
  {
-     <span class="comment">// Map from device coordinates in case the screen is transformed</span>
+     <span class="comment">//</span> Map from device coordinates in case the screen is transformed
      QSize screenSize(qt_screen-&gt;width(), qt_screen-&gt;height());
      QPoint p = qt_screen-&gt;mapToDevice(event-&gt;pos(), screenSize);
 
@@ -140,8 +138,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

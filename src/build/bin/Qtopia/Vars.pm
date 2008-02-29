@@ -9,6 +9,7 @@ use Qtopia::File;
 use Carp;
 #perl2exe_include Carp::Heavy
 $Carp::CarpLevel = 1;
+use Digest::MD5 qw(md5_base64);
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -43,7 +44,6 @@ our $VERSION = '0.01';
 # imported variables
 our $depotpath;
 
-
 use constant TRACE => 0;
 
 # Platform detection
@@ -53,6 +53,7 @@ our $qtopiaVersionStr;
 our $qtVersionStr;
 our @configureoptions;
 our $shadow;
+our $perl2exe_hash;
 
 # Check for a bug in perl on RedHat 9.1
 if ( !$isWindows ) {
@@ -113,20 +114,44 @@ sub check_script
     if ( $script =~ /\.exe$/i ) {
         $compiled_code = 1;
     }
+    my $orig = "$path/".script_name($script);
+    # perl2exe test run bail out hook
     if ( $compiled_code && defined($arg) && $arg eq "-nop" ) {
+        if ( !check_perl2exe_hash($orig) ) {
+            die "ERROR: Stored hash does not match script hash:\n".
+                "       $0\n".
+                "       $orig\n";
+        }
 	exit 0;
     }
-    if ( configopt("depot") && $compiled_code && !$ENV{QTOPIA_NO_PERL} ) {
+    # If we're in the depot, run the perl scripts directly
+    if ( $compiled_code ) {
         $script = script_name($script);
-        if ( $script eq "configure" ) {
-            print "USING PERL\n";
-        }
         #print "running the perl script ".fixpath("$path/$script")."\n";
         my $ret = system("perl $path/$script ".(scalar(@ARGV)?"\"":"").join("\" \"", @ARGV).(scalar(@ARGV)?"\"":""));
         exit $ret;
-    } else {
-        #print "NOT running the perl script ".fixpath("$path/$script")."\n";
     }
+    # Windows doesn't set HOME but the build system expects it to be set!
+    $ENV{HOME} = $ENV{HOMEDRIVE}.$ENV{HOMEPATH};
+}
+
+# Check the md5sum embedded in the .exe file with the script it was built from
+sub check_perl2exe_hash
+{
+    my ( $orig ) = @_;
+    if ( !defined($perl2exe_hash) ) {
+        die "ERROR: Stored hash is missing!";
+    }
+    open IN, "$orig" or die "Can't read $orig";
+    my $data = join("", <IN>);
+    close IN;
+    my $md5 = md5_base64($data);
+    #print "stored hash $perl2exe_hash\n";
+    #print "script hash $md5\n";
+    if ( $perl2exe_hash eq $md5 ) {
+        return 1;
+    }
+    return 0;
 }
 
 # Is a particular value in the .configureoptions file

@@ -34,9 +34,10 @@
 <p>All the changes required to add these device specific customizations are centralized in Qtopia and involve a small number of files (described below). This document should make it easy for OEMs and system integrators to understand how to make Qtopia aware of any special hardware that a device might have.</p>
 <a name="devicespecific"></a><a name="device-specific-code"></a>
 <h2>Device-specific Code</h2>
-<p>Device-specific code is implemented in <a href="buildsystem/over-device-profiles-1.html#custom-h-custom-cpp">custom.h/custom.cpp</a>.</p>
+<p>Device-specific code is implemented in <a href="buildsystem/over-device-profiles-1.html">custom.h/custom.cpp</a>.</p>
 <p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="custom-h.html">&lt;custom.h&gt;</a> for more information about these files.</p>
-<p>For reference implementations of these files, the existing files found in <tt>&lt;source&gt;/devices/&lt;device&gt;/custom.*</tt> and <tt>&lt;source&gt;/src/libraries/qtopiabase/custom-&lt;xplatform&gt;.*</tt> may be of assistance.</p>
+<p>Device profiles can implement their own <tt>custom.(h|cpp)</tt> files, which will override the <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt> and <tt>custom.(h|cpp)</tt> files in Qtopia.</p>
+<p>For reference implementations of these files, the existing files found in <tt>&lt;source&gt;/devices/greenphone/custom.*</tt> may be of assistance.</p>
 <a name="removable-media-and-devices"></a>
 <h2>Removable Media and Devices</h2>
 <p>Qtopia supports both removable media, such as SD cards, and removable hotplug devices, such as PCMCIA network cards. However, as there is no standard way in Linux for Qtopia to detect when these devices or media are inserted or removed, it is the system integrators responsibility to detect whenever the attached PCMCIA devices or mounted filesystems change notify Qtopia appropriately.</p>
@@ -53,8 +54,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

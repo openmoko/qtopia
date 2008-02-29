@@ -23,6 +23,9 @@ SOURCES		= memory.cpp \
                   securityinfo.cpp 
 #                  cleanupwizard.cpp
 
+# Always rebuild versioninfo.o so that the reported build date is correct
+create_raw_dependency($$OBJECTS_DIR/versioninfo.o,FORCE)
+
 depends(libraries/qtopiacomm)
 enable_cell {
     HEADERS += siminfo.h modeminfo.h
@@ -50,4 +53,4 @@ cleanupservice.path=/services/CleanupWizard
 INSTALLS+=cleanupservice
 
 pkg.desc=System information for Qtopia.
-pkg.domain=window,cardreader,phonecomm,doc_server
+pkg.domain=trusted

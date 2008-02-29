@@ -17,5 +17,5 @@ sysmsgservice.path=/services/SystemMessages
 INSTALLS+=sysmsgservice
 
 # SXE permissions required
-pkg.domain=window,msg,cardreader
+pkg.domain=trusted
 

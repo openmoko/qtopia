@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -325,6 +325,7 @@ public:
     bool hasMenu(QWidget *w, QSoftMenuBar::FocusState state);
     void addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState state);
     void removeMenuFrom(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState state);
+    QWidgetList widgetsFor(const QMenu *menu, QSoftMenuBar::FocusState state);
     void setHelpEnabled(QWidget *widget, bool enable);
     void setCancelEnabled(QWidget *widget, bool enable);
     void setInputMethodEnabled(QWidget *widget, bool enable);
@@ -423,6 +424,17 @@ void QSoftMenuBar::addMenuTo(QWidget *widget, QMenu *menu, FocusState state)
 void QSoftMenuBar::removeMenuFrom(QWidget *widget, QMenu *menu, FocusState state)
 {
     MenuManager::instance()->removeMenuFrom(widget, menu, state);
+}
+
+/*!
+  Returns all widgets that have added \a menu to the menu bar for focus
+  \a state.
+
+  \sa addMenuTo(), removeMenuFrom(), menuFor(), hasMenu()
+*/
+QWidgetList QSoftMenuBar::widgetsFor(const QMenu *menu, QSoftMenuBar::FocusState state)
+{
+    return MenuManager::instance()->widgetsFor(menu, state);
 }
 
 /*!
@@ -624,6 +636,28 @@ void MenuManager::removeMenuFrom(QWidget *w, QMenu *menu, QSoftMenuBar::FocusSta
         disconnect(menu, SIGNAL(destroyed()), this, SLOT(menuDestroyed()));
     }
     widgetDataMap.remove(w);
+}
+
+QWidgetList MenuManager::widgetsFor(const QMenu *menu, QSoftMenuBar::FocusState state)
+{
+    QWidgetList wl;
+
+    QMap<QWidget*, QMenu*>::iterator it;
+    if (state & QSoftMenuBar::EditFocus) {
+        for (it = modalMenuMap.begin(); it != modalMenuMap.end(); ++it) {
+            if (*it == menu)
+                wl.append(it.key());
+        }
+    }
+
+    if (state & QSoftMenuBar::NavigationFocus) {
+        for (it = nonModalMenuMap.begin(); it != nonModalMenuMap.end(); ++it) {
+            if (*it == menu)
+                wl.append(it.key());
+        }
+    }
+
+    return wl;
 }
 
 void MenuManager::setHelpEnabled(QWidget *widget, bool enable)

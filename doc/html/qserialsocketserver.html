@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSerialSocketServer Class Reference</h1>
 <p>The QSerialSocketServer class provides a server to handle incoming serial-over-sockets connections. <a href="#details">More...</a></p>
-<pre>    #include &lt;QSerialSocketServer&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QSerialSocketServer&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qserialsocketserver-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <li><div class="fn"/>quint16 <b><a href="qserialsocketserver.html#port">port</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -34,17 +34,16 @@
 <li><div class="fn"/>void <b><a href="qserialsocketserver.html#incoming">incoming</a></b> ( QSerialSocket * <i>socket</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -54,7 +53,7 @@
 <p>See also <a href="qserialsocket.html">QSerialSocket</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSerialSocketServer"></a>QSerialSocketServer::QSerialSocketServer ( quint16 <i>port</i>, bool <i>localHostOnly</i> = true, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSerialSocketServer"></a>QSerialSocketServer::QSerialSocketServer ( <a href="./qtglobal.html#quint16-typedef">quint16</a> <i>port</i>, bool <i>localHostOnly</i> = true, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a new serial-over-sockets server, bound to <i>port</i>, and attach it to <i>parent</i>. If <i>localHostOnly</i> is true (the default), then the socket will only be accessible from applications on the same host.</p>
 <h3 class="fn"><a name="dtor.QSerialSocketServer"></a>QSerialSocketServer::~QSerialSocketServer ()</h3>
 <p>Destroy this serial-over-sockets server.</p>
@@ -62,12 +61,12 @@
 <p>Signal that is emitted when an incoming connection is detected. The session is represented by <i>socket</i>.</p>
 <h3 class="fn"><a name="isListening"></a>bool QSerialSocketServer::isListening () const</h3>
 <p>Returns true if this server was able to listen on the specified port number when it was constructed; otherwise returns false.</p>
-<h3 class="fn"><a name="port"></a>quint16 QSerialSocketServer::port () const</h3>
+<h3 class="fn"><a name="port"></a><a href="./qtglobal.html#quint16-typedef">quint16</a> QSerialSocketServer::port () const</h3>
 <p>Returns the port number that this serial-over-sockets server is bound to.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

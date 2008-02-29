@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -78,6 +76,9 @@
 #ifndef QT_NO_TABDIALOG
 #  define QT_NO_TABDIALOG
 #endif
+#ifndef QT_NO_WIZARD
+#  define QT_NO_WIZARD
+#endif
 
 /* File I/O */
 #ifndef QT_NO_DOM
@@ -88,6 +89,9 @@
 #endif
 #ifndef QT_NO_PROCESS
 #  define QT_NO_PROCESS
+#endif
+#ifndef QT_NO_TEMPORARYFILE
+#  define QT_NO_TEMPORARYFILE
 #endif
 #ifndef QT_NO_TEXTSTREAM
 #  define QT_NO_TEXTSTREAM
@@ -102,6 +106,9 @@
 /* Fonts */
 #ifndef QT_NO_FREETYPE
 #  define QT_NO_FREETYPE
+#endif
+#ifndef QT_NO_QWS_QPF2
+#  define QT_NO_QWS_QPF2
 #endif
 
 /* Images */
@@ -265,6 +272,12 @@
 #ifndef QT_NO_DIRECTPAINTER
 #  define QT_NO_DIRECTPAINTER
 #endif
+#ifndef QT_NO_PAINTONSCREEN
+#  define QT_NO_PAINTONSCREEN
+#endif
+#ifndef QT_NO_PAINT_DEBUG
+#  define QT_NO_PAINT_DEBUG
+#endif
 #ifndef QT_NO_PICTURE
 #  define QT_NO_PICTURE
 #endif
@@ -338,16 +351,25 @@
 #ifndef QT_NO_STYLE_STYLESHEET
 #  define QT_NO_STYLE_STYLESHEET
 #endif
+#ifndef QT_NO_STYLE_WINDOWSVISTA
+#  define QT_NO_STYLE_WINDOWSVISTA
+#endif
 #ifndef QT_NO_STYLE_WINDOWSXP
 #  define QT_NO_STYLE_WINDOWSXP
 #endif
 
 /* Utilities */
+#ifndef QT_NO_ACCESSIBILITY
+#  define QT_NO_ACCESSIBILITY
+#endif
 #ifndef QT_NO_COMPLETER
 #  define QT_NO_COMPLETER
 #endif
 #ifndef QT_NO_DESKTOPSERVICES
 #  define QT_NO_DESKTOPSERVICES
+#endif
+#ifndef QT_NO_SCRIPT
+#  define QT_NO_SCRIPT
 #endif
 #ifndef QT_NO_SYSTEMTRAYICON
 #  define QT_NO_SYSTEMTRAYICON
@@ -449,6 +471,9 @@
 #endif
 #ifndef QT_NO_GRAPHICSVIEW
 #  define QT_NO_GRAPHICSVIEW
+#endif
+#ifndef QT_NO_MDIAREA
+#  define QT_NO_MDIAREA
 #endif
 #ifndef QT_NO_TEXTEDIT
 #  define QT_NO_TEXTEDIT

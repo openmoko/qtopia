@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -362,7 +360,7 @@ void QGLContext::updatePaintDevice()
 {
     Q_D(QGLContext);
     d->update = false;
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+#if 0 //(MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5) {
         if(d->paintDevice->devType() == QInternal::Widget) {
             QWidget *w = (QWidget *)d->paintDevice;
@@ -603,8 +601,9 @@ bool QGLWidget::event(QEvent *e)
 {
     Q_D(QGLWidget);
     if (e->type() == QEvent::MacGLWindowChange
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
-           && QSysInfo::MacintoshVersion < QSysInfo::MV_10_5
+#if 0 //(MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+            && ((QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5 && isWindow())
+                || QSysInfo::MacintoshVersion <= QSysInfo::MV_10_4)
 #endif
         ) {
         if (d->needWindowChange) {
@@ -614,6 +613,7 @@ bool QGLWidget::event(QEvent *e)
         }
         return true;
     }
+
     return QWidget::event(e);
 }
 
@@ -695,8 +695,19 @@ void QGLWidget::setContext(QGLContext *context, const QGLContext* shareContext, 
 
 void QGLWidgetPrivate::init(QGLContext *context, const QGLWidget* shareWidget)
 {
+    Q_Q(QGLWidget);
     initContext(context, shareWidget);
     olcx = 0;
+
+    QWidget *current  = q;
+    while (current) {
+        qt_widget_private(current)->glWidgets.append(QWidgetPrivate::GlWidgetInfo(q));
+        if (current->isWindow())
+            break;
+        current = current->parentWidget();
+    };
+
+    qt_widget_private(q)->isGLWidget = 1;
 
 #if 0
     // overlays are not supported by the GL drivers on the Mac..

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,49 +22,35 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <qobject.h>
-#include <qdialog.h>
-
 #include <HardwareManipulator>
-#include <attranslator.h>
 
-class Ui_ControlBase;
+class ControlWidget;
 
 class Control: public HardwareManipulator
 {
 Q_OBJECT
 
 public:
-    Control(const QString& ruleFile, QWidget *parent=0);
-    bool shouldShow() const;
+    Control(const QString& ruleFile, QObject *parent=0);
+    virtual ~Control();
 
 public slots:
     void handleFromData( const QString& );
     void handleToData( const QString& );
-    void resetTranslator();
+    void setPhoneNumber( const QString& );
 
-private slots:
-    void sendSQ();
-    void sendBC();
-    void sendOPS();
-    void sendREG();
-    void sendCBM();
-    void sendSMSMessage();
-    void sendMGD();
-    void selectFile();
-    void sendSMSDatagram();
-    void sendCall();
-    void atChanged();
+protected:
+    virtual void warning( const QString&, const QString& );
 
 private:
-    Ui_ControlBase *ui;
-    AtTranslator *translator;
+    ControlWidget *widget;
+    friend class ControlWidget;
 };
 
 class ControlFactory : public HardwareManipulatorFactory
 {
 public:
-    inline virtual HardwareManipulator *create(QWidget *parent)
+    inline virtual HardwareManipulator *create(QObject *parent)
         { return new Control(ruleFile(), parent); }
 };
 

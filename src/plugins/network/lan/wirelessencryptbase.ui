@@ -121,9 +121,6 @@
      <property name="wordWrap" >
       <bool>true</bool>
      </property>
-     <property name="buddy" >
-      <cstring>passphrase</cstring>
-     </property>
     </widget>
    </item>
    <item>

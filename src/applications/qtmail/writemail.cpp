@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -48,6 +48,7 @@
 #include <QToolTip>
 #include <QWhatsThis>
 #include <QStackedWidget>
+#include <QDrmContentPlugin>
 #include <sys/vfs.h>  // sharp 1862
 
 #include "detailspage.h"
@@ -64,6 +65,9 @@ public:
     }
 
     const QString& key() const { return _key; }
+    QMailMessage::MessageType type() { return type(_key); }
+
+    static QMailMessage::MessageType type(const QString& key) { return QMailComposerFactory::messageType(key); }
 
 private:
     QString _key;
@@ -77,7 +81,10 @@ public:
     SelectListWidget( QWidget* parent );
 
     void setKeys(const QStringList& keys);
+    void setTypes(const QList<QMailMessage::MessageType>& types);
     void setSelected(const QString& selected);
+
+    QString singularKey() const;
 
 signals:
     void selected(const QString& key);
@@ -88,6 +95,8 @@ protected slots:
 
 protected:
     void keyPressEvent(QKeyEvent *e);
+
+    QStringList _keys;
 };
 
 SelectListWidget::SelectListWidget( QWidget *parent )
@@ -102,8 +111,16 @@ SelectListWidget::SelectListWidget( QWidget *parent )
 
 void SelectListWidget::setKeys(const QStringList& keys)
 {
-    foreach (const QString& key, keys)
-        (void)new SelectListWidgetItem(key, this);
+    _keys = keys;
+}
+
+void SelectListWidget::setTypes(const QList<QMailMessage::MessageType>& types)
+{
+    clear();
+
+    foreach (const QString& key, _keys)
+        if (types.contains(SelectListWidgetItem::type(key)))
+            (void)new SelectListWidgetItem(key, this);
 }
 
 void SelectListWidget::setSelected(const QString& selected)
@@ -118,6 +135,14 @@ void SelectListWidget::setSelected(const QString& selected)
     }
 
     setCurrentRow(selectIndex);
+}
+
+QString SelectListWidget::singularKey() const
+{
+    if (count() == 1)
+        return static_cast<SelectListWidgetItem*>(item(0))->key();
+
+    return QString();
 }
 
 void SelectListWidget::accept(QListWidgetItem* item)
@@ -172,9 +197,34 @@ void WriteMail::setAccountList(AccountList *list)
 {
     accountList = list;
     if (m_detailsPage )
-        m_detailsPage->setFromFields( accountList->emailAccounts() );
-    QStringList::Iterator it;
-    QStringList as = accountList->emailAccounts();
+        m_detailsPage->setAccountList( accountList );
+
+    // Find what types of outgoing messages our accounts support
+    _sendTypes.clear();
+    QListIterator<QMailAccount*> itAccount = accountList->accountIterator();
+    while (itAccount.hasNext()) {
+        const QMailAccount* account = itAccount.next();
+
+        if ((account->accountType() == QMailAccount::SMS) && 
+            (!_sendTypes.contains(QMailMessage::Sms)))
+            _sendTypes.append(QMailMessage::Sms);
+
+        // We can only send an MMS if a WAP interface is configured
+        if ((account->accountType() == QMailAccount::MMS) && 
+#ifndef ENABLE_UNCONDITIONAL_MMS_SEND
+            (!account->networkConfig().isEmpty()) &&
+#endif
+            (!_sendTypes.contains(QMailMessage::Mms)))
+            _sendTypes.append(QMailMessage::Mms);
+
+        // We can only send email if an account has SMTP details configured
+        if (((account->accountType() == QMailAccount::POP) || (account->accountType() == QMailAccount::IMAP)) && 
+            (!account->emailAddress().isEmpty()) && 
+            (!_sendTypes.contains(QMailMessage::Email)))
+            _sendTypes.append(QMailMessage::Email);
+    }
+
+    _composerList->setTypes(_sendTypes);
 }
 
 static int messageTypeValue(QMailMessage::MessageType type)
@@ -201,6 +251,8 @@ void WriteMail::init()
 {
     widgetStack = new QStackedWidget(this);
     setCentralWidget(widgetStack);
+
+    QDrmContentPlugin::initialize();
 
     /*
     TODO  : composers should handle this
@@ -268,6 +320,11 @@ void WriteMail::detailsStage()
         return;
     }
 
+    showDetailsPage();
+}
+
+void WriteMail::showDetailsPage()
+{
     m_detailsPage->setType( m_composerInterface->messageType() );
 
     if (_detailsOnly) //fix resize problem if not showing composer
@@ -283,6 +340,8 @@ void WriteMail::composeStage()
 {
     if (composer().isEmpty())
         setComposer( QMailComposerFactory::defaultKey() );
+    else
+        m_composerInterface->setSignature( signature() );
 
     widgetStack->setCurrentWidget(m_composerWidget);
 
@@ -354,40 +413,19 @@ void WriteMail::previousStage()
 
 bool WriteMail::buildMail()
 {
-    // TODO - should check formatting of recipients?
-    /*
-      if (!isComplete()) {
-      qWarning("BUG: build mail called on incomplete mail");
-      return false;
-      }
-    */
-
     //retain the old mail id since it may have been a draft
+    QMailId existingId = mail.id();
     
-    QMailId oglId = mail.id();
-    
-    mail = m_composerInterface->message();
-    
-    mail.setId(oglId);
+    // Ensure the signature of the selected account is used
+    m_composerInterface->setSignature(signature());
 
+    // Extract the message from the composer
+    mail = m_composerInterface->message();
     m_detailsPage->getDetails( mail );
 
     mail.setDate( QMailTimeStamp::currentDateTime() );
 
-    //FIXME : DetailsPage::getDetails should do this, but needs account list
-    QString fromName, fromEmail;
-    QMailAddress fromAddress = mail.from();
-    QListIterator<MailAccount*> itAccount = accountList->accountIterator();
-    while (itAccount.hasNext()) {
-        MailAccount* current = itAccount.next();
-        if (current->emailAddress() == fromAddress.address() ||
-            current->userName().toLower() == fromAddress.name().toLower() ) {
-            fromName = current->userName();
-            fromEmail = current->emailAddress();
-            break;
-        }
-    }
-    mail.setFrom( QMailAddress(fromName, fromEmail) );
+    mail.setId(existingId);
     mail.setStatus( QMailMessage::Outgoing, true);
     mail.setStatus( QMailMessage::Downloaded, true);
     mail.setStatus( QMailMessage::Read,true);
@@ -436,25 +474,15 @@ static void checkOutlookString(QString &str)
     str = newStr.join(", ");
 }
 
-void WriteMail::attach( const QContent &dl )
+void WriteMail::attach( const QContent &dl, QMailMessage::AttachmentsAction action )
 {
     if (m_composerInterface) {
-        m_composerInterface->attach( dl );
+        m_composerInterface->attach( dl, action );
     } else {
         qWarning("WriteMail::attach called with no composer interface present.");
     }
 }
 
-void WriteMail::attach( const QString &fileName )
-{
-    if (m_composerInterface) {
-        m_composerInterface->attach( fileName );
-    } else {
-        qWarning("WriteMail::attach called with no composer interface present.");
-    }
-}
-
-// type 1 = reply, 2 = reply all, 3 = forward
 void WriteMail::reply(const QMailMessage& replyMail, int type)
 {
     const QString fwdIndicator(tr("Fwd"));
@@ -471,9 +499,9 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
 
     //accountId stored in mail, but email address used for selecting
     //account, so loop through and find the matching account
-    QListIterator<MailAccount*> it = accountList->accountIterator();
+    QListIterator<QMailAccount*> it = accountList->accountIterator();
     while (it.hasNext()) {
-        MailAccount* current = it.next();
+        QMailAccount* current = it.next();
         if (current->id() == replyMail.fromAccount()) {
             fromAddress = current->emailAddress();
             break;
@@ -487,17 +515,33 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
 
     newMail(QMailComposerFactory::defaultKey( replyMail.messageType() ));
     if (composer().isEmpty())
-	return;
+        return;
 
     if (replyMail.messageType() == QMailMessage::Sms) {
         // SMS
-        QString from = replyAddress.address();
-        if (!from.isEmpty()) {
-            toAddress = from;
+        if (type == Forward) {
+            QString bodyText;
+            if (replyMail.status() & QMailMessage::Incoming)  {
+                bodyText = replyAddress.displayName();
+                bodyText += ":\n\"";
+                bodyText += replyMail.body().data();
+                bodyText += "\"\n--\n";
+            } else {
+                bodyText += replyMail.body().data();
+            }
+
+            QMailMessageContentType contentType("text/plain; charset=UTF-8");
+            mail.setBody(QMailMessageBody::fromData(bodyText, contentType, QMailMessageBody::Base64));
+            m_composerInterface->setMessage(mail);
+        } else {
+            QString from = replyAddress.address();
+            if (!from.isEmpty()) {
+                toAddress = from;
+            }
         }
     } else if (replyMail.messageType() == QMailMessage::Mms) {
         // MMS
-        if (type == 3) {
+        if (type == Forward) {
             // Copy the existing mail
             mail = replyMail;
             mail.setId(QMailId());
@@ -510,7 +554,7 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
             }
             m_composerInterface->setMessage( mail );
 
-            QTimer::singleShot(0, this, SLOT(detailsStage()));
+            showDetailsPage();
         } else {
             if (subject.left(replyIndicator.length() + 1) == (replyIndicator.toLower() + ":")) {
                 subjectText = replyMail.subject();
@@ -540,7 +584,7 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
             }
         }
 
-        if ( type == 3 ) {
+        if ( type == Forward ) {
             // Copy the existing mail
             mail = replyMail;
             mail.setId(QMailId());
@@ -575,7 +619,7 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
         }
 
         QString bodyText;
-        if (type == 3) {
+        if (type == Forward) {
             bodyText = "\n------------ Forwarded Message ------------\n";
             bodyText += "Date: " + replyMail.date().toString() + "\n";
             bodyText += "From: " + replyAddress.toString() + "\n";
@@ -607,7 +651,7 @@ void WriteMail::reply(const QMailMessage& replyMail, int type)
             part.setBody(QMailMessageBody::fromData(bodyText, contentType, QMailMessageBody::Base64));
         }
 
-        if (type == 2) {
+        if (type == ReplyToAll) {
             // Set the reply-to-all address list
             QList<QMailAddress> all;
             foreach (const QMailAddress& addr, replyMail.to() + replyMail.cc())
@@ -654,10 +698,12 @@ void WriteMail::modify(const QMailMessage& previousMessage)
         QMailAddress fromAddress( previousMessage.from() );
         m_detailsPage->setFrom( fromAddress.address() );
         m_detailsPage->setSubject( previousMessage.subject() );
-        m_composerInterface->setMessage( previousMessage );
         m_detailsPage->setTo( QMailAddress::toStringList(previousMessage.to()).join(", ") );
         m_detailsPage->setCc( QMailAddress::toStringList(previousMessage.cc()).join(", ") );
         m_detailsPage->setBcc( QMailAddress::toStringList(previousMessage.bcc()).join(", ") );
+
+        m_composerInterface->setSignature( signature() );
+        m_composerInterface->setMessage( previousMessage );
 
         // ugh. we need to do this everywhere
         hasMessageChanged = false;
@@ -668,6 +714,15 @@ void WriteMail::setRecipient(const QString &recipient)
 {
     if (m_detailsPage ) {
 	m_detailsPage->setTo( recipient );
+    } else {
+        qWarning("WriteMail::setRecipient called with no composer interface present.");
+    }
+}
+
+void WriteMail::setSubject(const QString &subject)
+{
+    if (m_detailsPage ) {
+	m_detailsPage->setSubject( subject );
     } else {
         qWarning("WriteMail::setRecipient called with no composer interface present.");
     }
@@ -708,7 +763,7 @@ void WriteMail::setRecipients(const QString &emails, const QString & numbers)
         to += ", ";
     to +=  numbers;
     if (m_detailsPage ) {
-	m_detailsPage->setTo( to );
+        m_detailsPage->setTo( to );
     } else {
         qWarning("WriteMail::setRecipients called with no composer interface present.");
     }
@@ -739,21 +794,31 @@ void WriteMail::reset()
     hasMessageChanged = false;
 }
 
-void WriteMail::newMail(const QString& key, bool detailsOnly)
+bool WriteMail::newMail(const QString& key, bool detailsOnly)
 {
+    bool success = true;
+
     reset();
 
     _detailsOnly = detailsOnly;
 
     if (key.isEmpty()) {
-        _composerList->setSelected(composer());
+        // If there's just one composer option, select it immediately
+        QString singularKey = _composerList->singularKey();
+        if (!singularKey.isEmpty()) {
+            success = composerSelected(singularKey);
+        } else {
+            _composerList->setSelected(composer());
 
-        m_mainWindow->setWindowTitle( tr("Select type") );
-        _selectComposer->setVisible(true);
-        widgetStack->setCurrentWidget(_selectComposer);
+            m_mainWindow->setWindowTitle( tr("Select type") );
+            _selectComposer->setVisible(true);
+            widgetStack->setCurrentWidget(_selectComposer);
+        }
     } else {
-        composerSelected(key);
+        success = composerSelected(key);
     }
+
+    return success;
 }
 
 void WriteMail::discard()
@@ -838,44 +903,28 @@ void WriteMail::selectionCanceled()
     _selectComposer->setVisible(false);
 }
 
-void WriteMail::composerSelected(const QString &key)
+bool WriteMail::composerSelected(const QString &key)
 {
     // We need to ensure that we can send for this composer
     QMailMessage::MessageType selectedType = QMailComposerFactory::messageType(key);
 
-    bool sendAccount(false);
-    QListIterator<MailAccount*> itAccount = accountList->accountIterator();
-    while (itAccount.hasNext() && !sendAccount) {
-        MailAccount* current = itAccount.next();
-
-        sendAccount |= ((current->accountType() == MailAccount::SMS && selectedType == QMailMessage::Sms) ||
-                        (current->accountType() == MailAccount::MMS && selectedType == QMailMessage::Mms));
-
-        if (!sendAccount && selectedType == QMailMessage::Email) {
-            if (current->accountType() == MailAccount::POP ||
-                current->accountType() == MailAccount::IMAP) {
-                // This account can (attempt to) send if it has SMTP details configured 
-                sendAccount = !current->emailAddress().isEmpty();
-            }
-        }
-    }
-
-    if (!sendAccount) {
-        selectionCanceled();
-
-        emit noSendAccount(selectedType);
-    } else {
-        setComposer(key);
-
-        if(_detailsOnly) {
-            detailsStage();
-        } else {
-            composeStage();
-            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
-        }
-
+    if (!_sendTypes.contains(selectedType)) {
         _selectComposer->setVisible(false);
+        emit noSendAccount(selectedType);
+        return false;
     }
+
+    setComposer(key);
+
+    if(_detailsOnly) {
+        detailsStage();
+    } else {
+        composeStage();
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
+    }
+
+    _selectComposer->setVisible(false);
+    return true;
 }
 
 void WriteMail::setComposer( const QString &key )
@@ -924,7 +973,7 @@ void WriteMail::setComposer( const QString &key )
     menu->addAction(m_draftAction);
     menu->addAction(m_cancelAction);
 
-    m_detailsPage = new DetailsPage( this );
+    m_detailsPage = new DetailsPage( this, "send-message" );
     m_detailsPage->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     m_detailsPage->setType( m_composerInterface->messageType() );
     connect( m_detailsPage, SIGNAL(changed()), this, SLOT(detailsChanged()));
@@ -932,7 +981,9 @@ void WriteMail::setComposer( const QString &key )
     connect( m_detailsPage, SIGNAL(cancel()), this, SLOT(saveChangesOnRequest()));
 
     if (accountList)
-        m_detailsPage->setFromFields( accountList->emailAccounts() );
+        m_detailsPage->setAccountList( accountList );
+
+    m_composerInterface->setSignature( signature() );
 
     QMenu *detailsMenu = QSoftMenuBar::menuFor( m_detailsPage );
     detailsMenu->addSeparator();
@@ -1031,6 +1082,16 @@ uint WriteMail::largeAttachmentsLimit() const
         mailconf.endGroup();
     }
     return limit;
+}
+
+QString WriteMail::signature() const 
+{
+    if (m_detailsPage)
+        if (QMailAccount* account = m_detailsPage->fromAccount()) 
+            if (account->useSig())
+                return account->sig();
+
+    return QString();
 }
 
 #include "writemail.moc"

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,10 +35,10 @@
 #include <QScrollArea>
 
 BTSettingsMainWindow::BTSettingsMainWindow(QWidget *parent, Qt::WFlags fl)
-    : QMainWindow(parent, fl)
+    : QMainWindow(parent, fl), m_localDevice(new QBluetoothLocalDevice(this)),
+      m_controller(0)
 {
-    QBluetoothLocalDevice *localDevice = new QBluetoothLocalDevice(this);
-    if (!localDevice->isValid()) {
+    if (!m_localDevice->isValid()) {
         QLabel *label = new QLabel(tr("(Bluetooth not available.)"));
         label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         label->setWordWrap(true);
@@ -55,30 +55,47 @@ BTSettingsMainWindow::BTSettingsMainWindow(QWidget *parent, Qt::WFlags fl)
     m_menu = QSoftMenuBar::menuFor(this);
     m_tabs = new QTabWidget();
 
-    SettingsDisplay *settings = new SettingsDisplay(localDevice);
+    m_controller =
+            new QCommDeviceController(m_localDevice->deviceName().toLatin1(), this);
+
+    SettingsDisplay *settings = new SettingsDisplay(m_localDevice, m_controller);
     scroll->setWidget(settings);
+    scroll->setFocusProxy(settings);
     m_tabs->addTab(scroll, tr("Settings"));
 
-    MyDevicesDisplay *myDevices = new MyDevicesDisplay(localDevice);
-    m_tabs->addTab(myDevices, tr("Paired Devices"));
-    QTimer::singleShot(0, myDevices, SLOT(initDisplay()));
+    // Delay initialization of tabs other than the first
+    m_tabs->addTab(new QWidget, tr("Paired Devices"));
+    m_tabs->setTabEnabled(1, false);
 
     m_tabs->setCurrentIndex(0);
 
-    // see whether we need to fiddle with the context menu at all.
+    // change the context menu when the tab changes
     connect(m_tabs, SIGNAL(currentChanged(int)), SLOT(tabChanged(int)));
 
-    QCommDeviceController *controller =
-            new QCommDeviceController(localDevice->deviceName().toLatin1(), this);
-    connect(controller, SIGNAL(powerStateChanged(QCommDeviceController::PowerState)),
-            SLOT(setTabsEnabled(QCommDeviceController::PowerState)));
-    setTabsEnabled(controller->powerState());
-
-    // set the context menu
+    // set the current context menu
     tabChanged(m_tabs->currentIndex());
 
     setCentralWidget(m_tabs);
     setWindowTitle(tr("Bluetooth"));
+
+    QTimer::singleShot(0, this, SLOT(init()));
+}
+
+void BTSettingsMainWindow::init()
+{
+    MyDevicesDisplay *pairedDevices = new MyDevicesDisplay(m_localDevice);
+
+    m_tabs->setUpdatesEnabled(false);
+    QString title = m_tabs->tabText(1);
+    delete m_tabs->widget(1);
+    m_tabs->insertTab(1, pairedDevices, title);
+    m_tabs->setUpdatesEnabled(true);
+
+    connect(m_controller, SIGNAL(powerStateChanged(QCommDeviceController::PowerState)),
+            SLOT(setTabsEnabled(QCommDeviceController::PowerState)));
+    setTabsEnabled(m_controller->powerState());
+
+    QTimer::singleShot(200, pairedDevices, SLOT(populateDeviceList()));
 }
 
 BTSettingsMainWindow::~BTSettingsMainWindow()
@@ -87,8 +104,10 @@ BTSettingsMainWindow::~BTSettingsMainWindow()
 
 void BTSettingsMainWindow::tabChanged(int /*index*/)
 {
-    QWidget *w = m_tabs->currentWidget();
     m_menu->clear();
+    QWidget *w = m_tabs->currentWidget();
+    if (QScrollArea *scroll = qobject_cast<QScrollArea *>(w))
+        w = scroll->widget();
     m_menu->addActions(w->actions());
 }
 

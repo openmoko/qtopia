@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,6 +30,7 @@ class PlayerControl;
 class PlayerWidget;
 class MediaBrowser;
 class RequestHandler;
+class QMediaContentContext;
 
 class MediaPlayer : public QWidget
 {
@@ -42,11 +43,13 @@ public:
     void setPlayerVisible( bool visible );
 
     // Open playlist in player
-    void setPlaylist( Playlist* playlist );
-    Playlist* playlist() const { return m_playlist; }
+    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
 
     // Open url in player
     void openUrl( const QString& url );
+
+    static MediaPlayer *instance();
 
 public slots:
     // Load and parse playlist from file
@@ -64,10 +67,11 @@ private:
     PlayerControl *m_playercontrol;
     PlayerWidget *m_playerwidget;
     bool m_closeonback, m_acceptclose;
+    QMediaContentContext *context;
 
     RequestHandler *m_requesthandler;
     MediaBrowser *m_mediabrowser;
-    Playlist *m_playlist;
+    QExplicitlySharedDataPointer< Playlist > m_playlist;
 };
 
 #endif // MEDIAPLAYER_H

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/sql/kernel/qsqlfield.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/sql/kernel/qsqlfield.cpp -->
 <head>
   <title>Qt 4.3: QSqlField Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -65,10 +65,10 @@
 <p>QSqlField represents the characteristics of a single column in a database table or view, such as the data type and column name. A field also contains the value of the database column, which can be viewed or changed.</p>
 <p>Field data values are stored as QVariants. Using an incompatible type is not permitted. For example:</p>
 <pre>     QSqlField field(&quot;age&quot;, QVariant::Int);
-     field.setValue(QPixmap());  <span class="comment">// WRONG</span></pre>
+     field.setValue(QPixmap());  <span class="comment">//</span> WRONG</pre>
 <p>However, the field will attempt to cast certain data types to the field data type where possible:</p>
 <pre>     QSqlField field(&quot;age&quot;, QVariant::Int);
-     field.setValue(QString(&quot;123&quot;));  <span class="comment">// casts QString to int</span></pre>
+     field.setValue(QString(&quot;123&quot;));  <span class="comment">//</span> casts QString to int</pre>
 <p>QSqlField objects are rarely created explicitly in application code. They are usually accessed indirectly through <a href="qsqlrecord.html">QSqlRecord</a>s that already contain a list of fields. For example:</p>
 <pre>     QSqlQuery query;
      ...
@@ -178,15 +178,10 @@
 <p>Sets the field equal to <i>other</i>.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QSqlField::operator== ( const QSqlField &amp; <i>other</i> ) const</h3>
 <p>Returns true if the field is equal to <i>other</i>; otherwise returns false.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="setNull"></a>void QSqlField::setNull ()</h3>
-<p>Use <a href="qsqlfield.html#clear">clear</a>() instead.</p>
-<p>See also <a href="qsqlfield.html#isNull">isNull</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

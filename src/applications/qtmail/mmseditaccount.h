@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,7 +25,7 @@
 #include "ui_mmseditaccountbase.h"
 #include <QDialog>
 
-class MailAccount;
+class QMailAccount;
 
 class MmsEditAccount : public QDialog, Ui_MmsEditAccountBase
 {
@@ -33,7 +33,7 @@ class MmsEditAccount : public QDialog, Ui_MmsEditAccountBase
 public:
     MmsEditAccount(QWidget *parent=0);
 
-    void setAccount(MailAccount *in);
+    void setAccount(QMailAccount *in);
 
 protected slots:
     void accept();
@@ -44,7 +44,7 @@ private:
     void populateNetwork();
 
 private:
-    MailAccount *account;
+    QMailAccount *account;
 };
 
 #endif

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -108,16 +108,6 @@ private:
 
     QMap< QString, QDrmContentPlugin * > m_pluginMap;
     QList< QDrmContentPlugin * > m_plugins;
-};
-
-
-class DRMThumbnailLoader : public ThumbnailLoader
-{
-public:
-    DRMThumbnailLoader( ThumbnailCache* cache, QObject* parent );
-
-protected:
-    virtual QPixmap loadThumbnail( const QString &filename, const QSize &size );
 };
 
 #endif

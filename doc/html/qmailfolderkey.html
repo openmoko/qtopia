@@ -26,9 +26,12 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey">QMailFolderKey</a></b> ( const Property &amp; <i>p</i>, const QVariant &amp; <i>value</i>, const Operand &amp; <i>c</i> = Equal )</li>
-<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey-2">QMailFolderKey</a></b> ( const QMailFolderKey &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey">QMailFolderKey</a></b> ()</li>
+<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey-2">QMailFolderKey</a></b> ( const Property &amp; <i>p</i>, const QVariant &amp; <i>value</i>, const Operand &amp; <i>c</i> = Equal )</li>
+<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey-3">QMailFolderKey</a></b> ( const QMailIdList &amp; <i>ids</i> )</li>
+<li><div class="fn"/><b><a href="qmailfolderkey.html#QMailFolderKey-4">QMailFolderKey</a></b> ( const QMailFolderKey &amp; <i>other</i> )</li>
 <li><div class="fn"/>virtual <b><a href="qmailfolderkey.html#dtor.QMailFolderKey">~QMailFolderKey</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qmailfolderkey.html#isEmpty">isEmpty</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmailfolderkey.html#operator-not-eq">operator!=</a></b> ( const QMailFolderKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailFolderKey <b><a href="qmailfolderkey.html#operator-and">operator&amp;</a></b> ( const QMailFolderKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailFolderKey &amp; <b><a href="qmailfolderkey.html#operator-and-eq">operator&amp;=</a></b> ( const QMailFolderKey &amp; <i>other</i> )</li>
@@ -67,7 +70,7 @@
 <tr><td valign="top"><tt>QMailFolderKey::GreaterThanEqual</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">represents the '&gt;= operator'.</td></tr>
 <tr><td valign="top"><tt>QMailFolderKey::Equal</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">represents the '=' operator.</td></tr>
 <tr><td valign="top"><tt>QMailFolderKey::NotEqual</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">represents the '!=' operator.</td></tr>
-<tr><td valign="top"><tt>QMailFolderKey::Contains</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">represents an operation in which an associated property is checked to see if it contains a provided value. For most property types this will perform a string based check. For Flag type properties this will perform a check to see if a flag bit value is set.</td></tr>
+<tr><td valign="top"><tt>QMailFolderKey::Contains</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">represents an operation in which an associated property is checked to see if it contains a provided value. For most property types this will perform a string based check. For Status type properties this will perform a check to see if a status flag bit value is set.</td></tr>
 </table></p>
 <h3 class="fn"><a name="Property-enum"></a>enum QMailFolderKey::Property</h3>
 <p>This enum type describes the queryable data properties of a <a href="qmailfolder.html">QMailFolder</a>.</p>
@@ -79,12 +82,21 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailFolderKey"></a>QMailFolderKey::QMailFolderKey ( const <a href="qmailfolderkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailfolderkey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
+<h3 class="fn"><a name="QMailFolderKey"></a>QMailFolderKey::QMailFolderKey ()</h3>
+<p>Create a <a href="qmailfolderkey.html">QMailFolderKey</a> with specifying matching parameters.</p>
+<p>A default-constructed key (one for which <a href="qmailfolderkey.html#isEmpty">isEmpty</a>() returns true) matches all folders. The logical negation of an empty key also matches all folders.</p>
+<p>The result of combining an empty key with a non-empty key is the same as the original non-empty key. This is true regardless of whether the combination is formed by a logical AND or a logical OR operation.</p>
+<p>The result of combining two empty keys is an empty key.</p>
+<h3 class="fn"><a name="QMailFolderKey-2"></a>QMailFolderKey::QMailFolderKey ( const <a href="qmailfolderkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailfolderkey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
 <p>Construct a <a href="qmailfolderkey.html">QMailFolderKey</a> which defines a query parameter where QMailFolder::Property <i>p</i> is compared using comparison operator <i>c</i> with a value <i>value</i>.</p>
-<h3 class="fn"><a name="QMailFolderKey-2"></a>QMailFolderKey::QMailFolderKey ( const QMailFolderKey &amp; <i>other</i> )</h3>
+<h3 class="fn"><a name="QMailFolderKey-3"></a>QMailFolderKey::QMailFolderKey ( const QMailIdList &amp; <i>ids</i> )</h3>
+<p>Construct a <a href="qmailfolderkey.html">QMailFolderKey</a> which defines a query parameter where folder id's matching those in <i>ids</i> are returned.</p>
+<h3 class="fn"><a name="QMailFolderKey-4"></a>QMailFolderKey::QMailFolderKey ( const QMailFolderKey &amp; <i>other</i> )</h3>
 <p>Create a copy of the <a href="qmailfolderkey.html">QMailFolderKey</a> <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QMailFolderKey"></a>QMailFolderKey::~QMailFolderKey ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys this <a href="qmailfolderkey.html">QMailFolderKey</a>.</p>
+<h3 class="fn"><a name="isEmpty"></a>bool QMailFolderKey::isEmpty () const</h3>
+<p>Returns true if the key remains empty after default construction; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QMailFolderKey::operator!= ( const QMailFolderKey &amp; <i>other</i> ) const</h3>
 <p>Returns <tt>true</tt> if the value of this key is not the same as the key <i>other</i>. Returns <tt>false</tt> otherwise.</p>
 <h3 class="fn"><a name="operator-and"></a>QMailFolderKey QMailFolderKey::operator&amp; ( const QMailFolderKey &amp; <i>other</i> ) const</h3>
@@ -103,8 +115,8 @@
 <p>Returns a key that is the logical NOT of the value of this key.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

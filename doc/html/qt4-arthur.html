@@ -93,11 +93,11 @@
 <p align="center"><img src="images/conicalGradient.png" /></p><a name="alpha-blended-drawing"></a>
 <h3>Alpha-Blended Drawing</h3>
 <p>With Qt 4 we support alpha-blended outlining and filling. The alpha channel of a color is defined through <a href="qcolor.html">QColor</a>. The alpha channel specifies the transparency effect, 0 represents a fully transparent color, while 255 represents a fully opaque color. For example:</p>
-<pre><span class="comment"> // Specfiy semi-transparent red</span>
+<pre><span class="comment"> //</span> Specfiy semi-transparent red
  painter.setBrush(QColor(255, 0, 0, 127));
  painter.drawRect(0, 0, width()/2, height());
 
-<span class="comment"> // Specify semi-transparend blue</span>
+<span class="comment"> //</span> Specify semi-transparend blue
  painter.setBrush(QColor(0, 0, 255, 127));
  painter.drawRect(0, 0, width(), height()/2);</pre>
 <p>The code shown above produces the following output:</p>
@@ -108,10 +108,10 @@
 <a name="anti-aliased-edges"></a>
 <h3>Anti-Aliased Edges</h3>
 <p>On platforms where this is supported by the native drawing API, we provide the option of turning on anti-aliased edges when drawing graphics primitives.</p>
-<pre><span class="comment"> // One line without anti-aliasing</span>
+<pre><span class="comment"> //</span> One line without anti-aliasing
  painter.drawLine(0, 0, width()/2, height());
 
-<span class="comment"> // One line with anti-aliasing</span>
+<span class="comment"> //</span> One line with anti-aliasing
  painter.setRenderHint(QPainter::Antialiasing);
  painter.drawLine(width()/2, 0, width()/2, height());</pre>
 <p>This produces the following output:</p>
@@ -138,14 +138,14 @@
 <pre> QPixmap buffer(size());
  QPainter painter(&amp;buffer);
 
-<span class="comment"> // Paint code here</span>
+<span class="comment"> //</span> Paint code here
 
  painter.end();
  bitBlt(this, 0, 0, &amp;buffer);</pre>
 <p>Since the double-buffering is handled by <a href="qwidget.html">QWidget</a> internally this now becomes:</p>
 <pre> QPainter painter(this);
 
-<span class="comment"> // Paint code here</span>
+<span class="comment"> //</span> Paint code here
 
  painter.end();</pre>
 <p>Double-buffering is turned on by default, but can be turned off for individual widgets by setting the widget attribute <a href="qt.html#WidgetAttribute-enum">Qt::WA_PaintOnScreen</a>.</p>
@@ -173,7 +173,7 @@
 <pre> QImage image(100, 100, 32);
  QPainter painter(&amp;image);
 
-<span class="comment"> // painter commands.</span>
+<span class="comment"> //</span> painter commands.
 
  painter.end();</pre>
 <a name="svg-rendering-support"></a>
@@ -191,8 +191,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,8 +24,11 @@
 #include <QDir>
 #include <QDebug>
 #include <QTextStream>
+#include <QSystemMutex>
 #include <unistd.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
 #include "qmailmessage.h"
 
 MailBodyStore::MailBodyStore()
@@ -46,6 +49,10 @@ bool MailBodyStore::insert(const QMailMessage& m, QString* fileName)
 {
 	QString newName = generateUniqueFileName();
 	QString newPath = _storePath + "/" + newName;
+
+    int id = (int)::ftok(newPath.toAscii(),0);
+    QSystemMutex lock(id, true);
+
 	QFile file(newPath);
 	
 	if (!file.open(QIODevice::ReadWrite)) 
@@ -62,23 +69,35 @@ bool MailBodyStore::insert(const QMailMessage& m, QString* fileName)
     }
 	else
 	{
+
 		qWarning("Could not save mail, removing temporary mail file..");
 		//remove the mail file
 		if(!QFile::remove(newPath))
 			qWarning("Could not remove temporary mail file %s",qPrintable(newName));
+        lock.unlock();
 		return false;
 	}
+    lock.unlock();
 	return true;
 }
 
 bool MailBodyStore::remove(const QString& fileName)
 {
+    
 	//remove the mail file
 	QString path = _storePath + "/" + fileName;
 
+    int id = (int)::ftok(path.toAscii(), 0);
+    QSystemMutex lock(id, true);
+
+
+    bool result = false;
+
 	if(QFile::exists(path))
-		return QFile::remove(path);
-	return true;		
+        result = QFile::remove(path);
+
+    lock.unlock();
+	return result;		
 }
 
 bool MailBodyStore::update(const QString& fileName, const QMailMessage& data)
@@ -88,13 +107,18 @@ bool MailBodyStore::update(const QString& fileName, const QMailMessage& data)
 	QString backupFile = _storePath + "/" + fileName + ".tmp";
 	QString newFile = _storePath + "/" + fileName;
 
+    int id = (int)::ftok(newFile.toAscii(),0);
+    QSystemMutex lock(id, true);
+
 	if(!QFile::rename(newFile,backupFile))
 	{
+        lock.unlock();
 		qWarning("Count not create temp backup file %s",qPrintable(backupFile));
 		return false;
 	}
 
 	//save the new file
+
 
 	QFile file(newFile);
 	
@@ -104,12 +128,13 @@ bool MailBodyStore::update(const QString& fileName, const QMailMessage& data)
 		//rename the old file back
 		if(!QFile::rename(backupFile,newFile))
 			qWarning() << "Could not restore temp backup file %s",qPrintable(backupFile);
+        lock.unlock();
 		return false;
 	}
 
-        QDataStream out(&file);
-        data.toRfc2822(out, QMailMessage::StorageFormat); 
-        if (out.status() != QDataStream::Ok)
+    QDataStream out(&file);
+    data.toRfc2822(out, QMailMessage::StorageFormat); 
+    if (out.status() != QDataStream::Ok)
 	{
 		qWarning("Could not save mail, removing temporary mail file..");
 		//remove the mail file
@@ -118,6 +143,7 @@ bool MailBodyStore::update(const QString& fileName, const QMailMessage& data)
 		//restore the backup file
 		if(!QFile::rename(backupFile,newFile))
 			qWarning() << "Could not restore temp backup file %s",qPrintable(backupFile);
+        lock.unlock();
 		return false;
 	}
 	//delete the temp mail file
@@ -125,41 +151,26 @@ bool MailBodyStore::update(const QString& fileName, const QMailMessage& data)
 	if(!QFile::remove(backupFile))
 		qWarning() << "Could not remove the backup file";
 
+    lock.unlock();
+
 	return true;
-
-	
-		
-	//add the new File
-//	QString newName;
-//	bool result = insert(data,&newName);
-//	if(!result)
-//	{
-//		qWarning("Could not create the temporary mail file %s",qPrintable(newName)); 
-//		return false;
-//	}
-
-	//remove the old mail file
-//	if(!remove(fileName))
-//	{
-//		qWarning("Could not remove the old mail file %s, removing temporary mail file..",qPrintable(fileName));
-//		if(!remove(fileName))
-//			qWarning("Could not remove the temporary mail file %s",qPrintable(newName));
-//		return false;
-//	}
-//	*newFileName = newName;
-//	return true;
 }
 
 bool MailBodyStore::load(const QString& fileName, QMailMessage* out) const
 {
     QString mailFile = _storePath + "/" + fileName;
+    int id = (int)::ftok(mailFile.toAscii(),0);
+    QSystemMutex lock(id, true);
 
 	if(!QFile::exists( mailFile ))
 	{
+        lock.unlock();
 		qWarning("Could not load mail file %s, does not exist",qPrintable(mailFile));
 		return false;
     }
     *out = QMailMessage::fromRfc2822File( mailFile );
+
+    lock.unlock();
 
     static const QString smsTag("@sms");
     static const QString fromField("From");
@@ -171,7 +182,6 @@ bool MailBodyStore::load(const QString& fileName, QMailMessage* out) const
         sender.chop(smsTag.length());
         out->setHeaderField(fromField, sender);
     }
-
     return true;
 }
 

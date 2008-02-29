@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -121,6 +121,7 @@ protected slots:
     void deleteItem();
     void deleteItem(int);
     void contactsChanged();
+    void dialNumber();
 
 protected:
     void keyPressEvent( QKeyEvent *e );
@@ -183,7 +184,6 @@ protected slots:
     void clearList();
     void clearList( QCallList::ListType );
     void setFilterCur(const QString &f);
-    void cleanup();
     void deleteCurrentItem();
     void deleteViewedItem();
     void showList( QCallList::ListType type );
@@ -191,8 +191,8 @@ protected slots:
     void updateTabText( const QString &filterStr );
 
 protected:
-    void closeEvent(QCloseEvent *e);
     void constructTab( QCallList::ListType type, QAction *clearAction, CallContactDelegate *delegate );
+    void cleanup();
 
 private:
     QMap<QObject *, QString> mFilters;

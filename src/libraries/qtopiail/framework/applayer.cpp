@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -64,6 +64,7 @@
 
 // #define QVALUESPACE_DEBUG
 // #define QVALUESPACE_DEBUG_VERBOSE
+// #define QVALUESPACE_UPDATE_STATS
 
 static inline QDataStream& operator<<(QDataStream& stream, unsigned long v)
 {
@@ -725,7 +726,7 @@ unsigned short FixedMemoryTree::findRecur(unsigned short node,
 unsigned short FixedMemoryTree::removeRecur(unsigned short node,
                                             NodeOwner owner)
 {
-    Node * const me = this->node(node);
+    Node * me = this->node(node);
 
     unsigned short * const subNodes =
         (unsigned short*)fromPtr(me->subNodePtr);
@@ -813,6 +814,7 @@ unsigned short FixedMemoryTree::removeRecur(unsigned short node,
                         setData(node, datum->owner,
                                 (NodeDatum::Type)datum->type,
                                 datum->data, datum->len);
+                        me = this->node(node);
                         found = true;
                     }
                 }
@@ -1759,7 +1761,11 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 
 private:
+#ifdef QVALUESPACE_UPDATE_STATS
     void updateStats();
+#else
+    inline void updateStats() {}
+#endif
     QList<NodeWatch> watchers(const QByteArray &);
     void doClientEmit();
     void doClientRemove(const QByteArray &path);
@@ -2962,6 +2968,8 @@ void ApplicationLayer::remHandle(HANDLE h)
     }
 }
 
+#ifdef QVALUESPACE_UPDATE_STATS
+
 void ApplicationLayer::updateStats()
 {
     if(!m_statPoolSize) {
@@ -3010,6 +3018,8 @@ void ApplicationLayer::updateStats()
     *m_statInuseBytes = mstats.inuseBytes;
     *m_statKeepCost = mstats.keepCost;
 }
+
+#endif
 
 QList<NodeWatch> ApplicationLayer::watchers(const QByteArray &path)
 {

@@ -40,28 +40,28 @@
 <p>See also <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="localNumber"></a><a href="qstring.html">QString</a> QPhoneNumber::localNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localNumber"></a><a href="./qstring.html">QString</a> QPhoneNumber::localNumber ( const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the local component of the phone <i>number</i>. In the case of countries with variable length area codes this may only return the end of the local number. In the case of URLs (for example 'sip:<a href="mailto:user@voipserver">user@voipserver</a>'), the original URL is returned.</p>
-<h3 class="fn"><a name="matchNumbers"></a>int QPhoneNumber::matchNumbers ( const <a href="qstring.html">QString</a> &amp; <i>num1</i>, const <a href="qstring.html">QString</a> &amp; <i>num2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="matchNumbers"></a>int QPhoneNumber::matchNumbers ( const <a href="./qstring.html">QString</a> &amp; <i>num1</i>, const <a href="./qstring.html">QString</a> &amp; <i>num2</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Compare two phone numbers, <i>num1</i> and <i>num2</i>, to determine the degree to which they match. Returns zero for no match, or increasing positive values for the &quot;quality&quot; of the match between the values.</p>
 <p>Both numbers should be in numeric (not alphanumeric) form, unless they are URLs. URLs are just compared strictly for equality. If one argument appears to be a URL, and the other does not appear to be one, then the non protocol part of the URL argument will be compared strictly against the other argument.</p>
 <p>See also <a href="qphonenumber.html#resolveLetters">resolveLetters</a>().</p>
-<h3 class="fn"><a name="matchPrefix"></a>bool QPhoneNumber::matchPrefix ( const <a href="qstring.html">QString</a> &amp; <i>num</i>, const <a href="qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="matchPrefix"></a>bool QPhoneNumber::matchPrefix ( const <a href="./qstring.html">QString</a> &amp; <i>num</i>, const <a href="./qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns whether the given number <i>num</i> appears to start with the given <i>prefix</i>.</p>
 <p>For a URL argument <i>num</i>, if the <i>prefix</i> argument is also a URL, a strict prefix match will be performed. If only one of the arguments is a URL, the non protocol part of the URL will be strictly against the other argument.</p>
 <p>For non URL arguments, the <i>prefix</i> will be tested against <i>num</i> with and without area code or international prefixes. Both numbers should be in numeric (not alphanumeric) form.</p>
 <p>See also <a href="qphonenumber.html#resolveLetters">resolveLetters</a>().</p>
-<h3 class="fn"><a name="resolveLetters"></a><a href="qstring.html">QString</a> QPhoneNumber::resolveLetters ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="resolveLetters"></a><a href="./qstring.html">QString</a> QPhoneNumber::resolveLetters ( const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Convert an alphanumeric phone <i>number</i> into a regular phone number. e.g&#x2e; <tt>1-800-HEY-PHIL</tt> becomes <tt>1-800-439-7445</tt>.</p>
 <p>If a URL is passed to this function (e.g&#x2e; 'sip:<a href="mailto:user@sipserver">user@sipserver</a>'), the original value is returned.</p>
 <p>Certain letters are not converted into numbers, because they can be used to control the way a number is dialed. These letters are lower case <tt>p</tt>, <tt>w</tt> and <tt>x</tt>, which insert pauses or waits when dialing a number. Upper case letters are always converted into the corresponding numbers.</p>
 <p>Note: this is the only function in the API that can take an alphanumeric phone number as an argument. All other functions assume that the number has already been resolved.</p>
-<h3 class="fn"><a name="stripNumber"></a><a href="qstring.html">QString</a> QPhoneNumber::stripNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="stripNumber"></a><a href="./qstring.html">QString</a> QPhoneNumber::stripNumber ( const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Strip the given <i>number</i> down to remove non-digit and non-dialing characters. If <i>number</i> seems to be a URI, this function will return the original value.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

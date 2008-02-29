@@ -719,6 +719,7 @@
          border: 1px solid #999999;
          height: 8px; <span class="comment">/* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */</span>
          background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #B1B1B1, stop:1 #c4c4c4);
+         margin: 2px 0;
      }
 
      QSlider::handle:horizontal {
@@ -974,40 +975,40 @@
 <ul>
 <li>The <a href="qtoolbutton.html">QToolButton</a> has no menu. In this case, the <a href="qtoolbutton.html">QToolButton</a> is styled exactly like <a href="qpushbutton.html">QPushButton</a>. See <a href="#customizing-qpushbutton">Customizing QPushButton</a> for an example.</li>
 <li>The <a href="qtoolbutton.html">QToolButton</a> has a menu and has the <a href="qtoolbutton.html#popupMode-prop">QToolButton::popupMode</a> set to <a href="qtoolbutton.html#ToolButtonPopupMode-enum">QToolButton::DelayedPopup</a> or <a href="qtoolbutton.html#ToolButtonPopupMode-enum">QToolButton::InstantPopup</a>. In this case, the <a href="qtoolbutton.html">QToolButton</a> is styled exactly like a <a href="qpushbutton.html">QPushButton</a> with a menu. See <a href="#customizing-qpushbutton">Customizing QPushButton</a> for an example of the usage of the menu-indicator pseudo state.</li>
-<li>The <a href="qtoolbutton.html">QToolButton</a> has its <a href="qtoolbutton.html#popupMode-prop">QToolButton::popupMode</a> set to <a href="qtoolbutton.html#ToolButtonPopupMode-enum">QToolButton::MenuButtonPopup</a>. In this case, we style it as follows:<pre>         QToolButton { <span class="comment">/* all types of tool button */</span>
-             border: 2px solid #8f8f91;
-             border-radius: 6px;
-             background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                              stop: 0 #f6f7fa, stop: 1 #dadbde);
-         }
-
-         QToolButton[popupMode=&quot;1&quot;] { <span class="comment">/* only for MenuButtonPopup */</span>
-             padding-right: 20px; <span class="comment">/* make way for the popup button */</span>
-         }
-
-         QToolButton:pressed {
-             background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                               stop: 0 #dadbde, stop: 1 #f6f7fa);
-         }
-
-         <span class="comment">/* the subcontrols below are used only in the MenuButtonPopup mode */</span>
-         QToolButton::menu-button {
-             border: 2px solid gray;
-             border-top-right-radius: 6px;
-             border-bottom-right-radius: 6px;
-             <span class="comment">/* 16px width + 4px for border = 20px allocated above */</span>
-             width: 16px;
-         }
-
-         QToolButton::menu-arrow {
-             image: url(downarrow.png);
-         }
-
-         QToolButton::menu-arrow:open {
-             top: 1px; left: 1px; <span class="comment">/* shift it a bit */</span>
-         }</pre>
-</li>
+<li>The <a href="qtoolbutton.html">QToolButton</a> has its <a href="qtoolbutton.html#popupMode-prop">QToolButton::popupMode</a> set to <a href="qtoolbutton.html#ToolButtonPopupMode-enum">QToolButton::MenuButtonPopup</a>. In this case, we style it as follows:</li>
 </ul>
+<pre>     QToolButton { <span class="comment">/* all types of tool button */</span>
+         border: 2px solid #8f8f91;
+         border-radius: 6px;
+         background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                           stop: 0 #f6f7fa, stop: 1 #dadbde);
+     }
+
+     QToolButton[popupMode=&quot;1&quot;] { <span class="comment">/* only for MenuButtonPopup */</span>
+         padding-right: 20px; <span class="comment">/* make way for the popup button */</span>
+     }
+
+     QToolButton:pressed {
+         background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                           stop: 0 #dadbde, stop: 1 #f6f7fa);
+     }
+
+     <span class="comment">/* the subcontrols below are used only in the MenuButtonPopup mode */</span>
+     QToolButton::menu-button {
+         border: 2px solid gray;
+         border-top-right-radius: 6px;
+         border-bottom-right-radius: 6px;
+         <span class="comment">/* 16px width + 4px for border = 20px allocated above */</span>
+         width: 16px;
+     }
+
+     QToolButton::menu-arrow {
+         image: url(downarrow.png);
+     }
+
+     QToolButton::menu-arrow:open {
+         top: 1px; left: 1px; <span class="comment">/* shift it a bit */</span>
+     }</pre>
 <a name="customizing-qtooltip"></a>
 <h3>Customizing QToolTip</h3>
 <p><a href="qtooltip.html">QToolTip</a> is customized exactly like a <a href="qlabel.html">QLabel</a>. In addition, for platforms that support it, the opacity property may be set to adjust the opacity.</p>
@@ -1088,8 +1089,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

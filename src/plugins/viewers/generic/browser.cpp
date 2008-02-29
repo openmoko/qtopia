@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -111,6 +111,7 @@ QVariant Browser::loadResource(int type, const QUrl& name)
 QList<QString> Browser::embeddedNumbers() const
 {
     QList<QString> result;
+#ifndef QTOPIA_NO_DIAL_FUNCTION
     QSet<QString> appended;
 
     foreach (const QString& number, numbers) {
@@ -123,6 +124,7 @@ QList<QString> Browser::embeddedNumbers() const
             result.append(number);
         }
     }
+#endif
 
     return result;
 }
@@ -223,46 +225,16 @@ void Browser::setMessage(const QMailMessage& email, bool plainTextMode)
 
 void Browser::displayPlainText(const QMailMessage* mail)
 {
-    QString text;
+    QString bodyText;
 
-    if (mail->messageType() != QMailMessage::Sms)
-        text += tr("Subject") + ": " + mail->subject() + "\n";
-
-    QMailAddress fromAddress(mail->from());
-    if (!fromAddress.isNull())
-        text += tr("From") + ": " + fromAddress.toString() + "\n";
-
-    if (mail->to().count() > 0) {
-        text += tr("To") + ": ";
-        text += QMailAddress::toStringList(mail->to()).join(", ");
-    }
-    if (mail->cc().count() > 0) {
-        text += "\n" + tr("CC") + ": ";
-        text += QMailAddress::toStringList(mail->cc()).join(", ");
-    }
-    if (mail->bcc().count() > 0) {
-        text += "\n" + tr("BCC") + ": ";
-        text += QMailAddress::toStringList(mail->bcc()).join(", ");
-    }
-    if ( !mail->replyTo().isNull() ) {
-        text += "\n" + tr("Reply-To") + ": ";
-        text += mail->replyTo().toString();
-    }
-
-    text += "\n" + tr("Date") + ": ";
-    text += QTimeString::localYMDHMS( mail->date().toLocalTime(), QTimeString::Long ) + "\n";
-
-    text += "\n";
     if ( (mail->status() & QMailMessage::Incoming) && !(mail->status() & QMailMessage::Downloaded) ) {
-        if (mail->status() & QMailMessage::Removed) {
-            text += "\n" + tr("Message deleted from server") + "\n";
-        } else {
-            text += "\n" + tr("Awaiting download") + "\n";
-            text += tr("Size of message") + ": " + describeMailSize(mail->size());
+        if ( !(mail->status() & QMailMessage::Removed) ) {
+            bodyText += "\n" + tr("Awaiting download") + "\n";
+            bodyText += tr("Size of message") + ": " + describeMailSize(mail->size());
         }
     } else {
         if (mail->hasBody()) {
-            text += mail->body().data();
+            bodyText += mail->body().data();
         }
         else {
             if ( mail->multipartType() == QMailMessagePartContainer::MultipartAlternative ) {
@@ -295,9 +267,9 @@ void Browser::displayPlainText(const QMailMessage* mail)
                 }
 
                 if (bestPart != 0)
-                    text += bestPart->body().data() + "\n";
+                    bodyText += bestPart->body().data() + "\n";
                 else
-                    text += "\n<" + tr("Message part is not displayable") + ">\n";
+                    bodyText += "\n<" + tr("Message part is not displayable") + ">\n";
             }
             else if ( mail->multipartType() == QMailMessagePartContainer::MultipartRelated ) {
                 const QMailMessagePart* startPart = &mail->partAt(0);
@@ -314,9 +286,9 @@ void Browser::displayPlainText(const QMailMessage* mail)
 
                 // Render the start part, if possible
                 if (startPart->contentType().type().toLower() == "text")
-                    text += startPart->body().data() + "\n";
+                    bodyText += startPart->body().data() + "\n";
                 else
-                    text += "\n<" + tr("Message part is not displayable") + ">\n";
+                    bodyText += "\n<" + tr("Message part is not displayable") + ">\n";
             }
             else {
                 // According to RFC 2046, any unrecognised type should be treated as 'mixed'
@@ -328,13 +300,57 @@ void Browser::displayPlainText(const QMailMessage* mail)
                     const QMailMessagePart &part = mail->partAt( i );
 
                     if (part.contentType().type().toLower() == "text") {
-                        text += part.body().data() + "\n";
+                        bodyText += part.body().data() + "\n";
                     } else {
-                        text += "\n<" + tr("Part") + ": " + part.displayName() + ">\n";
+                        bodyText += "\n<" + tr("Part") + ": " + part.displayName() + ">\n";
                     }
                 }
             }
         }
+    }
+
+    QString text;
+
+    if (mail->messageType() != QMailMessage::Sms)
+        text += tr("Subject") + ": " + mail->subject() + "\n";
+
+    QMailAddress fromAddress(mail->from());
+    if (!fromAddress.isNull())
+        text += tr("From") + ": " + fromAddress.toString() + "\n";
+
+    if (mail->to().count() > 0) {
+        text += tr("To") + ": ";
+        text += QMailAddress::toStringList(mail->to()).join(", ");
+    }
+    if (mail->cc().count() > 0) {
+        text += "\n" + tr("CC") + ": ";
+        text += QMailAddress::toStringList(mail->cc()).join(", ");
+    }
+    if (mail->bcc().count() > 0) {
+        text += "\n" + tr("BCC") + ": ";
+        text += QMailAddress::toStringList(mail->bcc()).join(", ");
+    }
+    if ( !mail->replyTo().isNull() ) {
+        text += "\n" + tr("Reply-To") + ": ";
+        text += mail->replyTo().toString();
+    }
+
+    text += "\n" + tr("Date") + ": ";
+    text += QTimeString::localYMDHMS( mail->date().toLocalTime(), QTimeString::Long ) + "\n";
+
+    if (mail->status() & QMailMessage::Removed) {
+        if (!bodyText.isEmpty()) {
+            // Don't include the notice - the most likely reason to view plain text
+            // is for printing, and we don't want to print the notice
+        } else {
+            text += "\n";
+            text += tr("Message deleted from server");
+        }
+    }
+
+    if (!bodyText.isEmpty()) {
+        text += "\n";
+        text += bodyText;
     }
 
     setPlainText(text);
@@ -420,9 +436,7 @@ void Browser::displayHtml(const QMailMessage* mail)
     metadata.append(qMakePair(tr("Date"), QTimeString::localYMDHMS( mail->date().toLocalTime(), QTimeString::Long )));
 
     if ( (mail->status() & QMailMessage::Incoming) && !(mail->status() & QMailMessage::Downloaded) ) {
-        if ( mail->status() & QMailMessage::Removed) {
-            bodyText = tr("Message deleted from server") + "<br>";
-        } else {
+        if ( !(mail->status() & QMailMessage::Removed) ) {
             bodyText = 
     "<b>WAITING_TEXT</b><br>"
     "SIZE_TEXT<br>"
@@ -576,6 +590,19 @@ void Browser::displayHtml(const QMailMessage* mail)
         QString linkColor = palette().link().color().name();
         subjectTemplate = replaceLast(subjectTemplate, "LINK_COLOR", QString("\"%1\"").arg(linkColor));
         pageData += replaceLast(subjectTemplate, "SUBJECT_TEXT", Qt::escape(subjectText));
+    }
+
+    if (mail->status() & QMailMessage::Removed) {
+        QString noticeTemplate = 
+"<div align=center>NOTICE_TEXT<br></div>";
+
+        QString notice = tr("Message deleted from server");
+        if (!bodyText.isEmpty()) {
+            notice.prepend("<font size=\"-5\">[");
+            notice.append("]</font>");
+        }
+
+        pageData += replaceLast(noticeTemplate, "NOTICE_TEXT", notice);
     }
 
     if (!bodyText.isEmpty()) {
@@ -995,6 +1022,7 @@ QString Browser::encodeUrlAndMail(const QString& txt) const
         }
     }
 
+#ifndef QTOPIA_NO_DIAL_FUNCTION
     // Find and encode dialable numbers
     QRegExp numberPattern(QMailAddress::phoneNumberPattern());
 
@@ -1066,6 +1094,7 @@ QString Browser::encodeUrlAndMail(const QString& txt) const
             pos += len;
         }
     }
+#endif
 
     return str;
 }
@@ -1085,7 +1114,10 @@ QString Browser::refMailTo(const QMailAddress& address) const
     if (name == "System")
         return name;
 
-    return "<a href=\"mailto:" + Qt::escape(address.address()) + "\">" + name + "</a>";
+    if (address.isPhoneNumber() || address.isEmailAddress())
+        return "<a href=\"mailto:" + Qt::escape(address.address()) + "\">" + name + "</a>";
+
+    return name;
 }
 
 QString Browser::refNumber(const QString& number) const

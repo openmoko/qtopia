@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,7 +47,7 @@ uint OmegaCamera::refocusDelay() const
 
 int OmegaCamera::minimumFramePeriod() const
 {
-    return 40; // milliseconds
+    return (int)(1000/20); // milliseconds
 }
 
 OmegaCamera::OmegaCamera():
@@ -317,67 +317,9 @@ void OmegaCamera::getCameraImage( QImage& img, bool copy )
         return;
     }
 
-    int frame = currentFrame;
-
-#if 0
-    // Start capturing the next frame (we alternate between 0 and 1).
-    /XXX:  ioctl not supported by device
-
-    struct video_mmap capture;
-    memset(&capture, 0, sizeof(capture));
-
-    if ( mbuf.frames > 1 ) {
-        currentFrame = !currentFrame;
-        capture.frame = currentFrame;
-        capture.width = width;
-        capture.height = height;
-
-        ioctl( fd, VIDIOCMCAPTURE, &capture );
-    }
-
-    // Wait for the current frame to complete.
-    ioctl(fd, VIDIOCSYNC, &frame);
-
-    // {{{ Convert 
-    /*
-    unsigned char*  buf = frames + mbuf.offsets[frame];
-    unsigned char*  end = buf + width * height * 2;
-    quint16*        dst = m_imageBuf;
-
-    while (buf < end)
-    {
-        int u = buf[0] - 128;
-        int v = buf[2] - 128;
-
-        yuv2rgb(buf[1] - 16, u, v, dst++);
-        yuv2rgb(buf[3] - 16, u, v, dst++);
-
-        buf += 4;
-    }
-    */
-    // }}}
-
-    // {{{ Convert + rotate
-    int             wp = height;
-    int             hp = width;
-    unsigned char*  buf = frames + mbuf.offsets[frame];
-
-    for (int x = wp - 1; x >= 0; --x)
-    {
-        for (int y = 0; y < hp;)
-        {
-            int u = buf[0] - 128;
-            int v = buf[2] - 128;
-
-            yuv2rgb(buf[1] - 16, u, v, m_imageBuf + (y++ * wp) + x);
-            yuv2rgb(buf[3] - 16, u, v, m_imageBuf + (y++ * wp) + x);
-
-            buf += 4;
-        }
-    }
-    // }}}
-#endif 
-    unsigned char*  buf = frames + mbuf.offsets[frame];
+    currentFrame = ++currentFrame % mbuf.frames;
+    
+    unsigned char*  buf = frames + mbuf.offsets[currentFrame];
     quint16 *dest;
     for (int x = height  - 1; x >= 0; --x)
     { 
@@ -385,7 +327,6 @@ void OmegaCamera::getCameraImage( QImage& img, bool copy )
         
         for (int y = 0; y < width; y+=2)
         {
-       
             int u = buf[0];
             int v = buf[2];
             yuv2rgb(buf[1], u, v, dest);
@@ -398,17 +339,6 @@ void OmegaCamera::getCameraImage( QImage& img, bool copy )
      }
     img = QImage((uchar*) m_imageBuf, height, width, QImage::Format_RGB16);
 
-#if 0
-    //XXX:  ioctl not supported by device
-    // Queue up another frame if the device only supports one at a time.
-    if ( mbuf.frames <= 1 ) {
-        capture.frame = currentFrame;
-        capture.width = width;
-        capture.height = height;
-
-        ioctl( fd, VIDIOCMCAPTURE, &capture );
-    }
-#endif    
 }
 
 QList<QSize> OmegaCamera::photoSizes() const

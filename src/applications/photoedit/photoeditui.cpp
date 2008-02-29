@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,8 @@
 
 #include "photoeditui.h"
 
+#include "thumbnailmodel.h"
+#include "imageviewer.h"
 #include <qtopiaapplication.h>
 #include <qsoftmenubar.h>
 #include <qdocumentproperties.h>
@@ -28,7 +30,6 @@
 #include <qtopiasendvia.h>
 #include <qtopiaservices.h>
 #include <qcontent.h>
-#include <qimagedocumentselector.h>
 #include <qdrmcontentplugin.h>
 
 #include <QPoint>
@@ -43,19 +44,18 @@
 #include <QMimeType>
 #include <QStackedLayout>
 #include <QMenu>
+#include <QListView>
+#include <QContentFilterDialog>
+#include <QDesktopWidget>
 
 #include <cmath>
 
 PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     : QWidget( parent, f )
-    , ui_state( SELECTOR )
-    , editor_state( VIEW )
-    , only_editor( false )
     , service_requested( false )
+    , is_fullscreen( false )
     , was_fullscreen( false )
     , edit_canceled( false )
-    , editor_state_changed( false )
-    , selector_image( QDrmRights::Display )
     , separator_action(0)
     , properties_action(0)
     , beam_action(0)
@@ -63,20 +63,31 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     , delete_action(0)
     , edit_action(0)
     , slide_show_action(0)
-    , selector_menu(0)
-    , image_selector(0)
+    , fullscreen_action(0)
+    , viewer_edit_action(0)
+    , image_viewer(0)
+    , selector_view(0)
+    , type_label(0)
+    , category_label(0)
+    , selector_widget(0)
     , region_selector(0)
     , navigator(0)
     , brightness_slider(0)
     , zoom_slider(0)
+    , brightness_widget(0)
+    , zoom_widget(0)
     , image_ui(0)
     , image_processor(0)
     , image_io(0)
+    , editor_stack(0)
     , slide_show_dialog(0)
     , slide_show_ui(0)
     , slide_show(0)
     , widget_stack(0)
+    , type_dialog( 0 )
+    , category_dialog( 0 )
     , currEditImageRequest(0)
+    , list_init_timer_id(-1)
 {
     setWindowTitle( tr( "Pictures" ) );
 
@@ -96,9 +107,7 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
         this,
         SLOT(contentChanged(QContentIdList,QContent::ChangeType)));
 
-    // The rest of the UI will be created by calling init(bool) from resizeEvent(...), because
-    // by that time we will know whether we are creating PhotoEditUI for a single document or for
-    // a list of thumbnails.
+    list_init_timer_id = startTimer( 0 );
 }
 
 PhotoEditUI::~PhotoEditUI()
@@ -107,199 +116,460 @@ PhotoEditUI::~PhotoEditUI()
     currEditImageRequest = 0;
 }
 
-// This finishes constructing the UI. We figure out whether or not to call this by looking at
-// whether image_io has been constructed.
-// ****HACK HACK HACK*** (again). We're working on the assumption that setDocument(...) only
-// gets called when you're not constructing a list, i.e. when you ONLY want to display a single
-// document. Once upon a golden time, you could figure this out in the constructor (you had
-// a qApp argument). Alas, no longer. But if setDocument(...) gets called (i.e NOT list mode)
-// a file gets passed to service_lnk. By the time the resizeEvent(...) gets called, we can figure
-// out if this has happened.
-// If we DON'T do this, we drag in a whole lot of extra documents, and end up displaying the first
-// in that list prior to displaying the one we really want (along with other undesirable bugs)...
-void PhotoEditUI::init(bool listMode)
+
+ImageViewer *PhotoEditUI::imageViewer()
 {
-    // Construct widget stack (only in list mode for phone)
-    if ( listMode ) {
-        // We're constructing for a list of documents, rather than just trying
-        // to display a single picture.
-        // For a list of documents, it makes sense to create the slide show. For a single
-        // document, it does not.
-        // FIXME: Don't create the slideshow until we need it
-        slide_show = new SlideShow( this );
-        slide_show_dialog = new SlideShowDialog( this );
-        slide_show_ui = new SlideShowUI(0);
-        slide_show_ui->setWindowTitle( windowTitle() );
+    if( !image_viewer )
+    {
+        image_viewer = new ImageViewer;
 
-        // Update image when slide show has changed
-        connect( slide_show, SIGNAL(changed(QContent)),
-                 slide_show_ui, SLOT(setImage(QContent)) );
-        // Stop slide show when slide show ui pressed
-        connect( slide_show_ui, SIGNAL(pressed()), slide_show, SLOT(stop()) );
-        // Show selector when slide show has stopped
-        connect( slide_show, SIGNAL(stopped()), this, SLOT(exitCurrentUIState()) );
+        image_viewer->setScaleMode( ImageViewer::ScaleToFit );
 
-        // Construct image selector
-        widget_stack->addWidget( image_selector = new QImageDocumentSelector( this ) );
+        connect( image_viewer, SIGNAL(imageInvalidated()), this, SLOT(exitCurrentUIState()) );
 
-        if ( !service_category.acceptAll() ) {
-            image_selector->setFilter(
-                QContentFilter( QContent::Document ) &
-                QContentFilter( QContentFilter::MimeType, "image/*" ) &
-                QContentFilter( service_category ) );
-        }
+        QMenu *viewer_menu = QSoftMenuBar::menuFor( image_viewer );
 
-        connect( image_selector, SIGNAL(documentSelected(QContent)),
-                 this, SLOT(setViewSingle()) );
-        connect( image_selector, SIGNAL(documentsChanged()),
-            this, SLOT(toggleActions()) );
+        viewer_edit_action = viewer_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT(editCurrentSelection()) );
+        viewer_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT(launchPropertiesDialog()) );
+        viewer_menu->addAction( QIcon( ":icon/beam" ), tr( "Send" ), this, SLOT(beamImage()) );
+        viewer_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
+        viewer_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT(deleteImage()) );
 
-        // Construct context menu for selector ui
-        selector_menu = QSoftMenuBar::menuFor( image_selector );
-        separator_action = selector_menu->insertSeparator( selector_menu->actions().first() );
-        // Add properties item to selector menu
-        properties_action = new QAction( QIcon( ":icon/info" ), tr( "Properties" ), this );
-        properties_action->setVisible( false );
-        connect( properties_action, SIGNAL(triggered()), this, SLOT(launchPropertiesDialog()) );
-        selector_menu->insertAction( separator_action, properties_action );
-        // Add print item to selector menu
-        print_action = new QAction( QIcon( ":icon/beam" ), tr( "Print" ), this );
-        print_action->setVisible( false );
-        connect( print_action, SIGNAL(triggered()), this, SLOT(printImage()) );
-        selector_menu->insertAction( properties_action, print_action );
-        // Add beam item to selector menu
-        beam_action = new QAction( QIcon( ":icon/beam" ), tr( "Beam" ), this );
-        beam_action->setVisible( false );
-        connect( beam_action, SIGNAL(triggered()), this, SLOT(beamImage()) );
-        selector_menu->insertAction( print_action, beam_action );
-        // Add delete item to selector menu
-        delete_action = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
-        delete_action->setVisible( false );
-        connect( delete_action, SIGNAL(triggered()), this, SLOT(deleteImage()) );
-        selector_menu->insertAction( beam_action, delete_action );
-        // Add edit item to selector menu
-        edit_action = new QAction( QIcon( ":icon/edit" ), tr( "Edit" ), this );
-        edit_action->setVisible( false );
-        connect( edit_action, SIGNAL(triggered()), this, SLOT(editCurrentSelection()) );
-        selector_menu->insertAction( delete_action, edit_action );
-        // Add slide show item to selector menu
-        slide_show_action = new QAction( QIcon( ":icon/slideshow" ), tr( "Slide Show..." ), this );
-        slide_show_action->setVisible( true );
-        connect( slide_show_action, SIGNAL(triggered()), this, SLOT(launchSlideShowDialog()) );
-        selector_menu->insertAction( edit_action, slide_show_action );
+        connect( viewer_menu, SIGNAL(aboutToShow()), this, SLOT(viewerMenuAboutToShow()) );
+
+        QSoftMenuBar::setLabel( image_viewer, Qt::Key_Select, QSoftMenuBar::NoLabel );
+
+        widget_stack->addWidget( image_viewer );
     }
 
-    // Construct image io
-    image_io = new ImageIO( this );
-
-    // Construct image processor
-    image_processor = new ImageProcessor( image_io, this );
-
-    // Construct image_ui or editor ui
-    image_ui = new ImageUI(image_processor);
-    widget_stack->addWidget(image_ui);
-
-    // Construct image ui controls
-    QVBoxLayout *box = new QVBoxLayout;
-    box->setMargin(0);
-    // Construct region selector
-    region_selector = new RegionSelector( image_ui );
-    box->addWidget( region_selector );
-
-    if( Qtopia::mousePreferred() ) {
-        connect( region_selector, SIGNAL(pressed()),
-            this, SLOT(exitCurrentEditorState()) );
-        connect( region_selector, SIGNAL(canceled()),
-            this, SLOT(exitCurrentEditorState()) );
-    }
-
-    connect( region_selector, SIGNAL(selected()),
-        this, SLOT(cropImage()) );
-    connect( region_selector, SIGNAL(selected()),
-        this, SLOT(exitCurrentEditorState()) );
-
-    QGridLayout *grid_layout = new QGridLayout;
-    grid_layout->setColumnStretch( 1, 1 );
-    grid_layout->setRowStretch( 1, 1 );
-    // Construct brightness control
-    brightness_slider = new Slider( -70, 70, 0, 0, region_selector );
-    grid_layout->addWidget( brightness_slider, 2, 1 );
-    brightness_slider->hide();
-    connect( brightness_slider, SIGNAL(selected()),
-        this, SLOT(exitCurrentEditorState()) );
-    connect( brightness_slider, SIGNAL(valueChanged(int)),
-        this, SLOT(setBrightness(int)) );
-
-    // Construct zoom control
-    zoom_slider = new Slider( 100, 200, 10, 0, region_selector );
-    zoom_slider->setSingleStep( 5 );
-    grid_layout->addWidget( zoom_slider, 2, 1 );
-    zoom_slider->hide();
-    connect( zoom_slider, SIGNAL(selected()),
-        this, SLOT(exitCurrentEditorState()) );
-    connect( zoom_slider, SIGNAL(valueChanged(int)),
-        this, SLOT(setZoom(int)) );
-
-    // Construct navigator
-    navigator = new Navigator( image_ui );
-    grid_layout->addWidget( navigator, 2, 2 );
-
-    region_selector->setLayout( grid_layout );
-    image_ui->setLayout( box );
-
-    // Clear context bar
-    QSoftMenuBar::setLabel( image_ui, Qt::Key_Select, QSoftMenuBar::NoLabel );
-
-    // Construct context menu for image ui
-    QMenu *context_menu = QSoftMenuBar::menuFor( image_ui );
-    QSoftMenuBar::setHelpEnabled( image_ui, true );
-
-    context_menu->addAction( QIcon( ":icon/cut" ), tr( "Crop" ), this, SLOT(enterCrop()) );
-    context_menu->addAction( QIcon( ":icon/color" ), tr( "Brightness" ), this, SLOT(enterBrightness()) );
-    QAction *rotate_action = context_menu->addAction( QIcon( ":icon/rotate" ), tr( "Rotate" ), image_processor, SLOT(rotate()) );
-    connect( rotate_action, SIGNAL(triggered()), this, SLOT(exitCurrentEditorState()) );
-    context_menu->addSeparator();
-    context_menu->addAction( QIcon( ":icon/find" ), tr( "Zoom" ), this, SLOT(enterZoom()) );
-    // TODO -- Full screen mode has been removed from 4.2 until further notice, since it offers
-    // nothing at this point in time.
-    context_menu->addAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this, SLOT(enterFullScreen()) );
-    context_menu->addSeparator();
-    context_menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(cancelEdit()) );
-
-    connect( &selector_image, SIGNAL(rightsExpired(QDrmContent)),
-              this,           SLOT  (setViewThumbnail()) );
-    connect( &selector_image, SIGNAL(rightsExpired(QDrmContent)),
-              this,           SLOT  (enterSelector()) );
-
-    toggleActions();
-    widget_stack->setCurrentIndex( widget_stack->indexOf( image_selector ) );
+    return image_viewer;
 }
 
-void PhotoEditUI::showEvent(QShowEvent *event )
+QWidget *PhotoEditUI::selectorWidget()
 {
-    if ( !image_io ) {
-        init(service_lnk.fileName().isNull());
+    if( !selector_widget )
+    {
+        QSettings settings( QLatin1String( "Trolltech" ), QLatin1String( "photoedit" ) );
+
+        QStringList types = settings.value( QLatin1String( "Types" ) ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts );
+        QStringList categories = settings.value( QLatin1String( "Categories" ) ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts );
+
+        foreach( QString type, types )
+            type_filter |= QContentFilter::mimeType( type );
+        foreach( QString category, categories )
+            category_filter |= QContentFilter::category( category );
+
+        QString typeLabel;
+        if( types.count() == 1 )
+            typeLabel = tr("Type: %1").arg( types.first() );
+        else if( types.count() > 1 )
+            typeLabel = tr("Type: %1").arg( tr( "(Multi)" ) );
+
+        QString categoryLabel;
+        if( categories.count() == 1 )
+        {
+            if( categories.first() == QLatin1String( "Unfiled" ) )
+            {
+                categoryLabel = tr("Category: %1").arg( tr( "Unfiled" ) );
+            }
+            else
+            {
+                QCategoryManager manager;
+
+                categoryLabel = tr("Category: %1").arg( manager.label( categories.first() ) );
+            }
+        }
+        else if( categories.count() > 1 )
+            categoryLabel = tr("Category: %1").arg( tr( "(Multi)" ) );
+
+
+        image_set = new QContentSet( QContentSet::Asynchronous, this );
+
+        image_set->setCriteria(
+                QContentFilter( QContent::Document )
+            & category_filter
+            & (type_filter.isValid() ? type_filter : QContentFilter::mimeType( QLatin1String( "image/*" ) )) );
+
+
+        int iconSize = (36 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
+
+        image_model = new ThumbnailContentSetModel( image_set, this );
+        image_model->setThumbnailSize( QSize( iconSize, iconSize ) );
+
+        connect( image_model, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+                 this,          SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)) );
+
+        connect( image_model, SIGNAL(rowsInserted(QModelIndex,int,int)),
+                 this,          SLOT(rowsInserted(QModelIndex,int,int)) );
+
+        image_model->setView( selector_view = new ContentThumbnailView );
+
+
+        selector_view->setModel( image_model );
+        selector_view->setViewMode( QListView::IconMode );
+        selector_view->setIconSize( QSize( iconSize, iconSize ) );
+        selector_view->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+        selector_view->setFrameStyle( QFrame::NoFrame );
+        selector_view->setResizeMode( QListView::Fixed );
+        selector_view->setSelectionMode( QAbstractItemView::SingleSelection );
+        selector_view->setSelectionBehavior( QAbstractItemView::SelectItems );
+        selector_view->setUniformItemSizes( true );
+        selector_view->setItemDelegate( new ContentThumbnailDelegate( selector_view ) );
+
+
+        QMenu *selector_menu = QSoftMenuBar::menuFor( selector_view );
+
+        slide_show_action  = selector_menu->addAction( QIcon( ":icon/slideshow" ), tr( "Slide Show..." ), this, SLOT(launchSlideShowDialog()) );
+
+        selector_menu->addSeparator();
+
+        edit_action = selector_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT(editCurrentSelection()) );
+        properties_action = selector_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT(launchPropertiesDialog()) );
+        beam_action = selector_menu->addAction( QIcon( ":icon/beam" ), tr( "Send" ), this, SLOT(beamImage()) );
+        print_action = selector_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
+        delete_action = selector_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT(deleteImage()) );
+
+        slide_show_action->setVisible( false );
+        edit_action->setVisible( false );
+        beam_action->setVisible( false );
+        print_action->setVisible( false );
+        delete_action->setVisible( false );
+        properties_action->setVisible( false );
+
+        separator_action = selector_menu->addSeparator();
+
+        selector_menu->addAction( tr( "View Type..." ), this, SLOT(selectType()) );
+        selector_menu->addAction( QIcon( QLatin1String( ":icon/viewcategory" ) ), tr( "View Category..." ), this, SLOT(selectCategory()) );
+
+        connect( selector_menu, SIGNAL(aboutToShow()), this, SLOT(selectorMenuAboutToShow()) );
+
+        connect( selector_view, SIGNAL(activated(QModelIndex)),
+                 this, SLOT(imageSelected(QModelIndex)) );
+
+        type_label = new QLabel( typeLabel );
+        type_label->setVisible( !typeLabel.isEmpty() );
+
+        category_label = new QLabel( categoryLabel );
+        category_label->setVisible( !categoryLabel.isEmpty() );
+
+        QVBoxLayout *layout = new QVBoxLayout;
+
+        layout->setMargin( 0 );
+        layout->setSpacing( 0 );
+        layout->addWidget( selector_view );
+        layout->addWidget( type_label );
+        layout->addWidget( category_label );
+
+        selector_widget = new QWidget;
+        selector_widget->setLayout( layout );
+        selector_widget->setFocusProxy( selector_view );
+
+        widget_stack->addWidget( selector_widget );
     }
-    QWidget::showEvent( event );
+
+    return selector_widget;
+}
+
+ImageUI *PhotoEditUI::imageEditor()
+{
+    if( !image_io )
+    {
+        // Construct image io
+        image_io = new ImageIO( this );
+
+        // Construct image processor
+        image_processor = new ImageProcessor( image_io, this );
+
+        // Construct image_ui or editor ui
+        image_ui = new ImageUI(image_processor);
+
+        image_ui->setObjectName( QLatin1String( "editmode" ) );
+
+        editor_stack = new QStackedLayout;
+
+        // Construct navigator
+        navigator = new Navigator( image_ui );
+
+        editor_stack->addWidget( navigator );
+
+        // Construct region selector
+        region_selector = new RegionSelector( image_ui );
+        region_selector->setEnabled( true );
+        region_selector->setObjectName( QLatin1String( "dimensions" ) );
+
+        if( Qtopia::mousePreferred() )
+            QSoftMenuBar::menuFor( region_selector );
+
+        editor_stack->addWidget( region_selector );
+
+        connect( region_selector, SIGNAL(selected()),
+            this, SLOT(cropImage()) );
+        connect( region_selector, SIGNAL(selected()),
+            this, SLOT(exitCurrentEditorState()) );
+
+        // Construct brightness control
+        brightness_slider = new Slider( -70, 70, 0, 0, 0 );
+
+        connect( brightness_slider, SIGNAL(selected()),
+            this, SLOT(exitCurrentEditorState()) );
+        connect( brightness_slider, SIGNAL(valueChanged(int)),
+            this, SLOT(setBrightness(int)) );
+
+
+        QVBoxLayout *brightness_layout = new QVBoxLayout;
+        brightness_layout->addStretch();
+        brightness_layout->addWidget( brightness_slider );
+
+        brightness_widget = new QWidget;
+        brightness_widget->setLayout( brightness_layout );
+        brightness_widget->setObjectName( QLatin1String( "brightness" ) );
+
+        editor_stack->addWidget( brightness_widget );
+
+        // Construct zoom control
+        zoom_slider = new Slider( 100, 200, 10, 0, 0 );
+        zoom_slider->setSingleStep( 5 );
+
+        connect( zoom_slider, SIGNAL(selected()),
+            this, SLOT(exitCurrentEditorState()) );
+        connect( zoom_slider, SIGNAL(valueChanged(int)),
+            this, SLOT(setZoom(int)) );
+
+        QVBoxLayout *zoom_layout = new QVBoxLayout;
+        zoom_layout->addStretch();
+        zoom_layout->addWidget( zoom_slider );
+
+        zoom_widget = new QWidget;
+        zoom_widget->setLayout( zoom_layout );
+
+        editor_stack->addWidget( zoom_widget );
+
+        image_ui->setLayout( editor_stack );
+
+        // Clear context bar
+        QSoftMenuBar::setLabel( image_ui, Qt::Key_Select, QLatin1String( ":icon/view" ), tr( "Zoom" ) );
+
+        // Construct context menu for image ui
+        QMenu *context_menu = QSoftMenuBar::menuFor( image_ui );
+        QSoftMenuBar::setHelpEnabled( image_ui, true );
+
+        context_menu->addAction( QIcon( ":icon/cut" ), tr( "Crop" ), this, SLOT(enterCrop()) );
+        context_menu->addAction( QIcon( ":icon/color" ), tr( "Brightness" ), this, SLOT(enterBrightness()) );
+        QAction *rotate_action = context_menu->addAction( QIcon( ":icon/rotate" ), tr( "Rotate" ), image_processor, SLOT(rotate()) );
+        connect( rotate_action, SIGNAL(triggered()), this, SLOT(exitCurrentEditorState()) );
+        context_menu->addSeparator();
+        context_menu->addAction( QIcon( ":icon/view" ), tr( "Zoom" ), this, SLOT(enterZoom()) );
+
+        if( !Qtopia::mousePreferred() ) {
+            fullscreen_action = context_menu->addAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this, SLOT(enterFullScreen()) );
+        }
+        context_menu->addSeparator();
+        context_menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(cancelEdit()) );
+
+        widget_stack->addWidget(image_ui);
+    }
+
+    return image_ui;
+}
+
+void PhotoEditUI::timerEvent( QTimerEvent *event )
+{
+    if( event->timerId() == list_init_timer_id )
+    {
+        killTimer( list_init_timer_id );
+
+        list_init_timer_id = -1;
+
+        QWidget *selector = selectorWidget();
+
+        widget_stack->setCurrentWidget( selector );
+
+        navigation_stack.append( selector );
+
+        selector->setFocus();
+    }
+}
+
+bool PhotoEditUI::event( QEvent *event )
+{
+    if( event->type() == QEvent::WindowDeactivate && is_fullscreen )
+    {
+        lower();
+    }
+    else if( event->type() == QEvent::WindowActivate && is_fullscreen )
+    {
+        QString title = windowTitle();
+
+        setWindowTitle( QLatin1String( "_allow_on_top_" ) );
+
+        raise();
+
+        setWindowTitle( title );
+    }
+
+     return QWidget::event( event );
 }
 
 void PhotoEditUI::setDocument( const QString& lnk )
 {
-    service_lnk = QContent(lnk);
+    if( list_init_timer_id != -1 )
+    {
+        killTimer( list_init_timer_id );
 
-    QTimer::singleShot( 0, this, SLOT(processSetDocument()) );
+        list_init_timer_id = -1;
+    }
+
+    viewImage( QContent( lnk, false ) );
 }
 
 void PhotoEditUI::editImage( const QDSActionRequest& request )
 {
+    if( list_init_timer_id != -1 )
+    {
+        killTimer( list_init_timer_id );
+
+        list_init_timer_id = -1;
+    }
+    else
+        hide();
+
     showMaximized();
     currEditImageRequest = new QDSActionRequest( request );
     QDataStream stream( currEditImageRequest->requestData().toIODevice() );
     QPixmap orig;
     stream >> orig;
     service_image = orig.toImage();
+    clearEditor();
+    service_requested = true;
 
-    QTimer::singleShot( 0, this, SLOT(processGetImage()) );
+    if( !navigation_stack.isEmpty() && navigation_stack.last() == image_viewer )
+    {
+        current_image = image_viewer->content();
+        image_viewer->setContent( QContent() );
+    }
+
+    enterEditor();
+}
+
+void PhotoEditUI::imageSelected( const QModelIndex &index )
+{
+    viewImage( qvariant_cast< QContent >( index.data( Qt::UserRole + 1 ) ) );
+}
+
+void PhotoEditUI::viewImage( const QContent &content )
+{
+    ImageViewer *viewer = imageViewer();
+
+    viewer->setContent( content );
+
+    widget_stack->setCurrentWidget( viewer );
+
+    navigation_stack.append( viewer );
+}
+
+void PhotoEditUI::selectType()
+{
+    if( !type_dialog )
+    {
+        QSettings settings( QLatin1String( "Trolltech" ), QLatin1String( "photoedit" ) );
+
+        QStringList types = settings.value( QLatin1String( "Types" ) ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts );
+
+        QContentFilterModel::Template typePage;
+
+        typePage.setOptions( QContentFilterModel::CheckList | QContentFilterModel::SelectAll );
+
+        typePage.addList( QContentFilter::MimeType, QString(), types );
+
+        type_dialog = new QContentFilterDialog( typePage, this );
+
+        type_dialog->setWindowTitle( tr("View Type") );
+        type_dialog->setFilter( QContentFilter( QContent::Document ) & QContentFilter::mimeType( QLatin1String( "image/*" ) ) );
+        type_dialog->setObjectName( QLatin1String( "documents-type" ) );
+    }
+
+    QtopiaApplication::execDialog( type_dialog );
+
+    type_filter = type_dialog->checkedFilter();
+
+    image_set->setCriteria(
+            QContentFilter( QContent::Document )
+          & category_filter
+          & (type_filter.isValid() ? type_filter : QContentFilter::mimeType( QLatin1String( "image/*" ) )) );
+
+    QString label = type_dialog->checkedLabel();
+
+    if( !type_filter.isValid() || label.isEmpty() )
+    {
+        type_label->setVisible( false );
+    }
+    else
+    {
+        type_label->setText( tr("Type: %1").arg( label ) );
+        type_label->setVisible( true );
+    }
+
+    QSettings settings( QLatin1String( "Trolltech" ), QLatin1String( "photoedit" ) );
+
+    settings.setValue( QLatin1String( "Types" ), type_filter.arguments( QContentFilter::MimeType ).join( QLatin1String( ";" ) ) );
+}
+
+void PhotoEditUI::selectCategory()
+{
+    if( !category_dialog )
+    {
+        QSettings settings( QLatin1String( "Trolltech" ), QLatin1String( "photoedit" ) );
+
+        QStringList categories = category_filter.arguments( QContentFilter::Category );
+
+        QContentFilterModel::Template categoryPage;
+
+        categoryPage.setOptions( QContentFilterModel::CheckList | QContentFilterModel::SelectAll );
+
+        categoryPage.addList( QContentFilter::Category, QString(), categories );
+        categoryPage.addList( QContentFilter::Category, QLatin1String( "Documents" ), categories );
+
+        category_dialog = new QContentFilterDialog( categoryPage, this );
+
+        category_dialog->setWindowTitle( tr("View Category") );
+        category_dialog->setFilter( QContentFilter( QContent::Document ) & QContentFilter::mimeType( QLatin1String( "image/*" ) ) );
+        category_dialog->setObjectName( QLatin1String( "documents-category" ) );
+    }
+
+    QtopiaApplication::execDialog( category_dialog );
+
+    category_filter = category_dialog->checkedFilter();
+
+    image_set->setCriteria(
+            QContentFilter( QContent::Document )
+          & category_filter
+          & (type_filter.isValid() ? type_filter : QContentFilter::mimeType( QLatin1String( "image/*" ) )) );
+
+    QString label = category_dialog->checkedLabel();
+
+    if( !category_filter.isValid() || label.isEmpty() )
+    {
+        category_label->setVisible( false );
+    }
+    else
+    {
+        category_label->setText( tr("Category: %1").arg( label ) );
+        category_label->setVisible( true );
+    }
+
+    QSettings settings( QLatin1String( "Trolltech" ), QLatin1String( "photoedit" ) );
+
+    settings.setValue( QLatin1String( "Categories" ), category_filter.arguments( QContentFilter::Category ).join( QLatin1String( ";" ) ) );
+}
+
+void PhotoEditUI::viewerMenuAboutToShow()
+{
+    viewer_edit_action->setEnabled( image_viewer->content().drmState() != QContent::Protected );
+}
+
+void PhotoEditUI::selectorMenuAboutToShow()
+{
+    edit_action->setEnabled( qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) ).drmState() != QContent::Protected );
 }
 
 void PhotoEditUI::appMessage( const QString& msg, const QByteArray& data )
@@ -319,100 +589,24 @@ void PhotoEditUI::appMessage( const QString& msg, const QByteArray& data )
     }
 }
 
-void PhotoEditUI::processSetDocument()
-{
-    only_editor = true;
-    clearEditor();
-    qApp->processEvents();
-    current_image = service_lnk;
-    enterEditor();
-}
-
-void PhotoEditUI::processGetImage()
-{
-    only_editor = true;
-    clearEditor();
-    qApp->processEvents();
-    service_requested = true;
-    if( service_image.isNull() ) enterSelector();
-    else enterEditor();
-}
-
-// toggle the various actions to represent current state of the control
-void PhotoEditUI::toggleActions()
-{
-    if ( !image_selector )
-        return;
-
-    // If there are images in the visible collection, enable actions
-    // Otherwise, disable action
-    bool b = image_selector->documents().count();
-
-    switch( image_selector->viewMode() ) {
-        case QImageDocumentSelector::Single:
-            edit_action->setVisible( true );
-            beam_action->setVisible( true );
-            print_action->setVisible( true );
-            delete_action->setVisible( true );
-            properties_action->setVisible( true );
-            slide_show_action->setVisible( false );
-            QSoftMenuBar::setLabel( image_selector, Qt::Key_Select, QSoftMenuBar::NoLabel );
-            break;
-        case QImageDocumentSelector::Thumbnail:
-            slide_show_action->setVisible( b );
-            {
-                // If an image is selected, then enable single image functions
-                bool valid = b && image_selector->currentDocument().isValid();
-                edit_action->setVisible( valid );
-                beam_action->setVisible( valid );
-                print_action->setVisible( valid );
-                delete_action->setVisible( valid );
-                properties_action->setVisible( valid );
-            }
-            QSoftMenuBar::setLabel( image_selector, Qt::Key_Select,
-                                    b ? QSoftMenuBar::View : QSoftMenuBar::NoLabel );
-            break;
-    }
-
-    separator_action->setVisible( b );
-}
-
-void PhotoEditUI::enterSelector()
-{
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::enterSelector() being called when there is NO image selector.");
-        return;
-    }
-
-    // Clear current image
-    current_image = QContent();
-    // Raise selector to top of stack
-    widget_stack->setCurrentIndex( widget_stack->indexOf( image_selector ) );
-    toggleActions();
-    image_selector->setFocus();
-    ui_state = SELECTOR;
-}
-
 void PhotoEditUI::enterSlideShow()
 {
-    if ( !slide_show || !slide_show_ui ) {
-        qWarning("PhotoEditUI::toggleActions() being called when there is NO slide show.");
-        return;
-    }
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::toggleActions() being called when there is NO image selector.");
+    if ( !selector_view ) {
+        qWarning("PhotoEditUI::enterSlideShow() being called when there is NO image selector.");
         return;
     }
 
     // Set slide show collection from currently visible collection in selector
-    slide_show->setCollection( image_selector->documents() );
+    slide_show->setCollection( *image_set );
     // Set first image in slideshow to currently selected image in selector
-    slide_show->setFirstImage( image_selector->currentDocument() );
-    // Show slide show ui in full screen
-    slide_show_ui->showMaximized();
+    slide_show->setFirstImage( qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) ) );
+
+    widget_stack->setCurrentWidget( slide_show_ui );
+
+    navigation_stack.append( slide_show_ui );
+
     // Start slideshow
     slide_show->start();
-    ui_state = SLIDE_SHOW;
     QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
 }
 
@@ -423,33 +617,25 @@ void PhotoEditUI::enterEditor()
     ( (dw)*(sh) > (dh)*(sw) ? (double)(dh)/(double)(sh) : \
     (double)(dw)/(double)(sw) )
 
-    if ( navigator ) {
-        navigator->hide();
-    }
-    if ( image_ui ) {
-        image_ui->setEnabled( false );
-    }
+    ImageUI *editor = imageEditor();
+
+    editor->setEnabled( false );
 
     // Raise editor to top of widget stack
-    if ( widget_stack ) {
-        widget_stack->setCurrentIndex( widget_stack->indexOf( image_ui ) );
-    }
-    ui_state = EDITOR;
+    widget_stack->setCurrentWidget( editor );
 
-    qApp->processEvents();
+    navigation_stack.append( editor );
 
     // Update image io with current image
     ImageIO::Status status;
-    if( service_requested && !service_image.isNull() && image_io ) {
+    if( service_requested && !service_image.isNull() ) {
         status = image_io->load( service_image );
     } else if ( !current_image.isValid() ) {
         // I believe this is because it is possible to get in here before
         // an image has been established.
         status = ImageIO::LOAD_ERROR;
-    } else if( selector_image.requestLicense( current_image ) ) {
-        status = image_io->load(current_image);
     } else {
-        status = ImageIO::LOAD_ERROR;
+        status = image_io->load(current_image);
     }
 
     switch( status ) {
@@ -479,65 +665,61 @@ void PhotoEditUI::enterEditor()
             connect( zoom_slider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)) );
             image_ui->reset();
             image_ui->setEnabled( true );
-            navigator->show();
-            navigator->setFocus();
-            selector_image.renderStarted();
+            editor_stack->setCurrentWidget( navigator );
         }
         break;
 
         case ImageIO::SIZE_ERROR:
         case ImageIO::LOAD_ERROR:
             QMessageBox::warning( 0, tr( "Load Error" ), tr( "<qt>Unable to load image.</qt>" ) );
-            if ( only_editor )
-                close();
+            navigation_stack.removeLast();
+            if( !navigation_stack.isEmpty() )
+            {
+                if( navigation_stack.last() == image_viewer )
+                    image_viewer->setContent( current_image );
+
+                widget_stack->setCurrentWidget( navigation_stack.last() );
+            }
             else
-                enterSelector();
+                close();
         break;
 
         case ImageIO::DEPTH_ERROR:
             QMessageBox::warning( 0, tr( "Depth Error" ), tr( "<qt>Image depth is not supported.</qt>" ) );
-            if ( only_editor )
-                close();
+            navigation_stack.removeLast();
+            if( !navigation_stack.isEmpty() )
+            {
+                if( navigation_stack.last() == image_viewer )
+                    image_viewer->setContent( current_image );
+
+                widget_stack->setCurrentWidget( navigation_stack.last() );
+            }
             else
-                enterSelector();
+                close();
         break;
     }
 }
 
 void PhotoEditUI::enterZoom()
 {
-    // Hide navigator
-    navigator->hide();
-    // Show zoom control
-    zoom_slider->show();
-    zoom_slider->setFocus();
-    editor_state = ZOOM;
+    editor_stack->setCurrentWidget( zoom_widget );
 }
 
 void PhotoEditUI::enterBrightness()
 {
-    // Hide navigator
-    navigator->hide();
-    // Show brightness control
-    brightness_slider->show();
-    brightness_slider->setFocus();
-    editor_state = BRIGHTNESS;
+    editor_stack->setCurrentWidget( brightness_widget );
 }
 
 void PhotoEditUI::enterCrop()
 {
-    // Hide navigator
-    navigator->hide();
     // Enable selection in region selector
+    editor_stack->setCurrentWidget( region_selector );
+
     region_selector->reset();
-    region_selector->setEnabled( true );
-    region_selector->setFocus();
-    editor_state = CROP;
 }
 
 void PhotoEditUI::enterFullScreen()
 {
-    navigator->hide();
     // Show editor view in full screen
     QString title = windowTitle();
 
@@ -547,48 +729,57 @@ void PhotoEditUI::enterFullScreen()
 
     setWindowTitle( title );
 
-    editor_state = FULL_SCREEN;
+    fullscreen_action->setVisible( false );
+
+    is_fullscreen = true;
 }
 
 void PhotoEditUI::setViewThumbnail()
 {
-    if ( !image_selector ) {
+    if ( !selector_view ) {
         qWarning("PhotoEditUI::setViewThumbnail() being called when there is NO image selector.");
         return;
     }
 
     // If image selector not in multi, change to single and update context menu
-    if( image_selector->viewMode() != QImageDocumentSelector::Thumbnail )
-    {
-        image_selector->setViewMode( QImageDocumentSelector::Thumbnail );
-    }
-    toggleActions();
+    widget_stack->setCurrentWidget( selector_widget );
 }
 
 void PhotoEditUI::setViewSingle()
 {
-    if ( !image_selector ) {
+    if ( !selector_view ) {
         qWarning("PhotoEditUI::setViewSingle() being called when there is NO image selector.");
         return;
     }
 
     // If image selector not in single, change to single and update context menu
-    if( image_selector->viewMode() != QImageDocumentSelector::Single )
-    {
-        image_selector->setViewMode( QImageDocumentSelector::Single );
-    }
-    toggleActions();
+    widget_stack->setCurrentWidget( image_viewer );
 }
 
 void PhotoEditUI::launchSlideShowDialog()
 {
     if ( !slide_show_dialog ) {
-        qWarning("PhotoEditUI::launchSlideShowDialog() being called when there is NO slide show.");
-        return;
+        slide_show_dialog = new SlideShowDialog( this );
+        slide_show_dialog->setObjectName( QLatin1String( "slideshow" ) );
     }
 
     // If slide show dialog accepted, start slideshow
     if( QtopiaApplication::execDialog( slide_show_dialog, true ) ) {
+        if ( !slide_show ) {
+            slide_show = new SlideShow( this );
+            slide_show_ui = new SlideShowUI(this);
+            slide_show_ui->setWindowTitle( windowTitle() );
+
+            widget_stack->addWidget( slide_show_ui );
+
+            // Update image when slide show has changed
+            connect( slide_show, SIGNAL(changed(QContent)),
+                    slide_show_ui, SLOT(setImage(QContent)) );
+            // Stop slide show when slide show ui pressed
+            connect( slide_show_ui, SIGNAL(pressed()), slide_show, SLOT(stop()) );
+            // Show selector when slide show has stopped
+            connect( slide_show, SIGNAL(stopped()), this, SLOT(exitCurrentUIState()) );
+        }
         // Set slide show options
         slide_show_ui->setDisplayName( slide_show_dialog->isDisplayName() );
         slide_show->setSlideLength( slide_show_dialog->slideLength() );
@@ -599,115 +790,82 @@ void PhotoEditUI::launchSlideShowDialog()
 
 void PhotoEditUI::launchPropertiesDialog()
 {
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::launchPropertiesDialog() being called when there is NO image selector.");
-        return;
-    }
+    QContent image;
 
-    QContent doc( image_selector->currentDocument() );
-    QDocumentPropertiesDialog dialog( doc );
+    if( widget_stack->currentWidget() == image_viewer )
+        image = image_viewer->content();
+    else if( widget_stack->currentWidget() == selector_widget )
+        image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
+    else
+        return;
+
+    QDocumentPropertiesDialog dialog( image );
+    dialog.setObjectName( QLatin1String( "properties" ) );
     // Launch properties dialog with current image
     QtopiaApplication::execDialog( &dialog );
 }
 
 bool PhotoEditUI::exitCurrentUIState()
 {
-    switch( ui_state ) {
-    case SELECTOR:
-        if ( !image_selector ) {
-            qWarning("PhotoEditUI::exitCurrentUIState() being called for context requiring image selector.");
-            break;
-        }
+    if( navigation_stack.isEmpty() )
+        return true;
 
-        // If in single view and there are images, change to thumbnail and update context menu
-        // Otherwise, close application
-        if ( image_selector->viewMode() == QImageDocumentSelector::Single &&
-             image_selector->documents().count() )
-            setViewThumbnail();
-        else
-            return true;
-        break;
-    case SLIDE_SHOW:
-        if ( !slide_show_ui ) {
-            qWarning("PhotoEditUI::exitCurrentUIState() being called for context requiring slide show.");
-            break;
-        }
-        QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
-        // Return from slide show
-        slide_show_ui->hide();
-        enterSelector();
-        break;
-    case EDITOR:
-        selector_image.releaseLicense();
+    navigation_stack.removeLast();
 
-        if( !edit_canceled ) {
-            if( service_requested ) {
+    if( widget_stack->currentWidget() == image_ui )
+    {
+        if( service_requested ) {
+            if( !edit_canceled ) {
                 sendValueSupplied();
-            } else {
-                saveChanges();
             }
-        }
-        if( only_editor ) {
-            if( service_requested && service_image.isNull() && edit_canceled ) {
-                enterSelector();
-            } else {
-                return true;
-            }
-        } else {
-            enterSelector();
+            setWindowState( windowState() | Qt::WindowMinimized );
+        } else if( !edit_canceled ) {
+            saveChanges();
         }
         edit_canceled = false;
-        break;
+
+        if( !navigation_stack.isEmpty() && navigation_stack.last() == image_viewer )
+            image_viewer->setContent( current_image );
+    }
+    else if( widget_stack->currentWidget() == image_viewer )
+    {
+        image_viewer->setContent( QContent() );
+    }
+    else if( widget_stack->currentWidget() == slide_show_ui )
+    {
+        QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
     }
 
-    return false;
+    if( !navigation_stack.isEmpty() )
+    {
+        widget_stack->setCurrentWidget( navigation_stack.last() );
+
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 void PhotoEditUI::exitCurrentEditorState()
 {
-    switch( editor_state ) {
-    // If in view, no change
-    case VIEW:
-        editor_state_changed = false;
-        break;
-    // If in full screen, return from full screen
-    case FULL_SCREEN:
-        // Set editor central widget to editor view
-        navigator->show();
-        navigator->setFocus();
-        showMaximized();
-        editor_state = VIEW;
-        editor_state_changed = true;
-        break;
-    // If in zoom, hide zoom control
-    case ZOOM:
-        zoom_slider->hide();
-        // Show navigator
-        navigator->show();
-        navigator->setFocus();
-        editor_state = VIEW;
-        editor_state_changed = true;
-        break;
-    // If in brightness, hide brightness control
-    case BRIGHTNESS:
-        brightness_slider->hide();
-        // Show navigator
-        navigator->show();
-        navigator->setFocus();
-        editor_state = VIEW;
-        editor_state_changed = true;
-        break;
-    // If in crop, disable region selector and show navigator
-    case CROP:
-        region_selector->setEnabled( false );
-        region_selector->update();
-        // Show navigator
-        navigator->show();
-        navigator->setFocus();
-        editor_state = VIEW;
-        editor_state_changed = true;
-        break;
-    };
+    if( editor_stack->currentWidget() == navigator ) {
+        // If in full screen, return from full screen
+        if( is_fullscreen ) {
+            is_fullscreen = false;
+            fullscreen_action->setVisible( true );
+
+            QTimer::singleShot( 0, this, SLOT(showMaximized()) );
+        // If in view, no change
+        }
+    } else {
+        if( editor_stack->currentWidget() == region_selector ) {
+            region_selector->update();
+        }
+
+        editor_stack->setCurrentWidget( navigator );
+    }
 }
 
 void PhotoEditUI::setZoom( int x )
@@ -722,23 +880,32 @@ void PhotoEditUI::setBrightness( int x )
 
 void PhotoEditUI::editCurrentSelection()
 {
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::editCurrentSelection() being called when there is NO image selector.");
-        return;
+    if( widget_stack->currentWidget() == image_viewer )
+    {
+        current_image = image_viewer->content();
+
+        image_viewer->setContent( QContent() );
+
+        enterEditor();
     }
+    else if( widget_stack->currentWidget() == selector_widget )
+    {
+        current_image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
 
-    // Retrieve current selection from image selector and open for editing
-    current_image = image_selector->currentDocument();
-
-    enterEditor();
+        enterEditor();
+    }
 }
 
 void PhotoEditUI::cancelEdit()
 {
-    edit_canceled = true;
+    if( is_fullscreen ) {
+        exitCurrentEditorState();
+    } else {
+        edit_canceled = true;
 
-    if( exitCurrentUIState() )
-        close();
+        if( exitCurrentUIState() )
+            close();
+    }
 }
 
 void PhotoEditUI::cropImage()
@@ -757,24 +924,30 @@ void PhotoEditUI::cropImage()
 
 void PhotoEditUI::beamImage()
 {
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::beamImage() being called when there is NO image selector.");
-        return;
-    }
-
     // Send current image over IR link
-    QContent image = image_selector->currentDocument();
+    QContent image;
+
+    if( widget_stack->currentWidget() == image_viewer )
+        image = image_viewer->content();
+    else if( widget_stack->currentWidget() == selector_widget )
+        image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
+    else
+        return;
+
     QtopiaSendVia::sendFile(this, image);
 }
 
 void PhotoEditUI::printImage()
 {
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::printImage() being called when there is NO image selector.");
-        return;
-    }
+    QContent image;
 
-    QContent image = image_selector->currentDocument();
+    if( widget_stack->currentWidget() == image_viewer )
+        image = image_viewer->content();
+    else if( widget_stack->currentWidget() == selector_widget )
+        image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
+    else
+        return;
+
     QtopiaServiceRequest srv( "Print", "print(QString,QString)" );
     srv << image.fileName();
     srv << (image.mimeTypes().count() ? image.mimeTypes().at(0) : QString());
@@ -783,33 +956,68 @@ void PhotoEditUI::printImage()
 
 void PhotoEditUI::deleteImage()
 {
-    if ( !image_selector ) {
-        qWarning("PhotoEditUI::deleteImage() being called when there is NO image selector.");
-        return;
-    }
-
     // Retrieve currently highlighted image from selector
-    QContent image = image_selector->currentDocument();
+    QContent image;
+
+    if( widget_stack->currentWidget() == image_viewer )
+        image = image_viewer->content();
+    else if( widget_stack->currentWidget() == selector_widget )
+        image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
+    else
+        return;
 
     // Launch confirmation dialog
     // If deletion confirmed, delete image
     if( QMessageBox::information( this, tr( "Delete" ), tr( "<qt>Are you sure "
         "you want to delete %1?</qt>"," %1 = file name" ).arg(image.name()),
-        QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
+        QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) {
         image.removeFiles();
+
+        if ( widget_stack->currentWidget() == image_viewer && exitCurrentUIState() ) {
+            close();
+        }
+    }
 }
 
 void PhotoEditUI::contentChanged( const QContentIdList &idList, const QContent::ChangeType type )
 {
-    if ( !idList.contains(current_image.id()) )
-        return;
-
     // If content is current image and has been deleted, show selector
-    if ( QContent::Removed == type ) {
-        if ( only_editor )
-            close();
+    if ( QContent::Removed == type && widget_stack->currentWidget() == image_viewer && idList.contains(current_image.id()) ) {
+        navigation_stack.removeLast();
+        if( !navigation_stack.isEmpty() )
+            widget_stack->setCurrentWidget( navigation_stack.last() );
         else
-            enterSelector();
+            close();
+    }
+}
+
+void PhotoEditUI::rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end )
+{
+    if( end - start + 1 == selector_view->model()->rowCount( parent ) )
+    {
+        QSoftMenuBar::setLabel( selector_view, Qt::Key_Select, QSoftMenuBar::NoLabel );
+
+        slide_show_action->setVisible( false );
+        edit_action->setVisible( false );
+        beam_action->setVisible( false );
+        print_action->setVisible( false );
+        delete_action->setVisible( false );
+        properties_action->setVisible( false );
+    }
+}
+
+void PhotoEditUI::rowsInserted( const QModelIndex &parent, int start, int end )
+{
+    if( end - start + 1 == selector_view->model()->rowCount( parent ) )
+    {
+        QSoftMenuBar::setLabel( selector_view, Qt::Key_Select, QSoftMenuBar::View );
+
+        slide_show_action->setVisible( true );
+        edit_action->setVisible( true );
+        beam_action->setVisible( true );
+        print_action->setVisible( true );
+        delete_action->setVisible( true );
+        properties_action->setVisible( true );
     }
 }
 
@@ -817,7 +1025,7 @@ void PhotoEditUI::keyPressEvent( QKeyEvent *e )
 {
     if( e->key() == Qt::Key_Back )
     {
-        if( ui_state == EDITOR && editor_state != VIEW )
+        if( widget_stack->currentWidget() == image_ui && editor_stack->currentWidget() != navigator || is_fullscreen )
         {
             exitCurrentEditorState();
         }
@@ -827,14 +1035,43 @@ void PhotoEditUI::keyPressEvent( QKeyEvent *e )
         }
         e->accept();
     }
+    else if( e->key() == Qt::Key_Select && widget_stack->currentWidget() == image_ui && editor_stack->currentWidget() == navigator )
+    {
+        enterZoom();
+
+        e->accept();
+    }
+    else if( selector_view && widget_stack->currentWidget() == image_viewer && (
+             e->key() == Qt::Key_Left  ||
+             e->key() == Qt::Key_Right ||
+             e->key() == Qt::Key_Up    ||
+             e->key() == Qt::Key_Down ) )
+    {
+        QModelIndex nextIndex;
+        QModelIndex currentIndex = selector_view->currentIndex();
+
+        if( e->key() == (QApplication::keyboardInputDirection() == Qt::LeftToRight ? Qt::Key_Left : Qt::Key_Right) ||
+            e->key() == Qt::Key_Down )
+            nextIndex = currentIndex.sibling( currentIndex.row() + 1, currentIndex.column() );
+        else
+            nextIndex = currentIndex.sibling( currentIndex.row() - 1, currentIndex.column() );
+
+        if( nextIndex.isValid() )
+        {
+            selector_view->setCurrentIndex( nextIndex );
+            selector_view->scrollTo( nextIndex );
+
+            image_viewer->setContent( qvariant_cast< QContent >( nextIndex.data( Qt::UserRole + 1 ) ) );
+
+            e->accept();
+        }
+    }
     else
         QWidget::keyPressEvent( e );
 }
 
 void PhotoEditUI::clearEditor()
 {
-    if ( navigator )
-        navigator->hide();
     if ( image_ui ) {
         image_ui->setEnabled( false );
         image_ui->repaint();
@@ -870,11 +1107,26 @@ void PhotoEditUI::saveChanges()
 
         QImage image = image_processor->image();
         // Attempt to save changes
-        if ( !image_io->save( image, overwrite ) ) {
+
+        QContent content = image_io->save( image, overwrite );
+
+        if ( content.isNull() ) {
              QMessageBox::warning(
                 this,
                 tr( "Save failed" ),
                 tr( "<qt>Your edits were not saved.</qt>" ) );
+        } else {
+            current_image = content;
+
+            if ( !overwrite ) {
+                QDocumentPropertiesDialog *properties = new QDocumentPropertiesDialog( current_image, this );
+
+                if ( QtopiaApplication::execDialog( properties ) ) {
+                    current_image = properties->document();
+                }
+
+                delete properties;
+            }
         }
     }
 }
@@ -903,14 +1155,6 @@ void PhotoEditUI::sendValueSupplied()
     }
 }
 
-void PhotoEditUI::rightsExpired( const QDrmContent& )
-{
-    if( only_editor )
-        close();
-    else
-        enterSelector();
-}
-
 /*!
     \service PhotoEditService PhotoEdit
     \brief Provides the Qtopia PhotoEdit service.
@@ -935,18 +1179,30 @@ PhotoEditService::~PhotoEditService()
 */
 void PhotoEditService::showCategory( const QString& category )
 {
-    mParent->service_category = QCategoryFilter(category);
-
-    if ( mParent->image_selector ) {
-        mParent->image_selector->setFilter(
-                QContentFilter( QContent::Document ) &
-                QContentFilter( QContentFilter::MimeType, "image/*" ) &
-                QContentFilter( mParent->service_category ) );
-
-        mParent->enterSelector();
-
-    }
+    mParent->hide();
     mParent->showMaximized();
+
+    while( !mParent->exitCurrentUIState() );
+
+    if( mParent->category_dialog )
+    {
+        delete mParent->category_dialog;
+
+        mParent->category_dialog = 0;
+    }
+
+    QWidget *selector = mParent->selectorWidget();
+
+    mParent->navigation_stack.append( selector );
+
+    mParent->widget_stack->setCurrentWidget( selector );
+
+    mParent->category_filter = QCategoryFilter(category);
+
+    mParent->image_set->setCriteria(
+            QContentFilter( QContent::Document )
+            & mParent->category_filter
+            & (mParent->type_filter.isValid() ? mParent->type_filter : QContentFilter::mimeType( QLatin1String( "image/*" ) )) );
 }
 
 /*!

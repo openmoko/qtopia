@@ -33,4 +33,4 @@ phone {
 }
 
 pkg.desc=DRM information for Qtopia.
-pkg.domain=window,drm,cardreader,msg,launcher,qds,doc_server,doc_write
+pkg.domain=trusted

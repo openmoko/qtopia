@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/containers.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/containers.qdoc -->
 <head>
   <title>Qt 4.3: Generic Containers</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -246,13 +246,13 @@
  for (i = map.constBegin(); i != map.constEnd(); ++i)
      qDebug() &lt;&lt; i.key() &lt;&lt; &quot;:&quot; &lt;&lt; i.value();</pre>
 <p>Thanks to <a href="shared.html#implicit-sharing">implicit sharing</a>, it is very inexpensive for a function to return a container per value. The Qt API contains dozens of functions that return a <a href="qlist.html">QList</a> or <a href="qstringlist.html">QStringList</a> per value (e.g&#x2e;, <a href="qsplitter.html#sizes">QSplitter::sizes</a>()). If you want to iterate over these using an STL iterator, you should always take a copy of the container and iterate over the copy. For example:</p>
-<pre><span class="comment"> // RIGHT</span>
+<pre><span class="comment"> //</span> RIGHT
  const QList&lt;int&gt; sizes = splitter-&gt;sizes();
  QList&lt;int&gt;::const_iterator i;
  for (i = sizes.begin(); i != sizes.end(); ++i)
      ...
 
-<span class="comment"> // WRONG</span>
+<span class="comment"> //</span> WRONG
  QList&lt;int&gt;::const_iterator i;
  for (i = splitter-&gt;sizes().begin();
          i != splitter-&gt;sizes().end(); ++i)
@@ -375,8 +375,8 @@
 <p>If you know approximately how many items you will store in a container, you can start by calling reserve(), and when you are done populating the container, you can call squeeze() to release the extra preallocated memory.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

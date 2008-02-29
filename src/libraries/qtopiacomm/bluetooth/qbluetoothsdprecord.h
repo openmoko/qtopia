@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,12 +46,17 @@ class QBLUETOOTH_EXPORT QBluetoothSdpSequence : public QList<QVariant>
 class QBLUETOOTH_EXPORT QBluetoothSdpRecord {
 public:
     static int rfcommChannel(const QBluetoothSdpRecord &service);
+    static QBluetoothSdpRecord fromDevice(QIODevice *device);
+    static QBluetoothSdpRecord fromData(const QByteArray &data);
 
     QBluetoothSdpRecord();
     ~QBluetoothSdpRecord();
 
+    bool isNull() const;
+
     QBluetoothSdpRecord(const QBluetoothSdpRecord &other);
     QBluetoothSdpRecord &operator=(const QBluetoothSdpRecord &other);
+    bool operator==(const QBluetoothSdpRecord &other) const;
 
     bool isInstance(QBluetooth::SDPProfile profile) const;
     bool isInstance(const QBluetoothSdpUuid &uuid) const;
@@ -93,7 +98,6 @@ public:
     void clearAttributes();
 
 private:
-    bool operator==(const QBluetoothSdpRecord &other) const;
     QMap<quint16, QVariant> m_attrs;
 };
 

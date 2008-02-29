@@ -61,10 +61,10 @@
  QFont font = QFontDialog::getFont(
                  &amp;ok, QFont(&quot;Helvetica [Cronyx]&quot;, 10), this);
  if (ok) {
-     <span class="comment">// the user clicked OK and font is set to the font the user selected</span>
+     <span class="comment">//</span> the user clicked OK and font is set to the font the user selected
  } else {
-     <span class="comment">// the user canceled the dialog; font is set to the initial</span>
-     <span class="comment">// value, in this case Helvetica [Cronyx], 10</span>
+     <span class="comment">//</span> the user canceled the dialog; font is set to the initial
+     <span class="comment">//</span> value, in this case Helvetica [Cronyx], 10
  }</pre>
 <p>The dialog can also be used to set a widget's font directly:</p>
 <pre> myWidget.setFont(QFontDialog::getFont(0, myWidget.font()));</pre>
@@ -81,10 +81,10 @@
 <pre> bool ok;
  QFont font = QFontDialog::getFont(&amp;ok, QFont(&quot;Times&quot;, 12), this);
  if (ok) {
-     <span class="comment">// font is set to the font the user selected</span>
+     <span class="comment">//</span> font is set to the font the user selected
  } else {
-     <span class="comment">// the user canceled the dialog; font is set to the initial</span>
-     <span class="comment">// value, in this case Times, 12.</span>
+     <span class="comment">//</span> the user canceled the dialog; font is set to the initial
+     <span class="comment">//</span> value, in this case Times, 12.
  }</pre>
 <p>The dialog can also be used to set a widget's font directly:</p>
 <pre> myWidget.setFont(QFontDialog::getFont(0, myWidget.font()));</pre>
@@ -109,15 +109,15 @@
 <pre> bool ok;
  QFont font = QFontDialog::getFont(&amp;ok, this);
  if (ok) {
-     <span class="comment">// font is set to the font the user selected</span>
+     <span class="comment">//</span> font is set to the font the user selected
  } else {
-     <span class="comment">// the user canceled the dialog; font is set to the default</span>
-     <span class="comment">// application font, QApplication::font()</span>
+     <span class="comment">//</span> the user canceled the dialog; font is set to the default
+     <span class="comment">//</span> application font, QApplication::font()
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

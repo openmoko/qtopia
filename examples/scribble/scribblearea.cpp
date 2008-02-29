@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,6 +32,7 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     scribbling = false;
     myPenWidth = 1;
     myPenColor = Qt::blue;
+    qWarning()<<"scribbleArea size"<<size().width() <<size().height();
 }
 
 bool ScribbleArea::openImage(const QString &fileName)
@@ -40,8 +41,6 @@ bool ScribbleArea::openImage(const QString &fileName)
     if (!loadedImage.load(fileName))
         return false;
 
-    QSize newSize = loadedImage.size().expandedTo(size());
-    resizeImage(&loadedImage, newSize);
     image = loadedImage;
     modified = false;
     update();
@@ -51,8 +50,6 @@ bool ScribbleArea::openImage(const QString &fileName)
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
     QImage visibleImage = image;
-    resizeImage(&visibleImage, size());
-
     if (visibleImage.save(fileName, fileFormat)) {
             // Create new doc link
         QContent lnk;
@@ -61,7 +58,7 @@ bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
           //   lnk.setCategories( _lnk.categories() );
         lnk.setFile( fileName );
         lnk.commit();
-                
+
         modified = false;
         return true;
     } else {
@@ -75,8 +72,6 @@ bool ScribbleArea::openImage(QIODevice *data, const char *format)
     if (!loadedImage.load(data,format))
         return false;
 
-    QSize newSize = loadedImage.size().expandedTo(size());
-    resizeImage(&loadedImage, newSize);
     image = loadedImage;
     modified = false;
     update();
@@ -86,7 +81,6 @@ bool ScribbleArea::openImage(QIODevice *data, const char *format)
 bool ScribbleArea::saveImage(QIODevice *data, const char *format)
 {
     QImage visibleImage = image;
-    resizeImage(&visibleImage, size());
 
     if (visibleImage.save(data, format)) {
         modified = false;
@@ -116,6 +110,7 @@ void ScribbleArea::clearImage()
 
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
 {
+    qWarning()<<lastPoint<<scribbling;
     if (event->button() == Qt::LeftButton) {
         lastPoint = event->pos();
         scribbling = true;
@@ -145,11 +140,12 @@ void ScribbleArea::paintEvent(QPaintEvent * /* event */)
 void ScribbleArea::resizeEvent(QResizeEvent *event)
 {
     if (width() > image.width() || height() > image.height()) {
-        int newWidth = qMax(width() + 128, image.width());
-        int newHeight = qMax(height() + 128, image.height());
+        int newWidth = qMax(width() , image.width());
+        int newHeight = qMax(height() , image.height());
         resizeImage(&image, QSize(newWidth, newHeight));
         update();
     }
+
     QWidget::resizeEvent(event);
 }
 

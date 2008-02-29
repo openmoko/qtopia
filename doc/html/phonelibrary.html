@@ -31,18 +31,20 @@
 <tr valign="top" class="odd"><td><a href="qcallbarring.html">QCallBarring</a></td><td>Settings related to call barring.</td></tr>
 <tr valign="top" class="even"><td><a href="qcallforwarding.html">QCallForwarding</a></td><td>Settings related to call forwarding.</td></tr>
 <tr valign="top" class="odd"><td><a href="qcallsettings.html">QCallSettings</a></td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
-<tr valign="top" class="even"><td><a href="qcellbroadcast.html">QCellBroadcast</a></td><td>Access to cell broadcast messages.</td></tr>
-<tr valign="top" class="odd"><td><a href="qgprsnetworkregistration.html">QGprsNetworkRegistration</a></td><td>Notification of GPRS registration state.</td></tr>
-<tr valign="top" class="even"><td><a href="qnetworkregistration.html">QNetworkRegistration</a></td><td>Notification of general network registration state, plus operator selection.</td></tr>
-<tr valign="top" class="odd"><td><a href="qphonebook.html">QPhoneBook</a></td><td>Access to phone books that are stored on a SIM.</td></tr>
-<tr valign="top" class="even"><td><a href="qphonecallmanager.html">QPhoneCallManager</a></td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
-<tr valign="top" class="odd"><td><a href="qphonerffunctionality.html">QPhoneRfFunctionality</a></td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
-<tr valign="top" class="even"><td><a href="qpinmanager.html">QPinManager</a></td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
-<tr valign="top" class="odd"><td><a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a></td><td>Access to the preferred network operator list in a SIM.</td></tr>
-<tr valign="top" class="even"><td><a href="qpresence.html">QPresence</a></td><td>VoIP presence information.</td></tr>
-<tr valign="top" class="odd"><td><a href="qservicechecker.html">QServiceChecker</a></td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
-<tr valign="top" class="even"><td><a href="qservicenumbers.html">QServiceNumbers</a></td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
-<tr valign="top" class="odd"><td><a href="qsimfiles.html">QSimFiles</a></td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" class="even"><td><a href="qcallvolume.html">QCallVolume</a></td><td>Control the volume while on a call.</td></tr>
+<tr valign="top" class="odd"><td><a href="qcellbroadcast.html">QCellBroadcast</a></td><td>Access to cell broadcast messages.</td></tr>
+<tr valign="top" class="even"><td><a href="qgprsnetworkregistration.html">QGprsNetworkRegistration</a></td><td>Notification of GPRS registration state.</td></tr>
+<tr valign="top" class="odd"><td><a href="qnetworkregistration.html">QNetworkRegistration</a></td><td>Notification of general network registration state, plus operator selection.</td></tr>
+<tr valign="top" class="even"><td><a href="qphonebook.html">QPhoneBook</a></td><td>Access to phone books that are stored on a SIM.</td></tr>
+<tr valign="top" class="odd"><td><a href="qphonecallmanager.html">QPhoneCallManager</a></td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
+<tr valign="top" class="even"><td><a href="qphonerffunctionality.html">QPhoneRfFunctionality</a></td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
+<tr valign="top" class="odd"><td><a href="qpinmanager.html">QPinManager</a></td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
+<tr valign="top" class="even"><td><a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a></td><td>Access to the preferred network operator list in a SIM.</td></tr>
+<tr valign="top" class="odd"><td><a href="qpresence.html">QPresence</a></td><td>VoIP presence information.</td></tr>
+<tr valign="top" class="even"><td><a href="qservicechecker.html">QServiceChecker</a></td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
+<tr valign="top" class="odd"><td><a href="qservicenumbers.html">QServiceNumbers</a></td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
+<tr valign="top" class="even"><td><a href="qsimfiles.html">QSimFiles</a></td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" class="odd"><td><a href="qsimgenericaccess.html">QSimGenericAccess</a></td><td>Raw access for sending commands to the SIM.</td></tr>
 <tr valign="top" class="even"><td><a href="qsiminfo.html">QSimInfo</a></td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
 <tr valign="top" class="odd"><td><a href="qsimtoolkit.html">QSimToolkit</a></td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
 <tr valign="top" class="even"><td><a href="qsmsreader.html">QSMSReader</a></td><td>Access to the incoming SMS message queue.</td></tr>
@@ -122,6 +124,7 @@
     }</pre>
 <p>The VoIP daemon creates an instance of <tt>VoIPService</tt>, and then calls the <tt>initialize()</tt> method to complete the initialization process.</p>
 <p>In the example above, we call <tt>supports()</tt> to first check if there is an existing implementation of <a href="qsmssender.html">QSMSSender</a> before creating the new one. This style of interface creation supports inheritance of services. A better version of the VoIP service could inherit from <tt>VoIPService</tt>, override <tt>initialize()</tt>, and create a new implementation of the <a href="qsmssender.html">QSMSSender</a> interface that replaces the original.</p>
+<p>The <a href="syscust-voip.html">VoIP Integration Guide</a> provides more detailed information on integrating VoIP telephony services into Qtopia, and the particular interfaces that are required.</p>
 <a name="automatic-starting-of-telephony-services"></a>
 <h2>Automatic Starting of Telephony Services</h2>
 <p>Third-party telephony services can be easily added to Qtopia by adding a file to the directory <tt>$QPEDIR/services/Telephony</tt> whose name is the same as the daemon binary. Its contents should be as follows:</p>
@@ -132,16 +135,16 @@
 <p>The example VoIP implementation that comes with Qtopia, <tt>sipagent</tt>, demonstrates how to write such a service and integrate it with the rest of Qtopia.</p>
 <p>Because telephony services do not normally have a user interface associated with them, it is necessary to register the daemon as a running task to prevent Qtopia from telling it to exit soon after startup. You should place a line of code in your startup logic such as the following:</p>
 <pre>    QtopiaApplication::instance()-&gt;registerRunningTask( &quot;Telephony&quot;, obj );</pre>
-<p>where <tt>obj</tt> is a <a href="qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the <a href="qtelephonyservice.html">QTelephonyService</a> instance may be a good candidate).</p>
+<p>where <tt>obj</tt> is a <a href="./qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the <a href="qtelephonyservice.html">QTelephonyService</a> instance may be a good candidate).</p>
 <a name="modem-services"></a>
 <h2>Modem Services</h2>
-<p>AT-based GSM <tt>modem</tt> telephony services have special support in Qtopia. Most of the time, Qtopia's implementation will be fine as-is, but there are slight variations in GSM modems that may need additional support.</p>
+<p>AT-based GSM <tt>modem</tt> telephony services have special support in Qtopia. Most of the time, Qtopia's implementation will be sufficient, but there are slight variations in GSM modems that may need additional support.</p>
 <p>The systems integrator can elect to write their own modem telephony service from scratch, but this is usually very time-consuming. A better way is to use the existing Qtopia implementation in <tt>src/libraries/qtopiaphonemodem</tt> and just override the pieces that are different in a modem vendor plugin.</p>
 <p>The <a href="syscust-gsm.html">GSM Modem Integration</a> page describes how to write a modem vendor plugin.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

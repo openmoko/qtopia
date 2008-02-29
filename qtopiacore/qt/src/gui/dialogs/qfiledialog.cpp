@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -496,8 +494,8 @@ void QFileDialogPrivate::retranslateStrings()
 */
 void QFileDialogPrivate::_q_goToUrl(const QUrl &url)
 {
-    Q_Q(QFileDialog);
-    q->setDirectory(url.toLocalFile());
+    QModelIndex idx = model->index(url.toLocalFile());
+    _q_enterDirectory(idx);
 }
 
 /*!
@@ -555,6 +553,7 @@ void QFileDialog::selectFile(const QString &filename)
         if (!d->lineEdit()->hasFocus())
             d->lineEdit()->setText(text);
     } else {
+        d->qFileDialogUi->listView->selectionModel()->clear();
         if (!d->lineEdit()->hasFocus())
             d->lineEdit()->setText(index.data().toString());
     }
@@ -1577,7 +1576,7 @@ void QFileDialog::accept()
 #ifndef QT_NO_MESSAGEBOX
             QString message = tr("%1\nDirectory not found.\nPlease verify the "
                                           "correct directory name was given.");
-            QMessageBox::warning(this, windowTitle(), info.fileName() + message);
+            QMessageBox::warning(this, windowTitle(), message.arg(info.fileName()));
 #endif // QT_NO_MESSAGEBOX
             return;
         }
@@ -1605,6 +1604,7 @@ void QFileDialog::accept()
 
         // check if we have to ask for permission to overwrite the file
         if (!info.exists() || !confirmOverwrite() || acceptMode() == AcceptOpen) {
+            emit filesSelected(QStringList(fn));
             QDialog::accept();
 #ifndef QT_NO_MESSAGEBOX
         } else {
@@ -1613,6 +1613,7 @@ void QFileDialog::accept()
                                      .arg(info.fileName()),
                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                 == QMessageBox::Yes)
+                emit filesSelected(QStringList(fn));
                 QDialog::accept();
 #endif
         }
@@ -2247,6 +2248,9 @@ void QFileDialogPrivate::_q_updateOkButton() {
     if (!button)
         return;
     QModelIndex index = mapToSource(qFileDialogUi->treeView->currentIndex());
+    if (!index.isValid())
+        index = mapToSource(qFileDialogUi->treeView->selectionModel()->selectedIndexes().value(0));
+
     switch (fileMode) {
     case QFileDialog::DirectoryOnly:
     case QFileDialog::Directory:
@@ -2622,12 +2626,13 @@ QStringList QFSCompletor::splitPath(const QString &path) const
 #endif
 
     QRegExp re(QLatin1String("[") + QRegExp::escape(sep) + QLatin1String("]"));
-    QStringList parts = pathCopy.split(re);
 
 #ifdef Q_OS_WIN
+    QStringList parts = pathCopy.split(re, QString::SkipEmptyParts);
     if (!doubleSlash.isEmpty())
         parts[0].prepend(doubleSlash);
 #else
+    QStringList parts = pathCopy.split(re);
     if (path[0] == sep[0]) // read the "/" at the beginning as the split removed it
         parts[0] = sep[0];
 #endif

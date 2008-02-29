@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -306,12 +306,21 @@ protected:
     void accept();
     void reject();
 
+private slots:
+    void speakerSliderChanged(int volume);
+    void speakerVolumeChanged(int volume);
+    void microphoneSliderChanged(int volume);
+    void microphoneVolumeChanged(int volume);
+
 private:
     QSlider *speakerVolume;
     QSlider *microphoneVolume;
 
     int m_oldSpeakerVolume;
     int m_oldMicrophoneVolume;
+
+    bool m_changeSpeakerVolume;
+    bool m_changeMicrophoneVolume;
 
     QCallVolume *callVolume;
 };

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -60,14 +60,15 @@ public:
         Receiving = 0x01,
         Sending = 0x02,
         AsyncArrival = 0x04,
-        AsyncDeletion = 0x08
+        AsyncDeletion = 0x08,
+        SyncRetrieval = 0x10
     };
 
     void connectClient(Client *client, int type, QString sigName);
-    void setMailAccount(MailAccount *account);
-    void setSmtpAccount(MailAccount *account);
-    void setSmsAccount(MailAccount *account);
-    void setMmsAccount(MailAccount *account);
+    void setMailAccount(QMailAccount *account);
+    void setSmtpAccount(QMailAccount *account);
+    void setSmsAccount(QMailAccount *account);
+    void setMmsAccount(QMailAccount *account);
     void sendMail(QList<QMailMessage>& mailList);
     void getMailHeaders();
     void getMailByList(MailList *mailList, bool newConnection);
@@ -77,8 +78,8 @@ public:
     void rejectMail(const QMailMessage& mail);
     int unreceivedSmsCount();
     int unreadSmsCount();
-    Client* clientFromAccount(const MailAccount *account) const;
-    MailAccount* accountFromClient(const Client *client) const;
+    Client* clientFromAccount(const QMailAccount *account) const;
+    QMailAccount* accountFromClient(const Client *client) const;
     bool smsReadyToDelete() const;
     void synchroniseClients();
     int newMessageCount();
@@ -104,6 +105,7 @@ signals:
     void failedList(QStringList &);
     void allMessagesReceived();
     void nonexistentMessage(const QMailId&);
+    void expiredMessages(const QStringList&, const QString&, bool);
 
 public slots:
     void unresolvedUidl(QStringList &);
@@ -111,7 +113,9 @@ public slots:
     void receiveStatusChange(const QString&);
     void sendStatusChange(const QString&);
     void sendProgress(const QMailId&, uint percentage);
+    void retrievalProgress(const QString&, uint percentage);
     void messageProcessed(const QMailId&);
+    void messageProcessed(const QString&);
 
 private slots:
     void messagesReceived();
@@ -127,17 +131,19 @@ private slots:
     void reportNewMessage(const QMailMessage& m);
     void reportAllMessagesReceived();
     void reportMailTransferred(int n);
-    void reportDownloadedSize(int n);
     void reportMailboxSize(int n);
     void reportSendProgress(const QMailId&, uint percentage);
+    void reportRetrievalProgress(const QString&, uint percentage);
     void reportMessageProcessed(const QMailId& id);
+    void reportMessageProcessed(const QString& uid);
+    void reportExpiredMessages(const QStringList& l, const QString& m, bool b);
 #endif
 
 private:
-    MailAccount *mailAccount;
-    MailAccount *smtpAccount;
-    MailAccount *smsAccount;
-    MailAccount *mmsAccount;
+    QMailAccount *mailAccount;
+    QMailAccount *smtpAccount;
+    QMailAccount *smsAccount;
+    QMailAccount *mmsAccount;
     SmtpClient *smtpClient;
 #ifndef QTOPIA_NO_SMS
     SmsClient *smsClient;
@@ -151,6 +157,8 @@ private:
     QList<const Client*> unsynchronised;
     QMap<QMailId, uint> sendSize;
     uint totalSendSize;
+    QMap<QString, uint> retrievalSize;
+    uint totalRetrievalSize;
 };
 
 #endif

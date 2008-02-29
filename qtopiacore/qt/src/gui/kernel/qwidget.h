@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -715,6 +713,9 @@ private:
 #endif
 
     friend Q_GUI_EXPORT QWidgetData *qt_qwidget_data(QWidget *widget);
+#ifdef Q_WS_MAC
+    friend Q_GUI_EXPORT QWidgetPrivate *qt_widget_private(QWidget *widget);
+#endif
 
 private:
     Q_DISABLE_COPY(QWidget)

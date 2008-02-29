@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,7 +23,9 @@
 #include <qmap.h>
 
 class AccountList;
-class MailAccount;
+class QMailAccount;
+class EmailClient;
+class StatusDisplay;
 class QMenu;
 class QListWidget;
 class QListWidgetItem;
@@ -33,24 +35,26 @@ class AccountSettings : public QDialog
 {
     Q_OBJECT
 public:
-    AccountSettings(AccountList *al, QWidget *parent=0, const char *name=0, bool modal=true);
+    AccountSettings(AccountList *al, EmailClient *parent, const char *name=0, bool modal=true);
 
 signals:
-    void changedAccount(MailAccount *account);
-    void deleteAccount(MailAccount *account);
+    void changedAccount(QMailAccount *account);
+    void deleteAccount(QMailAccount *account);
 
 public slots:
     void addAccount();
+
 private slots:
     void editAccount();
     void removeAccount();
     void accountSelected(QListWidgetItem*);
     void accountSelected(int idx);
     void accountHighlighted(int idx);
+    void displayProgress(uint, uint);
 
 private:
     void populateAccountList();
-    void editAccount(MailAccount *account, bool newAccount=false);
+    void editAccount(QMailAccount *account, bool newAccount=false);
 
 private:
     AccountList *accountList;
@@ -59,5 +63,6 @@ private:
     QMenu *context;
     QAction *addAccountAction;
     QAction *removeAccountAction;
+    StatusDisplay *statusDisplay;
 };
 

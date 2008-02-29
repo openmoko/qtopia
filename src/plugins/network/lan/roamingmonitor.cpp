@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -135,8 +135,8 @@ int RoamingMonitor::selectWLAN( const QString& essid )
         const bool hasStarted = scanner->startScanning();
         if ( !hasStarted ) {
             qLog(Network) << "Can not start scan. Attempting to start first configured network.";
-            return 1;
             delete loop;
+            return 1;
         }
     } // else { //already scanning}
     connect( scanner, SIGNAL(scanningFinished()), loop, SLOT(quit()) );

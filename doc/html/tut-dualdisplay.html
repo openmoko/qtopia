@@ -21,7 +21,7 @@
 <a name="controlled-by-qtopia"></a>
 <h2>Controlled by Qtopia</h2>
 <p>This is the preferred method of controlling a secondary display. This display is available as a framebuffer device and managed by Qtopia's multiple display support. This allows any Qtopia application to display windows on the secondary display. Support for a secondary display of this type is already built into Qtopia and will be enabled if more than one display is specified.</p>
-<p>The display configuration is specified to Qtopia by the <tt>QWS_DISPLAY</tt> environment variable. The <tt>multi</tt> display driver presents multiple display devices to Qtopia as one large display. The <a href="qdesktopwidget.html">QDesktopWidget</a> class may be used to access the display properties.</p>
+<p>The display configuration is specified to Qtopia by the <tt>QWS_DISPLAY</tt> environment variable. The <tt>multi</tt> display driver presents multiple display devices to Qtopia as one large display. The <a href="./qdesktopwidget.html">QDesktopWidget</a> class may be used to access the display properties.</p>
 <p>Consider the following screen configuration:</p>
 <ol type="1">
 <li>/dev/fb0 - primary 240x320 display</li>
@@ -32,7 +32,7 @@
 <p>The multi display driver accepts a space delimited list of drivers. The first parameter specifies the primary display, attached to /dev/fb0. The second parameter specifies the secondary display, attached to /dev/fb1 and positioned directly below the primary display (at 0, 320).</p>
 <p>If it required to test Qtopia in the virtual framebuffer (using the same resolution as above) the following <tt>QWS_DISPLAY</tt> configuration can be used:</p>
 <pre>    QWS_DISPLAY=&quot;multi: QVFb:mmWidth34:mmHeight44:0 QVFb:offset=0,320:1 :0&quot;</pre>
-<p>Note that two QVFb instances have to be started for this use case. For more details on how to setup and configure see <a href="qtopiacore-qvfb.html">Qtopia Core's Virtual Framebuffer</a> documentation.</p>
+<p>Note that two QVFb instances have to be started for this use case. For more details on how to setup and configure see <a href="./qtopiacore-qvfb.html">Qtopia Core's Virtual Framebuffer</a> documentation.</p>
 <p>The secondary display support provided by Qtopia Phone uses themes to specify the title and homescreen of the secondary display, similar to the title and homescreen of the primary screen. These are specified by <tt>secondarytitle.xml</tt> and <tt>secondaryhome.xml</tt> in the <tt>$QPEDIR/etc/themes/</tt> directories and are able to display the same data as the primary title and homescreen.</p>
 <p>Besides the homescreen and title, Qtopia provides callscreen and camera integration on the secondary display. It is also possible for any application to display a widget on the secondary display simply by positioning a top level window in the secondary display logical area, for example:</p>
 <pre>    if (QApplication::desktop()-&gt;numScreens() &gt; 1) {
@@ -42,9 +42,10 @@
     }</pre>
 <a name="controlled-independantly"></a>
 <h2>Controlled Independantly</h2>
+<p>If the secondary display is not exposed as a framebuffer device, or Qtopia multiple display support is not being used, the <a href="qphonestatus.html">QPhoneStatus</a> class is available to enable easy access to phone status information for custom secondary status display.</p>
 <a name="example-dual-screen-application"></a>
 <h3>Example Dual Screen Application</h3>
-<p>There is an example of a simple status display for a dual screen phone in <tt>src/tools/dualdisplaybasic</tt>. It illustrates the use of the phone status library and provides a small display, similar to a monochrome LCD display to display the state of the phone.</p>
+<p>There is an example of a simple status display for a dual screen phone in <tt>examples/dualdisplaybasic</tt>. It illustrates the use of the phone status library and provides a small display, similar to a monochrome LCD display to display the state of the phone.</p>
 <p>There are two options for display:</p>
 <ol type="1">
 <li>using one Qtopia Core display -<p>the status display will appear as a floating display in the Qtopia display. This is the common case for a LCD display which does not need the complete Qtopia Core graphics engine to drive it. To view in this mode, simply run the application.</p>
@@ -57,8 +58,8 @@
 </ol>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

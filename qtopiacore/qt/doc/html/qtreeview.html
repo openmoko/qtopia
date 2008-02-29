@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/itemviews/qtreeview.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/itemviews/qtreeview.cpp -->
 <head>
   <title>Qt 4.3: QTreeView Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -277,6 +277,7 @@
 <h3 class="fn"><a name="uniformRowHeights-prop"></a>uniformRowHeights : bool</h3>
 <p>This property holds whether all items in the treeview have the same height.</p>
 <p>This property should only be set to true if it is guaranteed that all items in the view has the same height. This enables the view to do some optimizations.</p>
+<p>The height is obtained from the first item in the view. It is updated when the data changes on that item.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>bool uniformRowHeights () const</b></li>
@@ -350,6 +351,7 @@
 <p>See also <a href="qtreeview.html#setHeader">setHeader</a>() and <a href="qabstractitemmodel.html#headerData">QAbstractItemModel::headerData</a>().</p>
 <h3 class="fn"><a name="hideColumn"></a>void QTreeView::hideColumn ( int <i>column</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Hides the <i>column</i> given.</p>
+<p><b>Note:</b> This function should only be called after the model has been initialized, as the view needs to know the number of columns in order to hide <i>column</i>.</p>
 <p>See also <a href="qtreeview.html#showColumn">showColumn</a>() and <a href="qtreeview.html#setColumnHidden">setColumnHidden</a>().</p>
 <h3 class="fn"><a name="horizontalOffset"></a>int QTreeView::horizontalOffset () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the horizontal offset of the items in the treeview.</p>
@@ -439,7 +441,7 @@
 <p>Reimplemented from <a href="qabstractitemview.html#sizeHintForColumn">QAbstractItemView</a>.</p>
 <p>See also <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a> and <a href="qtreeview.html#header">header</a>().</p>
 <h3 class="fn"><a name="sortByColumn"></a>void QTreeView::sortByColumn ( int <i>column</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> )</h3>
-<p>Sorts the model by the values in the given <i>column</i> in the given <i>order</i>.</p>
+<p>Sets the model up for sorting by the values in the given <i>column</i> and <i>order</i>.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qtreeview.html#sortingEnabled-prop">sortingEnabled</a>.</p>
 <h3 class="fn"><a name="verticalOffset"></a>int QTreeView::verticalOffset () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -454,8 +456,8 @@
 <p>Reimplemented from <a href="qabstractitemview.html#visualRegionForSelection">QAbstractItemView</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

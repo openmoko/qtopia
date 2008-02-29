@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/simpledommodel.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/simpledommodel.qdoc -->
 <head>
   <title>Qt 4.3: Simple DOM Model Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -23,6 +23,7 @@
 <li><a href="itemviews-simpledommodel-mainwindow-cpp.html">itemviews/simpledommodel/mainwindow.cpp</a></li>
 <li><a href="itemviews-simpledommodel-mainwindow-h.html">itemviews/simpledommodel/mainwindow.h</a></li>
 <li><a href="itemviews-simpledommodel-main-cpp.html">itemviews/simpledommodel/main.cpp</a></li>
+<li><a href="itemviews-simpledommodel-simpledommodel-pro.html">itemviews/simpledommodel/simpledommodel.pro</a></li>
 </ul>
 <p>The Simple DOM Model example shows how an existing class can be adapted for use with the model/view framework.</p>
 <p align="center"><img src="images/simpledommodel-example.png" /></p><p>Qt provides two complementary sets of classes for reading XML files: The classes based around <a href="qxmlreader.html">QXmlReader</a> provide a SAX-style API for incremental reading of large files, and the classes based around <a href="qdomdocument.html">QDomDocument</a> enable developers to access the contents of XML files using a Document Object Model (DOM) API.</p>
@@ -147,7 +148,7 @@
 <h3>Basic Properties of The Model</h3>
 <p>Some aspects of the model do not depend on the structure of the underlying document, and these are simple to implement.</p>
 <p>The number of columns exposed by the model is returned by the <tt>columnCount()</tt> function:</p>
-<pre> int DomModel::columnCount(const QModelIndex &amp;/*parent*/</span>) const
+<pre> int DomModel::columnCount(const QModelIndex &amp;<span class="comment">/*parent*/</span>) const
  {
      return 3;
  }</pre>
@@ -276,8 +277,8 @@
 <p>We use item wrappers for each <a href="qdomnode.html">QDomNode</a> to provide consistent pointers that the model can use to navigate the document structure.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

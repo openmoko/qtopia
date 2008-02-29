@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,9 @@
 #include <qvaluespace.h>
 #include <qtopialog.h>
 
+#include <QtopiaIpcEnvelope>
+#include <QtopiaIpcAdaptor>
+
 AudioInputStream::AudioInputStream( QObject *parent )
     : MediaStream( parent )
 {
@@ -39,6 +42,17 @@ AudioInputStream::~AudioInputStream()
 
 void AudioInputStream::start( int frequency, int channels )
 {
+    //Request mic input from audio system,
+
+    QtopiaIpcAdaptor         *mgr;
+    QByteArray               domain("Phone");
+
+    mgr = new QtopiaIpcAdaptor("QPE/AudioStateManager", this);
+    mgr->send("setDomain(QByteArray,int)",domain,1);
+    QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
+    e << "Phone";
+
+
     stop();
 
     audio = new QAudioInput( this );
@@ -143,7 +157,10 @@ void AudioInputStream::audioReady()
         qLog(SipAudioData) << "audioReady() - bytesAvailable ="
                            << audio->bytesAvailable();
     }
+    int count=0;
     for(;;) {
+        if(count>5) break;
+        count++;
         int len = audio->read( buffer, sizeof( buffer ) );
         if ( len > 0 ) {
             if ( dumpAudioData ) {

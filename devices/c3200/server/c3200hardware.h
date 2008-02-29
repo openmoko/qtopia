@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,10 +27,17 @@
 #include <QObject>
 #include <QProcess>
 
+#include <QAudioStateConfiguration>
+#include <QAudioStateInfo>
+#include <qaudionamespace.h>
+#include <QtopiaIpcEnvelope>
+
 #include <qvaluespace.h>
 
 class QSocketNotifier;
 class QtopiaIpcAdaptor;
+class QPowerSourceProvider;
+class QAudioStateConfiguration;
 
 class C3200Hardware : public QObject
 {
@@ -46,9 +53,21 @@ private:
     QSocketNotifier *m_notifyDetect;
     int detectFd;
 
+    QPowerSourceProvider *batterySource;
+    QPowerSourceProvider *wallSource;
+
+    QtopiaIpcAdaptor *mgr;
+    QAudioStateConfiguration *audioConf;
+
 private slots:
     void readDetectData();
     void shutdownRequested();
+
+    void chargingChanged(bool charging);
+    void chargeChanged(int charge);
+
+    void availabilityChanged();
+    void currentStateChanged(const QAudioStateInfo &state, QAudio::AudioCapability capability);
 };
 
 #endif // QT_QWS_C3200

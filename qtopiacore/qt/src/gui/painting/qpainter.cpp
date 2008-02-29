@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -176,8 +174,8 @@ void QPainterPrivate::draw_helper(const QPainterPath &originalPath, DrawOperatio
                 QPainterPath stroke = stroker.createStroke(originalPath);
                 strokeBounds = (stroke * state->matrix).boundingRect();
             } else {
-                strokeOffsetX = penWidth / qAbs(2.0 * state->matrix.m11());
-                strokeOffsetY = penWidth / qAbs(2.0 * state->matrix.m22());
+                strokeOffsetX = qAbs(penWidth * state->matrix.m11() / 2.0);
+                strokeOffsetY = qAbs(penWidth * state->matrix.m22() / 2.0);
             }
         }
     }
@@ -423,10 +421,10 @@ void QPainterPrivate::updateEmulationSpecifier(QPainterState *s)
         conicalGradient = ((penBrushStyle == Qt::ConicalGradientPattern) ||
                             (brushStyle == Qt::ConicalGradientPattern));
         patternBrush = (((penBrushStyle > Qt::SolidPattern
-                           && brushStyle < Qt::LinearGradientPattern)
+                           && penBrushStyle < Qt::LinearGradientPattern)
                           || penBrushStyle == Qt::TexturePattern) ||
                          ((brushStyle > Qt::SolidPattern
-                           && penBrushStyle < Qt::LinearGradientPattern)
+                           && brushStyle < Qt::LinearGradientPattern)
                           || brushStyle == Qt::TexturePattern));
 
         if (((penBrush.style() == Qt::TexturePattern && penBrush.texture().hasAlpha())
@@ -4449,8 +4447,13 @@ void QPainter::drawImage(const QRectF &targetRect, const QImage &image, const QR
     Draws the given \a text with the currently defined text direction,
     beginning at the given \a position.
 
-    This function does not break text into multiple lines. Use the QPainter::drawText()
-    overload that takes a rectangle instead if you want line breaking.
+    This function does not handle the newline character (\n), as it cannot
+    break text into multiple lines, and it cannot display the newline character.
+    Use the QPainter::drawText() overload that takes a rectangle instead
+    if you want to draw multiple lines of text with the newline character, or
+    if you want the text to be wrapped.
+
+    \note The y-position is used as the baseline of the font.
 */
 
 void QPainter::drawText(const QPointF &p, const QString &str)
@@ -4531,6 +4534,9 @@ void QPainter::drawText(const QRect &r, int flags, const QString &str, QRect *br
 
     Draws the given \a text with the currently defined text direction,
     beginning at the given \a position.
+
+    \note The y-position is used as the baseline of the font.
+
 */
 
 /*!
@@ -4593,7 +4599,7 @@ void QPainter::drawText(const QRectF &r, int flags, const QString &str, QRectF *
 
     Draws the given \a text within the provided \a rectangle according
     to the specified \a flags. The \a boundingRect (if not null) is set to
-    the what the bounding rectangle should be in order to enclose the whole text. 
+    the what the bounding rectangle should be in order to enclose the whole text.
 */
 
 /*!
@@ -4603,6 +4609,9 @@ void QPainter::drawText(const QRectF &r, int flags, const QString &str, QRectF *
 
     Draws the given \a text at position (\a{x}, \a{y}), using the painter's
     currently defined text direction.
+
+    \note The y-position is used as the baseline of the font.
+
 */
 
 /*!
@@ -4632,6 +4641,8 @@ void QPainter::drawText(const QRectF &r, int flags, const QString &str, QRectF *
     \o Qt::TextShowMnemonic
     \o Qt::TextWordWrap
     \endlist
+
+    \note The y-position is used as the baseline of the font.
 
     \sa Qt::AlignmentFlag, Qt::TextFlag
 */
@@ -7057,9 +7068,6 @@ const QTransform & QPainter::worldTransform() const
 /*!
     Returns the transformation matrix combining the current
     window/viewport and world transformation.
-
-    It is advisable to use combinedTransform() instead of this
-    function to preserve the properties of perspective transformations.
 
     \sa setWorldMatrix(), setWindow(), setViewport()
 */

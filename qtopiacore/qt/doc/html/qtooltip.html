@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qtooltip.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qtooltip.cpp -->
 <head>
   <title>Qt 4.3: QToolTip Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -70,27 +70,10 @@
 <h3 class="fn"><a name="showText-2"></a>void QToolTip::showText ( const <a href="qpoint.html">QPoint</a> &amp; <i>pos</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qwidget.html">QWidget</a> * <i>w</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is analogous to calling QToolTip::showText(<i>pos</i>, <i>text</i>, <i>w</i>, QRect())</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="add"></a>void QToolTip::add ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qwidget.html#toolTip-prop">QWidget::setToolTip</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> tip-&gt;add(widget, text);</font></pre>
-<p>you can rewrite it as</p>
-<pre> widget-&gt;setToolTip(text);</pre>
-<h3 class="fn"><a name="add-2"></a>void QToolTip::add ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, const <a href="qrect.html">QRect</a> &amp; <i>rect</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Intercept the <a href="qevent.html#Type-enum">QEvent::ToolTip</a> events in your widget's <a href="qwidget.html#event">QWidget::event</a>() function and call <a href="qtooltip.html#showText">QToolTip::showText</a>() with the text you want to display. The <a href="widgets-tooltips.html">Tooltips</a> example illustrates this technique.</p>
-<h3 class="fn"><a name="remove"></a>void QToolTip::remove ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qwidget.html#toolTip-prop">QWidget::setToolTip</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> tip-&gt;remove(widget);</font></pre>
-<p>you can rewrite it as</p>
-<pre> widget-&gt;setToolTip(&quot;&quot;);</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

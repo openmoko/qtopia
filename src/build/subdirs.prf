@@ -62,7 +62,7 @@ build_all_dirs {
     }
 }
 
-# If not SUBDIRS targets exist, try to build part of the tree
+# If SUBDIRS isn't set try to build part of the tree
 search=
 isEmpty(SUBDIRS) {
     search=$$fixpath($$QTOPIA_ID/)
@@ -81,7 +81,7 @@ isEmpty(SUBDIRS) {
 SYNCQTOPIA=syncqtopia first_syncqtopia
 QMAKE_TARGETS=first all clean distclean install uninstall
 TARGETS=\
-    $$SYNCQTOPIA $$QMAKE_TARGETS regenerate_all test checkp4 lupdate packages\
+    $$SYNCQTOPIA $$QMAKE_TARGETS regenerate_all test install_tests checkp4 lupdate packages\
     install_target remove_target nodeps mocables printdependrules qmake_check
 !equals(QTOPIA_SDKROOT,$$QPEDIR):TARGETS+=sdk
 qtopia_depot:TARGETS+=auto_docs
@@ -174,3 +174,48 @@ THE_SUBDIRS=$$SUBDIRS
 # Since we are overriding the qmake rules, we need to stop it from doing anything
 SUBDIRS=
 
+
+# test integration
+dirname=$$tail($$QTOPIA_ID)
+equals(dirname,tests) {
+    LITERAL_SPACE=" "
+
+    win32 {
+        echonull=echo.
+        quote=
+        equote=$$LITERAL_QUOTE
+    } else {
+        echonull=echo
+        quote=$$LITERAL_QUOTE
+        equote=$$LITERAL_ESCAPED_QUOTE
+    }
+
+    listtests.commands=$$COMMAND_HEADER\
+        $$echonull $$LINE_SEP\
+        $$echonull $$LINE_SEP\
+        echo The available tests are: $$LINE_SEP
+    for(s,THE_SUBDIRS) {
+        listtests.commands+="echo $$quote $$LITERAL_SPACE $$LITERAL_SPACE $$s$$quote" $$LINE_SEP
+    }
+    listtests.commands+=\
+        $$echonull $$LINE_SEP\
+        $$echonull
+    QMAKE_EXTRA_TARGETS+=listtests
+
+    !win32 {
+        listtests.commands+=$$LINE_SEP\
+            echo $${LITERAL_QUOTE}To run specific tests use: make test TESTS=$${LITERAL_ESCAPED_QUOTE}test1 test2$$LITERAL_ESCAPED_QUOTE$$LITERAL_QUOTE $$LINE_SEP\
+            echo $$LINE_SEP\
+            echo
+
+        test.commands=$$COMMAND_HEADER\
+            tests=$$LITERAL_QUOTE$(TESTS)$$LITERAL_QUOTE;\
+            if [ -z $$LITERAL_QUOTE\$$tests$$LITERAL_QUOTE ]; then\
+                tests=$$LITERAL_QUOTE$$THE_SUBDIRS$$LITERAL_QUOTE;\
+            fi;\
+            for dir in \$$tests; do\
+                $$MAKE -C \$$dir test;\
+            done
+        test.depends=
+    }
+}

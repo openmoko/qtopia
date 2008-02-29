@@ -2,11 +2,11 @@ exists($$QPEDIR/src/build/trace_on):message(packages.prf)
 # Package creation
 #
 # struct package {
-#     name       # eg. $name.ipk
+#     name       # eg. $name.qpk
 #     desc       # one line summary
 #     domain     # SXE security domains
-#     deps       # packages that this ipk depends on
-#     multi      # additional projects that should be included in this package
+#     deps       # packages that this package depends(ipk only)
+#     multi      # put multiple projects in a single package
 #     version    # package version
 #     license    # package license
 #     maintainer # package maintainer
@@ -27,10 +27,8 @@ isEmpty(DEFAULT_VERSION) {
     else:DEFAULT_VERSION=1.0.0-1
 }
 
-enable_sxe:!no_quicklaunch {
-    packages.messages+="$$self: You must add CONFIG+=no_quicklaunch and rebuild in order to create a package."
-    CONFIG+=no_pkg
-}
+p.quicklaunch=0
+quicklaunch:p.quicklaunch=1
 
 # pkg is the "default" package
 !no_pkg {
@@ -52,6 +50,12 @@ for(_p,PACKAGES) {
     PARTS=name desc domain deps multi version trust license maintainer targets
     for(part,PARTS) {
         eval(p.$${part}=\$$eval(\$${_p}.$${part}))
+    }
+    # Only add projects that are in PROJECTS
+    tmp=$$p.multi
+    p.multi=
+    for(t,tmp) {
+        contains(PROJECTS,$$t):p.multi+=$$t
     }
 
     # Default values
@@ -84,7 +88,9 @@ for(_p,PACKAGES) {
             $$LITERAL_QUOTE$$p.trust$$LITERAL_QUOTE\
             $$LITERAL_QUOTE$$p.license$$LITERAL_QUOTE\
             $$LITERAL_QUOTE$$p.maintainer$$LITERAL_QUOTE\
-            $$LITERAL_QUOTE$$p.targets$$LITERAL_QUOTE
+            $$LITERAL_QUOTE$$p.targets$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.quicklaunch$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$(SPLIT_I18N)$$LITERAL_QUOTE
     eval(package_$${p.name}_dummy.commands=\$$commands)
     QMAKE_EXTRA_TARGETS+=package_$${p.name}_dummy
     packages.depends+=package_$${p.name}_dummy

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 #include <QBluetoothAbstractService>
 #include <QBluetoothLocalDevice>
 #include <QBluetoothAddress>
+#include <QBluetoothSdpRecord>
 #include <QBuffer>
 
 #include <QObexServerSession>
@@ -487,7 +488,7 @@ QObex::ResponseCode BtFtpSession::provideData(const char **data, qint64 *size)
 
 QObex::ResponseCode BtFtpSession::connect(const QObexHeader &header)
 {
-    if (header.target().isEmpty() || header.target() != target_uuid)
+    if (header.target().isEmpty() || header.target() != QByteArray(target_uuid, sizeof(target_uuid)))
         return QObex::ServiceUnavailable;
 
     QObexHeader response;
@@ -497,7 +498,7 @@ QObex::ResponseCode BtFtpSession::connect(const QObexHeader &header)
         response.setTarget(header.who());
     }
 
-    response.setWho(target_uuid);
+    response.setWho(QByteArray(target_uuid, sizeof(target_uuid)));
 
     setNextResponseHeader(response);
 
@@ -859,9 +860,9 @@ BtFtpService::BtFtpService(QObject *parent)
       m_local(new QBluetoothLocalDevice(this)),
       m_numBtSessions(0),
       m_session(0),
-      m_sdpRecordHandle(0)
+      m_sdpRecordHandle(0),
+      m_manager(0)
 {
-    m_manager = new BtFtpContentManager(this);
 }
 
 BtFtpService::~BtFtpService()
@@ -900,26 +901,31 @@ void BtFtpService::start()
         }
     }
 
-    m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/ftp.xml");
-    if (m_sdpRecordHandle == 0) {
-        emit started(true,
-                     tr("Error registering with SDP server"));
-        return;
+    m_sdpRecordHandle = 0;
+    QBluetoothSdpRecord sdpRecord;
+
+    // register the SDP service
+    QFile sdpRecordFile(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/ftp.xml");
+    if (sdpRecordFile.open(QIODevice::ReadOnly)) {
+        sdpRecord = QBluetoothSdpRecord::fromDevice(&sdpRecordFile);
+        if (!sdpRecord.isNull())
+            m_sdpRecordHandle = registerRecord(sdpRecord);
     }
 
-    // For now, hard code in the channel, which has to be the same channel as
-    // the one in the XML file passed in the registerRecord() call above
-    int channel = 7;
+    if (m_sdpRecordHandle == 0) {
+        emit started(true, tr("Error registering with SDP server"));
+        return;
+    }
 
     m_server = new QBluetoothRfcommServer(this);
     connect(m_server, SIGNAL(newConnection()),
             this, SLOT(newFtpConnection()));
 
-    if (!m_server->listen(m_local->address(), channel)) {
+    if (!m_server->listen(m_local->address(),
+                QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {
         unregisterRecord(m_sdpRecordHandle);
         close();
-        emit started(true,
-                   tr("Error listening on OBEX Push Server"));
+        emit started(true, tr("Error listening on OBEX Push Server"));
         return;
     }
     m_server->setSecurityOptions(m_securityOptions);
@@ -938,6 +944,8 @@ void BtFtpService::newFtpConnection()
 
     QBluetoothRfcommSocket *rfcommSocket =
             qobject_cast<QBluetoothRfcommSocket*>(m_server->nextPendingConnection());
+    if (!m_manager)
+        m_manager = new BtFtpContentManager(this);
     BtFtpRfcommSession *session = new BtFtpRfcommSession(m_manager, rfcommSocket);
     connect(session, SIGNAL(disconnected()), this, SLOT(sessionEnded()));
     connect(session, SIGNAL(disconnected()), session, SLOT(deleteLater()));
@@ -977,10 +985,8 @@ void BtFtpService::stop()
 
 void BtFtpService::setSecurityOptions(QBluetooth::SecurityOptions options)
 {
-    qDebug() << "Setting security options to: " << options;
     m_securityOptions = options;
     if (m_server && m_server->isListening()) {
-        qDebug() << "Setting security options";
         m_server->setSecurityOptions(options);
     }
 }
@@ -1001,35 +1007,12 @@ void BtFtpService::setSecurityOptions(QBluetooth::SecurityOptions options)
   Constructs the BtFtpServiceTask instance with the given \a parent.
   */
 BtFtpServiceTask::BtFtpServiceTask( QObject* parent )
-    : QObject( parent ), m_service( 0 )
-{
-    //we start this once the GUI is up and running
-    serverWidgetVsi = new QValueSpaceItem("/System/ServerWidgets/Initialized", this);
-    connect( serverWidgetVsi, SIGNAL(contentsChanged()), this, SLOT(delayedServiceStart()) );
-    delayedServiceStart(); //in case its visible already
-}
-
-/*!
-  \internal
-  */
-void BtFtpServiceTask::delayedServiceStart()
-{
-    if ( serverWidgetVsi && serverWidgetVsi->value( QByteArray(), false ).toBool() ) {
-        serverWidgetVsi->disconnect();
-        serverWidgetVsi->deleteLater();
-        serverWidgetVsi = 0;
-        QTimer::singleShot( 5000, this, SLOT(activateService()) );
-    }
-}
-
-/*!
-  \internal
-  */
-void BtFtpServiceTask::activateService()
+    : QObject( parent )
 {
     qLog(Bluetooth) << "Initializing Bluetooth FTP";
     m_service = new BtFtpService(this);
 }
+
 /*!
   Destroys the BtDialupServiceTask instance.
   */

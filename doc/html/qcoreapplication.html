@@ -381,8 +381,8 @@
 
  void init_ptr()
  {
-     global_ptr = new int[100];      <span class="comment">// allocate data</span>
-     qAddPostRoutine(cleanup_ptr);   <span class="comment">// delete later</span>
+     global_ptr = new int[100];      <span class="comment">//</span> allocate data
+     qAddPostRoutine(cleanup_ptr);   <span class="comment">//</span> delete later
  }</pre>
 <p>Note that for an application- or module-wide cleanup, qAddPostRoutine() is often not suitable. For example, if the program is split into dynamically loaded modules, the relevant module may be unloaded long before the <a href="qapplication.html">QApplication</a> destructor is called.</p>
 <p>For modules and libraries, using a reference-counted initialization manager or Qt's parent-child deletion mechanism may be better. Here is an example of a private class that uses the parent-child mechanism to call a cleanup function at the right time:</p>
@@ -398,14 +398,14 @@
 
      ~MyPrivateInitStuff()
      {
-         <span class="comment">// cleanup goes here</span>
+         <span class="comment">//</span> cleanup goes here
      }
 
  private:
      MyPrivateInitStuff(QObject *parent)
          : QObject(parent)
      {
-         <span class="comment">// initialization goes here</span>
+         <span class="comment">//</span> initialization goes here
      }
 
      MyPrivateInitStuff *p;
@@ -431,36 +431,10 @@
  };</pre>
 <p>The <i>context</i> parameter is normally the class name, but it can be any string.</p>
 <p>See also <a href="qobject.html#Q_OBJECT">Q_OBJECT</a>, <a href="qobject.html#tr">QObject::tr</a>(), and <a href="qobject.html#trUtf8">QObject::trUtf8</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="enter_loop"></a>int QCoreApplication::enter_loop ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This function enters the main event loop (recursively). Do not call it unless you really know what you are doing.</p>
-<h3 class="fn"><a name="exit_loop"></a>void QCoreApplication::exit_loop ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This function exits from a recursive call to the main event loop. Do not call it unless you are an expert.</p>
-<h3 class="fn"><a name="lock"></a>void QCoreApplication::lock ()</h3>
-<p>In Qt 3, this function locked the Qt library mutex, allowing non-GUI threads to perform basic printing operations using <a href="qpainter.html">QPainter</a>.</p>
-<p>In Qt 4, this is no longer supported, since painting is only supported from within a paint event handler. This function does nothing.</p>
-<p>See also <a href="qwidget.html#paintEvent">QWidget::paintEvent</a>().</p>
-<h3 class="fn"><a name="locked"></a>bool QCoreApplication::locked ()</h3>
-<p>This function does nothing. It is there to keep old code working. It always returns false.</p>
-<p>See <a href="qcoreapplication-qt3.html#lock">lock</a>() for details.</p>
-<h3 class="fn"><a name="loopLevel"></a>int QCoreApplication::loopLevel ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the current loop level.</p>
-<h3 class="fn"><a name="processOneEvent"></a>void QCoreApplication::processOneEvent ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Waits for an event to occur, processes it, then returns.</p>
-<p>This function is useful for adapting Qt to situations where the event processing must be grafted onto existing program loops.</p>
-<p>Using this function in new applications may be an indication of design problems.</p>
-<p>See also <a href="qcoreapplication.html#processEvents">processEvents</a>(), <a href="qcoreapplication.html#exec">exec</a>(), and <a href="qtimer.html">QTimer</a>.</p>
-<h3 class="fn"><a name="tryLock"></a>bool QCoreApplication::tryLock ()</h3>
-<p>This function does nothing. It is there to keep old code working. It always returns false.</p>
-<p>See <a href="qcoreapplication-qt3.html#lock">lock</a>() for details.</p>
-<h3 class="fn"><a name="unlock"></a>void QCoreApplication::unlock ( bool <i>wakeUpGui</i> = true )</h3>
-<p>In Qt 3, this function unlocked the Qt library mutex. The mutex allowed non-GUI threads to perform basic printing operations using <a href="qpainter.html">QPainter</a>.</p>
-<p>In Qt 4, this is no longer supported, since painting is only supported from within a paint event handler. This function does nothing.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

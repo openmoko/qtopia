@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,9 +56,7 @@ public:
     void reset();
     void setPrompt( const QString& );
     QString password() const;
-    void setLast( bool value );
-
-    bool eventFilter( QObject *obj, QEvent *e );
+    void resetLabels( bool useOkLabel );
 
 signals:
     void passwordEntered( const QString& );
@@ -70,24 +68,42 @@ protected:
     void keyPressEvent( QKeyEvent * );
 
 private:
-    void input( QString );
+    void input( const QString & );
     friend class QPasswordDialog;
-    QString text;
     QPasswordDialog::InputMode mode;
-    bool last;
 };
 
-/*
- *  Constructs a QPasswordWidget which is a child of 'parent', with the
- *  name 'name' and widget flags set to 'f'
- */
 QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
-    : QWidget( parent, fl ), last( true )
+    : QWidget( parent, fl )
 {
     setupUi(this);
-    installEventFilter( this );
 
-    if  (!Qtopia::mousePreferred()) {
+    /*
+    The button layout and softkeys differ depending on whether
+    Qtopia::mousePreferred() returns true or false.
+
+    if mouse is preferred:
+        - all buttons are displayed
+        - Key_Back is OK/Next, and Key_Select does nothing
+    otherwise:
+        - all buttons are hidden
+        - Key_Back means 'backspace', and Key_Select is OK/Next
+    */
+
+    if  (Qtopia::mousePreferred()) {
+        button_backspace->setIcon(QIcon(":icon/i18n/backspace"));
+        connect(button_0,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_1,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_2,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_3,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_4,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_5,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_6,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_7,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_8,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_9,SIGNAL(clicked()),this,SLOT(key()));
+        connect(button_backspace,SIGNAL(clicked()),this,SLOT(key()));
+    } else {
         button_0->hide();
         button_1->hide();
         button_2->hide();
@@ -98,20 +114,10 @@ QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
         button_7->hide();
         button_8->hide();
         button_9->hide();
+        button_backspace->hide();
     }
-    button_OK->hide();
 
-    connect(button_0,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_1,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_2,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_3,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_4,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_5,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_6,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_7,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_8,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_9,SIGNAL(clicked()),this,SLOT(key()));
-    connect(button_OK,SIGNAL(clicked()),this,SLOT(key()));
+    resetLabels(true);
 
     QPalette pal = display->palette();
     QBrush base = pal.brush(QPalette::Normal, QPalette::Base);
@@ -120,10 +126,14 @@ QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
     pal.setColor(QPalette::Disabled, QPalette::Text, text);
     display->setPalette(pal);
 
+    display->setMaxLength(8);
+
     setFocusPolicy(Qt::StrongFocus);
-    setFocus();
 
     reset();
+
+    QSoftMenuBar::menuFor( this );
+    QSoftMenuBar::setHelpEnabled( this, false );
 }
 
 /*
@@ -141,12 +151,11 @@ QPasswordWidget::~QPasswordWidget()
 void QPasswordWidget::key()
 {
     QPushButton* s = (QPushButton*)sender();
-    if ( s == button_OK )
-        emit passwordEntered( text );
+    if ( s == button_backspace )
+        display->backspace();
     else
         input(s->text());
 }
-
 
 /*!
   \reimp
@@ -154,59 +163,35 @@ void QPasswordWidget::key()
 
 void QPasswordWidget::keyPressEvent( QKeyEvent *e )
 {
-    if ( (Qtopia::mousePreferred() || (!Qtopia::mousePreferred() && hasEditFocus()))
-        && (e->key() == Qt::Key_Back || e->key() == Qt::Key_No) ) {
-        if( !Qtopia::mousePreferred() )
-            setEditFocus(false);
-        e->ignore();
-        return;
-    }
-
     if ( e->key() == Qt::Key_Back ) {
-        if (text.length() > 0) {
-            text = text.left( text.size() - 1 );
-            display->setText( text );
-            if ( text.size() == 0 ) {
-                if ( last )
-                    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-                else
-                    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
-                QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
-            }
-            return;
-        } else {
-            emit passwordEntered( text );
-            return;
-        }
-    }
+        if ( Qtopia::mousePreferred() )
+            emit passwordEntered( display->text() );
+        else
+            display->backspace();
 
-    if ( e->key() == Qt::Key_Select ) {
-        emit passwordEntered( text );
-        return;
-    }
-    if ( e->key() == Qt::Key_NumberSign && mode == QPasswordDialog::Pin ) {
+    } else if (  e->key() == Qt::Key_Select ) {
+        if (!Qtopia::mousePreferred())
+            emit passwordEntered( display->text() );
+        // ignore Key_Select if mouse preferred
+
+    } else if ( e->key() == Qt::Key_NumberSign && mode == QPasswordDialog::Pin ) {
         // Key_NumberSign (#), is required for GCF compliance.
         // GSM 02.30, section 4.6.1, Entry of PIN and PIN2.
-        emit passwordEntered( text );
-        return;
-    }
+        emit passwordEntered( display->text() );
 
-    QString t = e->text().left(1);
-    if ( t[0]>='0' && t[0]<='9' ) {
-        input(t);
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Ok);
-    }
+    } else {
+        QString t = e->text().left(1);
+        if ( t[0]>='0' && t[0]<='9' ) {
+            input(t);
+        }
 
-    QWidget::keyPressEvent( e );
+        QWidget::keyPressEvent( e );
+    }
 }
 
-void QPasswordWidget::input( QString c )
+void QPasswordWidget::input( const QString &c )
 {
-    if (text.length() < 8) {
-        text += c;
-        display->setText( text );
-    }
+    display->setText( display->text() + c );
 }
 
 void QPasswordWidget::setPrompt( const QString& s )
@@ -216,56 +201,37 @@ void QPasswordWidget::setPrompt( const QString& s )
 
 void QPasswordWidget::reset()
 {
-    text = "";
-    input("");
+    display->clear();
 }
 
 QString QPasswordWidget::password() const
 {
-    if (text.isEmpty())
+    if (display->text().isEmpty())
         return "";
-    return ( mode == QPasswordDialog::Crypted ? MD5::hash(text) : text );
+    return ( mode == QPasswordDialog::Crypted ?
+            MD5::hash(display->text()) : display->text() );
 }
 
-void QPasswordWidget::setLast( bool value )
+void QPasswordWidget::resetLabels( bool useOkLabel )
 {
-    last = value;
-#ifdef QTOPIA_PHONE
-    if ( last )
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-    else
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
-    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
-#endif
-}
+    QSoftMenuBar::StandardLabel okLabel =
+            ( useOkLabel ? QSoftMenuBar::Ok : QSoftMenuBar::Next);
 
-/**
-* Implement event filter interface (part of qobject). Filter to prevent
-* users escaping from the password dialog by using the "Escape" or other
-* device keys when the password widget "m_passw" is active.
-*/
-bool QPasswordWidget::eventFilter( QObject *obj, QEvent *e )
-{
-    // only filter events for m_passw
-    if ( obj != this )
-        return QWidget::eventFilter( obj, e );
-    // if event is anything other than keypress allow m_passw to handle it
-    if ( e->type() == QEvent::KeyRelease ) {
-        QKeyEvent *k = (QKeyEvent *)e;
-        if ( k->modifiers() == Qt::NoModifier
-                || k->key() == Qt::Key_Escape
-                || k->key() == Qt::Key_Menu )
-            return true;
+    if (Qtopia::mousePreferred()) {
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, okLabel);
+    } else {
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, okLabel);
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
     }
-    // if keypress is other, allow m_passw to handle it
-    return false;
 }
+
 
 /*!
     \class QPasswordDialog
     \mainclass
 
-    \brief The QPasswordDialog class provides a dialog widget for inputting a password.
+    \brief The QPasswordDialog class provides a dialog widget for entering a PIN code.
 */
 
 /*!
@@ -290,12 +256,10 @@ bool QPasswordWidget::eventFilter( QObject *obj, QEvent *e )
 QPasswordDialog::QPasswordDialog( QWidget* parent, Qt::WFlags flags)
     : QDialog( parent, flags )
 {
-    QSoftMenuBar::menuFor(this);
-    QSoftMenuBar::setHelpEnabled(this, false);
-
     m_passw = new QPasswordWidget( this );
     QBoxLayout *l = new QVBoxLayout( this );
     l->addWidget( m_passw );
+    setFocusProxy( m_passw );
 
     // defaults
     m_passw->mode = QPasswordDialog::Crypted;
@@ -387,7 +351,7 @@ QString QPasswordDialog::getPassword( QWidget* parent,
         max = false;
 
     QPasswordDialog pd( parent );
-    pd.m_passw->setLast( last );
+    pd.m_passw->resetLabels( last );
     pd.setPrompt( prompt );
     pd.setInputMode( mode );
 

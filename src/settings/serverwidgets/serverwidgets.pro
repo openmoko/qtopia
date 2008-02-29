@@ -21,4 +21,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Changes Qtopia server UI.
-pkg.domain=window,profiles
+pkg.domain=trusted

@@ -76,6 +76,6 @@ INSTALLS+=pics
 pkg.name=qpe-calculator
 pkg.desc=A simple calculator for Qtopia.
 pkg.multi=libraries/qtopiacalc
-pkg.domain=window
+pkg.domain=trusted
 
 #idep(LIBS+=-l$$TARGET)

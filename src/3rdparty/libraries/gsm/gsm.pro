@@ -22,7 +22,7 @@ SOURCES		=   add.c \
 DEFINES    +=  FAST SASR WAV49
 
 pkg.desc=GSM library
-pkg.domain=lib
+pkg.domain=trusted
 
 # FIXME "make syncqtopia"
 dep(INCLUDEPATH+=$$PWD)

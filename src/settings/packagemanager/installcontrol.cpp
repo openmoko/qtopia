@@ -1,7 +1,7 @@
 /****************************************************************************
 // create links for the icon, binary
  **
- ** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+ ** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
  **
  ** This file is part of the Opensource Edition of the Qtopia Toolkit.
  **
@@ -78,7 +78,7 @@ void SimpleErrorReporter::doReportError( const QString &simpleError, const QStri
     QString logError = userVisibleError + "\n" + detailedError;  
     
     QMessageBox::warning( 0, subject, userVisibleError );
-    qWarning() << logError;
+    qWarning() << qPrintable(logError);
 }
 
 InstallControl::InstallControl()
@@ -93,6 +93,15 @@ InstallControl::InstallControl()
 
 InstallControl::~InstallControl()
 {
+}
+
+/* Returns the path of where the package was downloaded to.
+   (The entire file path is returned not just the directory)
+*/
+QString InstallControl::downloadedFileLoc()
+{
+    static const QString location=Qtopia::tempDir() + "/package";
+    return location;
 }
 
 /*!
@@ -113,8 +122,7 @@ InstallControl::~InstallControl()
 */
 bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, const QString &md5Sum, ErrorReporter *reporter ) const
 {
-    QString packageFile = pkg.packageFile;
-    packageFile.prepend( Qtopia::tempDir() );
+    QString packageFile = downloadedFileLoc();
 
     if (  QFile( packageFile).size() != pkg.size.toLongLong() )
     {
@@ -158,6 +166,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     qlonglong expectedSize = SizeUtils::parseInstalledSize( pkg.installedSize );
     qlonglong extractedSize =targz_archive_size( packageFile );
 
+
     if ( extractedSize > expectedSize )
     {
         if ( reporter )
@@ -167,7 +176,19 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
                                      "uncompressed size: %2 (prior to extracting data.tar.gz)")
                                 .arg( expectedSize ).arg( extractedSize ) );
         }
-        job.removeDestination();
+        return false;
+    }
+
+
+    if ( !check_tar_valid( packageFile ) )
+    {
+        if ( reporter )
+        {
+            reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
+                    QString( "Installcontrol:installpackage:- package qpk file is invalid, "
+                        "Package must not contain hard links, absolute paths or path references to parent "
+                        "directories or symlinks which refer to absolute paths or parent directories" ) );
+        }
         return false;
     }
 
@@ -180,7 +201,6 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
                             .arg( packageFile )
                             .arg( job.destinationPath() ));
         }
-        job.removeDestination();
         return false;
     }
 
@@ -192,15 +212,26 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
         if ( reporter )
         {
             reporter->reportError( PackageView::tr("Uncompressed package larger than advertised size" ),
-                    QString( "installcontrol:installpackage:- (maximum)expected uncompressed size: %1 "
-                        "uncompressed size of qpk: %2 (after extracting data.tar.gz)") 
+                    QString( "Installcontrol:installpackage:- (maximum)expected uncompressed size: %1 "
+                        "uncompressed size of qpk: %2 (after extracting data.tar.gz)")
                     .arg( expectedSize ).arg( extractedSize ) );
         }
-        job.removeDestination();
         return false;
     }
 
-    if( !targz_extract_all( dataTarGz, job.destinationPath(), true ) )
+    if ( !check_tar_valid( dataTarGz ) )
+    {
+        if ( reporter )
+        {
+            reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
+                    QString( "Installcontrol:installpackage:- package's data.tar.gz is invalid "
+                        "Package must not contain hard links, absolute paths or path references to parent "
+                        "directories or symlinks which refer to absolute paths or parent directories" ) );
+        }
+        return false;
+    }
+
+    if( !targz_extract_all( dataTarGz, job.destinationPath(), false ) )
     {
         if( reporter )
         {
@@ -209,7 +240,6 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
                             .arg( dataTarGz )
                             .arg( job.destinationPath() ));
         }
-        job.removeDestination();
         return false;
     }
 
@@ -221,12 +251,9 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     tmpPackage.remove();
 
     if ( !verifyPackage( job.destinationPath(), pkg, reporter ))
-    {
-        job.removeDestination();
         return false;
-    }
 
-    job.registerPackageFiles();
+    job.preprocessPackageFiles();
 
     if ( pkg.isSystemPackage() )
     {
@@ -242,11 +269,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
         {
             qWarning( "******* No writeable system path for system package *******" );
             if ( !job.setupSandbox() )
-            {
-                job.removeDestination();
-
                 return false;
-            }
         }
         else
         {
@@ -261,7 +284,6 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
                                     .arg( dataTarGz )
                                     .arg( job.destinationPath() ));
                 }
-                job.removeDestination();
                 return false;
             }
             job.removeDestination();
@@ -270,17 +292,11 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     else
     {
         if (!job.setupSandbox())
-        {
-            job.removeDestination();
             return false;
-        }
     }
 
     if( !job.installContent() )
-    {
-        job.removeDestination();
-        return false;        
-    }
+        return false;
 
     return true;
 }
@@ -289,7 +305,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
 */
 void InstallControl::uninstallPackage( const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
 {
-    SandboxUninstallJob job( &pkg, m_installMedia, reporter );
+    SandboxUninstallJob job( &pkg, m_installMedia );
     job.terminateApps();
     job.unregisterPackageFiles();
     job.dismantleSandbox();
@@ -335,7 +351,6 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             QString simpleError = PackageView::tr( "Incompatible package, contact package supplier");
             QString detailedError("InstallControl::verifyPackage:- Trying to install sxe package "
                                   "with a non-sxe configured qtopia" );
-            detailedError.arg( pkg.domain ).arg( infoReader.domain() );
             reporter->reportError( simpleError, detailedError );
         }
         return false;
@@ -349,7 +364,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             QString simpleError = PackageView::tr( "Invalid package, security requirements differ from declared " 
                                                    "security requirements. Contact package supplier");
             QString detailedError("InstallControl::verifyPackage:- descriptor domain(s): %1, control file domain(s): %2");
-            detailedError.arg( pkg.domain ).arg( infoReader.domain() );
+            detailedError = detailedError.arg( pkg.domain ).arg( infoReader.domain() );
             reporter->reportError( simpleError, detailedError );
         }
         return false;
@@ -362,7 +377,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             QString simpleError = PackageView::tr( "Invalid package, contact package supplier" );
             QString detailedError("InstallControl::verifyPackage:- installed sizes inconsistent "
                                   " descriptor installed size: %1, control file installed size: %2 " );
-            detailedError.arg( pkg.installedSize ).arg( infoReader.installedSize() );
+            detailedError = detailedError.arg( pkg.installedSize ).arg( infoReader.installedSize() );
             reporter->reportError( simpleError, detailedError );
         }
         return false;

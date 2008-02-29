@@ -88,10 +88,6 @@ clean_package()
         rm -rf $CROSSTOOL
         rm -f $STAMPDIR/$CROSSTOOL.buildstamp
         ;;
-    busybox-secure)
-        rm -rf $BUSYBOX-secure
-        rm -f $STAMPDIR/$BUSYBOX-secure.buildstamp
-        ;;
     busybox)
         rm -rf $BUSYBOX
         rm -f $STAMPDIR/$BUSYBOX.buildstamp
@@ -228,32 +224,32 @@ download_package()
     case $1 in
     toolchain)
         if [ "$OWNTOOLCHAIN" != "1" ]; then
-            wget -nc $VERBOSITY $PACKAGE_LOCATION/$CROSSTOOL.tar.gz || die "downloading toolchain/$CROSSTOOL"
+            [ -e $CROSSTOOL.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$CROSSTOOL.tar.gz || die "downloading toolchain/$CROSSTOOL"
             for file in $BINUTILS $GCCSTRAP $GCC $GDB $GLIBC $LINUXTHREADS $LINUX; do
-                wget -nc $VERBOSITY $PACKAGE_LOCATION/$file.tar.bz2 || die "downloading toolchain/$file"
+                [ -e $file.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$file.tar.bz2 || die "downloading toolchain/$file"
             done
 		fi
         ;;
-    busybox-secure|busybox)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
+    busybox)
+        [ -e $BUSYBOX.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
         ;;
     libungif)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBUNGIF.tar.bz2 || die "downloading $LIBUNGIF"
+        [ -e $LIBUNGIF.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBUNGIF.tar.bz2 || die "downloading $LIBUNGIF"
         ;;
     ilib)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$ILIB-min.tar.gz || die "downloading $ILIB"
+        [ -e $ILIB-min.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$ILIB-min.tar.gz || die "downloading $ILIB"
         ;;
     dosfstools)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$DOSFSTOOLS.src.tar.gz || die "downloading $DOSFSTOOLS"
+        [ -e $DOSFSTOOLS.src.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$DOSFSTOOLS.src.tar.gz || die "downloading $DOSFSTOOLS"
         ;;
     strace)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$STRACE.tar.bz2 || die "downloading $STRACE"
+        [ -e $STRACE.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$STRACE.tar.bz2 || die "downloading $STRACE"
         ;;
     ppp)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$PPP.tar.gz || die "downloading $PPP"
+        [ -e $PPP.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$PPP.tar.gz || die "downloading $PPP"
         ;;
     samba)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$SAMBA.tar.gz || die "downloading $SAMBA"
+        [ -e $SAMBA.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$SAMBA.tar.gz || die "downloading $SAMBA"
         ;;
     sxetools)
         ;;
@@ -266,57 +262,57 @@ download_package()
     bootcharger)
         ;;
     prelink)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBELF.tar.gz || die "downloading prelink/$LIBELF"
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$PRELINK.orig.tar.gz || die "downloading $PRELINK"
+        [ -e $LIBELF.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIBELF.tar.gz || die "downloading prelink/$LIBELF"
+        [ -e $PRELINK.orig.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$PRELINK.orig.tar.gz || die "downloading $PRELINK"
         ;;
     dropbear)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$DROPBEAR.tar.gz || die "downloading $DROPBEAR"
+        [ -e $DROPBEAR.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$DROPBEAR.tar.gz || die "downloading $DROPBEAR"
         ;;
     expat)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$EXPAT.tar.gz || die "downloading $EXPAT"
+        [ -e $EXPAT.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$EXPAT.tar.gz || die "downloading $EXPAT"
         ;;
     dbus)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$DBUS.tar.gz || die "downloading $DBUS"
+        [ -e $DBUS.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$DBUS.tar.gz || die "downloading $DBUS"
         ;;
     bluez-libs)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZLIBS.tar.gz || die "downloading $BLUEZLIBS"
+        [ -e $BLUEZLIBS.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZLIBS.tar.gz || die "downloading $BLUEZLIBS"
         ;;
     bluez-utils)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZUTILS.tar.gz || die "downloading $BLUEZUTILS"
+        [ -e $BLUEZUTILS.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZUTILS.tar.gz || die "downloading $BLUEZUTILS"
         ;;
     bluez-hcidump)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZHCIDUMP.tar.gz || die "downloading $BLUEZHCIDUMP"
+        [ -e $BLUEZHCIDUMP.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZHCIDUMP.tar.gz || die "downloading $BLUEZHCIDUMP"
         ;;
     bluez-firmware)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZFIRMWARE.tar.gz || die "downloading $BLUEZFIRMWARE"
+        [ -e $BLUEZFIRMWARE.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BLUEZFIRMWARE.tar.gz || die "downloading $BLUEZFIRMWARE"
         ;;
     wireless-tools)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$WIRELESSTOOLS.tar.gz || die "downloading $WIRELESSTOOLS"
+        [ -e $WIRELESSTOOLS.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$WIRELESSTOOLS.tar.gz || die "downloading $WIRELESSTOOLS"
         ;;
     wpa_supplicant)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$WPASUPPLICANT.tar.gz || die "downloading $WPASUPPLICANT"
+        [ -e $WPASUPPLICANT.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$WPASUPPLICANT.tar.gz || die "downloading $WPASUPPLICANT"
         ;;
     initrd)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
+        [ -e $BUSYBOX.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BUSYBOX.tar.bz2 || die "downloading $BUSYBOX"
         ;;
     linux)
         [ -n "$KERNEL_SOURCE_PATH" ] || die "kernel source path not defined."
         [ -d "$KERNEL_SOURCE_PATH" ] || die "kernel source path ($KERNEL_SOURCE_PATH) does not exist or is not a directory."
         ;;
     popt)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$POPT.tar.gz || die "downloading $POPT"
+        [ -e $POPT.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$POPT.tar.gz || die "downloading $POPT"
         ;;
     raid)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$RAID.tar.gz || die "downloading $LIDS"
+        [ -e $RAID.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$RAID.tar.gz || die "downloading $LIDS"
         ;;
     lids)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIDS.tar.gz || die "downloading $LIDS"
+        [ -e $LIDS.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$LIDS.tar.gz || die "downloading $LIDS"
         ;;
     openssl)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$OPENSSL.tar.gz || die "downloading $OPENSSL"
+        [ -e $OPENSSL.tar.gz ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$OPENSSL.tar.gz || die "downloading $OPENSSL"
         ;;
     bootchart)
-        wget -nc $VERBOSITY $PACKAGE_LOCATION/$BOOTCHART.tar.bz2 || die "downloading $PACKAGE_LOCATION/$BOOTCHART.tar.bz2"
+        [ -e $BOOTCHART.tar.bz2 ] || wget -nc $VERBOSITY $PACKAGE_LOCATION/$BOOTCHART.tar.bz2 || die "downloading $PACKAGE_LOCATION/$BOOTCHART.tar.bz2"
         ;;
     basefiles)
         ;;
@@ -359,28 +355,6 @@ build_package()
         cd ..
         touch $STAMPDIR/$CROSSTOOL.buildstamp
         ;;
-    busybox-secure)
-        source_changed $ROOTFS_SOURCE_PATH/busybox $STAMPDIR/$BUSYBOX-secure.buildstamp || return 0
-
-        rm -rf $BUSYBOX-secure
-        mkdir $BUSYBOX-secure
-
-        tar -C $BUSYBOX-secure --strip-components=1 -xjf $DOWNLOAD_DIR/$BUSYBOX.tar.bz2 ||
-            die "busybox-secure extract"
-
-        cd $ROOTFS_BUILD_PATH/$BUSYBOX-secure
-        for i in $ROOTFS_SOURCE_PATH/busybox/*.patch; do
-            patch -p 1 < $i || die "busybox-secure patch"
-        done
-        cp $ROOTFS_SOURCE_PATH/busybox/config-secure .config ||
-            die "busybox-secure configure"
-        export EXTRA_VERSION="secure"
-        make >$LOGFILE 2>&1 || die "busybox-secure build"
-        unset EXTRA_VERSION
-        cd ..
-
-        touch $STAMPDIR/$BUSYBOX-secure.buildstamp
-        ;;
     busybox)
         source_changed $ROOTFS_SOURCE_PATH/busybox $STAMPDIR/$BUSYBOX.buildstamp || return 0
 
@@ -394,9 +368,7 @@ build_package()
         done
         cp $ROOTFS_SOURCE_PATH/busybox/config-greenphone .config ||
             die "busybox configure"
-        export EXTRA_VERSION="standard"
         make >$LOGFILE 2>&1 || die "busybox build"
-        unset EXTRA_VERSION
         cd ..
 
         touch $STAMPDIR/$BUSYBOX.buildstamp
@@ -1111,24 +1083,6 @@ install_package()
 			fi
         install $TOOLCHAIN_ROOT/etc $ROOTFS_IMAGE_DIR/etc rpc
         ;;
-    busybox-secure)
-        cd $ROOTFS_BUILD_PATH/$BUSYBOX-secure
-        make install PREFIX=$ROOTFS_IMAGE_DIR >$LOGFILE 2>&1
-
-        # remove symlink to busybox-secure shell
-        rm -f $ROOTFS_IMAGE_DIR/bin/sh
-        rm -f $ROOTFS_IMAGE_DIR/bin/ash
-
-        cat > $ROOTFS_IMAGE_DIR/sbin/sh-secure <<EOF
-#!/bin/sh
-
-[ -r /etc/profile ] && . /etc/profile
-exec /sbin/busybox-secure sh "\$@"
-
-EOF
-        chmod a+x $ROOTFS_IMAGE_DIR/sbin/sh-secure
-        cd ..
-        ;;
     busybox)
         cd $ROOTFS_BUILD_PATH/$BUSYBOX
         make install linkopts="-s" INSTALL_OPTS=--noclobber PREFIX=$ROOTFS_IMAGE_DIR >$LOGFILE 2>&1
@@ -1718,7 +1672,7 @@ else
 fi
 
 # The order that some of these packages are built in is important.
-ALL_PACKAGES="toolchain busybox-secure busybox"
+ALL_PACKAGES="toolchain busybox"
 ALL_PACKAGES="$ALL_PACKAGES libungif ilib"
 ALL_PACKAGES="$ALL_PACKAGES dosfstools"
 ALL_PACKAGES="$ALL_PACKAGES ppp"
@@ -1931,7 +1885,7 @@ EXPAT=expat-2.0.0
 DBUS=dbus-1.0.2
 BLUEZLIBS=bluez-libs-3.19
 BLUEZUTILS=bluez-utils-3.19
-BLUEZHCIDUMP=bluez-hcidump-1.34
+BLUEZHCIDUMP=bluez-hcidump-1.40
 BLUEZFIRMWARE=bluez-firmware-1.2
 WIRELESSTOOLS=wireless_tools.28
 WPASUPPLICANT=wpa_supplicant-0.5.7

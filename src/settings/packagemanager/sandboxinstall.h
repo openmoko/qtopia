@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,7 +36,7 @@ class SandboxInstallJob : public QObject
         virtual ~SandboxInstallJob() {};
         QString destinationPath() const { return destination; }
         bool isAborted() const { return abort; }
-        bool registerPackageFiles( const QString &f = QString() );
+        bool preprocessPackageFiles( const QString &f = QString() );
         void removeDestination() const;
         bool installContent();
         bool setupSandbox();
@@ -50,7 +50,9 @@ class SandboxInstallJob : public QObject
 
     private:
         void mediaSandboxRoot();
-        void clearMiscFiles() const;
+        void registerHelpFiles( const QString& helpDir );
+        void registerI18NFiles( const QString& i18nDir );
+        bool setupSettingsFiles();
         void applyDomainRules( const QString &, const QString & );
         const InstallControl::PackageInfo *package;
         QString destination;
@@ -70,13 +72,16 @@ class SandboxUninstallJob
         void unregisterPackageFiles() const;
         void dismantleSandbox() const;
         void rollBackSandboxRule( const QString &binPath ) const;
+        static void clearMiscFiles( const InstallControl::PackageInfo * );
 
     private:
         QStringList getPackageBinaryPaths( const QString &path = QString() ) const;
         void removePackage() const;
+        static void clearMiscFilesHelper( const QDir &dir,  const InstallControl::PackageInfo *);
 
         const InstallControl::PackageInfo *package;
         QString packagePath;
+        ErrorReporter *reporter;
 };
 
 

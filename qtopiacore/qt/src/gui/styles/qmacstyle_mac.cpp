@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -83,6 +81,7 @@
 #include <qtreeview.h>
 #include <qwizard.h>
 #include <qdebug.h>
+#include <qlibrary.h>
 
 extern QRegion qt_mac_convert_mac_region(RgnHandle); //qregion_mac.cpp
 extern QHash<QByteArray, QFont> *qt_app_fonts_hash(); // qapplication.cpp
@@ -98,6 +97,12 @@ static const int SmallButtonH = 30;
 static const int BevelButtonW = 50;
 static const int BevelButtonH = 22;
 static const int PushButtonContentPadding = 6;
+
+// Resolve these at run-time, since the functions was moved in Leopard.
+typedef HIRect * (*PtrHIShapeGetBounds)(HIShapeRef, HIRect *);
+static PtrHIShapeGetBounds ptrHIShapeGetBounds = 0;
+typedef OSStatus (*PtrHIShapeGetAsQDRgn)(HIShapeRef, RgnHandle);
+static PtrHIShapeGetAsQDRgn ptrHIShapeGetAsQDRgn = 0;
 
 /*
     AHIG:
@@ -1132,6 +1137,13 @@ QMacStylePrivate::QMacStylePrivate(QMacStyle *style)
 {
     defaultButtonStart = CFAbsoluteTimeGetCurrent();
     memset(&buttonState, 0, sizeof(ButtonState));
+
+    if (ptrHIShapeGetBounds == 0) {
+        QLibrary library(QLatin1String("/System/Library/Frameworks/Carbon.framework/Carbon"));
+        ptrHIShapeGetBounds = reinterpret_cast<PtrHIShapeGetBounds>(library.resolve("HIShapeGetBounds"));
+        ptrHIShapeGetAsQDRgn = reinterpret_cast<PtrHIShapeGetAsQDRgn>(library.resolve("HIShapeGetAsQDRgn"));
+    }
+
 }
 
 bool QMacStylePrivate::animatable(QMacStylePrivate::Animates as, const QWidget *w) const
@@ -1503,17 +1515,6 @@ bool QMacStylePrivate::eventFilter(QObject *o, QEvent *e)
             break; }
         }
     }
-    else if (e->type() == QEvent::Paint && o->isWidgetType()
-             && qt_mac_is_metal(static_cast<QWidget *>(o))) {
-        QWidget *widget = static_cast<QWidget *>(o);
-        HIThemeBackgroundDrawInfo bginfo;
-        bginfo.version = qt_mac_hitheme_version;
-        bginfo.state = kThemeStateActive;
-        bginfo.kind = kThemeBackgroundMetal;
-        HIRect rect = CGRectMake(0, 0, widget->width(), widget->height());
-        HIThemeDrawBackground(&rect, &bginfo, QCFType<CGContextRef>(qt_mac_cg_context(widget)),
-                               kHIThemeOrientationNormal);
-    }
     return false;
 }
 
@@ -1777,7 +1778,7 @@ void QMacStyle::polish(QWidget* w)
     if (qobject_cast<QMenu*>(w)) {
         w->setWindowOpacity(0.95);
         if (!w->testAttribute(Qt::WA_SetPalette)) {
-            QPixmap px(200, 200);
+            QPixmap px(64, 64);
             HIThemeMenuDrawInfo mtinfo;
             mtinfo.version = qt_mac_hitheme_version;
             mtinfo.menuType = kThemeMenuTypePopUp;
@@ -1972,7 +1973,7 @@ int QMacStyle::pixelMetric(PixelMetric metric, const QStyleOption *opt, const QW
             HIRect hirect = qt_hirectForQRect(tb->rect);
             HIThemeGetWindowShape(&hirect, &wdi, kWindowTitleBarRgn, &region);
             HIRect rect;
-            HIShapeGetBounds(region, &rect);
+            ptrHIShapeGetBounds(region, &rect);
             ret = int(rect.size.height);
             ret += 4;
         }
@@ -2421,6 +2422,25 @@ int QMacStyle::styleHint(StyleHint sh, const QStyleOption *opt, const QWidget *w
         break;
     case SH_ItemView_ArrowKeysNavigateIntoChildren:
         ret = false;
+        break;
+    case SH_Menu_Mask:
+        if (opt) {
+            if (QStyleHintReturnMask *mask = qstyleoption_cast<QStyleHintReturnMask*>(hret)) {
+                ret = true;
+                HIRect menuRect = CGRectMake(opt->rect.x(), opt->rect.y() + 4,
+                                             opt->rect.width(), opt->rect.height() - 8);
+                HIThemeMenuDrawInfo mdi;
+                mdi.version = 0;
+                mdi.menuType = kThemeMenuTypePopUp;
+                QCFType<HIShapeRef> shape;
+                HIThemeGetMenuBackgroundShape(&menuRect, &mdi, &shape);
+                RgnHandle rgn = qt_mac_get_rgn();
+                ptrHIShapeGetAsQDRgn(shape, rgn);
+                mask->region = qt_mac_convert_mac_region(rgn);
+                qt_mac_dispose_rgn(rgn);
+
+            }
+        }
         break;
     default:
         ret = QWindowsStyle::styleHint(sh, opt, w, hret);
@@ -3457,7 +3477,7 @@ void QMacStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPainter
                     QCFType<HIShapeRef> titleRegion;
                     QRect newr = opt->rect.adjusted(0, 0, 2, 0);
                     HIThemeGetWindowShape(&tmpRect, &wdi, kWindowTitleBarRgn, &titleRegion);
-                    HIShapeGetBounds(titleRegion, &tmpRect);
+                    ptrHIShapeGetBounds(titleRegion, &tmpRect);
                     newr.translate(newr.x() - int(tmpRect.origin.x), newr.y() - int(tmpRect.origin.y));
                     titleBarRect = qt_hirectForQRect(newr);
                 }
@@ -3944,7 +3964,7 @@ QRect QMacStyle::subElementRect(SubElement sr, const QStyleOption *opt,
         QCFType<HIShapeRef> shape;
         HIRect outRect;
         HIThemeGetButtonShape(&inRect, &bdi, &shape);
-        HIShapeGetBounds(shape, &outRect);
+        ptrHIShapeGetBounds(shape, &outRect);
         rect = QRect(int(outRect.origin.x), int(outRect.origin.y),
                   int(contentRect.origin.x - outRect.origin.x), int(outRect.size.height));
         break;
@@ -4228,7 +4248,7 @@ void QMacStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComplex 
                 // Small optimization, the same as q->subControlRect
                 QCFType<HIShapeRef> shape;
                 HIThemeGetTrackThumbShape(&tdi, &shape);
-                HIShapeGetBounds(shape, &macRect);
+                ptrHIShapeGetBounds(shape, &macRect);
                 tdi.value = slider->sliderValue;
             }
 
@@ -4427,7 +4447,7 @@ void QMacStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComplex 
                 QCFType<HIShapeRef> titleRegion;
                 QRect newr = titlebar->rect.adjusted(0, 0, 2, 0);
                 HIThemeGetWindowShape(&tmpRect, &wdi, kWindowTitleBarRgn, &titleRegion);
-                HIShapeGetBounds(titleRegion, &tmpRect);
+                ptrHIShapeGetBounds(titleRegion, &tmpRect);
                 newr.translate(newr.x() - int(tmpRect.origin.x), newr.y() - int(tmpRect.origin.y));
                 titleBarRect = qt_hirectForQRect(newr);
             }
@@ -4482,7 +4502,7 @@ void QMacStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComplex 
                     QCFType<HIShapeRef> titleRegion2;
                     HIThemeGetWindowShape(&titleBarRect, &wdi, kWindowTitleProxyIconRgn,
                                           &titleRegion2);
-                    HIShapeGetBounds(titleRegion2, &tmpRect);
+                    ptrHIShapeGetBounds(titleRegion2, &tmpRect);
                     if (tmpRect.size.width != 1)
                         iw = titlebar->icon.pixmap(pixelMetric(PM_SmallIconSize),
                                                    QIcon::Normal).width();
@@ -4491,7 +4511,7 @@ void QMacStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComplex 
                     p->save();
                     QCFType<HIShapeRef> titleRegion3;
                     HIThemeGetWindowShape(&titleBarRect, &wdi, kWindowTitleTextRgn, &titleRegion3);
-                    HIShapeGetBounds(titleRegion3, &tmpRect);
+                    ptrHIShapeGetBounds(titleRegion3, &tmpRect);
                     p->setClipRect(qt_qrectForHIRect(tmpRect));
                     QRect br = p->clipRegion().boundingRect();
                     int x = br.x(),
@@ -4815,7 +4835,7 @@ QRect QMacStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *op
             if ((scrollBar && sc == SC_ScrollBarSlider)
                 || (!scrollBar && sc == SC_SliderHandle)) {
                 HIThemeGetTrackThumbShape(&tdi, &shape);
-                HIShapeGetBounds(shape, &macRect);
+                ptrHIShapeGetBounds(shape, &macRect);
             } else if (!scrollBar && sc == SC_SliderGroove) {
                 HIThemeGetTrackBounds(&tdi, &macRect);
             } else if (sc == SC_ScrollBarGroove) { // Only scroll bar parts available...
@@ -4893,13 +4913,13 @@ QRect QMacStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *op
                 QRect tmpRect = titlebar->rect;
                 HIRect titleRect = qt_hirectForQRect(tmpRect);
                 HIThemeGetWindowShape(&titleRect, &wdi, kWindowTitleBarRgn, &region);
-                HIShapeGetBounds(region, &titleRect);
+                ptrHIShapeGetBounds(region, &titleRect);
                 CFRelease(region);
                 tmpRect.translate(tmpRect.x() - int(titleRect.origin.x),
                                tmpRect.y() - int(titleRect.origin.y));
                 titleRect = qt_hirectForQRect(tmpRect);
                 HIThemeGetWindowShape(&titleRect, &wdi, wrc, &region);
-                HIShapeGetBounds(region, &titleRect);
+                ptrHIShapeGetBounds(region, &titleRect);
                 ret = qt_qrectForHIRect(titleRect);
             }
         }
@@ -5240,11 +5260,14 @@ QSize QMacStyle::sizeFromContents(ContentsType ct, const QStyleOption *opt,
     case CT_ComboBox:
         sz.rwidth() += 50;
         break;
-    case CT_Menu:
-        // Hmm... the size is too big on the bottom, but I don't have anyway to correct
-        // this in QMenu, so correct it here.
-        sz.rheight() -= 4;
-        break;
+    case CT_Menu: {
+        QStyleHintReturnMask menuMask;
+        QStyleOption myOption = *opt;
+        myOption.rect.setSize(sz);
+        if (styleHint(SH_Menu_Mask, &myOption, widget, &menuMask)) {
+            sz = menuMask.region.boundingRect().size();
+        }
+        break; }
     case CT_ScrollBar :
         // Make sure that the scroll bar is large enough to display the thumb indicator.
         if (const QStyleOptionSlider *slider = qstyleoption_cast<const QStyleOptionSlider *>(opt)) {

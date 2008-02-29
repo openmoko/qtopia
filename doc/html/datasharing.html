@@ -169,7 +169,7 @@
 <a name="extensibility"></a>
 <h2>Extensibility</h2>
 <p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class.</p>
-<p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="qbytearray.html">QByteArray</a>.</p>
+<p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="./qbytearray.html">QByteArray</a>.</p>
 <pre>    VCard vcard;
     QByteArray vCardArray;
     {
@@ -179,20 +179,20 @@
     QDSData vCardData( vCardArray, QMimeType( &quot;text/x-vCard&quot; ) );</pre>
 <p>This allows services to be provided for <tt>text/x-vCard</tt> data assuming that there has streaming operator defined in the VCard class.</p>
 <p>For example</p>
-<pre><span class="comment">    //declare the streaming function in the VCard's header file</span>
+<pre><span class="comment">    //</span>declare the streaming function in the VCard's header file
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard );
 
     ...
 
-<span class="comment">    //implement the streaming function in the VCard's cpp file</span>
+<span class="comment">    //</span>implement the streaming function in the VCard's cpp file
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )
     {
     ...
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

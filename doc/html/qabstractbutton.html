@@ -303,50 +303,16 @@
 <pre> void MyWidget::reactToToggle(bool checked)
  {
     if (checked) {
-       <span class="comment">// Examine the new button states.</span>
+       <span class="comment">//</span> Examine the new button states.
        ...
     }
  }</pre>
 <p>Button groups can be created using the <a href="qbuttongroup.html">QButtonGroup</a> class, and updates to the button states monitored with the <a href="qbuttongroup.html#buttonClicked">QButtonGroup::buttonClicked</a>() signal.</p>
 <p>See also <a href="qabstractbutton.html#checked-prop">checked</a> and <a href="qabstractbutton.html#clicked">clicked</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QAbstractButton-2"></a>QAbstractButton::QAbstractButton ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<p>Use <a href="qabstractbutton.html">QAbstractButton</a>(<a href="qwidget.html">QWidget</a> *) instead.</p>
-<p>Call <a href="qobject.html#objectName-prop">setObjectName</a>() if you want to specify an object name, and <a href="qwidget.html#setParent">setParent</a>() if you want to set the window flags.</p>
-<h3 class="fn"><a name="accel"></a><a href="qkeysequence.html">QKeySequence</a> QAbstractButton::accel () const</h3>
-<p>Use <a href="qabstractbutton.html#shortcut-prop">shortcut</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#setAccel">setAccel</a>().</p>
-<h3 class="fn"><a name="iconSet"></a><a href="qicon.html">QIcon</a> * QAbstractButton::iconSet () const</h3>
-<p>Use <a href="qabstractbutton.html#icon-prop">icon</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#setIconSet">setIconSet</a>().</p>
-<h3 class="fn"><a name="isOn"></a>bool QAbstractButton::isOn () const</h3>
-<p>Use <a href="qabstractbutton.html#checked-prop">isChecked</a>() instead.</p>
-<h3 class="fn"><a name="isToggleButton"></a>bool QAbstractButton::isToggleButton () const</h3>
-<p>Use <a href="qabstractbutton.html#checkable-prop">isCheckable</a>() instead.</p>
-<h3 class="fn"><a name="pixmap"></a>const <a href="qpixmap.html">QPixmap</a> * QAbstractButton::pixmap () const</h3>
-<p>This compatibility function always returns 0.</p>
-<p>Use <a href="qabstractbutton.html#icon-prop">icon</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#setPixmap">setPixmap</a>().</p>
-<h3 class="fn"><a name="setAccel"></a>void QAbstractButton::setAccel ( const <a href="qkeysequence.html">QKeySequence</a> &amp; <i>key</i> )</h3>
-<p>Use <a href="qabstractbutton.html#shortcut-prop">setShortcut</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#accel">accel</a>().</p>
-<h3 class="fn"><a name="setIconSet"></a>void QAbstractButton::setIconSet ( const <a href="qicon.html">QIcon</a> &amp; <i>icon</i> )</h3>
-<p>Use <a href="qabstractbutton.html#icon-prop">setIcon</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#iconSet">iconSet</a>().</p>
-<h3 class="fn"><a name="setOn"></a>void QAbstractButton::setOn ( bool <i>b</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Use <a href="qabstractbutton.html#checked-prop">setChecked</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#isOn">isOn</a>().</p>
-<h3 class="fn"><a name="setPixmap"></a>void QAbstractButton::setPixmap ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>p</i> )</h3>
-<p>Use <a href="qabstractbutton.html#icon-prop">setIcon</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#pixmap">pixmap</a>().</p>
-<h3 class="fn"><a name="setToggleButton"></a>void QAbstractButton::setToggleButton ( bool <i>b</i> )</h3>
-<p>Use <a href="qabstractbutton.html#checkable-prop">setCheckable</a>() instead.</p>
-<p>See also <a href="qabstractbutton-qt3.html#isToggleButton">isToggleButton</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

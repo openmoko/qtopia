@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -171,7 +171,7 @@ public:
                             list << "Saturday";
                         if ( mask & Outlook::olSunday )
                             list << "Sunday";
-                        stream << list.join(",");
+                        stream << list.join(" ");
                     } else {
                         LOG() << "recpat->GetDayOfWeekMask" << 0;
                     }
@@ -370,7 +370,7 @@ public:
 
                         if ( key == "WeekMask" ) {
                             int mask = 0;
-                            foreach( const QString &v, value.split(",") ) {
+                            foreach( const QString &v, value.split(" ") ) {
                                 if ( v == "Monday" ) mask |= Outlook::olMonday;
                                 else if ( v == "Tuesday" ) mask |= Outlook::olTuesday;
                                 else if ( v == "Wednesday" ) mask |= Outlook::olWednesday;

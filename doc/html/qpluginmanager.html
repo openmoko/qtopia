@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPluginManager Class Reference</h1>
 <p>The QPluginManager class simplifies plug-in loading and allows plugins to be enabled/disabled. <a href="#details">More...</a></p>
-<pre>    #include &lt;QPluginManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QPluginManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qpluginmanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -30,7 +30,7 @@
 <li><div class="fn"/>void <b><a href="qpluginmanager.html#setEnabled">setEnabled</a></b> ( const QString &amp; <i>name</i>, bool <i>enabled</i> = true )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -38,17 +38,16 @@
 <li><div class="fn"/>bool <b><a href="qpluginmanager.html#inSafeMode">inSafeMode</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -68,22 +67,22 @@
         }
     }</pre>
 <p>The <a href="qpluginmanager.html#list">list</a>() function returns a list of plugins, using the filenames of the plugins in the plugin directory. This does not require any plugins to be loaded, so it is very lightweight.</p>
-<p>In order to load a plugin, call the <a href="qpluginmanager.html#instance">instance</a>() function with the name of the plugin to load. <a href="qobject.html#qobject_cast">qobject_cast</a>() may then be used to query for the desired interface.</p>
+<p>In order to load a plugin, call the <a href="qpluginmanager.html#instance">instance</a>() function with the name of the plugin to load. <a href="./qobject.html#qobject_cast">qobject_cast</a>() may then be used to query for the desired interface.</p>
 <p>If the application loading a plugin crashes during while loading the plugin, the plugin will be disabled. This prevents a plugin from permanently rendering an application unusable. Disabled plugins can be queried using <a href="qpluginmanager.html#disabledList">disabledList</a>() and reenabled using <a href="qpluginmanager.html#setEnabled">setEnabled</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPluginManager"></a>QPluginManager::QPluginManager ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QPluginManager"></a>QPluginManager::QPluginManager ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a <a href="qpluginmanager.html">QPluginManager</a> for plugins of <i>type</i> with the given <i>parent</i>.</p>
 <p>The plugins must be installed in the [qt_prefix]/plugins/<i>type</i> directory.</p>
 <h3 class="fn"><a name="dtor.QPluginManager"></a>QPluginManager::~QPluginManager ()</h3>
 <p>Destroys the <a href="qpluginmanager.html">QPluginManager</a> and releases any resources allocated by the PluginManager.</p>
 <h3 class="fn"><a name="clear"></a>void QPluginManager::clear ()</h3>
 <p>Releases all resources allocated by the <a href="qpluginmanager.html">QPluginManager</a></p>
-<h3 class="fn"><a name="disabledList"></a>const <a href="qstringlist.html">QStringList</a> &amp; QPluginManager::disabledList () const</h3>
+<h3 class="fn"><a name="disabledList"></a>const <a href="./qstringlist.html">QStringList</a> &amp; QPluginManager::disabledList () const</h3>
 <p>Returns the list of plugins that have been disabled.</p>
 <h3 class="fn"><a name="inSafeMode"></a>bool QPluginManager::inSafeMode ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if Qtopia is currently in <i>Safe Mode</i>. In safe mode <a href="qpluginmanager.html#list">list</a>() will return an empty list and no plugins should be loaded. This is to allow misbehaving plugins to be disabled.</p>
-<h3 class="fn"><a name="instance"></a><a href="qobject.html">QObject</a> * QPluginManager::instance ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="instance"></a><a href="./qobject.html">QObject</a> * QPluginManager::instance ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Load the plug-in specified by <i>name</i>.</p>
 <p>Returns the plugin interface if found, otherwise 0.</p>
 <pre>    QObject *instance = pluginManager-&gt;instance(&quot;name&quot;);
@@ -91,22 +90,22 @@
         EffectsInterface *iface = 0;
         iface = qobject_cast&lt;EffectsInterface*&gt;(instance);
         if (iface) {
-            <span class="comment">// We have an instance of the desired type.</span>
+            <span class="comment">//</span> We have an instance of the desired type.
         }
     }</pre>
 <p>If an instance is no longer required and resources need to be released, simply delete the returned instance.</p>
-<h3 class="fn"><a name="isEnabled"></a>bool QPluginManager::isEnabled ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
+<h3 class="fn"><a name="isEnabled"></a>bool QPluginManager::isEnabled ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
 <p>Returns true if the plug-in <i>name</i> is enabled.</p>
-<h3 class="fn"><a name="list"></a>const <a href="qstringlist.html">QStringList</a> &amp; QPluginManager::list () const</h3>
+<h3 class="fn"><a name="list"></a>const <a href="./qstringlist.html">QStringList</a> &amp; QPluginManager::list () const</h3>
 <p>Returns the list of plugins that are available.</p>
 <p>The plugin list is derived from the filenames of the plugins and does not force any plugins to be loaded.</p>
-<h3 class="fn"><a name="setEnabled"></a>void QPluginManager::setEnabled ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, bool <i>enabled</i> = true )</h3>
+<h3 class="fn"><a name="setEnabled"></a>void QPluginManager::setEnabled ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, bool <i>enabled</i> = true )</h3>
 <p>Enables or disables plug-in <i>name</i> depending on the value of <i>enabled</i>. A disabled plug-in can still be loaded, but it will not be returned by <a href="qpluginmanager.html#list">list</a>().</p>
 <p>See also <a href="qpluginmanager.html#isEnabled">isEnabled</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

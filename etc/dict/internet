@@ -104,6 +104,7 @@ hu
 id
 ie
 il
+imap
 in
 int
 io
@@ -205,6 +206,7 @@ si
 sj
 sl
 sm
+smtp
 sn
 so
 sr
@@ -243,6 +245,7 @@ vg
 vi
 vn
 vu
+webmail
 wf
 ws
 www

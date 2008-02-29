@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qiodevice.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/io/qiodevice.cpp -->
 <head>
   <title>Qt 4.3: QIODevice Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -282,7 +282,7 @@
      char buf[1024];
      qint64 lineLength = file.readLine(buf, sizeof(buf));
      if (lineLength != -1) {
-         <span class="comment">// the line is available in buf</span>
+         <span class="comment">//</span> the line is available in buf
      }
  }</pre>
 <p>The newline character ('\n') is included in the buffer. If a newline is not encountered before maxSize - 1 bytes are read, a newline will not be inserted into the buffer. On windows newline characters are replaced with '\n'.</p>
@@ -351,66 +351,10 @@
 <p>Writes up to <i>maxSize</i> bytes from <i>data</i> to the device. Returns the number of bytes written, or -1 if an error occurred.</p>
 <p>This function is called by <a href="qiodevice.html">QIODevice</a>. Reimplement this function when creating a subclass of <a href="qiodevice.html">QIODevice</a>.</p>
 <p>See also <a href="qiodevice.html#read">read</a>() and <a href="qiodevice.html#write">write</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="Offset-typedef"></a>typedef QIODevice::Offset</h3>
-<p>Use <tt>qint64</tt> instead.</p>
-<h3 class="fn"><a name="Status-typedef"></a>typedef QIODevice::Status</h3>
-<p>Use <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::OpenMode</a> instead, or see the documentation for specific devices.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="at"></a><a href="qiodevice-qt3.html#Offset-typedef">Offset</a> QIODevice::at () const</h3>
-<p>Use <a href="qiodevice.html#pos">pos</a>() instead.</p>
-<h3 class="fn"><a name="at-2"></a>bool QIODevice::at ( <a href="qiodevice-qt3.html#Offset-typedef">Offset</a> <i>offset</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use seek(<i>offset</i>) instead.</p>
-<h3 class="fn"><a name="flags"></a>int QIODevice::flags () const</h3>
-<p>Use <a href="qiodevice.html#openMode">openMode</a>() instead.</p>
-<h3 class="fn"><a name="getch"></a>int QIODevice::getch ()</h3>
-<p>Use <a href="qiodevice.html#getChar">getChar</a>() instead.</p>
-<h3 class="fn"><a name="isAsynchronous"></a>bool QIODevice::isAsynchronous () const</h3>
-<p>This functionality is no longer available. This function always returns true.</p>
-<h3 class="fn"><a name="isBuffered"></a>bool QIODevice::isBuffered () const</h3>
-<p>Use !(<a href="qiodevice.html#openMode">openMode</a>() &amp; <a href="qiodevice.html#OpenModeFlag-enum">QIODevice::Unbuffered</a>) instead.</p>
-<h3 class="fn"><a name="isCombinedAccess"></a>bool QIODevice::isCombinedAccess () const</h3>
-<p>Use <a href="qiodevice.html#openMode">openMode</a>() instead.</p>
-<h3 class="fn"><a name="isDirectAccess"></a>bool QIODevice::isDirectAccess () const</h3>
-<p>Use !<a href="qiodevice.html#isSequential">isSequential</a>() instead.</p>
-<h3 class="fn"><a name="isInactive"></a>bool QIODevice::isInactive () const</h3>
-<p>Use <a href="qiodevice.html#isOpen">isOpen</a>(), <a href="qiodevice.html#isReadable">isReadable</a>(), or <a href="qiodevice.html#isWritable">isWritable</a>() instead.</p>
-<h3 class="fn"><a name="isRaw"></a>bool QIODevice::isRaw () const</h3>
-<p>Use <a href="qiodevice.html#openMode">openMode</a>() instead.</p>
-<h3 class="fn"><a name="isSequentialAccess"></a>bool QIODevice::isSequentialAccess () const</h3>
-<p>Use <a href="qiodevice.html#isSequential">isSequential</a>() instead.</p>
-<h3 class="fn"><a name="isSynchronous"></a>bool QIODevice::isSynchronous () const</h3>
-<p>This functionality is no longer available. This function always returns false.</p>
-<h3 class="fn"><a name="isTranslated"></a>bool QIODevice::isTranslated () const</h3>
-<p>Use <a href="qiodevice.html#openMode">openMode</a>() instead.</p>
-<h3 class="fn"><a name="mode"></a>int QIODevice::mode () const</h3>
-<p>Use <a href="qiodevice.html#openMode">openMode</a>() instead.</p>
-<h3 class="fn"><a name="putch"></a>int QIODevice::putch ( int <i>ch</i> )</h3>
-<p>Use putChar(<i>ch</i>) instead.</p>
-<h3 class="fn"><a name="readBlock"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QIODevice::readBlock ( char * <i>data</i>, <a href="qtglobal.html#quint64-typedef">quint64</a> <i>size</i> )</h3>
-<p>Use read(<i>data</i>, <i>size</i>) instead.</p>
-<h3 class="fn"><a name="resetStatus"></a>void QIODevice::resetStatus ()</h3>
-<p>For device specific error handling, please refer to the individual device documentation.</p>
-<p>See also <a href="qobject.html#qobject_cast">qobject_cast</a>().</p>
-<h3 class="fn"><a name="state"></a>int QIODevice::state () const</h3>
-<p>Use <a href="qiodevice.html#isOpen">isOpen</a>() instead.</p>
-<h3 class="fn"><a name="status"></a><a href="qiodevice-qt3.html#Status-typedef">Status</a> QIODevice::status () const</h3>
-<p>For device specific error handling, please refer to the individual device documentation.</p>
-<p>See also <a href="qobject.html#qobject_cast">qobject_cast</a>().</p>
-<h3 class="fn"><a name="ungetch"></a>int QIODevice::ungetch ( int <i>ch</i> )</h3>
-<p>Use ungetChar(<i>ch</i>) instead.</p>
-<h3 class="fn"><a name="writeBlock"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QIODevice::writeBlock ( const char * <i>data</i>, <a href="qtglobal.html#quint64-typedef">quint64</a> <i>size</i> )</h3>
-<p>Use write(<i>data</i>, <i>size</i>) instead.</p>
-<h3 class="fn"><a name="writeBlock-2"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QIODevice::writeBlock ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use write(<i>data</i>) instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -49,11 +49,11 @@ QDBMigrationEngine *QDBMigrationEngine::instance()
     return migrationEngine();
 }
 
-bool QDBMigrationEngine::check(bool result, int line, char *file)
+bool QDBMigrationEngine::check(bool result, int line, char *file, char *message)
 {
     if(result == false)
     {
-        QString errString=QString("CHECK: %3:%2 check failed\n").arg(line).arg(file);
+        QString errString=QString("CHECK: %1:%2 check failed: %3\n").arg(file).arg(line).arg(message);
         db.rollback();
         db.close();
         qCritical(qPrintable(errString));
@@ -271,6 +271,11 @@ bool QDBMigrationEngine::loadSchema(QTextStream &ts, bool transact)
 
 bool QDBMigrationEngine::doMigrate(const QStringList &args)
 {
+#ifndef QTOPIA_CONTENT_INSTALLER
+    // Ensure QStorageMetaInfo and QtopiaSql are up to date.
+    QStorageMetaInfo::instance()->update();
+#endif
+
     // this should be passed a list of database paths
     QList<QtopiaDatabaseId> databaseIds;
     if(args.count() > 0)
@@ -285,8 +290,8 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
         databaseIds = QtopiaSql::instance()->databaseIds();
     foreach(QtopiaDatabaseId id, databaseIds)
     {
-        bool removable=false;
 #ifndef QTOPIA_CONTENT_INSTALLER
+        bool removable=false;
         if(id != 0 && !QtopiaSql::instance()->databasePathForId(id).isEmpty() && QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id)) != NULL)
             removable = QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id))->isRemovable();
 #endif
@@ -304,6 +309,39 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
         bool hasChanges=false;
         if(db.driverName() == QLatin1String("QSQLITE"))
         {
+#ifndef QTOPIA_CONTENT_INSTALLER
+            if( !checkIntegrity( db, false ) )
+            {   // Attempt to recover by doing a vacuum.
+                db.exec( "VACUUM" );
+
+                if( !checkIntegrity( db, true ) )
+                {   // Still no good, backup the old database to documents and create a new one.
+                    db.close();
+
+                    QFileSystem fs = QFileSystem::fromFileName( db.databaseName() );
+                    QDir backupDir( fs.documents() ? fs.documentsPath() : QFileSystem::documentsFileSystem().documentsPath() );
+                    QString backup = QLatin1String( "qtopia_db.sqlite.corrupt000" );
+                    for( int i = 0; backupDir.exists( backup ); backup = QString( "qtopia_db.sqlite.corrupt%1" ).arg( ++i, 3, 10, QLatin1Char( '0' ) ) );
+
+                    QFile dbFile( db.databaseName() );
+
+                    dbFile.copy( backupDir.absoluteFilePath( backup ) );
+
+                    dbFile.remove();
+
+                    // Should notify the user at this point that the database is corrupted and unrecoverable.
+                    // Deferred to a later release due to string freeze: Task 193949.
+
+                    if(!db.open())
+                    {
+                        QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+                        qCritical(qPrintable(errString));
+                        return false;
+                    }
+                }
+            }
+#endif
+
             EXEC("PRAGMA synchronous = OFF");   // full/normal sync is safer, but by god slower.
             EXEC("PRAGMA temp_store = memory");
             EXEC("PRAGMA cache_size = 1000");
@@ -620,6 +658,31 @@ QByteArray QDBMigrationEngine::transformString( const QString &string ) const
         return QByteArray( buffer );
     else
         return localString;
+}
+
+bool QDBMigrationEngine::checkIntegrity( const QSqlDatabase &database, bool printErrors )
+{
+    QSqlQuery query;
+
+    query.prepare( "PRAGMA integrity_check" );
+
+    if( query.exec() && query.next() )
+    {
+        if( query.value( 0 ).toString() == QLatin1String( "ok" ) )
+        {
+            return true;
+        }
+        else if( printErrors )
+        {
+            qWarning() << "Integrity check of" << database.databaseName() << "failed";
+            do
+            {
+                qWarning() << query.value( 0 ).toString().toLatin1().constData();
+            }
+            while( query.next() );
+        }
+    }
+    return false;
 }
 
 #ifndef QTOPIA_CONTENT_INSTALLER

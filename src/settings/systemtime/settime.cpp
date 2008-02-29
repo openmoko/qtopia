@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -55,14 +55,17 @@
 
 
 SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
-    : QMainWindow( parent, f ), tzEditable(true), tzLabel(0)
+    : QDialog( parent, f ), tzEditable(true), tzLabel(0)
 {
     setWindowTitle( tr("Date/Time") );
 
     QWidget *timePage, *formatPage;
     QFormLayout *timeLayout, *formatLayout;
 
-    QTabWidget *tb = new QTabWidget;
+    QTabWidget *tb = new QTabWidget(this);
+    QVBoxLayout *lay = new QVBoxLayout(this);
+    lay->setContentsMargins(0,0,0,0);
+    lay->addWidget(tb);
 
     timePage = new QWidget;
     timeLayout = new QFormLayout;
@@ -74,8 +77,6 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
 
     tb->addTab(timePage, tr("Time"));
     tb->addTab(formatPage, tr("Format"));
-
-    setCentralWidget( tb );
 
     atz = new QComboBox;
     atz->addItem(tr("Off"));
@@ -153,15 +154,13 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
         entry.replace( "Y", tr("Y", "Y == year") );
         translated_date_formats.append( entry );
     }
+    connect(dateFormatCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(updateDateFormat()));
 
     QStringListModel *model = new QStringListModel(translated_date_formats, dateFormatCombo);
     dateFormatCombo->setModel(model);
     dateFormatCombo->setCurrentIndex( currentdf );
 
-    connect(dateFormatCombo, SIGNAL(activated(int)),
-            this, SLOT(setDateFormat()));
-    connect(qApp, SIGNAL(dateFormatChanged()),
-            this, SLOT(updateDateFormat()));
     connect(qApp, SIGNAL(timeChanged()),
             this, SLOT(sysTimeZoneChanged()) );
 
@@ -196,8 +195,11 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
     lconfig.beginGroup( "Location" );
     bool confatz = lconfig.value("TimezoneAuto").toBool();
     bool confatzp = lconfig.value("TimezoneAutoPrompt").toBool();
-    atz->setCurrentIndex(confatz ? confatzp ? 1 : 2 : 0);
-    setAutomatic(atz->currentIndex());
+
+    // If it's automatic, but no good data received, turn automatic off
+    bool autoworks = confatz && QDateTime::currentDateTime() > QDateTime(QDate(2007,11,20),QTime(0,0));
+    atz->setCurrentIndex(autoworks ? confatzp ? 1 : 2 : 0);
+    setAutomatic(autoworks);
 
     // XXX Location/TimeAuto and Location/TimeAutoPrompt ignored for now - no GUI
 
@@ -260,6 +262,18 @@ void SetDateTime::editDate()
     QtopiaApplication::instance()->showMainWidget();
 }
 
+QString SetDateTime::selectedDateFormat() const
+{
+    QString df;
+    if ( dateFormatCombo->currentIndex() > 0 ) {
+        df = date_formats[dateFormatCombo->currentIndex()];
+        df.replace("D", "%D"); //convert to QTimeString format
+        df.replace("M", "%M");
+        df.replace("Y", "%Y");
+    }
+    return df;
+}
+
 void SetDateTime::storeSettings()
 {
     // really turn off power saving before doing anything
@@ -268,7 +282,6 @@ void SetDateTime::storeSettings()
     // Need to process the QCOP event generated
     qApp->processEvents();
 
-    bool ampmChange = false;
     bool monSunChange = false;
 
     {
@@ -308,16 +321,43 @@ void SetDateTime::storeSettings()
         setWeek << weekStartCombo->currentIndex();
     }
 
+    bool dfch = false;
+    {
+        QSettings config("Trolltech","qpe");
+        config.beginGroup( "Date" );
+        QString df = selectedDateFormat();
+        if ( df != config.value("DateFormat") ) {
+            config.setValue("DateFormat", df);
+            dfch = true;
+        }
+    }
+
+    if ( dfch) // Notify everyone what date format to use
+        QtopiaIpcEnvelope setDateFormat( "QPE/System", "setDateFormat()" );
+
+    QSettings config("Trolltech","qpe");
+    config.beginGroup( "Time" );
+    int show12hr = config.value("AMPM").toBool() ? 1 : 0;
+    bool ampm = ampmCombo->currentIndex()>0;
+    if ( show12hr != ampm) {
+        config.setValue( "AMPM", ampmCombo->currentIndex() );
+        QtopiaIpcEnvelope setClock( "QPE/System", "clockChange(bool)" );
+        setClock << (int)ampm;
+    }
+
     // Restore screensaver
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-
-    //QDialog::accept();
 }
 
-void SetDateTime::closeEvent( QCloseEvent* e )
+void SetDateTime::accept()
 {
     storeSettings();
-    e->accept();
+    QDialog::accept();
+}
+
+void SetDateTime::reject()
+{
+    QDialog::reject();
 }
 
 void SetDateTime::sysTimeZoneChanged()
@@ -378,29 +418,19 @@ void SetDateTime::timerEvent( QTimerEvent* )
     clocktimer.start(qMax(500,(58-now.time().second())*1000),this);
 }
 
-void SetDateTime::setDateFormat()
-{
-    {
-        QSettings config("Trolltech","qpe");
-        config.beginGroup( "Date" );
-        QString df;
-        if ( dateFormatCombo->currentIndex() > 0 ) {
-            df = date_formats[dateFormatCombo->currentIndex()];
-            df.replace("D", "%D"); //convert to QTimeString format
-            df.replace("M", "%M");
-            df.replace("Y", "%Y");
-        }
-        config.setValue("DateFormat", df);
-    }
-
-    // Notify everyone what date format to use
-    QtopiaIpcEnvelope setDateFormat( "QPE/System", "setDateFormat()" );
-}
-
 void SetDateTime::updateDateFormat()
 {
-    date->setFocus();
-    dateFormatCombo->setFocus();
+    QString df;
+    if ( dateFormatCombo->currentIndex() > 0 ) {
+        df = selectedDateFormat();
+        df.replace(QString("%D"), QString("dd"));
+        df.replace(QString("%M"), QString("MM"));
+        df.replace(QString("%Y"), QString("yyyy"));
+    } else {
+        df = QLocale().dateFormat(QLocale::ShortFormat);
+    }
+
+    date->setDisplayFormat(df);
 }
 
 void SetDateTime::updateTimeFormat(int ampm)
@@ -409,14 +439,6 @@ void SetDateTime::updateTimeFormat(int ampm)
         time->setDisplayFormat("h:mm ap");
     else
         time->setDisplayFormat("hh:mm");
-    QSettings config("Trolltech","qpe");
-    config.beginGroup( "Time" );
-    int show12hr = config.value("AMPM").toBool() ? 1 : 0;
-    if ( show12hr != ampm) {
-        config.setValue( "AMPM", ampmCombo->currentIndex() );
-        QtopiaIpcEnvelope setClock( "QPE/System", "clockChange(bool)" );
-        setClock << (int)ampm;
-    }
 }
 
 /*!

@@ -31,17 +31,17 @@
 <p>The QMailPassThroughCodec allows client code to use the same <a href="qmailcodec.html">QMailCodec</a> interface to convert data between different ASCII encodings, or no encoding at all, without having to be aware of the details involved.</p>
 <p>The pass-through codec is primarily useful when communicating with SMTP servers supporting the <a href="http://www.ietf.org/rfc/rfc1652.txt">RFC 1652</a> (8BITMIME) extension, which permits the exchange of data without coding via 7-bit ASCII.</p>
 <p>A QMailPassThroughCodec can be instantiated directly, but is more likely to be used polymorphically:</p>
-<pre><span class="comment">    // Get an object to perform the encoding required for the current server</span>
+<pre><span class="comment">    //</span> Get an object to perform the encoding required for the current server
     QMailCodec* encoder = getCodecForServer(currentServer());
 
-<span class="comment">    // If the codec returned is a QMailPassThroughCodec, the input data will</span>
-<span class="comment">    // be written to the output stream without encoding to 7-bit ASCII</span>
+<span class="comment">    //</span> If the codec returned is a QMailPassThroughCodec, the input data will
+<span class="comment">    //</span> be written to the output stream without encoding to 7-bit ASCII
     encoder-&gt;encode(outputStream, inputStream);</pre>
 <p>See also <a href="qmailcodec.html">QMailCodec</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

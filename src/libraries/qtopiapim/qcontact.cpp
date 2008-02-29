@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -2184,7 +2184,6 @@ template <typename Stream> void QContact::deserialize(Stream &s)
     s >> d->mUid;
     s >> d->mCategories;
     s >> d->customMap;
-    s >> d->anniversary;
     s >> d->emails;
     s >> d->gender;
     s >> d->birthday;

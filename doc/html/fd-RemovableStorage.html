@@ -13,34 +13,17 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content: Document Management: Removable Storage<br><small>Functional Description</small></h1><p>
 <h2>Features</h2>
-<ul><li><a href="#Permedia_Database">Per-media Database.</a>
+<ul><li><a href="#Permedia_Database">Per-media Database</a>
 <li><a href="#Removable_Storage_Scanning">Removable Storage Scanning</a>
-</ul><h3><a name="Permedia_Database">Per-media Database.</a></h3>
-<p><ul>
-	<li>Re-architected so that the underlying mechanism uses databases stored on the physical media (ie 1 for phone, 1 for SD-card, etc), which reduces the need for the system to scan all the entries on a new media card into the local database every single time and remove them upon removal of the media.
-	<ul>
-		<li>Moved ContentLinkSql back to being shared per object (with a contained database, instead of limited lifetime).</li>
-		<li>Hooked QStorageMetaInfo into ContentServer to notify when new media is inserted, as well as attached this to a list of media databases. Included system wide DocAPI notification so that QContentSets know when to refresh.</li>
-		<li>Modified QContentSet (and PIM) to understand multiple database connections.</li>
-	</ul>
-	</li>
-</ul>
+</ul><h3><a name="Permedia_Database">Per-media Database</a></h3>
+<p>Removable storage may be configured so that the Qtopia Document System maintains a separate database for each device, stored on the physical media itself.  The document system takes responsibility for determining which database content belongs to and merging the results from queries against multiple databases, giving the appearance of working against a single source.
 
-
-<h4><a name="Databaseperformanceimprovements."></a>Database performance improvements.</h4>
-<ul>
-	<li>Batched writing entries from the document scanner up, to help work around significantly slower write times on removable media.</li>
-	<li>Found the correct set of pragmas to turn on asynchronous mode writing for the database (speedups of around 15x seen on SD Media).</li>
-</ul>
-
+<p>Storing the databases on removable media allows content information to be persisted when the media is removed, this improves scan time as only changes need be written to the database, and prevents loss of user assigned information such as categories.</p>
 <h3><a name="Removable_Storage_Scanning">Removable Storage Scanning</a></h3>
-<p><ul>
-	<li>Qtopia scans removable storage upon insertion and populates the Document system with the documents found on the storage media.</li>
-</ul>
-
-<td width=10></table><hr /><div align="center">
+<p>Qtopia scans removable storage upon insertion and populates the Document system with the documents found on the storage media.
+<hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div>

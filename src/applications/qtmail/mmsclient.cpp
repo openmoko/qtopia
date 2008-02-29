@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,7 @@
 #include <QtopiaNetwork>
 #include <QWapAccount>
 #include <QMailMessage>
+#include <QDrmContentPlugin>
 
 QString getPath(const QString& fn, bool isdir=false);
 
@@ -59,6 +60,8 @@ MmsClient::MmsClient()
 {
     connect(&raiseTimer, SIGNAL(timeout()), this, SLOT(raiseFailure()));
     connect(&inactivityTimer, SIGNAL(timeout()), this, SLOT(networkDormant()));
+
+    QDrmContentPlugin::initialize();
 }
 
 MmsClient::~MmsClient()
@@ -73,7 +76,7 @@ MmsClient::~MmsClient()
     }
 }
 
-void MmsClient::setAccount(MailAccount *_account)
+void MmsClient::setAccount(QMailAccount *_account)
 {
     if (account == _account)
         return;
@@ -132,7 +135,6 @@ void MmsClient::setAccount(MailAccount *_account)
 void MmsClient::newConnection()
 {
     messagesSent = 0;
-    messagesRecv = 0;
     sendNextMessage();
     quitRecv = false;
 }
@@ -346,12 +348,7 @@ void MmsClient::getNextMessage()
         return;
     QString *msg;
 
-    //messagesRecv is reset when doing a read-reply
-    //so just get next message
-/*     if (!messagesRecv)
-        msg = mailList->first();
-    else */
-        msg = mailList->next();
+    msg = (messagesRecv == 0 ? mailList->first() : mailList->next());
     if (msg) {
         internalId = mailList->currentId();
         QUrl url(*msg);
@@ -491,15 +488,17 @@ QMailMessage MmsClient::convertToEmail(const MMSMessage &mms, int size)
 {
     QMailMessage msg(messageFromHeaders(mms.headers()));
 
+    // Default to mixed multipart - so we don't assume dependenccies between parts
+    QMailMessagePartContainer::MultipartType multipartType = QMailMessagePartContainer::MultipartMixed;
+
+    // Determine whether this message is composed of dependant parts
     const QWspField *f = mms.field("Content-Type");
     if (f) {
         // Add the original C-T, since we will need to change it to store the message
         msg.appendHeaderField("X-qtmail-internal-original-content-type", f->value);
 
         if (f->value.contains("application/vnd.wap.multipart.related"))
-            msg.setMultipartType(QMailMessagePartContainer::MultipartRelated);
-        else
-            msg.setMultipartType(QMailMessagePartContainer::MultipartMixed);
+            multipartType = QMailMessagePartContainer::MultipartRelated;
     }
 
     f = mms.field("Message-ID");
@@ -570,7 +569,7 @@ QMailMessage MmsClient::convertToEmail(const MMSMessage &mms, int size)
     // Meta-data
     msg.setMessageType(QMailMessage::Mms);
     msg.setId(internalId);
-    msg.setMultipartType(QMailMessage::MultipartRelated);
+    msg.setMultipartType(multipartType);
     msg.setSize(size);
     msg.setStatus(QMailMessage::Downloaded, true);
     msg.setStatus(QMailMessage::Incoming, true);

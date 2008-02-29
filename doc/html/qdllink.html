@@ -57,7 +57,7 @@
 <h3 class="fn"><a name="QDLLink"></a>QDLLink::QDLLink ()</h3>
 <p>Constructs a Null <a href="qdllink.html">QDLLink</a></p>
 <p>See also <a href="qdllink.html#isNull">isNull</a>().</p>
-<h3 class="fn"><a name="QDLLink-2"></a>QDLLink::QDLLink ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i>, const <a href="qstring.html">QString</a> &amp; <i>icon</i> )</h3>
+<h3 class="fn"><a name="QDLLink-2"></a>QDLLink::QDLLink ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i>, const <a href="./qstring.html">QString</a> &amp; <i>icon</i> )</h3>
 <p>Constructs a <a href="qdllink.html">QDLLink</a> with <i>description</i> and an <i>icon</i> name. The Qtopia service <i>service</i> contains a QDS service for activating the <a href="qdllink.html">QDLLink</a> on the QDL source and application specific data for the activation is stored in <i>data</i>.</p>
 <h3 class="fn"><a name="QDLLink-3"></a>QDLLink::QDLLink ( const QDLLink &amp; <i>other</i> )</h3>
 <p>Constructs a <a href="qdllink.html">QDLLink</a> by deep copying <i>other</i>.</p>
@@ -67,13 +67,13 @@
 <p>Destroy a QDL Link object.</p>
 <h3 class="fn"><a name="activate"></a>void QDLLink::activate () const</h3>
 <p>Activates the link on the QDL source.</p>
-<h3 class="fn"><a name="data"></a><a href="qbytearray.html">QByteArray</a> QDLLink::data () const</h3>
+<h3 class="fn"><a name="data"></a><a href="./qbytearray.html">QByteArray</a> QDLLink::data () const</h3>
 <p>Returns the application specific data used to activate the link on the QDL source.</p>
 <p>See also <a href="qdllink.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QDLLink::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> QDLLink::description () const</h3>
 <p>Returns the description of the link.</p>
 <p>See also <a href="qdllink.html#setDescription">setDescription</a>().</p>
-<h3 class="fn"><a name="icon"></a><a href="qstring.html">QString</a> QDLLink::icon () const</h3>
+<h3 class="fn"><a name="icon"></a><a href="./qstring.html">QString</a> QDLLink::icon () const</h3>
 <p>Returns the icon name for the link.</p>
 <p>See also <a href="qdllink.html#setIcon">setIcon</a>().</p>
 <h3 class="fn"><a name="isBroken"></a>bool QDLLink::isBroken () const</h3>
@@ -87,22 +87,22 @@
 <h3 class="fn"><a name="mimeType"></a><a href="qmimetype.html">QMimeType</a> QDLLink::mimeType ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the MIME type used for QDLLinks stored in <a href="qdsdata.html">QDSData</a> objects.</p>
 <p>See also <a href="qdllink.html#listMimeType">listMimeType</a>().</p>
-<h3 class="fn"><a name="service"></a><a href="qstring.html">QString</a> QDLLink::service () const</h3>
+<h3 class="fn"><a name="service"></a><a href="./qstring.html">QString</a> QDLLink::service () const</h3>
 <p>Returns the Qtopia service which contains the QDS service to activate the link.</p>
 <p>See also <a href="qdllink.html#setService">setService</a>().</p>
 <h3 class="fn"><a name="setBroken"></a>void QDLLink::setBroken ( const bool <i>broken</i> = true )</h3>
 <p>Set the link's broken state to <i>broken</i>.</p>
 <p>See also <a href="qdllink.html#isBroken">isBroken</a>().</p>
-<h3 class="fn"><a name="setData"></a>void QDLLink::setData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="setData"></a>void QDLLink::setData ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>Sets the application specific data for link activation to <i>data</i>.</p>
 <p>See also <a href="qdllink.html#data">data</a>().</p>
-<h3 class="fn"><a name="setDescription"></a>void QDLLink::setDescription ( const <a href="qstring.html">QString</a> &amp; <i>description</i> )</h3>
+<h3 class="fn"><a name="setDescription"></a>void QDLLink::setDescription ( const <a href="./qstring.html">QString</a> &amp; <i>description</i> )</h3>
 <p>Sets the link description to <i>description</i>.</p>
 <p>See also <a href="qdllink.html#description">description</a>().</p>
-<h3 class="fn"><a name="setIcon"></a>void QDLLink::setIcon ( const <a href="qstring.html">QString</a> &amp; <i>icon</i> )</h3>
+<h3 class="fn"><a name="setIcon"></a>void QDLLink::setIcon ( const <a href="./qstring.html">QString</a> &amp; <i>icon</i> )</h3>
 <p>Sets the link icon name to <i>icon</i>.</p>
 <p>See also <a href="qdllink.html#icon">icon</a>().</p>
-<h3 class="fn"><a name="setService"></a>void QDLLink::setService ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )</h3>
+<h3 class="fn"><a name="setService"></a>void QDLLink::setService ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )</h3>
 <p>Sets the Qtopia service which contains the QDS service for link activation to <i>service</i>.</p>
 <p>See also <a href="qdllink.html#service">service</a>().</p>
 <h3 class="fn"><a name="toQDSData"></a><a href="qdsdata.html">QDSData</a> QDLLink::toQDSData () const</h3>
@@ -111,8 +111,8 @@
 <p>Deep copies <i>other</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

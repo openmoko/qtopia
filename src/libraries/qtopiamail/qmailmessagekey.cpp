@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -51,7 +51,7 @@
     \\assuming parent has been retrieved from the mail store.
     QMailFolder parent; 
     QMailMessageKey parentFolderKey(QMailMessageKey::ParentFolderId,parent.id())
-    QMailMessageKey readKey(QMailMessageKey::Flags,QMailMessage::Read,QMailMessageKey::Contains);
+    QMailMessageKey readKey(QMailMessageKey::Status,QMailMessage::Read,QMailMessageKey::Contains);
     QMailIdList results = QMailStore::query(parentFolderKey & ~readKey);
     \endcode 
     
@@ -72,7 +72,7 @@
     \value NotEqual represents the '!=' operator.
     \value Contains represents an operation in which an associated property is checked to see if it
     contains a provided value. For most property types this will perform a string based check. For
-    Flag type properties this will perform a check to see if a flag bit value is set.
+    Status type properties this will perform a check to see if a status bit value is set.
 */
 
 /*!
@@ -87,7 +87,7 @@
     \value Recipients The message recipient address string.
     \value Subject The message subject string.
     \value TimeStamp The message timestamp
-    \value Flags The message status flags.
+    \value Status The message status flags.
     \value FromAccount The name of the account the mesasge was downloaded from.
     \value FromMailbox The imap mailbox the message was downloaded from. 
     \value ServerUid The IMAP server UID of the message.
@@ -95,10 +95,10 @@
 */
 
 /*!
-    Create a QMailMessageKey with specifying matching parameters.
+    Create a QMailFolderKey with specifying matching parameters.
 
-    A default-constructed key (one for which isEmpty() returns true) matches no messages. 
-    The logical negation of an empty key also matches no messages.
+    A default-constructed key (one for which isEmpty() returns true) matches all messages. 
+    The logical negation of an empty key also matches all messages.
 
     The result of combining an empty key with a non-empty key is the same as the original 
     non-empty key. This is true regardless of whether the combination is formed by a 
@@ -109,7 +109,7 @@
 
 QMailMessageKey::QMailMessageKey()
 {
-    init();
+    d = new QMailMessageKeyPrivate;
 }
 
 /*!
@@ -120,7 +120,29 @@ QMailMessageKey::QMailMessageKey()
 
 QMailMessageKey::QMailMessageKey(const Property& p, const QVariant& value, const Operand& c)
 {
-    init(p,c,value);
+    d = new QMailMessageKeyPrivate;
+    QMailMessageKeyPrivate::Argument m;
+    m.property = p;
+    m.op = c;
+    m.valueList.append(value);
+    d->arguments.append(m);
+
+}
+
+/*!
+    Construct a QMailMessageKey which defines a query parameter where
+    message id's matching those in \a idList are returned.
+*/
+
+QMailMessageKey::QMailMessageKey(const QMailIdList& idList)
+{
+    d = new QMailMessageKeyPrivate;
+    QMailMessageKeyPrivate::Argument m;
+    m.property = QMailMessageKey::Id;
+    m.op = Equal;
+    foreach(QMailId id,idList)
+        m.valueList.append(id);
+    d->arguments.append(m);
 }
 
 /*!
@@ -147,7 +169,10 @@ QMailMessageKey::~QMailMessageKey()
 
 bool QMailMessageKey::isEmpty() const
 {
-    return d->isEmpty();
+    return d->logicalOp == QMailMessageKeyPrivate::None &&
+        d->negated == false &&
+        d->subKeys.isEmpty() && 
+        d->arguments.isEmpty();
 }
 
 /*!
@@ -157,7 +182,8 @@ bool QMailMessageKey::isEmpty() const
 QMailMessageKey QMailMessageKey::operator~() const
 {
     QMailMessageKey k(*this);
-    k.d->negated = !d->negated;
+    if(!isEmpty())
+        k.d->negated = !d->negated;
     return k;
 }
 
@@ -173,7 +199,6 @@ QMailMessageKey QMailMessageKey::operator&(const QMailMessageKey& other) const
         return *this;
 
     QMailMessageKey k;
-    k.d->negated = false;
     k.d->logicalOp = QMailMessageKeyPrivate::And;
 
     if(d->logicalOp != QMailMessageKeyPrivate::Or && !d->negated && other.d->logicalOp != QMailMessageKeyPrivate::Or && !other.d->negated)
@@ -201,7 +226,6 @@ QMailMessageKey QMailMessageKey::operator|(const QMailMessageKey& other) const
         return *this;
 
     QMailMessageKey k;
-    k.d->negated = false;
     k.d->logicalOp = QMailMessageKeyPrivate::Or;
     if(d->logicalOp != QMailMessageKeyPrivate::And && !d->negated && other.d->logicalOp != QMailMessageKeyPrivate::And && !other.d->negated)
     {
@@ -270,32 +294,5 @@ QMailMessageKey& QMailMessageKey::operator=(const QMailMessageKey& other)
 {
     d = other.d;
     return *this;
-}
-
-/*!
-    Initialize the key class.
-*/
-
-void QMailMessageKey::init()
-{
-    d = new QMailMessageKeyPrivate();
-    d->negated =false;
-    d->logicalOp = QMailMessageKeyPrivate::None;
-}
-
-/*!
-    Initialize the key class with a selection criterion defined by applying the operand /a op 
-    to /a property, using the comparison /a value.
-*/
-
-void QMailMessageKey::init(const Property& p , const Operand& op, const QVariant& value)
-{
-    init();
-
-    QMailMessageKeyPrivate::Argument m;
-    m.property = p;
-    m.op = op;
-    m.value = value;
-    d->arguments.append(m);
 }
 

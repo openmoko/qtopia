@@ -1,10 +1,16 @@
 <html>
 <head><title>Reading Email</title></head>
 <body>
+<!--#if expr="$USERGUIDE"-->
 <h3>Reading Email</h3>
-<p>If you have an email account configured, you can read email messages.  Otherwise, you need to create an account: <a href="qtmail-create-account.html">Create New Account</a></p>
+<!--#endif-->
+<p>If you have an email account configured, you can read email messages.
+Otherwise, you need to create an account: 
+<a href="qtmail-create-account.html">Account Settings</a></p>
 <p>To view email messages, select the <b>Email</b> folder from the folder list. A list of Email folders will be displayed.</p>
-<p>The email Inbox contains a folder for each separate account you have set up.</p>
+<p>If you have a single email account configured, it will be displayed at the top of the folder list. Otherwise, your email accounts will be grouped under an <b>Inbox</b> folder.</p>
+<p>If your account is structured with folders, the folder structure will be displayed as an expandable tree.</p>
+<p>Each folder's name is displayed along with a message count summary, containing the total number of messages in the folder, and, where relevant, the number of unread messages in the folder. If either number is marked with an asterisk, then there are folders with more messages beneath the marked folder, not currently displayed.</p>
 <h3>Retrieving Email Messages</h3>
 <p>Usually, you need to ask the Messages application to retrieve any email messages that have been sent to you.</p>
 <ul>

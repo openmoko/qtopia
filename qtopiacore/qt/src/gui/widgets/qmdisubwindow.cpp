@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -146,6 +144,8 @@
 #include <QToolTip>
 #include <QMainWindow>
 #include <QStatusBar>
+#include <QAbstractScrollArea>
+#include <QScrollBar>
 #include <QDebug>
 #if defined(Q_WS_MAC) && !defined(QT_NO_STYLE_MAC)
 #include <QMacStyle>
@@ -1041,7 +1041,8 @@ void QMdiSubWindowPrivate::updateMask()
     cachedStyleOptions.rect = q->rect();
     QStyleHintReturnMask frameMask;
     q->style()->styleHint(QStyle::SH_WindowFrame_Mask, &cachedStyleOptions, q, &frameMask);
-    q->setMask(frameMask.region);
+    if (!frameMask.region.isEmpty())
+        q->setMask(frameMask.region);
 }
 
 /*!
@@ -1261,7 +1262,20 @@ void QMdiSubWindowPrivate::setMaximizeMode()
         }
     }
 
-    QRect availableRect = q->parentWidget()->contentsRect();
+    QWidget *parent = q->parentWidget();
+    QRect availableRect = parent->contentsRect();
+
+    // Adjust geometry if the sub-window is inside a scroll area.
+    QAbstractScrollArea *scrollArea = qobject_cast<QAbstractScrollArea *>(parent->parentWidget());
+    if (scrollArea && scrollArea->viewport() == parent) {
+        QScrollBar *hbar = scrollArea->horizontalScrollBar();
+        QScrollBar *vbar = scrollArea->verticalScrollBar();
+        const int xOffset = hbar ? hbar->value() : 0;
+        const int yOffset = vbar ? vbar->value() : 0;
+        availableRect.adjust(-xOffset, -yOffset, -xOffset, -yOffset);
+        oldGeometry.adjust(xOffset, yOffset, xOffset, yOffset);
+    }
+
     setNewGeometry(&availableRect);
     // QWidget::setGeometry will reset Qt::WindowMaximized so we have to update it here.
     ensureWindowState(Qt::WindowMaximized);
@@ -1651,7 +1665,8 @@ bool QMdiSubWindowPrivate::drawTitleBarWhenMaximized() const
     return true;
 #else
     QMainWindow *mainWindow = qobject_cast<QMainWindow *>(q->window());
-    if (!mainWindow || !mainWindow->menuWidget() || mainWindow->menuWidget()->isHidden())
+    if (!mainWindow || !qobject_cast<QMenuBar *>(mainWindow->menuWidget())
+        || mainWindow->menuWidget()->isHidden())
         return true;
     return isChildOfQMdiSubWindow(q);
 #endif

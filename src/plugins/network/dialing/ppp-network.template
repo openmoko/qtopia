@@ -12,7 +12,7 @@
 # into the image directory.
 #
 # For further details how this script is used 
-# see $QPEDIR/src/plugins/network/dialing/dialup.cpp.
+# see $QPEDIR/src/plugins/network/dialing/dialup.cpp and the Network Services documentation
 
 
 ########## constants
@@ -63,7 +63,7 @@ install()
             #install a new peer file
             print_debug "installing $2 to /etc/ppp/peers"
             ##ADD CODE HERE##
-            #sudo cp -f $2 /etc/ppp/peers
+            #cp -f $2 /etc/ppp/peers
             ;;
         dns)
             #install new dns server 
@@ -96,7 +96,7 @@ stop()
     print_debug "stopping pppd for interface $1";
     if [ -f "/var/run/$1.pid" ]; then
         print_debug "pppd pid: `cat /var/run/$1.pid`"
-        sudo kill -SIGTERM `cat /var/run/$1.pid`
+        kill -SIGTERM `cat /var/run/$1.pid`
     fi
 }
 
@@ -111,7 +111,7 @@ cleanup()
             # delete peers file given as $2
             print_debug "deleting peer file /etc/ppp/peers/$1";
             ##ADD CODE HERE##
-            #sudo rm -f "/etc/ppp/peers/$1";
+            #rm -f "/etc/ppp/peers/$1";
             ;;
         dns)
             # remove dns server details 
@@ -133,16 +133,16 @@ cleanup()
 route()
 {
     # find the IP of the gateway associated with our ppp interface
-    gateway=`sudo /sbin/route -n|grep -i "$1" | cut -d' ' -f1`;
+    gateway=`/sbin/route -n|grep -i "$1" | cut -d' ' -f1`;
     gateway=`echo $gateway | cut -d' ' -f1`;
     
     # set IP as default gateway
     print_debug "changing default route"
     if [ -n "$gateway" ]; then
         print_debug "removing old default route";
-        sudo /sbin/route del default;
+        /sbin/route del default;
         print_debug "adding new default route via $1";
-        sudo /sbin/route add default gw $gateway;
+        /sbin/route add default gw $gateway;
     fi
 }
 

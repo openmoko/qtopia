@@ -44,7 +44,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QTimeString class provides localized strings for times and dates.</p>
-<p>It is recommended to use QTimeString rather than <a href="qdatetime.html#toString">QDateTime::toString</a>() because QTimeString returns localized strings for a given date and/or time. Each function expects a parameter that determines the length of a returned string. If the user changes the date or time format all strings obtained from QTimeString have to be invalidated. The <a href="qtopiaapplication.html#dateFormatChanged">QtopiaApplication::dateFormatChanged</a>() and <a href="qtopiaapplication.html#clockChanged">QtopiaApplication::clockChanged</a>() signals will indicate when this happens. The handler for these signals must ensure that all time/date strings are refreshed.</p>
+<p>It is recommended to use QTimeString rather than <a href="./qdatetime.html#toString">QDateTime::toString</a>() because QTimeString returns localized strings for a given date and/or time. Each function expects a parameter that determines the length of a returned string. If the user changes the date or time format all strings obtained from QTimeString have to be invalidated. The <a href="qtopiaapplication.html#dateFormatChanged">QtopiaApplication::dateFormatChanged</a>() and <a href="qtopiaapplication.html#clockChanged">QtopiaApplication::clockChanged</a>() signals will indicate when this happens. The handler for these signals must ensure that all time/date strings are refreshed.</p>
 <p><b>Warning:</b> The length of the localized string can vary among languages.</p>
 <p>See also <a href="qtopiaapplication.html#dateFormatChanged">QtopiaApplication::dateFormatChanged</a>() and <a href="qtopiaapplication.html#clockChanged">QtopiaApplication::clockChanged</a>().</p>
 <hr />
@@ -61,24 +61,24 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="currentAMPM"></a>bool QTimeString::currentAMPM ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if 12 hour time is preferred over 24 hour time; otherwise returns false.</p>
-<h3 class="fn"><a name="currentFormat"></a><a href="qstring.html">QString</a> QTimeString::currentFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="currentFormat"></a><a href="./qstring.html">QString</a> QTimeString::currentFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the date format used by <a href="qtimestring.html">QTimeString</a> (e.g&#x2e; D.M&#x2e;Y) if set; otherwise returns an empty string.</p>
-<p>In case no format is set the default format which is returned by <a href="qlocale.html#dateFormat">QLocale::dateFormat</a>() in <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a> is used.</p>
+<p>In case no format is set the default format which is returned by <a href="./qlocale.html#dateFormat">QLocale::dateFormat</a>() in <a href="./qlocale.html#formattype-enum">QLocale::ShortFormat</a> is used.</p>
 <p>See also <a href="qtimestring.html#formatOptions">QTimeString::formatOptions</a>().</p>
-<h3 class="fn"><a name="formatOptions"></a><a href="qstringlist.html">QStringList</a> QTimeString::formatOptions ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns additional format options for a date string. The default format is the format of the current locale as returned by <a href="qlocale.html#dateFormat">QLocale::dateFormat</a>() in <a href="qlocale.html#FormatType-enum">QLocale::ShortFormat</a>.</p>
+<h3 class="fn"><a name="formatOptions"></a><a href="./qstringlist.html">QStringList</a> QTimeString::formatOptions ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns additional format options for a date string. The default format is the format of the current locale as returned by <a href="./qlocale.html#dateFormat">QLocale::dateFormat</a>() in <a href="./qlocale.html#formattype-enum">QLocale::ShortFormat</a>.</p>
 <p>See also <a href="qtimestring.html#currentFormat">QTimeString::currentFormat</a>().</p>
-<h3 class="fn"><a name="localDayOfWeek"></a><a href="qstring.html">QString</a> QTimeString::localDayOfWeek ( const <a href="qdate.html">QDate</a> &amp; <i>date</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localDayOfWeek"></a><a href="./qstring.html">QString</a> QTimeString::localDayOfWeek ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized name of the week day on <i>date</i> in the given <i>len</i>.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - Monday</li>
 <li><tt>QTimeString::Medium</tt> - Mon</li>
 <li><tt>QTimeString::Short</tt> - M</li>
 </ul>
-<h3 class="fn"><a name="localH"></a><a href="qstring.html">QString</a> QTimeString::localH ( int <i>hour</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localH"></a><a href="./qstring.html">QString</a> QTimeString::localH ( int <i>hour</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>hour</i>, in 12 hour if <a href="qtimestring.html#currentAMPM">QTimeString::currentAMPM</a>() is true; otherwise in 24 hour format.</p>
 <p>If <i>hour</i> is greater than 23 or less then 0 then hour will default to 0.</p>
-<h3 class="fn"><a name="localHM"></a><a href="qstring.html">QString</a> QTimeString::localHM ( const <a href="qtime.html">QTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localHM"></a><a href="./qstring.html">QString</a> QTimeString::localHM ( const <a href="./qtime.html">QTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>t</i> in the given <i>len</i>, showing hours and minutes.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - 02:05 PM</li>
@@ -86,7 +86,7 @@
 <li><tt>QTimeString::Short</tt> - 2:05</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="localHMDayOfWeek"></a><a href="qstring.html">QString</a> QTimeString::localHMDayOfWeek ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localHMDayOfWeek"></a><a href="./qstring.html">QString</a> QTimeString::localHMDayOfWeek ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>t</i> in the given <i>len</i>, showing hours, minutes, and day of the week.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - Monday 02:04 PM</li>
@@ -94,7 +94,7 @@
 <li><tt>QTimeString::Short</tt> - M 2:40</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="localHMS"></a><a href="qstring.html">QString</a> QTimeString::localHMS ( const <a href="qtime.html">QTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localHMS"></a><a href="./qstring.html">QString</a> QTimeString::localHMS ( const <a href="./qtime.html">QTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>t</i> in the given <i>len</i>, showing hours, minutes, and seconds.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - 02:05:12 PM</li>
@@ -102,7 +102,7 @@
 <li><tt>QTimeString::Short</tt> - 2:05:12</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="localHMSDayOfWeek"></a><a href="qstring.html">QString</a> QTimeString::localHMSDayOfWeek ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localHMSDayOfWeek"></a><a href="./qstring.html">QString</a> QTimeString::localHMSDayOfWeek ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>t</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>t</i> in the given <i>len</i>, showing hours, minutes, seconds, and day of the week.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - Monday 02:04:14 PM</li>
@@ -110,7 +110,7 @@
 <li><tt>QTimeString::Short</tt> - M 2:40:14</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="localMD"></a><a href="qstring.html">QString</a> QTimeString::localMD ( const <a href="qdate.html">QDate</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localMD"></a><a href="./qstring.html">QString</a> QTimeString::localMD ( const <a href="./qdate.html">QDate</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>dt</i> in the given <i>len</i>, showing month and date.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - 27 September</li>
@@ -118,7 +118,7 @@
 <li><tt>QTimeString::Short</tt> - 27 Sep</li>
 </ul>
 <p>The format, including the order of month and date depends on the user's current locale.</p>
-<h3 class="fn"><a name="localYMD"></a><a href="qstring.html">QString</a> QTimeString::localYMD ( const <a href="qdate.html">QDate</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localYMD"></a><a href="./qstring.html">QString</a> QTimeString::localYMD ( const <a href="./qdate.html">QDate</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>dt</i> in the given <i>len</i> showing year, month, and date.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - Mon 27 September 2005</li>
@@ -126,7 +126,7 @@
 <li><tt>QTimeString::Short</tt> - the same as the medium string</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="localYMDHMS"></a><a href="qstring.html">QString</a> QTimeString::localYMDHMS ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="localYMDHMS"></a><a href="./qstring.html">QString</a> QTimeString::localYMDHMS ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>dt</i> in the given <i>len</i>, showing year, month, date, hours, minutes, and seconds.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - 27 September 2005 02:54:22 PM</li>
@@ -134,21 +134,21 @@
 <li><tt>QTimeString::Short</tt> - 27 Sep 05 2:54:22</li>
 </ul>
 <p>The format, including order depends on the user's settings.</p>
-<h3 class="fn"><a name="nameOfMonth"></a><a href="qstring.html">QString</a> QTimeString::nameOfMonth ( int <i>month</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="nameOfMonth"></a><a href="./qstring.html">QString</a> QTimeString::nameOfMonth ( int <i>month</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the name of <i>month</i> in the given <i>len</i>.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - January</li>
 <li><tt>QTimeString::Medium</tt> - Jan</li>
 <li><tt>QTimeString::Short</tt> - Jan</li>
 </ul>
-<h3 class="fn"><a name="nameOfWeekDay"></a><a href="qstring.html">QString</a> QTimeString::nameOfWeekDay ( int <i>day</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="nameOfWeekDay"></a><a href="./qstring.html">QString</a> QTimeString::nameOfWeekDay ( int <i>day</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the name for the <i>day</i> of the week in the given <i>len</i>.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - Monday</li>
 <li><tt>QTimeString::Medium</tt> - Mon</li>
 <li><tt>QTimeString::Short</tt> - M</li>
 </ul>
-<h3 class="fn"><a name="numberDateString"></a><a href="qstring.html">QString</a> QTimeString::numberDateString ( const <a href="qdate.html">QDate</a> &amp; <i>date</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="numberDateString"></a><a href="./qstring.html">QString</a> QTimeString::numberDateString ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i>, <a href="qtimestring.html#Length-enum">Length</a> <i>len</i> = Medium )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a localized string for <i>date</i> showing day, month and year as a number in the given <i>len</i>.</p>
 <ul>
 <li><tt>QTimeString::Long</tt> - 07/08/2005</li>
@@ -158,8 +158,8 @@
 <p>The format, including order depends on the user's settings.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

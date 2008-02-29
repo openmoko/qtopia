@@ -60,7 +60,7 @@
 <pre> QValidator *validator = new QIntValidator(100, 999, this);
  QLineEdit *edit = new QLineEdit(this);
 
-<span class="comment"> // the edit lineedit will only accept integers between 100 and 999</span>
+<span class="comment"> //</span> the edit lineedit will only accept integers between 100 and 999
  edit-&gt;setValidator(validator);</pre>
 <p>Below we present some examples of validators. In practice they would normally be associated with a widget as in the example above.</p>
 <pre> QString str;
@@ -68,23 +68,23 @@
  QIntValidator v(100, 999, this);
 
  str = &quot;1&quot;;
- v.validate(str, pos);     <span class="comment">// returns Intermediate</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Intermediate
  str = &quot;12&quot;;
- v.validate(str, pos);     <span class="comment">// returns Intermediate</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Intermediate
 
  str = &quot;123&quot;;
- v.validate(str, pos);     <span class="comment">// returns Acceptable</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Acceptable
  str = &quot;678&quot;;
- v.validate(str, pos);     <span class="comment">// returns Acceptable</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Acceptable
 
  str = &quot;1234&quot;;
- v.validate(str, pos);     <span class="comment">// returns Invalid</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Invalid
  str = &quot;-123&quot;;
- v.validate(str, pos);     <span class="comment">// returns Invalid</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Invalid
  str = &quot;abc&quot;;
- v.validate(str, pos);     <span class="comment">// returns Invalid</span>
+ v.validate(str, pos);     <span class="comment">//</span> returns Invalid
  str = &quot;12cm&quot;;
- v.validate(str, pos);     <span class="comment">// returns Invalid</span></pre>
+ v.validate(str, pos);     <span class="comment">//</span> returns Invalid</pre>
 <p>The minimum and maximum values are set in one call with <a href="qintvalidator.html#setRange">setRange</a>(), or individually with <a href="qintvalidator.html#bottom-prop">setBottom</a>() and <a href="qintvalidator.html#top-prop">setTop</a>().</p>
 <p>QIntValidator uses its <a href="qvalidator.html#locale">locale</a>() to interpret the number. For example, in Arabic locales, QIntValidator will accept Arabic digits. In addition, QIntValidator is always guaranteed to accept a number formatted according to the &quot;C&quot; locale.</p>
 <p>See also <a href="qdoublevalidator.html">QDoubleValidator</a>, <a href="qregexpvalidator.html">QRegExpValidator</a>, and <a href="widgets-lineedits.html">Line Edits Example</a>.</p>
@@ -122,25 +122,19 @@
 <pre> int pos = 0;
 
  s = &quot;abc&quot;;
- v.validate(s, pos);    <span class="comment">// returns Invalid</span>
+ v.validate(s, pos);    <span class="comment">//</span> returns Invalid
 
  s = &quot;5&quot;;
- v.validate(s, pos);    <span class="comment">// returns Intermediate</span>
+ v.validate(s, pos);    <span class="comment">//</span> returns Intermediate
 
  s = &quot;50&quot;;
- v.validate(s, pos);    <span class="comment">// returns Acceptable</span></pre>
+ v.validate(s, pos);    <span class="comment">//</span> returns Acceptable</pre>
 <p>By default, the <i>pos</i> parameter is not used by this validator.</p>
 <p>Reimplemented from <a href="qvalidator.html#validate">QValidator</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QIntValidator-3"></a>QIntValidator::QIntValidator ( <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a validator with a <i>parent</i> object and a <i>name</i> that accepts all integers.</p>
-<h3 class="fn"><a name="QIntValidator-4"></a>QIntValidator::QIntValidator ( int <i>minimum</i>, int <i>maximum</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a validator called <i>name</i> with a <i>parent</i>, that accepts integers from <i>minimum</i> to <i>maximum</i> inclusive.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

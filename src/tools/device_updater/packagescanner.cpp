@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,7 +56,6 @@ PackageScanner::~PackageScanner()
 
 void PackageScanner::connectorComplete()
 {
-    // qDebug() << "connectorComplete()";
 }
 
 /*!
@@ -207,7 +206,6 @@ PackageItem *PackageScanner::findPackageByName( const QString &name )
 
 void PackageScanner::refresh()
 {
-    // qDebug() << "scanner refresh";
     emit progressMessage( tr( "Scanning for packages..." ));
     emit progressValue( 0 );
     mScanner = new ScannerThread( this );
@@ -216,12 +214,10 @@ void PackageScanner::refresh()
     connect( mScanner, SIGNAL(terminated()),
             this, SLOT(scannerDone()) );
     mScanner->start();
-    // qDebug() << "scanner refresh exit";
 }
 
 void PackageScanner::scannerDone()
 {
-    // qDebug() << "scanner done";
     emit progressValue( DEFAULT_PROGRESS_MAX );
     emit progressMessage( tr( "Found %1 packages" ).arg( mPackageList.count() ));
     emit updated();

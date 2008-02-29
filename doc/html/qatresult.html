@@ -156,16 +156,16 @@
 <p>Construct a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QAtResult"></a>QAtResult::~QAtResult ()</h3>
 <p>Destruct this <a href="qatresult.html">QAtResult</a> object.</p>
-<h3 class="fn"><a name="append"></a>void QAtResult::append ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="append"></a>void QAtResult::append ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Append <i>value</i> to the current content, after a line terminator.</p>
 <p>See also <a href="qatresult.html#content">content</a>() and <a href="qatresult.html#setContent">setContent</a>().</p>
-<h3 class="fn"><a name="content"></a><a href="qstring.html">QString</a> QAtResult::content () const</h3>
+<h3 class="fn"><a name="content"></a><a href="./qstring.html">QString</a> QAtResult::content () const</h3>
 <p>Returns the content that was returned with an AT command's result.</p>
 <p>See also <a href="qatresult.html#setContent">setContent</a>() and <a href="qatresult.html#append">append</a>().</p>
 <h3 class="fn"><a name="ok"></a>bool QAtResult::ok () const</h3>
 <p>Returns true if this result indicates a successful command; false otherwise. Success is indicated when <a href="qatresult.html#resultCode">resultCode</a>() returns either <a href="qatresult.html#ResultCode-enum">QAtResult::OK</a> or <a href="qatresult.html#ResultCode-enum">QAtResult::Connect</a>. All other result codes indicate failure.</p>
 <p>See also <a href="qatresult.html#resultCode">resultCode</a>().</p>
-<h3 class="fn"><a name="result"></a><a href="qstring.html">QString</a> QAtResult::result () const</h3>
+<h3 class="fn"><a name="result"></a><a href="./qstring.html">QString</a> QAtResult::result () const</h3>
 <p>Returns the result line that terminated the command's response. This is usually a string such as <tt>OK</tt>, <tt>ERROR</tt>, <tt>+CME ERROR: N</tt>, and so on.</p>
 <p>The <a href="qatresult.html#resultCode">resultCode</a>() function is a better way to determine why a command failed, but sometimes it is necessary to parse the text result line. For example, for <tt>CONNECT baudrate</tt>, the caller may be interested in the baud rate.</p>
 <p>See also <a href="qatresult.html#setResult">setResult</a>(), <a href="qatresult.html#resultCode">resultCode</a>(), and <a href="qatresult.html#ok">ok</a>().</p>
@@ -173,10 +173,10 @@
 <p>Returns the numeric result code associated with <a href="qatresult.html#result">result</a>().</p>
 <p>Extended error codes are only possible if the appropriate modem error mode has been enabled (e.g&#x2e; with the <tt>AT+CMEE=1</tt> command). Otherwise most errors will simply be reported as <a href="qatresult.html#ResultCode-enum">QAtResult::Error</a>.</p>
 <p>See also <a href="qatresult.html#setResultCode">setResultCode</a>(), <a href="qatresult.html#result">result</a>(), and <a href="qatresult.html#ok">ok</a>().</p>
-<h3 class="fn"><a name="setContent"></a>void QAtResult::setContent ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setContent"></a>void QAtResult::setContent ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the content that was returned with an AT command's result to <i>value</i>.</p>
 <p>See also <a href="qatresult.html#content">content</a>() and <a href="qatresult.html#append">append</a>().</p>
-<h3 class="fn"><a name="setResult"></a>void QAtResult::setResult ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setResult"></a>void QAtResult::setResult ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the result line that terminated the command's response to <i>value</i>. This will also update <a href="qatresult.html#resultCode">resultCode</a>() to reflect the appropriate code.</p>
 <p>See also <a href="qatresult.html#result">result</a>() and <a href="qatresult.html#resultCode">resultCode</a>().</p>
 <h3 class="fn"><a name="setResultCode"></a>void QAtResult::setResultCode ( <a href="qatresult.html#ResultCode-enum">QAtResult::ResultCode</a> <i>value</i> )</h3>
@@ -188,15 +188,15 @@
 <h3 class="fn"><a name="userData"></a><a href="qatresult-userdata.html">QAtResult::UserData</a> * QAtResult::userData () const</h3>
 <p>Returns the user data associated with this result object.</p>
 <p>See also <a href="qatresult.html#setUserData">setUserData</a>().</p>
-<h3 class="fn"><a name="verboseResult"></a><a href="qstring.html">QString</a> QAtResult::verboseResult () const</h3>
+<h3 class="fn"><a name="verboseResult"></a><a href="./qstring.html">QString</a> QAtResult::verboseResult () const</h3>
 <p>Returns a more verbose version of <a href="qatresult.html#result">result</a>(), suitable for debug output. Many modems report extended errors by number (e.g&#x2e; <tt>+CME ERROR: 4</tt>), which can be difficult to use when diagnosing problems. This function returns a string that is more suitable for diagnostic output than <a href="qatresult.html#result">result</a>(). If <a href="qatresult.html#result">result</a>() is already verbose, it will be returned as-is.</p>
 <p>See also <a href="qatresult.html#result">result</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QAtResult &amp; QAtResult::operator= ( const QAtResult &amp; <i>other</i> )</h3>
 <p>Assign the contents of <i>other</i> to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

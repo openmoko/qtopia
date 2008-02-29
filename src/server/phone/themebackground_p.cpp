@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -163,11 +163,11 @@ ThemeBackgroundImagePlugin::ThemeBackgroundImagePlugin(int _screen)
     }
 }
 
-void ThemeBackgroundImagePlugin::renderSvg(int width, int height, Qt::AspectRatioMode mode)
+void ThemeBackgroundImagePlugin::renderSvg(int w, int h, Qt::AspectRatioMode mode)
 {
     QSvgRenderer r(imgName);
     QSize svgSize = r.defaultSize();
-    svgSize.scale(width, height, mode);
+    svgSize.scale(w, h, mode);
     bg = QPixmap(svgSize);
     bg.fill(QColor(0,0,0,0));
     QPainter p(&bg);
@@ -192,34 +192,45 @@ void ThemeBackgroundImagePlugin::resize(int w, int h)
                 renderSvg(bg.width(), bg.height(), Qt::KeepAspectRatio);
         } else {
             // gussing viewport size
-            height = qMin(QtopiaApplication::desktop()->availableGeometry().height(), height);
-            QPixmap p;
-            p.load(imgName);
+            QRect availableRect = QtopiaApplication::desktop()->availableGeometry(screen);
+            height = qMin(availableRect.height(), height);
+            width = qMin(availableRect.width(), width);
 
             Qt::AspectRatioMode mode;
             if (dpMode == ScaleAndCrop) mode = Qt::KeepAspectRatioByExpanding;
             else if (dpMode == Stretch) mode = Qt::IgnoreAspectRatio;
             else if (dpMode == Scale) mode = Qt::KeepAspectRatio;
 
-            if (imgName.endsWith(".svg"))
+            if (imgName.endsWith(".svg")) {
                 renderSvg(width, height, mode);
-            else
+            } else {
+                QPixmap p;
+                p.load(imgName);
                 bg = p.scaled(QSize(width, height), mode);
+            }
         }
     }
-    qLog(UI) << "Home screen picture resized:" << bg.size().width() << "x" << bg.size().height();
     qLog(UI) << "Home screen picture display mode:"
-        << ((dpMode == Center) ? "Center" : (dpMode == Scale) ? "Maximize" : "Tile");
+        << ((dpMode == ScaleAndCrop) ? "Scale and Crop" : (dpMode == Stretch) ? "Stretch"
+                : (dpMode == Center) ? "Center" : (dpMode == Tile) ? "Tile" : "Scale");
+    qLog(UI) << "Available screen size:" << width << "x" << height
+        << "Homescreen image size:" << bg.size().width() << "x" << bg.size().height();
 }
 
 void ThemeBackgroundImagePlugin::paint(QPainter *p, const QRect &r)
 {
     if (!bg.isNull()) {
-        QRect cr = QtopiaApplication::desktop()->availableGeometry();
+        QRect cr = QtopiaApplication::desktop()->availableGeometry(screen);
+
+        // ensure image is drawn as if screen origin is at (0,0)
+        // (secondary displays may not have (0,0) as screen origin)
+        QRect sr = QtopiaApplication::desktop()->screenGeometry(screen);
+        cr.moveTopLeft(QPoint(cr.left() - sr.left(), cr.top() - sr.top()));
+
         if (dpMode == Tile) {
             p->drawTiledPixmap( cr.left(), cr.top(), cr.width(), cr.height(), bg );
         } else {
-            QPoint off((cr.width()-bg.width())/2, (cr.height()-bg.height())/2 + cr.y());
+            QPoint off((cr.width()-bg.width())/2 + cr.x(), (cr.height()-bg.height())/2 + cr.y());
             cr.translate(-off.x(), -off.y());
             cr &= QRect(0, 0, bg.width(), bg.height());
             p->drawPixmap(cr.topLeft()+off, bg, cr);

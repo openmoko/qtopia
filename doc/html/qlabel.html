@@ -285,7 +285,7 @@
  QLineEdit *phoneEd = new QLineEdit(this);
  QLabel    *phoneLb = new QLabel(&quot;&amp;Phone:&quot;, this);
  phoneLb-&gt;setBuddy(phoneEd);
-<span class="comment"> // (layout setup not shown)</span></pre>
+<span class="comment"> //</span> (layout setup not shown)</pre>
 <p>With the code above, the focus jumps to the Name field when the user presses Alt+N, and to the Phone field when the user presses Alt+P.</p>
 <p>To unset a previously set buddy, call this function with <i>buddy</i> set to 0.</p>
 <p>See also <a href="qlabel.html#buddy">buddy</a>(), <a href="qlabel.html#text-prop">setText</a>(), <a href="qshortcut.html">QShortcut</a>, and <a href="qlabel.html#alignment-prop">setAlignment</a>().</p>
@@ -306,29 +306,10 @@
 <p>Sets the label contents to <i>picture</i>. Any previous content is cleared.</p>
 <p>The buddy shortcut, if any, is disabled.</p>
 <p>See also <a href="qlabel.html#picture">picture</a>() and <a href="qlabel.html#setBuddy">setBuddy</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QLabel-3"></a>QLabel::QLabel ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<p>Constructs an empty label.</p>
-<p>The <i>parent</i>, <i>name</i> and widget flag <i>f</i>, arguments are passed to the <a href="qframe.html">QFrame</a> constructor.</p>
-<p>See also <a href="qlabel.html#alignment-prop">setAlignment</a>(), <a href="qframe.html#setFrameStyle">setFrameStyle</a>(), and <a href="qlabel.html#indent-prop">setIndent</a>().</p>
-<h3 class="fn"><a name="QLabel-4"></a>QLabel::QLabel ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<p>Constructs a label that displays the text, <i>text</i>.</p>
-<p>The <i>parent</i>, <i>name</i> and widget flag <i>f</i>, arguments are passed to the <a href="qframe.html">QFrame</a> constructor.</p>
-<p>See also <a href="qlabel.html#text-prop">setText</a>(), <a href="qlabel.html#alignment-prop">setAlignment</a>(), <a href="qframe.html#setFrameStyle">setFrameStyle</a>(), and <a href="qlabel.html#indent-prop">setIndent</a>().</p>
-<h3 class="fn"><a name="QLabel-5"></a>QLabel::QLabel ( <a href="qwidget.html">QWidget</a> * <i>buddy</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
-<p>Constructs a label that displays the text <i>text</i>. The label has a buddy widget, <i>buddy</i>.</p>
-<p>If the <i>text</i> contains an underlined letter (a letter preceded by an ampersand, &amp;), when the user presses Alt+ the underlined letter, focus is passed to the buddy widget.</p>
-<p>The <i>parent</i>, <i>name</i> and widget flag, <i>f</i>, arguments are passed to the <a href="qframe.html">QFrame</a> constructor.</p>
-<p>See also <a href="qlabel.html#text-prop">setText</a>(), <a href="qlabel.html#setBuddy">setBuddy</a>(), <a href="qlabel.html#alignment-prop">setAlignment</a>(), <a href="qframe.html#setFrameStyle">setFrameStyle</a>(), and <a href="qlabel.html#indent-prop">setIndent</a>().</p>
-<h3 class="fn"><a name="setAlignment-2"></a>void QLabel::setAlignment ( int <i>alignment</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use setAlignment(<a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a>) instead.</p>
-<p>If <i>alignment</i> specifies text flags as well, use <a href="qlabel.html#textFormat-prop">setTextFormat</a>() to set those.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

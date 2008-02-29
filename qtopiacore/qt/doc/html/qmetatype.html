@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/kernel/qmetatype.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/kernel/qmetatype.cpp -->
 <head>
   <title>Qt 4.3: QMetaType Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -163,8 +163,8 @@
 <h3 class="fn"><a name="qMetaTypeId"></a>int qMetaTypeId ()</h3>
 <p>Returns the meta type id of type <tt>T</tt> at compile time. If the type was not declared with <a href="qmetatype.html#Q_DECLARE_METATYPE">Q_DECLARE_METATYPE</a>(), compilation will fail.</p>
 <p>Typical usage:</p>
-<pre> int id = qMetaTypeId&lt;QString&gt;();    <span class="comment">// id is now QMetaType::QString</span>
- id = qMetaTypeId&lt;MyStruct&gt;();       <span class="comment">// compile error if MyStruct not declared</span></pre>
+<pre> int id = qMetaTypeId&lt;QString&gt;();    <span class="comment">//</span> id is now QMetaType::QString
+ id = qMetaTypeId&lt;MyStruct&gt;();       <span class="comment">//</span> compile error if MyStruct not declared</pre>
 <p><a href="qmetatype.html#type">QMetaType::type</a>() returns the same ID as qMetaTypeId(), but does a lookup at runtime based on the name of the type. <a href="qmetatype.html#type">QMetaType::type</a>() is a bit slower, but compilation succeeds if a type is not registered.</p>
 <p><b>Note:</b> This function is <a href="threads.html#thread-safe">thread-safe</a>.</p>
 <p>This function was introduced in Qt 4.1.</p>
@@ -218,17 +218,17 @@
 <p>Since <tt>MyStruct</tt> is now known to <a href="qmetatype.html">QMetaType</a>, it can be used in <a href="qvariant.html">QVariant</a>:</p>
 <pre> MyStruct s;
  QVariant var;
- var.setValue(s); <span class="comment">// copy s into the variant</span>
+ var.setValue(s); <span class="comment">//</span> copy s into the variant
 
  ...
 
-<span class="comment"> // retrieve the value</span>
+<span class="comment"> //</span> retrieve the value
  MyStruct s2 = var.value&lt;MyStruct&gt;();</pre>
 <p>See also <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

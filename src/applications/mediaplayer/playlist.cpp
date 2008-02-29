@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,9 +19,36 @@
 **
 ****************************************************************************/
 
+#include <QUrl>
+#include <QContent>
+#include <QDebug>
+
 #include "playlist.h"
 
-#include <qcontent.h>
+
+QExplicitlySharedDataPointer<Playlist> Playlist::construct_playlist( const QString& filename )
+{
+    QExplicitlySharedDataPointer<Playlist> result;
+
+    QUrl    url(filename, QUrl::StrictMode);
+
+    if (url.isValid()) {
+        QString scheme = url.scheme();
+        if (scheme == "http")
+            result = new BasicPlaylist(QStringList(filename));
+        else if (scheme == "file" || scheme.isEmpty()) {
+            QString checkedName = url.path();
+            if (filename.endsWith(".m3u"))
+                result = new M3UPlaylist(checkedName);
+            else if (checkedName.endsWith(".pls"))
+                result = new PLSPlaylist(checkedName);
+            else
+                result = new BasicPlaylist(QStringList(checkedName));
+        }
+    }
+
+    return result;
+}
 
 MyShufflePlaylist::MyShufflePlaylist( const QContentFilter& filter )
     : m_recent( 15 ), m_filter( filter )
@@ -95,7 +122,7 @@ void MyShufflePlaylist::reset()
     }
 }
 
-void MyShufflePlaylist::cue( Playlist* playlist )
+void MyShufflePlaylist::cue( QExplicitlySharedDataPointer<Playlist> playlist )
 {
     for( int i = 0; i < playlist->rowCount(); ++i ) {
         QString track = playlist->data( playlist->index( i ), Playlist::Url ).toString();
@@ -113,10 +140,8 @@ void MyShufflePlaylist::cue( Playlist* playlist )
     emit dataChanged( MyShufflePlaylist::index( 0 ), MyShufflePlaylist::index( m_list.count() - 1 ) );
 }
 
-void MyShufflePlaylist::playNow( Playlist* playlist )
+void MyShufflePlaylist::playNow( QExplicitlySharedDataPointer<Playlist> playlist )
 {
-    int front = 3 + m_cued.count();
-
     for( int i = 0; i < playlist->rowCount(); ++i ) {
         QString track = playlist->data( playlist->index( i ), Playlist::Url ).toString();
         m_recent.insert( track );
@@ -172,7 +197,7 @@ QVariant MyShufflePlaylist::data( const QModelIndex& index, int role ) const
     return QVariant();
 }
 
-int MyShufflePlaylist::rowCount( const QModelIndex& parent ) const
+int MyShufflePlaylist::rowCount( const QModelIndex& ) const
 {
     return m_list.count();
 }
@@ -233,7 +258,7 @@ QModelIndex BasicPlaylist::playing() const
     return m_playing;
 }
 
-void BasicPlaylist::cue( Playlist* playlist )
+void BasicPlaylist::cue( QExplicitlySharedDataPointer<Playlist> playlist )
 {
     int cuepos = m_urls.count();
     beginInsertRows( QModelIndex(), cuepos, cuepos + playlist->rowCount() - 1 );
@@ -245,7 +270,7 @@ void BasicPlaylist::cue( Playlist* playlist )
     endInsertRows();
 }
 
-void BasicPlaylist::playNow( Playlist* playlist )
+void BasicPlaylist::playNow( QExplicitlySharedDataPointer<Playlist> playlist )
 {
     int cuepos = m_playing.isValid() ? m_playing.row() + 1 : m_urls.count();
 
@@ -473,3 +498,4 @@ int PLSPlaylist::rowCount( const QModelIndex& parent ) const
     Q_UNUSED(parent);
     return m_items.count();
 }
+

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -73,7 +73,8 @@ class ThemePreview : public QObject
 class ThemeInfo
 {
 public:
-    ThemeInfo( const QString &tn);
+    ThemeInfo();
+    void setThemeName( const QString &n );
     const QString & themeName();
     void setStyleName( const QString sn );
     const QString &styleName() const;
@@ -101,6 +102,7 @@ private:
     QString popupShadows;
     QString hideMenuIcons;
     QString fullWidthMenu;
+    QString iconPath;
 
 friend class AppearanceSettings;
 };
@@ -130,37 +132,39 @@ protected slots:
 
 private:
     void setupUi();
-    void readThemeInfo();
-    void readColorScheme();
+    QString findFile(const QString &file);
+    bool readTheme(const QString &configFileName, ThemeInfo &theme);
+    void readThemeSettings();
+    void readColorSchemeSettings();
     void applyStyle();
-    void applyTheme();
-    void applyColorScheme();
+    void writeThemeSettings(const ThemeInfo &theme);
+    void writeColorSchemeSettings();
     void applyBackgroundImage();
-    void applyLabel();
+    void applySoftKeyLabels();
     QString status();
     void setStatus( const QString details );
     void pullSettingStatus();
 
 private:
-    QComboBox       *themeCombo;
-    QComboBox       *colorCombo;
-    QComboBox       *bgCombo;
-    QCheckBox       *labelCkBox;
-    QGroupBox       *groupBox;
-    QLabel          titleLabel;
-    QLabel          contextLabel;
-    QLabel          backgroundLabel;
-    ThemePreview    *titlePreview;
-    ThemePreview    *contextPreview;
+    QComboBox       *mThemeCombo;
+    QComboBox       *mColorCombo;
+    QComboBox       *mBgCombo;
+    QCheckBox       *mLabelCkBox;
+    QGroupBox       *mGroupBox;
+    QLabel          mTitleLabel;
+    QLabel          mContextLabel;
+    QLabel          mBackgroundLabel;
+    ThemePreview    *mTitlePreview;
+    ThemePreview    *mContextPreview;
 
-    QList<ThemeInfo> themes;
-    QStringList colorListIDs;
+    QList<ThemeInfo> mThemes;
+    QStringList mColorListIDs;
     QString mServerWidgets;
     QString mActiveTheme, mActiveColor, mActiveBackground;
     int mActiveThemeIndex;
     QSoftMenuBar::LabelType mActiveLabelType;
 
-    bool isStatusView, isFromActiveProfile;
+    bool mIsStatusView, mIsFromActiveProfile;
 };
 
 #endif // APPEARANCESETTINGS_H

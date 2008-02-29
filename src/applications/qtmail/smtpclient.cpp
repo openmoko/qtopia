@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,7 +32,6 @@
 
 SmtpClient::SmtpClient()
 {
-    qLog(SMTP) << "Constructor" << flush;
     sending = false;
     authenticating = false;
     account = 0;
@@ -43,10 +42,9 @@ SmtpClient::SmtpClient()
 SmtpClient::~SmtpClient()
 {
     delete transport;
-    qLog(SMTP) << "Destructor" << flush;
 }
 
-void SmtpClient::setAccount(MailAccount *_account)
+void SmtpClient::setAccount(QMailAccount *_account)
 {
     account = _account;
 }
@@ -78,13 +76,12 @@ void SmtpClient::newConnection()
 
     // authenticate with POP first?
     bool authenticateFirst = ( !account->mailServer().isEmpty() && 
-                               (account->smtpAuthentication() == MailAccount::Auth_NONE) );
+                               (account->smtpAuthentication() == QMailAccount::Auth_INCOMING) );
     doSend(authenticateFirst);
 }
 
 void SmtpClient::doSend(bool authenticating)
 {
-    qLog(SMTP) << "doSend begin" << flush;
     status = Init;
     sending = true;
     this->authenticating = authenticating;
@@ -101,8 +98,8 @@ void SmtpClient::doSend(bool authenticating)
     else
     {
         qLog(SMTP) << "Not authenticating" << flush;
-        connect(transport, SIGNAL(connected(MailAccount::EncryptType)),
-                this, SLOT(connected(MailAccount::EncryptType)));
+        connect(transport, SIGNAL(connected(QMailAccount::EncryptType)),
+                this, SLOT(connected(QMailAccount::EncryptType)));
         connect(transport, SIGNAL(readyRead()),
                 this, SLOT(incomingData()));
         connect(transport, SIGNAL(bytesWritten(qint64)),
@@ -111,7 +108,6 @@ void SmtpClient::doSend(bool authenticating)
         qLog(SMTP) << "Open connection" << flush;
         transport->open(account->smtpServer(), account->smtpPort(), account->smtpEncryption());
     }
-    qLog(SMTP) << "doSend end" << flush;
 }
 
 #ifndef QT_NO_OPENSSL
@@ -149,19 +145,11 @@ bool SmtpClient::addMail(const QMailMessage& mail)
     rawmail.to = sendTo;
     rawmail.mail = mail;
 
-    //set signature if present
-
-    if ( account && account->useSig() ) {
-        QString text = rawmail.mail.body().data() + QMailMessage::CRLF + account->sig();
-        QMailMessageContentType type("text/plain; charset=UTF-8");
-        rawmail.mail.setBody( QMailMessageBody::fromData( text, type, rawmail.mail.body().transferEncoding() ) );
-    }
-
     mailList.append(rawmail);
     return true;
 }
 
-void SmtpClient::connected(MailAccount::EncryptType encryptType)
+void SmtpClient::connected(QMailAccount::EncryptType encryptType)
 {
     if (account->smtpEncryption() == encryptType) {
         qLog(SMTP) << "Connected" << flush;
@@ -172,7 +160,8 @@ void SmtpClient::connected(MailAccount::EncryptType encryptType)
     if (status == TLS)
     {
         transport->stream() << "EHLO qtmail\r\n" << flush;
-        if (account->smtpAuthentication() != MailAccount::Auth_NONE)
+        if ((account->smtpAuthentication() == QMailAccount::Auth_LOGIN) ||
+            (account->smtpAuthentication() == QMailAccount::Auth_PLAIN))
             status = Auth;
         else
             status = From;
@@ -206,8 +195,8 @@ void SmtpClient::errorHandling(int errorCode, QString msg)
         }
         return;
     } else {
-        disconnect(transport, SIGNAL(connected(MailAccount::EncryptType)),
-		   this, SLOT(connected(MailAccount::EncryptType)));
+        disconnect(transport, SIGNAL(connected(QMailAccount::EncryptType)),
+		   this, SLOT(connected(QMailAccount::EncryptType)));
         disconnect(transport, SIGNAL(readyRead()),
 		   this, SLOT(incomingData()));
         disconnect(transport, SIGNAL(bytesWritten(qint64)),
@@ -240,7 +229,7 @@ void SmtpClient::authenticate()
     QString response = transport->readLine();
     qLog(SMTP) << "Authenticate response " << response.left(response.length() - 2) << flush;
 
-    if ( account->accountType() == MailAccount::IMAP ) {
+    if ( account->accountType() == QMailAccount::IMAP ) {
         if (status == Init ) {
             qLog(SMTP) << "Authenticating IMAP Init" << flush;
             status = Done;
@@ -331,12 +320,13 @@ void SmtpClient::incomingData()
             status = From;
             mailItr = mailList.begin();
 #ifndef QT_NO_OPENSSL
-            if (account->smtpAuthentication() != MailAccount::Auth_NONE ||
-                account->smtpEncryption() == MailAccount::Encrypt_TLS)
+            if ((account->smtpAuthentication() == QMailAccount::Auth_LOGIN ||
+                 account->smtpAuthentication() == QMailAccount::Auth_PLAIN) ||
+                account->smtpEncryption() == QMailAccount::Encrypt_TLS)
             {
                 qLog(SMTP) << "Init: sent:" << "EHLO qtmail" << flush;
                 stream << "EHLO qtmail\r\n" << flush;
-                if (account->smtpEncryption() == MailAccount::Encrypt_TLS)
+                if (account->smtpEncryption() == QMailAccount::Encrypt_TLS)
                     status = StartTLS;
                 else
                     status = Auth;
@@ -381,13 +371,13 @@ void SmtpClient::incomingData()
     {
         if (line[0] == '2')
         {
-            if (account->smtpAuthentication() == MailAccount::Auth_LOGIN)
+            if (account->smtpAuthentication() == QMailAccount::Auth_LOGIN)
             {
                 qLog(SMTP) << "Auth: sent:" << "AUTH LOGIN " << flush;
                 stream << "AUTH LOGIN \r\n" << flush;
                 status = AuthUser;
             }
-            else if (account->smtpAuthentication() == MailAccount::Auth_PLAIN)
+            else if (account->smtpAuthentication() == QMailAccount::Auth_PLAIN)
             {
                 QString temp = account->smtpUsername() + '\0' + account->smtpUsername() + '\0' + account->smtpPassword();
                 temp = _toBase64(temp);
@@ -531,8 +521,8 @@ void SmtpClient::incomingData()
             sending = false;
             transport->close();
             qLog(SMTP) << "Closed connection" << flush;
-            disconnect(transport, SIGNAL(connected(MailAccount::EncryptType)),
-		       this, SLOT(connected(MailAccount::EncryptType)));
+            disconnect(transport, SIGNAL(connected(QMailAccount::EncryptType)),
+		       this, SLOT(connected(QMailAccount::EncryptType)));
             disconnect(transport, SIGNAL(readyRead()),
 		       this, SLOT(incomingData()));
             disconnect(transport, SIGNAL(bytesWritten(qint64)),

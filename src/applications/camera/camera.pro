@@ -13,6 +13,7 @@ HEADERS = mainwindow.h \
           bayerconverter.h \
           phototimer.h \
           minsecspinbox.h\
+          noeditspinbox.h\
           yuvconverter.h
 
 SOURCES = mainwindow.cpp \
@@ -22,6 +23,7 @@ SOURCES = mainwindow.cpp \
           main.cpp \
           phototimer.cpp \
           minsecspinbox.cpp\
+          noeditspinbox.cpp\
           yuvconverter.cpp
 
 # This is documented in src/build/doc/src/deviceprofiles.qdoc
@@ -72,4 +74,4 @@ INSTALLS+=qdsservice
 #INSTALLS+=categories
 
 pkg.desc=Camera
-pkg.domain=window,msg,pim,qds,cardreader,pictures,camera,doc_server,doc_write,cameraservice,launcher
+pkg.domain=trusted

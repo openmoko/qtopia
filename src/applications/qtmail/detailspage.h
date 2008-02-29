@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,8 @@ class QToolButton;
 class QLabel;
 class QCheckBox;
 class RecipientEdit;
+class AccountList;
+class QMailAccount;
 
 class DetailsPage : public QWidget
 {
@@ -43,6 +45,8 @@ class DetailsPage : public QWidget
 public:
 
     DetailsPage( QWidget *parent, const char *name = 0 );
+
+    void setAccountList( AccountList* accountList );
 
     void setTo( const QString &a_to );
     QString to() const;
@@ -58,7 +62,8 @@ public:
 
     QString from() const;
     void setFrom( const QString &from );
-    void setFromFields( const QStringList &from );
+
+    QMailAccount* fromAccount() const;
 
     void setType( int t );
 
@@ -90,6 +95,7 @@ private:
     RecipientEdit *m_ccField, *m_bccField, *m_toField;
     QHBoxLayout *m_toBox, *m_ccBox, *m_bccBox;
     QToolButton *m_toPicker, *m_ccPicker, *m_bccPicker;
+    AccountList *m_accountList;
 };
 
 #endif

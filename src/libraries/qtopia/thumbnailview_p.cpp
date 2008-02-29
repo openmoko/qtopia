@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -45,6 +45,8 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QContentSet>
+#include <Qtopia>
+#include <private/drmcontent_p.h>
 
 // ### TODO: incorporate global pixmap cache
 
@@ -81,9 +83,11 @@ bool VisibleRule::isMetBy( const ThumbnailRequest& request ) const
 {
     // If index visible in view, return true
     // Otherwise, return false
-    QModelIndex index = request.index();
-    if( index.isValid() && view_->visualRect( index ).intersects( view_->viewport()->contentsRect() ) ) {
-        return true;
+    if( view_ ) {
+        QModelIndex index = request.index();
+        if( index.isValid() && view_->visualRect( index ).intersects( view_->viewport()->contentsRect() ) ) {
+            return true;
+        }
     }
 
     return false;
@@ -93,65 +97,48 @@ bool CacheRule::isMetBy( const ThumbnailRequest& request ) const
 {
     // If thumbnail in cache, return true
     // Otherwise, return false
-    return cache_->contains( request );
+    return cache_ && cache_->contains( request );
 }
 
-ThumbnailLoader::ThumbnailLoader( ThumbnailCache* cache, QObject* parent )
-    : QObject( parent ), cache_( cache )
+
+ThumbnailLoader::ThumbnailLoader( QObject *parent )
+    : QThread( parent )
+    , m_requestHandler( 0 )
 {
-#define PAUSE 75
-    connect( &load_timer, SIGNAL(timeout()), this, SLOT(loadFront()) );
 
-    load_timer.setInterval( PAUSE );
-    load_timer.setSingleShot( true );
-
-    running = false;
 }
 
-void ThumbnailLoader::load( const ThumbnailRequest& request )
+void ThumbnailLoader::load( const ThumbnailRequest &request )
 {
-    // Enqueue thumbnail request
-    queue.enqueue( request );
-    // If load timer not started, start timer
-    if( !running ) {
-        running = true;
-        load_timer.start();
-    }
-}
+    {
+        QMutexLocker locker( &m_initMutex );
 
-void ThumbnailLoader::loadFront()
-{
-    // Remove all items from front of queue that are not visible
-    while( !queue.isEmpty() && ( cache_rule.isMetBy( queue.head() ) || !visible_rule.isMetBy( queue.head() )  )  ) {
-        queue.dequeue();
+        if( !m_requestHandler )
+            m_initCondition.wait( &m_initMutex );
     }
 
-    // If queue is not empty, dequeue and load item
-    if( !queue.isEmpty() ) {
-        ThumbnailRequest request = queue.dequeue();
-        // Load thumbnail and insert into cache
+    if( requests.isEmpty() )
+    {
+        QContent content( request.filename(), false );
 
-        QPixmap pixmap = loadThumbnail( request.filename(), request.size() );
+        if( content.drmState() == QContent::Protected )
+        {
+            QPixmap thumbnail = DrmContentPrivate::thumbnail( request.filename(), request.size(), Qt::KeepAspectRatio );
 
-        // Load thumbnail and insert into cache
-        cache_->insert( request, pixmap );
-        // Notify thumbnail has been loaded
+            QMetaObject::invokeMethod( this, "thumbnailLoaded", Qt::QueuedConnection, Q_ARG(QPixmap,thumbnail) );
+        }
+        else
+        {
+            ThumbnailRequestEvent *event = new ThumbnailRequestEvent( request.filename(), request.size() );
 
-        if( !pixmap.isNull() ) {
-            emit loaded( request, pixmap );
+            QCoreApplication::postEvent( m_requestHandler, event );
         }
     }
 
-    // If queue is not empty, restart timer
-    if( !queue.isEmpty() ) {
-        load_timer.start();
-    } else {
-        running = false;
-        load_timer.stop();
-    }
+    requests.append( request );
 }
 
-QPixmap ThumbnailLoader::loadThumbnail( const QString &filename, const QSize &size )
+QImage ThumbnailLoader::loadThumbnail( const QString &filename, const QSize &size )
 {
     QImageReader reader( filename );
 
@@ -179,11 +166,95 @@ QPixmap ThumbnailLoader::loadThumbnail( const QString &filename, const QSize &si
             image = image.scaled( maxSize, Qt::KeepAspectRatio, Qt::FastTransformation );
         }
 
-        return QPixmap::fromImage( image );
+        return image;
+    }
+
+    return QImage();
+}
+
+void ThumbnailLoader::run()
+{
+    ThumbnailRequestHandler requestHandler( this );
+
+    {
+        QMutexLocker locker( &m_initMutex );
+
+        m_requestHandler = &requestHandler;
+
+        connect( &requestHandler, SIGNAL(thumbnailLoaded(QImage)),
+                 this           , SLOT  (thumbnailLoaded(QImage)) );
+
+        m_initCondition.wakeAll();
+    }
+
+    exec();
+
+    QMutexLocker locker( &m_initMutex );
+
+    disconnect( &requestHandler );
+
+    m_requestHandler = 0;
+
+    m_initCondition.wakeAll();
+}
+
+void ThumbnailLoader::thumbnailLoaded( const QImage &image )
+{
+    thumbnailLoaded( QPixmap::fromImage( image ) );
+}
+
+void ThumbnailLoader::thumbnailLoaded( const QPixmap &pixmap )
+{
+    emit loaded( requests.takeFirst(), pixmap );
+
+    while( !requests.isEmpty() )
+    {
+        ThumbnailRequest request = requests.first();
+
+        if( !cache_rule.isMetBy( request ) && visible_rule.isMetBy( request ) )
+        {
+            QContent content( request.filename(), false );
+
+            if( content.drmState() == QContent::Protected )
+            {
+                QPixmap thumbnail = DrmContentPrivate::thumbnail( request.filename(), request.size(), Qt::KeepAspectRatio );
+
+                QMetaObject::invokeMethod( this, "thumbnailLoaded", Qt::QueuedConnection, Q_ARG(QPixmap,thumbnail) );
+            }
+            else
+            {
+                ThumbnailRequestEvent *event = new ThumbnailRequestEvent( request.filename(), request.size() );
+
+                QCoreApplication::postEvent( m_requestHandler, event );
+            }
+            return;
+
+        }
+        else
+            requests.removeFirst();
+    }
+}
+
+ThumbnailRequestHandler::ThumbnailRequestHandler( ThumbnailLoader *loader )
+    : m_loader( loader )
+{
+
+}
+
+bool ThumbnailRequestHandler::event( QEvent *event )
+{
+    if( event->type() == QEvent::User )
+    {
+        ThumbnailRequestEvent *e = static_cast< ThumbnailRequestEvent * >( event );
+
+        emit thumbnailLoaded( m_loader->loadThumbnail( e->fileName(), e->size() ) );
+
+        return true;
     }
     else
-        return QPixmap();
+        return QObject::event( event );
 }
+
 
 ThumbnailRepository::ThumbnailRepository( ThumbnailCache* cache, ThumbnailLoader* loader, QObject* parent )
     : QObject( parent ), cache_( cache ), loader_( loader )
@@ -299,6 +370,57 @@ void ThumbnailView::emitSelected( const QModelIndex& index )
         emit selected();
     }
 }
+
+void ThumbnailView::rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end )
+{
+    QModelIndex index = currentIndex();
+
+    QScrollBar *vScroll = verticalScrollBar();
+
+    int startY = visualRect( index.sibling( start, index.column() ) ).top();
+    int endY = visualRect( index.sibling( end + 1, index.column() ) ).top();
+
+    int scrollValue = vScroll->value() - endY + startY;
+
+    QListView::rowsAboutToBeRemoved( parent, start, end );
+
+    if( index.row() >= start )
+    {
+        if( index.row() <= end && end + 1 < model()->rowCount( parent ) )
+        {
+            selectionModel()->setCurrentIndex(
+                    model()->index( end + 1, index.column(), parent ),
+                    QItemSelectionModel::ClearAndSelect);
+        }
+    }
+
+    if( startY <= 0 )
+        vScroll->setValue( scrollValue );
+}
+
+void ThumbnailView::rowsInserted( const QModelIndex &parent, int start, int end )
+{
+    QListView::rowsInserted( parent, start, end );
+
+    if( !Qtopia::mousePreferred() )
+    {
+        if( !currentIndex().isValid() )
+            selectionModel()->setCurrentIndex( model()->index( 0, 0, parent ), QItemSelectionModel::ClearAndSelect );
+    }
+    else
+        selectionModel()->clearSelection();
+
+    QScrollBar *vScroll = verticalScrollBar();
+
+    int startY = visualRect( model()->index( start, 0 ) ).top();
+    int endY = visualRect( model()->index( end + 1, 0 ) ).top();
+
+    int scrollValue = vScroll->value() + endY - startY;
+
+    if( startY <= 0 )
+        vScroll->setValue( scrollValue );
+}
+
 
 void ThumbnailView::keyPressEvent( QKeyEvent* e )
 {

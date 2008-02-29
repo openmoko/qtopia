@@ -24,4 +24,4 @@ INSTALLS+=classicbgimage
 
 pkg.name=qpe-theme-classic
 pkg.desc=Qtopia Classic theme
-pkg.domain=theme
+pkg.domain=trusted

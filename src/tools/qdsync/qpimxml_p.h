@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -72,7 +72,7 @@ public:
     void readEndElement();
     QString readTextElement(const QString &qualifiedName);
     QDate readDateElement(const QString &qualifiedName);
-    QDateTime readDateTimeElement(const QString &qualifiedName);
+    QDateTime readDateTimeElement(const QString &qualifiedName, bool utc);
     QUniqueId readIdentifierElement(QString &serverId);
     bool readBooleanElement(const QString &qualifiedName);
     QString readAttribute(const QString &qualifiedName);
@@ -117,7 +117,7 @@ private:
     void writeAttribute(const QString &qualifiedName, const QString &value);
 
     void writeDateElement(const QString &qualifiedName, const QDate &value);
-    void writeDateTimeElement(const QString &qualifiedName, const QDateTime &value);
+    void writeDateTimeElement(const QString &qualifiedName, const QDateTime &value, bool utc);
     void writeBooleanElement(const QString &qualifiedName, bool value);
     void writeCategoryElements(const QStringList &categories);
     void writeCustomFieldElements(const QMap<QString, QString> &fields);

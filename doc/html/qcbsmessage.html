@@ -101,56 +101,56 @@
 <p>Constructs a copy of <i>msg</i>.</p>
 <h3 class="fn"><a name="dtor.QCBSMessage"></a>QCBSMessage::~QCBSMessage ()</h3>
 <p>Destructs the <a href="qcbsmessage.html">QCBSMessage</a>.</p>
-<h3 class="fn"><a name="channel"></a>uint QCBSMessage::channel () const</h3>
+<h3 class="fn"><a name="channel"></a><a href="./qtglobal.html#uint-typedef">uint</a> QCBSMessage::channel () const</h3>
 <p>Returns the channel number for this cell broadcast message. The most common channel number is 50, indicating cell location information.</p>
 <p>See also <a href="qcbsmessage.html#setChannel">setChannel</a>().</p>
-<h3 class="fn"><a name="fromPdu"></a>QCBSMessage QCBSMessage::fromPdu ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromPdu"></a>QCBSMessage QCBSMessage::fromPdu ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Convert a binary <i>pdu</i> into a CBS message, according to 3GPP TS 03.41 and 3GPP TS 23.041.</p>
 <h3 class="fn"><a name="language"></a><a href="qcbsmessage.html#Language-enum">QCBSMessage::Language</a> QCBSMessage::language () const</h3>
 <p>Returns the language that this cell broadcast message is expressed in. This can allow applications to distinguish between multiple copies of the same information in different languages.</p>
 <p>See also <a href="qcbsmessage.html#setLanguage">setLanguage</a>().</p>
-<h3 class="fn"><a name="messageCode"></a>uint QCBSMessage::messageCode () const</h3>
+<h3 class="fn"><a name="messageCode"></a><a href="./qtglobal.html#uint-typedef">uint</a> QCBSMessage::messageCode () const</h3>
 <p>Returns the cell broadcast message code.</p>
 <p>See also <a href="qcbsmessage.html#setMessageCode">setMessageCode</a>().</p>
-<h3 class="fn"><a name="numPages"></a>uint QCBSMessage::numPages () const</h3>
+<h3 class="fn"><a name="numPages"></a><a href="./qtglobal.html#uint-typedef">uint</a> QCBSMessage::numPages () const</h3>
 <p>Returns the number of pages that make up this cell broadcast message.</p>
 <p>See also <a href="qcbsmessage.html#setNumPages">setNumPages</a>().</p>
-<h3 class="fn"><a name="page"></a>uint QCBSMessage::page () const</h3>
+<h3 class="fn"><a name="page"></a><a href="./qtglobal.html#uint-typedef">uint</a> QCBSMessage::page () const</h3>
 <p>Returns the page number for this cell broadcast message if the information that it contains is split over multiple pages.</p>
 <p>See also <a href="qcbsmessage.html#setPage">setPage</a>().</p>
 <h3 class="fn"><a name="scope"></a><a href="qcbsmessage.html#GeographicalScope-enum">QCBSMessage::GeographicalScope</a> QCBSMessage::scope () const</h3>
 <p>Returns the geographical scope of the message.</p>
 <p>See also <a href="qcbsmessage.html#setScope">setScope</a>().</p>
-<h3 class="fn"><a name="setChannel"></a>void QCBSMessage::setChannel ( uint <i>chan</i> )</h3>
+<h3 class="fn"><a name="setChannel"></a>void QCBSMessage::setChannel ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>chan</i> )</h3>
 <p>Sets the channel number for this cell broadcast message to <i>chan</i>.</p>
 <p>See also <a href="qcbsmessage.html#channel">channel</a>().</p>
 <h3 class="fn"><a name="setLanguage"></a>void QCBSMessage::setLanguage ( <a href="qcbsmessage.html#Language-enum">QCBSMessage::Language</a> <i>lang</i> )</h3>
 <p>Sets the language that this cell broadcast message is expressed in to <i>lang</i>.</p>
 <p>See also <a href="qcbsmessage.html#language">language</a>().</p>
-<h3 class="fn"><a name="setMessageCode"></a>void QCBSMessage::setMessageCode ( uint <i>num</i> )</h3>
+<h3 class="fn"><a name="setMessageCode"></a>void QCBSMessage::setMessageCode ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>num</i> )</h3>
 <p>Sets the cell broadcast message code to <i>num</i>.</p>
 <p>See also <a href="qcbsmessage.html#messageCode">messageCode</a>().</p>
-<h3 class="fn"><a name="setNumPages"></a>void QCBSMessage::setNumPages ( uint <i>npages</i> )</h3>
+<h3 class="fn"><a name="setNumPages"></a>void QCBSMessage::setNumPages ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>npages</i> )</h3>
 <p>Sets the number of pages in this cell broadcast message to <i>npages</i>.</p>
 <p>See also <a href="qcbsmessage.html#numPages">numPages</a>().</p>
-<h3 class="fn"><a name="setPage"></a>void QCBSMessage::setPage ( uint <i>page</i> )</h3>
+<h3 class="fn"><a name="setPage"></a>void QCBSMessage::setPage ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>page</i> )</h3>
 <p>Sets the page number for this cell broadcast message to <i>page</i>.</p>
 <p>See also <a href="qcbsmessage.html#page">page</a>().</p>
 <h3 class="fn"><a name="setScope"></a>void QCBSMessage::setScope ( <a href="qcbsmessage.html#GeographicalScope-enum">QCBSMessage::GeographicalScope</a> <i>scope</i> )</h3>
 <p>Sets the geographical scope of the message to <i>scope</i>.</p>
 <p>See also <a href="qcbsmessage.html#scope">scope</a>().</p>
-<h3 class="fn"><a name="setText"></a>void QCBSMessage::setText ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
+<h3 class="fn"><a name="setText"></a>void QCBSMessage::setText ( const <a href="./qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the text that is contained in this cell broadcast message to <i>str</i>.</p>
 <p>See also <a href="qcbsmessage.html#text">text</a>().</p>
-<h3 class="fn"><a name="setUpdateNumber"></a>void QCBSMessage::setUpdateNumber ( uint <i>num</i> )</h3>
+<h3 class="fn"><a name="setUpdateNumber"></a>void QCBSMessage::setUpdateNumber ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>num</i> )</h3>
 <p>Sets the update number for this cell broadcast message to <i>num</i>.</p>
 <p>See also <a href="qcbsmessage.html#updateNumber">updateNumber</a>().</p>
-<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QCBSMessage::text () const</h3>
+<h3 class="fn"><a name="text"></a><a href="./qstring.html">QString</a> QCBSMessage::text () const</h3>
 <p>Returns the text that is contained in this cell broadcast message.</p>
 <p>See also <a href="qcbsmessage.html#setText">setText</a>().</p>
-<h3 class="fn"><a name="toPdu"></a><a href="qbytearray.html">QByteArray</a> QCBSMessage::toPdu () const</h3>
+<h3 class="fn"><a name="toPdu"></a><a href="./qbytearray.html">QByteArray</a> QCBSMessage::toPdu () const</h3>
 <p>Convert this CBS message into its binary PDU form, according to 3GPP TS 03.41 and 3GPP TS 23.041.</p>
-<h3 class="fn"><a name="updateNumber"></a>uint QCBSMessage::updateNumber () const</h3>
+<h3 class="fn"><a name="updateNumber"></a><a href="./qtglobal.html#uint-typedef">uint</a> QCBSMessage::updateNumber () const</h3>
 <p>Returns the update number for this cell broadcast message.</p>
 <p>See also <a href="qcbsmessage.html#setUpdateNumber">setUpdateNumber</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QCBSMessage::operator!= ( const QCBSMessage &amp; <i>other</i> ) const</h3>
@@ -161,8 +161,8 @@
 <p>Returns true if this cell broadcast message object is equal to <i>other</i>; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

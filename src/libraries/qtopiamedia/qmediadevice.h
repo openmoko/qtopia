@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,19 +29,39 @@
 
 #include <qtopiaglobal.h>
 
-class QMediaPipe;
 
 class QTOPIAMEDIA_EXPORT QMediaDevice : public QIODevice
 {
+    Q_OBJECT
+
 public:
-    virtual void connectInputPipe(QMediaPipe* inputPipe) = 0;
-    virtual void connectOutputPipe(QMediaPipe* outputPipe) = 0;
 
-    virtual void disconnectInputPipe(QMediaPipe* inputPipe) = 0;
-    virtual void disconnectOutputPipe(QMediaPipe* outputPipe) = 0;
+    struct Info
+    {
+        enum DataType { Raw, PCM };
 
-    virtual void setValue(QString const& name, QVariant const& value) = 0;
-    virtual QVariant value(QString const& name) = 0;
+        DataType    type;
+        union
+        {
+            struct /* Raw */
+            {
+                qint64      dataSize;
+            };
+
+            struct /* PCM */
+            {
+                int         frequency;
+                int         bitsPerSample;
+                int         channels;
+                int         volume;
+            };
+        };
+    };
+
+    virtual Info const& dataType() const = 0;
+
+    virtual bool connectToInput(QMediaDevice* input) = 0;
+    virtual void disconnectFromInput(QMediaDevice* input) = 0;
 };
 
 

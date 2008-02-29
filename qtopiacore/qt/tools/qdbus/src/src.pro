@@ -88,6 +88,10 @@ targ_headers.path = $$[QT_INSTALL_HEADERS]/QtDBus
 targ_pkgconfig.path = $$[QT_INSTALL_LIBS]/pkgconfig
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target targ_headers targ_pkgconfig
+win32 {
+    dlltarget.path=$$[QT_INSTALL_BINS]
+    INSTALLS += dlltarget
+}
 
 PUB_HEADERS =  qdbusargument.h \
 	       qdbusconnectioninterface.h \

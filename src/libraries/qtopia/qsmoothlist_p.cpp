@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -687,7 +687,6 @@ void ListItem::setDelegate(QAbstractItemDelegate *delegate)
 void ListItem::checkCache(bool active)
 {
     if(!active && !cacheValid) {
-        //qDebug() << "not cached" << qPrintable(QTime::currentTime().toString("h:mm:ss.zzz"));
         cache = QPixmap(m_width, ItemHeight);
         cache.fill(QColor(0,0,0,0));
         QPainter cp(&cache);
@@ -696,7 +695,6 @@ void ListItem::checkCache(bool active)
         m_delegate->paint(&cp, opt, m_idx);
         imageCache = cache.toImage();
         cacheValid = true;
-        //qDebug() << "not cache2" << qPrintable(QTime::currentTime().toString("h:mm:ss.zzz"));
     }
 
     if(active && !cacheActiveValid) {
@@ -1014,7 +1012,7 @@ void QSmoothList::doUpdate(bool force)
                 m_items[ii]->paint(fp, false /* m_items[ii]->index() == m_focusItem */);
         }
 
-        //HACK: better to disable timelines, etc so we don't take any performance hit?
+        //TODO: better to disable timelines, etc so we don't take any performance hit?
         if (m_scrollbar->barHeight() < height())
             m_scrollbar->paint(fp);
 
@@ -1320,7 +1318,7 @@ void QSmoothList::paintEvent(QPaintEvent *pe)
         if (pe->rect().intersects(m_items[ii]->rect()))
             m_items[ii]->paint(&p, false /*m_items[ii]->index() == m_focusItem*/);
 
-    //HACK: better to disable timelines, etc so we don't take any performance hit?
+    //TODO: better to disable timelines, etc so we don't take any performance hit?
     if (m_scrollbar->barHeight() < height())
         m_scrollbar->paint(&p);
 }

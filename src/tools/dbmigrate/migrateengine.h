@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,11 +40,12 @@ public:
     void setDatabase(const QSqlDatabase& database) { db=database; }
     const QSqlDatabase& database() { return db; }
     bool loadSchema(QTextStream &ts, bool transact=false);
-    bool check(bool result, int line, char *file);
+    bool check(bool result, int line, char *file, char *message);
     bool exec(QSqlQuery &query, int line, char *file);
     bool exec(const QString &query, int line, char *file);
     static QDBMigrationEngine *instance();
 private:
+    bool checkIntegrity( const QSqlDatabase &database, bool printErrors );
     bool verifyLocale( const QSqlDatabase &database );
     QByteArray transformString( const QString &string ) const;
 
@@ -68,6 +69,6 @@ private slots:
 };
 #endif
 
-#define CHECK(result) {if(QDBMigrationEngine::instance()->check((result), __LINE__, __FILE__) == false) return false; }
+#define CHECK(result) {if(QDBMigrationEngine::instance()->check((result), __LINE__, __FILE__, #result) == false) return false; }
 #define EXEC(query) {if(QDBMigrationEngine::instance()->exec((query), __LINE__, __FILE__) == false) return false; }
 

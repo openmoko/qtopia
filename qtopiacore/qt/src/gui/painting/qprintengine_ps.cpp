@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -114,31 +112,31 @@ static const char *const ps_header =
 "dup 0 m _h l}for}if BSt 12 eq BSt 14 eq or{_w _h gt{0 6 _w _h add{dup 0 m _h\n"
 "sub _h l}for}{0 6 _w _h add{dup 0 exch m _w sub _w exch l}for}ie}if BSt 13\n"
 "eq BSt 14 eq or{_w _h gt{0 6 _w _h add{dup _h m _h sub 0 l}for}{0 6 _w _h\n"
-"add{dup _w exch m _w sub 0 exch l}for}ie}if S}if BSt 15 eq{}if BSt 24 eq{}if\n"
-"gr}BD/f{/WFi true def BF n}BD/f*{/WFi false def BF n}BD/B{/WFi true def BF S\n"
-"n}BD/B*{/WFi false def BF S n}BD/QI{/C save def pageinit q n}BD/QP{Q C\n"
-"restore showpage}BD/SPD{/setpagedevice where{<< 3 1 roll >> setpagedevice}{\n"
-"pop pop}ie}BD/T1AddMapping{10 dict begin/glyphs ED/fnt ED/current fnt\n"
-"/NumGlyphs get def/CMap fnt/CMap get def 0 1 glyphs length 1 sub{glyphs exch\n"
-"get/gn ED current dup 256 mod/min ED 256 idiv/maj ED CMap dup maj get dup\n"
-"null eq{pop 256 array 0 1 255{1 i exch/.notdef put}for}if dup min gn put maj\n"
-"exch put/current current 1 add def}for fnt/CMap CMap put fnt/NumGlyphs\n"
-"current put end}def/T1AddGlyphs{10 dict begin/glyphs ED/fnt ED/current fnt\n"
-"/NumGlyphs get def/CMap fnt/CMap get def/CharStrings fnt/CharStrings get def\n"
-"0 1 glyphs length 2 idiv 1 sub{2 mul dup glyphs exch get/gn ED 1 add glyphs\n"
-"exch get/cs ED current dup 256 mod/min ED 256 idiv/maj ED CMap dup maj get\n"
-"dup null eq{pop 256 array 0 1 255{1 i exch/.notdef put}for}if dup min gn put\n"
-"maj exch put CharStrings gn cs put/current current 1 add def}for fnt\n"
-"/CharStrings CharStrings put fnt/CMap CMap put fnt/NumGlyphs current put end\n"
-"}def/StringAdd{1 i length 1 i length add string 3 1 roll 2 i 0 3 i\n"
-"putinterval 2 i 2 i length 2 i putinterval pop pop}def/T1Setup{10 dict begin\n"
-"dup/FontName ED (-Base) StringAdd cvx cvn/Font ED/MaxPage Font/NumGlyphs get\n"
-"1 sub 256 idiv def/FDepVector MaxPage 1 add array def/Encoding MaxPage 1 add\n"
-"array def 0 1 MaxPage{dup Encoding exch dup put dup/Page ED FontName (-)\n"
-"StringAdd exch 20 string cvs StringAdd cvn Font 0 dict copy d2/CMap get Page\n"
-"get/Encoding exch put definefont FDepVector exch Page exch put}for FontName\n"
-"cvn <</FontType 0/FMapType 2/FontMatrix[1 0 0 1 0 0]/Encoding Encoding\n"
-"/FDepVector FDepVector >> definefont pop end}def\n";
+"add{dup _w exch m _w sub 0 exch l}for}ie}if stroke}if BSt 15 eq{}if BSt 24\n"
+"eq{}if gr}BD/f{/WFi true def BF n}BD/f*{/WFi false def BF n}BD/B{/WFi true\n"
+"def BF S n}BD/B*{/WFi false def BF S n}BD/QI{/C save def pageinit q n}BD/QP{\n"
+"Q C restore showpage}BD/SPD{/setpagedevice where{<< 3 1 roll >>\n"
+"setpagedevice}{pop pop}ie}BD/T1AddMapping{10 dict begin/glyphs ED/fnt ED\n"
+"/current fnt/NumGlyphs get def/CMap fnt/CMap get def 0 1 glyphs length 1 sub\n"
+"{glyphs exch get/gn ED current dup 256 mod/min ED 256 idiv/maj ED CMap dup\n"
+"maj get dup null eq{pop 256 array 0 1 255{1 i exch/.notdef put}for}if dup\n"
+"min gn put maj exch put/current current 1 add def}for fnt/CMap CMap put fnt\n"
+"/NumGlyphs current put end}def/T1AddGlyphs{10 dict begin/glyphs ED/fnt ED\n"
+"/current fnt/NumGlyphs get def/CMap fnt/CMap get def/CharStrings fnt\n"
+"/CharStrings get def 0 1 glyphs length 2 idiv 1 sub{2 mul dup glyphs exch\n"
+"get/gn ED 1 add glyphs exch get/cs ED current dup 256 mod/min ED 256 idiv\n"
+"/maj ED CMap dup maj get dup null eq{pop 256 array 0 1 255{1 i exch/.notdef\n"
+"put}for}if dup min gn put maj exch put CharStrings gn cs put/current current\n"
+"1 add def}for fnt/CharStrings CharStrings put fnt/CMap CMap put fnt\n"
+"/NumGlyphs current put end}def/StringAdd{1 i length 1 i length add string 3\n"
+"1 roll 2 i 0 3 i putinterval 2 i 2 i length 2 i putinterval pop pop}def\n"
+"/T1Setup{10 dict begin dup/FontName ED (-Base) StringAdd cvx cvn/Font ED\n"
+"/MaxPage Font/NumGlyphs get 1 sub 256 idiv def/FDepVector MaxPage 1 add\n"
+"array def/Encoding MaxPage 1 add array def 0 1 MaxPage{dup Encoding exch dup\n"
+"put dup/Page ED FontName (-) StringAdd exch 20 string cvs StringAdd cvn Font\n"
+"0 dict copy d2/CMap get Page get/Encoding exch put definefont FDepVector\n"
+"exch Page exch put}for FontName cvn <</FontType 0/FMapType 2/FontMatrix[1 0\n"
+"0 1 0 0]/Encoding Encoding/FDepVector FDepVector >> definefont pop end}def\n";
 
 
 
@@ -537,7 +535,7 @@ void QPSPrintEnginePrivate::emitHeader(bool finished)
           << " mm (landscape)\n 90 rotate " << scale << "-" << scale << "scale } def\n";
     }
     s << "%%EndProlog\n";
-    
+
     outDevice->write(header);
     headerDone = true;
 }

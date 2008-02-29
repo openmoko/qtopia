@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,13 +19,10 @@
 
 #include "view.h"
 
-#include <qapplication.h>
 #include <QVBoxLayout>
-#include <QtDebug>
+#include <QtopiaApplication>
 
-#include <stdlib.h>
 #include <math.h>
-#include <time.h>
 
 //#define REFRESH_DELAY          20
 #define REFRESH_DELAY          33
@@ -95,7 +92,7 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
 KAsteroidsView::KAsteroidsView(QWidget* parent)
     : QWidget(parent)
 {
-    srand (time(NULL));
+    qsrand( QDateTime::currentDateTime().toTime_t() );
     scene_ = KSprite::scene();
     textSprite_ = new QGraphicsSimpleTextItem(0,scene_);
     textPending_ = false;
@@ -114,7 +111,6 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
     layout->setMargin(0);
 
     KSprite::setView(this);
-    KSprite::loadSprites();
 
     shieldTimer_ = new QTimer(this);
     connect(shieldTimer_, SIGNAL(timeout()), this, SLOT(dropShield()));
@@ -142,6 +138,7 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
 KAsteroidsView::~KAsteroidsView()
 {
     mainTimer_->stop();
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
 }
 
 /*!
@@ -155,6 +152,7 @@ void KAsteroidsView::newGame()
     KSprite::reset();
     game_paused_ = false;
     mainTimer_->start();
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
     emit updateVitals();
 }
 
@@ -173,9 +171,13 @@ void KAsteroidsView::pause(bool p)
 {
     if (!game_paused_ && p) {
         mainTimer_->stop();
+        QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
     }
     else if (game_paused_ && !p)
+    {
         mainTimer_->start();
+        QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
+    }
     game_paused_ = p;
 }
 
@@ -286,6 +288,7 @@ void KAsteroidsView::reportGameOver()
 {
     showText(gameOverMessage_);
     QTimer::singleShot(60000, mainTimer_, SLOT(stop()));
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
 }
 
 /*!

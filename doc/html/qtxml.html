@@ -193,8 +193,8 @@
 <p>The behavior of an XML reader depends on its support for certain optional features. For example, a reader may have the feature &quot;report attributes used for namespace declarations and prefixes along with the local name of a tag&quot;. Like every other feature this has a unique name represented by a URI: it is called <i>http://xml.org/sax/features/namespace-prefixes</i>.</p>
 <p>The Qt SAX2 implementation can report whether the reader has particular functionality using the <a href="qxmlreader.html#hasFeature">QXmlReader::hasFeature</a>() function. Available features can be tested with <a href="qxmlreader.html#feature">QXmlReader::feature</a>(), and switched on or off using <a href="qxmlreader.html#setFeature">QXmlReader::setFeature</a>().</p>
 <p>Consider the example</p>
-<pre> &lt;document xmlns:book = 'http:<span class="comment">//trolltech.com/fnord/book/'</span>
-           xmlns      = 'http:<span class="comment">//trolltech.com/fnord/' &gt;</span></pre>
+<pre> &lt;document xmlns:book = 'http:<span class="comment">//</span>trolltech.com/fnord/book/'
+           xmlns      = 'http:<span class="comment">//</span>trolltech.com/fnord/' &gt;</pre>
 <p>A reader that does not support the <i>http://xml.org/sax/features/namespace-prefixes</i> feature would report the element name <i>document</i> but not its attributes <i>xmlns:book</i> and <i>xmlns</i> with their values. A reader with the feature <i>http://xml.org/sax/features/namespace-prefixes</i> reports the namespace attributes if the <a href="qxmlreader.html#feature">feature</a> is switched on.</p>
 <p>Other features include <i>http://xml.org/sax/features/namespace</i> (namespace processing, implies <i>http://xml.org/sax/features/namespace-prefixes</i>) and <i>http://xml.org/sax/features/validation</i> (the ability to report validation errors).</p>
 <p>Whilst SAX2 leaves it to the user to define and implement whatever features are required, support for <i>http://xml.org/sax/features/namespace</i> (and thus <i>http://xml.org/sax/features/namespace-prefixes</i>) is mandantory. The <a href="qxmlsimplereader.html">QXmlSimpleReader</a> implementation of <a href="qxmlreader.html">QXmlReader</a>, supports them, and can do namespace processing.</p>
@@ -210,7 +210,7 @@
 <li>Attributes that declare namespaces (i.e&#x2e; the attribute <i>xmlns</i> and attributes starting with <i>xmlns:</i>) are reported.</li>
 </ol>
 <p>Consider the following element:</p>
-<pre> &lt;author xmlns:fnord = 'http:<span class="comment">//trolltech.com/fnord/'</span>
+<pre> &lt;author xmlns:fnord = 'http:<span class="comment">//</span>trolltech.com/fnord/'
               title=&quot;Ms&quot;
               fnord:title=&quot;Goddess&quot;
               name=&quot;Eris Kallisti&quot;/&gt;</pre>
@@ -233,7 +233,7 @@
 <a name="properties"></a>
 <h4>Properties</h4>
 <p>Properties are a more general concept. They have a unique name, represented as an URI, but their value is <tt>void*</tt>. Thus nearly anything can be used as a property value. This concept involves some danger, though: there is no means of ensuring type-safety; the user must take care that they pass the right type. Properties are useful if a reader supports special handler classes.</p>
-<p>The URIs used for features and properties often look like URLs, e.g&#x2e; <tt>http:<span class="comment">//xml.org/sax/features/namespace</span></tt>. This does not mean that the data required is at this address. It is simply a way of defining unique names.</p>
+<p>The URIs used for features and properties often look like URLs, e.g&#x2e; <tt>http:<span class="comment">//</span>xml.org/sax/features/namespace</tt>. This does not mean that the data required is at this address. It is simply a way of defining unique names.</p>
 <p>Anyone can define and use new SAX2 properties for their readers. Property support is not mandatory.</p>
 <p>To set or query properties the following functions are provided: <a href="qxmlreader.html#setProperty">QXmlReader::setProperty</a>(), <a href="qxmlreader.html#property">QXmlReader::property</a>() and <a href="qxmlreader.html#hasProperty">QXmlReader::hasProperty</a>().</p>
 <a name="dom"></a><a name="the-qt-dom-classes"></a>
@@ -323,18 +323,18 @@
 <p>Before we can apply a namespace to element or attribute names we must declare it.</p>
 <p>Namespaces are URIs like <i>http://trolltech.com/fnord/book/</i>. This does not mean that data must be available at this address; the URI is simply used to provide a unique name.</p>
 <p>We declare namespaces in the same way as attributes; strictly speaking they <i>are</i> attributes. To make for example <i>http://trolltech.com/fnord/</i> the document's default XML namespace <i>xmlns</i> we write</p>
-<pre> xmlns=&quot;http:<span class="comment">//trolltech.com/fnord/&quot;</span></pre>
+<pre> xmlns=&quot;http:<span class="comment">//</span>trolltech.com/fnord/&quot;</pre>
 <p>To distinguish the <i>http://trolltech.com/fnord/book/</i> namespace from the default, we must supply it with a prefix:</p>
-<pre> xmlns:book=&quot;http:<span class="comment">//trolltech.com/fnord/book/&quot;</span></pre>
+<pre> xmlns:book=&quot;http:<span class="comment">//</span>trolltech.com/fnord/book/&quot;</pre>
 <p>A namespace that is declared like this can be applied to element and attribute names by prepending the appropriate prefix and a &quot;:&quot; delimiter. We have already seen this with the <i>book:title</i> element.</p>
 <p>Element names without a prefix belong to the default namespace. This rule does not apply to attributes: an attribute without a prefix does not belong to any of the declared XML namespaces at all. Attributes always belong to the &quot;traditional&quot; namespace of the element in which they appear. A &quot;traditional&quot; namespace is not an XML namespace, it simply means that all attribute names belonging to one element must be different. Later we will see how to assign an XML namespace to an attribute.</p>
 <p>Due to the fact that attributes without prefixes are not in any XML namespace there is no collision between the attribute <i>title</i> (that belongs to the <i>author</i> element) and for example the <i>title</i> element within a <i>chapter</i>.</p>
 <p>Let's clarify this with an example:</p>
-<pre> &lt;document xmlns:book = 'http:<span class="comment">//trolltech.com/fnord/book/'</span>
-           xmlns      = 'http:<span class="comment">//trolltech.com/fnord/' &gt;</span>
+<pre> &lt;document xmlns:book = 'http:<span class="comment">//</span>trolltech.com/fnord/book/'
+           xmlns      = 'http:<span class="comment">//</span>trolltech.com/fnord/' &gt;
  &lt;book&gt;
    &lt;book:title&gt;Practical XML&lt;/book:title&gt;
-   &lt;book:author xmlns:fnord = 'http:<span class="comment">//trolltech.com/fnord/'</span>
+   &lt;book:author xmlns:fnord = 'http:<span class="comment">//</span>trolltech.com/fnord/'
                 title=&quot;Ms&quot;
                 fnord:title=&quot;Goddess&quot;
                 name=&quot;Eris Kallisti&quot;/&gt;
@@ -373,8 +373,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

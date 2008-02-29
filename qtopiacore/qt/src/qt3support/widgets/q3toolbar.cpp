@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the Qt3Support module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -489,7 +487,8 @@ bool Q3ToolBar::event(QEvent * e)
         if (child && child->isWidgetType() && !((QWidget*)child)->isWindow()
              && child->parent() == this
             && QLatin1String("qt_dockwidget_internal") != child->objectName()) {
-            QWidgetItem *item = new QWidgetItem((QWidget*)child);
+            boxLayout()->addWidget((QWidget*)child);
+            QLayoutItem *item = boxLayout()->itemAt(boxLayout()->indexOf((QWidget*)child));
             if (QToolButton *button = qobject_cast<QToolButton*>(child)) {
                 item->setAlignment(Qt::AlignHCenter);
                 button->setFocusPolicy(Qt::NoFocus);
@@ -503,7 +502,6 @@ bool Q3ToolBar::event(QEvent * e)
                 }
                 button->setAutoRaise(true);
             }
-            boxLayout()->addItem(item);
             if (isVisible()) {
                 // toolbar compatibility: we auto show widgets that
                 // are not explicitly hidden
@@ -551,6 +549,8 @@ QString Q3ToolBar::label() const
 void Q3ToolBar::clear()
 {
     QObjectList childList = children();
+    d->extension = 0;
+    d->extensionPopup = 0; //they will both be destroyed by the following code
     for (int i = 0; i < childList.size(); ++i) {
         QObject *obj = childList.at(i);
         if (obj->isWidgetType() && QLatin1String("qt_dockwidget_internal") != obj->objectName())

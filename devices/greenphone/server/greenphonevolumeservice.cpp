@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,17 +34,35 @@
 
 #include "greenphonevolumeservice.h"
 
+class GreenphoneVolumeServicePrivate 
+{
+public:
+    
+    void sendCurrentVolume()
+    {
+        QString volume;
+        volume.setNum(currVolume);
+        QtopiaIpcEnvelope e("QPE/AudioVolumeManager","currentVolume(QString)");
+        e << volume;
+    };
+
+    int currVolume;
+};
 
 GreenphoneVolumeService::GreenphoneVolumeService():
     QtopiaIpcAdaptor("QPE/AudioVolumeManager/GreenphoneVolumeService")
 {
     publishAll(Slots);
 
+    m_d = new GreenphoneVolumeServicePrivate;
+    m_d->currVolume = 0;
+
     QTimer::singleShot(0, this, SLOT(registerService()));
 }
 
 GreenphoneVolumeService::~GreenphoneVolumeService()
 {
+    delete m_d;
 }
 
 //public slots:
@@ -61,6 +79,7 @@ void GreenphoneVolumeService::setVolume(int leftChannel, int rightChannel)
 void GreenphoneVolumeService::increaseVolume(int increment)
 {
     adjustVolume(increment, increment, Relative);
+    m_d->sendCurrentVolume();
 }
 
 void GreenphoneVolumeService::decreaseVolume(int decrement)
@@ -68,6 +87,8 @@ void GreenphoneVolumeService::decreaseVolume(int decrement)
     decrement *= -1;
 
     adjustVolume(decrement, decrement, Relative);
+    m_d->sendCurrentVolume();
+
 }
 
 void GreenphoneVolumeService::setMute(bool)
@@ -90,6 +111,7 @@ void GreenphoneVolumeService::setCallDomain()
     e << QString("Headset");
 }
 
+
 void GreenphoneVolumeService::adjustVolume(int leftChannel, int rightChannel, AdjustType adjust)
 {
     int mixerFd = open("/dev/mixer", O_RDWR);
@@ -99,7 +121,7 @@ void GreenphoneVolumeService::adjustVolume(int leftChannel, int rightChannel, Ad
         int right;
 
         if (adjust == Relative) {
-            ioctl(mixerFd, SOUND_MIXER_READ_ALTPCM, &leftright);
+            ioctl(mixerFd, SOUND_MIXER_READ_VOLUME, &leftright);
 
             left = (leftright & 0xff00) >> 8;
             right = (leftright & 0x00ff);
@@ -112,12 +134,8 @@ void GreenphoneVolumeService::adjustVolume(int leftChannel, int rightChannel, Ad
         }
 
         leftright = (left << 8) | right;
-        ioctl(mixerFd, SOUND_MIXER_WRITE_ALTPCM, &leftright);
-
-        // ??
-        leftright = (100 << 8) | 100;
-        ioctl(mixerFd, SOUND_MIXER_WRITE_SPEAKER, &leftright);
-
+        ioctl(mixerFd, SOUND_MIXER_WRITE_VOLUME, &leftright);       
+        m_d->currVolume = (int)(left+right)>>1;
         close(mixerFd);
     }
 }

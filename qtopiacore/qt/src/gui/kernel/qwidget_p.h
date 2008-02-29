@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -487,6 +485,20 @@ public:
     static OSStatus qt_widget_event(EventHandlerCallRef er, EventRef event, void *);
     static bool qt_widget_rgn(QWidget *, short, RgnHandle, bool);
 
+
+    // Each wiget keeps a list of all its child and grandchild OpeGL widgets.
+    // This list is used to update the gl context whenever a parent and a granparent
+    // moves, and also to check for intersections with gl widgets within the window
+    // when a widget moves.
+    struct GlWidgetInfo
+    {
+        GlWidgetInfo(QWidget *widget) : widget(widget), lastUpdateWidget(0) { }
+        bool operator==(const GlWidgetInfo &other) const { return (widget == other.widget); }
+        QWidget * widget;
+        QWidget * lastUpdateWidget;
+    };
+    QList<GlWidgetInfo> glWidgets;
+
     //these are here just for code compat (HIViews)
     QRegion clp;
     Qt::HANDLE qd_hd;
@@ -494,6 +506,7 @@ public:
     inline QRegion clippedRegion(bool = true) { return clp; }
     inline uint clippedSerial(bool =true) { return clp_serial; }
     uint needWindowChange : 1;
+    uint isGLWidget : 1;
 #endif
 
 #if defined(Q_WS_X11) || defined (Q_WS_WIN) || defined(Q_WS_MAC)

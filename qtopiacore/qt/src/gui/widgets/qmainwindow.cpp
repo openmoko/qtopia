@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -145,7 +143,7 @@ void QMainWindowPrivate::init()
     application's user interface. Qt has QMainWindow and its \l{Main
     Window and Related Classes}{related classes} for main window
     management. QMainWindow has its own layout to which you can add
-    \l{QToolBar}{QToolBar}s, \l{QDockWindow}{QDockWindow}s, a
+    \l{QToolBar}s, \l{QDockWidget}s, a
     QMenuBar, and a QStatusBar. The layout has a center area that can
     be occupied by any kind of widget. You can see an image of the
     layout below.
@@ -1215,6 +1213,11 @@ bool QMainWindow::event(QEvent *event)
     \i Toolbar breaks are not respected or preserved
     \i Any custom widgets in the toolbar will not be shown if the toolbar becomes too small
       (only actions will be shown)
+    \i If you call showFullScreen() on the main window, the QToolbar will
+       disappear since it is considered to be part of the title bar. You can work
+       around this by doing the following by turning off the unified toolbar
+       before you call showFullScrenn() and restore the value after you call
+       showNormal().
     \endlist
 
     Setting this back to false will remove these restrictions.
@@ -1314,7 +1317,8 @@ void QMainWindow::contextMenuEvent(QContextMenuEvent *event)
 #ifndef QT_NO_MENU
 /*!
     Returns a popup menu containing checkable entries for the toolbars and
-    dock widgets present in the main window.
+    dock widgets present in the main window. If  there are no toolbars and
+    dock widgets present, this function returns a null pointer.
 
     By default, this function is called by the main window when the user
     activates a context menu, typically by right-clicking on a toolbar or a dock

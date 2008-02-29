@@ -83,4 +83,4 @@ enable_sxe {
 }
 
 pkg.desc=Safely download and install programs for Qtopia.
-pkg.domain=window,cardreader,docapi,policy,prefix,doc_server,doc_write,doc_install,tmp_write,key_manager,packagemanagement,kill
+pkg.domain=trusted

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -219,11 +219,7 @@ void Ficgta01Battery::readPowerKbdData()
     }
     switch(event.code) {
     case 0x164: //usb/power plug up = out.down = in
-        if(event.value != 0) {
                QTimer::singleShot( 1000, this, SLOT(updateFicStatus()));
-        } else {
-            updateFicStatus();
-        }
         break;
     }
 }
@@ -240,25 +236,29 @@ int Ficgta01Battery::getBatteryLevel()
     battvolt.close();
 
 
-    voltage = voltage - 2800;
-    float perc = voltage  / 14;
+    // lets use 3400 as empty, for all intensive purposes,
+    // 2 minutes left of battery life till neo shuts off might
+    // as well be empty
+
+    voltage = voltage - 3400;
+    float perc = voltage  / 8;
     percentCharge = round( perc + 0.5);
     percentCharge = qBound<quint16>(0, percentCharge, 100);
-    qLog(PowerManagement)<<"Battery volt"<<voltage+2800 << percentCharge<<"%";
+    qLog(PowerManagement)<<"Battery volt"<< voltage + 3400 << percentCharge<<"%";
 
 /*
 4200 = 100%
 4000 = 90%
-3600 = 20%
-3400 = 5%
-2800 = 0%
+3600 = 20% << 10 minutes left
+3400 = 5% << 2 minutes left
+3100 = 0%
 */
     return voltage;
 }
 
 bool Ficgta01Battery::batteryIsFull()
 {
-    if(getBatteryLevel() + 2800 > 4200)
+    if(getBatteryLevel() + 3400 > 4200)
         return true;
     return false;
 }

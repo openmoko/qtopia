@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2034,16 +2032,21 @@ static void convert_ARGB_to_ARGB_PM(QImageData *dest, const QImageData *src, Qt:
     Q_ASSERT(dest->format == QImage::Format_ARGB32_Premultiplied);
     Q_ASSERT(src->width == dest->width);
     Q_ASSERT(src->height == dest->height);
-    Q_ASSERT(src->nbytes == dest->nbytes);
-    Q_ASSERT(src->bytes_per_line == dest->bytes_per_line);
 
+    const int src_pad = (src->bytes_per_line >> 2) - src->width;
+    const int dest_pad = (dest->bytes_per_line >> 2) - dest->width;
     const QRgb *src_data = (QRgb *) src->data;
-    const QRgb *end = src_data + (src->nbytes>>2);
     QRgb *dest_data = (QRgb *) dest->data;
-    while (src_data < end) {
-        *dest_data = PREMUL(*src_data);
-        ++src_data;
-        ++dest_data;
+
+    for (int i = 0; i < src->height; ++i) {
+        const QRgb *end = src_data + src->width;
+        while (src_data < end) {
+            *dest_data = PREMUL(*src_data);
+            ++src_data;
+            ++dest_data;
+        }
+        src_data += src_pad;
+        dest_data += dest_pad;
     }
 }
 
@@ -2053,16 +2056,21 @@ static void convert_ARGB_PM_to_ARGB(QImageData *dest, const QImageData *src, Qt:
     Q_ASSERT(dest->format == QImage::Format_ARGB32);
     Q_ASSERT(src->width == dest->width);
     Q_ASSERT(src->height == dest->height);
-    Q_ASSERT(src->nbytes == dest->nbytes);
-    Q_ASSERT(src->bytes_per_line == dest->bytes_per_line);
 
+    const int src_pad = (src->bytes_per_line >> 2) - src->width;
+    const int dest_pad = (dest->bytes_per_line >> 2) - dest->width;
     const QRgb *src_data = (QRgb *) src->data;
-    const QRgb *end = src_data + (src->nbytes>>2);
     QRgb *dest_data = (QRgb *) dest->data;
-    while (src_data < end) {
-        *dest_data = INV_PREMUL(*src_data);
-        ++src_data;
-        ++dest_data;
+
+    for (int i = 0; i < src->height; ++i) {
+        const QRgb *end = src_data + src->width;
+        while (src_data < end) {
+            *dest_data = INV_PREMUL(*src_data);
+            ++src_data;
+            ++dest_data;
+        }
+        src_data += src_pad;
+        dest_data += dest_pad;
     }
 }
 
@@ -2072,16 +2080,21 @@ static void convert_ARGB_PM_to_RGB(QImageData *dest, const QImageData *src, Qt::
     Q_ASSERT(dest->format == QImage::Format_RGB32);
     Q_ASSERT(src->width == dest->width);
     Q_ASSERT(src->height == dest->height);
-    Q_ASSERT(src->nbytes == dest->nbytes);
-    Q_ASSERT(src->bytes_per_line == dest->bytes_per_line);
 
+    const int src_pad = (src->bytes_per_line >> 2) - src->width;
+    const int dest_pad = (dest->bytes_per_line >> 2) - dest->width;
     const QRgb *src_data = (QRgb *) src->data;
-    const QRgb *end = src_data + (src->nbytes>>2);
     QRgb *dest_data = (QRgb *) dest->data;
-    while (src_data < end) {
-        *dest_data = 0xff000000 | INV_PREMUL(*src_data);
-        ++src_data;
-        ++dest_data;
+
+    for (int i = 0; i < src->height; ++i) {
+        const QRgb *end = src_data + src->width;
+        while (src_data < end) {
+            *dest_data = 0xff000000 | INV_PREMUL(*src_data);
+            ++src_data;
+            ++dest_data;
+        }
+        src_data += src_pad;
+        dest_data += dest_pad;
     }
 }
 
@@ -2110,15 +2123,21 @@ static void mask_alpha_converter(QImageData *dest, const QImageData *src, Qt::Im
 {
     Q_ASSERT(src->width == dest->width);
     Q_ASSERT(src->height == dest->height);
-    Q_ASSERT(src->nbytes == dest->nbytes);
 
+    const int src_pad = (src->bytes_per_line >> 2) - src->width;
+    const int dest_pad = (dest->bytes_per_line >> 2) - dest->width;
     const uint *src_data = (const uint *)src->data;
-    const uint *end = (const uint *)(src->data + src->nbytes);
     uint *dest_data = (uint *)dest->data;
-    while (src_data < end) {
-        *dest_data = *src_data | 0xff000000;
-        ++src_data;
-        ++dest_data;
+
+    for (int i = 0; i < src->height; ++i) {
+        const uint *end = src_data + src->width;
+        while (src_data < end) {
+            *dest_data = *src_data | 0xff000000;
+            ++src_data;
+            ++dest_data;
+        }
+        src_data += src_pad;
+        dest_data += dest_pad;
     }
 }
 
@@ -5126,10 +5145,9 @@ void QImage::setAlphaChannel(const QImage &alphaChannel)
     \l{QPixmap::}{alphaChannel()}, which works in the same way as
     this function on QPixmaps.
 
-    \sa setAlphaChannel(), {QPixmap#Pixmap Information}{Pixmap
-
-    \sa setAlphaChannel(), hasAlphaChannel(), {QImage#Image
-    Transformations}{Image Transformations}
+    \sa setAlphaChannel(), hasAlphaChannel(),
+    {QPixmap#Pixmap Information}{Pixmap},
+    {QImage#Image Transformations}{Image Transformations}
 */
 
 QImage QImage::alphaChannel() const

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qmake-manual.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/qmake-manual.qdoc -->
 <head>
   <title>Qt 4.3: Using Precompiled Headers</title>
   <link rel="prev" href="qmake-advanced-usage.html" />
@@ -48,14 +48,14 @@
 <p>The precompiled header must contain code which is <i>stable</i> and <i>static</i> throughout your project. A typical PCH might look like this:</p>
 <a name="example"></a>
 <h4>Example: <tt>stable.h</tt></h4>
-<pre><span class="comment"> // Add C includes here</span>
+<pre><span class="comment"> //</span> Add C includes here
 
  #if defined __cplusplus
-<span class="comment"> // Add C++ includes here</span>
+<span class="comment"> //</span> Add C++ includes here
  #include &lt;stdlib&gt;
  #include &lt;iostream&gt;
  #include &lt;vector&gt;
- #include &lt;QApplication&gt; <span class="comment">// Qt includes</span>
+ #include &lt;QApplication&gt; <span class="comment">//</span> Qt includes
  #include &lt;QPushButton&gt;
  #include &lt;QLabel&gt;
  #include &quot;thirdparty/include/libmain.h&quot;
@@ -132,10 +132,10 @@
  &lt;/ui&gt;</pre>
 <a name=""></a>
 <h3><tt>stable.h</tt></h3>
-<pre> /* Add C includes here */
+<pre><span class="comment"> /* Add C includes here */</span>
 
  #if defined __cplusplus
- /* Add C++ includes here */</span>
+<span class="comment"> /* Add C++ includes here */</span>
 
  # include &lt;iostream&gt;
  # include &lt;QApplication&gt;
@@ -168,7 +168,7 @@
 <h3><tt>util.cpp</tt></h3>
 <pre> void util_function_does_nothing()
  {
-     <span class="comment">// Nothing here...</span>
+     <span class="comment">//</span> Nothing here...
      int x = 0;
      ++x;
  }</pre>
@@ -221,8 +221,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

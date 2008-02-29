@@ -14,10 +14,12 @@ my %type_to_page = (
     "dataset" => "dataset",
     "qdsync" => "qdsync",
     "changelog" => "chlog",
+    "task" => "task",
 );
+my $page_tag_re = '\\\\('.join("|", keys(%type_to_page)).') (.*)';
 
 my %type_to_title_pre = (
-    "changelog" => "Changes for ",
+    "changelog" => "Qtopia Sync Agent changes for ",
 );
 
 my %type_to_title_post = (
@@ -29,13 +31,15 @@ my %type_to_group = (
     "dataset" => "datasets",
     "qdsync" => "qdsync_commands",
     "changelog" => "changes",
+    "task" => "tasks",
 );
 
 my %type_to_parent = (
     "overview" => "Overviews",
     "dataset" => "Datasets",
-    "qdsync" => "qdsync Protocol Commands",
+    "qdsync" => "qdsync Protocol",
     "changelog" => "What's New?",
+    "task" => "Integration Tasks",
 );
 
 for my $infile ( @ARGV ) {
@@ -106,7 +110,7 @@ for my $infile ( @ARGV ) {
         }
 
         # New page type declarations
-        if ( /\\(overview|dataset|qdsync|changelog) (.*)/ ) {
+        if ( /$page_tag_re/ ) {
             my $type = $1;
             my $name = $2;
             $section = $name;
@@ -120,7 +124,7 @@ for my $infile ( @ARGV ) {
             push(@outdata, "\\ingroup ".$type_to_group{$type}."\n");
             push(@outdata, "\\sa {".$type_to_parent{$type}."}\n");
             if ( $type eq "changelog" ) {
-                push(@outdata, "\\brief Changes for the Qtopia Sync Agent $name\n");
+                push(@outdata, "\\brief Changes for Qtopia Sync Agent $name\n");
             }
             next;
         }
@@ -161,6 +165,7 @@ sub get_page_name
 {
     my ( $pagename ) = @_;
     $pagename =~ s/[\(\)]//g;
+    $pagename =~ s/ /_/g;
     if ( $pagenames{$pagename})  {
         $pagenames{$pagename}++;
     } else {

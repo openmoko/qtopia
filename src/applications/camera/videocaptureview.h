@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,8 @@
 #include <qimage.h>
 #include <qlist.h>
 
+#include <QSocketNotifier>
+
 
 namespace camera
 {
@@ -36,6 +38,11 @@ class VideoCaptureDevice;
 class VideoCaptureView : public QWidget
 {
     Q_OBJECT
+
+#ifdef QT_QWS_GREENPHONE
+public slots:
+    void imageReady(int);
+#endif
 
 public:
     VideoCaptureView(QWidget *parent = 0, Qt::WFlags fl = 0);
@@ -68,7 +75,6 @@ protected:
     void resizeEvent(QResizeEvent* resizeEvent);
     void paintEvent(QPaintEvent* paintEvent);
     void timerEvent(QTimerEvent* timerEvent);
-
 private:
     bool                m_cleared;
     int                 m_tidUpdate;
@@ -82,6 +88,11 @@ private:
     int m_zoomlevel;
     double m_zoomfactor;
 
+    bool m_force;
+#ifdef QT_QWS_GREENPHONE
+    QSocketNotifier* syncNotifier;
+    bool m_still;
+#endif
 };
 
 #endif

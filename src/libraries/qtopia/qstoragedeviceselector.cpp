@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -111,22 +111,19 @@ QStorageDeviceSelector::~QStorageDeviceSelector()
  */
 void QStorageDeviceSelector::setLocation( const QContent &lnk )
 {
-    // NB: setLocation(const QString) assumes only lnk->fileName() is used.
-
-    if ( lnk.isValid() ) {
-        QFileInfo fi( lnk.fileName() );
-        d->fileSize = fi.size();
-        const QFileSystem *fs =  storage->fileSystemOf( lnk.fileName() );
-        d->originalPath = fs ? fs->path() : QString();
+    if ( !lnk.isNull() ) {
+        d->fileSize = lnk.size();
     } else {
         d->fileSize = 0;
-        d->originalPath = QString();
     }
+
+    const QFileSystem *fs =  storage->fileSystemOf( lnk.fileName() );
+    d->originalPath = fs ? fs->path() : QString();
 
     setupCombo();
 
     int currentLocation = -1;
-    if ( lnk.isValid()) {
+    if ( !lnk.isNull()) {
         int n = locations.count();
         for ( int i = 0; i < n; i++ ) {
             if ( lnk.fileName().contains( locations[i] ) )
@@ -257,8 +254,23 @@ void QStorageDeviceSelector::setFilter( QFileSystemFilter *fsf )
  */
 void QStorageDeviceSelector::setLocation( const QString& path )
 {
-    QContent lnk;
-    lnk.setFile(path); // Since that's all setLocation(AppLnk) uses...
-    setLocation(lnk);
+    d->fileSize = 0;
+    const QFileSystem *fs =  storage->fileSystemOf( path );
+    d->originalPath = fs ? fs->path() : QString();
+
+    setupCombo();
+
+    int currentLocation = -1;
+    if ( !path.isEmpty() ) {
+        int n = locations.count();
+        for ( int i = 0; i < n; i++ ) {
+            if ( path.contains( locations[i] ) )
+                currentLocation = i;
+        }
+    }
+    if ( currentLocation == -1 )
+        currentLocation = 0; //default to the first one
+
+    setCurrentIndex( currentLocation );
 }
 

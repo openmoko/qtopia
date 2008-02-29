@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -72,7 +72,7 @@
     \value NotEqual represents the '!=' operator.
     \value Contains represents an operation in which an associated property is checked to see if it
     contains a provided value. For most property types this will perform a string based check. For
-    Flag type properties this will perform a check to see if a flag bit value is set.
+    Status type properties this will perform a check to see if a status flag bit value is set.
 */
 
 /*!
@@ -85,6 +85,23 @@
     \value ParentId the ID of the parent folder for a given folder.
 */
 
+/*!
+    Create a QMailFolderKey with specifying matching parameters.
+
+    A default-constructed key (one for which isEmpty() returns true) matches all folders. 
+    The logical negation of an empty key also matches all folders.
+
+    The result of combining an empty key with a non-empty key is the same as the original 
+    non-empty key. This is true regardless of whether the combination is formed by a 
+    logical AND or a logical OR operation.
+
+    The result of combining two empty keys is an empty key.
+*/
+
+QMailFolderKey::QMailFolderKey()
+{
+    d = new QMailFolderKeyPrivate();
+}
 
 
 /*!
@@ -95,7 +112,28 @@
 
 QMailFolderKey::QMailFolderKey(const Property& p, const QVariant& value, const Operand& c)
 {
-    init(p,c,value);
+    d = new QMailFolderKeyPrivate();
+    QMailFolderKeyPrivate::Argument m;
+    m.property = p;
+    m.op = c;
+    m.valueList.append(value);
+    d->arguments.append(m);
+}
+
+/*!
+    Construct a QMailFolderKey which defines a query parameter where
+    folder id's matching those in \a ids are returned.
+*/
+
+QMailFolderKey::QMailFolderKey(const QMailIdList& ids)
+{
+    d = new QMailFolderKeyPrivate();
+    QMailFolderKeyPrivate::Argument m;
+    m.property = QMailFolderKey::Id;
+    m.op = Equal;
+    foreach(QMailId id,ids)
+        m.valueList.append(id);
+    d->arguments.append(m);
 }
 
 /*!
@@ -124,7 +162,8 @@ QMailFolderKey::~QMailFolderKey()
 QMailFolderKey QMailFolderKey::operator~() const
 {
     QMailFolderKey k(*this);
-    k.d->negated = !d->negated;
+    if(!k.isEmpty())
+        k.d->negated = !d->negated;
     return k;
 }
 
@@ -134,8 +173,12 @@ QMailFolderKey QMailFolderKey::operator~() const
 
 QMailFolderKey QMailFolderKey::operator&(const QMailFolderKey& other) const
 {
+    if(isEmpty())
+        return other;
+    else if(other.isEmpty())
+        return *this;
+
     QMailFolderKey k;
-    k.d->negated = false;
     k.d->logicalOp = QMailFolderKeyPrivate::And;
 
     if(d->logicalOp != QMailFolderKeyPrivate::Or && !d->negated && other.d->logicalOp != QMailFolderKeyPrivate::Or && !other.d->negated)
@@ -157,9 +200,14 @@ QMailFolderKey QMailFolderKey::operator&(const QMailFolderKey& other) const
 
 QMailFolderKey QMailFolderKey::operator|(const QMailFolderKey& other) const
 {
+    if(isEmpty())
+        return other;
+    else if(other.isEmpty())
+        return *this;
+
     QMailFolderKey k;
-    k.d->negated = false;
     k.d->logicalOp = QMailFolderKeyPrivate::Or;
+
     if(d->logicalOp != QMailFolderKeyPrivate::And && 
        !d->negated && 
        other.d->logicalOp != QMailFolderKeyPrivate::And && 
@@ -232,31 +280,16 @@ QMailFolderKey& QMailFolderKey::operator=(const QMailFolderKey& other)
     return *this;
 }
 
-
 /*!
-    Create a QMailFolderKey with default params.
+    Returns true if the key remains empty after default construction; otherwise returns false. 
 */
 
-QMailFolderKey::QMailFolderKey()
+bool QMailFolderKey::isEmpty() const
 {
-    d = new QMailFolderKeyPrivate();
-    d->negated = false;
-    d->logicalOp = QMailFolderKeyPrivate::None;
+    return d->logicalOp == QMailFolderKeyPrivate::None &&
+        d->negated == false &&
+        d->subKeys.isEmpty() && 
+        d->arguments.isEmpty();
 }
 
-/*!
-    Initialize the key class.
-*/
-
-void QMailFolderKey::init(const Property& p , const Operand& op, const QVariant& value)
-{
-    d = new QMailFolderKeyPrivate();
-    d->logicalOp = QMailFolderKeyPrivate::None;
-    d->negated = false;
-    QMailFolderKeyPrivate::Argument m;
-    m.property = p;
-    m.op = op;
-    m.value = value;
-    d->arguments.append(m);
-}
 

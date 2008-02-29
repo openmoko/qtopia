@@ -5,7 +5,7 @@
   The CenterInterface struct is the interface that plugins use to access Qtopia Sync Agent's internals.
   It can be retieved using the QDPlugin::centerInterface() function.
 
-  \sa QDPlugin::centerInterface(), {Qtopia Sync Agent Plugins}
+  \sa QDPlugin::centerInterface()
 */
 
 /*!

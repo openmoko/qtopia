@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/svgalib.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/svgalib.qdoc -->
 <head>
   <title>Qt 4.3: Accelerated Graphics Driver Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -25,9 +25,10 @@
 <li><a href="qtopiacore-svgalib-svgalibscreen-h.html">qtopiacore/svgalib/svgalibscreen.h</a></li>
 <li><a href="qtopiacore-svgalib-svgalibsurface-cpp.html">qtopiacore/svgalib/svgalibsurface.cpp</a></li>
 <li><a href="qtopiacore-svgalib-svgalibsurface-h.html">qtopiacore/svgalib/svgalibsurface.h</a></li>
+<li><a href="qtopiacore-svgalib-svgalib-pro.html">qtopiacore/svgalib/svgalib.pro</a></li>
 </ul>
 <p>The Accelerated Graphics Driver example shows how you can write your own accelerated graphics driver and <a href="qtopiacore-accel.html#add-your-graphics-driver-to-qtopia-core">add your graphics driver to Qtopia Core</a>. In <a href="qtopiacore.html">Qtopia Core</a>, painting is a pure software implementation and is normally performed in two steps: The clients render each window onto a corresponding surface (stored in memory) using a paint engine, and then the server uses the graphics driver to compose the surface images and copy them to the screen. (See the <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a> documentation for details.)</p>
-<p>The rendering can be accelerated in two ways: Either by accelerating the copying of pixels to the screen, or by accelerating the explicit painting operations. The first is done in the graphics driver implementation, the latter is performed by the paint engine implementation. Typically, both the pixel copying and the painting operations are accelerted using the following approach:</p>
+<p>The rendering can be accelerated in two ways: Either by accelerating the copying of pixels to the screen, or by accelerating the explicit painting operations. The first is done in the graphics driver implementation, the latter is performed by the paint engine implementation. Typically, both the pixel copying and the painting operations are accelerated using the following approach:</p>
 <ol type="1">
 <li><a href="#step-1-creating-a-custom-graphics-driver">Creating a Custom Graphics Driver</a></li>
 <li><a href="#step-2-implementing-a-custom-raster-paint-engine">Implementing a Custom Paint Engine</a></li>
@@ -151,7 +152,7 @@
 <pre> void SvgalibScreen::exposeRegion(QRegion region, int changing)
  {
      QScreen::exposeRegion(region, changing);
-     <span class="comment">// flip between buffers if implementing a double buffered driver</span>
+     <span class="comment">//</span> flip between buffers if implementing a double buffered driver
  }</pre>
 <p>The next function we implement is the <a href="qscreen.html#exposeRegion">exposeRegion()</a> function that paints the given region on screen.</p>
 <p>The default implementation will do the necessary composing of the top-level windows and call <a href="qscreen.html#solidFill">solidFill()</a> and <a href="qscreen.html#blit">blit()</a> whenever it is required. We do not want to change this behavior in this driver so we just call the base class implementation. On the other hand, if you are implementing a double buffered screen driver, this is where you would like to flip between the buffers.</p>
@@ -451,8 +452,8 @@
 <p>The <a href="qscreen.html#createSurface">createSurface()</a> functions are factory functions that determines what kind of surface a top-level window is using. In our example we only use the custom surface if the given window has the <a href="qt.html#WidgetAttribute-enum">Qt::WA_PaintOnScreen</a> attribute or the <a href="qtopiacore-envvars.html#qt-onscreen-paint">QT_ONSCREEN_PAINT</a> environment variable is set.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

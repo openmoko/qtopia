@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -446,11 +446,14 @@ void QDLinkHelper::init( QIODevice *device )
     LOG() << "Using ping_interval" << ping_interval << "send_ack" << send_ack;
     {
         QTextStream stream( rawDevice );
+        // Pinging is currently disabled. It should really have been dropped from the protocol altogether.
+        /*
         // the device waits twice as long as our timeout
         // this should help to avoid dropouts due to OS paging, etc.
         int interval = ping_interval;
         if ( interval ) interval *= 2; // don't do this if the timeout is 0 (disabled)
-        stream << "HELPER_INIT" << " " << interval << " " << (send_ack?"1":"0") << " 0" << endl;
+        */
+        stream << "HELPER_INIT" << " " << 0 << " " << (send_ack?"1":"0") << " 0" << endl;
     }
 #endif
 

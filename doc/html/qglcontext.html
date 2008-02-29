@@ -158,14 +158,14 @@
 <p>Sets a <i>format</i> for this context. The context is <a href="qglcontext.html#reset">reset</a>.</p>
 <p>Call <a href="qglcontext.html#create">create</a>() to create a new GL context that tries to match the new format.</p>
 <pre> QGLContext *cx;
-<span class="comment"> //  ...</span>
+<span class="comment"> //</span>  ...
  QGLFormat f;
  f.setStereo(true);
  cx-&gt;setFormat(f);
  if (!cx-&gt;create())
-     exit(); <span class="comment">// no OpenGL support, or cannot render on the specified paintdevice</span>
+     exit(); <span class="comment">//</span> no OpenGL support, or cannot render on the specified paintdevice
  if (!cx-&gt;format().stereo())
-     exit(); <span class="comment">// could not create stereo context</span></pre>
+     exit(); <span class="comment">//</span> could not create stereo context</pre>
 <p>See also <a href="qglcontext.html#format">format</a>(), <a href="qglcontext.html#reset">reset</a>(), and <a href="qglcontext.html#create">create</a>().</p>
 <h3 class="fn"><a name="setInitialized"></a>void QGLContext::setInitialized ( bool <i>on</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>If <i>on</i> is true the context has been initialized, i.e&#x2e; QGLContext::setInitialized() has been called on it. If <i>on</i> is false the context has not been initialized.</p>
@@ -188,8 +188,8 @@
 <p>See also <a href="qglcontext.html#setWindowCreated">setWindowCreated</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

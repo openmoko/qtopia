@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,6 +50,7 @@ public:
     QModemService *service;
     QTimer *checkTimer;
     int count;
+    bool simPinRequired;
 };
 
 /*!
@@ -64,9 +65,14 @@ QModemSimInfo::QModemSimInfo( QModemService *service )
     d->checkTimer->setSingleShot( true );
     connect( d->checkTimer, SIGNAL(timeout()), this, SLOT(requestIdentity()) );
     d->count = 0;
+    d->simPinRequired = false;
 
     // Perform an initial AT+CIMI request to get the SIM identity.
     QTimer::singleShot( 0, this, SLOT(requestIdentity()) );
+
+    // Hook onto the posted event of the service to determine
+    // the current sim pin status
+    connect( service, SIGNAL(posted(QString)), this, SLOT(serviceItemPosted(QString)) );
 }
 
 /*!
@@ -126,14 +132,25 @@ void QModemSimInfo::cimi( bool ok, const QAtResult& result )
             d->count++;
         } else {
             d->count = 0;
-            // post a message to modem service to stop SIM PIN polling
-            d->service->post( "simnotinserted" );
-            emit notInserted();
+            // If not waiting for SIM pin to be entered by the user
+            if ( !d->simPinRequired ) {
+                // post a message to modem service to stop SIM PIN polling
+                d->service->post( "simnotinserted" );
+                emit notInserted();
+            }
         }
         // If we got a definite "not inserted" error, then emit notInserted().
         if ( result.resultCode() == QAtResult::SimNotInserted )
             emit notInserted();
     }
+}
+
+void QModemSimInfo::serviceItemPosted( const QString &item )
+{
+    if ( item == "simpinrequired" )
+        d->simPinRequired = true;
+    else if ( item == "simpinentered" )
+        d->simPinRequired = false;
 }
 
 // Extract the identity information from the content of an AT+CIMI response.

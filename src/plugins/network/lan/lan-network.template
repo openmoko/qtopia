@@ -12,7 +12,7 @@
 # into the image directory.
 #
 # For further details how this script is used 
-# see $QPEDIR/src/plugins/network/lan/lan.cpp.
+# see $QPEDIR/src/plugins/network/lan/lan.cpp and the Network Services documentation
 
 
 ###############################
@@ -94,7 +94,7 @@ install()
                echo "Asking DHCP server for dns details";
                 ## ADD CODE HERE ##
             fi
-            #sudo mv -f $TMP_FILE /etc/resolv.conf;
+            #mv -f $TMP_FILE /etc/resolv.conf;
             ;; 
         dhcp)
             print_debug "Using DHCP to obtain IP, gateway, broadcast and netmask address";
@@ -209,7 +209,7 @@ start()
 {
     print_debug "starting interface $1";
     ## ADD CODE HERE ##
-    #sudo /sbin/ifup $1;
+    #/sbin/ifup $1;
 }
 
 # Stops the interface
@@ -219,7 +219,7 @@ stop()
 {
     print_debug "stopping interface $1";
     ## ADD CODE HERE ##
-    #sudo /sbin/ifdown $1
+    #/sbin/ifdown $1
 }
 
 # Cleans any existing configuration file. This is called when the user deletes the interface
@@ -252,9 +252,9 @@ route()
 
     if [ -n "$gateway" ]; then
         print_debug "removing old default route";
-        sudo route del default;
+        /sbin/route del default;
         print_debug "adding new default route via $1";
-        sudo /sbin/route add default gw $gateway;
+        /sbin/route add default gw $gateway;
     fi
 }
 

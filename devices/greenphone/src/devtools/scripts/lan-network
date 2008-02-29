@@ -14,7 +14,7 @@
 # into the image directory.
 #
 # For further details how this script is used 
-# see $QPEDIR/src/plugins/network/lan/lan.cpp.
+# see $QPEDIR/src/plugins/network/lan/lan.cpp and the Network Services documentation.
 
 
 ###############################
@@ -83,7 +83,9 @@ update_hosts()
 #                       * [-authmode <open|shared> -multikey <defaultKey> <key1> <key2> <key3> <key4>] 
 #                       * [-authmode <open|shared> -phrase <passphrase> ]   
 #                       * [-authmode <none> -nokey ]  
-#                       * [-authmode <WPA-PSK|WPA-EAP> <password> ]
+#                       * [-authmode <WPA-PSK> <password> <TKIP|AES> ]
+#                       * [-authmode <WPA-EAP> <TLS> <identity> <client-key-password> <clientKey> <clientCert> <serverCert>
+#                       * [-authmode <WPA-EAP> <TTLS|PEAP> <identity> <password> <serverCert> <MD5|GTC|MSCHAPV2|Any> <anonymous identity>
  
 install()
 {
@@ -110,7 +112,7 @@ install()
                echo > $TMP_FILE
             fi
 
-            mv $TMP_FILE /etc/resolvconf/$IFACE
+            mv -f $TMP_FILE /etc/resolvconf/$IFACE
 
             rm -f $RESOLVCONF
             ln -s /etc/resolvconf/$IFACE $RESOLVCONF
@@ -144,59 +146,54 @@ install()
 
             mkdir -p $HOME/Settings/Network/wireless
             NET_OPTIONS=$HOME/Settings/Network/wireless/$IFACE
-            echo > $NET_OPTIONS
+            echo > $TMP_FILE
 
             while [ $# -gt 0 ]; do
                 case "$1" in 
                     -mode)
                         shift;
-                        echo "WIRELESS_MODE='$1'" >> $NET_OPTIONS
+                        echo "WIRELESS_MODE='$1'" >> $TMP_FILE;
                         ;;
                     -essid)
                         shift;
-                        WIRELESS_ESSID=$1
-                        echo "WIRELESS_ESSID=$1" >> $NET_OPTIONS
+                        echo "WIRELESS_ESSID=$1" >> $TMP_FILE;
                         ;;
                     -ap)
                         shift;
-                        echo "WIRELESS_AP=$1" >> $NET_OPTIONS
+                        echo "WIRELESS_AP=$1" >> $TMP_FILE;
                         ;;
                     -bitrate)
                         shift;
                         if [ "$1" = "0" ]; then
-                            echo "WIRELESS_BITRATE='auto'" >> $NET_OPTIONS
-                            echo "auto detect bitrate"
+                            echo "WIRELESS_BITRATE='auto'" >> $TMP_FILE;
                         else
-                            echo "WIRELESS_BITRATE='$1'" >> $NET_OPTIONS
-                            echo "use given bitrate";
+                            echo "WIRELESS_BITRATE='$1'" >> $TMP_FILE;
                         fi  
                         ;;
                     -nick)
                         shift;
-                        echo "WIRELESS_NICK='$1'" >> $NET_OPTIONS
+                        echo "WIRELESS_NICK='$1'" >> $TMP_FILE;
                         ;;
                     -channel)
                         shift;
                         if [ "$1" = "0" ]; then
-                            echo "WIRELESS_CHANNEL=''" >> $NET_OPTIONS
-                            echo "auto detect channel";
+                            echo "WIRELESS_CHANNEL=''" >> $TMP_FILE;
                         else
-                            echo "WIRELESS_CHANNEL='$1'" >> $NET_OPTIONS
-                            echo "use given channel";
+                            echo "WIRELESS_CHANNEL='$1'" >> $TMP_FILE;
                         fi
                         ;;
                     -keylength)
                         shift;
-                        echo "WIRELESS_KEY_LENGTH='$1'" >> $NET_OPTIONS
+                        echo "WIRELESS_KEY_LENGTH='$1'" >> $TMP_FILE;
                         ;;
                     -authmode)
                         shift;
-                        echo "WIRELESS_AUTH_MODE=$1" >> $NET_OPTIONS
                         case "$1" in 
                             open|shared|none)
-                                ## ADD CODE HERE ##
+                                echo "WIRELESS_AUTH_MODE=NONE" >> $TMP_FILE;
                                 # handle open/shared/none encryptipon
                                 shift;
+                                local ka kb kc kd="";
                                 if [ "$1" = "-phrase" ]; then
                                     shift;
                                     ## ADD CODE HERE ##
@@ -207,31 +204,67 @@ install()
                                     print_debug "no password/keys given";
                                 elif [ "$1" = "-multikey" ]; then
                                     shift;
-                                    echo "using default key: $1" # can be 0-3
-                                    ## ADD CODE HERE ##
+                                    echo "WIRELESS_DEFAULT_KEY='$1'" >> $TMP_FILE;
                                     shift;
-                                    ## ADD CODE HERE ##
-                                    # read all 4 keys and determine which is default
+                                    ka=$(echo $1 | tr -d :)
+                                    shift;
+                                    kb=$(echo $1 | tr -d :)
+                                    shift;
+                                    kc=$(echo $1 | tr -d :)
+                                    shift;
+                                    kd=$(echo $1 | tr -d :)
                                 fi
+                                echo "WIRELESS_KEY_0=$ka" >> $TMP_FILE;
+                                echo "WIRELESS_KEY_1=$kb" >> $TMP_FILE;
+                                echo "WIRELESS_KEY_2=$kc" >> $TMP_FILE;
+                                echo "WIRELESS_KEY_3=$kd" >> $TMP_FILE;
                                 ;;
                             WPA-PSK)
+                                echo "WIRELESS_AUTH_MODE=WPA-PSK" >> $TMP_FILE;
                                 shift;
-                                echo "WIRELESS_PSK=$1" >> $NET_OPTIONS
+                                echo "WIRELESS_WPA_PSK=$1" >> $TMP_FILE;
                                 shift;
                                 case "$1" in
                                     TKIP)
-                                        echo "WIRELESS_PAIRWISE=TKIP" >> $NET_OPTIONS
-                                        echo "WIRELESS_GROUP=TKIP" >> $NET_OPTIONS
+                                        echo "WIRELESS_PAIRWISE=TKIP" >> $TMP_FILE;
+                                        echo "WIRELESS_GROUP=TKIP" >> $TMP_FILE;
                                         ;;
                                     AES)
-                                        echo "WIRELESS_PAIRWISE=CCMP" >> $NET_OPTIONS
-                                        echo "WIRELESS_GROUP=CCMP" >> $NET_OPTIONS
+                                        echo "WIRELESS_PAIRWISE=CCMP" >> $TMP_FILE;
+                                        echo "WIRELESS_GROUP=CCMP" >> $TMP_FILE;
                                         ;;
                                 esac
                                 ;;
                             WPA-EAP)
+                                echo "WIRELESS_AUTH_MODE=WPA-EAP" >> $TMP_FILE;
                                 shift;
-                                ## ADD CODE HERE ##
+                                mode=$1;
+                                echo "WIRELESS_EAP_MODE=$mode" >> $TMP_FILE;
+                                shift;
+                                echo "WIRELESS_WPA_IDENTITY='$1'" >> $TMP_FILE;
+                                shift;
+                                if [ "$mode" = "TLS" ]; then
+                                    echo "WIRELESS_CLIENT_KEY_PASSWORD='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_CLIENT_KEY='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_CLIENT_CERT='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_CA_CERT='$1'" >> $TMP_FILE;
+                                    shift;
+                                else #PEAP and TTLS
+                                    echo "WIRELESS_WPA_PASSWORD='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_CA_CERT='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_EAP_AUTH='$1'" >> $TMP_FILE;
+                                    shift;
+                                    echo "WIRELESS_WPA_ANONID='$1'" >> $TMP_FILE;
+                                fi
+                                ;;
+                            *)
+                                print_debug "Unknown option: $1"
+                                shift;
                                 ;;
                         esac
                         ;;
@@ -243,6 +276,8 @@ install()
                 esac;
                 [ $# -gt 0 ] && shift;
             done
+
+            mv -f $TMP_FILE $NET_OPTIONS;
             ;;
         *)
             print_debug "Unknown option: $MODE";
@@ -269,30 +304,52 @@ start()
         # Generating wpa_supplicant.conf
         [ -d /var/lib/wpa_supplicant ] || mkdir -p /var/lib/wpa_supplicant
         WPACONF=/var/lib/wpa_supplicant/wpa_supplicant.conf
-        echo "network={" > $WPACONF
+        echo > $WPACONF
+        
+        echo "ap_scan=2" >> $WPACONF
+        echo "network={" >> $WPACONF
         [ -n "$WIRELESS_ESSID" ] && echo "    ssid=\"$WIRELESS_ESSID\"" >> $WPACONF
         echo "    proto=WPA2 WPA RSN" >> $WPACONF
         [ -n "$WIRELESS_AUTH_MODE" ] && echo "    key_mgmt=$WIRELESS_AUTH_MODE" >> $WPACONF
         [ -n "$WIRELESS_PAIRWISE" ] && echo "    pairwise=$WIRELESS_PAIRWISE" >> $WPACONF
         [ -n "$WIRELESS_GROUP" ] && echo "    group=$WIRELESS_GROUP" >> $WPACONF
-        [ -n "$WIRELESS_PSK" ] && echo "    psk=\"$WIRELESS_PSK\"" >> $WPACONF
+        # WPA-PSK
+        [ -n "$WIRELESS_WPA_PSK" ] && echo "    psk=\"$WIRELESS_WPA_PSK\"" >> $WPACONF
+        # WEP
+        [ -n "$WIRELESS_WEP_PHRASE" ] && echo "    wep_key0=\"$WIRELESS_WEP_PHRASE\"" >> $WPACONF
+        [ -n "$WIRELESS_KEY_0" ] && echo "    wep_key0=$WIRELESS_KEY_0" >> $WPACONF
+        [ -n "$WIRELESS_KEY_1" ] && echo "    wep_key0=$WIRELESS_KEY_1" >> $WPACONF
+        [ -n "$WIRELESS_KEY_2" ] && echo "    wep_key0=$WIRELESS_KEY_2" >> $WPACONF
+        [ -n "$WIRELESS_KEY_3" ] && echo "    wep_key0=$WIRELESS_KEY_3" >> $WPACONF
+        [ -n "$WIRELESS_DEFAULT_KEY" ] && echo "    wep_tx_keyidx=$WIRELESS_DEFAULT_KEY" >> $WPACONF
+        # WPA-EAP
+        [ -n "$WIRELESS_EAP_MODE" ] && echo "    eap=$WIRELESS_EAP_MODE" >> $WPACONF
+        [ -n "$WIRELESS_WPA_IDENTITY" ] && echo "    identity=\"$WIRELESS_WPA_IDENTITY\"" >> $WPACONF
+        [ -n "$WIRELESS_CLIENT_KEY" ] && echo "    private_key=\"$WIRELESS_CLIENT_KEY\"" >> $WPACONF
+        [ -n "$WIRELESS_CLIENT_KEY_PASSWORD" ] && echo "    private_key_passwd=\"$WIRELESS_CLIENT_KEY_PASSWORD\"" >> $WPACONF
+        [ -n "$WIRELESS_CLIENT_CERT" ] && echo "    client_cert=\"$WIRELESS_CLIENT_CERT\"" >> $WPACONF
+        [ -n "$WIRELESS_CA_CERT" ] && echo "    ca_cert=\"$WIRELESS_CA_CERT\"" >> $WPACONF
+        [ -n "$WIRELESS_WPA_PASSWORD" ] && echo "    password=\"$WIRELESS_WPA_PASSWORD\"" >> $WPACONF
+        [ -n "$WIRELESS_EAP_AUTH" ] && echo "    phase2=\"auth=$WIRELESS_EAP_AUTH\"" >> $WPACONF
+        [ -n "$WIRELESS_WPA_ANONID" ] && echo "    anonymous_identity=\"$WIRELESS_WPA_ANONID\"" >> $WPACONF
         echo "}" >> $WPACONF
         
         ifconfig $1 down
-        ifconfig $1 hw ether $(/usr/bin/tat localmac)
+        [ "$1" = "eth0" ] && ifconfig $1 hw ether $(/usr/bin/tat localmac)
         ifconfig $1 up
 
         if [ "$WIRELESS_ESSID" != "" ]; then
-            iwconfig $1 essid $WIRELESS_ESSID
+            iwconfig $1 essid "$WIRELESS_ESSID"
         else
             iwconfig $1 essid any
         fi
 
-        if [ "$WIRELESS_AP" != "" ]; then
-            iwconfig $1 ap $WIRELESS_AP
-        else
-            iwconfig $1 ap any
-        fi
+        # p300wlan does not support ap
+        #if [ "$WIRELESS_AP" != "" ]; then
+        #    iwconfig $1 ap $WIRELESS_AP
+        #else
+        #    iwconfig $1 ap any
+        #fi
 
         if [ "$WIRELESS_BITRATE" != "" ] && [ "$WIRELESS_BITRATE" != "auto" ]; then
             iwconfig $1 rate ${WIRELESS_BITRATE}M auto
@@ -300,16 +357,14 @@ start()
             iwconfig $1 rate auto
         fi
 
-        iwconfig $1 nick "$WIRELESS_NICK"
+        # p300wlan does not support nick
+        #iwconfig $1 nick "$WIRELESS_NICK"
 
         if [ "$WIRELESS_CHANNEL" != "" ]; then
             iwconfig $1 channel $WIRELESS_CHANNEL
         fi
         
-        if [ "$WIRELESS_AUTH_MODE" = "WPA-PSK" ] ||
-           [ "$WIRELESS_AUTH_MODE" = "WPA-EAP" ]; then
-            /sbin/wpa_supplicant -i $1 -D socketcf -c $WPACONF -dd | logger -t WPA &
-        fi
+        /sbin/wpa_supplicant -i $1 -D socketcf -c $WPACONF -dd | logger -t WPA &
     fi
     
     case $MODE in
@@ -374,12 +429,10 @@ route()
     print_debug "changing default route"
     
     if [ $# -gt 2 ]; then
-        ## ADD CODE HERE ##
         # gateway address was passed to us
         gateway=$3
     else
         echo "Using DHCP information to find gateway IP";
-
         # renew udhcpc for interface
         DHCP_PIDS=$( ps | grep "[u]dhcpc .*-i $1" | awk '{print $1}' )
         [ -n "$DHCP_PIDS" ] && kill -s SIGUSR1 $DHCP_PIDS 2>&1 >/dev/null
@@ -417,8 +470,8 @@ case $ACTION in
         route "$@";
         ;;
     *)
+        print_debug "Unknown option: $ACTION";
         print_options;
         exit 1;
         ;;
 esac
-

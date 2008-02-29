@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/network/qftp.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/network/qftp.cpp -->
 <head>
   <title>Qt 4.3: QFtp Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -108,11 +108,11 @@
 <p>If an error occurs during the execution of one of the commands in a sequence of commands, all the pending commands (i.e&#x2e; scheduled, but not yet executed commands) are cleared and no signals are emitted for them.</p>
 <p>Some commands, e.g&#x2e; <a href="qftp.html#list">list</a>(), emit additional signals to report their results.</p>
 <p>Example: If you want to download the INSTALL file from Trolltech's FTP server, you would write this:</p>
-<pre> ftp-&gt;connectToHost(&quot;ftp.trolltech.com&quot;);  <span class="comment">// id == 1</span>
- ftp-&gt;login();                             <span class="comment">// id == 2</span>
- ftp-&gt;cd(&quot;qt&quot;);                            <span class="comment">// id == 3</span>
- ftp-&gt;get(&quot;INSTALL&quot;);                      <span class="comment">// id == 4</span>
- ftp-&gt;close();                             <span class="comment">// id == 5</span></pre>
+<pre> ftp-&gt;connectToHost(&quot;ftp.trolltech.com&quot;);  <span class="comment">//</span> id == 1
+ ftp-&gt;login();                             <span class="comment">//</span> id == 2
+ ftp-&gt;cd(&quot;qt&quot;);                            <span class="comment">//</span> id == 3
+ ftp-&gt;get(&quot;INSTALL&quot;);                      <span class="comment">//</span> id == 4
+ ftp-&gt;close();                             <span class="comment">//</span> id == 5</pre>
 <p>For this example the following sequence of signals is emitted (with small variations, depending on network traffic, etc.):</p>
 <pre> start(1)
  stateChanged(HostLookup)
@@ -383,16 +383,10 @@
 <p>This signal is emitted when the state of the connection changes. The argument <i>state</i> is the new state of the connection; it is one of the <a href="qftp.html#State-enum">State</a> values.</p>
 <p>It is usually emitted in response to a <a href="qftp.html#connectToHost">connectToHost</a>() or <a href="qftp.html#close">close</a>() command, but it can also be emitted &quot;spontaneously&quot;, e.g&#x2e; when the server closes the connection unexpectedly.</p>
 <p>See also <a href="qftp.html#connectToHost">connectToHost</a>(), <a href="qftp.html#close">close</a>(), <a href="qftp.html#state">state</a>(), and <a href="qftp.html#State-enum">State</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QFtp-2"></a>QFtp::QFtp ( <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="readBlock"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QFtp::readBlock ( char * <i>data</i>, <a href="qtglobal.html#quint64-typedef">quint64</a> <i>maxlen</i> )</h3>
-<p>Use <a href="qftp.html#read">read</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

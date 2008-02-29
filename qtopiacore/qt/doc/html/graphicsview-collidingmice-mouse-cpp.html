@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -95,29 +93,29 @@
 
  void Mouse::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
  {
-     <span class="comment">// Body</span>
+     <span class="comment">//</span> Body
      painter-&gt;setBrush(color);
      painter-&gt;drawEllipse(-10, -20, 20, 40);
 
-     <span class="comment">// Eyes</span>
+     <span class="comment">//</span> Eyes
      painter-&gt;setBrush(Qt::white);
      painter-&gt;drawEllipse(-10, -17, 8, 8);
      painter-&gt;drawEllipse(2, -17, 8, 8);
 
-     <span class="comment">// Nose</span>
+     <span class="comment">//</span> Nose
      painter-&gt;setBrush(Qt::black);
      painter-&gt;drawEllipse(QRectF(-2, -22, 4, 4));
 
-     <span class="comment">// Pupils</span>
+     <span class="comment">//</span> Pupils
      painter-&gt;drawEllipse(QRectF(-8.0 + mouseEyeDirection, -17, 4, 4));
      painter-&gt;drawEllipse(QRectF(4.0 + mouseEyeDirection, -17, 4, 4));
 
-     <span class="comment">// Ears</span>
+     <span class="comment">//</span> Ears
      painter-&gt;setBrush(scene()-&gt;collidingItems(this).isEmpty() ? Qt::darkYellow : Qt::red);
      painter-&gt;drawEllipse(-17, -12, 16, 16);
      painter-&gt;drawEllipse(1, -12, 16, 16);
 
-     <span class="comment">// Tail</span>
+     <span class="comment">//</span> Tail
      QPainterPath path(QPointF(0, 20));
      path.cubicTo(-5, 22, -5, 22, 0, 25);
      path.cubicTo(5, 27, 5, 32, 0, 30);
@@ -128,7 +126,7 @@
 
  void Mouse::timerEvent(QTimerEvent *)
  {
-     <span class="comment">// Don't move too far away</span>
+     <span class="comment">//</span> Don't move too far away
      QLineF lineToCenter(QPointF(0, 0), mapFromScene(0, 0));
      if (lineToCenter.length() &gt; 150) {
          qreal angleToCenter = ::acos(lineToCenter.dx() / lineToCenter.length());
@@ -137,10 +135,10 @@
          angleToCenter = normalizeAngle((Pi - angleToCenter) + Pi / 2);
 
          if (angleToCenter &lt; Pi &amp;&amp; angleToCenter &gt; Pi / 4) {
-             <span class="comment">// Rotate left</span>
+             <span class="comment">//</span> Rotate left
              angle += (angle &lt; -Pi / 2) ? 0.25 : -0.25;
          } else if (angleToCenter &gt;= Pi &amp;&amp; angleToCenter &lt; (Pi + Pi / 2 + Pi / 4)) {
-             <span class="comment">// Rotate right</span>
+             <span class="comment">//</span> Rotate right
              angle += (angle &lt; Pi / 2) ? 0.25 : -0.25;
          }
      } else if (::sin(angle) &lt; 0) {
@@ -149,7 +147,7 @@
          angle -= 0.25;
      }
 
-     <span class="comment">// Try not to crash with any other mice</span>
+     <span class="comment">//</span> Try not to crash with any other mice
      QList&lt;QGraphicsItem *&gt; dangerMice = scene()-&gt;items(QPolygonF()
                                                         &lt;&lt; mapToScene(0, 0)
                                                         &lt;&lt; mapToScene(-30, -50)
@@ -165,15 +163,15 @@
          angleToMouse = normalizeAngle((Pi - angleToMouse) + Pi / 2);
 
          if (angleToMouse &gt;= 0 &amp;&amp; angleToMouse &lt; Pi / 2) {
-             <span class="comment">// Rotate right</span>
+             <span class="comment">//</span> Rotate right
              angle += 0.5;
          } else if (angleToMouse &lt;= TwoPi &amp;&amp; angleToMouse &gt; (TwoPi - Pi / 2)) {
-             <span class="comment">// Rotate left</span>
+             <span class="comment">//</span> Rotate left
              angle -= 0.5;
          }
      }
 
-     <span class="comment">// Add some random movement</span>
+     <span class="comment">//</span> Add some random movement
      if (dangerMice.size() &gt; 1 &amp;&amp; (qrand() % 10) == 0) {
          if (qrand() % 1)
              angle += (qrand() % 100) / 500.0;
@@ -191,8 +189,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

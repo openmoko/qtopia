@@ -5,7 +5,6 @@ qtopia_project(qtopia app)
 # TEMPLATE = app
 # INCLUDEPATH += .
 
-CONFIG	+= packages
 # Disable i18n support
 CONFIG+=no_tr
 
@@ -43,7 +42,7 @@ INSTALLS+=cert
 
 pkg.name=trust
 pkg.desc=Sample Trusted Application
-pkg.domain=graphics phonecomm
+pkg.domain=trusted
 pkg.version=1.0.0
 pkg.maintainer=Sarah Smith <sarah.smith@trolltech.com>
 pkg.trust=/etc/Trust/trustcorp.pem

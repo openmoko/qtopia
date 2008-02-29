@@ -42,7 +42,7 @@
 <p>You have to create coclasses to be able to connect to signals of the subobject. Note that the constructor deletes the interface object, so the following will cause a segmentation fault:</p>
 <pre> Outlook::_NameSpace *tmp = outlook-&gt;Session();
  Outlook::NameSpace *session = new Outlook::NameSpace(tmp);
- delete tmp; <span class="comment">// or any other use of tmp: segfault</span></pre>
+ delete tmp; <span class="comment">//</span> or any other use of tmp: segfault</pre>
 <p>If the return type is of a coclass or interface type declared in another type library you have to include the namespace header for that other type library before including the header for the namespace you want to use (both header have to be generated with this tool).</p>
 <p>By default, methods and property returning subobjects will use the type as in the type library. The caller of the function is responsible for deleting or reparenting the object returned. If the <tt>-compat</tt> switch is set, properties and method returning a COM object have the return type <tt>IDispatch*</tt>, and the namespace will not declare wrapper classes for interfaces.</p>
 <p>In this case, create the correct wrapper class explicitly:</p>
@@ -52,8 +52,8 @@
 <p>To build the tool you must first build the <a href="qaxcontainer.html">QAxContainer</a> library. Then run your make tool in <tt>tools/dumpcpp</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

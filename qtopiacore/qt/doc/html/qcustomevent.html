@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/kernel/qcoreevent.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/kernel/qcoreevent.cpp -->
 <head>
   <title>Qt 4.3: QCustomEvent Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -34,20 +34,10 @@
 <p>In Qt 3, <a href="qobject.html#customEvent">QObject::customEvent</a>() took a QCustomEvent pointer. We found out that this approach was unsatisfactory, because there was often no safe way of deleting the data held in the <tt>void *</tt>.</p>
 <p>In Qt 4, <a href="qobject.html#customEvent">QObject::customEvent</a>() takes a plain <a href="qevent.html">QEvent</a> pointer. You can add custom data by subclassing.</p>
 <p>See also <a href="qobject.html#customEvent">QObject::customEvent</a>() and <a href="qcoreapplication.html#notify">QCoreApplication::notify</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QCustomEvent"></a>QCustomEvent::QCustomEvent ( int <i>type</i>, void * <i>data</i> = 0 )</h3>
-<p>Constructs a custom event object with the event <i>type</i> and a pointer to <i>data</i>. The value of <i>type</i> must be at least as large as <a href="qevent.html#Type-enum">QEvent::User</a>. By default, the data pointer is set to 0.</p>
-<h3 class="fn"><a name="data"></a>void * QCustomEvent::data () const</h3>
-<p>Returns a pointer to the generic event data.</p>
-<p>See also <a href="qcustomevent-qt3.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="setData"></a>void QCustomEvent::setData ( void * <i>data</i> )</h3>
-<p>Sets the generic data pointer to <i>data</i>.</p>
-<p>See also <a href="qcustomevent-qt3.html#data">data</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

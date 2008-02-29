@@ -48,46 +48,46 @@
 <p>QMailMessageContentType provides simplified access to the various components of the 'Content-Type' header field. Components of the header field not exposed by member functions can be accessed using the functions inherited from <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailMessageContentType"></a>QMailMessageContentType::QMailMessageContentType ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="QMailMessageContentType"></a>QMailMessageContentType::QMailMessageContentType ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>type</i> )</h3>
 <p>Creates a content type object from the data in <i>type</i>.</p>
 <h3 class="fn"><a name="QMailMessageContentType-3"></a>QMailMessageContentType::QMailMessageContentType ( const <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a> &amp; <i>field</i> )</h3>
 <p>Creates a content type object from the content of <i>field</i>.</p>
-<h3 class="fn"><a name="boundary"></a><a href="qbytearray.html">QByteArray</a> QMailMessageContentType::boundary () const</h3>
-<p>Returns the value of the 'boundary' parameter, if present; otherwise returns an empty <a href="qbytearray.html">QByteArray</a>.</p>
+<h3 class="fn"><a name="boundary"></a><a href="./qbytearray.html">QByteArray</a> QMailMessageContentType::boundary () const</h3>
+<p>Returns the value of the 'boundary' parameter, if present; otherwise returns an empty <a href="./qbytearray.html">QByteArray</a>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#setBoundary">setBoundary</a>().</p>
-<h3 class="fn"><a name="charset"></a><a href="qbytearray.html">QByteArray</a> QMailMessageContentType::charset () const</h3>
-<p>Returns the value of the 'charset' parameter, if present; otherwise returns an empty <a href="qbytearray.html">QByteArray</a>.</p>
+<h3 class="fn"><a name="charset"></a><a href="./qbytearray.html">QByteArray</a> QMailMessageContentType::charset () const</h3>
+<p>Returns the value of the 'charset' parameter, if present; otherwise returns an empty <a href="./qbytearray.html">QByteArray</a>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#setCharset">setCharset</a>().</p>
-<h3 class="fn"><a name="name"></a><a href="qbytearray.html">QByteArray</a> QMailMessageContentType::name () const</h3>
-<p>Returns the value of the 'name' parameter, if present; otherwise returns an empty <a href="qbytearray.html">QByteArray</a>.</p>
+<h3 class="fn"><a name="name"></a><a href="./qbytearray.html">QByteArray</a> QMailMessageContentType::name () const</h3>
+<p>Returns the value of the 'name' parameter, if present; otherwise returns an empty <a href="./qbytearray.html">QByteArray</a>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#setName">setName</a>().</p>
-<h3 class="fn"><a name="setBoundary"></a>void QMailMessageContentType::setBoundary ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>boundary</i> )</h3>
+<h3 class="fn"><a name="setBoundary"></a>void QMailMessageContentType::setBoundary ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>boundary</i> )</h3>
 <p>Sets the value of the 'boundary' parameter to <i>boundary</i>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#boundary">boundary</a>().</p>
-<h3 class="fn"><a name="setCharset"></a>void QMailMessageContentType::setCharset ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>charset</i> )</h3>
+<h3 class="fn"><a name="setCharset"></a>void QMailMessageContentType::setCharset ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>charset</i> )</h3>
 <p>Sets the value of the 'charset' parameter to <i>charset</i>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#charset">charset</a>().</p>
-<h3 class="fn"><a name="setName"></a>void QMailMessageContentType::setName ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="setName"></a>void QMailMessageContentType::setName ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>name</i> )</h3>
 <p>Sets the value of the 'name' parameter to <i>name</i>.</p>
 <p>See also <a href="qmailmessagecontenttype.html#name">name</a>().</p>
-<h3 class="fn"><a name="setSubType"></a>void QMailMessageContentType::setSubType ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>subType</i> )</h3>
+<h3 class="fn"><a name="setSubType"></a>void QMailMessageContentType::setSubType ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>subType</i> )</h3>
 <p>Sets the sub-type information of the 'Content-Type' header field to <i>subType</i>. If no primary type has been set, then setting the sub-type has no effect.</p>
 <p>See also <a href="qmailmessagecontenttype.html#subType">subType</a>() and <a href="qmailmessagecontenttype.html#setType">setType</a>().</p>
-<h3 class="fn"><a name="setType"></a>void QMailMessageContentType::setType ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="setType"></a>void QMailMessageContentType::setType ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>type</i> )</h3>
 <p>Sets the primary type information of the 'Content-Type' header field to <i>type</i>. If <i>type</i> is empty, then any pre-existing sub-type information will be cleared.</p>
 <p>See also <a href="qmailmessagecontenttype.html#type">type</a>() and <a href="qmailmessagecontenttype.html#setSubType">setSubType</a>().</p>
-<h3 class="fn"><a name="subType"></a><a href="qbytearray.html">QByteArray</a> QMailMessageContentType::subType () const</h3>
+<h3 class="fn"><a name="subType"></a><a href="./qbytearray.html">QByteArray</a> QMailMessageContentType::subType () const</h3>
 <p>Returns the sub-type information of the 'Content-Type' header field.</p>
 <p>For example: if <a href="qmailmessageheaderfield.html#content">content</a>() returns &quot;text/plain&quot;, then subType() returns &quot;plain&quot;</p>
 <p>See also <a href="qmailmessagecontenttype.html#setSubType">setSubType</a>().</p>
-<h3 class="fn"><a name="type"></a><a href="qbytearray.html">QByteArray</a> QMailMessageContentType::type () const</h3>
+<h3 class="fn"><a name="type"></a><a href="./qbytearray.html">QByteArray</a> QMailMessageContentType::type () const</h3>
 <p>Returns the primary type information of the content type header field.</p>
 <p>For example: if <a href="qmailmessageheaderfield.html#content">content</a>() returns &quot;text/plain&quot;, then type() returns &quot;text&quot;</p>
 <p>See also <a href="qmailmessagecontenttype.html#setType">setType</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -648,8 +646,14 @@ void QWSWindowSurface::flush(QWidget *widget, const QRegion &region,
         if (win->isWindow()) {
             QTLWExtra *topextra = win->d_func()->extra->topextra;
             QWSManager *manager = topextra->qwsManager;
-            if (manager)
-                manager->d_func()->paint(paintDevice(), toFlush);
+            if (manager) {
+                QWSManagerPrivate *managerPrivate = manager->d_func();
+                if (!managerPrivate->dirtyRegions.isEmpty()) {
+                    beginPaint(toFlush);
+                    managerPrivate->paint(paintDevice(), toFlush);
+                    endPaint(toFlush);
+                }
+            }
         }
 #endif
 
@@ -921,7 +925,7 @@ void QWSLocalMemSurface::setGeometry(const QRect &rect)
 QByteArray QWSLocalMemSurface::permanentState() const
 {
     QByteArray array;
-    array.resize(sizeof(uchar*) + 2 * sizeof(int) + sizeof(QImage::Format) +
+    array.resize(sizeof(uchar*) + 3 * sizeof(int) +
                  sizeof(SurfaceFlags));
 
     char *ptr = array.data();
@@ -933,8 +937,8 @@ QByteArray QWSLocalMemSurface::permanentState() const
     reinterpret_cast<int*>(ptr)[1] = img.height();
     ptr += 2 * sizeof(int);
 
-    *reinterpret_cast<QImage::Format*>(ptr) = img.format();
-    ptr += sizeof(QImage::Format);
+    *reinterpret_cast<int *>(ptr) = img.format();
+    ptr += sizeof(int);
 
     *reinterpret_cast<SurfaceFlags*>(ptr) = surfaceFlags();
 
@@ -957,8 +961,8 @@ void QWSLocalMemSurface::setPermanentState(const QByteArray &data)
     height = reinterpret_cast<const int*>(ptr)[1];
     ptr += 2 * sizeof(int);
 
-    format = *reinterpret_cast<const QImage::Format*>(ptr);
-    ptr += sizeof(QImage::Format);
+    format = QImage::Format(*reinterpret_cast<const int*>(ptr));
+    ptr += sizeof(int);
 
     flags = *reinterpret_cast<const SurfaceFlags*>(ptr);
 

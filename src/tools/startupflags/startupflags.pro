@@ -28,5 +28,5 @@ script.hint=script
 INSTALLS+=script
 
 pkg.desc=Startup flags editor for Qtopia.
-pkg.domain=window,qtopiaetc
+pkg.domain=trusted
 

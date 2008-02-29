@@ -1,4 +1,4 @@
-These files are for building qtopia-phone in the OpenEmbedded build system, using a local overlay.
-http://openembedded.org
+Qtopia is now a target for openembedded. You can download the openmoko makefile, 
+which now also has a qtopia target, from here:
+http://svn.nslu2-linux.org/svnroot/mokomakefile/trunk/Makefile
 
-The Makefile is based off of the openmoko makefile.

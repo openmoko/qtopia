@@ -1,0 +1,116 @@
+#!/bin/sh
+
+if [ -r /opt/Qtopia/SDK/scripts/functions ]; then
+    . /opt/Qtopia/SDK/scripts/functions
+    QPEVER=$(version)
+fi
+echo $DEVICE
+
+# TEMPDIR=$(mktemp -d /tmp/updatedevice.XXXXXX)
+
+
+die()
+{
+    echo -n "updatedevice failed while doing: "
+    echo $@
+    exit 1
+}
+
+prepare_device()
+{
+    scp /opt/Qtopia/extras/flash-status-flashing.gif root@$PHONEIP:/tmp 
+    ssh root@$PHONEIP "if ps -C qpe | grep qpe > /dev/null; then /etc/init.d/qpe stop; fi"
+
+    ssh root@$PHONEIP "/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &" 
+
+    echo ""    
+    ssh root@$PHONEIP 'if [ -e /opt/Qtopia ]; then cd /opt/Qtopia; rm -rf * ; fi'
+
+}
+
+install_image()
+{
+echo "untar $DEVICE"
+    ssh root@$PHONEIP "cd /opt/Qtopia; tar -xpzf /qtopia-$DEVICE-update.tar.gz"
+    RESULT=$?
+
+    ssh root@$PHONEIP "rm -f /qtopia-$DEVICE-update.tar.gz"
+
+    if [ $RESULT -ne 0 ]; then
+				sleep 60
+    fi
+    ssh root@$PHONEIP "/etc/init.d/qpe start &" || die install_image restart
+    ssh root@$PHONEIP "rm -f /tmp/flash-status-flashing.gif" 
+}
+
+upload_image()
+{
+    echo "uploading $QTOPIA_IMAGE to /"
+    scp $QTOPIA_IMAGE root@$PHONEIP:/ 
+}
+
+restart_image()
+{
+    ssh root@$PHONEIP '/etc/init.d/qpe start &' || die install_image reboot
+   rm -rf $TEMPDIR
+}
+
+# Find default update image
+if [ $# -eq 0 ] && [ -r /opt/Qtopia/extras/images/qtopia-${DEVICE}-update.tar.gz ]; then
+    QTOPIA_IMAGE=/opt/Qtopia/extras/images/qtopia-${DEVICE}-update.tar.gz
+elif [ $# -eq 1 ]; then    
+    case "$1" in
+        /*)
+            QTOPIA_IMAGE="$1"
+            ;;
+        *)
+            QTOPIA_IMAGE="$(pwd)/$1"
+            ;;
+    esac
+else
+    echo "usage: $0 [image]"
+    exit 1
+fi
+
+# Check if network is up
+if which sdk >/dev/null 2>&1; then
+    # SDK 
+    if ! sdk -net; then
+        echo "Could not establish a network connection with Neo.  Check connection."
+        exit 1
+    fi
+else
+    # not SDK
+    if [ -z $PHONEIP ]; then
+        PHONEIP=192.168.0.202
+    fi
+
+    if ! ssh root@$PHONEIP /bin/true >/dev/null 2>&1; then
+        echo "Could not establish a network connection with Neo at $PHONEIP.  Check connection."
+        exit 1
+    fi
+fi
+
+
+# Flash Process
+echo "Starting Flash process, please wait..."
+
+#extract_image
+#echo "extract process completed"
+
+prepare_device
+echo "device prep stage complete."
+
+upload_image
+echo "uploading image stage complete."
+
+install_image
+echo "Installing image completed"
+
+echo
+echo "Flashing begins..........please wait....."
+restart_image
+echo "Image installed, phone will automatically restart Qtopia"
+echo
+echo
+

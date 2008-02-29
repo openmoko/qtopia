@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,10 +20,10 @@
 ****************************************************************************/
 #include "qdsync.h"
 #include "qcopbridge.h"
-#include "qpimsync_p.h"
 #include "log.h"
 #include "qcopenvelope_qd.h"
 #include "qcopchannel_qd.h"
+#include "qtopia4sync.h"
 
 #include <QtopiaApplication>
 #include <QCloseEvent>
@@ -33,18 +33,21 @@
 #include <QSoftMenuBar>
 #include <QMenu>
 #include <QProcess>
-#include <custom-qtopia.h>
+#include <custom.h>
 #include <QPluginManager>
 #include <private/contextkeymanager_p.h>
 
+// See documentation for this macro in doc/src/syscust/custom.qdoc
 #ifndef QDSYNC_DEFAULT_TCP_PORT
 #define QDSYNC_DEFAULT_TCP_PORT 4245
 #endif
 
+// See documentation for this macro in doc/src/syscust/custom.qdoc
 #ifndef QDSYNC_DEFAULT_SERIAL_PORT
 #define QDSYNC_DEFAULT_SERIAL_PORT "/dev/ttyS0"
 #endif
 
+// See documentation for this macro in doc/src/syscust/custom.qdoc
 #ifndef QDSYNC_DEFAULT_PORTS
 #define QDSYNC_DEFAULT_PORTS QStringList() << "tcp"
 #endif
@@ -83,11 +86,19 @@ QDSync::QDSync( QWidget *parent, Qt::WFlags /*f*/ )
     QSoftMenuBar::addMenuTo( this, menu );
 
     // Initialize tasks
+    Qtopia4Sync *sync = Qtopia4Sync::instance();
     QPluginManager *manager = new QPluginManager( "qdsync", this );
     foreach ( const QString &name, manager->list() ) {
         if ( name == "base" ) continue;
-        // Currently the plugins just manage themselves
-        /*QObject *object = */manager->instance( name );
+        QObject *object = manager->instance( name );
+        if ( Qtopia4SyncPlugin *plugin = qobject_cast<Qtopia4SyncPlugin*>(object) ) {
+            sync->registerPlugin( plugin );
+        } else if ( Qtopia4SyncPluginFactory *pf = qobject_cast<Qtopia4SyncPluginFactory*>(object) ) {
+            foreach ( const QString &name, pf->keys() ) {
+                Qtopia4SyncPlugin *plugin = pf->plugin( name );
+                sync->registerPlugin( plugin );
+            }
+        }
     }
 
     QCopChannel *chan = new QCopChannel( "QPE/QDSync", this );

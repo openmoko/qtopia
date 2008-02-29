@@ -23,86 +23,89 @@
 <a name="making-a-voice-call"></a>
 <h2>Making a Voice Call</h2>
 <p>The simplest way to dial a voice call is as follows:</p>
-<pre>    QPhoneCallManager mgr;
-    QPhoneCall call = mgr.create( &quot;Voice&quot; );
+<pre>    QPhoneCallManager *mgr;
 
-    QDialOptions dialOptions;
-    dialOptions.setNumber( &quot;1234567&quot; );
-
-    call.dial( dialOptions );</pre>
-<p>The <a href="qphonecallmanager.html">QPhoneCallManager</a> class provides access to the global list of all calls (voice, data, fax, etc) that are currently active within the system, and allows new calls to be created.</p>
-<p>The client application can connect to the state change signal to be notified about the call's progress. The following example prints debug messages whenever the call changes to the <tt>Connected</tt> state, or when it ends:</p>
-<pre>    call.connectStateChanged( this, SLOT(stateChanged(QPhoneCall)) );
-
-    void MyClient::stateChanged( const QPhoneCall&amp; call )
+    void Caller::dial()
     {
-        if ( call.state() == QPhoneCall::Connected )
-            qDebug() &lt;&lt; &quot;call&quot; &lt;&lt; call.identifier() &lt;&lt; &quot;has connected&quot; );
+        QPhoneCall call = mgr-&gt;create(&quot;Voice&quot;);
+
+        QDialOptions dialOptions;
+        dialOptions.setNumber(numberToDial-&gt;text());
+
+        call.dial(dialOptions);
+
+        call.connectStateChanged(this, SLOT(stateChanged(QPhoneCall)));
+    }</pre>
+<p>The <a href="qphonecallmanager.html">QPhoneCallManager</a> class provides access to the global list of all calls (voice, data, fax, etc) that are currently active within the system, and allows new calls to be created.</p>
+<p>The client application can connect to the state change signal to be notified about the call's progress. The following example shows a message whenever the call changes to the <tt>Connected</tt> state, or when it ends:</p>
+<pre>    void Caller::stateChanged(const QPhoneCall&amp; call)
+    {
+        if (call.state() == QPhoneCall::Connected)
+            status-&gt;setText(&quot;Call &quot; + call.number() + &quot; has connected&quot;);
         else if ( call.dropped() )
-            qDebug() &lt;&lt; &quot;call&quot; &lt;&lt; call.identifier() &lt;&lt; &quot;has ended&quot; );
+            status-&gt;setText(&quot;Call &quot; + call.number() + &quot; has ended&quot;);
     }</pre>
 <p>The <a href="qphonecall.html">QPhoneCall</a> class is a reference-counted pointer to a QPhoneCallPrivate instance. The QPhoneCallPrivate instance will be deleted once the call ends and all outstanding <a href="qphonecall.html">QPhoneCall</a> references to it are removed.</p>
 <a name="making-a-data-call"></a>
 <h2>Making a Data Call</h2>
 <p>The procedure for making a data call is very similar to that for voice calls:</p>
-<pre>    QPhoneCallManager mgr;
-    QPhoneCall call = mgr.create( &quot;Data&quot; );
-
-    QDialOptions dialOptions;
-    dialOptions.setNumber( &quot;1234567&quot; );
-
-    call.dial( dialOptions );</pre>
-<p>The primary difference is the use of <tt>Data</tt> for the call type instead of <tt>Voice</tt>. There are several options within the <a href="qdialoptions.html">QDialOptions</a> class that can be set to tune the data call for the client application's specific requirements. For example, the following will request a 9600 bps non-transparent connection:</p>
-<pre>    QDialOptions dialOptions;
-    dialOptions.setNumber( &quot;1234567&quot; );
-    dialOptions.setSpeed( 9600 );
-    dialOptions.setTransparentMode( QDialOptions::NonTransparent );</pre>
-<p>Consult the documentation for <a href="qdialoptions.html">QDialOptions</a>, and the 3GPP TS 27.007 standard for more information on the allowable data call options.</p>
-<p>Once the data call transitions to the <tt>Connected</tt> state, the device() method can be used to gain access to the raw data on the call:</p>
-<pre>    call.connectStateChanged( this, SLOT(stateChanged(QPhoneCall)) );
-
-    void MyClient::stateChanged( const QPhoneCall&amp; call )
+<pre>    void Caller::dialData()
     {
-        if ( call.callType() == &quot;Data&quot; &amp;&amp; call.state() == QPhoneCall::Connected ) {
+        QPhoneCall call = mgr-&gt;create(&quot;Data&quot;);
+
+        QDialOptions dialOptions;
+        dialOptions.setNumber(numberToDial-&gt;text());
+        dialOptions.setSpeed(9600);
+        dialOptions.setTransparentMode(QDialOptions::NonTransparent);
+
+        call.dial(dialOptions);
+
+        call.connectStateChanged(this, SLOT(dataStateChanged(QPhoneCall)));
+    }</pre>
+<p>The primary difference is the use of <tt>Data</tt> for the call type instead of <tt>Voice</tt>. There are several options within the <a href="qdialoptions.html">QDialOptions</a> class that can be set to tune the data call for the client application's specific requirements. The above example will request a 9600 bps non-transparent connection. Consult the documentation for <a href="qdialoptions.html">QDialOptions</a>, and the 3GPP TS 27.007 standard for more information on the allowable data call options.</p>
+<p>Once the data call transitions to the <tt>Connected</tt> state, the device() method can be used to gain access to the raw data on the call:</p>
+<pre>    void Caller::dataStateChanged(const QPhoneCall&amp; call)
+    {
+        if (call.callType() == &quot;Data&quot; &amp;&amp; call.state() == QPhoneCall::Connected) {
             dataDevice = call.device();
-            connect( dev, SIGNAL(readyRead()), this, SLOT(dataReady()) );
-            connect( dev, SIGNAL(closed()), this, SLOT(dataClosed()) );
+            connect(dataDevice, SIGNAL(readyRead()), this, SLOT(dataReady()));
+            connect(dataDevice, SIGNAL(closed()), this, SLOT(dataClosed()));
         }
     }
 
-    void MyClient::dataReady()
+    void Caller::dataReady()
     {
         char buffer[1024];
         qint64 len;
         while ( ( len = dataDevice-&gt;read( buffer, sizeof(buffer) ) ) &gt; 0 ) {
-            <span class="comment">// There is new data ready to process.</span>
-            ...
+            <span class="comment">//</span> There is new data ready to process.
+            <span class="comment">//</span> ...
         }
     }
 
-    void MyClient::dataClosed()
+    void Caller::dataClosed()
     {
-        <span class="comment">// The data call has ended - the device is now closed.</span>
+        <span class="comment">//</span> The data call has ended - the device is now closed.
         dataDevice = 0;
     }
 
-    void MyClient::dataWrite( const char *buf, int len )
+    void Caller::dataWrite( const char *buf, int len )
     {
-        <span class="comment">// Send the specified data on the data call if it is still active.</span>
-        if ( dataDevice )
-            dataDevice-&gt;write( buf, len );
+        <span class="comment">//</span> Send the specified data on the data call if it is still active.
+        if (dataDevice)
+            dataDevice-&gt;write(buf, len);
     }</pre>
 <a name="watching-for-an-incoming-voice-call"></a>
 <h2>Watching for an Incoming Voice Call</h2>
 <p>Client applications can watch for incoming calls by listening on the <a href="qphonecallmanager.html#newCall">QPhoneCallManager::newCall</a>() signal and checking the new call's state against <a href="qphonecall.html#State-enum">QPhoneCall::Incoming</a>:</p>
-<pre>    QPhoneCallManager *mgr = new QPhoneCallManager( this );
-    connect( mgr, SIGNAL(newCall(QPhoneCall)), this, SLOT(newCall(QPhoneCall)) );
+<pre>    mgr = new QPhoneCallManager(this);
+    connect(mgr, SIGNAL(newCall(QPhoneCall)), this, SLOT(newCall(QPhoneCall)));
 
-    void MyClient::newCall( const QPhoneCall&amp; call )
+    void Caller::newCall(const QPhoneCall&amp; call)
     {
         if ( call.state() == QPhoneCall::Incoming &amp;&amp;
              call.callType() == &quot;Voice&quot; ) {
-            qDebug() &lt;&lt; &quot;incoming voice call from&quot; &lt;&lt; call.number();
+            status-&gt;setText(&quot;Incoming call from &quot; + call.number());
         }
     }</pre>
 <a name="monitoring-the-state-of-all-calls"></a>
@@ -114,7 +117,7 @@
 <p>We will now walk through the first example in more detail, explaining what happens within Qtopia to effect a voice call.</p>
 <pre>    QPhoneCallManager mgr;
     QPhoneCall call = mgr.create( &quot;Voice&quot; );</pre>
-<p>The <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>() function first calls <a href="qphonecallmanager.html#services">QPhoneCallManager::services</a>() to locate a telephony service that can handle calls of the specified type, <tt>Voice</tt>. The service information is stored in the value space (see <a href="qvaluespaceitem.html">Qtopia Value Space</a>) under the <tt>/Telephony/CallTypes</tt> directory. A typical arrangement is as follows:</p>
+<p>The <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>() function first calls <a href="qphonecallmanager.html#services">QPhoneCallManager::services</a>() to locate a telephony service that can handle calls of the specified type, <tt>Voice</tt>. The service information is stored in the value space (see <a href="qvaluespaceitem.html">Qtopia Value Space</a>) under the <tt>/Communications/QPhoneCallProvider/CallTypes</tt> directory. A typical arrangement is as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Service</th><th>Supported Call Types</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>modem</tt></td><td><tt>Voice</tt>, <tt>Data</tt>, <tt>Fax</tt>, <tt>Video</tt>, <tt>IP</tt></td></tr>
@@ -126,14 +129,21 @@
     QPhoneCall call = mgr.create( &quot;Voice&quot;, &quot;modem&quot; );</pre>
 <p>Once the service has been located, <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>() calls <a href="qphonecallmanagerprivate.html#create">QPhoneCallManagerPrivate::create</a>() in <tt>qphonecallmanager.cpp</tt>. This method constructs a QPhoneCallPrivate instance, wraps it with a <a href="qphonecall.html">QPhoneCall</a> reference, and returns it to the caller.</p>
 <p>The constructor for QPhoneCallPrivate in <tt>qphonecall.cpp</tt> attaches to two <a href="qtopiaipc.html">Qtopia IPC</a> channels:</p>
-<pre>    QPE/Telephony/QPhoneCallProvider/Request
-    QPE/Telephony/QPhoneCallProvider/Response</pre>
+<pre>    QPE/Communications/QPhoneCallProvider/Request
+    QPE/Communications/QPhoneCallProvider/Response</pre>
 <p>The first Qtopia IPC channel is used to send requests to the telephony service to perform call operations. The second Qtopia IPC channel is used to receive state information about the call back from the telephony service.</p>
 <p>The next step is to dial the call:</p>
-<pre>    QDialOptions dialOptions;
-    dialOptions.setNumber( &quot;1234567&quot; );
+<pre>    void Caller::dial()
+    {
+        QPhoneCall call = mgr-&gt;create(&quot;Voice&quot;);
 
-    call.dial( dialOptions );</pre>
+        QDialOptions dialOptions;
+        dialOptions.setNumber(numberToDial-&gt;text());
+
+        call.dial(dialOptions);
+
+        call.connectStateChanged(this, SLOT(stateChanged(QPhoneCall)));
+    }</pre>
 <p>After initializing the local state of QPhoneCallPrivate, <a href="qphonecall.html#dial">QPhoneCall::dial</a>() sends the Qtopia IPC message <tt>dial(QString,QString,QString,QDialOptions)</tt> to the <tt>Request</tt> channel.</p>
 <p>In the telephony service, the Qtopia IPC message is received by QPhoneCallProvider::dial() in <tt>qphonecallprovider.cpp</tt>. It filters the message to check that it is intended for that service (all call providers listen on the same channel), and then calls <a href="qphonecallprovider.html#create">QPhoneCallProvider::create</a>() to create a <a href="qphonecallimpl.html">QPhoneCallImpl</a> object to represent the server-side instance of the phone call.</p>
 <p>The <a href="qphonecallprovider.html#create">QPhoneCallProvider::create</a>() method is implemented differently for each telephony service. For AT-based modems, it is overridden by <a href="qphonecallprovider.html#create">QModemCallProvider::create</a>() in <tt>qmodemcallprovider.cpp</tt>, which then creates a <a href="qmodemcall.html">QModemCall</a> object.</p>
@@ -143,8 +153,8 @@
 <p>See also <a href="qphonecall.html">QPhoneCall</a>, <a href="qphonecallmanager.html">QPhoneCallManager</a>, <a href="qdialoptions.html">QDialOptions</a>, <a href="qphonecallprovider.html">QPhoneCallProvider</a>, <a href="qmodemservice.html">QModemService</a>, <a href="qmodemcallprovider.html">QModemCallProvider</a>, and <a href="qmodemcall.html">QModemCall</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

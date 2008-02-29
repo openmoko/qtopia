@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1188,7 +1186,10 @@ bool QProcessPrivate::waitForDeadChild()
 
     // check if our process is dead
     int exitStatus;
-    pid_t waitResult = waitpid(pid_t(pid), &exitStatus, WNOHANG);
+    pid_t waitResult = 0;
+    do {
+        waitResult = waitpid(pid_t(pid), &exitStatus, WNOHANG);
+    } while ((waitResult == -1 && errno == EINTR));
     if (waitResult > 0) {
         processManager()->remove(q);
         crashed = !WIFEXITED(exitStatus);
@@ -1312,7 +1313,8 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
     int startResult = qt_native_read(startedPipe[0], &reply, 1);
     int result;
     qt_native_close(startedPipe[0]);
-    ::waitpid(childPid, &result, 0);
+    while (::waitpid(childPid, &result, 0) == -1 && errno == EINTR)
+    { }
     bool success = (startResult != -1 && reply == '\0');
     if (success && pid) {
         pid_t actualPid = 0;

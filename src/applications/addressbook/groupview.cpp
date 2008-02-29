@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,7 +37,7 @@
 
 #include <QtopiaItemDelegate>
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include "../../settings/ringprofile/ringtoneeditor.h"
 #endif
 
@@ -281,7 +281,7 @@ void GroupView::editCurrentGroup()
     QtopiaApplication::execDialog(&members);
 }
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 void GroupView::setGroupRingTone()
 {
     // show dialog for name, then
@@ -562,7 +562,7 @@ QString GroupEdit::name() const
     return mName->text();
 }
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 RingToneSelector::RingToneSelector(QWidget *parent)
     :QDialog(parent)
 {

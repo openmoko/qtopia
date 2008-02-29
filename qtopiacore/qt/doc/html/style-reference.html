@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/styles.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/styles.qdoc -->
 <head>
   <title>Qt 4.3: Implementing Styles and Style Aware Widgets</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -152,7 +152,7 @@
 <p>The style does not handle reverse layouts. We assume that the layout direction is left to right. <a href="qwindowsstyle.html">QWindowsStyle</a> handles reverse widgets; if we implemented reverse layouts, widgets that we change the position of sub elements, or handle text alignment in labels our selves would need to be updated.</p>
 <a name="styling-java-check-boxes"></a>
 <h4>Styling Java Check Boxes</h4>
-<p>As an example, we will examine the styling of check boxes in the java style. We describe the complete process and print all code in both the java style and Qt classes involved. In the rest of this document we will not examine the source code of the individual widgets. Hopefully, this will give you an idea on how to search through the code if you need to check specific implementation details; most widgets follow the same structure as the check boxes. We have edited the <a href="qcommonstyle.html">QCommonStyle</a> code somewhat to remove code that is not directly relevant for check box styling.</p>
+<p>As an example, we will examine the styling of check boxes in the java style. We describe the complete process and print all code in both the java style and Qt classes involved. In the rest of this document, we will not examine the source code of the individual widgets. Hopefully, this will give you an idea on how to search through the code if you need to check specific implementation details; most widgets follow the same structure as the check boxes. We have edited the <a href="qcommonstyle.html">QCommonStyle</a> code somewhat to remove code that is not directly relevant for check box styling.</p>
 <p>We start with a look at how <a href="qcheckbox.html">QCheckBox</a> builds it style option, which is <a href="qstyleoptionbutton.html">QStyleOptionButton</a> for checkboxes:</p>
 <pre> opt.init(q);
      if (down)
@@ -186,7 +186,7 @@
      if (widget-&gt;window()-&gt;isActiveWindow())
          state |= QStyle::State_Active;
  #ifdef Q_WS_MAC
-     extern bool qt_mac_can_clickThrough(const QWidget *w); <span class="comment">//qwidget_mac.cpp</span>
+     extern bool qt_mac_can_clickThrough(const QWidget *w); <span class="comment">//</span>qwidget_mac.cpp
      if (!(state &amp; QStyle::State_Active) &amp;&amp; !qt_mac_can_clickThrough(widget))
          state &amp;= ~QStyle::State_Enabled;
  #endif
@@ -276,7 +276,7 @@
              }
              painter-&gt;restore();
              break;</pre>
-<p>We first save the state of the painter. This is not always necessary but in this case the <a href="qwindowsstyle.html">QWindowsStyle</a> needs the painter in the same state as it was when PE_IndicatorCheckBox was called (We could also set the state with function calls, of course). We then use <tt>drawButtonBackground()</tt> to draw the background of the check box indicator. This is a helper function that draws the background and also the frame of push buttons and check boxes. We take a look at that function below. We then check if the mouse is hovering over the checkbox. If it is, we draw the frame java checkboxes have when the box is not pressed down and the mouse is over it. You may note that java does not handle tristate boxes, so we have not implemented it (I should do that actually; I say myself that we style Qt's widgets and not Java's).</p>
+<p>We first save the state of the painter. This is not always necessary but in this case the <a href="qwindowsstyle.html">QWindowsStyle</a> needs the painter in the same state as it was when PE_IndicatorCheckBox was called (We could also set the state with function calls, of course). We then use <tt>drawButtonBackground()</tt> to draw the background of the check box indicator. This is a helper function that draws the background and also the frame of push buttons and check boxes. We take a look at that function below. We then check if the mouse is hovering over the checkbox. If it is, we draw the frame java checkboxes have when the box is not pressed down and the mouse is over it. You may note that java does not handle tristate boxes, so we have not implemented it.</p>
 <p>Here we use a png image for our indicator. We could also check here if the widget is disabled. We would then have to use another image with the indicator in the disabled color.</p>
 <pre> void JavaStyle::drawButtonBackground(const QStyleOption *option,
                                       QPainter *painter, bool isCheckbox) const
@@ -726,8 +726,8 @@
 <p>For the buttons, <a href="qstyleoptionbutton.html">QStyleOptionButton</a> is used (see <a href="#tool-buttons">Tool Buttons</a> for content description). The dock widget resize handle has a plain <a href="qstyleoption.html">QStyleOption</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

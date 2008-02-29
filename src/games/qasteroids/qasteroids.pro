@@ -20,5 +20,5 @@ INSTALLS+=pics
 sounds.files=$$QTOPIA_DEPOT_PATH/sounds/qasteroids/*
 sounds.path=/sounds/qasteroids
 INSTALLS+=sounds
-pkg.domain=window,games,mediasession
+pkg.domain=trusted
 

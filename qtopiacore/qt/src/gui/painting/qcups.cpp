@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -117,8 +115,10 @@ QCUPSSupport::QCUPSSupport()
         resolveCups();
 
     // getting all available printers
-    if (isAvailable())
-        prnCount = _cupsGetDests(&printers);
+    if (!isAvailable())
+        return;
+        
+    prnCount = _cupsGetDests(&printers);
 
     for (int i = 0; i <  prnCount; ++i) {
         if (printers[i].is_default) {

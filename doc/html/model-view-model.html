@@ -104,7 +104,7 @@
          QModelIndex index = model-&gt;index(row, 0, parentIndex);</pre>
 <p>To obtain a model index, we specify the row number, column number (zero for the first column), and the appropriate model index for the parent of all the items that we want. The text stored in each item is retrieved using the model's <a href="qdirmodel.html#data">data()</a> function. We specify the model index and the <a href="qt.html#ItemDataRole-enum">DisplayRole</a> to obtain data for the item in the form of a string.</p>
 <pre>         QString text = model-&gt;data(index, Qt::DisplayRole).toString();
-         <span class="comment">// Display the text in a widget.</span>
+         <span class="comment">//</span> Display the text in a widget.
 
      }</pre>
 <p>The above example demonstrates the basic principles used to retrieve data from a model:</p>
@@ -124,8 +124,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

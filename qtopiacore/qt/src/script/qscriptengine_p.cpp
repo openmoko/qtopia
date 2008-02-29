@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtScript module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -862,17 +860,17 @@ QString QScriptEnginePrivate::toString_helper(qsreal d)
     QByteArray buf;
     buf.reserve(80);
 
-    int ndigits;
+    int decpt;
     int sign;
     char *result = 0;
-    (void) qdtoa(d, 0, 0, &ndigits, &sign, 0, &result);
+    (void) qdtoa(d, 0, 0, &decpt, &sign, 0, &result);
 
     if (! result)
         return QString();
 
-    else if (ndigits <= 0 && ndigits > -6) {
+    else if (decpt <= 0 && decpt > -6) {
 
-        buf.fill('0', -ndigits + 2 + sign);
+        buf.fill('0', -decpt + 2 + sign);
 
         if (sign) // fix the sign.
             buf[0] = '-';
@@ -888,11 +886,11 @@ QString QScriptEnginePrivate::toString_helper(qsreal d)
         buf += result;
         int length = buf.length() - sign;
 
-        if (ndigits <= 21 && ndigits > 0) {
-            if (length <= ndigits)
-                buf += QByteArray().fill('0', ndigits - length);
+        if (decpt <= 21 && decpt > 0) {
+            if (length <= decpt)
+                buf += QByteArray().fill('0', decpt - length);
             else
-                buf.insert(ndigits + sign, '.');
+                buf.insert(decpt + sign, '.');
         }
 
         else if (result[0] >= '0' && result[0] <= '9') {
@@ -900,9 +898,9 @@ QString QScriptEnginePrivate::toString_helper(qsreal d)
                 buf.insert(1, '.');
 
             buf += 'e';
-            buf += (ndigits >= 0) ? '+' : '-';
+            buf += (decpt >= 0) ? '+' : '-';
 
-            int e = ndigits - 1;
+            int e = decpt - 1;
 
             if (e < 0)
                 e = -e;

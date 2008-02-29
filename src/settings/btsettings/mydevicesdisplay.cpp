@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -68,8 +68,8 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
       m_local(local),
       m_browser(0),
       m_devicesPlaceholderLabel(0),
-      m_pairingAgent(new PairingAgent(m_local, this)),
-      m_pairingWaitWidget(new QWaitWidget(this)),
+      m_pairingAgent(0),
+      m_pairingWaitWidget(0),
       m_pairingDeviceDialog(0),
       m_pairingDeviceDialogFilter(0),
       m_sdpQuery(0),
@@ -82,6 +82,22 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
             QBluetoothRemoteDeviceSelector::Alias |
             QBluetoothRemoteDeviceSelector::ConnectionStatus, m_local, this);
 
+    QVBoxLayout *l = new QVBoxLayout;
+    l->addWidget(m_browser);
+    setLayout(l);
+
+    QTimer::singleShot(0, this, SLOT(init()));
+}
+
+MyDevicesDisplay::~MyDevicesDisplay()
+{
+    delete m_pairingDeviceDialogFilter;
+}
+
+void MyDevicesDisplay::init()
+{
+    // set up some signals and slots:
+
     connect(m_browser, SIGNAL(selectionChanged()),
             SLOT(deviceSelectionChanged()));
     connect(m_browser, SIGNAL(activated(QBluetoothAddress)),
@@ -92,37 +108,9 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
     connect(m_local, SIGNAL(pairingRemoved(QBluetoothAddress)),
             SLOT(pairingRemoved(QBluetoothAddress)));
 
-    connect(m_pairingAgent, SIGNAL(done(bool)),
-            SLOT(pairingAgentDone(bool)));
 
-    initActions();
+    // now set up actions:
 
-    // set up wait widget
-    connect(m_pairingWaitWidget, SIGNAL(cancelled()),
-            m_pairingAgent, SLOT(cancel()));
-
-    // get paired devices
-    m_initialDevices = m_local->pairedDevices();
-
-    // add paired devices to browser
-    if (m_initialDevices.size() > 0) {
-        for (int i=0; i<m_initialDevices.size(); i++)
-            m_browser->insert(QBluetoothRemoteDevice(m_initialDevices[i]));
-        m_browser->selectDevice(m_initialDevices[0]);
-    }
-
-    QVBoxLayout *l = new QVBoxLayout;
-    l->addWidget(m_browser);
-    setLayout(l);
-}
-
-MyDevicesDisplay::~MyDevicesDisplay()
-{
-    delete m_pairingDeviceDialogFilter;
-}
-
-void MyDevicesDisplay::initActions()
-{
     // this action is always visible
     QAction *pairAction = new QAction(QIcon(":image/bluetooth/paired"),
             tr("Pair with new device..."), this);
@@ -151,11 +139,30 @@ void MyDevicesDisplay::initActions()
     addActions(m_deviceActions);
 }
 
+void MyDevicesDisplay::showEvent(QShowEvent *e)
+{
+    populateDeviceList();
+    QWidget::showEvent(e);
+}
+
 /*
     This must be called to properly set up the list of devices.
 */
-void MyDevicesDisplay::initDisplay()
+void MyDevicesDisplay::populateDeviceList()
 {
+    if (!m_initialDevices.isEmpty())
+        return;     // already initialised
+
+    // get paired devices
+    m_initialDevices = m_local->pairedDevices();
+
+    // add paired devices to browser
+    if (m_initialDevices.size() > 0) {
+        for (int i=0; i<m_initialDevices.size(); i++)
+            m_browser->insert(QBluetoothRemoteDevice(m_initialDevices[i]));
+        m_browser->selectDevice(m_initialDevices[0]);
+    }
+
     if (m_initialDevices.size() > 0) {
         m_refreshIndex = 0;
         QTimer::singleShot(10, this, SLOT(refreshNextDevice()));
@@ -175,9 +182,9 @@ void MyDevicesDisplay::resetDisplay()
             m_deviceActions[i]->setVisible(true);
         m_browser->setVisible(true);
 
-        if (m_devicesPlaceholderLabel) {
+        if (m_devicesPlaceholderLabel)
             m_devicesPlaceholderLabel->setVisible(false);
-        }
+
     } else {
         if (!m_devicesPlaceholderLabel) {
             m_devicesPlaceholderLabel = new QLabel(tr("(No paired devices.)"));
@@ -230,6 +237,17 @@ void MyDevicesDisplay::selectedPairingTarget()
 
 void MyDevicesDisplay::createPairing(const QBluetoothAddress &addr)
 {
+    if (!m_pairingAgent) {
+        m_pairingAgent = new PairingAgent(m_local, this);
+        connect(m_pairingAgent, SIGNAL(done(bool)),
+                SLOT(pairingAgentDone(bool)));
+    }
+    if (!m_pairingWaitWidget) {
+        m_pairingWaitWidget = new QWaitWidget(this);
+        connect(m_pairingWaitWidget, SIGNAL(cancelled()),
+                m_pairingAgent, SLOT(cancel()));
+    }
+
     m_pairingWaitWidget->setText(tr("Pairing..."));
     m_pairingWaitWidget->setCancelEnabled(true);
     m_pairingWaitWidget->show();
@@ -348,6 +366,8 @@ void MyDevicesDisplay::doneAddDevice(bool error, const QString &errorString)
 
 void MyDevicesDisplay::pairingCreated(const QBluetoothAddress &addr)
 {
+    qLog(Bluetooth) << "MyDevicesDisplay::pairingCreated()" << addr.toString();
+
     QBluetoothRemoteDevice device(addr);
     if (m_browser->insert(device)) {
         if (m_browser->count() == 1)    // this is the 1st added device
@@ -356,11 +376,12 @@ void MyDevicesDisplay::pairingCreated(const QBluetoothAddress &addr)
         // must update name display since a QBluetoothRemoteDevice
         // won't be created with it by default
         m_local->updateRemoteDevice(device);
+
         m_browser->update(device, QBluetoothRemoteDeviceSelector::Name |
                                   QBluetoothRemoteDeviceSelector::DeviceIcon);
 
-        // did we initiate this pairing?
-        if (m_pairingAgent->remoteAddress() == addr)
+        // did we initiate this pairing through the pairing agent?
+        if (m_pairingAgent && m_pairingAgent->remoteAddress() == addr)
             m_browser->selectDevice(addr);
     }
 }
@@ -383,6 +404,8 @@ void MyDevicesDisplay::deleteDevice()
 
 void MyDevicesDisplay::pairingRemoved(const QBluetoothAddress &addr)
 {
+    qLog(Bluetooth) << "MyDevicesDisplay::pairingRemoved()" << addr.toString();
+
     if (m_browser->remove(addr)) {
         if (m_browser->count() == 0)
             resetDisplay();
@@ -394,6 +417,6 @@ void MyDevicesDisplay::pairingRemoved(const QBluetoothAddress &addr)
 
         // remove any alias that's been set, or else user can't change the
         // the alias anymore once the device has been removed from the list
-        m_local->removeRemoteAlias(addr);            
+        m_local->removeRemoteAlias(addr);
     }
 }

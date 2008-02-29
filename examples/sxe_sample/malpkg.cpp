@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,7 +21,6 @@
 
 #include "malpkg.h"
 
-#include <QWizard>
 #include <qtopiaipcadaptor.h>
 
 #ifdef Q_OS_UNIX
@@ -39,20 +38,13 @@
 #include <QTextStream>
 
 MalPkg::MalPkg( QWidget *parent, Qt::WFlags f )
-    : QDialog( parent, f )
+    : QWizard( parent, f )
 {
     QBoxLayout *mvb = new QVBoxLayout( this );
-    wiz = new QWizard( this );
-    mvb->addWidget( wiz );
 
-    wiz->addPage( initPwdExPage() );
-    wiz->addPage( initQcopExPage() );
-    wiz->setWindowTitle("Exploits");
-
-    connect( wiz, SIGNAL(accept()),
-            this, SLOT(accept()));
-    connect( wiz, SIGNAL(reject()),
-            this, SLOT(reject()));
+    addPage( initPwdExPage() );
+    addPage( initQcopExPage() );
+    setWindowTitle("Exploits");
 
     connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
             this, SLOT(appMessage(QString,QByteArray)) );
@@ -72,7 +64,7 @@ QWizardPage *MalPkg::initPwdExPage()
     pwdExMsgs->setReadOnly( true );
     pwdExLine = new QLineEdit( passwordExploit );
     QLabel *pwdExLbl = new QLabel( tr("New root pwd:"), passwordExploit );
-    pwdExButton = new QPushButton( tr("Change root Password"), passwordExploit );
+    pwdExButton = new QPushButton( tr("Change pwd"), passwordExploit );
     pwdExCheck = new QCheckBox( tr("Really do it"), passwordExploit );
     QBoxLayout *vb = new QVBoxLayout( passwordExploit );
     vb->addWidget( pwdExMsgs );
@@ -100,7 +92,7 @@ QWizardPage *MalPkg::initQcopExPage()
     qcopExLineMsg = new QLineEdit( qcopExploit );
     qcopExButton = new QPushButton( tr("Send qcop"), qcopExploit );
     qcopExCheck = new QCheckBox( tr("Really do it"), qcopExploit );
-    QLabel *qcopExLblNum = new QLabel( tr("Number to send to:"), qcopExploit );
+    QLabel *qcopExLblNum = new QLabel( tr("Recipient Number:"), qcopExploit );
     QLabel *qcopExLblMsg = new QLabel( tr("SMS message:"), qcopExploit );
     QBoxLayout *vb2 = new QVBoxLayout( qcopExploit );
     QGridLayout *glay2 = new QGridLayout();

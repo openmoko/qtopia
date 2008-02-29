@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtXML module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -3099,6 +3097,8 @@ void QXmlStreamWriter::writeEndElement()
         for (int i = d->tagStack.size() - 1; i > 0; --i)
             d->write("    ");
     }
+    if (d->tagStack.isEmpty())
+        return;
     d->lastWasStartElement = false;
     QXmlStreamWriterPrivate::Tag &tag = d->tagStack_pop();
     d->lastNamespaceDeclaration = tag.namespaceDeclarationsSize;

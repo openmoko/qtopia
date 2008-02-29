@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,38 @@
 #include <longstring_p.h>
 #include <QMailMessage>
 
+
+// Ensure a string is quoted, if required for IMAP transmission
+static QString quoteImapString(const QString& input)
+{
+    // We can't easily catch controls other than those caught by \\s...
+    static const QRegExp atomSpecials("[\\(\\)\\{\\s\\*%\\\\\"\\]]");
+
+    // The empty string must be quoted
+    if (input.isEmpty())
+        return QString("\"\"");
+
+    if (atomSpecials.indexIn(input) == -1)
+        return input;
+        
+    // We need to quote this string because it is not an atom
+    QString result(input);
+
+    QString::iterator begin = result.begin(), it = begin;
+    while (it != result.end()) {
+        // We need to escape any characters specially treated in quotes
+        if ((*it) == '\\' || (*it) == '"') {
+            int pos = (it - begin);
+            result.insert(pos, '\\');
+            it = result.begin() + (pos + 1);
+        }
+        ++it;
+    }
+
+    return QMail::quoteString(result);
+}
+
+
 ImapProtocol::ImapProtocol()
 {
     _connected = false;
@@ -48,10 +80,10 @@ ImapProtocol::~ImapProtocol()
     delete transport;
 }
 
-bool ImapProtocol::open( const MailAccount& account )
+bool ImapProtocol::open( const QMailAccount& account )
 {
     if ( _connected ) {
-        qWarning("transport in use, connection refused");
+        qLog(IMAP) << "transport in use, connection refused";
         return false;
     }
 
@@ -71,8 +103,8 @@ bool ImapProtocol::open( const MailAccount& account )
                 this, SIGNAL(updateStatus(QString)));
         connect(transport, SIGNAL(errorOccurred(int,QString)),
                 this, SLOT(errorHandling(int,QString)));
-        connect(transport, SIGNAL(connected(MailAccount::EncryptType)),
-                this, SLOT(connected(MailAccount::EncryptType)));
+        connect(transport, SIGNAL(connected(QMailAccount::EncryptType)),
+                this, SLOT(connected(QMailAccount::EncryptType)));
         connect(transport, SIGNAL(readyRead()),
                 this, SLOT(incomingData()));
     }
@@ -87,6 +119,8 @@ void ImapProtocol::close()
     _connected = false;
     _name = "";
     transport->close();
+    parseFetchTimer.stop();
+    d->reset();
 }
 
 int ImapProtocol::exists()
@@ -122,7 +156,7 @@ QString ImapProtocol::selected()
 /*  Type ignored for now    */
 void ImapProtocol::login( QString user, QString password )
 {
-    QString cmd = "LOGIN " + user + " " + password + "\r\n";
+    QString cmd = "LOGIN " + quoteImapString(user) + " " + quoteImapString(password) + "\r\n";
     status = IMAP_Login;
     sendCommand( cmd );
 }
@@ -136,14 +170,14 @@ void ImapProtocol::logout()
 
 void ImapProtocol::list( QString reference, QString mailbox )
 {
-    QString cmd = "LIST \"" + reference + "\" " + mailbox + "\r\n";
+    QString cmd = "LIST " + quoteImapString(reference) + " " + quoteImapString(mailbox) + "\r\n";
     status = IMAP_List;
     sendCommand( cmd );
 }
 
 void ImapProtocol::select( QString mailbox )
 {
-    QString cmd = "SELECT " + quoteString(mailbox) + "\r\n";
+    QString cmd = "SELECT " + quoteImapString(mailbox) + "\r\n";
     status = IMAP_Select;
     _name = mailbox;
     sendCommand(cmd);
@@ -207,7 +241,7 @@ void ImapProtocol::uidFetch( QString from, QString to, FetchItemFlags items )
     if (dataItems & F_Rfc822_Header)
         flags += " RFC822.HEADER";
     if (dataItems & F_Rfc822)
-        flags += " RFC822";
+        flags += " BODY.PEEK[]";
 
     flags += ")";
 
@@ -215,6 +249,7 @@ void ImapProtocol::uidFetch( QString from, QString to, FetchItemFlags items )
     if (from == to)
         fetchUid = from;
     status = IMAP_UIDFetch;
+    messageLength = 0;
 
     sendCommand( cmd );
 }
@@ -251,12 +286,10 @@ void ImapProtocol::expunge()
     sendCommand( cmd );
 }
 
-void ImapProtocol::connected(MailAccount::EncryptType encryptType)
+void ImapProtocol::connected(QMailAccount::EncryptType encryptType)
 {
-    mailDropSize = 0;
-
 #ifndef QT_NO_OPENSSL
-    if (encryptType == MailAccount::Encrypt_NONE)
+    if (encryptType == QMailAccount::Encrypt_NONE)
     {
         // TODO - TLS support not yet added!
     }
@@ -283,6 +316,9 @@ void ImapProtocol::sendCommand( QString cmd )
     d->reset();
 
     transport->stream() << command << flush;
+
+    if (command.length() > 1)
+        qLog(IMAP) << "SEND:" << qPrintable(command.left(command.length() - 2));
 }
 
 void ImapProtocol::incomingData()
@@ -292,6 +328,9 @@ void ImapProtocol::incomingData()
         response = transport->readLine();
         readLines++;
         read += response.length();
+
+        if (response.length() > 1)
+            qLog(IMAP) << "RECV:" << qPrintable(response.left(response.length() - 2));
 
         if (status != IMAP_Init) {
             d->append( response );
@@ -307,8 +346,10 @@ void ImapProtocol::incomingData()
         }
 
         if ((status == IMAP_UIDFetch) && (dataItems & F_Rfc822)) {
-            mailDropSize += response.length();
+            if (!response.startsWith("* "))
+                messageLength += response.length();
         }
+
         if (readLines > MAX_LINES) {
             incomingDataTimer.start(0);
             return;
@@ -343,7 +384,7 @@ void ImapProtocol::nextAction()
     }
 
     if ((status == IMAP_UIDFetch) && (dataItems & F_Rfc822))
-        emit downloadSize( mailDropSize );
+        emit downloadSize( messageLength );
 
     /* Applies to all functions below   */
     if (!response.startsWith( commandId( requests.at(requests.count() - 1 )))) {
@@ -354,7 +395,6 @@ void ImapProtocol::nextAction()
 
     if ((operationState = commandResponse( response )) != OpOk) {
         // The client decides whether the error is critical or not
-        qWarning( response.toAscii() );
         // tr string from server - this seems ambitious
         _lastError = tr( response.toAscii() );
         if (status == IMAP_UIDSearch)
@@ -464,7 +504,7 @@ OperationState ImapProtocol::commandResponse( QString in )
     start = in.indexOf( ' ', start );
     int stop = in.indexOf( ' ', start + 1 );
     if (start == -1 || stop == -1) {
-        qWarning(("could not parse command response: " + in).toAscii());
+        qLog(IMAP) << qPrintable("could not parse command response: " + in);
         return OpFailed;
     }
 
@@ -594,7 +634,7 @@ void ImapProtocol::parseFetch()
             }
 
             if (str.toUpper().startsWith("* NO")) {
-                qWarning( ("fetch failed: " + str).toAscii() );
+                qLog(IMAP) << qPrintable("fetch failed: " + str);
                 flags = 0;
             } else {
                 endMsg = msg.indexOf( headerTerminator );
@@ -657,7 +697,7 @@ void ImapProtocol::parseFetchAll()
 {
     QString str = d->first();
     if (str == QString::null) {
-        qWarning( "not a valid message" );
+        qLog(IMAP) << "not a valid message";
         return;
     }
 
@@ -765,28 +805,6 @@ QString ImapProtocol::token( QString str, QChar c1, QChar c2, int *index )
     *index = stop + (c2 == QMailMessage::CarriageReturn ? 2 : 1);
 
     return str.mid( start, stop - start );
-}
-
-
-/* Adds "" to mailbox names with spaces and not to mailboxes without.
-   Some IMAP servers require this methology.  */
-QString ImapProtocol::quoteString( QString name )
-{
-    if (name.indexOf(' ', 0) != -1)
-        return "\"" + name + "\"";
-
-    return name;
-}
-
-QString ImapProtocol::unquoteString( QString name )
-{
-    QString str = name.simplified();
-    if (str[0] == '\"')
-        str = str.right( str.length() - 1 );
-    if (str[str.length() - 1] == '\"')
-        str = str.left( str.length() - 1 );
-
-    return str.trimmed();
 }
 
 void ImapProtocol::createMail( const QByteArray& msg, QString& id, int size, uint flags )

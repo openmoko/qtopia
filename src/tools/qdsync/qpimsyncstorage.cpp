@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,7 +34,35 @@ QTOPIA_LOG_OPTION(QPimSync)
 
 #include "qpimsyncstorage.h"
 
-QPimSyncStorage::QPimSyncStorage(QObject *parent) : QObject(parent)
+QPimSyncStorageFactory::QPimSyncStorageFactory( QObject *parent )
+    : Qtopia4SyncPluginFactory( parent )
+{
+}
+QPimSyncStorageFactory::~QPimSyncStorageFactory()
+{
+}
+
+QStringList QPimSyncStorageFactory::keys()
+{
+    return QStringList() << "calendar" << "contacts" << "tasks";
+}
+
+Qtopia4SyncPlugin *QPimSyncStorageFactory::plugin( const QString &key )
+{
+    if (key == "calendar") {
+        return new QAppointmentSyncStorage();
+    } else if (key == "contacts") {
+        return new QContactSyncStorage();
+    } else if (key == "tasks") {
+        return new QTaskSyncStorage();
+    }
+    return 0;
+}
+
+QTOPIA_EXPORT_PLUGIN(QPimSyncStorageFactory)
+
+QPimSyncStorage::QPimSyncStorage(const QString &dataset, QObject *parent)
+    : Qtopia4SyncPlugin(parent), mDataset( dataset )
 {
 }
 
@@ -54,25 +82,25 @@ void QPimSyncStorage::setModel(QPimModel *model)
 
 QPimSyncStorage::~QPimSyncStorage(){}
 
-bool QPimSyncStorage::startSyncTransaction(const QDateTime &time)
+void QPimSyncStorage::beginTransaction(const QDateTime &time)
 {
     mUnmappedCategories.clear();
-    return m->startSyncTransaction(time);
+    m->startSyncTransaction(time);
 }
 
-bool QPimSyncStorage::abortSyncTransaction()
+void QPimSyncStorage::abortTransaction()
 {
-    return m->abortSyncTransaction();
+    m->abortSyncTransaction();
 }
 
-bool QPimSyncStorage::commitSyncTransaction()
+void QPimSyncStorage::commitTransaction()
 {
-    return m->commitSyncTransaction();
+    m->commitSyncTransaction();
 }
 
 // appointments
 QAppointmentSyncStorage::QAppointmentSyncStorage()
-    : QPimSyncStorage(0), model(new QAppointmentModel(this))
+    : QPimSyncStorage("calendar", 0), model(new QAppointmentModel(this))
 {
     setModel(model);
 }
@@ -81,29 +109,26 @@ QAppointmentSyncStorage::~QAppointmentSyncStorage()
 {
 }
 
-bool QAppointmentSyncStorage::commitSyncTransaction()
+void QAppointmentSyncStorage::commitTransaction()
 {
-    if (QPimSyncStorage::commitSyncTransaction()) {
-        QCategoryManager c("Calendar");
-        foreach(const QString &category, unmappedCategories()) {
-            QString id = c.add(category);
-            if (id != category) {
-                QSqlQuery q(QtopiaSql::instance()->systemDatabase());
-                if (!q.prepare("UPDATE appointmentcategories SET categoryid = :i WHERE categoryid = :c"))
-                    qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
+    QPimSyncStorage::commitTransaction();
+    QCategoryManager c("Calendar");
+    foreach(const QString &category, unmappedCategories()) {
+        QString id = c.add(category);
+        if (id != category) {
+            QSqlQuery q(QtopiaSql::instance()->systemDatabase());
+            if (!q.prepare("UPDATE appointmentcategories SET categoryid = :i WHERE categoryid = :c"))
+                qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
 
-                q.bindValue(":c", category);
-                q.bindValue(":i", id);
-                if (!q.exec())
-                    qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
-            }
+            q.bindValue(":c", category);
+            q.bindValue(":i", id);
+            if (!q.exec())
+                qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
         }
-        return true;
     }
-    return false;
 }
 
-void QAppointmentSyncStorage::addServerRecord(const QByteArray &record)
+void QAppointmentSyncStorage::createServerRecord(const QByteArray &record)
 {
     QAppointment appointment;
     // exceptions need to be applied after the appointment is added.
@@ -214,7 +239,7 @@ QList<QPimXmlException> QAppointmentSyncStorage::convertExceptions(const QList<Q
     return newList;
 }
 
-void QAppointmentSyncStorage::performSync(const QDateTime &since)
+void QAppointmentSyncStorage::fetchChangesSince(const QDateTime &since)
 {
     // if since null, slow sync, send all added.
     // else two way sync, use added, removed and modified.
@@ -236,11 +261,12 @@ void QAppointmentSyncStorage::performSync(const QDateTime &since)
         QByteArray record;
         QPimXmlStreamWriter h(&record);
         h.writeAppointment(a, convertExceptions(a.exceptions()));
-        emit addClientRecord(record);
+        emit createClientRecord(record);
     }
     if (since.isNull()) {
         // slow sync, modified and removed make no sense, create for
         // exceptions would have been caught anyway;
+        emit clientChangesCompleted();
         return;
     }
 
@@ -290,10 +316,12 @@ void QAppointmentSyncStorage::performSync(const QDateTime &since)
         }
 
     }
+
+    emit clientChangesCompleted();
 }
 
 QContactSyncStorage::QContactSyncStorage()
-    : QPimSyncStorage(0), model(new QContactModel(this))
+    : QPimSyncStorage("contacts", 0), model(new QContactModel(this))
 {
     setModel(model);
 }
@@ -302,31 +330,28 @@ QContactSyncStorage::~QContactSyncStorage()
 {
 }
 
-bool QContactSyncStorage::commitSyncTransaction()
+void QContactSyncStorage::commitTransaction()
 {
     qLog(QPimSync) << "task sync transaction.";
-    if (QPimSyncStorage::commitSyncTransaction()) {
-        QCategoryManager c("Address Book");
-        foreach(const QString &category, unmappedCategories()) {
-            QString id = c.add(category);
-            qLog(QPimSync) << "add category" << category << "with id" << id;
-            if (id != category) {
-                QSqlQuery q(QtopiaSql::instance()->systemDatabase());
-                if (!q.prepare("UPDATE contactcategories SET categoryid = :i WHERE categoryid = :c"))
-                    qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
+    QPimSyncStorage::commitTransaction();
+    QCategoryManager c("Address Book");
+    foreach(const QString &category, unmappedCategories()) {
+        QString id = c.add(category);
+        qLog(QPimSync) << "add category" << category << "with id" << id;
+        if (id != category) {
+            QSqlQuery q(QtopiaSql::instance()->systemDatabase());
+            if (!q.prepare("UPDATE contactcategories SET categoryid = :i WHERE categoryid = :c"))
+                qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
 
-                q.bindValue(":c", category);
-                q.bindValue(":i", id);
-                if (!q.exec())
-                    qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
-            }
+            q.bindValue(":c", category);
+            q.bindValue(":i", id);
+            if (!q.exec())
+                qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
         }
-        return true;
     }
-    return false;
 }
 
-void QContactSyncStorage::addServerRecord(const QByteArray &record)
+void QContactSyncStorage::createServerRecord(const QByteArray &record)
 {
     QPimXmlStreamReader h(record);
     QString serverId;
@@ -334,6 +359,7 @@ void QContactSyncStorage::addServerRecord(const QByteArray &record)
     if (!h.hasError()) {
         c.setUid(model->addContact(c));
         mergeUnmappedCategories(h.missedLabels());
+        //qDebug() << "QContactSyncStorage::createServerRecord" << "mappedId" << serverId << c.uid().toString();
         emit mappedId(serverId, c.uid().toString());
     } else {
         qLog(QPimSync) << "failed to parse:" << int(h.error()) << h.errorString();
@@ -358,7 +384,7 @@ void QContactSyncStorage::removeServerRecord(const QString &localId)
     model->removeContact(QUniqueId(localId));
 }
 
-void QContactSyncStorage::performSync(const QDateTime &since)
+void QContactSyncStorage::fetchChangesSince(const QDateTime &since)
 {
     QList<QUniqueId> changes = model->added(since);
     qLog(QPimSync) << "added" << changes.count();
@@ -368,7 +394,12 @@ void QContactSyncStorage::performSync(const QDateTime &since)
         QByteArray record;
         QPimXmlStreamWriter h(&record);
         h.writeContact(c);
-        emit addClientRecord(record);
+        emit createClientRecord(record);
+    }
+    if (since.isNull()) {
+        // slow sync, modified and removed make no sense
+        emit clientChangesCompleted();
+        return;
     }
 
     changes = model->removed(since);
@@ -390,10 +421,12 @@ void QContactSyncStorage::performSync(const QDateTime &since)
         h.writeContact(c);
         emit replaceClientRecord(record);
     }
+
+    emit clientChangesCompleted();
 }
 
 QTaskSyncStorage::QTaskSyncStorage()
-    : QPimSyncStorage(0), model(new QTaskModel(this))
+    : QPimSyncStorage("tasks", 0), model(new QTaskModel(this))
 {
     setModel(model);
 }
@@ -402,29 +435,26 @@ QTaskSyncStorage::~QTaskSyncStorage()
 {
 }
 
-bool QTaskSyncStorage::commitSyncTransaction()
+void QTaskSyncStorage::commitTransaction()
 {
-    if (QPimSyncStorage::commitSyncTransaction()) {
-        QCategoryManager c("Todo List");
-        foreach(const QString &category, unmappedCategories()) {
-            QString id = c.add(category);
-            if (id != category) {
-                QSqlQuery q(QtopiaSql::instance()->systemDatabase());
-                if (!q.prepare("UPDATE taskcategories SET categoryid = :i WHERE categoryid = :c"))
-                    qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
+    QPimSyncStorage::commitTransaction();
+    QCategoryManager c("Todo List");
+    foreach(const QString &category, unmappedCategories()) {
+        QString id = c.add(category);
+        if (id != category) {
+            QSqlQuery q(QtopiaSql::instance()->systemDatabase());
+            if (!q.prepare("UPDATE taskcategories SET categoryid = :i WHERE categoryid = :c"))
+                qWarning() << "Failed to prepare category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
 
-                q.bindValue(":c", category);
-                q.bindValue(":i", id);
-                if (!q.exec())
-                    qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
-            }
+            q.bindValue(":c", category);
+            q.bindValue(":i", id);
+            if (!q.exec())
+                qWarning() << "Failed to execute category update" << __FILE__ << __LINE__ << ":" << q.lastError().text();
         }
-        return true;
     }
-    return false;
 }
 
-void QTaskSyncStorage::addServerRecord(const QByteArray &record)
+void QTaskSyncStorage::createServerRecord(const QByteArray &record)
 {
     QPimXmlStreamReader h(record);
     QString serverId;
@@ -452,7 +482,7 @@ void QTaskSyncStorage::removeServerRecord(const QString &localId)
     model->removeTask(QUniqueId(localId));
 }
 
-void QTaskSyncStorage::performSync(const QDateTime &since)
+void QTaskSyncStorage::fetchChangesSince(const QDateTime &since)
 {
     QList<QUniqueId> changes = model->added(since);
 
@@ -461,7 +491,12 @@ void QTaskSyncStorage::performSync(const QDateTime &since)
         QByteArray record;
         QPimXmlStreamWriter h(&record);
         h.writeTask(t);
-        emit addClientRecord(record);
+        emit createClientRecord(record);
+    }
+    if (since.isNull()) {
+        // slow sync, modified and removed make no sense
+        emit clientChangesCompleted();
+        return;
     }
 
     changes = model->removed(since);
@@ -477,5 +512,7 @@ void QTaskSyncStorage::performSync(const QDateTime &since)
         h.writeTask(t);
         emit replaceClientRecord(record);
     }
+
+    emit clientChangesCompleted();
 }
 

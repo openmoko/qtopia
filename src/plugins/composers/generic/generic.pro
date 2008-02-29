@@ -1,7 +1,7 @@
 qtopia_project(qtopia plugin)
 TARGET=genericcomposer
 
-!enable_modem:DEFINES+=QTOPIA_NO_SMS
+!enable_cell:DEFINES+=QTOPIA_NO_SMS
 
 HEADERS+=\
     genericcomposer.h\

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -117,11 +115,11 @@ struct QDBusSlotCache
 };
 Q_DECLARE_METATYPE(QDBusSlotCache)
 
-class CallDeliveryEvent: public QMetaCallEvent
+class QDBusCallDeliveryEvent: public QMetaCallEvent
 {
 public:
-    CallDeliveryEvent(const QDBusConnection &c, int id, QObject *sender,
-                      const QDBusMessage &msg, const QList<int> &types, int f = 0)
+    QDBusCallDeliveryEvent(const QDBusConnection &c, int id, QObject *sender,
+                           const QDBusMessage &msg, const QList<int> &types, int f = 0)
         : QMetaCallEvent(id, sender), connection(c), message(msg), metaTypes(types), flags(f)
         { }
 
@@ -138,16 +136,16 @@ private:
     int flags;
 };
 
-class ActivateObjectEvent: public QMetaCallEvent
+class QDBusActivateObjectEvent: public QMetaCallEvent
 {
 public:
-    ActivateObjectEvent(const QDBusConnection &c, QObject *sender,
-                        const QDBusConnectionPrivate::ObjectTreeNode &n,
-                        int p, const QDBusMessage &m, QSemaphore *s = 0)
+    QDBusActivateObjectEvent(const QDBusConnection &c, QObject *sender,
+                             const QDBusConnectionPrivate::ObjectTreeNode &n,
+                             int p, const QDBusMessage &m, QSemaphore *s = 0)
         : QMetaCallEvent(-1, sender, 0, 0, 0, s), connection(c), node(n),
           pathStartPos(p), message(m), handled(false)
         { }
-    ~ActivateObjectEvent();
+    ~QDBusActivateObjectEvent();
 
     int placeMetaCall(QObject *);
 

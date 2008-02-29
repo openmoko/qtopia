@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "playercontrol.h"
+#include <QtopiaApplication>
 
 static const int VOLUME_MAX = 100;
 
@@ -61,12 +62,14 @@ void PlayerControl::setState( State state )
             {
             case Playing:
                 m_control->start();
+                QtopiaApplication::instance()->registerRunningTask( "Media Player", this );
                 break;
             case Paused:
                 m_control->pause();
                 break;
             case Stopped:
                 m_control->stop();
+                QtopiaApplication::instance()->unregisterRunningTask( this );
                 break;
             }
         }
@@ -77,7 +80,12 @@ void PlayerControl::setState( State state )
 
 void PlayerControl::setVolume( int volume )
 {
-    m_volume = volume;
+    if(m_volume != volume)
+    {
+        m_volume = volume;
+        QSettings config( "Trolltech", "MediaPlayer" );
+        config.setValue( "Volume", volume );
+    }
 }
 
 void PlayerControl::setMute( bool mute )

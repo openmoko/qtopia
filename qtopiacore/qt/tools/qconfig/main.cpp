@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -500,7 +498,7 @@ void Main::about()
 	"<p><b><font size=\"+2\">Qtopia Core build configuration</font></b></p>"
 	"<p></p>"
 	"<p>Version 2.0</p>"
-	"<p>Copyright (C) 2001-2007 Trolltech ASA. All rights reserved.</p>"
+	"<p>Copyright (C) 2001-2008 Trolltech ASA. All rights reserved.</p>"
 	"<p></p>"
 	"<p>This program is licensed to you under the terms of the GNU General "
 	"Public License Version 2 as published by the Free Software Foundation. This "

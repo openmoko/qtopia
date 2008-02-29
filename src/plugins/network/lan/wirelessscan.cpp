@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -750,7 +750,7 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
                     }
                   
                     //payload structure from iwlist.c 
-                    int len = iwevent.u.data.length;
+                    //int len = iwevent.u.data.length;
                     /*package structure (each package minimum of 2 bytes): 
                         - payload[0] -> 0xdd (WPA1 or other)
                                         ->
@@ -878,6 +878,9 @@ WSearchPage::WSearchPage( const QString& c, QWidget* parent, Qt::WFlags flags )
     : QWidget( parent, flags ), config( c ), scanEngine( 0 ), state( QtopiaNetworkInterface::Unknown ),
         currentSelection( 0 ), isRestart( false )
 {
+    // itemDescription is used to generate translations
+    Q_UNUSED(itemDescription);
+
     initUI();
     loadKnownNetworks();
 

@@ -32,15 +32,15 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>9 protected functions inherited from <a href="themegraphicitem.html#protected-functions">ThemeGraphicItem</a></li>
-<li><div class="fn"/>17 protected functions inherited from <a href="themeitem.html#protected-functions">ThemeItem</a></li>
+<li><div class="fn"/>15 protected functions inherited from <a href="themegraphicitem.html#protected-functions">ThemeGraphicItem</a></li>
+<li><div class="fn"/>21 protected functions inherited from <a href="themeitem.html#protected-functions">ThemeItem</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The ThemeListItem class represents a graphical list in a themed view.</p>
 <p>The ThemeListItem class implements the <a href="themed-view-elements.html#themelistelement">list element</a> from the theme XML.</p>
-<p>As an extension of <a href="themewidgetitem.html">ThemeWidgetItem</a>, ThemeListItem has the same functionality but only works with a <a href="qlistview.html">QListView</a> derived widget, and extra functionality needed to work with a <a href="themelistmodel.html">ThemeListModel</a>.</p>
+<p>As an extension of <a href="themewidgetitem.html">ThemeWidgetItem</a>, ThemeListItem has the same functionality but only works with a <a href="./qlistview.html">QListView</a> derived widget, and extra functionality needed to work with a <a href="themelistmodel.html">ThemeListModel</a>.</p>
 <p>Normally you do not want to call this item's functions directly, but rather specify the relevant attributes and data for this item in the themed view XML, and just pass it as a parameter when constructing a <a href="themelistmodel.html">ThemeListModel</a>. The model installs itself automatically using <a href="themelistitem.html#setModel">ThemeListItem::setModel</a>().</p>
 <p>See also <a href="themelistmodel.html">ThemeListModel</a> and <a href="themed-view-elements.html#themelistelement">list element</a>.</p>
 <hr />
@@ -49,18 +49,18 @@
 <p>Constructs a <a href="themelistitem.html">ThemeListItem</a> object. <i>parent</i>, <i>view</i> and <i>atts</i> are passed to the base class constructor.</p>
 <h3 class="fn"><a name="dtor.ThemeListItem"></a>ThemeListItem::~ThemeListItem ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="themelistitem.html">ThemeListItem</a> object.</p>
-<h3 class="fn"><a name="listView"></a><a href="qlistview.html">QListView</a> * ThemeListItem::listView () const</h3>
-<p>Returns the <a href="qlistview.html">QListView</a> for this item. Equivalent to qobject_cast&lt;<a href="qlistview.html">QListView</a>*&gt;(<a href="themewidgetitem.html#widget">widget</a>())</p>
+<h3 class="fn"><a name="listView"></a><a href="./qlistview.html">QListView</a> * ThemeListItem::listView () const</h3>
+<p>Returns the <a href="./qlistview.html">QListView</a> for this item. Equivalent to qobject_cast&lt;<a href="./qlistview.html">QListView</a>*&gt;(<a href="themewidgetitem.html#widget">widget</a>())</p>
 <h3 class="fn"><a name="model"></a><a href="themelistmodel.html">ThemeListModel</a> * ThemeListItem::model () const</h3>
 <p>Returns the <a href="themelistmodel.html">ThemeListModel</a> object associated with this <a href="themelistitem.html">ThemeListItem</a>.</p>
 <p>See also <a href="themelistitem.html#setModel">setModel</a>().</p>
 <h3 class="fn"><a name="setModel"></a>void ThemeListItem::setModel ( <a href="themelistmodel.html">ThemeListModel</a> * <i>model</i> )</h3>
-<p>Sets <i>model</i> to be the <a href="themelistmodel.html">ThemeListModel</a> associated with this <a href="themelistitem.html">ThemeListItem</a>. If this item currently has a <a href="qlistview.html">QListView</a> widget set, this model is installed immediately on the view using <a href="qabstractitemview.html#setModel">QListView::setModel</a>(). If a call is made to QWidget::setWidget() in the future, this model will be installed in the same way.</p>
+<p>Sets <i>model</i> to be the <a href="themelistmodel.html">ThemeListModel</a> associated with this <a href="themelistitem.html">ThemeListItem</a>. If this item currently has a <a href="./qlistview.html">QListView</a> widget set, this model is installed immediately on the view using <a href="./qabstractitemview.html#setModel">QListView::setModel</a>(). If a call is made to QWidget::setWidget() in the future, this model will be installed in the same way.</p>
 <p>See also <a href="themelistitem.html#model">model</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

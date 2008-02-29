@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,17 +39,17 @@
 
 #include <stddef.h>
 
-#define QT_VERSION_STR   "4.3.2"
+#define QT_VERSION_STR   "4.3.3"
 /*
    QT_VERSION is (major << 16) + (minor << 8) + patch.
 */
-#define QT_VERSION 0x040302
+#define QT_VERSION 0x040303
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 3, 0))
 */
 #define QT_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
 
-#define QT_PACKAGEDATE_STR "2007-10-03"
+#define QT_PACKAGEDATE_STR "2008-02-08"
 
 #if !defined(QT_BUILD_MOC)
 #include <QtCore/qconfig.h>

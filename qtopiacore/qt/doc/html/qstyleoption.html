@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/styles/qstyleoption.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/styles/qstyleoption.cpp -->
 <head>
   <title>Qt 4.3: QStyleOption Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -44,7 +44,7 @@
 <li><div class="fn"/>QPalette <b><a href="qstyleoption.html#palette-var">palette</a></b></li>
 <li><div class="fn"/>QRect <b><a href="qstyleoption.html#rect-var">rect</a></b></li>
 <li><div class="fn"/>QStyle::State <b><a href="qstyleoption.html#state-var">state</a></b></li>
-<li><div class="fn"/>int <b><a href="qstyleoption.html#type-varx">type</a></b></li>
+<li><div class="fn"/>int <b><a href="qstyleoption.html#type-var">type</a></b></li>
 <li><div class="fn"/>int <b><a href="qstyleoption.html#version-var">version</a></b></li>
 </ul>
 <a name="related-non-members"></a>
@@ -85,10 +85,10 @@
          const QStyleOptionFocusRect *focusRectOption =
                  qstyleoption_cast&lt;const QStyleOptionFocusRect *&gt;(option);
          if (focusRectOption) {
-             <span class="comment">// ...</span>
+             <span class="comment">//</span> ...
          }
      }
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> ...
  }</pre>
 <p>The <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() function will return 0 if the object to which <tt>option</tt> points is not of the correct type.</p>
 <p>For an example demonstrating how style options can be used, see the <a href="widgets-styles.html">Styles</a> example.</p>
@@ -137,7 +137,7 @@
 <tr><td valign="top"><tt>QStyleOption::SO_Q3ListView</tt></td><td align="center" valign="top">?</td><td valign="top"><a href="qstyleoptionq3listview.html">QStyleOptionQ3ListView</a></td></tr>
 <tr><td valign="top"><tt>QStyleOption::SO_Q3ListViewItem</tt></td><td align="center" valign="top"><tt>11</tt></td><td valign="top"><a href="qstyleoptionq3listviewitem.html">QStyleOptionQ3ListViewItem</a></td></tr>
 </table></p>
-<p>See also <a href="qstyleoption.html#type-varx">type</a>.</p>
+<p>See also <a href="qstyleoption.html#type-var">type</a>.</p>
 <h3 class="fn"><a name="StyleOptionType-enum"></a>enum QStyleOption::StyleOptionType</h3>
 <p>This enum is used to hold information about the type of the style option, and is defined for each <a href="qstyleoption.html">QStyleOption</a> subclass.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -160,7 +160,7 @@
 <p>Constructs a <a href="qstyleoption.html">QStyleOption</a> with the specified <i>version</i> and <i>type</i>.</p>
 <p>The version has no special meaning for <a href="qstyleoption.html">QStyleOption</a>; it can be used by subclasses to distinguish between different version of the same option type.</p>
 <p>The <a href="qstyleoption.html#state-var">state</a> member variable is initialized to <a href="qstyle.html#StateFlag-enum">QStyle::State_None</a>.</p>
-<p>See also <a href="qstyleoption.html#version-var">version</a> and <a href="qstyleoption.html#type-varx">type</a>.</p>
+<p>See also <a href="qstyleoption.html#version-var">version</a> and <a href="qstyleoption.html#type-var">type</a>.</p>
 <h3 class="fn"><a name="QStyleOption-2"></a>QStyleOption::QStyleOption ( const QStyleOption &amp; <i>other</i> )</h3>
 <p>Constructs a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QStyleOption"></a>QStyleOption::~QStyleOption ()</h3>
@@ -195,7 +195,7 @@
 <p>This variable holds the style flags that are used when drawing the control.</p>
 <p>The default value is <a href="qstyle.html#StateFlag-enum">QStyle::State_None</a>.</p>
 <p>See also <a href="qstyleoption.html#initFrom">initFrom</a>(), <a href="qstyle.html#drawPrimitive">QStyle::drawPrimitive</a>(), <a href="qstyle.html#drawControl">QStyle::drawControl</a>(), <a href="qstyle.html#drawComplexControl">QStyle::drawComplexControl</a>(), and <a href="qstyle.html#StateFlag-enum">QStyle::State</a>.</p>
-<h3 class="fn"><a name="type-varx"></a>int QStyleOption::type</h3>
+<h3 class="fn"><a name="type-var"></a>int QStyleOption::type</h3>
 <p>This variable holds the option type of the style option.</p>
 <p>The default value is <a href="qstyleoption.html#OptionType-enum">SO_Default</a>.</p>
 <p>See also <a href="qstyleoption.html#OptionType-enum">OptionType</a>.</p>
@@ -206,7 +206,7 @@
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="qstyleoption_cast"></a>T qstyleoption_cast ( const QStyleOption * <i>option</i> )</h3>
-<p>Returns a T or 0 depending on the <a href="qstyleoption.html#type-varx">type</a> and <a href="qstyleoption.html#version-var">version</a> of the given <i>option</i>.</p>
+<p>Returns a T or 0 depending on the <a href="qstyleoption.html#type-var">type</a> and <a href="qstyleoption.html#version-var">version</a> of the given <i>option</i>.</p>
 <p>Example:</p>
 <pre> void MyStyle::drawPrimitive(PrimitiveElement element,
                              const QStyleOption *option,
@@ -217,19 +217,19 @@
          const QStyleOptionFocusRect *focusRectOption =
                  qstyleoption_cast&lt;const QStyleOptionFocusRect *&gt;(option);
          if (focusRectOption) {
-             <span class="comment">// ...</span>
+             <span class="comment">//</span> ...
          }
      }
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> ...
  }</pre>
-<p>See also <a href="qstyleoption.html#type-varx">QStyleOption::type</a> and <a href="qstyleoption.html#version-var">QStyleOption::version</a>.</p>
+<p>See also <a href="qstyleoption.html#type-var">QStyleOption::type</a> and <a href="qstyleoption.html#version-var">QStyleOption::version</a>.</p>
 <h3 class="fn"><a name="qstyleoption_cast-3"></a>T qstyleoption_cast ( QStyleOption * <i>option</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a T or 0 depending on the type of the given <i>option</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

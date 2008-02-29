@@ -2,7 +2,9 @@
 <html>
 <head><title>During Calls</title></head>
 <body>
+<!--#if expr="$USERGUIDE"-->
 <h3>During Calls</h3>
+<!--#endif-->
 <p>During calls, the current calls and the elapsed time are shown for each.
 The following options are available from the <img src=":icon/options"><b>Options</b> menu when a call is in progress:</p>
 <p><b>Hold:</b> puts the current caller on hold; you can make other calls with someone on hold.</p>
@@ -15,7 +17,10 @@ The following options are available from the <img src=":icon/options"><b>Options
 <p><b>Transfer:</b> puts the caller on hold through to another number.</p>
 <p>If your phone supports audio routing, then additional options will become available on this screen.  The
 options will let you transfer call audio to the available connected accessories, e.g. Speakerphone,
-Bluetooth Headset, Headphones, etc.</p>
+<!--#if expr="$BLUETOOTH"-->
+Bluetooth Headset,
+<!--#endif -->
+Headphones, etc.</p>
 <p>For more Calls help, choose from the following topics:</p>
 <ul>
 <li><a href="qpe-calls-opening.html">Making Calls</a></li>

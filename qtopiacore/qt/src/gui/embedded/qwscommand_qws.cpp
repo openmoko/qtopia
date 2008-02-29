@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -41,6 +39,7 @@
 #include "qtransportauth_qws_p.h"
 
 #include <sys/uio.h>
+#include <unistd.h>
 
 // #define QWSCOMMAND_DEBUG 1 // Uncomment to debug client/server communication
 
@@ -340,6 +339,29 @@ const char *qws_getCommandTypeString( QWSCommand::Type tp )
  *********************************************************************/
 
 #ifndef QT_NO_QWS_MULTIPROCESS
+static void ensure_socket_write(QIODevice *socket, char* data, int len)
+{
+    // If the write attempt fails due to EAGAIN or similar, retry until success
+    // If a real error occurs, neither this nor qws_{read|write}_command will 
+    // handle it correctly!
+
+    // Note: with some other socket implementation it may be necessary to
+    // add support for partial writes as well as simple failures...
+    qint64 bytesWritten = socket->write(data, len);
+    if (bytesWritten == 0) {
+        // We need to retry
+        unsigned int delay = 1;
+        do {
+            // Pause before we make another attempt to send
+            ::usleep(delay * 1000);
+            if (delay < 1024) 
+                delay *= 2;
+
+            bytesWritten = socket->write(data, len);
+        } while (bytesWritten == 0);
+    }
+}
+
 void qws_write_command(QIODevice *socket, int type, char *simpleData, int simpleLen,
                        char *rawData, int rawLen)
 {
@@ -356,7 +378,8 @@ void qws_write_command(QIODevice *socket, int type, char *simpleData, int simple
         socket = ad;
 #endif
 
-    qws_write_uint(socket, type);
+    int datum = type;
+    ensure_socket_write(socket, reinterpret_cast<char*>(&datum), sizeof(int));
 
     if (rawLen > MAX_COMMAND_SIZE) {
         qWarning("qws_write_command: Message of size %d too big. "
@@ -364,16 +387,14 @@ void qws_write_command(QIODevice *socket, int type, char *simpleData, int simple
         rawLen = MAX_COMMAND_SIZE;
     }
 
-    qws_write_uint(socket, rawLen == -1 ? 0 : rawLen);
-
-    // Add total length of command here, allowing for later command expansion...
-    // qws_write_uint(socket, rawLen == -1 ? 0 : rawLen);
+    datum = rawLen == -1 ? 0 : rawLen;
+    ensure_socket_write(socket, reinterpret_cast<char*>(&datum), sizeof(int));
 
     if (simpleData && simpleLen)
-        socket->write(simpleData, simpleLen);
+        ensure_socket_write(socket, simpleData, simpleLen);
 
     if (rawLen && rawData)
-        socket->write(rawData, rawLen);
+        ensure_socket_write(socket, rawData, rawLen);
 }
 
 /*

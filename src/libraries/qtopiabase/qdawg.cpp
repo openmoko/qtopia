@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,9 +37,6 @@ class QTrie;
 typedef QList<QTrie*> TrieClub;
 typedef QHash<int, TrieClub *> TrieClubDirectory;
 
-static bool global_trie_mode = false;
-static uint global_trie_value = 0;
-
 class TriePtr {
 public:
     QChar letter;
@@ -58,7 +55,7 @@ public:
         sorted=true;
     }
 
-    QTrie* findAdd(QChar c,bool last);
+    QTrie* findAdd(QChar c,bool last,int value);
     bool equal(TrieList& l);
 
     void sort()
@@ -76,7 +73,7 @@ public:
     QTrie();
     ~QTrie();
 
-    void insertWord(const QString& s, uint index=0);
+    void insertWord(const QString& s, uint index, int value);
     bool equal(QTrie* o);
     void dump(int indent=0);
 
@@ -108,25 +105,24 @@ QTrie::~QTrie()
     // it's too difficult.  The QTrie's are deleted via the directory.
 }
 
-void QTrie::insertWord(const QString& s, uint index)
+void QTrie::insertWord(const QString& s, uint index, int value)
 {
-    if ( global_trie_mode && (int)index == s.length()-1 && s[(int)index]=='-' )
+    if ( (int)index == s.length()-1 && s[(int)index]=='*' )
         return;
     if ( (int)index == s.length() ) {
         isword = true;
     } else {
         bool last = (int)index == s.length()-1;
-        if ( global_trie_mode && (int)index == s.length()-2 && s[(int)index+1]=='-' )
+        if ( (int)index == s.length()-2 && s[(int)index+1]=='*' )
             last = true;
-        QTrie* t = children.findAdd(s[(int)index],last);
-        t->insertWord(s,index+1);
+        QTrie* t = children.findAdd(s[(int)index],last,value);
+        t->insertWord(s,index+1,value);
     }
 }
 
 bool QTrie::equal(QTrie* o)
 {
     if ( o == this ) return true;
-    if ( global_trie_mode ) return false;
     if ( isword != o->isword )
         return false;
     return children.equal(o->children);
@@ -223,24 +219,24 @@ bool TrieList::equal(TrieList& l)
     ConstIterator it2 = begin();
     ConstIterator it = l.begin();
     for( ; it != l.end(); ++it, ++it2 )
-        if ( (*it).letter != (*it2).letter || ! (*it).p->equal((*it2).p) )
+        if ( (*it).letter != (*it2).letter || ! (*it).p->equal((*it2).p) ||  (*it).val != (*it2).val )
             return false;
     return true;
 }
-QTrie* TrieList::findAdd(QChar c,bool last)
+QTrie* TrieList::findAdd(QChar c,bool last,int value)
 {
     for (Iterator it=begin(); it!=end(); ++it) {
         if ( (*it).letter == c ) {
-            if ( last && global_trie_mode )
-                (*it).val = global_trie_value;
+            if ( last )
+                (*it).val = value;
             return (*it).p;
         }
     }
     TriePtr p;
     p.p = new QTrie;
     p.letter = c;
-    if ( last && global_trie_mode )
-        p.val = global_trie_value;
+    if ( last )
+        p.val = value;
     else
         p.val = 0;
     prepend(p);
@@ -249,30 +245,30 @@ QTrie* TrieList::findAdd(QChar c,bool last)
     return p.p;
 }
 
-static const char* dawg_sig32 = "QDAWG100"; //32 bit Node - old format (not supported anymore)
-static const char* dawg_sig64 = "QDAWG200"; //64 bit Node
+static const char* dawg_sig = "QDWG";
+static const quint32 dawg_ver = 0x00000300;
 
+#include <QDebug>
 class QDawgPrivate {
 public:
     QDawgPrivate(QIODevice* dev)
     {
         memoryFile = 0;
-        QDataStream ds(dev);
-        char sig[8];
-        ds.readRawData(sig,8);
-        if ( !strncmp(dawg_sig32,sig,8) ) {
-            qWarning("Old QDawg format. Please generate a new QDawg file.");
+                QDataStream ds(dev);
+        char sig[4];
+        quint32 ver;
+        ds.readRawData(sig,4);
+        ds.readRawData((char*)&ver,4);
+        if ( 0!=strncmp(dawg_sig,sig,4) || ver != dawg_ver ) {
+            qWarning("Wrong QDawg format (found %.4s v.%x, require %.4s v.%x). Please generate a new QDawg file.",
+                    sig,ver,dawg_sig,dawg_ver);
             node = 0;
-        } else if ( !strncmp(dawg_sig64,sig,8) ) {
+        } else {
             uint n;
             char* nn;
             ds.readBytes(nn,n);
-
-            // #### endianness problem ignored.
             node = (QDawg::Node*)nn;
             nodes = n / sizeof(QDawg::Node);
-        } else {
-            node = 0;
         }
     }
 
@@ -298,15 +294,14 @@ public:
             mem = (uchar*)memoryFile->data();
 
         if (mem) {
-            if (!strncmp(dawg_sig32, (char*)mem,8)) {
-                qWarning("Old QDawg format. Please generate a new QDawg file.");
+            if ( 0!=strncmp(dawg_sig, (char*)mem,4) || *((quint32*)(mem+4)) != dawg_ver) {
+                qWarning("Wrong QDawg format (found %.4s v.%x, require %.4s v.%x). Please regenerate %s.",
+                        mem,*((quint32*)(mem+4)),dawg_sig,dawg_ver,fileName.toLatin1().data());
                 node = 0;
-            } else if (!strncmp(dawg_sig64, (char*)mem, 8)) {
+            } else {
                 mem += 8; //skip signature
                 int n = memoryFile->size() - 12;
                 mem += 4; //skip file size
-
-                // #### endianness problem ignored.
                 node = (QDawg::Node*)((char*)mem);
                 nodes = n / sizeof(QDawg::Node);
             }
@@ -332,15 +327,25 @@ public:
         }
     }
 
-    bool write(QIODevice* dev)
+    bool write(QIODevice* dev, bool byteswap)
     {
         QDataStream ds(dev);
-        if (ds.writeRawData(dawg_sig64,8) != 8)
+        if (ds.writeRawData(dawg_sig,4) != 4)
             return false;
-        // #### endianness problem ignored.
-        //always write new style
-        ds.writeBytes((char*)node,sizeof(QDawg::Node)*nodes);
-        return true;
+        if ( byteswap ) {
+            ds.setByteOrder(QSysInfo::ByteOrder == QSysInfo::BigEndian
+                    ? QDataStream::LittleEndian : QDataStream::BigEndian);
+            ds << dawg_ver;
+            // writeBytes sends the size (as a quint32) followed by the actual bytes
+            ds << (quint32)(nodes*sizeof(QDawg::Node));
+            for (int i=0; i<nodes; ++i)
+                ds << node[i].let << node[i].val << node[i].offset;
+        } else {
+            if (ds.writeRawData((char*)&dawg_ver,4) != 4)
+                return false;
+            ds.writeBytes((char*)node,sizeof(QDawg::Node)*nodes);
+        }
+        return ds.status() == QDataStream::Ok;
     }
 
     void dumpWords(int nid=0, int index=0)
@@ -350,10 +355,10 @@ public:
         do {
             QDawg::Node& n = node[nid+i];
             word[index] = n.let;
-            if ( n.isword )
+            if ( n.isWord() )
                 fprintf(stderr,"%.*s\n",index+1,word);
             if ( n.offset ) dumpWords(n.offset+nid+i,index+1);
-        } while (!node[nid+i++].islast);
+        } while (!node[nid+i++].isLast());
     }
 
     void dump(int nid=0, int indent=0)
@@ -365,9 +370,9 @@ public:
             for (int in=0; in<indent; in++)
                 fputc(' ',stderr);
             fprintf(stderr," %c %d %d %d %d\n",n.let,
-                n.isword,n.islast,n.offset,n.val);
+                n.isWord(), n.isLast(), n.offset, n.value());
             if ( n.offset ) dump(n.offset+nid+i,indent+2);
-        } while (!node[nid+i++].islast);
+        } while (!node[nid+i++].isLast());
     }
 
     int countWords(int nid=0)
@@ -376,11 +381,11 @@ public:
         int i=0;
         do {
             QDawg::Node& n = node[nid+i];
-            if ( n.isword )
+            if ( n.isWord() )
                 t++;
             if ( n.offset )
                 t+=countWords(n.offset+nid+i);
-        } while (!node[nid+i++].islast);
+        } while (!node[nid+i++].isLast());
         return t;
     }
 
@@ -391,12 +396,12 @@ public:
             do {
                 QDawg::Node& n = node[nid+i];
                 if ( s[index] == QChar((ushort)n.let) ) {
-                    if ( n.isword && index == (int)s.length()-1 )
+                    if ( n.isWord() && index == (int)s.length()-1 )
                         return true;
                     if ( n.offset )
                         return contains(s,n.offset+nid+i,index+1);
                 }
-            } while (!node[nid+i++].islast);
+            } while (!node[nid+i++].isLast());
         }
         return false;
     }
@@ -408,12 +413,12 @@ public:
         do {
             QDawg::Node& n = node[nid+i];
             s[next] = QChar((ushort)n.let);
-            if ( n.isword )  {
+            if ( n.isWord() )  {
                 list.append(s);
             }
             if ( n.offset )
                 appendAllWords(list, n.offset+nid+i, s);
-        } while (!node[nid+i++].islast);
+        } while (!node[nid+i++].isLast());
     }
 
     const QDawg::Node* root() { return node; }
@@ -441,11 +446,9 @@ private:
                 QTrie* s = (*it).p;
                 ++n;
                 n->let = (*it).letter.unicode();
-                n->isword = s->isword;
-                if ( global_trie_mode ) {
-                    n->val = (*it).val;
-                }
-                n->islast = 0;
+                n->setIsWord( s->isword );
+                n->setValue((*it).val);
+                n->setIsLast(false);
                 n->offset = appendToArray(s);
                 if ( n->offset ) {
                     int t = n->offset-here;
@@ -455,7 +458,7 @@ private:
                 }
                 here++;
             }
-            n->islast = 1;
+            n->setIsLast(true);
         }
         return t->key;
     }
@@ -560,6 +563,17 @@ QDawg::~QDawg()
 /*!
     \overload
     Replaces all the words in the QDawg with words read by QIODevice::readLine() from \a dev.
+
+    \internal
+    In addition to single words on a line, QDawg also allows prefixes and node values.
+
+    Prefixes are words with a trailing "*"; any necessary nodes are added to the QDawg,
+    but the final node is not marks as isWord().
+
+    Node values are integers appended to the word (or prefix) following a space. The values
+    are accessible via the value() function. Note that storing a wide range of values will
+    increase the size of the generated dawg since suffixes with different values cannot
+    be merged.
 */
 bool QDawg::createFromWords(QIODevice* dev)
 {
@@ -570,12 +584,10 @@ bool QDawg::createFromWords(QIODevice* dev)
     int n=0;
     while (!i.atEnd()) {
         QString line = i.readLine();
-        if ( global_trie_mode ) {
-            QStringList t = line.split(' ');
-            global_trie_value = t.count() > 1 ? t[1].toUInt() : 0;
-            line = t[0];
-        }
-        trie->insertWord(line);
+        QStringList t = line.split(QChar(' '));
+        int value = t.count() > 1 ? t[1].toUInt() : 0;
+        line = t[0];
+        trie->insertWord(line,0,value);
         n++;
     }
     //trie->dump();
@@ -585,6 +597,17 @@ bool QDawg::createFromWords(QIODevice* dev)
         d = 0;
     return true;
 }
+
+/*!
+  \fn  bool QDawg::Node::setIsWord(bool isWord)
+  \internal
+*/
+
+/*!
+  \fn QDawg::Node::setIsLast(bool isLast)
+  \internal
+*/
+
 
 /*XXX
   \fn int QDawg::Node::value() const
@@ -598,28 +621,6 @@ bool QDawg::createFromWords(QIODevice* dev)
 */
 
 /*!
-  \internal
-
-  Not yet supported.
-
-  Not thread-safe.
-
-  Format of file is:
-  \code
-  word value
-  pref- value 
-  \endcode
-  Words and prefixes can thus be assigned a value.
-*/
-bool QDawg::createTrieFromWords(QIODevice* dev)
-{
-    global_trie_mode = true;
-    bool y = createFromWords(dev);
-    global_trie_mode = false;
-    return y;
-}
-
-/*!
   Replaces all the words in the QDawg with the words in the \a list.
 */
 void QDawg::createFromWords(const QStringList& list)
@@ -629,7 +630,7 @@ void QDawg::createFromWords(const QStringList& list)
     if ( list.count() ) {
         QTrie* trie = new QTrie;
         for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-            trie->insertWord(*it);
+            trie->insertWord(*it,0,0);
         }
         d = new QDawgPrivate(trie);
     } else {
@@ -701,7 +702,20 @@ bool QDawg::read(QIODevice* dev)
 */
 bool QDawg::write(QIODevice* dev) const
 {
-    return d ? d->write(dev) : true;
+    return d ? d->write(dev,false) : true;
+}
+
+/*!
+  Writes the QDawg to \a dev, in a custom QDAWG format, with bytes
+  reversed from the endianness of the host. This allows a host of one
+  endianness to write a QDAWG file readable on a target device with
+  reverse endianness.
+
+  Returns true if successful.
+*/
+bool QDawg::writeByteSwapped(QIODevice* dev) const
+{
+    return d ? d->write(dev,true) : true;
 }
 
 /*!

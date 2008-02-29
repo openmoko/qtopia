@@ -16,7 +16,6 @@
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#definitions">Definitions</a></li>
 <li><a href="#file-name-standards">File Name Standards</a></li>
-<li><a href="#desktop-file-standard">Desktop File Standard</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
@@ -25,10 +24,10 @@
 <h2>Definitions</h2>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Term</th><th>Definition</th></tr></thead>
-<tr valign="top" class="odd"><td>&lt;appname&gt;</td><td>this is the application's executable filename. It should be globally unique. Since this name is not intended to be seen or entered by the end-user, long and complex names such as &quot;abc-textedit-3&quot; can be used.</td></tr>
+<tr valign="top" class="odd"><td>&lt;appname&gt;</td><td>this is the application's executable file name. It should be globally unique. Since this name is not intended to be seen or entered by the end-user, long and complex names such as &quot;abc-textedit-3&quot; can be used.</td></tr>
 <tr valign="top" class="even"><td><i>language</i></td><td>this is the ISO639 language code (e.g&#x2e; &quot;de&quot; for German).</td></tr>
 </table></p>
-<a name="desktop"></a><a name="file-name-standards"></a>
+<a name="file-name-standards"></a>
 <h2>File Name Standards</h2>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>File Type</th><th>Location</th></tr></thead>
@@ -38,11 +37,11 @@
 <tr valign="top" class="odd"><td>Library</td><td><tt>/opt/Qtopia/lib/&lt;appname&gt;/...</tt></td></tr>
 <tr valign="top" class="even"><td></td><td><b>Description:</b> Applications may put libraries here as required</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
-<tr valign="top" class="odd"><td>Image</td><td><tt>/opt/Qtopia/pics/&lt;appname&gt;/*.{png,jpg}</tt></td></tr>
-<tr valign="top" class="even"><td></td><td><b>Description:</b> Any image files the application needs to use should either be standard built-in images, or be files in this application-specific directory. The files can be referred to using <a href="qpixmap.html">QPixmap</a>(&quot;:image/&lt;name&gt;&quot;) for pictures belonging to the current application or the global context, and using <a href="qpixmap.html">QPixmap</a>(&quot;:image/&lt;appname&gt;/&lt;name&gt;&quot;) for pictures belonging to another application context.</td></tr>
+<tr valign="top" class="odd"><td>Image</td><td><tt>/opt/Qtopia/pics/&lt;appname&gt;/*.{png,jpg,svg}</tt></td></tr>
+<tr valign="top" class="even"><td></td><td><b>Description:</b> Any image files the application needs to use should either be standard built-in images, or be files in this application-specific directory. The files can be referred to using <a href="./qpixmap.html">QPixmap</a>(&quot;:image/&lt;name&gt;&quot;) for pictures belonging to the current application or the global context, and using <a href="./qpixmap.html">QPixmap</a>(&quot;:image/&lt;appname&gt;/&lt;name&gt;&quot;) for pictures belonging to another application context.</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
-<tr valign="top" class="odd"><td>Icon</td><td><tt>/opt/Qtopia/pics/&lt;appname&gt;/icons/&lt;IconSize&gt;x&lt;IconSize&gt;/*.png</tt></td></tr>
-<tr valign="top" class="even"><td></td><td><b>Description:</b> Any icon files the application needs to use should either be standard built-in icons, or be files in this application-specific directory. The files can be referred to using <a href="qicon.html">QIcon</a>(&quot;:icon/<i>name</i>&quot;) for icons belonging to the current application or the global context, and using or <a href="qicon.html">QIcon</a>(&quot;:icon/&lt;appname&gt;/&lt;name&gt;&quot;) for icons belonging to another application context.</td></tr>
+<tr valign="top" class="odd"><td>Icon</td><td><tt>/opt/Qtopia/pics/&lt;appname&gt;/icons/&lt;IconSize&gt;x&lt;IconSize&gt;/*.{png,svg}</tt></td></tr>
+<tr valign="top" class="even"><td></td><td><b>Description:</b> Any icon files the application needs to use should either be standard built-in icons, or be files in this application-specific directory. The files can be referred to using <a href="./qicon.html">QIcon</a>(&quot;:icon/<i>name</i>&quot;) for icons belonging to the current application or the global context, and using or <a href="./qicon.html">QIcon</a>(&quot;:icon/&lt;appname&gt;/&lt;name&gt;&quot;) for icons belonging to another application context.</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
 <tr valign="top" class="odd"><td>Sound</td><td><tt>/opt/Qtopia/sounds/&lt;appname&gt;/...</tt></td></tr>
 <tr valign="top" class="even"><td></td><td><b>Description:</b> Any sound files the application needs to use should either be standard built-in sounds, or be files in this application-specific directory.</td></tr>
@@ -72,55 +71,19 @@
 <tr valign="top" class="even"><td></td><td><b>Description:</b> Network setup modules are placed in this directory.</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
 <tr valign="top" class="odd"><td>Configuration</td><td><tt>/opt/Qtopia/etc/default/...</tt>, <tt>$HOME/Settings/...</tt></td></tr>
-<tr valign="top" class="even"><td></td><td><b>Description:</b> Configuration files are stored automatically in <tt>$HOME/Settings</tt> by using <a href="qsettings.html">QSettings</a>. If default configuration files are required, they should created and installed in <tt>/opt/Qtopia/etc/default/...</tt> as read only.</td></tr>
+<tr valign="top" class="even"><td></td><td><b>Description:</b> Configuration files are stored automatically in <tt>$HOME/Settings</tt> by using <a href="./qsettings.html">QSettings</a>. If default configuration files are required, they should created and installed in <tt>/opt/Qtopia/etc/default/...</tt> as read only.</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
 <tr valign="top" class="odd"><td>Application Data</td><td><tt>$HOME/Application/&lt;appname&gt;/...</tt></td></tr>
 <tr valign="top" class="even"><td></td><td><b>Description:</b> Application specific data will be stored here, for example cache data.</td></tr>
 <thead><tr valign="top" class="qt-style"><th></th><th></th></tr></thead>
 <tr valign="top" class="odd"><td>Temporary Data</td><td><tt>/tmp/...</tt>, /tmp/qtopia-&lt;QWS ID&gt;/..&#x2e;, /tmp/qt-embedded-&lt;QWS ID&gt;/..&#x2e;</td></tr>
-<tr valign="top" class="even"><td></td><td><b>Description:</b> All temporary files are expected to be stored under /tmp; typically /tmp is a RAM hosted partition on a device. In particular a directory such as <tt>/tmp/qtopia-0/</tt> will be used by Qtopia application for thier temporary files.<p><b>Note:</b> The <tt>ramfs</tt> file system should not be used for the /tmp partition as it often incorrectly reports the amount of free space. Instead of using <tt>ramfs</tt> use <tt>tempfs</tt> for a RAM hosted /tmp partition.</p>
+<tr valign="top" class="even"><td></td><td><b>Description:</b> All temporary files are expected to be stored under /tmp; typically /tmp is a RAM hosted partition on a device. In particular a directory such as <tt>/tmp/qtopia-0/</tt> will be used by Qtopia application for their temporary files.<p><b>Note:</b> The <tt>ramfs</tt> file system should not be used for the /tmp partition as it often incorrectly reports the amount of free space. Instead of using <tt>ramfs</tt> use <tt>tempfs</tt> for a RAM hosted /tmp partition.</p>
 </td></tr>
 </table></p>
-<a name="desktop-file-standard"></a>
-<h2>Desktop File Standard</h2>
-<p>The <tt>.desktop</tt> file <b>Placement</b> is : <tt>/opt/Qtopia/apps/category/&lt;appname&gt;.desktop</tt></p>
-<p>The whole file has to be encoded using the <a href="qsettings.html">QSettings</a> INI file format and encoded in <tt>UTF-8</tt>, see also <a href="syscust-internat.html#desktop-configuration-file-internationalization">Desktop &amp; Configuration File Internationalization</a>.</p>
-<p>The <tt>.desktop</tt> file specifies an entry in the launcher and the start menu. <i>Category</i> must be one of the following and should reflect the launcher <i>Category</i> in which you want the application to appear.:</p>
-<ul>
-<li><b>Settings:</b> if the software configures functionality that has an ongoing effect on the user's environment. Such software never creates Documents.</li>
-<li><b>Games:</b> if the software is solely for amusement purposes.</li>
-<li><b>Applications:</b> for all other software.</li>
-</ul>
-<p>These categories have been chosen and defined in this way to make it easier for the average user to differentiate between them.</p>
-<p>To install software in other categories would create confusion and should be avoided. For example, you should not attempt to categorize your software as a &quot;Utility&quot;, since it is difficult to differentiate this category from the <i>Settings</i> and <i>Applications</i> categories (it falls somewhere in between).</p>
-<p>The file format is similar to the file format used by the Unix desktops KDE and Gnome. The format is as follows (lines beginning with a ';' are ignored as comments):</p>
-<pre>    [Desktop Entry]
-    ; the line above is mandatory at the beginning of the file
-    ;
-    ; Exec specifies the name of the executable that should be in /opt/Qtopia/bin
-    ; Command-line arguments to the executable are not supported and should not be used.
-    Exec=executablename
-    ;
-    ; This should always be Application for links to applications.
-    Type=Application
-    ;
-    ; Specifies the icon to be found in /opt/Qtopia/pics. Endings are auto-detected.
-    ; The icons should be at least 32x32 and should smooth-scale well
-    ; from 14x14 to at least 48x48
-    Icon=Iconfile
-    ;
-    ; The mimetype entry specifies a comma separated list of mimetypes this application can handle.
-    MimeType=&quot;audio/mp3&quot;
-    ;
-    ; the next lines specify the name of the application as it should appear in the launcher
-    ; and start menu
-    Name=&quot;My fancy application&quot;
-    ; or if you want to support different languages:
-    ; Name[]=&quot;My fancy application&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

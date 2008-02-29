@@ -36,7 +36,7 @@
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="qtelephonyservice.html#public-functions">QTelephonyService</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterfacegroup.html#public-functions">QAbstractIpcInterfaceGroup</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -45,7 +45,7 @@
 <li><div class="fn"/>void <b><a href="qmodemservice.html#resetModem">resetModem</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -53,7 +53,7 @@
 <li><div class="fn"/>QModemService * <b><a href="qmodemservice.html#createVendorSpecific">createVendorSpecific</a></b> ( const QString &amp; <i>service</i> = &quot;modem&quot;, const QString &amp; <i>device</i> = QString(), QObject * <i>parent</i> = 0 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="protected-slots"></a>
 <h3>Protected Slots</h3>
@@ -66,13 +66,12 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>2 protected functions inherited from <a href="qabstractipcinterfacegroup.html#protected-functions">QAbstractIpcInterfaceGroup</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -103,27 +102,27 @@
 <p>See also <a href="qtelephonyservice.html">QTelephonyService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QModemService"></a>QModemService::QModemService ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qstring.html">QString</a> &amp; <i>device</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QModemService"></a>QModemService::QModemService ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, const <a href="./qstring.html">QString</a> &amp; <i>device</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new modem service handler called <i>service</i> and attaches it to <i>parent</i>.</p>
 <p>The <i>device</i> parameter specifies the serial device and baud rate to use to communicate with the modem (for example, <tt>/dev/ttyS0:115200</tt>).</p>
 <p>If <i>device</i> is empty, the default serial device specified by the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable is used.</p>
-<h3 class="fn"><a name="QModemService-2"></a>QModemService::QModemService ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QModemService-2"></a>QModemService::QModemService ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new modem service handler called <i>service</i> and attaches it to <i>parent</i>. The <i>mux</i> parameter specifies the serial device multiplexer to use for accessing the modem.</p>
 <p>This version of the constructor may be needed if the modem is accessed via some mechanism other than kernel-level serial devices. The caller would construct an appropriate multiplexer wrapper around the new mechanism before calling this constructor.</p>
 <h3 class="fn"><a name="dtor.QModemService"></a>QModemService::~QModemService ()</h3>
 <p>Destroys this modem service and all of its interfaces.</p>
-<h3 class="fn"><a name="chat"></a>void QModemService::chat ( const <a href="qstring.html">QString</a> &amp; <i>command</i> )</h3>
+<h3 class="fn"><a name="chat"></a>void QModemService::chat ( const <a href="./qstring.html">QString</a> &amp; <i>command</i> )</h3>
 <p>Sends <i>command</i> to the modem on the primary AT chat channel. If the command fails, the caller will not be notified.</p>
 <p>See also <a href="qmodemservice.html#primaryAtChat">primaryAtChat</a>() and <a href="qmodemservice.html#retryChat">retryChat</a>().</p>
-<h3 class="fn"><a name="chat-2"></a>void QModemService::chat ( const <a href="qstring.html">QString</a> &amp; <i>command</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
+<h3 class="fn"><a name="chat-2"></a>void QModemService::chat ( const <a href="./qstring.html">QString</a> &amp; <i>command</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sends <i>command</i> to the modem on the primary AT chat channel. When the command finishes, notify <i>slot</i> on <i>target</i>. The slot has the signature <tt>done(bool,QAtResult&amp;)</tt>. The boolean parameter indicates if the command succeeded or not, and the <a href="qatresult.html">QAtResult</a> parameter contains the full result data.</p>
 <p>The optional <i>data</i> parameter can be used to pass extra user data that will be made available to the target slot in the <a href="qatresult.html#userData">QAtResult::userData</a>() field.</p>
 <p>See also <a href="qmodemservice.html#primaryAtChat">primaryAtChat</a>() and <a href="qmodemservice.html#retryChat">retryChat</a>().</p>
-<h3 class="fn"><a name="connectToPost"></a>void QModemService::connectToPost ( const <a href="qstring.html">QString</a> &amp; <i>item</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i> )</h3>
+<h3 class="fn"><a name="connectToPost"></a>void QModemService::connectToPost ( const <a href="./qstring.html">QString</a> &amp; <i>item</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i> )</h3>
 <p>Connects <i>slot</i> on <i>target</i> to receive posted <i>item</i> values. This can be used as an alternative to the <a href="qmodemservice.html#posted">posted</a>() signal. Only those posted items that equal <i>item</i> will be delivered to the slot.</p>
 <p>See also <a href="qmodemservice.html#post">post</a>() and <a href="qmodemservice.html#posted">posted</a>().</p>
-<h3 class="fn"><a name="createVendorSpecific"></a>QModemService * QModemService::createVendorSpecific ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = &quot;modem&quot;, const <a href="qstring.html">QString</a> &amp; <i>device</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="createVendorSpecific"></a>QModemService * QModemService::createVendorSpecific ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = &quot;modem&quot;, const <a href="./qstring.html">QString</a> &amp; <i>device</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Creates and returns a vendor-specific modem service handler called <i>service</i> (the default is <tt>modem</tt>) and attaches it to <i>parent</i>.</p>
 <p>The <i>device</i> parameter specifies the serial device and baud rate to use to communicate with the modem (for example, <tt>/dev/ttyS0:115200</tt>).</p>
 <p>If <i>device</i> is empty, the default serial device specified by the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable is used.</p>
@@ -138,12 +137,12 @@
 <p>Requests the SMS service from the modem and places it into PDU mode. The &quot;smsready&quot; item will be posted when it is ready. If the SMS service is already known to be ready and in PDU mode, then the &quot;smsready&quot; item will be posted upon the next entry to the event loop. The object requesting SMS service should use <a href="qmodemservice.html#connectToPost">connectToPost</a>() to monitor for when &quot;smsready&quot; is posted.</p>
 <p>This implementation repeatedly sends <tt>AT+CMGF=0</tt> every second for fifteen seconds until the command succeeds or the retry count expires. Higher levels that call this function should timeout their requests after fifteen seconds if &quot;smsready&quot; has not been received in the meantime.</p>
 <p>See also <a href="qmodemservice.html#post">post</a>() and <a href="qmodemservice.html#connectToPost">connectToPost</a>().</p>
-<h3 class="fn"><a name="post"></a>void QModemService::post ( const <a href="qstring.html">QString</a> &amp; <i>item</i> )</h3>
+<h3 class="fn"><a name="post"></a>void QModemService::post ( const <a href="./qstring.html">QString</a> &amp; <i>item</i> )</h3>
 <p>Posts <i>item</i> to functionality providers that have expressed an interest via <a href="qmodemservice.html#connectToPost">connectToPost</a>() or <a href="qmodemservice.html#posted">posted</a>(). The posted item will be delivered upon the next entry to the event loop.</p>
 <p>Posted events are used as a simple communication mechanism between functionality providers. Providers that post items are completely decoupled from providers that consume items.</p>
 <p>For example, posting the item <tt>sms:needed</tt> will ask the SMS functionality provider to initialize the SMS subsystem. Once SMS has been initialized, it will post the <tt>sms:available</tt> item. Other providers that depend upon SMS initialization can then proceed with using the SMS functionality.</p>
 <p>See also <a href="qmodemservice.html#connectToPost">connectToPost</a>() and <a href="qmodemservice.html#posted">posted</a>().</p>
-<h3 class="fn"><a name="posted"></a>void QModemService::posted ( const <a href="qstring.html">QString</a> &amp; <i>item</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="posted"></a>void QModemService::posted ( const <a href="./qstring.html">QString</a> &amp; <i>item</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted whenever an <i>item</i> is posted using <a href="qmodemservice.html#post">post</a>(). Slots that are connected to this signal should filter on <i>item</i> to determine if the posted item is relevant to them. Alternatively, they can use <a href="qmodemservice.html#connectToPost">connectToPost</a>() to only receive notification of specific posted items.</p>
 <p>See also <a href="qmodemservice.html#post">post</a>() and <a href="qmodemservice.html#connectToPost">connectToPost</a>().</p>
 <h3 class="fn"><a name="primaryAtChat"></a><a href="qatchat.html">QAtChat</a> * QModemService::primaryAtChat () const</h3>
@@ -151,7 +150,7 @@
 <p>See also <a href="qmodemservice.html#secondaryAtChat">secondaryAtChat</a>().</p>
 <h3 class="fn"><a name="resetModem"></a>void QModemService::resetModem ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the modem has reset, either during start up or just after a <tt>AT+CFUN</tt> command. Slots that connect to this signal should issue AT commands to put the modem into a known state and to enable unsolicited notifications of interest to the connected object.</p>
-<h3 class="fn"><a name="retryChat"></a>void QModemService::retryChat ( const <a href="qstring.html">QString</a> &amp; <i>command</i> )</h3>
+<h3 class="fn"><a name="retryChat"></a>void QModemService::retryChat ( const <a href="./qstring.html">QString</a> &amp; <i>command</i> )</h3>
 <p>Retry <i>command</i> up to 15 times, once per second, until it succeeds. This is typically used to send initialization commands that may need several tries before the modem will accept them during start up.</p>
 <p>See also <a href="qmodemservice.html#primaryAtChat">primaryAtChat</a>() and <a href="qmodemservice.html#chat">chat</a>().</p>
 <h3 class="fn"><a name="secondaryAtChat"></a><a href="qatchat.html">QAtChat</a> * QModemService::secondaryAtChat () const</h3>
@@ -174,8 +173,8 @@
 <p>See also <a href="qmodemservice.html#wake">wake</a>() and <a href="qmodemservice.html#suspend">suspend</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

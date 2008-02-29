@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,7 +44,7 @@ public:
     ImapClient();
     ~ImapClient();
     void newConnection();
-    void setAccount(MailAccount *_account);
+    void setAccount(QMailAccount *_account);
     void setSelectedMails(MailList *list, bool connected);
     void quit();
     void checkForNewMessages();
@@ -54,10 +54,12 @@ signals:
     void serverFolders();
     void newMessage(const QMailMessage&);
     void mailTransferred(int);
-    void downloadedSize(int);
     void failedList(QStringList &);
     void allMessagesReceived();
     void nonexistentMessage(const QMailId& id);
+    void expiredMessages(const QStringList&, const QString& mailbox, bool locationExists);
+    void retrievalProgress(const QString&, uint);
+    void messageProcessed(const QString&);
 
 public slots:
     void errorHandling(int, QString msg);
@@ -67,6 +69,7 @@ protected slots:
     void mailboxListed(QString &, QString &, QString &);
     void messageFetched(QMailMessage& mail);
     void nonexistentMessage(const QString& uid);
+    void downloadSize(int);
 
 private:
     void removeDeletedMailboxes();
@@ -79,10 +82,12 @@ private:
     bool messagesToDelete();
     void setNextDeleted();
     void fetchNextMail();
+    void searchCompleted();
+    void previewCompleted();
 
 private:
     ImapProtocol client;
-    MailAccount *account;
+    QMailAccount *account;
     MailList *mailList;
     QString msgUidl;
     enum transferStatus
@@ -102,9 +107,12 @@ private:
 
     QStringList mailboxNames;
     QMailId internalId;
-    QStringList uniqueUidList, unresolvedUid, delList;
+    QStringList uniqueUidList, expiredUidList, unresolvedUid, delList;
     Mailbox *currentBox;
     uint atCurrentBox;
+
+    QString retrieveUid;
+    uint retrieveLength;
 };
 
 #endif

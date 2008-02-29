@@ -13,40 +13,37 @@ for(p,PROJECTS) {
 }
 QMAKE_STRIP=
 
-f_dir.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/.directory
+startup.files=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/startup/qpe.sh \
+              $$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/startup/qpe.env
+startup.path=/
+startup.hint=script
+INSTALLS+=startup
+
+script.files=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/scripts/*
+script.path=/bin
+script.hint=script
+INSTALLS+=script
+
+
+f_dir.files=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/.directory
 f_dir.path=/apps/Devtools
 f_dir.trtarget=Devtools
 f_dir.hint=desktop nct
+INSTALLS+=f_dir
 
-startup.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/startup/qpe.sh \
-              $$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/startup/qpe.env
-startup.path=/
-startup.hint=script
-
-script.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/scripts/*
-script.path=/bin
-script.hint=script
-
-desktop.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/shuffle.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/docapi-rescan.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/sdcard-umount.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/network-services-start.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/network-services-stop.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/usb-gadget-ether.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/usb-gadget-serial.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/desktop/usb-gadget-storage.desktop
+#desktop.files+=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/desktop/docapi-rescan.desktop
+#desktop.files+=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/desktop/usb-gadget-ether.desktop
+#desktop.files+=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/desktop/usb-gadget-serial.desktop
+#desktop.files+=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/desktop/usb-gadget-storage.desktop
 
 desktop.path=/apps/Devtools
 desktop.depends+=install_docapi_f_dir
 desktop.hint=desktop
+INSTALLS+=desktop
 
-pics.files=$$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/*.png\
-           $$QTOPIA_DEPOT_PATH/devices/c3200/src/devtools/*.svg
+pics.files=$$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/*.png\
+           $$QTOPIA_DEPOT_PATH/devices/n800/src/devtools/*.svg
 pics.path=/pics/devtools
 pics.hint=pics
+INSTALLS+=pics
 
-help.source=$$QTOPIA_DEPOT_PATH/help
-help.files=devtools*
-help.hint=help
-
-INSTALLS+=f_dir desktop pics script startup help

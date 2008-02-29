@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/plugandpaint.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/plugandpaint.qdoc -->
 <head>
   <title>Qt 4.3: Plug &amp; Paint Basic Tools Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -18,6 +18,7 @@
 <ul>
 <li><a href="tools-plugandpaintplugins-basictools-basictoolsplugin-cpp.html">tools/plugandpaintplugins/basictools/basictoolsplugin.cpp</a></li>
 <li><a href="tools-plugandpaintplugins-basictools-basictoolsplugin-h.html">tools/plugandpaintplugins/basictools/basictoolsplugin.h</a></li>
+<li><a href="tools-plugandpaintplugins-basictools-basictools-pro.html">tools/plugandpaintplugins/basictools/basictools.pro</a></li>
 </ul>
 <p>The Basic Tools example is a static plugin for the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example. It provides a set of basic brushes, shapes, and filters. Through the Basic Tools example, we will review the four steps involved in writing a Qt plugin:</p>
 <ol type="1">
@@ -40,7 +41,7 @@
 <p>We start by including <tt>interfaces.h</tt>, which defines the plugin interfaces for the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application. For the <tt>#include</tt> to work, we need to add an <tt>INCLUDEPATH</tt> entry to the <tt>.pro</tt> file with the path to Qt's <tt>examples/tools</tt> directory.</p>
 <p>The <tt>BasicToolsPlugin</tt> class is a <a href="qobject.html">QObject</a> subclass that implements the <tt>BrushInterface</tt>, the <tt>ShapeInterface</tt>, and the <tt>FilterInterface</tt>. This is done through multiple inheritance. The <tt>Q_INTERFACES()</tt> macro is necessary to tell <a href="moc.html#moc">moc</a>, Qt's meta-object compiler, that the base classes are plugin interfaces. Without the <tt>Q_INTERFACES()</tt> macro, we couldn't use <a href="qobject.html#qobject_cast">qobject_cast</a>() in the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> application to detect interfaces.</p>
 <pre> public:
-     <span class="comment">// BrushInterface</span>
+     <span class="comment">//</span> BrushInterface
      QStringList brushes() const;
      QRect mousePress(const QString &amp;brush, QPainter &amp;painter,
                       const QPoint &amp;pos);
@@ -49,11 +50,11 @@
      QRect mouseRelease(const QString &amp;brush, QPainter &amp;painter,
                         const QPoint &amp;pos);
 
-     <span class="comment">// ShapeInterface</span>
+     <span class="comment">//</span> ShapeInterface
      QStringList shapes() const;
      QPainterPath generateShape(const QString &amp;shape, QWidget *parent);
 
-     <span class="comment">// FilterInterface</span>
+     <span class="comment">//</span> FilterInterface
      QStringList filters() const;
      QImage filterImage(const QString &amp;filter, const QImage &amp;image,
                         QWidget *parent);
@@ -126,9 +127,9 @@
 <li>If the brush is <b>Random Letters</b>, we draw a random letter at the new cursor position. Most of the code is for setting the font to be bold and larger than the default font and for computing an appropriate bounding rect.</li>
 </ul>
 <p>At the end, we restore the painter state to what it was upon entering the function and we return the bounding rectangle.</p>
-<pre> QRect BasicToolsPlugin::mouseRelease(const QString &amp; /* brush */,
-                                      QPainter &amp; /* painter */,
-                                      const QPoint &amp; /* pos */</span>)
+<pre> QRect BasicToolsPlugin::mouseRelease(const QString &amp; <span class="comment">/* brush */</span>,
+                                      QPainter &amp; <span class="comment">/* painter */</span>,
+                                      const QPoint &amp; <span class="comment">/* pos */</span>)
  {
      return QRect(0, 0, 0, 0);
  }</pre>
@@ -221,8 +222,8 @@
 <p>The <tt>CONFIG()</tt> code at the end is necessary for this example because the example is part of the Qt distribution and Qt can be configured to be built simultaneously in debug and in release modes. You don't need to for your own plugins.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

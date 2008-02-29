@@ -42,7 +42,7 @@
 
  QAbstractFileEngine *ZipEngineHandler::create(const QString &amp;fileName) const
  {
-     <span class="comment">// ZipEngineHandler returns a ZipEngine for all .zip files</span>
+     <span class="comment">//</span> ZipEngineHandler returns a ZipEngine for all .zip files
      return fileName.toLower().endsWith(&quot;.zip&quot;) ? new ZipEngine(fileName) : 0;
  }
 
@@ -72,14 +72,14 @@
 <p>Example:</p>
 <pre> QAbstractSocketEngine *ZipEngineHandler::create(const QString &amp;fileName) const
  {
-     <span class="comment">// ZipEngineHandler returns a ZipEngine for all .zip files</span>
+     <span class="comment">//</span> ZipEngineHandler returns a ZipEngine for all .zip files
      return fileName.toLower().endsWith(&quot;.zip&quot;) ? new ZipEngine(fileName) : 0;
  }</pre>
 <p>See also <a href="qabstractfileengine.html#create">QAbstractFileEngine::create</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

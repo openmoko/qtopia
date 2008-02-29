@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@ public:
         Recipients,
         Subject,
         TimeStamp,
-        Flags,
+        Status,
         FromAccount,
         FromMailbox,
         ServerUid,      
@@ -49,6 +49,7 @@ public:
 
 
 public:
+    QMailMessageSortKey();
     QMailMessageSortKey(const Property& p, const Qt::SortOrder& order = Qt::AscendingOrder);
     QMailMessageSortKey(const QMailMessageSortKey& other);
     virtual ~QMailMessageSortKey();
@@ -61,8 +62,7 @@ public:
 
     QMailMessageSortKey& operator=(const QMailMessageSortKey& other);
 
-private:
-    QMailMessageSortKey();
+    bool isEmpty() const;
 
 private:
 	friend class QMailStore;

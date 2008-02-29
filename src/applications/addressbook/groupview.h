@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,7 +24,7 @@
 #include <QUniqueId>
 #include <QWidget>
 #include <QDialog>
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include <QContent>
 #endif
 
@@ -37,7 +37,7 @@ class GroupViewData;
 class QModelIndex;
 class QLineEdit;
 class QItemSelectionModel;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 class RingToneSelect;
 #endif
 
@@ -69,7 +69,7 @@ public slots:
     void addGroup();
     void removeCurrentGroup();
     void editCurrentGroup();
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     void setGroupRingTone();
 #endif
     void renameCurrentGroup();
@@ -130,7 +130,7 @@ private:
     QLineEdit *mName;
 };
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 /*
    selects a ringtone for the group
    */

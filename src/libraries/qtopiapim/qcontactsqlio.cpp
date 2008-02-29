@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -530,6 +530,7 @@ void ContactSqlIO::invalidateCache()
 {
     QPimSqlIO::invalidateCache();
     contactByRowValid = false;
+    mLocalNumberCache.clear();
     emit filtersUpdated();
 }
 
@@ -557,7 +558,7 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
     if (cr) {
         switch(k) {
             case QContactModel::Identifier:
-                return cr->recid;
+                return QUniqueId::fromUInt(cr->recid.toUInt()).toByteArray();
             case QContactModel::NameTitle:
                 return cr->nameTitle;
             case QContactModel::FirstName:
@@ -585,7 +586,7 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
                 break;
         }
     }
-        
+
     return QContactIO::contactField(row, k);
 }
 
@@ -1062,8 +1063,6 @@ int ContactSqlIO::predictedRow(const QVariant &k, const QUniqueId &id) const
 #ifdef QTOPIA_PHONE
 QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch) const
 {
-    /* SELECT recid FROM contactphonenumbers WHERE phone_number LIKE '%partial' */
-
     QString local = QPhoneNumber::localNumber(phnumber);
     if (local.isEmpty())
         return QUniqueId();
@@ -1073,28 +1072,57 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
     if (colonIdx > 0 && colonIdx < local.length() - 1)
         local = local.mid(colonIdx + 1);
 
-    QPreparedSqlQuery q(database());
-    q.prepare("SELECT recid, phone_number FROM contactphonenumbers WHERE phone_number LIKE :q");
-    q.bindValue(":q", "%" + local + "%"); // Watch out for SQL injection..
-    q.exec();
+    /* Unfortunately we don't store the "localNumber" version of the entered number, so spaces, dashes etc
+       cause an SQL LIKE clause to miss the number.. instead, maintain a cache of localNumber entries
+       derived from the stored numbers. */
+    if (mLocalNumberCache.isEmpty()) {
+        QPreparedSqlQuery q(database());
+        // Ensure numbers are added in a deterministic order
+        q.prepare("SELECT recid, phone_number FROM contactphonenumbers ORDER BY recid"); 
+        q.exec();
+
+        while (q.next()) {
+            QUniqueId numberId = QUniqueId::fromUInt(q.value(0).toUInt());
+            QString phoneNumber = q.value(1).toString();
+            QString localNumber = QPhoneNumber::localNumber(phoneNumber);
+            
+            if (!localNumber.isEmpty())
+                mLocalNumberCache.insert(localNumber, qMakePair(numberId, phoneNumber));
+        }
+    }
 
     bestMatch = 0;
     QUniqueId bestContact;
-    while (q.next()) {
-        QUniqueId matchId = QUniqueId::fromUInt(q.value(0).toUInt());
-        QString matchPh(q.value(1).toString());
-        if (!contains(matchId))
-            continue;
 
-        int match = QPhoneNumber::matchNumbers(phnumber,matchPh);
+    LocalNumberCache::const_iterator it = mLocalNumberCache.find(local), end = mLocalNumberCache.end();
+    if (it != end) {
+        // We have at least one exact match on the local number - see if there is a better one
+        for ( ; (bestMatch != 100) && (it != end) && (it.key() == local); ++it) {
+            const QPair<QUniqueId, QString>& matched(it.value());
 
-        if (match > bestMatch) {
-            bestMatch = match;
-            bestContact = matchId;
+            int match = QPhoneNumber::matchNumbers(phnumber, matched.second);
+            if (match > bestMatch) {
+                bestMatch = match;
+                bestContact = matched.first;
+            }
         }
-        if (match == 100)
-            break;
     }
+
+    /* Is it possible to have two phone numbers that do not match in local form, but have a 
+       meaningful match in their complete forms?  If so, we need to do a full cache search:
+    if (bestMatch <= 5) {
+        // We haven't found an acceptable match - try all numbers
+        for (it = mLocalNumberCache.begin(); (bestMatch != 100) && (it != end); ++it) {
+            const QPair<QUniqueId, QString>& entry(it.value());
+
+            int match = QPhoneNumber::matchNumbers(phnumber, entry.second);
+            if (match > bestMatch) {
+                bestMatch = match;
+                bestContact = entry.first;
+            }
+        }
+    }
+    */
     qLog(Sql) << "QContactSqlIO::matchPhoneNumber() result:" << bestMatch << bestContact.toString();
     return bestContact;
 }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -97,10 +95,10 @@ Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, loader,
     plugin (see QStylePlugin).
 
     The valid keys can be retrieved using the keys()
-    function. Typically they include "windows", "motif", "cde", and
+    function. Typically they include "windows", "motif", "cde",
     "plastique" and "cleanlooks".  Depending on the platform,
-    "windowsxp" and "macintosh" may be available. Note that keys are
-    case insensitive.
+    "windowsxp", "windowsvista" and "macintosh" may be available.
+    Note that keys are case insensitive.
 
     \sa QStyle
 */
@@ -174,7 +172,7 @@ QStyle *QStyleFactory::create(const QString& key)
 }
 
 /*!
-    Returns the list of valid keys, i.e. the leys this factory can
+    Returns the list of valid keys, i.e. the keys this factory can
     create styles for.
 
     \sa create()

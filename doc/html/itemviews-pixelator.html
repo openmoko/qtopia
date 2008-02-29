@@ -23,6 +23,7 @@
 <li><a href="itemviews-pixelator-pixeldelegate-h.html">itemviews/pixelator/pixeldelegate.h</a></li>
 <li><a href="itemviews-pixelator-main-cpp.html">itemviews/pixelator/main.cpp</a></li>
 <li><a href="itemviews-pixelator-images-qrc.html">itemviews/pixelator/images.qrc</a></li>
+<li><a href="itemviews-pixelator-pixelator-pro.html">itemviews/pixelator/pixelator.pro</a></li>
 </ul>
 <p>The Pixelator example shows how delegates can be used to customize the way that items are rendered in standard item views.</p>
 <p align="center"><img src="images/pixelator-example.png" /></p><p>By default, <a href="qtreeview.html">QTreeView</a>, <a href="qtableview.html">QTableView</a>, and <a href="qlistview.html">QListView</a> use a standard item delegate to display and edit a set of common data types that are sufficient for many applications. However, an application may need to represent items of data in a particular way, or provide support for rendering more specialized data types, and this often requires the use of a custom delegate.</p>
@@ -70,12 +71,12 @@
  }</pre>
 <p>The <a href="qabstractitemmodel.html#reset">QAbstractItemModel::reset</a>() call tells the view(s) that the model has changed.</p>
 <p>The <tt>rowCount()</tt> and <tt>columnCount()</tt> functions return the height and width of the image respectively:</p>
-<pre> int ImageModel::rowCount(const QModelIndex &amp; /* parent */) const
+<pre> int ImageModel::rowCount(const QModelIndex &amp; <span class="comment">/* parent */</span>) const
  {
      return modelImage.height();
  }
 
- int ImageModel::columnCount(const QModelIndex &amp; /* parent */) const
+ int ImageModel::columnCount(const QModelIndex &amp; <span class="comment">/* parent */</span>) const
  {
      return modelImage.width();
  }</pre>
@@ -90,8 +91,8 @@
 <p>In this implementation, we only check that the model index is valid, and that the role requested is the <a href="qt.html#ItemDataRole-enum">DisplayRole</a>. If so, the function returns the grayscale value of the relevant pixel in the image; otherwise, a null model index is returned.</p>
 <p>This model can be used with <a href="qtableview.html">QTableView</a> to display the integer brightness values for the pixels in the image. However, we will implement a custom delegate to display this information in a more artistic way.</p>
 <p>The <tt>headerData()</tt> function is also reimplemented:</p>
-<pre> QVariant ImageModel::headerData(int /* section */,
-                                 Qt::Orientation /* orientation */</span>,
+<pre> QVariant ImageModel::headerData(int <span class="comment">/* section */</span>,
+                                 Qt::Orientation <span class="comment">/* orientation */</span>,
                                  int role) const
  {
      if (role == Qt::SizeHintRole)
@@ -162,8 +163,8 @@
 <p>Finally, we paint the circle within the rectangle specified by the style option and we call <a href="qpainter.html#restore">restore()</a> on the painter.</p>
 <p>The <tt>paint()</tt> function does not have to be particularly complicated; it is only necessary to ensure that the state of the painter when the function returns is the same as it was when it was called. This usually means that any transformations applied to the painter must be preceded by a call to <a href="qpainter.html#save">QPainter::save</a>() and followed by a call to <a href="qpainter.html#restore">QPainter::restore</a>().</p>
 <p>The delegate's <a href="qabstractitemdelegate.html#sizeHint">sizeHint()</a> function returns a size for the item based on the predefined pixel size, initially set up in the constructor:</p>
-<pre> QSize PixelDelegate::sizeHint(const QStyleOptionViewItem &amp; /* option */,
-                               const QModelIndex &amp; /* index */</span>) const
+<pre> QSize PixelDelegate::sizeHint(const QStyleOptionViewItem &amp; <span class="comment">/* option */</span>,
+                               const QModelIndex &amp; <span class="comment">/* index */</span>) const
  {
      return QSize(pixelSize, pixelSize);
  }</pre>
@@ -214,8 +215,8 @@
 <p>We explicitly resize the columns and rows to match the <b>Pixel size</b> combobox.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

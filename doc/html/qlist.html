@@ -112,8 +112,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-lt-lt">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-gt-gt">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-lt-lt-47">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlist.html#operator-gt-gt-32">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -134,7 +134,7 @@
 <p>QList stores a list of items. The default constructor creates an empty list. To insert items into the list, you can use operator&lt;&lt;():</p>
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;one&quot; &lt;&lt; &quot;two&quot; &lt;&lt; &quot;three&quot;;
-<span class="comment"> // list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</pre>
 <p>QList provides these basic functions to add, move, and remove items: <a href="qlist.html#insert">insert</a>(), <a href="qlist.html#replace">replace</a>(), <a href="qlist.html#removeAt">removeAt</a>(), <a href="qlist.html#move">move</a>(), and <a href="qlist.html#swap">swap</a>(). In addition, it provides the following convenience functions: <a href="qlist.html#append">append</a>(), <a href="qlist.html#prepend">prepend</a>(), <a href="qlist.html#removeFirst">removeFirst</a>(), and <a href="qlist.html#removeLast">removeLast</a>().</p>
 <p>QList uses 0-based indexes, just like C++ arrays. To access the item at a particular index position, you can use operator[](). On non-const lists, operator[]() returns a reference to the item and can be used on the left side of an assignment:</p>
 <pre> if (list[0] == &quot;Bob&quot;)
@@ -197,7 +197,7 @@
  list.append(&quot;one&quot;);
  list.append(&quot;two&quot;);
  list.append(&quot;three&quot;);
-<span class="comment"> // list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</pre>
 <p>This is the same as list.insert(<a href="qlist.html#size">size</a>(), <i>value</i>).</p>
 <p>This operation is typically very fast (<a href="containers.html#constant-time">constant time</a>), because <a href="qlist.html">QList</a> preallocates extra space on both sides of its internal buffer to allow for fast growth at both ends of the list.</p>
 <p>See also <a href="qlist.html#operator-lt-lt">operator&lt;&lt;</a>(), <a href="qlist.html#prepend">prepend</a>(), and <a href="qlist.html#insert">insert</a>().</p>
@@ -279,7 +279,7 @@
  vect &lt;&lt; &quot;red&quot; &lt;&lt; &quot;green&quot; &lt;&lt; &quot;blue&quot; &lt;&lt; &quot;black&quot;;
 
  QList&lt;double&gt; list = QVector&lt;T&gt;::fromVector(vect);
-<span class="comment"> // list: [&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;black&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;black&quot;]</pre>
 <p>See also <a href="qlist.html#fromSet">fromSet</a>(), <a href="qlist.html#toVector">toVector</a>(), and <a href="qvector.html#toList">QVector::toList</a>().</p>
 <h3 class="fn"><a name="front"></a>T &amp; QList::front ()</h3>
 <p>This function is provided for STL compatibility. It is equivalent to <a href="qlist.html#first">first</a>().</p>
@@ -290,10 +290,10 @@
 <p>Example:</p>
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;A&quot;;
- list.indexOf(&quot;B&quot;);          <span class="comment">// returns 1</span>
- list.indexOf(&quot;B&quot;, 1);       <span class="comment">// returns 1</span>
- list.indexOf(&quot;B&quot;, 2);       <span class="comment">// returns 3</span>
- list.indexOf(&quot;X&quot;);          <span class="comment">// returns -1</span></pre>
+ list.indexOf(&quot;B&quot;);          <span class="comment">//</span> returns 1
+ list.indexOf(&quot;B&quot;, 1);       <span class="comment">//</span> returns 1
+ list.indexOf(&quot;B&quot;, 2);       <span class="comment">//</span> returns 3
+ list.indexOf(&quot;X&quot;);          <span class="comment">//</span> returns -1</pre>
 <p>This function requires the value type to have an implementation of <tt>operator==()</tt>.</p>
 <p>See also <a href="qlist.html#lastIndexOf">lastIndexOf</a>() and <a href="qlist.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="insert"></a>void QList::insert ( int <i>i</i>, const T &amp; <i>value</i> )</h3>
@@ -302,7 +302,7 @@
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;alpha&quot; &lt;&lt; &quot;beta&quot; &lt;&lt; &quot;delta&quot;;
  list.insert(2, &quot;gamma&quot;);
-<span class="comment"> // list: [&quot;alpha&quot;, &quot;beta&quot;, &quot;gamma&quot;, &quot;delta&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;alpha&quot;, &quot;beta&quot;, &quot;gamma&quot;, &quot;delta&quot;]</pre>
 <p>See also <a href="qlist.html#append">append</a>(), <a href="qlist.html#prepend">prepend</a>(), <a href="qlist.html#replace">replace</a>(), and <a href="qlist.html#removeAt">removeAt</a>().</p>
 <h3 class="fn"><a name="insert-2"></a><a href="qlist-iterator.html">iterator</a> QList::insert ( <a href="qlist-iterator.html">iterator</a> <i>before</i>, const T &amp; <i>value</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -320,10 +320,10 @@
 <p>Example:</p>
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;A&quot;;
- list.lastIndexOf(&quot;B&quot;);      <span class="comment">// returns 3</span>
- list.lastIndexOf(&quot;B&quot;, 3);   <span class="comment">// returns 3</span>
- list.lastIndexOf(&quot;B&quot;, 2);   <span class="comment">// returns 1</span>
- list.lastIndexOf(&quot;X&quot;);      <span class="comment">// returns -1</span></pre>
+ list.lastIndexOf(&quot;B&quot;);      <span class="comment">//</span> returns 3
+ list.lastIndexOf(&quot;B&quot;, 3);   <span class="comment">//</span> returns 3
+ list.lastIndexOf(&quot;B&quot;, 2);   <span class="comment">//</span> returns 1
+ list.lastIndexOf(&quot;X&quot;);      <span class="comment">//</span> returns -1</pre>
 <p>This function requires the value type to have an implementation of <tt>operator==()</tt>.</p>
 <p>See also <a href="qlist.html#indexOf">indexOf</a>().</p>
 <h3 class="fn"><a name="mid"></a>QList&lt;T&gt; QList::mid ( int <i>pos</i>, int <i>length</i> = -1 ) const</h3>
@@ -334,7 +334,7 @@
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;D&quot; &lt;&lt; &quot;E&quot; &lt;&lt; &quot;F&quot;;
  list.move(1, 4);
-<span class="comment"> // list: [&quot;A&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;, &quot;B&quot;, &quot;F&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;A&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;, &quot;B&quot;, &quot;F&quot;]</pre>
 <p>This is the same as insert(<i>to</i>, takeAt(<i>from</i>)).</p>
 <p>See also <a href="qlist.html#swap">swap</a>(), <a href="qlist.html#insert">insert</a>(), and <a href="qlist.html#takeAt">takeAt</a>().</p>
 <h3 class="fn"><a name="pop_back"></a>void QList::pop_back ()</h3>
@@ -348,7 +348,7 @@
  list.prepend(&quot;one&quot;);
  list.prepend(&quot;two&quot;);
  list.prepend(&quot;three&quot;);
-<span class="comment"> // list: [&quot;three&quot;, &quot;two&quot;, &quot;one&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;three&quot;, &quot;two&quot;, &quot;one&quot;]</pre>
 <p>This is the same as list.insert(0, <i>value</i>).</p>
 <p>This operation is usually very fast (<a href="containers.html#constant-time">constant time</a>), because <a href="qlist.html">QList</a> preallocates extra space on both sides of its internal buffer to allow for fast growth at both ends of the list.</p>
 <p>See also <a href="qlist.html#append">append</a>() and <a href="qlist.html#insert">insert</a>().</p>
@@ -362,7 +362,7 @@
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;sun&quot; &lt;&lt; &quot;cloud&quot; &lt;&lt; &quot;sun&quot; &lt;&lt; &quot;rain&quot;;
  list.removeAll(&quot;sun&quot;);
-<span class="comment"> // list: [&quot;cloud&quot;, &quot;rain&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;cloud&quot;, &quot;rain&quot;]</pre>
 <p>This function requires the value type to have an implementation of <tt>operator==()</tt>.</p>
 <p>See also <a href="qlist.html#removeAt">removeAt</a>(), <a href="qlist.html#takeAt">takeAt</a>(), and <a href="qlist.html#replace">replace</a>().</p>
 <h3 class="fn"><a name="removeAt"></a>void QList::removeAt ( int <i>i</i> )</h3>
@@ -390,7 +390,7 @@
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;D&quot; &lt;&lt; &quot;E&quot; &lt;&lt; &quot;F&quot;;
  list.swap(1, 4);
-<span class="comment"> // list: [&quot;A&quot;, &quot;E&quot;, &quot;C&quot;, &quot;D&quot;, &quot;B&quot;, &quot;F&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;A&quot;, &quot;E&quot;, &quot;C&quot;, &quot;D&quot;, &quot;B&quot;, &quot;F&quot;]</pre>
 <p>See also <a href="qlist.html#move">move</a>().</p>
 <h3 class="fn"><a name="takeAt"></a>T QList::takeAt ( int <i>i</i> )</h3>
 <p>Removes the item at index position <i>i</i> and returns it.</p>
@@ -416,9 +416,9 @@
  list &lt;&lt; &quot;Julia&quot; &lt;&lt; &quot;Mike&quot; &lt;&lt; &quot;Mike&quot; &lt;&lt; &quot;Julia&quot; &lt;&lt; &quot;Julia&quot;;
 
  QSet&lt;QString&gt; set = list.toSet();
- set.contains(&quot;Julia&quot;);  <span class="comment">// returns true</span>
- set.contains(&quot;Mike&quot;);   <span class="comment">// returns true</span>
- set.size();             <span class="comment">// returns 2</span></pre>
+ set.contains(&quot;Julia&quot;);  <span class="comment">//</span> returns true
+ set.contains(&quot;Mike&quot;);   <span class="comment">//</span> returns true
+ set.size();             <span class="comment">//</span> returns 2</pre>
 <p>See also <a href="qlist.html#toVector">toVector</a>(), <a href="qlist.html#fromSet">fromSet</a>(), and <a href="qset.html#fromList">QSet::fromList</a>().</p>
 <h3 class="fn"><a name="toStdList"></a>std::list&lt;T&gt; QList::toStdList () const</h3>
 <p>Returns a std::list object with the data contained in this <a href="qlist.html">QList</a>. Example:</p>
@@ -434,7 +434,7 @@
  list &lt;&lt; &quot;Sven&quot; &lt;&lt; &quot;Kim&quot; &lt;&lt; &quot;Ola&quot;;
 
  QVector&lt;QString&gt; vect = list.toVector();
-<span class="comment"> // vect: [&quot;Sven&quot;, &quot;Kim&quot;, &quot;Ola&quot;]</span></pre>
+<span class="comment"> //</span> vect: [&quot;Sven&quot;, &quot;Kim&quot;, &quot;Ola&quot;]</pre>
 <p>See also <a href="qlist.html#toSet">toSet</a>(), <a href="qlist.html#fromVector">fromVector</a>(), and <a href="qvector.html#fromList">QVector::fromList</a>().</p>
 <h3 class="fn"><a name="value"></a>T QList::value ( int <i>i</i> ) const</h3>
 <p>Returns the value at index position <i>i</i> in the list.</p>
@@ -481,38 +481,20 @@
 <p>Same as <a href="qlist.html#at">at</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-47"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the list <i>list</i> to stream <i>out</i>.</p>
 <p>This function requires the value type to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-32"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QList&lt;T&gt; &amp; <i>list</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a list from stream <i>in</i> into <i>list</i>.</p>
 <p>This function requires the value type to implement <tt>operator&gt;&gt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="find"></a><a href="qlist-iterator.html">iterator</a> QList::find ( const T &amp; <i>t</i> )</h3>
-<p>Use <a href="qlist.html#indexOf">indexOf</a>() instead.</p>
-<h3 class="fn"><a name="find-2"></a><a href="qlist-const-iterator.html">const_iterator</a> QList::find ( const T &amp; <i>t</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qlist.html#indexOf">indexOf</a>() instead.</p>
-<h3 class="fn"><a name="find-3"></a><a href="qlist-iterator.html">iterator</a> QList::find ( <a href="qlist-iterator.html">iterator</a> <i>from</i>, const T &amp; <i>t</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qlist.html#indexOf">indexOf</a>() instead.</p>
-<h3 class="fn"><a name="find-4"></a><a href="qlist-const-iterator.html">const_iterator</a> QList::find ( <a href="qlist-const-iterator.html">const_iterator</a> <i>from</i>, const T &amp; <i>t</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qlist.html#indexOf">indexOf</a>() instead.</p>
-<h3 class="fn"><a name="findIndex"></a>int QList::findIndex ( const T &amp; <i>t</i> ) const</h3>
-<p>Use <a href="qlist.html#indexOf">indexOf</a>() instead.</p>
-<h3 class="fn"><a name="remove"></a><a href="qlist-iterator.html">iterator</a> QList::remove ( <a href="qlist-iterator.html">iterator</a> <i>pos</i> )</h3>
-<p>Use <a href="qlist.html#erase">erase</a>() instead.</p>
-<h3 class="fn"><a name="remove-2"></a>int QList::remove ( const T &amp; <i>t</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qlist.html#removeAll">removeAll</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -160,10 +158,13 @@ QFilePrivate::setError(QFile::FileError err, int errNum)
     QDataStream.
 
     The file name is usually passed in the constructor, but it can be
-    set at any time using setFileName(). You can check for a file's
-    existence using exists(), and remove a file using remove(). (More
-    advanced file system related operations are provided by QFileInfo
-    and QDir.)
+    set at any time using setFileName(). QFile expects the file
+    separator to be '/' regardless of operating system. The use of
+    other separators (e.g., '\\') is not supported.
+
+    You can check for a file's existence using exists(), and remove a
+    file using remove(). (More advanced file system related operations
+    are provided by QFileInfo and QDir.)
 
     The file is opened with open(), closed with close(), and flushed
     with flush(). Data is usually read and written using QDataStream
@@ -378,7 +379,8 @@ QFile::~QFile()
 }
 
 /*!
-    Returns the name set by setFileName().
+    Returns the name set by setFileName() or to the QFile
+    constructors.
 
     \sa setFileName(), QFileInfo::fileName()
 */
@@ -738,7 +740,7 @@ QFile::rename(const QString &oldName, const QString &newName)
 
     This function will not overwrite an already existing entity in the file system;
     in this case, \c link() will return false and set \l{QFile::}{error()} to
-    return \l{QFile::}{RenameError}.    
+    return \l{QFile::}{RenameError}.
 
     \note To create a valid link on Windows, \a linkName must have a \c{.lnk} file extension.
 
@@ -819,16 +821,22 @@ QFile::copy(const QString &newName)
                 d->setError(QFile::CopyError, errorMessage.arg(d->fileName));
             } else {
                 QString fileTemplate = QLatin1String("%1/qt_temp.XXXXXX");
+#ifdef QT_NO_TEMPORARYFILE
+                QFile out(fileTemplate.arg(QFileInfo(newName).path()));
+                if (!out.open(QIODevice::ReadWrite))
+                    error = true;
+#else
                 QTemporaryFile out(fileTemplate.arg(QFileInfo(newName).path()));
                 if (!out.open()) {
                     out.setFileTemplate(fileTemplate.arg(QDir::tempPath()));
-                    if (!out.open()) {
-                        close();
+                    if (!out.open())
                         error = true;
-                        d->setError(QFile::CopyError, QLatin1String("Cannot open for output"));
-                    }
                 }
-                if (!error) {
+#endif
+                if (error) {
+                    out.close();
+                    d->setError(QFile::CopyError, QLatin1String("Cannot open for output"));
+                } else {
                     char block[4096];
                     qint64 totalRead = 0;
                     while(!atEnd()) {
@@ -853,8 +861,10 @@ QFile::copy(const QString &newName)
                         QString errorMessage = QLatin1String("Cannot create %1 for output");
                         d->setError(QFile::CopyError, errorMessage.arg(newName));
                     }
+#ifndef QT_NO_TEMPORARYFILE
                     if (!error)
                         out.setAutoRemove(false);
+#endif
                 }
             }
             if(!error) {

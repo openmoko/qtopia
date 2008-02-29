@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/graphicsview/qgraphicsitem.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/graphicsview/qgraphicsitem.cpp -->
 <head>
   <title>Qt 4.3: QGraphicsItem Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -354,7 +354,7 @@
      QAction *removeAction = menu.addAction(&quot;Remove&quot;);
      QAction *markAction = menu.addAction(&quot;Mark&quot;);
      QAction *selectedAction = menu.exec(event-&gt;screenPos());
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> ...
  }</pre>
 <p>The default implementation does nothing.</p>
 <p>See also <a href="qgraphicsitem.html#sceneEvent">sceneEvent</a>().</p>
@@ -383,10 +383,10 @@
  rect.setPos(100, 100);
 
  rect.deviceTransform(view-&gt;viewportTransform()).map(QPointF(0, 0));
-<span class="comment"> // returns the item's (0, 0) point in view's viewport coordinates</span>
+<span class="comment"> //</span> returns the item's (0, 0) point in view's viewport coordinates
 
  rect.deviceTransform(view-&gt;viewportTransform()).inverted().map(QPointF(100, 100));
-<span class="comment"> // returns view's viewport's (100, 100) coordinate in item coordinates</span></pre>
+<span class="comment"> //</span> returns view's viewport's (100, 100) coordinate in item coordinates</pre>
 <p>This function is the same as combining this item's scene transform with the view's viewport transform, but is also understands <a href="qgraphicsitem.html#GraphicsItemFlag-enum">ItemIgnoresTransformations</a>.</p>
 <p>This function was introduced in Qt 4.3.</p>
 <p>See also <a href="qgraphicsitem.html#transform">transform</a>(), <a href="qgraphicsitem.html#setTransform">setTransform</a>(), <a href="qgraphicsitem.html#scenePos">scenePos</a>(), and <a href="graphicsview.html#the-graphics-view-coordinate-system">The Graphics View Coordinate System</a>.</p>
@@ -488,10 +488,10 @@
  QGraphicsLineItem *line = scene.addLine(QLineF(-10, -10, 20, 20));
 
  line-&gt;installSceneEventFilter(ellipse);
-<span class="comment"> // line's events are filtered by ellipse's sceneEventFilter() function.</span>
+<span class="comment"> //</span> line's events are filtered by ellipse's sceneEventFilter() function.
 
  ellipse-&gt;installSceneEventFilter(line);
-<span class="comment"> // ellipse's events are filtered by line's sceneEventFilter() function.</span></pre>
+<span class="comment"> //</span> ellipse's events are filtered by line's sceneEventFilter() function.</pre>
 <p>An item can only filter events for other items in the same scene. Also, an item cannot filter its own events; instead, you can reimplement <a href="qgraphicsitem.html#sceneEvent">sceneEvent</a>() directly.</p>
 <p>See also <a href="qgraphicsitem.html#removeSceneEventFilter">removeSceneEventFilter</a>(), <a href="qgraphicsitem.html#sceneEventFilter">sceneEventFilter</a>(), and <a href="qgraphicsitem.html#sceneEvent">sceneEvent</a>().</p>
 <h3 class="fn"><a name="isAncestorOf"></a>bool QGraphicsItem::isAncestorOf ( const QGraphicsItem * <i>child</i> ) const</h3>
@@ -535,11 +535,11 @@
 <pre> QVariant Component::itemChange(GraphicsItemChange change, const QVariant &amp;value)
  {
      if (change == ItemPositionChange &amp;&amp; scene()) {
-         <span class="comment">// value is the new position.</span>
+         <span class="comment">//</span> value is the new position.
          QPointF newPos = value.toPointF();
          QRectF rect = scene()-&gt;sceneRect();
          if (!rect.contains(newPos)) {
-             <span class="comment">// Keep the item inside the scene rect.</span>
+             <span class="comment">//</span> Keep the item inside the scene rect.
              newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
              newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
              return newPos;
@@ -770,19 +770,19 @@
 <h3 class="fn"><a name="rotate"></a>void QGraphicsItem::rotate ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>angle</i> )</h3>
 <p>Rotates the current item transformation <i>angle</i> degrees clockwise around its origin. To translate around an arbitrary point (x, y), you need to combine translation and rotation with <a href="qgraphicsitem.html#setTransform">setTransform</a>().</p>
 <p>Example:</p>
-<pre><span class="comment"> // Rotate an item 45 degrees around (0, 0).</span>
+<pre><span class="comment"> //</span> Rotate an item 45 degrees around (0, 0).
  item-&gt;rotate(45);
 
-<span class="comment"> // Rotate an item 45 degrees around (x, y).</span>
+<span class="comment"> //</span> Rotate an item 45 degrees around (x, y).
  item-&gt;setTransform(QTransform().translate(x, y).rotate(45).translate(-x, -y));</pre>
 <p>See also <a href="qgraphicsitem.html#setTransform">setTransform</a>(), <a href="qgraphicsitem.html#transform">transform</a>(), <a href="qgraphicsitem.html#scale">scale</a>(), <a href="qgraphicsitem.html#shear">shear</a>(), and <a href="qgraphicsitem.html#translate">translate</a>().</p>
 <h3 class="fn"><a name="scale"></a>void QGraphicsItem::scale ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>sx</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>sy</i> )</h3>
 <p>Scales the current item transformation by (<i>sx</i>, <i>sy</i>) around its origin. To scale from an arbitrary point (x, y), you need to combine translation and scaling with <a href="qgraphicsitem.html#setTransform">setTransform</a>().</p>
 <p>Example:</p>
-<pre><span class="comment"> // Scale an item by 3x2 from its origin</span>
+<pre><span class="comment"> //</span> Scale an item by 3x2 from its origin
  item-&gt;scale(3, 2);
 
-<span class="comment"> // Scale an item by 3x2 from (x, y)</span>
+<span class="comment"> //</span> Scale an item by 3x2 from (x, y)
  item-&gt;setTransform(QTransform().translate(x, y).scale(3, 2).translate(-x, -y));</pre>
 <p>See also <a href="qgraphicsitem.html#setTransform">setTransform</a>(), <a href="qgraphicsitem.html#transform">transform</a>(), <a href="qgraphicsitem.html#rotate">rotate</a>(), <a href="qgraphicsitem.html#shear">shear</a>(), and <a href="qgraphicsitem.html#translate">translate</a>().</p>
 <h3 class="fn"><a name="scene"></a><a href="qgraphicsscene.html">QGraphicsScene</a> * QGraphicsItem::scene () const</h3>
@@ -810,10 +810,10 @@
  rect.setPos(100, 100);
 
  rect.sceneTransform().map(QPointF(0, 0));
-<span class="comment"> // returns QPointF(100, 100);</span>
+<span class="comment"> //</span> returns QPointF(100, 100);
 
  rect.sceneTransform().inverted().map(QPointF(100, 100));
-<span class="comment"> // returns QPointF(0, 0);</span></pre>
+<span class="comment"> //</span> returns QPointF(0, 0);</pre>
 <p>Unlike <a href="qgraphicsitem.html#transform">transform</a>(), which returns only an item's local transformation, this function includes the item's (and any parents') position.</p>
 <p>This function was introduced in Qt 4.3.</p>
 <p>See also <a href="qgraphicsitem.html#transform">transform</a>(), <a href="qgraphicsitem.html#setTransform">setTransform</a>(), <a href="qgraphicsitem.html#scenePos">scenePos</a>(), and <a href="graphicsview.html#the-graphics-view-coordinate-system">The Graphics View Coordinate System</a>.</p>
@@ -942,7 +942,7 @@
 <p>If all you want is to move an item, you should call <a href="qgraphicsitem.html#moveBy">moveBy</a>() or <a href="qgraphicsitem.html#setPos">setPos</a>() instead; this function changes the item's translation, which is conceptually separate from its position.</p>
 <p>See also <a href="qgraphicsitem.html#setTransform">setTransform</a>(), <a href="qgraphicsitem.html#transform">transform</a>(), <a href="qgraphicsitem.html#rotate">rotate</a>(), <a href="qgraphicsitem.html#scale">scale</a>(), and <a href="qgraphicsitem.html#shear">shear</a>().</p>
 <h3 class="fn"><a name="type"></a>int QGraphicsItem::type () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the type of an item as an int. All standard graphicsitem classes are associated with a unique value; see <a href="qgraphicsitem.html#Type-var">QGraphicsItem::Type</a>. This type information is used by <a href="qgraphicsitem.html#qgraphicsitem_cast">qgraphicsitem_cast</a>() to distinguish between types.</p>
+<p>Returns the type of an item as an int. All standard graphicsitem classes are associated with a unique value; see <a href="qgraphicsitem.html#Type-varx">QGraphicsItem::Type</a>. This type information is used by <a href="qgraphicsitem.html#qgraphicsitem_cast">qgraphicsitem_cast</a>() to distinguish between types.</p>
 <p>Reimplementing this function and declaring a Type enum value equal to your custom item's type will enable use of <a href="qgraphicsitem.html#qgraphicsitem_cast">qgraphicsitem_cast</a>() with the item. Custom items must return a value larger than or equal to <a href="qgraphicsitem.html#UserType-var">UserType</a> (65536).</p>
 <p>The default implementation (in <a href="qgraphicsitem.html">QGraphicsItem</a>) returns <a href="qgraphicsitem.html#UserType-var">UserType</a>.</p>
 <h3 class="fn"><a name="unsetCursor"></a>void QGraphicsItem::unsetCursor ()</h3>
@@ -983,7 +983,7 @@
 
     int type() const
     {
-        <span class="comment">// Enable the use of qgraphicsitem_cast with this item.</span>
+        <span class="comment">//</span> Enable the use of qgraphicsitem_cast with this item.
         return Type;
     }
     ...
@@ -995,8 +995,8 @@
 <p>This function was introduced in Qt 4.2.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

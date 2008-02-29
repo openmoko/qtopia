@@ -233,13 +233,14 @@ install()
                                 elif [ "$1" = "-nokey" ]; then
                                     echo "WIRELESS_DEFAULT_KEY='0'">> $TMP_FILE;
                                     print_debug "No password/keys given";
+                                    echo "WIRELESS_KEY_0=$ka">> $TMP_FILE;
                                 elif [ "$1" = "-multikey" ]; then
                                     shift;
                                     echo "WIRELESS_DEFAULT_KEY='$1'">> $TMP_FILE;
                                     shift;
                                     ka=$1;shift;kb=$1;shift;kc=$1;shift;kd=$1;
+                                    echo "WIRELESS_KEY_0=$ka">> $TMP_FILE;
                                 fi
-                                echo "WIRELESS_KEY_0=$ka">> $TMP_FILE;
                                 echo "WIRELESS_KEY_1=$kb">> $TMP_FILE;
                                 echo "WIRELESS_KEY_2=$kc">> $TMP_FILE;
                                 echo "WIRELESS_KEY_3=$kd">> $TMP_FILE;

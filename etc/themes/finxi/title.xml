@@ -24,6 +24,7 @@
         <status name="lock" rect="26%,0,9%x0" imageon="lock.svg" on="expr:@/UI/KeyLock" active="expr:@/UI/KeyLock"/>
       </exclusive>
       <status name="roaming" rect="38.32%,0,9%x0" imageon="roaming.svg" on="expr:@/Telephony/Status/Roaming"/>
+       <status name="voip_active" rect="45.3%,0,9%x0" imageon="voipactive" on="expr:@/Telephony/Status/VoIP/Present &amp;&amp; @/Telephony/Status/VoIP/Registered"/>
       <exclusive>
         <status name="bluetooth" rect="50.65%,0,9%x0" imageon="bluetooth-enabled.svg" on="expr:@/Communications/Bluetooth/LocalDevice/Enabled" active="expr:@/Communications/Bluetooth/LocalDevice/Enabled"/>
         <status name="bluetooth" rect="50.65%,0,9%x0" imageon="bluetooth-visible.svg" on="expr:@/Communications/Bluetooth/LocalDevice/Visible" active="expr:@/Communications/Bluetooth/LocalDevice/Visible"/>
@@ -48,7 +49,7 @@
     <widget name="inputmethod" rect="75%,0,25%x0" transient="yes" active="expr:@/UI/IMVisible"/>
 </exclusive>
   </rect>
-  <text rect="10%,44%,-10%,-3%" name="caption" size="6" outline="#000000" bold="yes" color="#FFFFFF" align="hcenter,vcenter" transient="yes" elided="right">
+  <text rect="10%,44%,-10%,-3%" name="caption" outline="#000000" bold="yes" color="#FFFFFF" align="hcenter,vcenter" transient="yes" elided="right">
     expr:@/UI/ActiveWindow/Caption
   </text>
   <text rect="8%,44%,-8%,-3%" name="caption" size="6" outline="#000000" bold="yes" color="#FFFFFF" align="hcenter,vcenter" transient="yes" active="expr:!@/UI/ActiveWindow/Caption">

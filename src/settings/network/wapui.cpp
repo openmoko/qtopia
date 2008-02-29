@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -128,12 +128,17 @@ void WapUI::loadConfigs()
         item->setData( ConfigRole, config );
         item->setText(name);
         item->setIcon( QIcon(":icon/wap") );
-        if ( config == defaultWap ) {
+
+        const bool defaultConfig( config == defaultWap );
+        item->setData( DefaultRole, defaultConfig );
+
+        if ( defaultConfig ) {
             hasDefault = true;
-            QFont f = item->font();
-            f.setBold( config == defaultWap );
-            item->setFont( f );
             dfltAccount->setText( name );
+
+            QFont f = item->font();
+            f.setBold( true );
+            item->setFont( f );
         }
     }
 

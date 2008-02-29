@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qstring.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/tools/qstring.cpp -->
 <head>
   <title>Qt 4.3: QStringRef Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -48,13 +48,13 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-lt-10">operator&lt;</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-lt-eq-7">operator&lt;=</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-38">operator==</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-39">operator==</a></b> ( const QString &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-41">operator==</a></b> ( const QLatin1String &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-gt-7">operator&gt;</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qstringref.html#operator-gt-eq-7">operator&gt;=</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-lt-11">operator&lt;</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-lt-eq-8">operator&lt;=</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-44">operator==</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-45">operator==</a></b> ( const QString &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-eq-eq-47">operator==</a></b> ( const QLatin1String &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-gt-8">operator&gt;</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qstringref.html#operator-gt-eq-8">operator&gt;=</a></b> ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -130,35 +130,35 @@
 <p>Constructs a string reference to the given <i>string</i> and assigns it to this string reference, returning the result.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-10"></a>bool operator&lt; ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-11"></a>bool operator&lt; ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string reference <i>s1</i> is lexically less than string reference <i>s2</i>; otherwise returns false.</p>
 <p>The comparison is based exclusively on the numeric Unicode values of the characters and is very fast, but is not what a human would expect. Consider sorting user-interface strings using the <a href="qstring.html#localeAwareCompare">QString::localeAwareCompare</a>() function.</p>
-<h3 class="fn"><a name="operator-lt-eq-7"></a>bool operator&lt;= ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-eq-8"></a>bool operator&lt;= ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string reference <i>s1</i> is lexically less than or equal to string reference <i>s2</i>; otherwise returns false.</p>
 <p>The comparison is based exclusively on the numeric Unicode values of the characters and is very fast, but is not what a human would expect. Consider sorting user-interface strings using the <a href="qstring.html#localeAwareCompare">QString::localeAwareCompare</a>() function.</p>
-<h3 class="fn"><a name="operator-eq-eq-38"></a>bool operator== ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-44"></a>bool operator== ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string reference <i>s1</i> is lexically equal to string reference <i>s2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-eq-eq-39"></a>bool operator== ( const <a href="qstring.html">QString</a> &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-45"></a>bool operator== ( const <a href="qstring.html">QString</a> &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>s1</i> is lexically equal to string reference <i>s2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-eq-eq-41"></a>bool operator== ( const <a href="qlatin1string.html">QLatin1String</a> &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-47"></a>bool operator== ( const <a href="qlatin1string.html">QLatin1String</a> &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string <i>s1</i> is lexically equal to string reference <i>s2</i>; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-7"></a>bool operator&gt; ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-8"></a>bool operator&gt; ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string reference <i>s1</i> is lexically greater than string reference <i>s2</i>; otherwise returns false.</p>
 <p>The comparison is based exclusively on the numeric Unicode values of the characters and is very fast, but is not what a human would expect. Consider sorting user-interface strings using the <a href="qstring.html#localeAwareCompare">QString::localeAwareCompare</a>() function.</p>
-<h3 class="fn"><a name="operator-gt-eq-7"></a>bool operator&gt;= ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-eq-8"></a>bool operator&gt;= ( const QStringRef &amp; <i>s1</i>, const QStringRef &amp; <i>s2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if string reference <i>s1</i> is lexically greater than or equal to string reference <i>s2</i>; otherwise returns false.</p>
 <p>The comparison is based exclusively on the numeric Unicode values of the characters and is very fast, but is not what a human would expect. Consider sorting user-interface strings using the <a href="qstring.html#localeAwareCompare">QString::localeAwareCompare</a>() function.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

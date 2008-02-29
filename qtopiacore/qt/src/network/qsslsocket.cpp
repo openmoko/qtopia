@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -176,8 +174,9 @@
     information about ciphers and certificates, refer to QSslCipher and
     QSslCertificate.
     
-    This product includes software developed by the OpenSSL Project
-    for use in the OpenSSL Toolkit (http://www.openssl.org/).
+    This product uses software developed by the OpenSSL Project for use in the
+    OpenSSL Toolkit. You can download the necessary software from
+    http://www.openssl.org/.
 
     \sa QSslCertificate, QSslCipher, QSslError
 */

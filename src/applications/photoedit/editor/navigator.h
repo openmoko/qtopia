@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -58,9 +58,6 @@ protected:
     // Paint navigator onto widget
     void paintEvent( QPaintEvent* );
 
-    // Resize naviagtor and update display
-    void resizeEvent( QResizeEvent* );
-
     // Return preferred size of navigator
     QSize sizeHint() const;
 
@@ -85,6 +82,8 @@ private:
     QRect reduced_space;
     QRect reduced_viewport;
     QPoint centered_origin;
+
+    bool valid;
 };
 
 #endif

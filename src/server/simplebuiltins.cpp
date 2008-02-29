@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,19 +22,6 @@
 #include "applicationlauncher.h"
 #include <QtopiaChannel>
 #include <QtopiaServiceRequest>
-
-#ifdef Q_WS_QWS
-
-// "calibrate" builtin
-#include "../settings/calibrate/calibrate.h"
-static QWidget *calibrate()
-{
-    Calibrate *c = new Calibrate;
-    return c;
-}
-QTOPIA_SIMPLE_BUILTIN(calibrate, calibrate);
-
-#endif
 
 // "taskmanager" builtin
 static QWidget *taskmanager()

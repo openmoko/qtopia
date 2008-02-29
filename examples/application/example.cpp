@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -38,7 +38,6 @@ Example::Example(QWidget *parent, Qt::WFlags f)
     // Tell Qtopia to provide the "Help" option, which will enable the user to
     // read the Help documentation for this application.
     QSoftMenuBar::setHelpEnabled(this,true);
-    // To add further actions, see QWidget::insertAction(QAction *,QAction *)
 }
 
 /*

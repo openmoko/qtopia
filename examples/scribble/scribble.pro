@@ -1,6 +1,6 @@
 qtopia_project(qtopia app)
 TARGET=scribble
-CONFIG+=qtopia_main
+CONFIG+=qtopia_main no_quicklaunch
 
 HEADERS       = mainwindow.h \
                 scribblearea.h
@@ -19,5 +19,5 @@ pics.hint=pics
 INSTALLS+=desktop pics
 
 pkg.desc=Scribble Application
-pkg.domain=window,cardreader,print,doc_open,doc_save
+pkg.domain=trusted
 

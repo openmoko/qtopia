@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,9 +20,9 @@
 ****************************************************************************/
 
 #include "statewidget.h"
+#include "keyhold.h"
 
 #include <media.h>
-#include <private/keyhold_p.h>
 
 static const int KEY_SELECT_HOLD = Qt::Key_unknown + Qt::Key_Select;
 
@@ -77,13 +77,15 @@ void StateWidget::keyPressEvent( QKeyEvent* e )
     switch( e->key() )
     {
     case Qt::Key_Select:
+        e->accept();
         togglePlaying();
         break;
     case KEY_SELECT_HOLD:
+        e->accept();
         setStopped();
         break;
     default:
-        e->ignore();
+        QWidget::keyPressEvent(e);
         break;
     }
 }

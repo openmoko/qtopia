@@ -40,8 +40,11 @@ SOURCES+=\
     infopage.cpp\
     pluginspage.cpp\
     qlogpage.cpp\
-    lanlink.cpp\
     qcopconnection.cpp\
+
+# Always rebuild infopage.o so that the build date is correct
+win32:create_raw_dependency($$fixpath($$OBJECTS_DIR/infopage.obj),FORCE)
+else:create_raw_dependency($$fixpath($$OBJECTS_DIR/infopage.o),FORCE)
 
 # Test page to do all sorts of debugging things
 qtopia_depot:SOURCES+=testpage.cpp

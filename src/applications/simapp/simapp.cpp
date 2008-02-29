@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,9 +40,9 @@
 #include <QDebug>
 
 #ifndef QTOPIA_TEST
-#include "../../server/ui/delayedwaitdialog.h"
+#include "../../server/ui/components/delayedwaitdialog/delayedwaitdialog.h"
 #include "../../server/phone/homescreencontrol.h"
-#include "../../server/qtopiainputevents.h"
+#include "../../server/core_server/qtopiainputevents.h"
 #endif
 
 #define IDLEMODEIMAGENAME Qtopia::tempDir() + "idlemodeimage.png"
@@ -90,8 +90,8 @@ static DelayedWaitDialog *waitDlg = 0;
 
 SimApp::SimApp(QWidget *parent, Qt::WFlags f)
     : QMainWindow(parent, f), view(0), notification(0),
-      hasStk(false), simToolkitAvailable(false), eventList(0), failLabel(0),
-      commandOutsideMenu(false)
+      hasStk(false), simToolkitAvailable(false), eventList(0), idleModeMsgId(0),
+      failLabel(0), commandOutsideMenu(false), hasSustainedDisplayText(false)
 {
     status = new QValueSpaceObject("/Telephony/Status", this);
 
@@ -283,14 +283,18 @@ void SimApp::updateValueSpace()
 #ifndef QTOPIA_TEST
     if ( !idleModeImage.isNull() || !idleModeText.text().isEmpty() )
         if (HomeScreenControl::instance()->homeScreen()) {
-        idleModeMsgId = HomeScreenControl::instance()->homeScreen()->showInformation
-            ( IDLEMODEIMAGENAME,
-              idleModeText.iconSelfExplanatory() ? QString() : idleModeText.text(),
-              20 ); // set as very low priority
+            // remove old message
+            if ( idleModeMsgId )
+                HomeScreenControl::instance()->homeScreen()->clearInformation( idleModeMsgId );
+            idleModeMsgId = HomeScreenControl::instance()->homeScreen()->showInformation
+                ( IDLEMODEIMAGENAME,
+                  idleModeText.iconSelfExplanatory() ? QString() : idleModeText.text(),
+                  20 ); // set as very low priority
         }
     else {
         if (HomeScreenControl::instance()->homeScreen())
             HomeScreenControl::instance()->homeScreen()->clearInformation( idleModeMsgId );
+        idleModeMsgId = 0;
     }
 #endif
 }
@@ -303,7 +307,8 @@ void SimApp::sendEnvelope( const QSimEnvelope &env )
         hide();
     } else {
 #ifndef QTOPIA_TEST
-        waitDlg->show();
+        if (!hasSustainedDisplayText)
+            waitDlg->show();
 #endif
         stk->sendEnvelope( env );
     }
@@ -317,7 +322,8 @@ void SimApp::sendResponse( const QSimTerminalResponse &res )
         hide();
     } else {
 #ifndef QTOPIA_TEST
-        waitDlg->show();
+        if (!hasSustainedDisplayText)
+            waitDlg->show();
 #endif
         stk->sendResponse( res );
     }
@@ -367,8 +373,23 @@ void SimApp::cmdMenu(const QSimCommand &cmd)
 
 void SimApp::cmdDisplayText(const QSimCommand &cmd)
 {
+#ifndef QTOPIA_TEST
+    // DisplayText with low priority came while screen is busy
+    if ( !this->isVisible()
+            && !(HomeScreenControl::instance()->homeScreen()->windowState() & Qt::WindowActive)
+            && !cmd.highPriority() ) {
+        QSimTerminalResponse resp;
+        resp.setCommand(cmd);
+        resp.setCause(QSimTerminalResponse::ScreenIsBusy);
+        resp.setResult(QSimTerminalResponse::MEUnableToProcess);
+        sendResponse( resp );
+        return;
+    }
+#endif
     if ( cmd.iconId() > 0 )
         createIconReader();
+
+    hasSustainedDisplayText = cmd.immediateResponse();
 
     if (view && qobject_cast<SimText*>(view)) {
         SimText *text = (SimText *)view;
@@ -390,6 +411,7 @@ void SimApp::cmdDisplayText(const QSimCommand &cmd)
         SimText *text = new SimText(cmd, iconReader, stack);
         connect(text, SIGNAL(sendResponse(QSimTerminalResponse)),
                 this, SLOT(sendResponse(QSimTerminalResponse)) );
+        connect(text, SIGNAL(hideApp()), this, SLOT(hideApp()));
         setView(text);
     }
 }
@@ -511,8 +533,6 @@ void SimApp::closeEvent(QCloseEvent *ce)
         if (!view->inherits("SimMenu") || !((SimMenu*)view)->isMainMenu())
             ce->ignore();
     }
-    // terminate the session so the display returns to the Setup Menu
-    terminateSession();
     QMainWindow::closeEvent(ce);
 }
 
@@ -581,6 +601,10 @@ void SimApp::hideNotification()
 
 void SimApp::setView(SimCommandView *w)
 {
+    // View for other than DisplayText received. Cancel sustainedDisplay
+    if ( !qobject_cast<SimText*>(w) && hasSustainedDisplayText )
+       hasSustainedDisplayText = false;
+
 #ifndef QTOPIA_TEST
     waitDlg->hide();
 #endif
@@ -628,6 +652,15 @@ void SimApp::terminateSession()
         commandOutsideMenu = false;
         hide();
     }
+}
+
+void SimApp::hideApp()
+{
+    if ( view ) {
+        removeView( view );
+        hasSustainedDisplayText = false;
+    }
+    hide();
 }
 
 bool SimApp::listViewPreferred(const QSimCommand& cmd)
@@ -780,15 +813,15 @@ void SimApp::changeBrowserTerminationEvent(bool value)
     if ( value ) {
         connect( qtopiaTask<ApplicationLauncher>(),
                 SIGNAL(applicationTerminated
-                    (const QString &,ApplicationTypeLauncher::TerminationReason,bool)),
+                    (QString,ApplicationTypeLauncher::TerminationReason,bool)),
                 this, SLOT(applicationTerminated
-                    (const QString &,ApplicationTypeLauncher::TerminationReason,bool)) );
+                    (QString,ApplicationTypeLauncher::TerminationReason,bool)) );
     } else {
         disconnect( qtopiaTask<ApplicationLauncher>(),
                 SIGNAL(applicationTerminated
-                    (const QString &,ApplicationTypeLauncher::TerminationReason,bool)),
+                    (QString,ApplicationTypeLauncher::TerminationReason,bool)),
                 this, SLOT(applicationTerminated
-                    (const QString &,ApplicationTypeLauncher::TerminationReason,bool)) );
+                    (QString,ApplicationTypeLauncher::TerminationReason,bool)) );
     }
 #endif
 }

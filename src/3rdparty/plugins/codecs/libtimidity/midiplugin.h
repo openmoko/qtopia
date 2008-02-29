@@ -32,8 +32,6 @@ public:
 
     bool canEncode() const;
     bool canDecode() const;
-    bool supportsVideo() const;
-    bool supportsAudio() const;
 
     QMediaEncoder* encoder(QString const& mimeType);
     QMediaDecoder* decoder(QString const& mimeType);

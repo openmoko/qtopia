@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 #include "qmailaddress.h"
 #include "qmailid.h"
 #include "qmailtimestamp.h"
+#include "qprivateimplementation_p.h"
 
 #include <QByteArray>
 #include <QFlags>
@@ -41,9 +42,11 @@ class QFile;
 
 class QMailMessageHeaderFieldPrivate;
 
-class QTOPIAMAIL_EXPORT QMailMessageHeaderField
+class QTOPIAMAIL_EXPORT QMailMessageHeaderField : public QPrivatelyImplemented<QMailMessageHeaderFieldPrivate>
 {
 public:
+    typedef QMailMessageHeaderFieldPrivate ImplementationType;
+
     typedef QPair<QByteArray, QByteArray> ParameterType;
 
     enum FieldType
@@ -55,8 +58,6 @@ public:
     QMailMessageHeaderField();
     QMailMessageHeaderField(const QByteArray& text, FieldType fieldType = StructuredField);
     QMailMessageHeaderField(const QByteArray& name, const QByteArray& text, FieldType fieldType = StructuredField);
-    QMailMessageHeaderField(const QMailMessageHeaderField& other);
-    virtual ~QMailMessageHeaderField();
 
     bool isNull() const;
 
@@ -80,8 +81,6 @@ public:
 
     bool operator== (const QMailMessageHeaderField& other) const;
 
-    QMailMessageHeaderField& operator= (const QMailMessageHeaderField& other);
-
     static QByteArray encodeWord(const QString& input, const QByteArray& charset = "");
     static QString decodeWord(const QByteArray& input);
 
@@ -102,8 +101,6 @@ private:
     friend class QMailMessageHeaderPrivate;
 
     void output(QDataStream& out) const;
-
-    QSharedDataPointer<QMailMessageHeaderFieldPrivate> d;
 };
 
 
@@ -177,13 +174,13 @@ private:
 class QMailMessageHeaderPrivate;
 
 // This class is not exposed to clients:
-class QMailMessageHeader
+class QMailMessageHeader : public QPrivatelyImplemented<QMailMessageHeaderPrivate>
 {
 public:
+    typedef QMailMessageHeaderPrivate ImplementationType;
+
     QMailMessageHeader();
     QMailMessageHeader(const QByteArray& input);
-    QMailMessageHeader(const QMailMessageHeader& input);
-    ~QMailMessageHeader();
 
     void update(const QByteArray& id, const QByteArray& content);
     void append(const QByteArray& id, const QByteArray& content);
@@ -194,8 +191,6 @@ public:
 
     QList<const QByteArray*> fieldList() const;
 
-    QMailMessageHeader& operator= (const QMailMessageHeader& other);
-
 private:
     friend class QMailMessageHeaderPrivate;
     friend class QMailMessagePartContainerPrivate;
@@ -203,16 +198,16 @@ private:
     friend class QMailMessagePrivate;
 
     void output(QDataStream& out, const QList<QByteArray>& exclusions, bool stripInternal) const;
-
-    QSharedDataPointer<QMailMessageHeaderPrivate> d;
 };
 
 
 class QMailMessageBodyPrivate;
 
-class QTOPIAMAIL_EXPORT QMailMessageBody
+class QTOPIAMAIL_EXPORT QMailMessageBody : public QPrivatelyImplemented<QMailMessageBodyPrivate>
 {
 public:
+    typedef QMailMessageBodyPrivate ImplementationType;
+
     enum TransferEncoding 
     {
         NoEncoding = 0,
@@ -234,9 +229,6 @@ public:
         Encoded = 1,
         Decoded = 2
     };
-
-    QMailMessageBody(const QMailMessageBody& other);
-    ~QMailMessageBody();
 
     // Construction functions
     static QMailMessageBody fromFile(const QString& filename, const QMailMessageContentType& type, TransferEncoding encoding, EncodingStatus status);
@@ -260,8 +252,6 @@ public:
     TransferEncoding transferEncoding() const;
     QMailMessageContentType contentType() const;
 
-    QMailMessageBody& operator= (const QMailMessageBody& other);
-
 private:
     friend class QMailMessagePartContainerPrivate;
 
@@ -270,13 +260,13 @@ private:
     uint indicativeSize() const;
 
     void output(QDataStream& out, bool includeAttachments) const;
-
-    QSharedDataPointer<QMailMessageBodyPrivate> d;
 };
 
-class QTOPIAMAIL_EXPORT QMailMessagePartContainer
+class QTOPIAMAIL_EXPORT QMailMessagePartContainer : public QPrivatelyImplemented<QMailMessagePartContainerPrivate>
 {
 public:
+    typedef QMailMessagePartContainerPrivate ImplementationType;
+
     enum MultipartType 
     {
         MultipartNone = 0,
@@ -290,8 +280,6 @@ public:
         MultipartFormData = 8,
         MultipartReport = 9
     };
-
-    virtual ~QMailMessagePartContainer();
 
     // Parts management interface:
     MultipartType multipartType() const;
@@ -336,6 +324,10 @@ public:
 
     void removeHeaderField( const QString &id );
 
+protected:
+    template<typename Subclass>
+    QMailMessagePartContainer(Subclass* p);
+
 private:
     friend class QMailMessagePartContainerPrivate;
 
@@ -345,9 +337,6 @@ private:
 
     void outputParts(QDataStream& out, bool includePreamble, bool includeAttachments, bool stripInternal) const;
     void outputBody(QDataStream& out, bool includeAttachments) const;
-
-    virtual QMailMessagePartContainerPrivate* partContainerPrivate() = 0;
-    virtual const QMailMessagePartContainerPrivate* partContainerPrivate() const = 0;
 };
 
 class QMailMessagePartPrivate;
@@ -355,9 +344,9 @@ class QMailMessagePartPrivate;
 class QTOPIAMAIL_EXPORT QMailMessagePart : public QMailMessagePartContainer
 {
 public:
+    typedef QMailMessagePartPrivate ImplementationType;
+
     QMailMessagePart();
-    QMailMessagePart(const QMailMessagePart &other);
-    virtual ~QMailMessagePart();
 
     // Construction functions
     static QMailMessagePart fromFile(const QString& filename, const QMailMessageContentDisposition& disposition, 
@@ -397,8 +386,6 @@ public:
     QString displayName() const;
     QString identifier() const;
 
-    const QMailMessagePart& operator= (const QMailMessagePart& other);
-
     QString attachmentPath() const;
     bool detachAttachment(const QString& path);
 
@@ -406,14 +393,9 @@ private:
     friend class QMailMessagePrivate;
     friend class QMailMessagePartContainerPrivate;
 
-    virtual QMailMessagePartContainerPrivate* partContainerPrivate();
-    virtual const QMailMessagePartContainerPrivate* partContainerPrivate() const;
-
     void setAttachmentPath(const QString& path);
 
     void output(QDataStream& out, bool includeAttachments, bool stripInternal) const;
-
-    QSharedDataPointer<QMailMessagePartPrivate> d;
 };
 
 class QMailMessagePrivate;
@@ -421,14 +403,12 @@ class QMailMessagePrivate;
 class QTOPIAMAIL_EXPORT QMailMessage : public QMailMessagePartContainer
 {
 public:
+    typedef QMailMessagePrivate ImplementationType;
+
     // Mail content needs to use CRLF explicitly
     static const char CarriageReturn;
     static const char LineFeed;
     static const char* CRLF;
-
-    QMailMessage();
-    QMailMessage(const QMailMessage& other);
-    virtual ~QMailMessage();
 
     static QMailMessage fromRfc2822(const QByteArray &ba);
     static QMailMessage fromRfc2822File(const QString& fileName);
@@ -438,7 +418,8 @@ public:
         HeaderOnlyFormat = 1,
         StorageFormat = 2,
         TransmissionFormat = 3,
-        IdentityFormat = 4
+        IdentityFormat = 4,
+        SerializationFormat = 5
     }; 
 
     QByteArray toRfc2822(EncodingFormat format = TransmissionFormat) const;
@@ -450,7 +431,9 @@ public:
         HeaderAndBody	
     };
 
-    explicit QMailMessage(const QMailId& id, const MailDataSelection& selection = HeaderAndBody );
+    QMailMessage();
+    QMailMessage(const QMailId& id, MailDataSelection selection = HeaderAndBody);
+    QMailMessage(const QString& uid, const QString& account, MailDataSelection selection = HeaderAndBody);
 
     enum MessageType
     {
@@ -475,6 +458,12 @@ public:
         ReadElsewhere  = 0x0200,
     };
     Q_DECLARE_FLAGS(Status, MessageStatusFlag)
+
+    enum AttachmentsAction {
+        LinkToAttachments = 0,
+        CopyAttachments,
+        CopyAndDeleteAttachments
+    };
 
     QMailId id() const;
     void setId(QMailId id);
@@ -530,25 +519,29 @@ public:
 
     uint indicativeSize() const;
 
-    const QMailMessage& operator= (const QMailMessage& other);
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
 
 private:
     friend class QMailStore;
     friend class QMailStorePrivate;
 
-    virtual QMailMessagePartContainerPrivate* partContainerPrivate();
-    virtual const QMailMessagePartContainerPrivate* partContainerPrivate() const;
-
     bool uncommittedChanges() const;
     bool uncommittedMetadataChanges() const;
     void changesCommitted();
-
-    QSharedDataPointer<QMailMessagePrivate> d;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QMailMessage::Status)
 
+Q_DECLARE_USER_METATYPE_ENUM(QMailMessage::MessageType)
+Q_DECLARE_USER_METATYPE_ENUM(QMailMessage::AttachmentsAction)
+
+Q_DECLARE_USER_METATYPE(QMailMessage)
+
 typedef QList<QMailMessage> QMailMessageList;
+
+Q_DECLARE_METATYPE(QMailMessageList)
+Q_DECLARE_USER_METATYPE_TYPEDEF(QMailMessageList, QMailMessageList)
 
 
 // There is no good place to put this code; define it here, but we won't expose it to external clients

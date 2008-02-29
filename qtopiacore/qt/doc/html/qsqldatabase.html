@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/sql/kernel/qsqldatabase.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/sql/kernel/qsqldatabase.cpp -->
 <head>
   <title>Qt 4.3: QSqlDatabase Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -141,7 +141,7 @@
 <p>(We assume that <tt>qtdir</tt> is the directory where Qt is installed.) This will pull in the code that is needed to use the PostgreSQL client library and to instantiate a QPSQLDriver object, assuming that you have the PostgreSQL headers somewhere in your include search path.</p>
 <pre> PGconn *con = PQconnectdb(&quot;host=server user=bart password=simpson dbname=springfield&quot;);
  QPSQLDriver *drv =  new QPSQLDriver(con);
- QSqlDatabase db = QSqlDatabase::addDatabase(drv); <span class="comment">// becomes the new default connection</span>
+ QSqlDatabase db = QSqlDatabase::addDatabase(drv); <span class="comment">//</span> becomes the new default connection
  QSqlQuery query;
  query.exec(&quot;SELECT NAME, ID FROM STAFF&quot;);
  ...</pre>
@@ -221,13 +221,13 @@
 <p>Returns true if the <a href="qsqldatabase.html">QSqlDatabase</a> has a valid driver.</p>
 <p>Example:</p>
 <pre> QSqlDatabase db;
- qDebug() &lt;&lt; db.isValid();    <span class="comment">// Returns false</span>
+ qDebug() &lt;&lt; db.isValid();    <span class="comment">//</span> Returns false
 
  db = QSqlDatabase::database(&quot;sales&quot;);
- qDebug() &lt;&lt; db.isValid();    <span class="comment">// Returns true if &quot;sales&quot; connection exists</span>
+ qDebug() &lt;&lt; db.isValid();    <span class="comment">//</span> Returns true if &quot;sales&quot; connection exists
 
  QSqlDatabase::removeDatabase(&quot;sales&quot;);
- qDebug() &lt;&lt; db.isValid();    <span class="comment">// Returns false</span></pre>
+ qDebug() &lt;&lt; db.isValid();    <span class="comment">//</span> Returns false</pre>
 <h3 class="fn"><a name="lastError"></a><a href="qsqlerror.html">QSqlError</a> QSqlDatabase::lastError () const</h3>
 <p>Returns information about the last error that occurred on the database.</p>
 <p>Failures that occur in conjunction with an individual query are reported by <a href="qsqlquery.html#lastError">QSqlQuery::lastError</a>().</p>
@@ -263,20 +263,20 @@
 <p>Removes the database connection <i>connectionName</i> from the list of database connections.</p>
 <p><b>Warning:</b> There should be no open queries on the database connection when this function is called, otherwise a resource leak will occur.</p>
 <p>Example:</p>
-<pre><span class="comment"> // WRONG</span>
+<pre><span class="comment"> //</span> WRONG
  QSqlDatabase db = QSqlDatabase::database(&quot;sales&quot;);
  QSqlQuery query(&quot;SELECT NAME, DOB FROM EMPLOYEES&quot;, db);
- QSqlDatabase::removeDatabase(&quot;sales&quot;); <span class="comment">// will output a warning</span>
+ QSqlDatabase::removeDatabase(&quot;sales&quot;); <span class="comment">//</span> will output a warning
 
-<span class="comment"> // &quot;db&quot; is now a dangling invalid database connection,</span>
-<span class="comment"> // &quot;query&quot; contains an invalid result set</span></pre>
+<span class="comment"> //</span> &quot;db&quot; is now a dangling invalid database connection,
+<span class="comment"> //</span> &quot;query&quot; contains an invalid result set</pre>
 <p>The correct way to do it:</p>
 <pre> {
      QSqlDatabase db = QSqlDatabase::database(&quot;sales&quot;);
      QSqlQuery query(&quot;SELECT NAME, DOB FROM EMPLOYEES&quot;, db);
  }
-<span class="comment"> // Both &quot;db&quot; and &quot;query&quot; are destroyed because they are out of scope</span>
- QSqlDatabase::removeDatabase(&quot;sales&quot;); <span class="comment">// correct</span></pre>
+<span class="comment"> //</span> Both &quot;db&quot; and &quot;query&quot; are destroyed because they are out of scope
+ QSqlDatabase::removeDatabase(&quot;sales&quot;); <span class="comment">//</span> correct</pre>
 <p><b>Note:</b> This function is <a href="threads.html#thread-safe">thread-safe</a>.</p>
 <p>See also <a href="qsqldatabase.html#database">database</a>() and <a href="threads.html#threads-and-the-sql-module">Threads and the SQL Module</a>.</p>
 <h3 class="fn"><a name="rollback"></a>bool QSqlDatabase::rollback ()</h3>
@@ -338,24 +338,24 @@
 </table></p>
 <p>Examples:</p>
 <pre> ...
-<span class="comment"> // MySQL connection</span>
- db.setConnectOptions(&quot;CLIENT_SSL=1;CLIENT_IGNORE_SPACE=1&quot;); <span class="comment">// use an SSL connection to the server</span>
+<span class="comment"> //</span> MySQL connection
+ db.setConnectOptions(&quot;CLIENT_SSL=1;CLIENT_IGNORE_SPACE=1&quot;); <span class="comment">//</span> use an SSL connection to the server
  if (!db.open()) {
-     db.setConnectOptions(); <span class="comment">// clears the connect option string</span>
+     db.setConnectOptions(); <span class="comment">//</span> clears the connect option string
      ...
  }
  ...
-<span class="comment"> // PostgreSQL connection</span>
- db.setConnectOptions(&quot;requiressl=1&quot;); <span class="comment">// enable PostgreSQL SSL connections</span>
+<span class="comment"> //</span> PostgreSQL connection
+ db.setConnectOptions(&quot;requiressl=1&quot;); <span class="comment">//</span> enable PostgreSQL SSL connections
  if (!db.open()) {
-     db.setConnectOptions(); <span class="comment">// clear options</span>
+     db.setConnectOptions(); <span class="comment">//</span> clear options
      ...
  }
  ...
-<span class="comment"> // ODBC connection</span>
- db.setConnectOptions(&quot;SQL_ATTR_ACCESS_MODE=SQL_MODE_READ_ONLY;SQL_ATTR_TRACE=SQL_OPT_TRACE_ON&quot;); <span class="comment">// set ODBC options</span>
+<span class="comment"> //</span> ODBC connection
+ db.setConnectOptions(&quot;SQL_ATTR_ACCESS_MODE=SQL_MODE_READ_ONLY;SQL_ATTR_TRACE=SQL_OPT_TRACE_ON&quot;); <span class="comment">//</span> set ODBC options
  if (!db.open()) {
-     db.setConnectOptions(); <span class="comment">// don't try to set this option</span>
+     db.setConnectOptions(); <span class="comment">//</span> don't try to set this option
      ...
  }</pre>
 <p>Refer to the client library documentation for more information about the different options.</p>
@@ -369,7 +369,7 @@
  db = QSqlDatabase::addDatabase(&quot;QODBC&quot;);
  db.setDatabaseName(&quot;DRIVER={Microsoft Access Driver (*.mdb)};FIL={MS Access};DBQ=myaccessfile.mdb&quot;);
  if (db.open()) {
-     <span class="comment">// success!</span>
+     <span class="comment">//</span> success!
  }
  ...</pre>
 <p>There is no default value.</p>
@@ -404,20 +404,10 @@
 <p>See also <a href="qsqldatabase.html#setUserName">setUserName</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QSqlDatabase &amp; QSqlDatabase::operator= ( const QSqlDatabase &amp; <i>other</i> )</h3>
 <p>Assigns <i>other</i> to this object.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="record-2"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDatabase::record ( const <a href="qsqlquery.html">QSqlQuery</a> &amp; <i>query</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use query.<a href="qsqldatabase.html#record">record</a>() instead.</p>
-<h3 class="fn"><a name="recordInfo"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDatabase::recordInfo ( const <a href="qstring.html">QString</a> &amp; <i>tablename</i> ) const</h3>
-<p>Use <a href="qsqldatabase.html#record">record</a>() instead.</p>
-<h3 class="fn"><a name="recordInfo-2"></a><a href="qsqlrecord.html">QSqlRecord</a> QSqlDatabase::recordInfo ( const <a href="qsqlquery.html">QSqlQuery</a> &amp; <i>query</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use query.<a href="qsqldatabase.html#record">record</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

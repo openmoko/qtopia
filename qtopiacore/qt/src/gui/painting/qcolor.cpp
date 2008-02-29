@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1961,6 +1959,7 @@ QColor::operator QVariant() const
     Returns true if setNamedColor() is allowed to look up colors in
     the X11 color database. By default, this function returns false.
 
+    \note This function is only available on the X11 platform.    
     \sa setAllowX11ColorNames()
 */
 bool QColor::allowX11ColorNames()
@@ -1973,6 +1972,7 @@ bool QColor::allowX11ColorNames()
     if \a enabled. By default, setNamedColor() does \e not look up
     colors in the X11 color database.
 
+    \note This function is only available on the X11 platform.
     \sa setNamedColor(), allowX11ColorNames()
 */
 void QColor::setAllowX11ColorNames(bool enabled)

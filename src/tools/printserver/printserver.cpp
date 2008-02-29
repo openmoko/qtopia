@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,6 +31,7 @@
 #include <QMap>
 #include <QMessageBox>
 #include <QQueue>
+#include <QSoftMenuBar>
 
 class PrintServerPrivate {
 public:
@@ -205,7 +206,9 @@ void PrintServer::enqueueHtmlPrintJob(const QString &html)
 void PrintServer::selectPrinterPlugin()
 {
     QDialog dlg;
+    dlg.setObjectName( "printserver" );
     dlg.setWindowTitle( tr( "Printer Type" ) );
+    QSoftMenuBar::menuFor( &dlg );
 #ifdef QTOPIA_KEYPAD_NAVIGATION
     QtopiaApplication::setMenuLike( &dlg, true );
 #endif

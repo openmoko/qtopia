@@ -11,6 +11,10 @@ QLineEdit {
     -qt-style-features: background-color;
 }
 
+QLineEdit:no-frame {
+    border: none;
+}
+
 QFrame {
     border: native;
 }

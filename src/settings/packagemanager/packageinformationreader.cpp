@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -195,6 +195,10 @@ void PackageInformationReader::readLine( const QString &line )
     else if ( lineStr.startsWith( QLatin1String( "Domain:" ), Qt::CaseInsensitive ))
     {
         pkg.domain = lineStr.mid( colon ).trimmed();
+#ifndef QT_NO_SXE
+        if ( !DomainInfo::isDomainValid( pkg.domain ) )
+            pkg.domain = DomainInfo::defaultDomain();
+#endif
         if ( !pkg.domain.isEmpty() ) hasContent = true;
     }
     else if ( lineStr.startsWith( QLatin1String( "Filename:" ), Qt::CaseInsensitive ))

@@ -289,7 +289,7 @@
 <p>On windows, it is possible for a key to have both a value and subkeys. Its default value is accessed by using &quot;Default&quot; or &quot;.&quot; in place of a subkey:</p>
 <pre> settings.setValue(&quot;HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy&quot;, &quot;Milkyway&quot;);
  settings.setValue(&quot;HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Sun&quot;, &quot;OurStar&quot;);
- settings.value(&quot;HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Default&quot;); <span class="comment">// returns &quot;Milkyway&quot;</span></pre>
+ settings.value(&quot;HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Default&quot;); <span class="comment">//</span> returns &quot;Milkyway&quot;</pre>
 <p>On other platforms than windows, &quot;Default&quot; and &quot;.&quot; would be treated as regular subkeys.</p>
 <a name="platform-limitations"></a>
 <h4>Platform Limitations</h4>
@@ -404,11 +404,11 @@
  settings.setValue(&quot;tv&quot;, false);
 
  QStringList keys = settings.allKeys();
-<span class="comment"> // keys: [&quot;fridge/color&quot;, &quot;fridge/size&quot;, &quot;sofa&quot;, &quot;tv&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;fridge/color&quot;, &quot;fridge/size&quot;, &quot;sofa&quot;, &quot;tv&quot;]</pre>
 <p>If a group is set using <a href="qsettings.html#beginGroup">beginGroup</a>(), only the keys in the group are returned, without the group prefix:</p>
 <pre> settings.beginGroup(&quot;fridge&quot;);
  keys = settings.allKeys();
-<span class="comment"> // keys: [&quot;color&quot;, &quot;size&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;color&quot;, &quot;size&quot;]</pre>
 <p>See also <a href="qsettings.html#childGroups">childGroups</a>() and <a href="qsettings.html#childKeys">childKeys</a>().</p>
 <h3 class="fn"><a name="beginGroup"></a>void QSettings::beginGroup ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i> )</h3>
 <p>Appends <i>prefix</i> to the current group.</p>
@@ -492,11 +492,11 @@
  settings.setValue(&quot;tv&quot;, false);
 
  QStringList groups = settings.childGroups();
-<span class="comment"> // group: [&quot;fridge&quot;]</span></pre>
+<span class="comment"> //</span> group: [&quot;fridge&quot;]</pre>
 <p>If a group is set using <a href="qsettings.html#beginGroup">beginGroup</a>(), the first-level keys in that group are returned, without the group prefix.</p>
 <pre> settings.beginGroup(&quot;fridge&quot;);
  groups = settings.childGroups();
-<span class="comment"> // groups: []</span></pre>
+<span class="comment"> //</span> groups: []</pre>
 <p>You can navigate through the entire setting hierarchy using <a href="qsettings.html#childKeys">childKeys</a>() and childGroups() recursively.</p>
 <p>See also <a href="qsettings.html#childKeys">childKeys</a>() and <a href="qsettings.html#allKeys">allKeys</a>().</p>
 <h3 class="fn"><a name="childKeys"></a><a href="qstringlist.html">QStringList</a> QSettings::childKeys () const</h3>
@@ -509,11 +509,11 @@
  settings.setValue(&quot;tv&quot;, false);
 
  QStringList keys = settings.childKeys();
-<span class="comment"> // keys: [&quot;sofa&quot;, &quot;tv&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;sofa&quot;, &quot;tv&quot;]</pre>
 <p>If a group is set using <a href="qsettings.html#beginGroup">beginGroup</a>(), the top-level keys in that group are returned, without the group prefix:</p>
 <pre> settings.beginGroup(&quot;fridge&quot;);
  keys = settings.childKeys();
-<span class="comment"> // keys: [&quot;color&quot;, &quot;size&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;color&quot;, &quot;size&quot;]</pre>
 <p>You can navigate through the entire setting hierarchy using childKeys() and <a href="qsettings.html#childGroups">childGroups</a>() recursively.</p>
 <p>See also <a href="qsettings.html#childGroups">childGroups</a>() and <a href="qsettings.html#allKeys">allKeys</a>().</p>
 <h3 class="fn"><a name="clear"></a>void QSettings::clear ()</h3>
@@ -532,16 +532,16 @@
 <p>Resets the group to what it was before the corresponding <a href="qsettings.html#beginGroup">beginGroup</a>() call.</p>
 <p>Example:</p>
 <pre> settings.beginGroup(&quot;alpha&quot;);
-<span class="comment"> // settings.group() == &quot;alpha&quot;</span>
+<span class="comment"> //</span> settings.group() == &quot;alpha&quot;
 
  settings.beginGroup(&quot;beta&quot;);
-<span class="comment"> // settings.group() == &quot;alpha/beta&quot;</span>
+<span class="comment"> //</span> settings.group() == &quot;alpha/beta&quot;
 
  settings.endGroup();
-<span class="comment"> // settings.group() == &quot;alpha&quot;</span>
+<span class="comment"> //</span> settings.group() == &quot;alpha&quot;
 
  settings.endGroup();
-<span class="comment"> // settings.group() == &quot;&quot;</span></pre>
+<span class="comment"> //</span> settings.group() == &quot;&quot;</pre>
 <p>See also <a href="qsettings.html#beginGroup">beginGroup</a>() and <a href="qsettings.html#group">group</a>().</p>
 <h3 class="fn"><a name="fallbacksEnabled"></a>bool QSettings::fallbacksEnabled () const</h3>
 <p>Returns true if fallbacks are enabled; returns false otherwise.</p>
@@ -593,7 +593,7 @@
 
  settings.remove(&quot;monkey&quot;);
  QStringList keys = settings.allKeys();
-<span class="comment"> // keys: [&quot;ape&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;ape&quot;]</pre>
 <p>Be aware that if one of the fallback locations contains a setting with the same key, that setting will be visible after calling remove().</p>
 <p>If <i>key</i> is an empty string, all keys in the current <a href="qsettings.html#group">group</a>() are removed. For example:</p>
 <pre> QSettings settings;
@@ -607,7 +607,7 @@
  settings.endGroup();
 
  QStringList keys = settings.allKeys();
-<span class="comment"> // keys: [&quot;ape&quot;]</span></pre>
+<span class="comment"> //</span> keys: [&quot;ape&quot;]</pre>
 <p>See also <a href="qsettings.html#setValue">setValue</a>(), <a href="qsettings.html#value">value</a>(), and <a href="qsettings.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="setArrayIndex"></a>void QSettings::setArrayIndex ( int <i>i</i> )</h3>
 <p>Sets the current array index to <i>i</i>. Calls to functions such as <a href="qsettings.html#setValue">setValue</a>(), <a href="qsettings.html#value">value</a>(), <a href="qsettings.html#remove">remove</a>(), and <a href="qsettings.html#contains">contains</a>() will operate on the array entry at that index.</p>
@@ -639,10 +639,10 @@
 <p>Example:</p>
 <pre> QSettings settings;
  settings.setValue(&quot;interval&quot;, 30);
- settings.value(&quot;interval&quot;).toInt();     <span class="comment">// returns 30</span>
+ settings.value(&quot;interval&quot;).toInt();     <span class="comment">//</span> returns 30
 
  settings.setValue(&quot;interval&quot;, 6.55);
- settings.value(&quot;interval&quot;).toDouble();  <span class="comment">// returns 6.55</span></pre>
+ settings.value(&quot;interval&quot;).toDouble();  <span class="comment">//</span> returns 6.55</pre>
 <p>See also <a href="qsettings.html#value">value</a>(), <a href="qsettings.html#remove">remove</a>(), and <a href="qsettings.html#contains">contains</a>().</p>
 <h3 class="fn"><a name="status"></a><a href="qsettings.html#Status-enum">Status</a> QSettings::status () const</h3>
 <p>Returns a status code indicating the first error that was met by <a href="qsettings.html">QSettings</a>, or <a href="qsettings.html#Status-enum">QSettings::NoError</a> if no error occurred.</p>
@@ -655,160 +655,14 @@
 <p>Example:</p>
 <pre> QSettings settings;
  settings.setValue(&quot;animal/snake&quot;, 58);
- settings.value(&quot;animal/snake&quot;, 1024).toInt();   <span class="comment">// returns 58</span>
- settings.value(&quot;animal/zebra&quot;, 1024).toInt();   <span class="comment">// returns 1024</span>
- settings.value(&quot;animal/zebra&quot;).toInt();         <span class="comment">// returns 0</span></pre>
+ settings.value(&quot;animal/snake&quot;, 1024).toInt();   <span class="comment">//</span> returns 58
+ settings.value(&quot;animal/zebra&quot;, 1024).toInt();   <span class="comment">//</span> returns 1024
+ settings.value(&quot;animal/zebra&quot;).toInt();         <span class="comment">//</span> returns 0</pre>
 <p>See also <a href="qsettings.html#setValue">setValue</a>(), <a href="qsettings.html#contains">contains</a>(), and <a href="qsettings.html#remove">remove</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="System-enum"></a>enum QSettings::System</h3>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QSettings::Unix</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Unix systems (X11 and Qtopia Core)</td></tr>
-<tr><td valign="top"><tt>QSettings::Windows</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Microsoft Windows systems</td></tr>
-<tr><td valign="top"><tt>QSettings::Mac</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Mac OS X systems</td></tr>
-</table></p>
-<p>See also <a href="qsettings-qt3.html#insertSearchPath">insertSearchPath</a>() and <a href="qsettings-qt3.html#removeSearchPath">removeSearchPath</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="entryList"></a><a href="qstringlist.html">QStringList</a> QSettings::entryList ( const <a href="qstring.html">QString</a> &amp; <i>key</i> ) const</h3>
-<p>Returns a list of all sub-keys of <i>key</i>.</p>
-<p>Use <a href="qsettings.html#childKeys">childKeys</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QSettings settings;
- QStringList keys = settings.entryList(&quot;cities&quot;);
- ..&#x2e;</font></pre>
-<p>you can rewrite it as</p>
-<pre> QSettings settings;
- settings.beginGroup(&quot;cities&quot;);
- QStringList keys = settings.childKeys();
- ...
- settings.endGroup();</pre>
-<h3 class="fn"><a name="insertSearchPath"></a>void QSettings::insertSearchPath ( <a href="qsettings-qt3.html#System-enum">System</a> <i>system</i>, const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
-<p>This function is implemented as a no-op. It is provided for source compatibility with Qt 3. The new <a href="qsettings.html">QSettings</a> class has no concept of &quot;search path&quot;.</p>
-<h3 class="fn"><a name="readBoolEntry"></a>bool QSettings::readBoolEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, bool <i>defaultValue</i> = false, bool * <i>ok</i> = 0 )</h3>
-<p>Returns the value for setting <i>key</i> converted to a <tt>bool</tt>. If the setting doesn't exist, returns <i>defaultValue</i>.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- bool grid = settings.readBoolEntry(&quot;showGrid&quot;, true, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;showGrid&quot;);
- bool grid = settings.value(&quot;showGrid&quot;, true).toBool();</pre>
-<h3 class="fn"><a name="readDoubleEntry"></a>double QSettings::readDoubleEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, double <i>defaultValue</i> = 0, bool * <i>ok</i> = 0 )</h3>
-<p>Returns the value for setting <i>key</i> converted to a <tt>double</tt>. If the setting doesn't exist, returns <i>defaultValue</i>.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- double pi = settings.readDoubleEntry(&quot;pi&quot;, 3.141592, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;pi&quot;);
- double pi = settings.value(&quot;pi&quot;, 3.141592).toDouble();</pre>
-<h3 class="fn"><a name="readEntry"></a><a href="qstring.html">QString</a> QSettings::readEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>defaultValue</i> = QString(), bool * <i>ok</i> = 0 )</h3>
-<p>Returns the value for setting <i>key</i> converted to a <a href="qstring.html">QString</a>. If the setting doesn't exist, returns <i>defaultValue</i>.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- QString str = settings.readEntry(&quot;userName&quot;, &quot;administrator&quot;, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;userName&quot;);
- QString str = settings.value(&quot;userName&quot;, &quot;administrator&quot;).toString();</pre>
-<h3 class="fn"><a name="readListEntry"></a><a href="qstringlist.html">QStringList</a> QSettings::readListEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, bool * <i>ok</i> = 0 )</h3>
-<p>Returns the value of setting <i>key</i> converted to a <a href="qstringlist.html">QStringList</a>.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- QStringList list = settings.readListEntry(&quot;recentFiles&quot;, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;recentFiles&quot;);
- QStringList list = settings.value(&quot;recentFiles&quot;).toStringList();</pre>
-<h3 class="fn"><a name="readListEntry-2"></a><a href="qstringlist.html">QStringList</a> QSettings::readListEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, <a href="qchar.html">QChar</a> <i>separator</i>, bool * <i>ok</i> = 0 )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns the value of setting <i>key</i> converted to a <a href="qstringlist.html">QStringList</a>. <i>separator</i> is ignored.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- QStringList list = settings.readListEntry(&quot;recentFiles&quot;, &quot;:&quot;, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;recentFiles&quot;);
- QStringList list = settings.value(&quot;recentFiles&quot;).toStringList();</pre>
-<h3 class="fn"><a name="readNumEntry"></a>int QSettings::readNumEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, int <i>defaultValue</i> = 0, bool * <i>ok</i> = 0 )</h3>
-<p>Returns the value for setting <i>key</i> converted to an <tt>int</tt>. If the setting doesn't exist, returns <i>defaultValue</i>.</p>
-<p>If <i>ok</i> is not 0, *<i>ok</i> is set to true if the key exists, otherwise *<i>ok</i> is set to false.</p>
-<p>Use <a href="qsettings.html#value">value</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool ok;
- int max = settings.readNumEntry(&quot;maxConnections&quot;, 30, &amp;ok);</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool ok = settings.contains(&quot;maxConnections&quot;);
- int max = settings.value(&quot;maxConnections&quot;, 30).toInt();</pre>
-<h3 class="fn"><a name="removeEntry"></a>bool QSettings::removeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i> )</h3>
-<p>Use <a href="qsettings.html#remove">remove</a>() instead.</p>
-<h3 class="fn"><a name="removeSearchPath"></a>void QSettings::removeSearchPath ( <a href="qsettings-qt3.html#System-enum">System</a> <i>system</i>, const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
-<p>This function is implemented as a no-op. It is provided for source compatibility with Qt 3. The new <a href="qsettings.html">QSettings</a> class has no concept of &quot;search path&quot;.</p>
-<h3 class="fn"><a name="resetGroup"></a>void QSettings::resetGroup ()</h3>
-<p>Sets the current group to be the empty string.</p>
-<p>Use <a href="qsettings.html#endGroup">endGroup</a>() instead (possibly multiple times).</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QSettings settings;
- settings.beginGroup(&quot;mainWindow&quot;);
- settings.beginGroup(&quot;leftPanel&quot;);
- ..&#x2e;
- settings.resetGroup();</font></pre>
-<p>you can rewrite it as</p>
-<pre> QSettings settings;
- settings.beginGroup(&quot;mainWindow&quot;);
- settings.beginGroup(&quot;leftPanel&quot;);
- ...
- settings.endGroup();
- settings.endGroup();</pre>
-<h3 class="fn"><a name="setPath-2"></a>void QSettings::setPath ( const <a href="qstring.html">QString</a> &amp; <i>organization</i>, const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="qsettings.html#Scope-enum">Scope</a> <i>scope</i> = Global )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Specifies the <i>organization</i>, <i>application</i>, and <i>scope</i> to use by the <a href="qsettings.html">QSettings</a> object.</p>
-<p>Use the appropriate constructor instead, with <a href="qsettings.html#Scope-enum">QSettings::UserScope</a> instead of <a href="qsettings.html#Scope-enum">QSettings::User</a> and <a href="qsettings.html#Scope-enum">QSettings::SystemScope</a> instead of <a href="qsettings.html#Scope-enum">QSettings::Global</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QSettings settings;
- settings.setPath(&quot;twikimaster.com&quot;, &quot;Kanooth&quot;, QSettings::Global);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QSettings settings(QSettings::SystemScope, &quot;twikimaster.com&quot;, &quot;Kanooth&quot;);</pre>
-<h3 class="fn"><a name="subkeyList"></a><a href="qstringlist.html">QStringList</a> QSettings::subkeyList ( const <a href="qstring.html">QString</a> &amp; <i>key</i> ) const</h3>
-<p>Returns a list of all sub-keys of <i>key</i>.</p>
-<p>Use <a href="qsettings.html#childGroups">childGroups</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QSettings settings;
- QStringList groups = settings.entryList(&quot;cities&quot;);
- ..&#x2e;</font></pre>
-<p>you can rewrite it as</p>
-<pre> QSettings settings;
- settings.beginGroup(&quot;cities&quot;);
- QStringList groups = settings.childKeys();
- ...
- settings.endGroup();</pre>
-<h3 class="fn"><a name="writeEntry"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, bool <i>value</i> )</h3>
-<p>Sets the value of setting <i>key</i> to <i>value</i>.</p>
-<p>Use <a href="qsettings.html#setValue">setValue</a>() instead.</p>
-<h3 class="fn"><a name="writeEntry-2"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, double <i>value</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="writeEntry-3"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, int <i>value</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="writeEntry-4"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const char * <i>value</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="writeEntry-5"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="writeEntry-6"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>value</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<h3 class="fn"><a name="writeEntry-7"></a>bool QSettings::writeEntry ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>value</i>, <a href="qchar.html">QChar</a> <i>separator</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use setValue(<i>key</i>, <i>value</i>) instead. You don't need <i>separator</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

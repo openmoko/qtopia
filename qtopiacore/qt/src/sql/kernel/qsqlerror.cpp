@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtSql module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -68,7 +66,7 @@ QDebug operator<<(QDebug dbg, const QSqlError &s)
 /*!
     \enum QSqlError::ErrorType
 
-    This enum type describes the type of SQL error that occurred.
+    This enum type describes the context in which the error occurred, e.g., a connection error, a statement error, etc.
 
     \value NoError  No error occurred.
     \value ConnectionError  Connection error.

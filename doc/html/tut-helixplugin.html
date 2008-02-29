@@ -13,10 +13,10 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: How to Create a Helix Plug-in<br /><span class="subtitle"></span>
 </h1>
-<a name="top"></a><p>The Qtopia media player uses the Helix DNA Client multi-media engine. Information on writing plug-ins for Helix DNA Client can be found in the <a href="http://helix-client.helixcommunity.org">Helix DNA Client SDK Documentation</a>.</p>
+<a name="top"></a><p>The Qtopia media server is able to use the Helix DNA Client multi-media engine. Information on writing plug-ins for Helix DNA Client can be found in the <a href="http://helix-client.helixcommunity.org">Helix DNA Client SDK Documentation</a>.</p>
 <p>To include your plug-in into the Helix build systems requires the following steps:</p>
 <ol type="1">
-<li>Modify <tt>build/BIF/build.bif</tt> within the Helix source directory as follows:<pre>    &lt;!-- FILESYSTEM/QTOPIA --&gt;
+<li>Modify <tt>src/3rdparty/libraries/helix/src/build/build/BIF/helix.bif</tt> within the Helix source directory as follows:<pre>    &lt;!-- FILESYSTEM/QTOPIA --&gt;
     &lt;module id=&quot;filesystem_qtopia&quot; name=&quot;filesystem/qtopia&quot; group=&quot;core&quot;&gt;
         &lt;cvs root=&quot;helix&quot;/&gt;
         &lt;includeplatforms&gt;
@@ -43,7 +43,7 @@
 </ul>
 </li>
 <li>Add the plug-in to the <i>target</i> as follows:<pre>    &lt;!-- SPLAY_NODIST --&gt;
-    &lt;module id=&quot;splay_nodist&quot; name=&quot;clientapps/simpleplayer&quot; group=&quot;core&quot;&gt;
+    &lt;module id=&quot;splay_nodist_qtopia&quot; name=&quot;clientapps/simpleplayer&quot; group=&quot;core&quot;&gt;
         &lt;includeplatforms&gt;
             unix mac win32 symbian openwave wince
         &lt;/includeplatforms&gt;
@@ -91,9 +91,9 @@
 <li>project <tt>.AddSystemPaths</tt>.</li>
 </ul>
 </li>
-<li>At configure time after copying the Helix sources to <tt>src/3rdparty/libraries/helixbuild</tt> the Qtopia build system applies a patch to <tt>build.bif</tt>.<p>To have your changes applied at configure time do the following:</p>
+<li>At configure time after copying the Helix sources and Qtopia additions to <tt>src/3rdparty/libraries/helixbuild</tt> the Qtopia build system applies patches to the Helix source tree.<p>To have your changes applied at configure time you may perform one or both of the following:</p>
 <ul>
-<li>modify <tt>src/3rdparty/libraries/helix/trolltech/patches/build.patch</tt></li>
+<li>create a patch file in src/3rdparty/libraries/helix/trolltech/patches/.</li>
 <li>place your plug-in sources in <tt>src/3rdparty/libraries/helix/trolltech/src</tt>. This directory is copied to the <tt>helixbuild</tt> directory at configure time.</li>
 </ul>
 </li>
@@ -101,8 +101,8 @@
 <p><b>Note:</b> Reference documentation for Helix build system including <tt>Umakefiles</tt> is available in <tt>build/doc</tt> within the Helix source directory.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

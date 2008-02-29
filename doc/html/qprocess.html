@@ -232,7 +232,7 @@
  more.start(&quot;more&quot;);
  more.write(&quot;Text to display&quot;);
  more.closeWriteChannel();
-<span class="comment"> // QProcess will emit readyRead() once &quot;more&quot; starts printing</span></pre>
+<span class="comment"> //</span> QProcess will emit readyRead() once &quot;more&quot; starts printing</pre>
 <p>The write channel is implicitly opened when <a href="qprocess.html#start">start</a>() is called.</p>
 <p>See also <a href="qprocess.html#closeReadChannel">closeReadChannel</a>().</p>
 <h3 class="fn"><a name="environment"></a><a href="qstringlist.html">QStringList</a> QProcess::environment () const</h3>
@@ -290,7 +290,7 @@
 <p>For example, the following code adds the <tt>C:\\BIN</tt> directory to the list of executable paths (<tt>PATHS</tt>) on Windows:</p>
 <pre> QProcess process;
  QStringList env = QProcess::systemEnvironment();
- env &lt;&lt; &quot;TMPDIR=C:\\MyApp\\temp&quot;; <span class="comment">// Add an environment variable</span>
+ env &lt;&lt; &quot;TMPDIR=C:\\MyApp\\temp&quot;; <span class="comment">//</span> Add an environment variable
  env.replaceInStrings(QRegExp(&quot;^PATH=(.*)&quot;, Qt::CaseInsensitive), &quot;PATH=\\1;C:\\Bin&quot;);
  process.setEnvironment(env);
  process.start(&quot;myapp&quot;);</pre>
@@ -360,8 +360,8 @@
 
  void SandboxProcess::setupChildProcess()
  {
-     <span class="comment">// Drop all privileges in the child process, and enter</span>
-     <span class="comment">// a chroot jail.</span>
+     <span class="comment">//</span> Drop all privileges in the child process, and enter
+     <span class="comment">//</span> a chroot jail.
  #if defined Q_OS_UNIX
      ::setgroups(0, 0);
      ::chroot(&quot;/etc/safe&quot;);
@@ -382,7 +382,7 @@
 <p>Starts the program <i>program</i> in a new process. <i>program</i> is a single string of text containing both the program name and its arguments. The arguments are separated by one or more spaces. For example:</p>
 <pre> QProcess process;
  process.start(&quot;del /s *.txt&quot;);
-<span class="comment"> // same as process.start(&quot;del&quot;, QStringList() &lt;&lt; &quot;/s&quot; &lt;&lt; &quot;*.txt&quot;);</span>
+<span class="comment"> //</span> same as process.start(&quot;del&quot;, QStringList() &lt;&lt; &quot;/s&quot; &lt;&lt; &quot;*.txt&quot;);
  ...</pre>
 <p>The <i>program</i> string can also contain quotes, to ensure that arguments containing spaces are correctly supplied to the new process. For example:</p>
 <pre> QProcess process;
@@ -416,7 +416,7 @@
 <h3 class="fn"><a name="systemEnvironment"></a><a href="qstringlist.html">QStringList</a> QProcess::systemEnvironment ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the environment of the calling process as a list of key=value pairs. Example:</p>
 <pre> QStringList environment = QProcess::systemEnvironment();
-<span class="comment"> // environment = {&quot;PATH=/usr/bin:/usr/local/bin&quot;,</span>
+<span class="comment"> //</span> environment = {&quot;PATH=/usr/bin:/usr/local/bin&quot;,
                    &quot;USER=greg&quot;, &quot;HOME=/home/greg&quot;}</pre>
 <p>This function was introduced in Qt 4.1.</p>
 <p>See also <a href="qprocess.html#environment">environment</a>() and <a href="qprocess.html#setEnvironment">setEnvironment</a>().</p>
@@ -450,8 +450,8 @@
 <p>See also <a href="qprocess.html#pid">QProcess::pid</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

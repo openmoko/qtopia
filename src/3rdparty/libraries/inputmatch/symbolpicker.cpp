@@ -8,6 +8,7 @@
 #include <qtimer.h>
 #include <qstyle.h>
 #include <QPainter>
+#include <QDesktopWidget>
 
 #define cr_width 12
 #define cr_height 12
@@ -41,19 +42,30 @@ SymbolPicker::SymbolPicker(QWidget *parent)
 	chars += QChar(0x20AC);
 	chars += QChar(0x2022);
     }
-
     QFont fnt(font());
+    int fontPointSize = cfg.value("picker_font_point_size",-1).toInt();
+
     int cw=0;
+    bool pointSizeManuallySet = fontPointSize != -1;
+    // No size for font set in defaultbuttons.conf, so choose a sensible 
+    // default by taking the current font, and shrinking it until the 
+    // symbolpicker will fit on the desktop.
+    fontPointSize = fnt.pointSize();
+
     do {
-	if ( cw ) // not first time round
-	    fnt.setPointSize(fnt.pointSize()-2);
-	QFontMetrics fm(fnt);
-	cw = 1;
-	for ( int i=0; i<(int)chars.length(); i++ ) {
-	    int w = fm.width(chars[i]);
-	    if ( w > cw ) cw = w;
-	}
-    } while ( fnt.pointSize() > 6 );
+        if ( cw ) // not first time round
+            if(pointSizeManuallySet) 
+                break;
+            else
+                fontPointSize -= 2;
+        fnt.setPointSize(fontPointSize);
+        QFontMetrics fm(fnt);
+        cw = 1;
+        for ( int i=0; i<(int)chars.length(); i++ ) {
+            int w = fm.width(chars[i]);
+            if ( w > cw ) cw = w;
+        }
+    } while ( (cw+2) * charsPerRow > qApp->desktop()->width() && fnt.pointSize() > 6 );
 
     setFont(fnt);
 
@@ -112,4 +124,6 @@ void SymbolPicker::drawCell(QPainter *p, int row, int col, bool selected)
 	    p->drawText(0, 0, cellWidth(), cellHeight(), Qt::AlignCenter, QString(u));
     }
 }
+
+
 

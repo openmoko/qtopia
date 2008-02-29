@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -76,7 +76,6 @@ void QMediaHelixSettingsServerPrivate::setValue( QString const& name, QVariant c
     if( engine->QueryInterface( IID_IHXPreferences, (void**)&preferences ) == HXR_OK &&
         engine->QueryInterface( IID_IHXCommonClassFactory, (void**)&factory ) == HXR_OK ) {
         factory->CreateInstance( CLSID_IHXBuffer, (void**)&buffer );
-
         QString s = value.toString();
         buffer->Set( (const UCHAR*)s.toLatin1().data(), s.length() );
 
@@ -106,9 +105,9 @@ QMediaHelixSettingsServer::QMediaHelixSettingsServer(IHXClientEngine *engine):
 
     setValue(QLatin1String("AvailableSettings"), d->options);
 
-    setValue(QLatin1String("Bandwidth"), d->value(QLatin1String("Bandwidth")));
-    setValue(QLatin1String("ServerTimeOut"), d->value(QLatin1String("ServerTimeOut")));
-    setValue(QLatin1String("ConnectionTimeOut"), d->value(QLatin1String("ConnectionTimeOut")));
+    setOption(QLatin1String("Bandwidth"), d->value(QLatin1String("Bandwidth")));
+    setOption(QLatin1String("ServerTimeOut"), d->value(QLatin1String("ServerTimeOut")));
+    setOption(QLatin1String("ConnectionTimeOut"), d->value(QLatin1String("ConnectionTimeOut")));
 
     proxyAll(*metaObject());
 }

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMediaContentContext Class Reference</h1>
 <p>The QMediaContentContext class allows multiple related player objects to be grouped together. <a href="#details">More...</a></p>
-<pre>    #include &lt;QMediaContentContext&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QMediaContentContext&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qmediacontentcontext-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,7 +27,7 @@
 <li><div class="fn"/>void <b><a href="qmediacontentcontext.html#removeObject">removeObject</a></b> ( QObject * <i>object</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>void <b><a href="qmediacontentcontext.html#setMediaContent">setMediaContent</a></b> ( QMediaContent * <i>content</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -43,16 +43,15 @@
 <li><div class="fn"/>void <b><a href="qmediacontentcontext.html#contentChanged">contentChanged</a></b> ( QMediaContent * <i>content</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -83,27 +82,27 @@
 <p>See also <a href="qmediacontent.html">QMediaContent</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMediaContentContext"></a>QMediaContentContext::QMediaContentContext ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QMediaContentContext"></a>QMediaContentContext::QMediaContentContext ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs an empty media content context.</p>
-<p>The <i>parent</i> argument is passed to the <a href="qobject.html">QObject</a> constructor.</p>
+<p>The <i>parent</i> argument is passed to the <a href="./qobject.html">QObject</a> constructor.</p>
 <h3 class="fn"><a name="dtor.QMediaContentContext"></a>QMediaContentContext::~QMediaContentContext ()</h3>
 <p>Destroys the context.</p>
-<h3 class="fn"><a name="addObject"></a>void QMediaContentContext::addObject ( <a href="qobject.html">QObject</a> * <i>object</i> )</h3>
+<h3 class="fn"><a name="addObject"></a>void QMediaContentContext::addObject ( <a href="./qobject.html">QObject</a> * <i>object</i> )</h3>
 <p>Adds <i>object</i> to the context. The object should be a <a href="qmediacontentcontext.html#player-object">player object</a>.</p>
 <h3 class="fn"><a name="content"></a><a href="qmediacontent.html">QMediaContent</a> * QMediaContentContext::content () const</h3>
 <p>Returns the current media content object for the context.</p>
 <h3 class="fn"><a name="contentChanged"></a>void QMediaContentContext::contentChanged ( <a href="qmediacontent.html">QMediaContent</a> * <i>content</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>The media content object has changed to <i>content</i> within the context.</p>
 <p>See also <a href="qmediacontentcontext.html#setMediaContent">setMediaContent</a>().</p>
-<h3 class="fn"><a name="removeObject"></a>void QMediaContentContext::removeObject ( <a href="qobject.html">QObject</a> * <i>object</i> )</h3>
+<h3 class="fn"><a name="removeObject"></a>void QMediaContentContext::removeObject ( <a href="./qobject.html">QObject</a> * <i>object</i> )</h3>
 <p>Removes <i>object</i> from the context.</p>
 <h3 class="fn"><a name="setMediaContent"></a>void QMediaContentContext::setMediaContent ( <a href="qmediacontent.html">QMediaContent</a> * <i>content</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sets <i>content</i> as the media content object for the context as well as all player objects added to the context.</p>
 <p>See also <a href="qmediacontentcontext.html#contentChanged">contentChanged</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

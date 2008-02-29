@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -41,14 +41,13 @@
 #include <QLayout>
 #include <QGroupBox>
 #include <QScrollArea>
-#include <QToolButton>
 #include <QPushButton>
 #include <QSlider>
 #include <qsoftmenubar.h>
 #include <QKeyEvent>
 #include <QDrmContentPlugin>
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include "ringtoneeditor.h"
 #endif
 
@@ -98,7 +97,7 @@ ProfileEditDialog::ProfileEditDialog(QWidget *parent, bool isNew)
     infoTabLayout->setMargin( 6 );
     infoTabLayout->addLayout( infoLayout );
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     autoAnswer = new QCheckBox( tr( "Auto Answer" ), infoTab );
     infoTabLayout->addWidget( autoAnswer );
 
@@ -124,7 +123,7 @@ ProfileEditDialog::ProfileEditDialog(QWidget *parent, bool isNew)
 
     tabWidget->addTab( scrollArea1, tr( "Profile" ) );
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     // construct tone tab
     toneTab = new QWidget( tabWidget );
     QVBoxLayout *toneTabLayout = new QVBoxLayout( toneTab );
@@ -227,17 +226,17 @@ ProfileEditDialog::ProfileEditDialog(QWidget *parent, bool isNew)
 
     masterVolume->installEventFilter( this );
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     connect( profileName, SIGNAL(textChanged(QString)), this, SLOT(updateState()) );
     connect( masterVolume, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
     connect( vibrateAlert, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
     connect( autoAnswer, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
     connect( autoActivation, SIGNAL(toggled(bool)), this, SLOT(updateState()) );
     connect( editSchedule, SIGNAL(clicked()), this, SLOT(updateState()) );
-    connect( ringType, SIGNAL(activated(int)), this, SLOT(updateState()) );
+    connect( ringType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateState()) );
     connect( ringTone, SIGNAL(clicked()), this, SLOT(updateState()) );
     connect( videoTone, SIGNAL(clicked()), this, SLOT(updateState()) );
-    connect( messageType, SIGNAL(activated(int)), this, SLOT(updateState()) );
+    connect( messageType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateState()) );
     connect( messageAlertDuration, SIGNAL(valueChanged(int)), this, SLOT(updateState()) );
     connect( messageTone, SIGNAL(clicked()), this, SLOT(updateState()) );
 #endif
@@ -279,7 +278,7 @@ void ProfileEditDialog::setPhoneProfile()
         profileName->setFocus();
     }
     masterVolume->setValue((int)p.volume());
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     vibrateAlert->setChecked(p.vibrate());
     autoAnswer->setChecked(p.autoAnswer());
     ringType->setCurrentIndex((int)p.callAlert());
@@ -292,9 +291,13 @@ void ProfileEditDialog::setPhoneProfile()
     }
     messageType->setCurrentIndex((int)p.msgAlert());
     messageAlertDuration->setValue(p.msgAlertDuration()/1000);
-    messageTone->setTone(p.messageTone());
+    if ( p.messageTone().isValid() )
+        messageTone->setTone(p.messageTone());
+    else
+        messageTone->setTone(p.systemMessageTone());
 
     ringTone->setEnabled(ringType->currentIndex() != 0 && masterVolume->value() != 0);
+    messageType->setEnabled(masterVolume->value() != 0);
     messageTone->setEnabled(messageType->currentIndex() != 0 && masterVolume->value() != 0);
     messageAlertDuration->setEnabled(messageType->currentIndex() != 0 && messageType->currentIndex() != 1 );
 #endif
@@ -336,7 +339,7 @@ void ProfileEditDialog::accept()
 
     profile->profile().setIsSystemProfile(!profileName->isEnabled());
     profile->profile().setVolume(masterVolume->value());
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     profile->profile().setVibrate(vibrateAlert->isChecked());
     profile->profile().setAutoAnswer(autoAnswer->isChecked());
     profile->profile().setCallAlert((QPhoneProfile::AlertType)ringType->currentIndex());
@@ -352,12 +355,13 @@ void ProfileEditDialog::accept()
     QDialog::accept();
 }
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 void ProfileEditDialog::updateState()
 {
     int volumeIndex = masterVolume->value();
     ringTone->setEnabled(ringType->currentIndex() != 0 && volumeIndex != 0);
     videoTone->setEnabled(ringType->currentIndex() != 0);
+    messageType->setEnabled(masterVolume->value() != 0);
     messageTone->setEnabled(messageType->currentIndex() != 0 && volumeIndex != 0);
     messageAlertDuration->setEnabled(messageType->currentIndex() != 0 && messageType->currentIndex() != 1);
     // set the current volume to be used in preview
@@ -460,30 +464,28 @@ void ProfileEditDialog::initDialog( QDialog *dlg )
     dlg->setObjectName( "auto-on" );
     dlg->setModal( true );
     dlg->setWindowTitle( tr( "Set Day and Time" ) );
+    dlg->showMaximized();
     QVBoxLayout *scheduleVLayout = new QVBoxLayout( dlg );
     scheduleVLayout->setMargin( 10 );
     scheduleVLayout->setSpacing( 10 );
-    QHBoxLayout *scheduleHLayout1 = new QHBoxLayout();
-    QHBoxLayout *scheduleHLayout2 = new QHBoxLayout();
+    QHBoxLayout *scheduleHLayout = new QHBoxLayout();
 
-    days = new QToolButton * [7];
+    days = new QCheckBox * [7];
     deleteDays = true;
 
     for ( int i = 0; i < 7; i++ ) {
-        days[i] = new QToolButton( dlg );
-        scheduleHLayout1->addWidget( days[i] );
-        days[i]->setCheckable( true );
+        days[i] = new QCheckBox( dlg );
+        scheduleVLayout->addWidget( days[i] );
         days[i]->setChecked( false );
         days[i]->setFocusPolicy( Qt::StrongFocus );
-        days[i]->setText( QTimeString::nameOfWeekDay( i + 1, QTimeString::Short ) );
+        days[i]->setText( QTimeString::nameOfWeekDay( i + 1, QTimeString::Long ) );
     }
     time = new QTimeEdit( );
     time->setTime(QTime(8,0));
-    scheduleHLayout2->addWidget( new QLabel( tr( "Time" ), dlg ) );
-    scheduleHLayout2->addWidget( time );
+    scheduleHLayout->addWidget( new QLabel( tr( "Time" ), dlg ) );
+    scheduleHLayout->addWidget( time );
 
-    scheduleVLayout->addLayout( scheduleHLayout1 );
-    scheduleVLayout->addLayout( scheduleHLayout2 );
+    scheduleVLayout->addLayout( scheduleHLayout );
 
     for(int ii = Qt::Monday; ii <= Qt::Sunday; ++ii) {
         if(schedule.scheduledOnDay((Qt::DayOfWeek)ii))
@@ -523,14 +525,14 @@ void ProfileEditDialog::tabChanged( int index )
             profileName->setFocus();
         else
             masterVolume->setFocus();
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     } else if ( index == tabWidget->indexOf(toneTab) ) {
         ringType->setFocus();
 #endif
     } else if ( index == tabWidget->indexOf(settingTab) ) {
         settingListWidget->setFocus();
     }
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     if ( !ringTone->isFinished() )
         ringTone->stopSound();
     else if ( !videoTone->isFinished() )
@@ -545,7 +547,7 @@ bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
         switch ( ke->key() ) {
             case Qt::Key_Select:
                 editVolume = !editVolume;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
                 if ( !editVolume ) {
                     ringTone->stopSound();
                     videoTone->stopSound();
@@ -554,7 +556,7 @@ bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
                 return false;
                 break;
             case Qt::Key_Back:
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
                 if ( !ringTone->isFinished() ) {
                     ringTone->stopSound();
                 } else if ( !videoTone->isFinished() ) {
@@ -567,7 +569,7 @@ bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
                 return false;
                 break;
         }
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     } else if ( e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = (QKeyEvent*) e;
         // play current ringtone at the master volume
@@ -589,7 +591,7 @@ bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
         editVolume = true;
         return false;
     } else if ( e->type() == QEvent::MouseButtonRelease ) {
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         if ( ringTone->tone().isValid() )
             ringTone->playCurrentSound();
         else if ( videoTone->tone().isValid() )
@@ -599,7 +601,7 @@ bool ProfileEditDialog::eventFilter( QObject *, QEvent *e )
     } else if ( e->type() == QEvent::FocusOut ) {
         if ( editVolume ) {
             editVolume = false;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
             if ( !ringTone->isFinished() ) {
                 ringTone->stopSound();
             } else if ( !videoTone->isFinished() ) {
@@ -680,7 +682,7 @@ void ProfileEditDialog::addSetting( const QPhoneProfile::Setting s )
 
 bool ProfileEditDialog::event(QEvent *e)
 {
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     if ( e->type() == QEvent::WindowDeactivate ) {
         ringTone->stopSound();
         videoTone->stopSound();
@@ -886,7 +888,8 @@ ProfileSelect::ProfileSelect( QWidget *parent, Qt::WFlags f, const char *name )
     contextMenu->addAction(actionPlane);
 #endif
 
-    connect(itemlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(activateProfileAndClose(QListWidgetItem*)));
+    if (!style()->inherits("QThumbStyle"))
+        connect(itemlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(activateProfileAndClose(QListWidgetItem*)));
     connect(itemlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(updateIcons()));
     updateIcons();
 
@@ -1164,8 +1167,8 @@ void ProfileSelect::removeCurrentProfile()
 
     itemlist->takeItem(ci);
 
-    profMan.removeProfile(pItem->profile());
     if (pItem->profile().id() == profMan.activeProfile().id()) {
+        profMan.removeProfile(pItem->profile());
         activateProfile(itemlist->item(0));
         delete pItem;
     }

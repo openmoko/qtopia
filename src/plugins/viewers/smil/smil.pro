@@ -1,8 +1,8 @@
 qtopia_project(qtopia plugin)
 TARGET=smilviewer
-requires(enable_modem)
+requires(enable_cell)
 
-enable_modem:contains(PROJECTS,libraries/qtopiasmil) {
+enable_cell:contains(PROJECTS,libraries/qtopiasmil) {
 
     HEADERS+=\
         smilviewer.h

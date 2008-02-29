@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -66,8 +66,6 @@ QMediaServerSession* MediaAgentSession::wrappedSession() const
 void MediaAgentSession::start()
 {
     d->agent->sessionStarting(this);
-
-    d->wrapped->start();
 }
 
 void MediaAgentSession::pause()
@@ -77,8 +75,6 @@ void MediaAgentSession::pause()
 
 void MediaAgentSession::stop()
 {
-    d->wrapped->stop();
-
     d->agent->sessionStopped(this);
 }
 

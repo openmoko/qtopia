@@ -1,7 +1,8 @@
 PROJECTS*=\
     devtools\
     plugins/qtopiacore/kbddrivers/c3200\
-    plugins/qtopiacore/mousedrivers/c3200
+    plugins/qtopiacore/mousedrivers/c3200\
+    plugins/audiohardware/c3200
 
 enable_modem {
     for(p,PHONEVENDORS) {

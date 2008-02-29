@@ -148,13 +148,13 @@
 <h3 class="fn"><a name="clearDueDate"></a>void QTask::clearDueDate ()</h3>
 <p>Clears the due date of the task.</p>
 <p>See also <a href="qtask.html#setDueDate">setDueDate</a>().</p>
-<h3 class="fn"><a name="completedDate"></a><a href="qdate.html">QDate</a> QTask::completedDate () const</h3>
+<h3 class="fn"><a name="completedDate"></a><a href="./qdate.html">QDate</a> QTask::completedDate () const</h3>
 <p>Returns the date the task was completed. If the task is not completed, the returned date is null.</p>
 <p>See also <a href="qtask.html#isCompleted">isCompleted</a>() and <a href="qtask.html#setCompletedDate">setCompletedDate</a>().</p>
-<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QTask::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> QTask::description () const</h3>
 <p>Returns the description of the task.</p>
 <p>See also <a href="qtask.html#setDescription">setDescription</a>().</p>
-<h3 class="fn"><a name="dueDate"></a><a href="qdate.html">QDate</a> QTask::dueDate () const</h3>
+<h3 class="fn"><a name="dueDate"></a><a href="./qdate.html">QDate</a> QTask::dueDate () const</h3>
 <p>Returns the due date of the task.</p>
 <p>See also <a href="qtask.html#setDueDate">setDueDate</a>() and <a href="qtask.html#clearDueDate">clearDueDate</a>().</p>
 <h3 class="fn"><a name="hasDueDate"></a>bool QTask::hasDueDate () const</h3>
@@ -166,7 +166,7 @@
 <h3 class="fn"><a name="isCompleted"></a>bool QTask::isCompleted () const</h3>
 <p>Returns true if the task is completed. Otherwise returns false.</p>
 <p>See also <a href="qtask.html#setCompleted">setCompleted</a>().</p>
-<h3 class="fn"><a name="match"></a>bool QTask::match ( const <a href="qregexp.html">QRegExp</a> &amp; <i>r</i> ) const</h3>
+<h3 class="fn"><a name="match"></a>bool QTask::match ( const <a href="./qregexp.html">QRegExp</a> &amp; <i>r</i> ) const</h3>
 <p>Returns true if this task matches regular expression <i>r</i>. Otherwise returns false.</p>
 <p>This is intended to allow the user to enter text to find matching tasks.</p>
 <p>The expression will be matched against the following fields:</p>
@@ -180,30 +180,30 @@
 <li>the task's notes.</li>
 <li>the task's status, as a translated string.</li>
 </ul>
-<h3 class="fn"><a name="notes"></a><a href="qstring.html">QString</a> QTask::notes () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="notes"></a><a href="./qstring.html">QString</a> QTask::notes () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the notes for the task.</p>
 <p>Reimplemented from <a href="qpimrecord.html#notes">QPimRecord</a>.</p>
 <p>See also <a href="qtask.html#setNotes">setNotes</a>().</p>
-<h3 class="fn"><a name="percentCompleted"></a>uint QTask::percentCompleted () const</h3>
+<h3 class="fn"><a name="percentCompleted"></a><a href="./qtglobal.html#uint-typedef">uint</a> QTask::percentCompleted () const</h3>
 <p>Returns progress of the task as a percent completed. For tasks that have not been started, this will return 0, and for completed tasks, this function will always return 100.</p>
 <p>See also <a href="qtask.html#setPercentCompleted">setPercentCompleted</a>() and <a href="qtask.html#status">status</a>().</p>
 <h3 class="fn"><a name="priority"></a><a href="qtask.html#Priority-enum">Priority</a> QTask::priority () const</h3>
 <p>Returns the priority of the task.</p>
 <p>See also <a href="qtask.html#setPriority">setPriority</a>().</p>
-<h3 class="fn"><a name="readVCalendar"></a><a href="qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendar"></a><a href="./qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Reads a list of vCalendars from the given <i>device</i> and returns the equivalent set of tasks.</p>
 <p>See also <a href="qtask.html#writeVCalendar">writeVCalendar</a>().</p>
-<h3 class="fn"><a name="readVCalendar-2"></a><a href="qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendar-2"></a><a href="./qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the file specified by <i>filename</i> as a list of vCalendar objects and returns a list of QTasks that correspond to the data. Note that some vCalendar properties may not be supported by <a href="qtask.html">QTask</a>.</p>
 <p>See also <a href="qtask.html#writeVCalendar">writeVCalendar</a>().</p>
-<h3 class="fn"><a name="readVCalendar-3"></a><a href="qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendar-3"></a><a href="./qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendar ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>vcal</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the given vCalendar data in <i>vcal</i> and returns the list of corresponding QTasks.</p>
 <p>See also <a href="qtask.html#writeVCalendar">writeVCalendar</a>().</p>
-<h3 class="fn"><a name="readVCalendarData"></a><a href="qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendarData ( const char * <i>data</i>, unsigned long <i>len</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="readVCalendarData"></a><a href="./qlist.html">QList</a>&lt;QTask&gt; QTask::readVCalendarData ( const char * <i>data</i>, unsigned long <i>len</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This function is deprecated.</p>
 <p>Reads the <i>data</i> of <i>len</i> bytes as a list of vCalendar objects and returns the list of corresponding QTasks.</p>
 <p>See also <a href="qtask.html#writeVCalendar">writeVCalendar</a>() and <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
@@ -215,20 +215,20 @@
 <li>if the task is marked as complete, the percentage complete will be forced to 100%, and the completed date will be set to the current date if it was not previously set.</li>
 </ul>
 <p>See also <a href="qtask.html#isCompleted">isCompleted</a>() and <a href="qtask.html#completedDate">completedDate</a>().</p>
-<h3 class="fn"><a name="setCompletedDate"></a>void QTask::setCompletedDate ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<h3 class="fn"><a name="setCompletedDate"></a>void QTask::setCompletedDate ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )</h3>
 <p>Sets the tasks completed date to <i>date</i>. If <i>date</i> is null, and the task was previously completed, then the task will be marked as having status <tt>InProgress</tt>, and the percentage completed will be forced to 99%. In addition, if the task's started date was not previously set, it will be set to the supplied date.</p>
 <p>See also <a href="qtask.html#isCompleted">isCompleted</a>() and <a href="qtask.html#completedDate">completedDate</a>().</p>
-<h3 class="fn"><a name="setDescription"></a>void QTask::setDescription ( const <a href="qstring.html">QString</a> &amp; <i>description</i> )</h3>
+<h3 class="fn"><a name="setDescription"></a>void QTask::setDescription ( const <a href="./qstring.html">QString</a> &amp; <i>description</i> )</h3>
 <p>Sets the description of the task to <i>description</i>.</p>
 <p>See also <a href="qtask.html#description">description</a>().</p>
-<h3 class="fn"><a name="setDueDate"></a>void QTask::setDueDate ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<h3 class="fn"><a name="setDueDate"></a>void QTask::setDueDate ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )</h3>
 <p>Sets the due date of the task to <i>date</i>.</p>
 <p>See also <a href="qtask.html#clearDueDate">clearDueDate</a>() and <a href="qtask.html#dueDate">dueDate</a>().</p>
-<h3 class="fn"><a name="setNotes"></a>void QTask::setNotes ( const <a href="qstring.html">QString</a> &amp; <i>notes</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="setNotes"></a>void QTask::setNotes ( const <a href="./qstring.html">QString</a> &amp; <i>notes</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets the notes of the task to <i>notes</i>.</p>
 <p>Reimplemented from <a href="qpimrecord.html#setNotes">QPimRecord</a>.</p>
 <p>See also <a href="qtask.html#notes">notes</a>().</p>
-<h3 class="fn"><a name="setPercentCompleted"></a>void QTask::setPercentCompleted ( uint <i>percent</i> )</h3>
+<h3 class="fn"><a name="setPercentCompleted"></a>void QTask::setPercentCompleted ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>percent</i> )</h3>
 <p>Sets the tasks percent completed field to <i>percent</i>.</p>
 <p>The task's status field depends on the new percentage complete value in the following ways:</p>
 <ul>
@@ -244,7 +244,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the priority of the task to <i>priority</i>. This is a convenience wrapper function.</p>
 <p>See also <a href="qtask.html#priority">priority</a>().</p>
-<h3 class="fn"><a name="setStartedDate"></a>void QTask::setStartedDate ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> )</h3>
+<h3 class="fn"><a name="setStartedDate"></a>void QTask::setStartedDate ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )</h3>
 <p>Sets the tasks to have started on <i>date</i>. If <i>date</i> is null, then the task will be marked as having status <tt>NotStarted</tt>, any completed date will be cleared, and the percentage completed will be 0.</p>
 <p>See also <a href="qtask.html#hasStartedDate">hasStartedDate</a>() and <a href="qtask.html#startedDate">startedDate</a>().</p>
 <h3 class="fn"><a name="setStatus"></a>void QTask::setStatus ( <a href="qtask.html#Status-enum">Status</a> <i>status</i> )</h3>
@@ -257,46 +257,46 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the <a href="qtask.html#Status-enum">Status</a> of the task to <i>status</i>. This is a convenience wrapper function.</p>
 <p>See also <a href="qtask.html#status">status</a>().</p>
-<h3 class="fn"><a name="startedDate"></a><a href="qdate.html">QDate</a> QTask::startedDate () const</h3>
+<h3 class="fn"><a name="startedDate"></a><a href="./qdate.html">QDate</a> QTask::startedDate () const</h3>
 <p>Returns the date the task was started. If the task has not yet been started, the returned date is null.</p>
 <p>See also <a href="qtask.html#hasStartedDate">hasStartedDate</a>() and <a href="qtask.html#setStartedDate">setStartedDate</a>().</p>
 <h3 class="fn"><a name="status"></a><a href="qtask.html#Status-enum">Status</a> QTask::status () const</h3>
 <p>Returns the <a href="qtask.html#Status-enum">Status</a> of the task.</p>
 <p>See also <a href="qtask.html#setStatus">setStatus</a>().</p>
-<h3 class="fn"><a name="statusToText"></a><a href="qstring.html">QString</a> QTask::statusToText ( <a href="qtask.html#Status-enum">Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="statusToText"></a><a href="./qstring.html">QString</a> QTask::statusToText ( <a href="qtask.html#Status-enum">Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the translated text for the the task status <i>status</i>.</p>
-<h3 class="fn"><a name="toRichText"></a><a href="qstring.html">QString</a> QTask::toRichText () const</h3>
-<p>Returns a rich text formatted <a href="qstring.html">QString</a> of the <a href="qtask.html">QTask</a>.</p>
-<h3 class="fn"><a name="writeVCalendar"></a>bool QTask::writeVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const <a href="qlist.html">QList</a>&lt;QTask&gt; &amp; <i>tasks</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="toRichText"></a><a href="./qstring.html">QString</a> QTask::toRichText () const</h3>
+<p>Returns a rich text formatted <a href="./qstring.html">QString</a> of the <a href="qtask.html">QTask</a>.</p>
+<h3 class="fn"><a name="writeVCalendar"></a>bool QTask::writeVCalendar ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i>, const <a href="./qlist.html">QList</a>&lt;QTask&gt; &amp; <i>tasks</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Writes the given list of <i>tasks</i> to the given <i>device</i> as vCalendars.</p>
 <p>Returns true on success.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-2"></a>bool QTask::writeVCalendar ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const QTask &amp; <i>task</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCalendar-2"></a>bool QTask::writeVCalendar ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i>, const QTask &amp; <i>task</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>task</i> to the given <i>device</i> as vCalendars.</p>
 <p>Returns true on success.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-3"></a>void QTask::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qlist.html">QList</a>&lt;QTask&gt; &amp; <i>tasks</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCalendar-3"></a>void QTask::writeVCalendar ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const <a href="./qlist.html">QList</a>&lt;QTask&gt; &amp; <i>tasks</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the list of <i>tasks</i> as vCalendar objects to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-4"></a>void QTask::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const QTask &amp; <i>task</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="writeVCalendar-4"></a>void QTask::writeVCalendar ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const QTask &amp; <i>task</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Write the <i>task</i> as a vCalendar to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-5"></a>void QTask::writeVCalendar ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-5"></a>void QTask::writeVCalendar ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes this task as a vCalendar object to the file specified by <i>filename</i>.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-6"></a>void QTask::writeVCalendar ( <a href="qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-6"></a>void QTask::writeVCalendar ( <a href="./qfile.html">QFile</a> &amp; <i>file</i> ) const</h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes this task as a vCalendar object to the given <i>file</i>, which must be already open for writing.</p>
 <p>See also <a href="qtask.html#readVCalendar">readVCalendar</a>().</p>
-<h3 class="fn"><a name="writeVCalendar-7"></a>void QTask::writeVCalendar ( <a href="qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
+<h3 class="fn"><a name="writeVCalendar-7"></a>void QTask::writeVCalendar ( <a href="./qdatastream.html">QDataStream</a> * <i>stream</i> ) const</h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes this task as a vCalendar object to the given <i>stream</i>, which must be writable.</p>
@@ -309,8 +309,8 @@
 <p>Returns true if <i>other</i> is identical to this task. Otherwise return false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

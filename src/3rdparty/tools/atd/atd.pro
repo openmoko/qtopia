@@ -11,4 +11,4 @@ at.hint=script
 INSTALLS+=at
 
 pkg.desc=atd daemon for Sharp
-pkg.domain=comm
+pkg.domain=trusted

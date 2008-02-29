@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,6 +40,7 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QStringListModel>
+#include <QTimer>
 
 
 //===================================================================
@@ -150,6 +151,7 @@ void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
 
 //==========================================================================
 
+
 class DeviceConnectionStatus : public QWidget
 {
     Q_OBJECT
@@ -225,6 +227,11 @@ void DeviceConnectionStatus::remoteDeviceDisconnected(const QBluetoothAddress &a
 
 //===================================================================
 
+/*
+    Displays information about whether the local device has a transport
+    connection to a remote device. Allows user to disconnect the transport
+    if it is connected.
+*/
 class GenericDeviceConnectionStatus : public DeviceConnectionStatus
 {
     Q_OBJECT
@@ -276,6 +283,12 @@ void GenericDeviceConnectionStatus::updateConnectionStatus()
 
 //===================================================================
 
+/*
+    Displays information about whether the local device has an audio
+    (i.e. headset/handsfree) connection to a remote device. Allows user to
+    disconnect the audio connection if it is connected, and also disconnect
+    the transport connection if it is connected.
+*/
 class AudioDeviceConnectionStatus : public DeviceConnectionStatus
 {
     Q_OBJECT
@@ -368,13 +381,11 @@ void AudioDeviceConnectionStatus::setRemoteDevice(const QBluetoothAddress &addr)
 void AudioDeviceConnectionStatus::updateConnectionStatus()
 {
     QBluetoothAudioGateway *gateway = connectedGateway();
-    if (gateway || isTransportConnected()) {
+    if (gateway) {
         if (gateway == m_headsetGateway) {
             m_connectionStatusLabel->setText(tr("Connected to headset."));
         } else if (gateway == m_handsFreeGateway) {
             m_connectionStatusLabel->setText(tr("Connected to handsfree unit."));
-        } else {    // transport is connected but there's no audio connection
-            m_connectionStatusLabel->setText(tr("Connected."));
         }
         QFont f = m_connectionStatusLabel->font();
         f.setBold(true);
@@ -423,7 +434,10 @@ void AudioDeviceConnectionStatus::clickedConnectHandsFree()
 void AudioDeviceConnectionStatus::connectAudioGateway(QBluetoothAudioGateway *gateway, int channel)
 {
     m_waitWidget->setText(tr("Connecting..."));
+    m_waitWidget->setCancelEnabled(true);
+    connect(m_waitWidget, SIGNAL(cancelled()), gateway, SLOT(disconnect()));
     m_waitWidget->show();
+
     gateway->connect(address(), channel);
 
     qLog(Bluetooth) << "AudioDeviceConnectionStatus: Connecting to audio gateway on"
@@ -437,6 +451,12 @@ void AudioDeviceConnectionStatus::audioGatewayConnected(bool success, const QStr
 
     if (m_waitWidget->isVisible()) {
         m_waitWidget->hide();
+        QBluetoothAudioGateway *gateway = qobject_cast<QBluetoothAudioGateway *>(sender());
+        if (gateway) {
+            disconnect(m_waitWidget, SIGNAL(cancelled()), 
+                       gateway, SLOT(disconnect()));
+        }
+
         if (!success) {
             qLog(Bluetooth) << "AudioDeviceConnectionStatus: Headset/Handsfree connection failed:"
                     << msg;
@@ -452,14 +472,13 @@ void AudioDeviceConnectionStatus::clickedDisconnect()
 
     QBluetoothAudioGateway *gateway = connectedGateway();
     m_waitWidget->setText(tr("Disconnecting..."));
+    m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 
     if (gateway == m_headsetGateway) {
         m_headsetGateway->disconnect();
     } else if (gateway == m_handsFreeGateway) {
         m_handsFreeGateway->disconnect();
-    } else {
-        localDevice()->disconnectRemoteDevice(address());
     }
 }
 
@@ -481,9 +500,13 @@ void AudioDeviceConnectionStatus::headsetDisconnected()
 
     // This is called when any headset is disconnected, not necessarily the
     // one we're looking at.
-    // Don't hide the wait widget yet cos the transport probably hasn't been
-    // disconnected yet.
+
+    // Update status regardless of the device that has disconnected - if some
+    // other headset disconnected, then the audio gateway is now available,
+    // and the status display needs to change.
     updateConnectionStatus();
+
+    m_waitWidget->hide();
 }
 
 QBluetoothAudioGateway *AudioDeviceConnectionStatus::connectedGateway() const

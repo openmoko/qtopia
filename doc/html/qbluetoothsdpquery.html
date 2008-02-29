@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothSdpQuery Class Reference</h1>
 <p>The QBluetoothSdpQuery class encapsulates operations performed by the SDAP profile. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothSdpQuery&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothSdpQuery&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbluetoothsdpquery-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,7 +27,7 @@
 <li><div class="fn"/>bool <b><a href="qbluetoothsdpquery.html#searchServices-2">searchServices</a></b> ( const QBluetoothAddress &amp; <i>remote</i>, const QBluetoothLocalDevice &amp; <i>local</i>, const QBluetoothSdpUuid &amp; <i>uuid</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>void <b><a href="qbluetoothsdpquery.html#cancelSearch">cancelSearch</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -44,16 +44,15 @@
 <li><div class="fn"/>void <b><a href="qbluetoothsdpquery.html#searchComplete">searchComplete</a></b> ( const QBluetoothSdpQueryResult &amp; <i>result</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -63,8 +62,8 @@
 <p>See also <a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a> and <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothSdpQuery"></a>QBluetoothSdpQuery::QBluetoothSdpQuery ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a> object. The default local device will be used for all SDP queries. <i>parent</i> is the parent <a href="qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QBluetoothSdpQuery"></a>QBluetoothSdpQuery::QBluetoothSdpQuery ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a> object. The default local device will be used for all SDP queries. <i>parent</i> is the parent <a href="./qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QBluetoothSdpQuery"></a>QBluetoothSdpQuery::~QBluetoothSdpQuery ()</h3>
 <p>Deconstructs a <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a> object.</p>
 <h3 class="fn"><a name="browseServices"></a>bool QBluetoothSdpQuery::browseServices ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remote</i>, const <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> &amp; <i>local</i> )</h3>
@@ -95,8 +94,8 @@
 <p>See also <a href="qbluetoothsdpquery.html#searchComplete">searchComplete</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

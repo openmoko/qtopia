@@ -151,20 +151,20 @@
 <p>Construct a new SIM terminal response object as a copy of <i>value</i>.</p>
 <h3 class="fn"><a name="dtor.QSimTerminalResponse"></a>QSimTerminalResponse::~QSimTerminalResponse ()</h3>
 <p>Destruct a SIM terminal response object.</p>
-<h3 class="fn"><a name="addExtensionField"></a>void QSimTerminalResponse::addExtensionField ( int <i>tag</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="addExtensionField"></a>void QSimTerminalResponse::addExtensionField ( int <i>tag</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
 <p>Adds an extension field to the data from <a href="qsimterminalresponse.html#extensionData">extensionData</a>(). The field will have the specified <i>tag</i> and contents given by <i>value</i>.</p>
 <p>See also <a href="qsimterminalresponse.html#extensionField">extensionField</a>().</p>
 <h3 class="fn"><a name="cause"></a><a href="qsimterminalresponse.html#Cause-enum">QSimTerminalResponse::Cause</a> QSimTerminalResponse::cause () const</h3>
 <p>Returns the additional cause information for this SIM terminal response. Returns <tt>NoSpecificCause</tt> if there is no additional cause information.</p>
 <p>The additional cause value is the first byte of <a href="qsimterminalresponse.html#causeData">causeData</a>(), or <tt>NoSpecificCause</tt> if <a href="qsimterminalresponse.html#causeData">causeData</a>() is empty. Thus, cause() should be used only as a convenience function to quickly determine the cause of an error <a href="qsimterminalresponse.html#result">result</a>().</p>
 <p>See also <a href="qsimterminalresponse.html#setCause">setCause</a>(), <a href="qsimterminalresponse.html#causeData">causeData</a>(), and <a href="qsimterminalresponse.html#result">result</a>().</p>
-<h3 class="fn"><a name="causeData"></a><a href="qbytearray.html">QByteArray</a> QSimTerminalResponse::causeData () const</h3>
-<p>Returns the additional cause data associated with this SIM terminal response. The default value is an empty <a href="qbytearray.html">QByteArray</a>.</p>
+<h3 class="fn"><a name="causeData"></a><a href="./qbytearray.html">QByteArray</a> QSimTerminalResponse::causeData () const</h3>
+<p>Returns the additional cause data associated with this SIM terminal response. The default value is an empty <a href="./qbytearray.html">QByteArray</a>.</p>
 <p>See also <a href="qsimterminalresponse.html#setCauseData">setCauseData</a>(), <a href="qsimterminalresponse.html#cause">cause</a>(), and <a href="qsimterminalresponse.html#result">result</a>().</p>
 <h3 class="fn"><a name="command"></a><a href="qsimcommand.html">QSimCommand</a> QSimTerminalResponse::command () const</h3>
 <p>Returns the SIM command that gave rise to this SIM terminal response. The default is a default-constructed <a href="qsimcommand.html">QSimCommand</a>.</p>
 <p>See also <a href="qsimterminalresponse.html#setCommand">setCommand</a>(), <a href="qsimterminalresponse.html#commandPdu">commandPdu</a>(), and <a href="qsimterminalresponse.html#setCommandPdu">setCommandPdu</a>().</p>
-<h3 class="fn"><a name="commandPdu"></a><a href="qbytearray.html">QByteArray</a> QSimTerminalResponse::commandPdu () const</h3>
+<h3 class="fn"><a name="commandPdu"></a><a href="./qbytearray.html">QByteArray</a> QSimTerminalResponse::commandPdu () const</h3>
 <p>Returns the PDU form of the SIM command that gave rise to this SIM terminal response. The default is a PDU corresponding to a default-constructed <a href="qsimcommand.html">QSimCommand</a>.</p>
 <p>See also <a href="qsimterminalresponse.html#setCommandPdu">setCommandPdu</a>(), <a href="qsimterminalresponse.html#command">command</a>(), and <a href="qsimterminalresponse.html#setCommand">setCommand</a>().</p>
 <h3 class="fn"><a name="dataCodingScheme"></a>int QSimTerminalResponse::dataCodingScheme () const</h3>
@@ -173,24 +173,24 @@
 <h3 class="fn"><a name="destinationDevice"></a><a href="qsimcommand.html#Device-enum">QSimCommand::Device</a> QSimTerminalResponse::destinationDevice () const</h3>
 <p>Returns the destination device that will receive the response. The default value is <a href="qsimcommand.html#Device-enum">QSimCommand::SIM</a>.</p>
 <p>See also <a href="qsimterminalresponse.html#setDestinationDevice">setDestinationDevice</a>().</p>
-<h3 class="fn"><a name="duration"></a>uint QSimTerminalResponse::duration () const</h3>
+<h3 class="fn"><a name="duration"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimTerminalResponse::duration () const</h3>
 <p>Returns the number of milliseconds for the duration of a poll interval. The default value is zero, indicating that the default duration should be used.</p>
 <p>Applies to: <tt>PollInterval</tt>.</p>
 <p>See also <a href="qsimterminalresponse.html#setDuration">setDuration</a>().</p>
-<h3 class="fn"><a name="extensionData"></a><a href="qbytearray.html">QByteArray</a> QSimTerminalResponse::extensionData () const</h3>
+<h3 class="fn"><a name="extensionData"></a><a href="./qbytearray.html">QByteArray</a> QSimTerminalResponse::extensionData () const</h3>
 <p>Returns the extension data for this terminal response. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimterminalresponse.html#setExtensionData">setExtensionData</a>() and <a href="qsimterminalresponse.html#extensionField">extensionField</a>().</p>
-<h3 class="fn"><a name="extensionField"></a><a href="qbytearray.html">QByteArray</a> QSimTerminalResponse::extensionField ( int <i>tag</i> ) const</h3>
+<h3 class="fn"><a name="extensionField"></a><a href="./qbytearray.html">QByteArray</a> QSimTerminalResponse::extensionField ( int <i>tag</i> ) const</h3>
 <p>Returns the contents of an extension field. The <i>tag</i> is an 8-bit value, from 3GPP TS 11.14, that specifies the particular field the caller is interested in. The most significant bit of <i>tag</i> is ignored when searching for the field, as it contains the &quot;must comprehend&quot; status from 3GPP TS 11.14, and is not important for locating the desired field.</p>
 <p>This is a simpler method than <a href="qsimterminalresponse.html#extensionData">extensionData</a>() for accessing values within the extension data. As an example, the following code extracts the &quot;answer to reset&quot; information from the response to a <tt>PowerOnCard</tt> SIM command:</p>
 <pre>    QSimTerminalResponse resp;
     ...
     QByteArray atr = resp.extensionField(0xA1);</pre>
 <p>See also <a href="qsimterminalresponse.html#addExtensionField">addExtensionField</a>().</p>
-<h3 class="fn"><a name="fromPdu"></a>QSimTerminalResponse QSimTerminalResponse::fromPdu ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromPdu"></a>QSimTerminalResponse QSimTerminalResponse::fromPdu ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a SIM terminal response object corresponding to the data in <i>pdu</i>. The data is decoded as described in 3GPP TS 11.14, section 6.8&#x2e;</p>
 <p>See also <a href="qsimterminalresponse.html#toPdu">toPdu</a>().</p>
-<h3 class="fn"><a name="menuItem"></a>uint QSimTerminalResponse::menuItem () const</h3>
+<h3 class="fn"><a name="menuItem"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimTerminalResponse::menuItem () const</h3>
 <p>Returns the menu item to be selected. The default value is zero.</p>
 <p>Applies to: <tt>SelectItem</tt></p>
 <p>See also <a href="qsimterminalresponse.html#setMenuItem">setMenuItem</a>().</p>
@@ -199,15 +199,15 @@
 <p>The result code may not be sufficient on its own to determine the cause of a failure. The <a href="qsimterminalresponse.html#cause">cause</a>() and <a href="qsimterminalresponse.html#causeData">causeData</a>() functions provides the additional information.</p>
 <p>See also <a href="qsimterminalresponse.html#setResult">setResult</a>(), <a href="qsimterminalresponse.html#cause">cause</a>(), and <a href="qsimterminalresponse.html#causeData">causeData</a>().</p>
 <h3 class="fn"><a name="setCause"></a>void QSimTerminalResponse::setCause ( <a href="qsimterminalresponse.html#Cause-enum">QSimTerminalResponse::Cause</a> <i>value</i> )</h3>
-<p>Sets the additional cause information for this SIM terminal response to <i>value</i>. This is equivalent to calling <a href="qsimterminalresponse.html#setCauseData">setCauseData</a>() with a <a href="qbytearray.html">QByteArray</a> containing a single byte, <i>value</i>.</p>
+<p>Sets the additional cause information for this SIM terminal response to <i>value</i>. This is equivalent to calling <a href="qsimterminalresponse.html#setCauseData">setCauseData</a>() with a <a href="./qbytearray.html">QByteArray</a> containing a single byte, <i>value</i>.</p>
 <p>See also <a href="qsimterminalresponse.html#cause">cause</a>(), <a href="qsimterminalresponse.html#setCauseData">setCauseData</a>(), and <a href="qsimterminalresponse.html#result">result</a>().</p>
-<h3 class="fn"><a name="setCauseData"></a>void QSimTerminalResponse::setCauseData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setCauseData"></a>void QSimTerminalResponse::setCauseData ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
 <p>Sets the additional cause data associated with this SIM terminal response to <i>value</i>.</p>
 <p>See also <a href="qsimterminalresponse.html#causeData">causeData</a>() and <a href="qsimterminalresponse.html#result">result</a>().</p>
 <h3 class="fn"><a name="setCommand"></a>void QSimTerminalResponse::setCommand ( const <a href="qsimcommand.html">QSimCommand</a> &amp; <i>value</i> )</h3>
 <p>Sets the SIM command that gave rise to this SIM terminal response to <i>value</i>. Calling this function will also affect the result of <a href="qsimterminalresponse.html#commandPdu">commandPdu</a>().</p>
 <p>See also <a href="qsimterminalresponse.html#command">command</a>(), <a href="qsimterminalresponse.html#commandPdu">commandPdu</a>(), and <a href="qsimterminalresponse.html#setCommandPdu">setCommandPdu</a>().</p>
-<h3 class="fn"><a name="setCommandPdu"></a>void QSimTerminalResponse::setCommandPdu ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setCommandPdu"></a>void QSimTerminalResponse::setCommandPdu ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
 <p>Sets the PDU form of the SIM command that gave rise to this SIM terminal response to <i>value</i>. Calling this function will also affect the result of <a href="qsimterminalresponse.html#command">command</a>().</p>
 <p>See also <a href="qsimterminalresponse.html#commandPdu">commandPdu</a>(), <a href="qsimterminalresponse.html#command">command</a>(), and <a href="qsimterminalresponse.html#setCommand">setCommand</a>().</p>
 <h3 class="fn"><a name="setDataCodingScheme"></a>void QSimTerminalResponse::setDataCodingScheme ( int <i>value</i> )</h3>
@@ -216,14 +216,14 @@
 <h3 class="fn"><a name="setDestinationDevice"></a>void QSimTerminalResponse::setDestinationDevice ( <a href="qsimcommand.html#Device-enum">QSimCommand::Device</a> <i>value</i> )</h3>
 <p>Sets the destination device that will receive the response to <i>value</i>.</p>
 <p>See also <a href="qsimterminalresponse.html#destinationDevice">destinationDevice</a>().</p>
-<h3 class="fn"><a name="setDuration"></a>void QSimTerminalResponse::setDuration ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setDuration"></a>void QSimTerminalResponse::setDuration ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the duration of a poll interval to <i>value</i>.</p>
 <p>Applies to: <tt>PollInterval</tt></p>
 <p>See also <a href="qsimterminalresponse.html#duration">duration</a>().</p>
-<h3 class="fn"><a name="setExtensionData"></a>void QSimTerminalResponse::setExtensionData ( <a href="qbytearray.html">QByteArray</a> <i>value</i> )</h3>
+<h3 class="fn"><a name="setExtensionData"></a>void QSimTerminalResponse::setExtensionData ( <a href="./qbytearray.html">QByteArray</a> <i>value</i> )</h3>
 <p>Sets the extension data for this terminal response to <i>value</i>. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimterminalresponse.html#extensionData">extensionData</a>() and <a href="qsimterminalresponse.html#addExtensionField">addExtensionField</a>().</p>
-<h3 class="fn"><a name="setMenuItem"></a>void QSimTerminalResponse::setMenuItem ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setMenuItem"></a>void QSimTerminalResponse::setMenuItem ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the menu item to be selected to <i>value</i>.</p>
 <p>Applies to: <tt>SelectItem</tt></p>
 <p>See also <a href="qsimterminalresponse.html#menuItem">menuItem</a>().</p>
@@ -234,26 +234,26 @@
 <h3 class="fn"><a name="setSourceDevice"></a>void QSimTerminalResponse::setSourceDevice ( <a href="qsimcommand.html#Device-enum">QSimCommand::Device</a> <i>value</i> )</h3>
 <p>Sets the source device that generated the response to <i>value</i>.</p>
 <p>See also <a href="qsimterminalresponse.html#sourceDevice">sourceDevice</a>().</p>
-<h3 class="fn"><a name="setText"></a>void QSimTerminalResponse::setText ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setText"></a>void QSimTerminalResponse::setText ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the text to be sent along with this terminal response to <i>value</i>.</p>
 <p>Applies to: <tt>GetInkey</tt>, <tt>GetInput</tt></p>
 <p>See also <a href="qsimterminalresponse.html#text">text</a>().</p>
 <h3 class="fn"><a name="sourceDevice"></a><a href="qsimcommand.html#Device-enum">QSimCommand::Device</a> QSimTerminalResponse::sourceDevice () const</h3>
 <p>Returns the source device that generated the response. The default value is <a href="qsimcommand.html#Device-enum">QSimCommand::ME</a>.</p>
 <p>See also <a href="qsimterminalresponse.html#setSourceDevice">setSourceDevice</a>().</p>
-<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QSimTerminalResponse::text () const</h3>
+<h3 class="fn"><a name="text"></a><a href="./qstring.html">QString</a> QSimTerminalResponse::text () const</h3>
 <p>Returns the text to be sent along with this terminal response.</p>
 <p>Applies to: <tt>GetInkey</tt>, <tt>GetInput</tt></p>
 <p>See also <a href="qsimterminalresponse.html#setText">setText</a>().</p>
-<h3 class="fn"><a name="toPdu"></a><a href="qbytearray.html">QByteArray</a> QSimTerminalResponse::toPdu () const</h3>
+<h3 class="fn"><a name="toPdu"></a><a href="./qbytearray.html">QByteArray</a> QSimTerminalResponse::toPdu () const</h3>
 <p>Returns the PDU form of this SIM terminal response, encoded as described in 3GPP TS 11.14, section 6.8&#x2e;</p>
 <p>See also <a href="qsimterminalresponse.html#fromPdu">fromPdu</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QSimTerminalResponse &amp; QSimTerminalResponse::operator= ( const QSimTerminalResponse &amp; <i>value</i> )</h3>
 <p>Copy the <a href="qsimterminalresponse.html">QSimTerminalResponse</a> object <i>value</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

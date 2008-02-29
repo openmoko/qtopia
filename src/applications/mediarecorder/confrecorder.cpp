@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,7 +53,7 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
     // Create the UI.
     conf = new Ui::ConfigureRecorderBase();
     conf->setupUi( this );
-    setObjectName( "quality" );     // To display the correct help page.
+    setObjectName( "settings" );     // To display the correct help page.
 
     // Load the default quality settings.
     int qual;
@@ -165,10 +165,12 @@ void ConfigureRecorder::setQuality( int index )
     }
 
     // Set the number of channels.
+    conf->stereoChannels->setDisabled(true);
     if ( qualities[quality].channels == 1) {
         conf->monoChannels->setChecked( true );
     } else {
-        conf->stereoChannels->setChecked( true );
+        //conf->stereoChannels->setChecked( true );
+        conf->monoChannels->setChecked( true );
     }
 
     // Set the sample rate frequency.
@@ -246,6 +248,9 @@ void ConfigureRecorder::loadConfig()
 
     cfg.beginGroup( "Options" );
     QString qvalue = cfg.value( "Quality" ).toString();
+    if (qvalue == "") {
+        quality = VoiceQuality;
+    }
 
     for ( int qual = 0; qual < MaxQualities; ++qual ) {
         if ( qvalue == ConfigSections[qual] ) {

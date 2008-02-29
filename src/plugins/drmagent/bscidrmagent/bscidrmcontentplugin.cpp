@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -334,7 +334,8 @@ void BSciReadDevice::close ()
 
 
 /*!
-    \reimp
+    Opens the device in the specified \a mode.  Returns true if
+    the open was successful; false otherwise.
  */
 bool BSciReadDevice::open( QIODevice::OpenMode mode )
 {
@@ -690,6 +691,8 @@ void BSciDrmContentPlugin::reactivate( const QContent &content, QDrmRights::Perm
 
             if( !url.isEmpty() )
                 BSciPrompts::instance()->requestOpenUrl( content, url, permission, BSciPrompts::Expired );
+            else
+                BSciPrompts::instance()->notifyCannotActivate( content, permission, BSciPrompts::Expired );
         }
     }
 }

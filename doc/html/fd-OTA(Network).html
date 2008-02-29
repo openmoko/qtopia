@@ -25,7 +25,7 @@ New Configuration options are automatically matched against existing configurati
 <li><a href="#OTA_Update">OTA Update</a>
 <li><a href="#SIM_Download">SIM Download</a>
 </ul><h3><a name="Network_configuration">Network configuration</a></h3>
-<p>Qtopia can process OTA network configuration messages and writes the received settings to a file. 
+<p>Qtopia can process OTA network configuration messages and writes the received settings to a configuration file. 
 
 <p>The <span class="nobr"><a href="fd-Internet.html">Internet<sup></sup></a></span> application is responsible the processing of received OTA messages. Depending on the message content it <br/>
 may change Internet, WAP and MMS accounts. </p>
@@ -62,17 +62,11 @@ may change Internet, WAP and MMS accounts. </p>
 
 <p>New options are automatically matched against existing configurations. If there is no existing configuration available, new Internet/WAP accounts are created. The entire process does not require any interaction with the user. However for security reasons the user can refuse to accept configuration changes. Once the changes are applied new options are integrated into Qtopia's network configuration and can be used by starting the appropriate accounts.</p>
 <h3><a name="OTA_Update">OTA Update</a></h3>
-<p>Other forms of OTA Update are typically be handled by SMS push services, dispatching<br/>
-on either MIME type or port number.  The infrastructure for this is present in the<br/>
-telephony library.  Applications in specific functional areas handle the messages in question,<br/>
-dispatched via QDS service messages.
+<p>Other forms of OTA Update are typically handled by SMS push services, dispatching on either MIME type or port number. The infrastructure for this is present in the telephony library. Applications in specific functional areas handle the messages in question, dispatched via QDS service messages.
 <h3><a name="SIM_Download">SIM Download</a></h3>
-<p>GSM 11.14 specifies a method to download data directly to the SIM, used by<br/>
-operators to modify the user's settings.  From section 7.1.1 of GSM 11.14:
+<p>GSM 11.14 specifies a method to download data directly to the SIM, used by operators to modify the user's settings.  From section 7.1.1 of GSM 11.14:
 
-<p>&lt;blockquote&gt;<br/>
-If the service "data download via SMS Point-to-point" is allocated and activated in the<br/>
-SIM Service Table (see TS 11.11 <span class="error">&#91;20&#93;</span>), then the ME shall follow the procedure below:</p>
+<p>If the service "data download via SMS Point-to-point" is allocated and activated in the SIM Service Table (see TS 11.11 <span class="error">&#91;20&#93;</span>), then the ME shall follow the procedure below:</p>
 
 <ul>
 	<li>When the ME receives a Short Message with:
@@ -87,20 +81,16 @@ SIM Service Table (see TS 11.11 <span class="error">&#91;20&#93;</span>), then t
 		<li>data coding scheme = class 2 message, and the ME chooses not to handle the message ( e.g. MEs not supporting EGPRS over TIA/EIA-136 do not need to handle the message),</li>
 	</ul>
 	</li>
-	<li>then the ME shall pass the message transparently to the SIM using the ENVELOPE (SMS-PP DOWNLOAD)<br/>
-     command as defined below.</li>
-	<li>The ME shall not display the message, or alert the user of a short message waiting.<br/>
-&lt;/blockquote&gt;</li>
+	<li>then the ME shall pass the message transparently to the SIM using the ENVELOPE (SMS-PP DOWNLOAD) command as defined below.</li>
+	<li>The ME shall not display the message, or alert the user of a short message waiting.</li>
 </ul>
 
 
-<p>Many modems already do this internally, without notifying Qtopia, so there is nothing<br/>
-to be done to support this on those modems.  For modems that don't support SIM<br/>
-download internally, Qtopia passes the download message to the vendor-specific<br/>
-plugin to be handled according to the modem's specific requirements.</p>
-<td width=10></table><hr /><div align="center">
+
+<p>Many modems already do this internally, without notifying Qtopia, so there is nothing to be done to support this on those modems.  For modems that don't support SIM download internally, Qtopia passes the download message to the vendor-specific plugin to be handled according to the modem's specific requirements.</p>
+<hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div>

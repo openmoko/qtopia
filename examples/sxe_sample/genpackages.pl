@@ -75,6 +75,10 @@ for my $pkdir ( @projects )
             {
                 print DESKTOP "Icon=mal$pkdir\/mal\n";
             }
+            elsif (m/^Name\[\]/ )
+            {
+                print DESKTOP "Name[]=Mal$pkdir\n";
+            }
             else
             {
                 print DESKTOP;
@@ -88,6 +92,8 @@ for my $pkdir ( @projects )
         my $this_def = $proj_def;
         $this_def =~ s/malpkg/mal$pkdir/g ;
         $this_def =~ s/pkg.domain=graphics/pkg.domain=${domains[$dom]}/ ;
+        $this_def =~ s/(help.files=mal)$pkdir(.html)/$1pkg$2/; 
+
         open PRO, ">$proj_file" or die "open $projroot/$proj_file : $!\n";
         print PRO $this_def;
         close PRO;

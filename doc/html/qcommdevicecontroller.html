@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QCommDeviceController Class Reference</h1>
 <p>The QCommDeviceController class provides facilities to control the power state of a hardware communications device <a href="#details">More...</a></p>
-<pre>    #include &lt;QCommDeviceController&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QCommDeviceController&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qcommdevicecontroller-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -34,9 +34,10 @@
 <li><div class="fn"/>const QByteArray &amp; <b><a href="qcommdevicecontroller.html#deviceId">deviceId</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qcommdevicecontroller.html#isUp">isUp</a></b> () const</li>
 <li><div class="fn"/>PowerState <b><a href="qcommdevicecontroller.html#powerState">powerState</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qcommdevicecontroller.html#sessionsActive">sessionsActive</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -46,17 +47,16 @@
 <li><div class="fn"/>void <b><a href="qcommdevicecontroller.html#up">up</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -78,9 +78,9 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QCommDeviceController"></a>QCommDeviceController::QCommDeviceController ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>devId</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QCommDeviceController"></a>QCommDeviceController::QCommDeviceController ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>devId</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qcommdevicecontroller.html">QCommDeviceController</a> object. The <i>devId</i> specifies the device id. This is usually equivalent to the hardware device id of the device. E.g&#x2e; irdaX for Infrared devices and hciX for Bluetooth devices.</p>
-<p>The <i>parent</i> parameter is passed to the <a href="qobject.html">QObject</a> constructor.</p>
+<p>The <i>parent</i> parameter is passed to the <a href="./qobject.html">QObject</a> constructor.</p>
 <p>See also <a href="qcommdevicecontroller.html#deviceId">deviceId</a>().</p>
 <h3 class="fn"><a name="dtor.QCommDeviceController"></a>QCommDeviceController::~QCommDeviceController ()</h3>
 <p>Destructor.</p>
@@ -96,7 +96,7 @@
 <h3 class="fn"><a name="bringUpTimed"></a>void QCommDeviceController::bringUpTimed ( int <i>secs</i> )</h3>
 <p>Brings up the device in timed mode. The device will attempt to enter the <b><a href="qcommdevicecontroller.html#PowerState-enum">OnTimed</a></b> mode. The device will remain in this mode for <i>secs</i> seconds.</p>
 <p>See also <a href="qcommdevicecontroller.html#bringUp">bringUp</a>() and <a href="qcommdevicecontroller.html#bringUpOneItem">bringUpOneItem</a>().</p>
-<h3 class="fn"><a name="deviceId"></a>const <a href="qbytearray.html">QByteArray</a> &amp; QCommDeviceController::deviceId () const</h3>
+<h3 class="fn"><a name="deviceId"></a>const <a href="./qbytearray.html">QByteArray</a> &amp; QCommDeviceController::deviceId () const</h3>
 <p>Returns the id of the device.</p>
 <h3 class="fn"><a name="down"></a>void QCommDeviceController::down ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the device is turned off.</p>
@@ -110,13 +110,15 @@
 <h3 class="fn"><a name="powerStateChanged"></a>void QCommDeviceController::powerStateChanged ( <a href="qcommdevicecontroller.html#PowerState-enum">QCommDeviceController::PowerState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a device's power state has been changed. The <i>state</i> parameter holds the new power state.</p>
 <p>See also <a href="qcommdevicecontroller.html#powerState">powerState</a>().</p>
+<h3 class="fn"><a name="sessionsActive"></a>bool QCommDeviceController::sessionsActive () const</h3>
+<p>Returns true if there are applications using this device.</p>
 <h3 class="fn"><a name="up"></a>void QCommDeviceController::up ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the device is turned on.</p>
 <p>See also <a href="qcommdevicecontroller.html#bringUp">bringUp</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

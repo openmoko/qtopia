@@ -61,14 +61,14 @@
 
     bool ModifiedGsm0710MultiplexerPlugin::detect( QSerialIODevice *device )
     {
-        <span class="comment">// Determine if the module supports a frame size of 256.</span>
+        <span class="comment">//</span> Determine if the module supports a frame size of 256.
         return QGsm0710Multiplexer::cmuxChat( device, 256 );
     }
 
     QSerialIODeviceMultiplexer *ModifiedGsm0710MultiplexerPlugin::create
             ( QSerialIODevice *device )
     {
-        <span class="comment">// Create the GSM 07.10 multiplexer with a frame size of 256.</span>
+        <span class="comment">//</span> Create the GSM 07.10 multiplexer with a frame size of 256.
         return new QGsm0710Multiplexer( device, 256 );
     }
 
@@ -101,20 +101,20 @@
 
     QSerialIODeviceMultiplexer *MultiPortMultiplexerPlugin::create( QSerialIODevice *device )
     {
-        <span class="comment">// The primary AT command device, /dev/mux0, is configured</span>
-        <span class="comment">// in the custom.h file as QTOPIA_PHONE_DEVICE and then passed</span>
-        <span class="comment">// down to us in the &quot;device&quot; parameter.</span>
+        <span class="comment">//</span> The primary AT command device, /dev/mux0, is configured
+        <span class="comment">//</span> in the custom.h file as QTOPIA_PHONE_DEVICE and then passed
+        <span class="comment">//</span> down to us in the &quot;device&quot; parameter.
         QMultiPortMultiplexer *mux = new QMultiPortMultiplexer( device );
 
-        <span class="comment">// Add the secondary channel.</span>
+        <span class="comment">//</span> Add the secondary channel.
         QSerialPort *secondary = QSerialPort::create( &quot;/dev/mux1&quot; );
         mux-&gt;addChannel( &quot;secondary&quot;, secondary );
 
-        <span class="comment">// Add the data channel.</span>
+        <span class="comment">//</span> Add the data channel.
         QSerialPort *data = QSerialPort::create( &quot;/dev/mux2&quot; );
         mux-&gt;addChannel( &quot;data&quot;, data );
 
-        <span class="comment">// Add the data setup channel, which is the same as &quot;data&quot;.</span>
+        <span class="comment">//</span> Add the data setup channel, which is the same as &quot;data&quot;.
         mux-&gt;addChannel( &quot;datasetup&quot;, data );
         return mux;
     }
@@ -138,8 +138,8 @@
 <p>Refer to the source code under <tt>&lt;qtopia-root-dir&gt;/src/plugins/multiplexers/wavecom</tt> if you need to write a multiplexer of this kind. The source code for <a href="qgsm0710multiplexer.html">QGsm0710Multiplexer</a> might also provide some clues as to how to handle this case.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,6 +31,7 @@
 #include <QValueSpaceItem>
 //#include <qvibrateaccessory.h>
 #include <QtopiaIpcAdaptor>
+#include <QTimer>
 
 
 
@@ -48,12 +49,15 @@ private:
     int  kbdFDpower;
     int  kbdFDaux;
     bool shift;
+    QTimer *keytimer;
 
     QtopiaIpcAdaptor *mgr;
     QValueSpaceItem *m_headset;
+
 private Q_SLOTS:
     void readAuxKbdData();
     void readPowerKbdData();
+    void timerUpdate();
 
 };
 

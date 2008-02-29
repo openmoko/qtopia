@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@ public:
     QString type() const;
     Attributes const& attributes() const;
 
-    void addBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder);
+    void addBuilder(QString const& tag, int priority, QMediaSessionBuilder* sessionBuilder);
     void removeBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder);
 
     QMediaServerSession* createSession(QMediaSessionRequest sessionRequest);

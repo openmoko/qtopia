@@ -3,16 +3,12 @@
 <body>
 <!--#if expr="$USERGUIDE"-->
    <h2>Edit Contacts</h2>
-<!--#else -->
-   <h3>Editing Contacts</h3>
 <!--#endif -->
 <p>Four information tabs are available for recording different contact details.</p>
-<p><b>To enter information:</b></p>
 <p>
 <!--#if expr="$KEYPAD"-->
 Use <img src=":icon/left">/<img src=":icon/right"> </img> buttons
-<!--#endif-->
-<!--#if expr="$TOUCH"-->
+<!--#else-->
 Press tabs
 <!--#endif-->
 to select Contact, Business, Personal or Media pages.
@@ -30,16 +26,18 @@ to select Contact, Business, Personal or Media pages.
 <li><b>Phone numbers:</b> add as many as you want.</li>
 <li><b>Phone number Type:</b> select <b>Type</b> from the <img src=":icon/options"><b>Options</b> menu.</li>
 </ul>
-<p><img src=":image/addressbook/business"> </img> <b>Business:</b> Company, Title show same as on <b>Contact</b> page. Phone, Mobile, Fax, Pager also show the same business numbers as set on the <b>Contact</b> page.</p>
+<p><img src=":icon/addressbook/business"> </img> <b>Business:</b> Company, Title show same as on <b>Contact</b> page. Phone, Mobile, Fax, Pager also show the same business numbers as set on the <b>Contact</b> page.</p>
 <p><img src=":icon/addressbook/home"> </img> <b>Personal:</b> Phone, Mobile, Fax show same home numbers as set on <b>Contact</b> page.</p>
-<p><img src=":icon/addressbook/notes"> </img> <b>Media:</b> use this to add free-text notes.</p>
+<p><img src=":icon/addressbook/notes"> </img> <b>Media:</b></p>
 <ul>
-<li><b>Photo:</b> shows on Contacts list<!--#if expr="$TELEPHONY"-->, shows when this person calls you<!--#endif-->.  To add or change a photo, highlight and select.</li>
+<li><b>Photo:</b> shows on Contacts list<!--#if expr="$TELEPHONY"--> and shows when this person calls you<!--#endif-->.  To add or change a photo, highlight and select.</li>
 <!--#if expr="$TELEPHONY"-->
 <li><b>Ringtone:</b> will sound when this person calls.</li>
 <li><b>Videotone:</b> will be shown when this person calls.</li>
 <!--#endif-->
+<li><b>Notes:</b> use this to add free-text notes, including hyperlinks to other Contacts, Calendar or Tasks records.</li>
 <li><b>Groups:</b> used to group this contact to similar records.</li>
+</ul>
 <p>See Also: <a href="qpe-categories.html">Categories</a></p>
 </body>
 </html>

@@ -54,26 +54,26 @@
      number /= 2;
  }</pre>
 <p>If these two methods are called in succession, the following happens:</p>
-<pre><span class="comment"> // method1()</span>
- number *= 5;        <span class="comment">// number is now 30</span>
- number /= 4;        <span class="comment">// number is now 7</span>
+<pre><span class="comment"> //</span> method1()
+ number *= 5;        <span class="comment">//</span> number is now 30
+ number /= 4;        <span class="comment">//</span> number is now 7
 
-<span class="comment"> // method2()</span>
- number *= 3;        <span class="comment">// number is now 21</span>
- number /= 2;        <span class="comment">// number is now 10</span></pre>
+<span class="comment"> //</span> method2()
+ number *= 3;        <span class="comment">//</span> number is now 21
+ number /= 2;        <span class="comment">//</span> number is now 10</pre>
 <p>If these two methods are called simultaneously from two threads then the following sequence could result:</p>
-<pre><span class="comment"> // Thread 1 calls method1()</span>
- number *= 5;        <span class="comment">// number is now 30</span>
+<pre><span class="comment"> //</span> Thread 1 calls method1()
+ number *= 5;        <span class="comment">//</span> number is now 30
 
-<span class="comment"> // Thread 2 calls method2().</span>
+<span class="comment"> //</span> Thread 2 calls method2().
 <span class="comment"> //</span>
-<span class="comment"> // Most likely Thread 1 has been put to sleep by the operating</span>
-<span class="comment"> // system to allow Thread 2 to run.</span>
- number *= 3;        <span class="comment">// number is now 90</span>
- number /= 2;        <span class="comment">// number is now 45</span>
+<span class="comment"> //</span> Most likely Thread 1 has been put to sleep by the operating
+<span class="comment"> //</span> system to allow Thread 2 to run.
+ number *= 3;        <span class="comment">//</span> number is now 90
+ number /= 2;        <span class="comment">//</span> number is now 45
 
-<span class="comment"> // Thread 1 finishes executing.</span>
- number /= 4;        <span class="comment">// number is now 11, instead of 10</span></pre>
+<span class="comment"> //</span> Thread 1 finishes executing.
+ number /= 4;        <span class="comment">//</span> number is now 11, instead of 10</pre>
 <p>If we add a mutex, we should get the result we want:</p>
 <pre> QMutex mutex;
  int number = 6;
@@ -130,25 +130,10 @@
 <h3 class="fn"><a name="unlock"></a>void QMutex::unlock ()</h3>
 <p>Unlocks the mutex. Attempting to unlock a mutex in a different thread to the one that locked it results in an error. Unlocking a mutex that is not locked results in undefined behavior.</p>
 <p>See also <a href="qmutex.html#lock">lock</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMutex-2"></a>QMutex::QMutex ( bool <i>recursive</i> )</h3>
-<p>Use the constructor that takes a <a href="qmutex.html#RecursionMode-enum">RecursionMode</a> parameter instead.</p>
-<h3 class="fn"><a name="locked"></a>bool QMutex::locked ()</h3>
-<p>Returns true if the mutex is locked by another thread; otherwise returns false.</p>
-<p>It is generally a bad idea to use this function, because code that uses it has a race condition. Use <a href="qmutex.html#tryLock">tryLock</a>() and <a href="qmutex.html#unlock">unlock</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> bool isLocked = mutex.locked();</font></pre>
-<p>you can rewrite it as</p>
-<pre> bool isLocked = true;
- if (mutex.tryLock()) {
-     mutex.unlock();
-     isLocked = false;
- }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

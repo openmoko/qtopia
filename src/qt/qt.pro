@@ -13,7 +13,7 @@ INSTALLS+=fontdir
 pkg.name=qt-embedded
 pkg.desc=Qt/Embedded
 pkg.version=$$QTE_VERSION
-pkg.domain=libs
+pkg.domain=trusted
 
 !disable_qt_lupdate {
     #

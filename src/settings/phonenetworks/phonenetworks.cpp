@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -59,7 +59,11 @@ void PhoneNetworks::init()
         QStringList::const_iterator i;
         for ( i = list.constBegin(); i != list.constEnd(); ++i ) {
             QNetworkRegistration nr( (*i), this );
-            QString str = nr.currentOperatorTechnology().isEmpty() ? (*i) : nr.currentOperatorTechnology();
+            QString str = nr.currentOperatorTechnology();
+            if ( str.isEmpty() && (*i) == "voip" )
+                str = tr( "VoIP" );
+            if ( str.isEmpty() )
+                str = (*i);
             QListWidgetItem *item = new QListWidgetItem( str, m_list );
             item->setData( Qt::UserRole, QVariant( (*i) ) );
         }
@@ -93,14 +97,18 @@ void PhoneNetworks::serviceSelected( QListWidgetItem *item )
     layout->setContentsMargins(0, 0, 0, 0);
     QWidget *widget = 0;
 
-    if ( str == "modem" )
+    if ( str == "modem" ) {
         widget = new ModemNetworkRegister( this );
-    else if ( str == "voip" )
+        dlg->setWindowTitle( tr( "Call Networks" ) );
+    } else if ( str == "voip" ) {
         widget = new VoipNetworkRegister( this );
+        dlg->setWindowTitle( tr( "VoIP Network" ) );
+    }
 
     if ( widget ) {
         layout->addWidget( widget );
-        QtopiaApplication::execDialog( dlg );
+        dlg->showMaximized();
+        QtopiaApplication::execDialog( dlg, false );
     }
 }
 

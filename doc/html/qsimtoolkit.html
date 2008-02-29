@@ -27,7 +27,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -55,7 +55,7 @@
 <li><div class="fn"/>void <b><a href="qsimtoolkit.html#userActivity">userActivity</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -66,7 +66,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -75,15 +75,14 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -97,7 +96,7 @@
 <p>See also <a href="qsimcommand.html">QSimCommand</a> and <a href="qsimmenuitem.html">QSimMenuItem</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSimToolkit"></a>QSimToolkit::QSimToolkit ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QSimToolkit"></a>QSimToolkit::QSimToolkit ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new SIM toolkit handling object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports SIM toolkit. If there is more than one service that supports SIM toolkit, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qsimtoolkit.html">QSimToolkit</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
@@ -176,7 +175,7 @@
 <p>End the current session, upon the user's request. The SIM returns to the main menu.</p>
 <p>Applies to: <tt>GetInkey</tt>, <tt>GetInput</tt>, <tt>SelectItem</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() to generate a <a href="qsimterminalresponse.html#Result-enum">QSimTerminalResponse::SessionTerminated</a> response instead.</p>
-<h3 class="fn"><a name="help"></a>void QSimToolkit::help ( <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> <i>command</i>, uint <i>item</i> = 0 )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="help"></a>void QSimToolkit::help ( <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> <i>command</i>, <a href="./qtglobal.html#uint-typedef">uint</a> <i>item</i> = 0 )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Request help for a particular type of <i>command</i> or menu <i>item</i>.</p>
 <p>Applies to: <tt>SetupMenu</tt>, <tt>GetInkey</tt>, <tt>GetInput</tt>, <tt>SelectItem</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() or <a href="qsimtoolkit.html#sendEnvelope">sendEnvelope</a>() to generate the appropriate help request instead.</p>
@@ -185,17 +184,17 @@
 <p>Applies to: <tt>SetupEventList</tt>.</p>
 <p>This function is deprecated. Use <a href="qsimtoolkit.html#sendEnvelope">sendEnvelope</a>() to generate an idle screen event instead.</p>
 <p>See also <a href="qsimtoolkit.html#userActivity">userActivity</a>().</p>
-<h3 class="fn"><a name="input"></a>void QSimToolkit::input ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="input"></a>void QSimToolkit::input ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sends a string <i>value</i> in response to a <tt>GetInput</tt> command.</p>
 <p>Applies to: <tt>GetInput</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() to generate a <a href="qsimterminalresponse.html#Result-enum">QSimTerminalResponse::Success</a> response instead.</p>
 <p>See also <a href="qsimtoolkit.html#key">key</a>().</p>
-<h3 class="fn"><a name="key"></a>void QSimToolkit::key ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="key"></a>void QSimToolkit::key ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sends a string <i>value</i> in response to a <tt>GetInkey</tt> command.</p>
 <p>Applies to: <tt>GetInkey</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() to generate a <a href="qsimterminalresponse.html#Result-enum">QSimTerminalResponse::Success</a> response instead.</p>
 <p>See also <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() and <a href="qsimtoolkit.html#input">input</a>().</p>
-<h3 class="fn"><a name="mainMenuSelected"></a>void QSimToolkit::mainMenuSelected ( uint <i>item</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="mainMenuSelected"></a>void QSimToolkit::mainMenuSelected ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>item</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate to the SIM toolkit application that an <i>item</i> on the main menu has been selected.</p>
 <p>Applies to: <tt>SetupMenu</tt>.</p>
 <p>This function is deprecated. Use <a href="qsimtoolkit.html#sendEnvelope">sendEnvelope</a>() to generate a <a href="qsimenvelope.html#Type-enum">QSimEnvelope::MenuSelection</a> envelope instead.</p>
@@ -217,7 +216,7 @@
 <p>Applies to: <tt>SelectItem</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() to generate a <a href="qsimterminalresponse.html#Result-enum">QSimTerminalResponse::BackwardMove</a> response instead.</p>
 <p>See also <a href="qsimtoolkit.html#subMenuSelected">subMenuSelected</a>().</p>
-<h3 class="fn"><a name="subMenuSelected"></a>void QSimToolkit::subMenuSelected ( uint <i>item</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="subMenuSelected"></a>void QSimToolkit::subMenuSelected ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>item</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate to the SIM toolkit application that an <i>item</i> on a sub menu has been selected.</p>
 <p>Applies to: <tt>SelectItem</tt>.</p>
 <p>This function is deprecated because it cannot properly match commands and responses. Use <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() to generate a <a href="qsimterminalresponse.html#Result-enum">QSimTerminalResponse::Success</a> response instead.</p>
@@ -232,8 +231,8 @@
 <p>See also <a href="qsimtoolkit.html#idleScreen">idleScreen</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

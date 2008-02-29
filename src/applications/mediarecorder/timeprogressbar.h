@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,7 +35,7 @@ public:
     void setPlaying();
 
 protected:
-    bool setIndicator( QString& progress_str, int progress, int totalSteps );
+    void paintEvent( QPaintEvent *event );
     bool event( QEvent * );
 
 private:

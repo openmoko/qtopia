@@ -89,7 +89,7 @@
  };
  QT_DECLARE_METATYPE(MyStructure)
 
-<span class="comment"> // Marshall the MyStructure data into a D-BUS argument</span>
+<span class="comment"> //</span> Marshall the MyStructure data into a D-BUS argument
  QDBusArgument &amp;operator&lt;&lt;(QDBusArgument &amp;argument, const MyStructure &amp;mystruct)
  {
      argument.beginStructure();
@@ -98,7 +98,7 @@
      return argument;
  }
 
-<span class="comment"> // Retrieve the MyStructure data from the D-BUS argument</span>
+<span class="comment"> //</span> Retrieve the MyStructure data from the D-BUS argument
  const QDBusArgument &amp;operator&gt;&gt;(const QDBusArgument &amp;argument, MyStructure &amp;mystruct)
  {
      argument.beginStructure();
@@ -140,7 +140,7 @@
 <h3 class="fn"><a name="beginArray"></a>void QDBusArgument::beginArray ( int <i>id</i> )</h3>
 <p>Opens a new D-BUS array suitable for appending elements of meta-type <i>id</i>.</p>
 <p>This function is used usually in <tt>operator&lt;&lt;</tt> streaming operators, as in the following example:</p>
-<pre><span class="comment"> // append an array of MyElement types</span>
+<pre><span class="comment"> //</span> append an array of MyElement types
  QDBusArgument &amp;operator&lt;&lt;(QDBusArgument &amp;argument, const MyArray &amp;myarray)
  {
      argument.beginArray( qMetaTypeId&lt;MyElement&gt;() );
@@ -155,7 +155,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Recurses into the D-BUS array to allow extraction of the array elements.</p>
 <p>This function is used usually in <tt>operator&gt;&gt;</tt> streaming operators, as in the following example:</p>
-<pre><span class="comment"> // extract a MyArray array of MyElement elements</span>
+<pre><span class="comment"> //</span> extract a MyArray array of MyElement elements
  const QDBusArgument &amp;operator&gt;&gt;(const QDBusArgument &amp;argument, MyArray &amp;myarray)
  {
      argument.beginArray();
@@ -175,7 +175,7 @@
 <h3 class="fn"><a name="beginMap"></a>void QDBusArgument::beginMap ( int <i>kid</i>, int <i>vid</i> )</h3>
 <p>Opens a new D-BUS map suitable for appending elements. Maps are containers that associate one entry (the key) to another (the value), such as Qt's <a href="qmap.html">QMap</a> or <a href="qhash.html">QHash</a>. The ids of the map's key and value meta types must be passed in <i>kid</i> and <i>vid</i> respectively.</p>
 <p>This function is used usually in <tt>operator&lt;&lt;</tt> streaming operators, as in the following example:</p>
-<pre><span class="comment"> // append a dictionary that associates ints to MyValue types</span>
+<pre><span class="comment"> //</span> append a dictionary that associates ints to MyValue types
  QDBusArgument &amp;operator&lt;&lt;(QDBusArgument &amp;argument, const MyDictionary &amp;mydict)
  {
      argument.beginMap( QVariant::Int, qMetaTypeId&lt;MyValue&gt;() );
@@ -193,7 +193,7 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Recurses into the D-BUS map to allow extraction of the map's elements.</p>
 <p>This function is used usually in <tt>operator&gt;&gt;</tt> streaming operators, as in the following example:</p>
-<pre><span class="comment"> // extract a MyDictionary map that associates ints to MyValue elements</span>
+<pre><span class="comment"> //</span> extract a MyDictionary map that associates ints to MyValue elements
  const QDBusArgument &amp;operator&gt;&gt;(const QDBusArgument &amp;argument, MyDictionary &amp;mydict)
  {
      argument.beginMap();
@@ -397,8 +397,8 @@
 <p>This function was introduced in Qt 4.2.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

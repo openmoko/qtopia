@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -287,7 +287,7 @@ void TimeManager::setDaySpan(int daystart, int dayend)
 {
     // NOTE, there is an argument for allowing a span exceeding a day.
     daystart = qBound(0, daystart, 24*60);
-    dayend = qBound(daystart, dayend, 24*60);
+    dayend = qBound(daystart, dayend, 24*60 - 1);
 
     d->ds = daystart;
     d->de = dayend;

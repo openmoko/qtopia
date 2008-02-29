@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -280,7 +278,7 @@ static bool qt_isGenuineQWidget(HIViewRef ref)
     return HIObjectIsOfClass(HIObjectRef(ref), kObjectQWidget);
 }
 
-static bool qt_isGenuineQWidget(const QWidget *window)
+bool qt_isGenuineQWidget(const QWidget *window)
 {
     return window && qt_isGenuineQWidget(HIViewRef(window->winId()));
 }
@@ -348,7 +346,7 @@ inline static void qt_mac_set_window_group_to_stays_on_top(WindowRef window, Qt:
     // all stays on top (aka popups) will fall into the same
     // group and be able to be raise()'d with releation to one another (from
     // within the same window group).
-    qt_mac_set_window_group(window, type|Qt::WindowStaysOnTopHint, kCGOverlayWindowLevelKey);
+    qt_mac_set_window_group(window, type|Qt::WindowStaysOnTopHint, qt_mac_get_group_level(kOverlayWindowClass));
 }
 
 inline static void qt_mac_set_window_group_to_tooltip(WindowRef window)
@@ -365,8 +363,8 @@ inline static void qt_mac_set_window_group_to_popup(WindowRef window)
     // In Qt, a popup is seen as a 'stay on top' window.
     // Since new groups are created for 'stays on top' windows, the
     // same must be done for popups. Otherwise, popups would be drawn
-    // below 'stays on top' windows.
-    qt_mac_set_window_group(window, Qt::Popup, kCGOverlayWindowLevelKey+1);
+    // below 'stays on top' windows. Add 1 to get above pure stay-on-top windows.
+    qt_mac_set_window_group(window, Qt::Popup, qt_mac_get_group_level(kOverlayWindowClass)+1);
 }
 
 void QWidgetPrivate::macUpdateIsOpaque()
@@ -1119,6 +1117,12 @@ static HIViewRef qt_mac_create_widget(HIViewRef parent)
     return ret;
 }
 
+void qt_mac_unregister_widget()
+{
+    HIObjectUnregisterClass(widget_class);
+    widget_class = 0;
+}
+
 void QWidgetPrivate::toggleDrawers(bool visible)
 {
     for (int i = 0; i < children.size(); ++i) {
@@ -1823,6 +1827,22 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
     QTLWExtra *topData = maybeTopData();
     bool wasCreated = q->testAttribute(Qt::WA_WState_Created);
 
+
+    // Maintain the glWidgets list on parent change: remove "our" gl widgets 
+    // from the list on the old parent and grandparents.
+    if (glWidgets.isEmpty() == false) {
+        QWidget *current = q->parentWidget();
+        while (current) {
+            for (QList<QWidgetPrivate::GlWidgetInfo>::const_iterator it = glWidgets.constBegin(); 
+                 it != glWidgets.constEnd(); ++it)
+                current->d_func()->glWidgets.removeAll(*it);
+
+            if (current->isWindow())
+                break;
+            current = current->parentWidget();
+        }
+    }
+
     EventHandlerRef old_window_event = 0;
     HIViewRef old_id = 0;
     if (wasCreated && !(q->windowType() == Qt::Desktop)) {
@@ -1879,6 +1899,19 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
             CFRelease(old_id);
         }
     }
+
+    // Maintain the glWidgets list on parent change: add "our" gl widgets 
+    // to the list on the new parent and grandparents.
+    if (glWidgets.isEmpty() == false) {
+        QWidget *current = q->parentWidget();
+        while (current) {
+            current->d_func()->glWidgets += glWidgets;
+            if (current->isWindow())
+                break;
+            current = current->parentWidget();
+        }
+    }
+
     qt_event_request_window_change(q);
 }
 
@@ -2036,6 +2069,21 @@ void QWidget::activateWindow()
         return;
     qt_event_remove_activate();
 
+    QWidget *fullScreenWidget = tlw;
+    QWidget *parentW = tlw->parentWidget();
+    // Find the oldest parent or the parent with fullscreen, whichever comes first.
+    while (parentW) {
+        fullScreenWidget = parentW->window();
+        if (fullScreenWidget->windowState() & Qt::WindowFullScreen)
+            break;
+        parentW = fullScreenWidget->parentWidget();
+    }
+
+    if (fullScreenWidget->windowType() != Qt::ToolTip) {
+        qt_mac_set_fullscreen_mode((fullScreenWidget->windowState() & Qt::WindowFullScreen) &&
+                                               qApp->desktop()->screenNumber(this) == 0);
+    }
+
     WindowPtr window = qt_mac_window_for(tlw);
     if((tlw->windowType() == Qt::Popup) || (tlw->windowType() == Qt::Tool) ||
        qt_mac_is_macdrawer(tlw) || IsWindowActive(window)) {
@@ -2126,6 +2174,7 @@ void QWidgetPrivate::show_sys()
     }
     data.fstrut_dirty = true;
     if(q->isWindow()) {
+        setModal_sys();
         WindowPtr window = qt_mac_window_for(q);
         SizeWindow(window, q->width(), q->height(), true);
         if(qt_mac_is_macsheet(q)) {
@@ -2652,6 +2701,8 @@ void QWidgetPrivate::scroll_sys(int dx, int dy, const QRect &r)
     const bool valid_rect = r.isValid();
     if (!q->updatesEnabled() &&  (valid_rect || q->children().isEmpty()))
         return;
+
+    qt_event_request_window_change(q);    
 
     if(!valid_rect) {        // scroll children
         QPoint pd(dx, dy);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,7 @@
 #include <qobexheader.h>
 
 #include <qobexnamespace.h>
+#include <qtopialog.h>
 
 #include <QFile>
 #include <QPointer>
@@ -34,13 +35,6 @@
 
 
 #define OBEX_STREAM_BUF_SIZE 4096
-
-
-//#define QOBEXPUSHSERVICE_DEBUG
-
-#ifdef QOBEXPUSHSERVICE_DEBUG
-#   include <QDebug>
-#endif
 
 
 class QObexPushServicePrivate : public QObexServerSession
@@ -80,6 +74,7 @@ public:
     QByteArray m_vcard;
     bool m_cleanUpPutDevice;
     QPointer<QIODevice> m_device;
+    bool m_abortPending;
 
 private:
     void updateState(QObexPushService::State state);
@@ -95,12 +90,10 @@ QObexPushServicePrivate::QObexPushServicePrivate(QIODevice *device, QObexPushSer
     : QObexServerSession(device, parent),
       m_parent(parent)
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "Running QObexPushService...";
-#endif
     m_state = QObexPushService::Ready;
     m_error = QObexPushService::NoError;
     m_device = 0;
+    m_abortPending = false;
     m_cleanUpPutDevice = false;
     m_callingAcceptFile = false;
 
@@ -110,9 +103,6 @@ QObexPushServicePrivate::QObexPushServicePrivate(QIODevice *device, QObexPushSer
 
 QObexPushServicePrivate::~QObexPushServicePrivate()
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushServicePrivate destructor";
-#endif
     cleanUpPut(false);
 }
 
@@ -134,22 +124,17 @@ QObex::ResponseCode QObexPushServicePrivate::get(const QObexHeader &header)
 
     // be confused if a Get request is not for a v-card
     if (header.type().compare("text/x-vCard", Qt::CaseInsensitive) != 0) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService received Get request that wasn't for a v-card";
-#endif
+        qLog(Obex) << "QObexPushService: received Get request that wasn't for a v-card";
         return QObex::Forbidden;
     }
 
     // OPP spec 5.6 - NotFound if there is no default object
-    if (m_vcard.isEmpty()) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: no business card to Get, responding NotFound";
-#endif
+    if (m_vcard.isEmpty())
         return QObex::NotFound;
-    }
 
     m_total = m_vcard.size();
     m_bytes = 0;
+    m_abortPending = false;
 
     emit m_parent->businessCardRequested();
     updateState(QObexPushService::Streaming);
@@ -158,9 +143,11 @@ QObex::ResponseCode QObexPushServicePrivate::get(const QObexHeader &header)
 
 QObex::ResponseCode QObexPushServicePrivate::provideData( const char **data, qint64 *size )
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() <<  "QObexPushService: feeding Stream";
-#endif
+    if (m_abortPending) {
+        m_error = QObexPushService::Aborted;
+        m_abortPending = false;
+        return QObex::Forbidden;
+    }
 
     char *streambuf = &m_vcard.data()[m_bytes];
 
@@ -168,14 +155,9 @@ QObex::ResponseCode QObexPushServicePrivate::provideData( const char **data, qin
 
     if ( (m_total - m_bytes) > OBEX_STREAM_BUF_SIZE) {
         len = OBEX_STREAM_BUF_SIZE;
-    }
-    else {
+    } else {
         len = m_total - m_bytes;
     }
-
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() <<  "QObexPushService: setting stream to len" << len;
-#endif
 
     m_bytes += len;
 
@@ -192,20 +174,15 @@ QObex::ResponseCode QObexPushServicePrivate::provideData( const char **data, qin
 
 QObex::ResponseCode QObexPushServicePrivate::put(const QObexHeader &header)
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService::put()" << header;
-#endif
-
     QPointer<QObexPushServicePrivate> ptr(this);
+    m_abortPending = false;
     m_cleanUpPutDevice = false;
     m_callingAcceptFile = true;
     m_device = m_parent->acceptFile(header.name(), header.type(),
                                     header.length(), header.description());
 
     if (ptr.isNull()) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: object deleted during acceptFile()";
-#endif
+        qLog(Obex) << "QObexPushService: self deleted during acceptFile()";
         return QObex::InternalServerError;
     }
 
@@ -215,20 +192,16 @@ QObex::ResponseCode QObexPushServicePrivate::put(const QObexHeader &header)
     // by showing a UI dialog box, etc. then it's possible the connection was
     // broken during the callback.
     if (m_error != QObexPushService::NoError) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: got error during acceptFile():" << m_error;
-#endif
+        qLog(Obex) << "QObexPushService: error during acceptFile():" << m_error;
+
         // emit done when this function has returned
         QTimer::singleShot(0, this, SLOT(emitDone()));
         return QObex::InternalServerError;
     }
 
-    if (!m_device) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: acceptFile() returned 0, rejecting file, responding Forbidden";
-#endif
+    // acceptFile() returned 0, so reject the request
+    if (!m_device)
         return QObex::Forbidden;
-    }
 
     if (!m_device->isOpen() && !m_device->open(QIODevice::WriteOnly)) {
         qWarning("QObexPushService: unable to open QIODevice for OBEX Put request");
@@ -246,9 +219,11 @@ QObex::ResponseCode QObexPushServicePrivate::put(const QObexHeader &header)
 
 QObex::ResponseCode QObexPushServicePrivate::dataAvailable( const char *data, qint64 size )
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: dataAvailable(), size =" << size;
-#endif
+    if (m_abortPending) {
+        m_error = QObexPushService::Aborted;
+        m_abortPending = false;
+        return QObex::Forbidden;
+    }
 
     m_bytes += size;
 
@@ -271,10 +246,6 @@ QObex::ResponseCode QObexPushServicePrivate::dataAvailable( const char *data, qi
 
 void QObexPushServicePrivate::sentFinalResponse(QObex::Request request)
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService::sentFinalResponse()" << request;
-#endif
-
     switch (request) {
         case QObex::Connect:
             updateState(QObexPushService::Ready);
@@ -290,13 +261,13 @@ void QObexPushServicePrivate::sentFinalResponse(QObex::Request request)
         default:
             break;
     }
+
+    m_abortPending = false;
 }
 
 void QObexPushServicePrivate::requestFinished()
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService::requestFinished() with error:" << m_error;
-#endif
+    bool wasStreaming = (m_state == QObexPushService::Streaming);
 
     if (m_error == QObexPushService::NoError ||
             m_error == QObexPushService::Aborted ) {
@@ -304,7 +275,8 @@ void QObexPushServicePrivate::requestFinished()
     }
 
     QPointer<QObexPushServicePrivate> ptr(this);
-    emit m_parent->requestFinished(m_error != QObexPushService::NoError);
+    if (wasStreaming)
+        emit m_parent->requestFinished(m_error != QObexPushService::NoError);
 
     if (ptr.isNull())
         return;
@@ -338,10 +310,6 @@ void QObexPushServicePrivate::updateState(QObexPushService::State state)
     if (m_state == state)
         return;
 
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: updating push service state to:" << state;
-#endif
-
     m_state = state;
     emit m_parent->stateChanged(m_state);
     if (m_state == QObexPushService::Closed) {
@@ -349,29 +317,19 @@ void QObexPushServicePrivate::updateState(QObexPushService::State state)
         cleanUpPut(false);
         QObexServerSession::close();
 
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: state now Closed, emit done";
-#endif
         emit m_parent->done(m_error != QObexPushService::NoError);
     }
 }
 
 void QObexPushServicePrivate::emitDone()
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: emitting done() with error:" << m_error;
-#endif
     emit m_parent->done(m_error != QObexPushService::NoError);
 }
 
 void QObexPushServicePrivate::error(QObexServerSession::Error error, const QString &errorString)
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: error" << error << errorString
+    qLog(Obex) << "QObexPushService: error" << error << errorString
             << "- during state:" << m_state;
-#else
-    Q_UNUSED(errorString);
-#endif
 
     if (m_state == QObexPushService::Closed)
         return;
@@ -407,15 +365,11 @@ void QObexPushServicePrivate::error(QObexServerSession::Error error, const QStri
 void QObexPushServicePrivate::cleanUpPut(bool aborted)
 {
     if (m_cleanUpPutDevice && m_device) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-        qDebug() << "QObexPushService: device was created by default acceptFile(), closing QIODevice";
-#endif
+        // device was opened by default acceptFile() implementation, so
+        // close it now
         m_device->close();
 
         if (aborted) {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-            qDebug() << "QObexPushService: aborted Put, deleting file";
-#endif
             QFile *file = qobject_cast<QFile*>(m_device);
             if (file)
                 file->remove();
@@ -425,7 +379,7 @@ void QObexPushServicePrivate::cleanUpPut(bool aborted)
     m_cleanUpPutDevice = false;
 }
 
-
+//==================================================================
 
 /*!
     \class QObexPushService
@@ -437,8 +391,6 @@ void QObexPushServicePrivate::cleanUpPut(bool aborted)
     This class implements the Bluetooth Object Push Profile, and can also
     be used to implement the Infrared IrXfer service.
 
-    When using QObexPushService, you should call
-    setIncomingDirectory() to set the incoming directory for received files.
     If you want to control whether an incoming file should be accepted,
     subclass QObexPushService and override the acceptFile() function.
     Subclasses can also override businessCard() to provide the default
@@ -458,6 +410,35 @@ void QObexPushServicePrivate::cleanUpPut(bool aborted)
 
     Finally, the done() signal is emitted when the OBEX client disconnects or
     if the connection is terminated.
+
+
+    \section1 Handling socket disconnections
+
+    You should ensure that the QIODevice provided in the constructor emits
+    QIODevice::aboutToClose() or QObject::destroyed() when the associated
+    transport connection is disconnected. If one of these signals
+    are emitted, QObexPushService will know the transport connection has
+    been lost, and will emit done() (and also requestFinished() if a \c Put or
+    \c Get request is in progress) with \c error set to \c true, and error()
+    will return ConnectionError.
+
+    This is particularly an issue for socket classes such as QTcpSocket that
+    do not emit QIODevice::aboutToClose() when a \c disconnected() signal is
+    emitted. In these cases, QObexPushService will not know that the
+    transport has been disconnected. To avoid this, you can make the socket
+    emit QIODevice::aboutToClose() when it is disconnected:
+
+    \code
+    // make the socket emit aboutToClose() when disconnected() is emitted
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));
+    \endcode
+
+    Or, if the socket can be discarded as soon as it is disconnected:
+
+    \code
+    // delete the socket when the transport is disconnected
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    \endcode
 
     \ingroup qtopiaobex
 */
@@ -479,14 +460,16 @@ void QObexPushServicePrivate::cleanUpPut(bool aborted)
 
     \value NoError No error has occurred.
     \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. If this happens, the state will change to QObexPushService::Closed.
-    \value Aborted The request was aborted by the client.
+    \value Aborted The request was aborted (either by the client, or by a call to abort()).
     \value UnknownError An error other than those specified above occurred.
  */
 
 /*!
-    Constructs an OBEX Push service.  The \a device parameter specifies the
-    device to use for the transport connection. The \a parent specifies
-    the parent object.
+    Constructs an OBEX Push service that uses \a device for the transport
+    connection. The \a parent is the QObject parent.
+
+    The \a device must be opened, or else the service will be unable
+    to receive any client requests.
 */
 QObexPushService::QObexPushService(QIODevice *device, QObject *parent)
     : QObject(parent)
@@ -504,7 +487,7 @@ QObexPushService::~QObexPushService()
 }
 
 /*!
-    Returns the last error that occurred.
+    Returns the error for the last completed request.
 */
 QObexPushService::Error QObexPushService::error() const
 {
@@ -571,10 +554,6 @@ static QString qobexpushservice_getSaveFileName(const QString &path, const QStri
 */
 QIODevice *QObexPushService::acceptFile(const QString &name, const QString &, qint64, const QString &)
 {
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: acceptFile() default implementation";
-#endif
-
     QString fname = name;
     if (fname.contains(QDir::separator())) {
         fname = QFileInfo(fname).fileName();
@@ -590,11 +569,6 @@ QIODevice *QObexPushService::acceptFile(const QString &name, const QString &, qi
     } else {
         file = new QFile(QDir::homePath() + QDir::separator() + fname, this);
     }
-
-#ifdef QOBEXPUSHSERVICE_DEBUG
-    qDebug() << "QObexPushService: acceptFile() default implementation creating file:"
-            << QFileInfo(*file).absoluteFilePath();
-#endif
 
     if (file->open(QIODevice::WriteOnly)) {
         // since file is created by the default implementation, we need to do
@@ -661,6 +635,21 @@ QIODevice *QObexPushService::sessionDevice() const
 }
 
 /*!
+    Aborts the current client request if a \c Put or \c Get request is in
+    progress. If the request was successfully aborted, requestFinished() will
+    be emitted with \c error set to \c true and error() will return
+    QObexPushService::Aborted.
+
+    Due to timing issues, the request may finish before it can be aborted, in
+    which case requestFinished() is emitted normally.
+*/
+void QObexPushService::abort()
+{
+    if (m_data->m_device)
+        m_data->m_abortPending = true;
+}
+
+/*!
     \fn void QObexPushService::done(bool error);
 
     This signal is emitted when the OBEX client has disconnected from the service
@@ -719,9 +708,9 @@ QIODevice *QObexPushService::sessionDevice() const
 /*!
     \fn void QObexPushService::requestFinished(bool error)
 
-    This signal is emitted when a client request is completed. The \a error
-    value is \c true if an error occurred during the request; otherwise
-    \a error is \c false.
+    This signal is emitted when a client \c Put or \c Get request is completed.
+    The \a error value is \c true if an error occurred during the request;
+    otherwise \a error is \c false.
 */
 
 

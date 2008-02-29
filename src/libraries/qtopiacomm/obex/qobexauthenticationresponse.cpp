@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,10 +21,7 @@
 #include <private/qobexauthenticationresponse_p.h>
 #include <private/qobexauthentication_p.h>
 
-#include <QDebug>
 #include <QCryptographicHash>
-
-#undef QOBEXAUTHENTICATIONRESPONSE_DEBUG
 
 
 /*!
@@ -157,10 +154,6 @@ QObexAuthenticationResponse &response)
         if ((i + tagSize) > size)
             return false;
 
-#ifdef QOBEXAUTHENTICATIONRESPONSE_DEBUG
-        qDebug() << "parseRawResponse(): Read response tag:" << tagId << tagSize;
-#endif
-
         // read tag value
         switch (tagId) {
         case (QObexAuth::RequestDigestTag):
@@ -183,9 +176,6 @@ QObexAuthenticationResponse &response)
             // doesn't support duplicate headers at the moment).
             break;
         default:
-#ifdef QOBEXAUTHENTICATIONRESPONSE_DEBUG
-            qDebug() << "readRawResponse(): Got unknown response header:" << tagId;
-#endif
             break;
         };
 
@@ -194,12 +184,8 @@ QObexAuthenticationResponse &response)
     }
 
     // if no valid digest was provided, the whole challenge is invalid
-    if (digest.size() != int(QObexAuth::RequestDigestSize)) {
-#ifdef QOBEXAUTHENTICATIONRESPONSE_DEBUG
-        qDebug() << "readRawResponse(): Invalid request digest!";
-#endif
+    if (digest.size() != int(QObexAuth::RequestDigestSize)) 
         return false;
-    }
 
     response.m_data->m_requestDigest = digest;
     response.m_data->m_user = user;

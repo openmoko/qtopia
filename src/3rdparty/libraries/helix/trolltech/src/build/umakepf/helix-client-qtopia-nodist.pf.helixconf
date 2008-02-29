@@ -87,7 +87,4 @@ exec_profile_file("helix-client-mp3.pfi")
 exec_profile_file("helix-client-mp4.pfi")
 exec_profile_file("helix-client-pcm.pfi")
 
-
-project.RemoveDefines('HELIX_FEATURE_DBG_LOG')
-
 #project.AddDefines('HELIX_FEATURE_NEWAUDIOSTREAM')

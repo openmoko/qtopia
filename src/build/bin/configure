@@ -42,6 +42,8 @@ if ( $isWindows ) {
 
 # We need to figure out the Qt/Qtopia Core paths so that Qtopia::Paths::get_paths() can work for other scripts.
 get_qtopiacore_paths();
+# Set the MKSPECS variable so that config tests can work.
+$ENV{MKSPECS} = "$qt_depot_path/mkspecs";
 
 my $cols = $ENV{COLUMNS};
 $cols = 80 unless ( $cols );
@@ -138,11 +140,6 @@ my $x86_64 = 0;
     $x86_64 = ( $machine eq "x86_64" );
 }
 
-# Version stuff
-my $qtopiaVersionStr = "0.0.0";
-my $qtVersionStr = "0.0.0";
-getVersions();
-
 # The $build_ variables limit what you can build
 my $build_desktop = configopt("desktop");
 my $build_pda = configopt("pda");
@@ -156,6 +153,11 @@ if ( $isWindows || $isMac ) {
     $build_phone = 0;
     $build_media = 0;
 }
+
+# Version stuff
+my $qtopiaVersionStr = "0.0.0";
+my $qtVersionStr = "0.0.0";
+getVersions();
 
 # Edition-specific defaults
 my %dispsz = ( "phone" => "160-240",
@@ -232,6 +234,10 @@ set_optvar( "reduce_exports", +{
     "available" => [ qw(auto yes no) ],
     "default" => "auto",
 });
+set_optvar( "target_little_endian", +{
+    "set" => [ "little-endian", "Force target build to use little endian (LSB first)." ],
+    "unset" => [ "big-endian", "Force target build to use big endian (MSB first)." ],
+});
 add_separator();
 set_optvar( "extraIncPaths", +{
     "set" => [ "I=s", "Add an explicit include path." ],
@@ -258,6 +264,8 @@ set_optvar( "extraDefines", +{
     "arg" => "def",
     "type" => '@',
 });
+add_note("The -I, -L, -l, -R and -D flags apply when building Qtopia and Qtopia Core. ".
+         "If you need to pass these flags to Qt you should use -extra-qt-config 'flags'.");
 set_optvar( "rpath", +{
     "set" => [ "%", "Set an automatic RPATH (so LD_LIBRARY_PATH is not required to run Qtopia).".
                     " Note that this requires QMAKE_RPATH to be set in your selected mkspec."],
@@ -302,10 +310,15 @@ set_optvar( "device", +{
     "autodep" => $qtopia_autoref,
     "available" => sub {
         my @avail;
-        map { push(@avail, basename($_)) if ( -d $_ ); } glob("$depotpath/devices/*");
+        map { push(@avail, basename($_)) if ( -d $_ && basename($_) ne "default" ); } glob("$depotpath/devices/*");
         @avail;
     },
-    "config_pri" => [ "device=%", "CONFIG+=build_device", "DEVICE_CONFIG_PATH=%{config_path}" ],
+    "config_pri" => [ "device=%",
+                      "CONFIG+=build_device",
+                      "DEVICE_CONFIG_PATH=%{config_path}",
+                      "DEFAULT_DEVICE_PATH=%{default_path}",
+                      "DEVICE_BIN=%{device_bin}" ],
+    "default_path" => "$depotpath/devices/default",
 });
 set_optvar( "using_device", +{
     "set" => [ "%=s", "hidden" ],
@@ -502,7 +515,8 @@ set_optvar( "languages", +{
         }
         $def;
     },
-    "config_pri" => "LANGUAGES=%",
+    "config_pri" => [ "LANGUAGES=%",
+                      "AVAILABLE_LANGUAGES=%{available}" ],
 });
 set_optvar( "iconsize", +{
     "set" => [ "%=s", "Non-scalable icons are installed at the requested size. ".
@@ -697,17 +711,18 @@ set_optvar( "dbus", +{
     "default_tested" => 1,
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
-    "config_pri" => "CONFIG+=enable_dbus",
+    "config_pri" => [ "CONFIG+=enable_dbus",
+                      "DBUS_CFLAGS=%{cflags}",
+                      "DBUS_LIBS=%{libs}" ],
 });
 set_optvar( "dbuspath", +{
-    "set" => [ "%=s", "Locate the DBUS build." ],
+    "set" => [ "%=s", "hidden" ],
     "setfunc" => sub { opt("dbuspath") = $_[1]; opt("dbus") = 1; },
-    "arg" => "dir",
-    "default" => "/usr/local",
-    "visible" => $qtopia_visref,
-    "autodep" => $qtopia_autoref,
-    "config_pri" => "DBUS_PREFIX=%",
-    "showauto" => 1,
+    "setfunc" => sub {
+        warn "WARNING: -dbuspath is deprecated. Please use -dbus instead.\n".
+             "         Note that pkg-config is now used to locate dbus.\n";
+        opt("dbus") = 1;
+    },
 });
 set_optvar( "drm", +{
     "set" => [ "%", "Enable support for DRM (Using the Beep Science DRM Agent v2.4)." ],
@@ -742,8 +757,17 @@ set_optvar( "v4l2", +{
     "config_pri" => "DEFINES+=QTOPIA_HAVE_V4L2",
 });
 add_separator();
+set_optvar( "telephony", +{
+    "set" => [ "%", "Enable Telephony components (UI, Modem, VoIP)." ],
+    "unset" => [ "no-%", "Disable Telephony components." ],
+    "default" => 1,
+    "visible" => $qtopia_visref,
+    "autodep" => $qtopia_autoref,
+    "config_pri" => [ "CONFIG+=enable_telephony",
+                      "DEFINES+=QTOPIA_TELEPHONY" ],
+});
 set_optvar( "modem", +{
-    "set" => [ "%", "Enable Modem communication." ],
+    "set" => [ "%", "Enable Modem communication (requires Telephony)." ],
     "unset" => [ "no-%", "Disable Modem communication." ],
     "default" => 1,
     "visible" => $qtopia_visref,
@@ -752,8 +776,7 @@ set_optvar( "modem", +{
     "config_pri" => "CONFIG+=enable_modem enable_cell",
 });
 set_optvar( "phonevendors", +{
-    "set" => [ "%=s",
-        "Build and install phonevendor plugins." ],
+    "set" => [ "%=s", "Build and install phonevendor plugins (reqires Modem)." ],
     "arg" => "plugin,plugin",
     "type" => "multi-value",
     "available_device" => sub {
@@ -791,8 +814,7 @@ set_optvar( "phonevendors", +{
     "autodep" => $qtopia_autoref,
 });
 set_optvar( "multiplexers", +{
-    "set" => [ "%=s",
-        "Build and install multiplexer plugins." ],
+    "set" => [ "%=s", "Build and install multiplexer plugins (reqires Modem)." ],
     "arg" => "plugin,plugin",
     "type" => "multi-value",
     "available_device" => sub {
@@ -830,7 +852,8 @@ set_optvar( "multiplexers", +{
     "autodep" => $qtopia_autoref,
 });
 set_optvar( "voip", +{
-    "set" => [ "%", "Enable VoIP (Voice over IP) communication. Note that the reference SIP agent will not build in singleexec mode." ],
+    "set" => [ "%", "Enable VoIP (Voice over IP) communication. Note that the reference ".
+                    "SIP agent will not build in singleexec mode. (requires Telephony)" ],
     "setaliases" => [ "enable-voip" ],
     "unset" => [ "no-%", "Disable VoIP communication." ],
     "unsetaliases" => [ "disable-voip" ],
@@ -840,7 +863,8 @@ set_optvar( "voip", +{
     "silentignore" => [ "no-voip" ],
     "config_pri" => "CONFIG+=enable_voip",
 });
-add_note("Modem and VoIP communication are not exclusive or mandatory. You can enable one, both or none.");
+add_note("Modem and VoIP communication are not exclusive or mandatory. You can enable one, both or none. ".
+         "You must enable telephony to enable Modem or VoIP.");
 add_separator();
 set_optvar( "vpn", +{
     "set" => [ "%", "Enable VPN (Virtual Private Network) support." ],
@@ -867,24 +891,46 @@ set_optvar( "qtopiamedia", +{
                       "DEFINES+=MEDIA_SERVER" ],
 });
 set_optvar( "mediaengines", +{
-    "set" => [ "%=s", "Select the sound engines to use with the Qtopia Media API." ],
+    "set" => [ "%=s", "Select the audio/video engines to use with the Qtopia Media API.".
+                       "The order of the engines is significant" ],
     "arg" => "engine,engine",
     "type" => "multi-value",
-    "available" => sub {
+    "available_device" => sub {
+        my @avail;
+        if ( opt("device", "config_path") ) {
+            map { push(@avail, basename($_)) if ( -f "$_/".basename($_).".pro" ); } glob(opt("device", "config_path")."/src/plugins/mediaengines/*");
+        }
+        @avail;
+    },
+    "available_depot" => sub {
         my @avail;
         map { push(@avail, basename($_)) if ( -f "$_/".basename($_).".pro" ); } glob("$depotpath/src/plugins/mediaengines/*");
         @avail;
     },
+    "available" => sub {
+        my @avail;
+        push(@avail, Qtopia::Opt::_resolve_to_array(opt("mediaengines", "available_depot")));
+        push(@avail, Qtopia::Opt::_resolve_to_array(opt("mediaengines", "available_device")));
+        @avail;
+    },
     "default" => sub {
-        my $def = "";
-        my @avail = Qtopia::Opt::_resolve_to_array(opt("mediaengines", "available"));
-        for ( @avail ) {
-            if ( $_ eq "helix" ) {
-                $def = "helix"; # default to helix, if it's available
-                last;
+        my $ret;
+        my @avail_device = Qtopia::Opt::_resolve_to_array(opt("mediaengines", "available_device"));
+        if ( @avail_device ) {
+            $ret = join(" ", @avail_device); # default to whatever is in the device profile
+        } else {
+            my @avail = Qtopia::Opt::_resolve_to_array(opt("mediaengines", "available"));
+            for ( @avail ) {
+                if ( $_ eq "cruxus" ) {
+                    $ret = "cruxus"; # default to cruxus unless helix is available
+                }
+                if ( $_ eq "helix" ) {
+                    $ret = "helix"; # default to helix, if it's available
+                    last;
+                }
             }
         }
-        $def;
+        $ret;
     },
     "default_tested" => 1,
     "visible" => $qtopia_visref,
@@ -906,7 +952,7 @@ if ( !&$helix_visref() ) {
             push(@avail, $_);
         }
     }
-    opt("mediaengines", "available") = join(" ", @avail);
+    opt("mediaengines", "available") = sub { @avail };
 }
 set_optvar( "helix", +{
     "set" => [ "helix", "hidden" ],
@@ -1134,8 +1180,10 @@ set_optvar( "greenphone_effects", +{
 });
 
 # placeholders. These aren't switches but the values get propagated via config.cache
-set_optvar( "gcc4", +{
+set_optvar( "compiler", +{
     "role" => "placeholder",
+    "config_pri" => [ "QTOPIA_HOST_ENDIAN=%{host_endian}",
+                      "QTOPIA_TARGET_ENDIAN=%{target_endian}" ],
 });
 set_optvar( "version", +{
     "role" => "placeholder",
@@ -1272,7 +1320,7 @@ if ( open IN, "$QPEDIR/config.status" ) {
 # Get options and print help
 my @ARGV_SAVE = @ARGV;
 Qtopia::Opt::setEngine($engine);
-my $ok = opt_get_options( "nohelp", "noextra" );
+my $ok = opt_get_options( "nohelp", "noextra", "novalidate" );
 
 # config.defaults simplifies configuring and building Qtopia for a specific environment (eg. greenphone SDK)
 if ( opt("config_defaults") ) {
@@ -1315,6 +1363,7 @@ END
 # Device profiles simplify configuring and building Qtopia
 if ( opt("device") ) {
     opt("device", "config_path") = fixpath("$depotpath/devices/".opt("device"));
+    opt("device", "device_bin") = fixpath("$QPEDIR/devices/".opt("device")."/device_bin");
     if ( ! -e opt("device", "config_path") ) {
         $ok = 0;
     }
@@ -1335,10 +1384,27 @@ if ( opt("device") ) {
         $command_line =~ s/'--?(device' '\Q$device\E')/'-using-$1 $conf/;
         $command_line .= " -no-save-options";
         my $device_config_path = opt("device", "config_path");
+        my $default_device_path = opt("device", "default_path");
+        my $device_bin = opt("device", "device_bin");
         DEBUG and print "-device used... rerunning configure:\n$command_line\n";
+
+# NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+#
+# The environment file handling logic is duplicated in runwithvars.sh
+# However, the removing of device_bin is specific to configure
+#
+# NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+
         exec <<END;
 DEVICE_CONFIG_PATH="$device_config_path"
+DEFAULT_DEVICE_PATH="$default_device_path"
+DEVICE_BIN="$device_bin"
+# Ensure device_bin is empty (so the wrapper scripts get re-generated)
+rm -rf \$DEVICE_BIN
+mkdir -p \$DEVICE_BIN
+. "\$DEFAULT_DEVICE_PATH/environment"
 [ -f "\$DEVICE_CONFIG_PATH/environment" ] && . "\$DEVICE_CONFIG_PATH/environment"
+setup_path
 cd $cwd && $command_line
 END
         die "ERROR: Could not re-run confiure!\n";
@@ -1358,6 +1424,10 @@ if ( @mkconf && !opt("using_mkconf") ) {
 cd $cwd && $command_line
 END
     die "ERROR: Could not re-run confiure!\n";
+}
+
+if ( !Qtopia::Opt::validate() ) {
+    $ok = 0;
 }
 
 if ( !$ok || opt("help") ) {
@@ -1395,10 +1465,6 @@ if ( $shadow ) {
 	die "ERROR: You cannot shadow build from inside the source tree\n";
     }
 
-    if ( -f "$depotpath/.shadow_warn" ) {
-        unlink "$depotpath/.shadow_warn";
-    }
-
     symlink_all_files("bin");
     symlink_all_files("scripts");
     symlink_all_files("tests/scripts");
@@ -1419,17 +1485,13 @@ if ( $shadow ) {
 
     # Clean out any builds found in the Qtopia source tree
     clean_qtopia_sources();
-} elsif ( !$isWindows && ! -f "$depotpath/.shadow_warn" ) {
-    if ( open OUT, ">$depotpath/.shadow_warn" ) {
-        print OUT "\n";
-        close OUT;
-    }
+} elsif ( !$isWindows ) {
     my $dir = basename($depotpath);
-    warn <<END;
+    die <<END;
 
 
-WARNING: In-source builds are not reliable. You should build from a different
-         directory to ensure that you do not run into problems.
+ERROR: Qtopia cannot be built from the source directory. You should build
+       from a different directory.
 
          eg.
 
@@ -1439,11 +1501,7 @@ WARNING: In-source builds are not reliable. You should build from a different
              ../$dir/configure [options]
 
 
-Note: This warning will not display again.
-
-
 END
-    sleep 30;
 }
 mkpath("$QPEDIR/lib/host");
 
@@ -1552,7 +1610,7 @@ if ( opt("edition") ) {
     if ( !opt("arch") ) {
         die "ERROR: Cannot detect architecture. Please specify -arch <architecture>\n";
     }
-    if ( grep { $_ eq opt("arch") } qw(x86 generic) ) {
+    if ( opt("arch") eq "x86" || (opt("arch", "auto") && opt("arch") eq "generic") ) {
         opt("arch") = $x86_64?"x86_64":"i386";
     }
     if ( ! -d "$qt_depot_path/src/corelib/arch/".opt("arch") ) {
@@ -1716,8 +1774,27 @@ if ( opt("edition") && opt("drm") ) {
 
 # Early config tests (needed before we build Qt)
 print "\n";
-opt("gcc4", "host") = 0;
-opt("gcc4", "target") = 0;
+opt("compiler", "host_gcc4") = 0;
+opt("compiler", "host_endian") = "unknown";
+opt("compiler", "target_gcc4") = 0;
+opt("compiler", "target_endian") = "unknown";
+# Qtopia's endian switches override the autodetect
+if ( defined(opt("target_little_endian")) ) {
+    if ( opt("target_little_endian") ) {
+        opt("compiler", "target_endian") = "little";
+    } else {
+        opt("compiler", "target_endian") = "big";
+    }
+}
+# Qtopia's endian switches also override Qtopia Core's switches so search through and remove them now
+{
+    my $ref = opt("extra_qte_config");
+    for ( @$ref ) {
+        if ( s/--?(little|big)-endian//g ) {
+            print "Note: -extra-qtopiacore-config -$1-endian has no effect.\n";
+        }
+    }
+}
 my @combinations = ( "host", opt("platform", "absolute"),
                      "target", opt("xplatform", "absolute") );
 while ( @combinations ) {
@@ -1760,16 +1837,38 @@ while ( @combinations ) {
         my $out;
         my $ret = configtest("compiler", "env", $envstring, "outvar", $out);
         if ( $ret ) {
+            my @msg;
             if ( grep /^GCC VERSION 4/, split(/\n/, $out)) {
-                opt("gcc4", $host) = 1;
+                opt("compiler", $host."_gcc4") = 1;
+                push(@msg, "GCC 4");
             } else {
-                opt("gcc4", $host) = 0;
+                opt("compiler", $host."_gcc4") = 0;
             }
-            if ( opt("gcc4", $host) ) {
-                print "OK (GCC 4)\n";
+            if ( grep /^LeastSignificantByteFirst/, split(/\n/, $out)) {
+                if ( opt("compiler", $host."_endian") eq "unknown" ) {
+                    opt("compiler", $host."_endian") = "little";
+                }
+                if ( opt("compiler", $host."_endian") eq "little" ) {
+                    push(@msg, "Little Endian");
+                } else {
+                    push(@msg, "Big Endian - user override");
+                }
+            } elsif ( grep /^MostSignificantByteFirst/, split(/\n/, $out)) {
+                if ( opt("compiler", $host."_endian") eq "unknown" ) {
+                    opt("compiler", $host."_endian") = "big";
+                }
+                if ( opt("compiler", $host."_endian") eq "big" ) {
+                    push(@msg, "Big Endian");
+                } else {
+                    push(@msg, "Little Endian - user override");
+                }
             } else {
-                print "OK\n";
+                print "FAIL (cannot detect endianness)\n";
+                print "Please use the -little-endian or -big-endian switch.\n";
+                print "Note: Run configure -verbose for verbose errors\n";
+                exit 1;
             }
+            print "OK ".(@msg?"(":"").join(", ",@msg).(@msg?")":"")."\n";
         } else {
             if ( $out =~ /CANNOT RUN BINARIES/ ) {
                 print "FAIL (cannot run binaries)\n";
@@ -1854,6 +1953,21 @@ if ( opt("edition") ) {
     opt("displaysize", "codes").=" T" if                 800 <= $szhi;
 
     mkpath("$QPEDIR/etc/default/Trolltech/");
+
+    # -no-telephony implies -no-modem and -no-voip (so enforce it)
+    if ( !opt("telephony") ) {
+        if ( opt("modem", "auto") ) {
+            opt("modem") = 0;
+        }
+        if ( opt("voip", "auto") ) {
+            opt("voip") = 0;
+        }
+        if ( opt("modem") || opt("voip") ) {
+            warn "ERROR: You cannot pass -modem and -no-telephony.\n" if ( opt("modem") );
+            warn "ERROR: You cannot pass -voip and -no-telephony.\n" if ( opt("voip") );
+            exit 1;
+        }
+    }
 }
 
 # Fix up the font definitions (easier in perl than in qmake)
@@ -2000,7 +2114,7 @@ if ( $HOST_QT eq $DQTDIR ) {
         map { $args .= " -no-sql-".basename($_) if ( basename($_) ne "tmp" && -d $_ ); } glob("$qt_depot_path/src/plugins/sqldrivers/*");
         $args .= " -qt-sql-sqlite";
         if ( !$isWindows ) {
-            $args .= " -no-qdbus";
+            $args .= " -no-qdbus -no-openssl";
             my $prefix = $DQTDIR;
             if ( opt("sdkroot") && !opt("sdkroot", "auto") ) {
                 $prefix = fixpath(opt("sdkroot")."/qtopiacore/host");
@@ -2024,14 +2138,13 @@ if ( $HOST_QT eq $DQTDIR ) {
         if ( opt("verbose") ) {
             $args .= " -verbose";
         }
-        if ( opt("gcc4", "host") && opt("reduce_exports") ne "auto" ) {
+        if ( opt("compiler", "host_gcc4") && opt("reduce_exports") ne "auto" ) {
             $args .= " --reduce-exports=".opt("reduce_exports");
         }
         if ( !$isWindows ) {
             if ( opt("silent") ) {
                 $args .= " -silent";
             }
-            $args .= " -no-qdbus";
             if ( !opt("separate_debug_info") ) {
                 $args .= " -no-separate-debug-info";
             }
@@ -2129,7 +2242,7 @@ END
                 opt("helix_system_id") = "linux-2.6-glibc23-amd64";
             } else {
                 # GCC 4 requires a different helix_system_id to avoid the annoying "-mcpu is deprecated" messages
-                if ( opt("gcc4", "target") ) {
+                if ( opt("compiler", "target_gcc4") ) {
                     opt("helix_system_id") = "linux-2.2-libc6-gcc32-i586-gcc4";
                 } else {
                     opt("helix_system_id") = "linux-2.2-libc6-gcc32-i586";
@@ -2423,7 +2536,7 @@ if ( opt("edition") && !opt("qte_config") ) {
     if ( opt("qtopiamedia") ) {
         $args .= " -DMEDIA_SERVER";
     }
-    if ( opt("gcc4", "target") && opt("reduce_exports") ne "auto" ) {
+    if ( opt("compiler", "target_gcc4") && opt("reduce_exports") ne "auto" ) {
         $args .= " --reduce-exports=".opt("reduce_exports");
     }
     if ( opt("silent") ) {
@@ -2443,6 +2556,26 @@ if ( opt("edition") && !opt("qte_config") ) {
     }
     if ( opt("glib") ) {
         $args .= " -glib";
+    }
+    my @data = (
+        "extraIncPaths" => "-I",
+        "extraLibPaths" => "-L",
+        "extraLibs" => "-l",
+        "extraRPaths" => "-R",
+        "extraDefines" => "-D",
+    );
+    while ( @data ) {
+        my $var = shift(@data);
+        my $flag = shift(@data);
+        my $listref = opt($var);
+        if ( @$listref ) {
+            $args .= " $flag".join(" $flag", @$listref);
+        }
+    }
+    if ( opt("compiler", "target_endian") eq "little" ) {
+        $args .= " -little-endian";
+    } elsif ( opt("compiler", "target_endian") eq "big" ) {
+        $args .= " -big-endian";
     }
     my $listref = opt("extra_qte_config");
     if ( @$listref ) {
@@ -2503,6 +2636,16 @@ if ( opt("edition") ) {
         die $err;
     }
     symlink_file("$custom.h",   $QPEDIR."/src/libraries/qtopiabase/custom-qtopia.h");
+    # Read the file in again so we can put in an include guard
+    open IN, "$QPEDIR/src/libraries/qtopiabase/custom-qtopia.h" or die "Can't read $QPEDIR/src/libraries/qtopiabase/custom-qtopia.h";
+    my @data = <IN>;
+    close IN;
+    unshift(@data, "#ifndef QTOPIACUSTOM_H // resolveHeader skip 3\n".
+                   "#error \"custom-qtopia.h is not part of the Qtopia API, include <custom.h> instead.\"\n".
+                   "#endif\n");
+    open OUT, ">$QPEDIR/src/libraries/qtopiabase/custom-qtopia.h" or die "Can't write $QPEDIR/src/libraries/qtopiabase/custom-qtopia.h";
+    print OUT @data;
+    close OUT;
     symlink_file("$custom.cpp", $QPEDIR."/src/libraries/qtopiabase/custom-qtopia.cpp");
     symlink_file(opt("defaultbuttons"), $QPEDIR."/etc/defaultbuttons.conf");
 }
@@ -2635,24 +2778,29 @@ if ( opt("readline") ) {
 if ( opt("dbus") ) {
     print "Testing DBUS: ";
     print "\n" if ( opt("verbose") );
-    my $ok = configtest("dbus", "env", "DBUS_PREFIX=".opt("dbuspath"));
+    my $out;
+    my $ok = configtest("dbus_version", "outvar", $out);
     my $fail = "";
     if ( $ok ) {
-        my $out;
-        $ok = configtest("dbus_version", "env", "DBUS_PREFIX=".opt("dbuspath"), "outvar", $out);
-        if ( $ok ) {
-            my ( $maj, $min ) = ( $out =~ /(\d+)\.(\d+)/ );
-            if ( !defined($maj) || !defined($min) ) {
-                $fail = "Could not decode version - expecting 0.92 or later, found $out";
-                $ok = 0;
+        my ( $version, $cflags, $libs ) = split(/\n/, $out);
+        my ( $maj, $min ) = ( $version =~ /(\d+)\.(\d+)/ );
+        if ( !defined($maj) || !defined($min) ) {
+            $fail = "Could not decode version - expecting 0.92 or later, found $version";
+            $ok = 0;
+        } else {
+            if ( $maj >= 1 || ( $maj == 0 && $min >= 92 ) ) {
             } else {
-                if ( $maj >= 1 || ( $maj == 0 && $min >= 92 ) ) {
-                } else {
-                    $ok = 0;
-                    $fail = "Version must be 0.92 or newer, found $out";
-                }
+                $ok = 0;
+                $fail = "Version must be 0.92 or newer, found $version";
             }
         }
+        opt("dbus", "cflags") = $cflags;
+        opt("dbus", "libs") = $libs;
+    } else {
+        $fail = "DBUS could not be found. Check that PKG_CONFIG_PATH is set correctly.";
+    }
+    if ( $ok ) {
+        $ok = configtest("dbus", "env", "DBUS_CFLAGS=\"".opt("dbus", "cflags")."\" DBUS_LIBS=\"".opt("dbus", "libs")."\"");
     }
     if ( $ok ) {
         print "OK\n";
@@ -2781,22 +2929,27 @@ push(@projectRoots, fixpath("$QPEDIR"),
                     fixpath("$QPEDIR/src/plugins/designer"));
 if ( opt("device") && -d opt("device", "config_path")."/src" && -f opt("device", "config_path")."/src/src.pro" ) {
     push(@$extraBuildPathsRef, opt("device", "config_path")."/src");
-    # Make this a project root (can't rely on the rule below because it
-    # rejects this path due to being inside QPEDIR)
-    my $dir = fixpath(opt("device", "config_path")."/src");
-    # Relocate it to the build tree
-    $dir =~ s,\Q$depotpath\E,$QPEDIR,;
-    push(@projectRoots, "$dir");
 }
 # Cleanup the locations passed as -build
 for my $dir ( @$extraBuildPathsRef ) {
     chdir $cwd; # in case $dir is relative!
+    chdir $dir or mkpath($dir); # this lets -build foo work (where $QPEDIR/foo doesn't exist but $depotpath/foo does)
     chdir $dir or die "Can't enter $dir";
     $dir = fixpath(getcwd());
     # Relocate it to the build tree
     $dir =~ s,\Q$depotpath\E,$QPEDIR,;
-    # Don't make dir a project root if it's inside the Qtopia tree (or you might cause problems)
-    if ( $dir !~ /^\Q$QPEDIR\E/ ) {
+    my @checkRoots;
+    map { push(@checkRoots, $_) unless ( $_ eq $QPEDIR ); } @projectRoots;
+    # You can make new project roots under $QPEDIR but not under any of the alread-defined project roots.
+    # For example, bad things would happen if you created a new project root in $QPEDIR/src/something.
+    my $add = 1;
+    for ( @checkRoots ) {
+        if ( $dir =~ /^\Q$_\E/ ) {
+            $add = 0;
+            last;
+        }
+    }
+    if ( $add ) {
         push(@projectRoots, $dir);
     }
 }
@@ -3296,7 +3449,7 @@ sub get_system_id_flags
                 push(@$flags, $1);
                 #print "$1\n";
             }
-            if ( opt("gcc4", "target") && /(-mtune=[^\s"]+)/ ) {
+            if ( opt("compiler", "target_gcc4") && /(-mtune=[^\s"]+)/ ) {
                 push(@$flags, $1);
                 #print "$1\n";
             }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,37 +29,6 @@
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <qtopiaapplication.h>
 #endif
-
-/*!
-    \internal
-    \class DRMThumbnailLoader
-    \mainclass
-    A specialisation of the ThumbnailLoader class that can load thumbnails of
-    DRM protected images.
- */
-
-/*!
-    Creates a new DRMThumbnailLoader object.
- */
-DRMThumbnailLoader::DRMThumbnailLoader( ThumbnailCache* cache, QObject* parent )
-    : ThumbnailLoader( cache, parent )
-{
-}
-
-/*!
-    Loads a thumbnail of an image, if the image is not DRM protected use the default implemetation
-    in ThumbnailLoader.  If the image is DRM protected use the loadDRMThumbnail function.
-*/
-QPixmap DRMThumbnailLoader::loadThumbnail( const QString &filename, const QSize &size )
-{
-    foreach( QDrmContentPlugin *plugin, DrmContentPluginManager::instance()->plugins() )
-    {
-        foreach( QString key, plugin->keys() )
-            if( filename.endsWith( '.' + key ) || filename.contains( '.' + key + QDir::separator() ) )
-                return DrmContentPrivate::thumbnail( filename, size );
-    }
-    return ThumbnailLoader::loadThumbnail( filename, size );
-}
 
 DrmContentPluginManager::DrmContentPluginManager()
     : m_agentManager( 0 )

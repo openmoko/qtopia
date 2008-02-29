@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,9 +39,10 @@ QTOPIA_EXPORT_PLUGIN( Ficgta01MultiplexerPlugin )
 // Define this to disable GSM 07.10 multiplexing, but still do wakeup handling.
 #define FICGTA01_NO_MUX
 
+
 // Size of GSM 07.10 frames to use with the multiplexer.
 #ifndef FICGTA01_FRAME_SIZE
-#define FICGTA01_FRAME_SIZE       31
+#define FICGTA01_FRAME_SIZE       64
 #endif
 
 #define N_TIHTC 17
@@ -92,7 +93,7 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
     // Issue an innocuous command to wake up the device.
     // It will respond with either "OK" or "AT-Command Interpreter ready".
 
-    QSerialIODeviceMultiplexer::chat( device, "ATE0" );
+  QSerialIODeviceMultiplexer::chat( device, "ATZ");
 
     // Issue the AT+CMUX command to determine if this device
     // uses GSM 07.10-style multiplexing.
@@ -107,7 +108,7 @@ QSerialIODeviceMultiplexer *Ficgta01MultiplexerPlugin::create
         ( QSerialIODevice *device )
 {
 #ifndef FICGTA01_NO_MUX
-    return new QGsm0710Multiplexer( device, FICGTA01_FRAME_SIZE );
+    return new QGsm0710Multiplexer( device, FICGTA01_FRAME_SIZE, true );
 #else
     return new QNullSerialIODeviceMultiplexer( device );
 #endif

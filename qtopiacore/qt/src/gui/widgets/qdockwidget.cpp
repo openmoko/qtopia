@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -226,15 +224,17 @@ QLayoutItem *QDockWidgetLayout::itemAt(int index) const
 
 QLayoutItem *QDockWidgetLayout::takeAt(int index)
 {
+    int j = 0;
     for (int i = 0; i < item_list.count(); ++i) {
         QLayoutItem *item = item_list.at(i);
         if (item == 0)
             continue;
-        if (index == i) {
+        if (index == j) {
             item_list[i] = 0;
             invalidate();
             return item;
         }
+        ++j;
     }
     return 0;
 }
@@ -343,8 +343,10 @@ QLayoutItem *QDockWidgetLayout::item(Role r) const
 void QDockWidgetLayout::setWidget(Role r, QWidget *w)
 {
     QWidget *old = widget(r);
-    if (old != 0)
+    if (old != 0) {
+        old->hide();
         removeWidget(old);
+    }
 
     if (w != 0) {
         addChildWidget(w);
@@ -377,9 +379,9 @@ int QDockWidgetLayout::minimumTitleWidth() const
     QSize closeSize(0, 0);
     QSize floatSize(0, 0);
     if (QLayoutItem *item = item_list[CloseButton])
-        closeSize = item->widget()->sizeHint();
+        closeSize = item->sizeHint();
     if (QLayoutItem *item = item_list[FloatButton])
-        floatSize = item->widget()->sizeHint();
+        floatSize = item->sizeHint();
 
     int titleHeight = this->titleHeight();
 
@@ -782,6 +784,10 @@ void QDockWidgetPrivate::mousePressEvent(QMouseEvent *event)
             return;
 
         initDrag(event->pos(), false);
+
+        if (state == 0)
+            return;
+
         state->ctrlDrag = event->modifiers() & Qt::ControlModifier;
     }
 
@@ -868,10 +874,19 @@ void QDockWidgetPrivate::nonClientAreaMouseEvent(QMouseEvent *event)
 
     QRect geo = q->geometry();
     QRect titleRect = q->frameGeometry();
-    titleRect.setLeft(geo.left());
-    titleRect.setRight(geo.right());
-    titleRect.setBottom(geo.top() - 1);
-    titleRect.adjust(0, fw, 0, 0);
+#ifdef Q_WS_MAC
+    if ((features & QDockWidget::DockWidgetVerticalTitleBar)) {
+        titleRect.setTop(geo.top());
+        titleRect.setBottom(geo.bottom());
+        titleRect.setRight(geo.left() - 1);
+    } else
+#endif
+    {
+        titleRect.setLeft(geo.left());
+        titleRect.setRight(geo.right());
+        titleRect.setBottom(geo.top() - 1);
+        titleRect.adjust(0, fw, 0, 0);
+    }
 
     switch (event->type()) {
         case QEvent::NonClientAreaMouseButtonPress:
@@ -884,6 +899,8 @@ void QDockWidgetPrivate::nonClientAreaMouseEvent(QMouseEvent *event)
             if (isAnimating())
                 break;
             initDrag(event->pos(), true);
+            if (state == 0)
+                break;
 #ifdef Q_OS_WIN
             // On Windows, NCA mouse events don't contain modifier info
             state->ctrlDrag = GetKeyState(VK_CONTROL) & 0x8000;
@@ -1460,6 +1477,7 @@ QAction * QDockWidget::toggleViewAction() const
 */
 
 /*!
+    \since 4.3
     Sets an arbitrary \a widget as the dock widget's title bar. If \a widget
     is 0, the title bar widget is removed, but not deleted.
 
@@ -1509,6 +1527,7 @@ void QDockWidget::setTitleBarWidget(QWidget *widget)
 }
 
 /*!
+    \since 4.3
     Returns the custom title bar widget set on the QDockWidget, or 0 if no
     custom title bar has been set.
 

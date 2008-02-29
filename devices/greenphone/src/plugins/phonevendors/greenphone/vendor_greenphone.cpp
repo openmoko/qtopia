@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -322,6 +322,8 @@ GreenphoneSimToolkit::GreenphoneSimToolkit( GreenphoneModemService *service )
         ( "*MTSMS:", this, SLOT(mtsms(QString)) );
     service->primaryAtChat()->registerNotificationType
         ( "*MTSS:", this, SLOT(mtss(QString)) );
+    service->primaryAtChat()->registerNotificationType
+        ( "*MTUSSD:", this, SLOT(mtussd(QString)) );
     service->primaryAtChat()->registerNotificationType
         ( "*MTDTMF:", this, SLOT(mtdtmf(QString)) );
     service->primaryAtChat()->registerNotificationType
@@ -909,6 +911,19 @@ void GreenphoneSimToolkit::mtss( const QString& msg )
     unicodeStrings = ( QAtUtils::parseNumber( msg, posn ) != 0 );
     cmd.setText( decodeString( text ) );
     cmd.setNumber( QAtUtils::nextString( msg, posn ) ); // SSstring value.
+    parseIconInfo( cmd, msg, posn );
+    emitCommandNoResponse( cmd );
+}
+
+void GreenphoneSimToolkit::mtussd( const QString& msg )
+{
+    QSimCommand cmd;
+    uint posn = 8;
+    cmd.setType( QSimCommand::SendUSSD );
+    QString text = QAtUtils::nextString( msg, posn );
+    unicodeStrings = ( QAtUtils::parseNumber( msg, posn ) != 0 );
+    cmd.setText( decodeString( text ) );
+    cmd.setNumber( QAtUtils::nextString( msg, posn ) ); // USSDstring value.
     parseIconInfo( cmd, msg, posn );
     emitCommandNoResponse( cmd );
 }
@@ -1629,9 +1644,11 @@ void GreenphoneModemService::mtz2Notification( const QString& msg )
     else
         timeString = time;
     QDateTime t = QDateTime::fromString(timeString, "MM/dd/yyyy, HH:mm:ss");
-    QDateTime utc = QDateTime(t.date(), t.time(), Qt::UTC);
-    utc = utc.addSecs(-zoneOffset * 60);
-    indicators()->setNetworkTime( utc.toTime_t(), zoneOffset, dst );
+    if ( t.isValid() ) {
+        QDateTime utc = QDateTime(t.date(), t.time(), Qt::UTC);
+        utc = utc.addSecs(-zoneOffset * 60);
+        indicators()->setNetworkTime( utc.toTime_t(), zoneOffset, dst );
+    }
 }
 
 void GreenphoneModemService::reset()

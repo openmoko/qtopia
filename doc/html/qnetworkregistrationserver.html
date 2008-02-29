@@ -28,7 +28,7 @@
 <li><div class="fn"/>8 public functions inherited from <a href="qnetworkregistration.html#public-functions">QNetworkRegistration</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -40,21 +40,20 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>8 properties inherited from <a href="qnetworkregistration.html#properties">QNetworkRegistration</a></li>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
 <li><div class="fn"/>2 public slots inherited from <a href="qnetworkregistration.html#public-slots">QNetworkRegistration</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>6 signals inherited from <a href="qnetworkregistration.html#signals">QNetworkRegistration</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -65,11 +64,11 @@
 <p>See also <a href="qnetworkregistration.html">QNetworkRegistration</a> and <a href="qcomminterface.html">QCommInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QNetworkRegistrationServer"></a>QNetworkRegistrationServer::QNetworkRegistrationServer ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QNetworkRegistrationServer"></a>QNetworkRegistrationServer::QNetworkRegistrationServer ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a server-side network registration object for <i>service</i> and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QNetworkRegistrationServer"></a>QNetworkRegistrationServer::~QNetworkRegistrationServer ()</h3>
 <p>Destroy this network registration server object.</p>
-<h3 class="fn"><a name="updateCurrentOperator"></a>void QNetworkRegistrationServer::updateCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="updateCurrentOperator"></a>void QNetworkRegistrationServer::updateCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Update the current operator information to <i>mode</i>, <i>id</i>, <i>name</i>, and <i>technology</i>, and then notify all interested clients if the information is different than the previous values.</p>
 <p>See also <a href="qnetworkregistration.html#currentOperatorId-prop">currentOperatorId</a>(), <a href="qnetworkregistration.html#currentOperatorName-prop">currentOperatorName</a>(), <a href="qnetworkregistration.html#currentOperatorMode-prop">currentOperatorMode</a>(), <a href="qnetworkregistration.html#currentOperatorTechnology-prop">currentOperatorTechnology</a>(), and <a href="qnetworkregistration.html#currentOperatorChanged">currentOperatorChanged</a>().</p>
 <h3 class="fn"><a name="updateInitialized"></a>void QNetworkRegistrationServer::updateInitialized ( bool <i>value</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
@@ -84,8 +83,8 @@
 <p>See also <a href="qnetworkregistration.html#registrationState-prop">registrationState</a>(), <a href="qnetworkregistration.html#registrationStateChanged">registrationStateChanged</a>(), <a href="qnetworkregistration.html#locationAreaCode-prop">locationAreaCode</a>(), and <a href="qnetworkregistration.html#cellId-prop">cellId</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

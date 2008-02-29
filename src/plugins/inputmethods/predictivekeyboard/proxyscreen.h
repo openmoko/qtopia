@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,8 @@ public:
     bool initDevice();
     void shutdownDevice();
     void disconnect();
+
+    void exposeRegion(QRegion region, int windowIndex);
 
     void setMode(int width, int height, int depth);
     bool supportsDepth(int) const;

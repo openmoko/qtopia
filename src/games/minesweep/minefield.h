@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -47,6 +47,7 @@ public:
 
     QSize sizeHint() const;
     QSize minimumSize() const;
+    int preferredGrid() const { return _preferredGrid;};
 
 public slots:
     void setup( int level );
@@ -72,6 +73,8 @@ protected:
     bool onBoard( int r, int c ) const { return r >= 0 && r < numRows && c >= 0 && c < numCols; }
     Mine *mine( int row, int col ) { return onBoard(row, col ) ? mines[row+numCols*col] : 0; }
     const Mine *mine( int row, int col ) const { return onBoard(row, col ) ? mines[row+numCols*col] : 0; }
+    int _minGrid;
+    int _preferredGrid;
 
 protected slots:
     void cellClicked( int row, int col );

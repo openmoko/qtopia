@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -45,7 +45,7 @@ namespace mediaserver
 // {{{ QSoundPlayer
 QSoundPlayer::QSoundPlayer(QUuid const& id, SessionManager* sessionManager):
     m_id(id),
-    m_domain("Default"),
+    m_domain("Media"),
     m_sessionManager(sessionManager),
     m_mediaSession(NULL)
 {
@@ -53,7 +53,8 @@ QSoundPlayer::QSoundPlayer(QUuid const& id, SessionManager* sessionManager):
 
 QSoundPlayer::~QSoundPlayer()
 {
-    m_sessionManager->destroySession(m_mediaSession);
+    if (m_mediaSession)
+        m_sessionManager->destroySession(m_mediaSession);
 }
 
 void QSoundPlayer::open(QString const& filePath)
@@ -92,7 +93,7 @@ void QSoundPlayer::setPriority(int priority)
     switch (priority)
     {
     case QSoundControl::Default:
-        m_domain = "Default";
+        m_domain = "Media";
         break;
 
     case QSoundControl::RingTone:
@@ -100,19 +101,24 @@ void QSoundPlayer::setPriority(int priority)
         break;
     }
 
-    m_mediaSession->setDomain(m_domain);
+    if (m_mediaSession)
+        m_mediaSession->setDomain(m_domain);
 }
 
 void QSoundPlayer::play()
 {
     if (m_mediaSession)
         m_mediaSession->start();
+    else
+        playerStateChanged(QtopiaMedia::Error);
 }
 
 void QSoundPlayer::stop()
 {
     if (m_mediaSession)
         m_mediaSession->stop();
+    else
+        playerStateChanged(QtopiaMedia::Stopped);
 }
 
 void QSoundPlayer::playerStateChanged(QtopiaMedia::State state)

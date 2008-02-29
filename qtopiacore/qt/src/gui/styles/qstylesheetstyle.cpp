@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1433,28 +1431,28 @@ int QStyleSheetStyle::nativeFrameWidth(const QWidget *w)
 
 #ifndef QT_NO_SPINBOX
     if (qobject_cast<const QAbstractSpinBox *>(w))
-        return base->pixelMetric(QStyle::PM_SpinBoxFrameWidth);
+        return base->pixelMetric(QStyle::PM_SpinBoxFrameWidth, 0, w);
 #endif
 
 #ifndef QT_NO_COMBOBOX
     if (qobject_cast<const QComboBox *>(w))
-        return base->pixelMetric(QStyle::PM_ComboBoxFrameWidth);
+        return base->pixelMetric(QStyle::PM_ComboBoxFrameWidth, 0, w);
 #endif
 
 #ifndef QT_NO_MENU
     if (qobject_cast<const QMenu *>(w))
-        return base->pixelMetric(QStyle::PM_MenuPanelWidth);
+        return base->pixelMetric(QStyle::PM_MenuPanelWidth, 0, w);
 #endif
 
 #ifndef QT_NO_MENUBAR
     if (qobject_cast<const QMenuBar *>(w))
-        return base->pixelMetric(QStyle::PM_MenuBarPanelWidth);
+        return base->pixelMetric(QStyle::PM_MenuBarPanelWidth, 0, w);
 #endif
 
     if (QString::fromLatin1(w->metaObject()->className()) == QLatin1String("QTipLabel"))
-        return base->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth);
+        return base->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, 0, w);
 
-    return base->pixelMetric(QStyle::PM_DefaultFrameWidth);
+    return base->pixelMetric(QStyle::PM_DefaultFrameWidth, 0, w);
 }
 
 static int pseudoClass(QStyle::State state)
@@ -1738,8 +1736,13 @@ QRenderRule QStyleSheetStyle::renderRule(const QWidget *w, const QStyleOption *o
 #endif // QT_NO_TOOLBOX
 #ifndef QT_NO_LINEEDIT
         // LineEdit sets Sunken flag to indicate Sunken frame (argh)
-        if (qobject_cast<const QLineEdit *>(w)) {
+        if (const QLineEdit *lineEdit = qobject_cast<const QLineEdit *>(w)) {
             state &= ~QStyle::State_Sunken;
+            if (lineEdit->hasFrame()) {
+                extraClass &= ~PseudoClass_Frameless;
+            } else {
+                extraClass |= PseudoClass_Frameless;
+            }
         } else
 #endif
         { } // required for the above ifdef'ery
@@ -2966,7 +2969,8 @@ void QStyleSheetStyle::drawControl(ControlElement ce, const QStyleOption *opt, Q
 
             if ((pseudo == PseudoElement_MenuSeparator) && subRule.hasDrawable()) {
                 subRule.drawRule(p, opt->rect);
-            } else if ((pseudo == PseudoElement_Item) && (subRule.hasBox() || subRule.hasBorder())) {
+            } else if ((pseudo == PseudoElement_Item) && (subRule.hasBox() || subRule.hasBorder() ||
+                        subRule.hasDrawable())) {
                 subRule.drawRule(p, opt->rect);
                 if (subRule.hasBackground()) {
                     mi.palette.setBrush(QPalette::Highlight, Qt::NoBrush);
@@ -3039,6 +3043,10 @@ void QStyleSheetStyle::drawControl(ControlElement ce, const QStyleOption *opt, Q
             } else if (hasStyleRule(w, PseudoElement_MenuCheckMark)) {
                 QWindowsStyle::drawControl(ce, &mi, p, w);
             } else {
+                if (rule.hasDrawable() && !subRule.hasDrawable() && !(opt->state & QStyle::State_Selected)) {
+                    mi.palette.setColor(QPalette::Window, Qt::transparent);
+                    mi.palette.setColor(QPalette::Button, Qt::transparent);
+                }
                 baseStyle()->drawControl(ce, &mi, p, w);
             }
 
@@ -3524,9 +3532,12 @@ void QStyleSheetStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *op
 
     case PE_FrameMenu:
     case PE_PanelMenuBar:
-        if (rule.hasDrawable()) {
-            rule.drawBorder(p, rule.borderRect(opt->rect));
-            return;
+        {
+            QRenderRule subRule = renderRule(w, opt, PseudoElement_Item);
+            if (rule.hasDrawable() && subRule.hasDrawable()) {
+                rule.drawBorder(p, rule.borderRect(opt->rect));
+                return;
+            }
         }
         break;
 
@@ -4396,7 +4407,9 @@ QRect QStyleSheetStyle::subControlRect(ComplexControl cc, const QStyleOptionComp
 QRect QStyleSheetStyle::subElementRect(SubElement se, const QStyleOption *opt, const QWidget *w) const
 {
     QRenderRule rule = renderRule(w, opt);
+#ifndef QT_NO_TABBAR
     int pe = PseudoElement_None;
+#endif
 
     switch (se) {
     case SE_PushButtonContents:
@@ -4462,7 +4475,7 @@ QRect QStyleSheetStyle::subElementRect(SubElement se, const QStyleOption *opt, c
     case SE_ViewItemCheckIndicator: {
         QRenderRule subRule = renderRule(w, opt, PseudoElement_Indicator);
         if (subRule.hasContentsSize()) {
-            return alignedRect(opt->direction, Qt::AlignLeft|Qt::AlignCenter, subRule.contentsSize(), opt->rect);
+            return alignedRect(opt->direction, Qt::AlignLeft|Qt::AlignVCenter, subRule.contentsSize(), opt->rect);
         }
                                     }
         break;
@@ -4476,7 +4489,7 @@ QRect QStyleSheetStyle::subElementRect(SubElement se, const QStyleOption *opt, c
 
     case SE_HeaderLabel: {
         QRenderRule subRule = renderRule(w, opt, PseudoElement_HeaderViewSection);
-        if (subRule.hasBox() || subRule.hasBorder())
+        if (subRule.hasBox() || !subRule.hasNativeBorder())
             return subRule.contentsRect(opt->rect);
                          }
         break;

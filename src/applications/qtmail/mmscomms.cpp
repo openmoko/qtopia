@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@
   Connect to the MMSC and POST the specified MMS message \a msg, the
   encoded content of which is contained in \a encoded.
   If a connection to a WAP gateway is necessary, it should be done also.
-  The MailAccount details can be accessed via the \i account variable.
+  The QMailAccount details can be accessed via the \i account variable.
 
   \sa sendConf()
 */
@@ -50,7 +50,7 @@
 
   Connect to the MMSC and GET an MMS message from URL \a url.
   If a connection to a WAP gateway is necessary, it should be done also.
-  The MailAccount details can be accessed via the \i account variable.
+  The QMailAccount details can be accessed via the \i account variable.
 
   \sa retrieveConf()
 */
@@ -140,7 +140,7 @@
   parent object \a parent.
 */
 
-MmsComms::MmsComms(MailAccount *acc, QObject *parent)
+MmsComms::MmsComms(QMailAccount *acc, QObject *parent)
     : QObject(parent), account(acc)
 {
 }

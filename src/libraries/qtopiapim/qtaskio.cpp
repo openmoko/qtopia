@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -125,6 +125,8 @@ QVariant QTaskIO::taskField(int row, QTaskModel::Field k) const
         default:
         case QTaskModel::Invalid:
             break;
+        case QTaskModel::Identifier:
+            return t.uid().toByteArray();
         case QTaskModel::Categories:
             return QVariant(t.categories());
         case QTaskModel::Description:

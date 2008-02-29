@@ -55,6 +55,10 @@
         <keyword ref="applicationlauncher.html#state">state</keyword>
         <section ref="applicationlauncher-members.html" title="List of all members"/>
     </section>
+    <section ref="applicationshutdowntask.html" title="ApplicationShutdownTask Class Reference">
+        <keyword ref="applicationshutdowntask.html">ApplicationShutdownTask</keyword>
+        <section ref="applicationshutdowntask-members.html" title="List of all members"/>
+    </section>
     <section ref="applicationterminationhandler.html" title="ApplicationTerminationHandler Class Reference">
         <keyword ref="applicationterminationhandler.html">ApplicationTerminationHandler</keyword>
         <keyword ref="applicationterminationhandler.html#terminated">terminated</keyword>
@@ -93,6 +97,11 @@
     <section ref="asteriskmanager.html" title="AsteriskManager Class Reference">
         <keyword ref="asteriskmanager.html">AsteriskManager</keyword>
         <section ref="asteriskmanager-members.html" title="List of all members"/>
+    </section>
+    <section ref="atparseutils.html" title="AtParseUtils Class Reference">
+        <keyword ref="atparseutils.html">AtParseUtils</keyword>
+        <keyword ref="atparseutils.html#mode">mode</keyword>
+        <section ref="atparseutils-members.html" title="List of all members"/>
     </section>
     <section ref="qnetworkregistration-availableoperator.html" title="AvailableOperator Class Reference">
         <keyword ref="qnetworkregistration-availableoperator.html">AvailableOperator</keyword>
@@ -485,10 +494,12 @@
         <keyword ref="qnetworkconnection-identity.html#operator-eq-eq">operator==</keyword>
         <section ref="qnetworkconnection-identity-members.html" title="List of all members"/>
     </section>
-    <section ref="idmangler.html" title="IdMangler Class Reference">
-        <keyword ref="idmangler.html">IdMangler</keyword>
-        <keyword ref="idmangler.html#gotIds">gotIds</keyword>
-        <section ref="idmangler-members.html" title="List of all members"/>
+    <section ref="qmediadevice-info.html" title="Info Class Reference">
+        <keyword ref="qmediadevice-info.html">Info</keyword>
+        <keyword ref="qmediadevice-info.html#DataType-enum">DataType</keyword>
+        <keyword ref="qmediadevice-info.html#DataType-enum">QMediaDevice::Info::Raw</keyword>
+        <keyword ref="qmediadevice-info.html#DataType-enum">QMediaDevice::Info::PCM</keyword>
+        <section ref="qmediadevice-info-members.html" title="List of all members"/>
     </section>
     <section ref="qpreferrednetworkoperators-info.html" title="Info Class Reference">
         <keyword ref="qpreferrednetworkoperators-info.html">Info</keyword>
@@ -626,6 +637,7 @@
     </section>
     <section ref="messagesservice.html" title="MessagesService Class Reference">
         <keyword ref="messagesservice.html">MessagesService</keyword>
+        <keyword ref="messagesservice.html#composeMessage">composeMessage</keyword>
         <keyword ref="messagesservice.html#viewMessage">viewMessage</keyword>
         <keyword ref="messagesservice.html#viewNewMessages">viewNewMessages</keyword>
         <section ref="messagesservice-members.html" title="List of all members"/>
@@ -691,6 +703,7 @@
     </section>
     <section ref="obexservicemanager.html" title="ObexServiceManager Class Reference">
         <keyword ref="obexservicemanager.html">ObexServiceManager</keyword>
+        <keyword ref="obexservicemanager.html#abortTransfer">abortTransfer</keyword>
         <keyword ref="obexservicemanager.html#completed">completed</keyword>
         <keyword ref="obexservicemanager.html#progress">progress</keyword>
         <keyword ref="obexservicemanager.html#receiveInitiated">receiveInitiated</keyword>
@@ -738,6 +751,7 @@
         <keyword ref="phonelauncherview.html#clicked">clicked</keyword>
         <keyword ref="phonelauncherview.html#currentItem">currentItem</keyword>
         <keyword ref="phonelauncherview.html#highlighted">highlighted</keyword>
+        <keyword ref="phonelauncherview.html#pressed">pressed</keyword>
         <keyword ref="phonelauncherview.html#setBusy">setBusy</keyword>
         <keyword ref="phonelauncherview.html#setCurrentItem">setCurrentItem</keyword>
         <keyword ref="phonelauncherview.html#updateImages">updateImages</keyword>
@@ -1144,6 +1158,7 @@
         <keyword ref="qatchat.html#pduNotification">pduNotification</keyword>
         <keyword ref="qatchat.html#registerErrorPrefix">registerErrorPrefix</keyword>
         <keyword ref="qatchat.html#registerNotificationType">registerNotificationType</keyword>
+        <keyword ref="qatchat.html#registerWakeupCommand">registerWakeupCommand</keyword>
         <keyword ref="qatchat.html#requestNextLine">requestNextLine</keyword>
         <keyword ref="qatchat.html#resume">resume</keyword>
         <keyword ref="qatchat.html#retryOnNonEcho">retryOnNonEcho</keyword>
@@ -1943,10 +1958,13 @@
         <keyword ref="qbluetoothsdprecord.html#clearAttributes">clearAttributes</keyword>
         <keyword ref="qbluetoothsdprecord.html#docUrl">docUrl</keyword>
         <keyword ref="qbluetoothsdprecord.html#execUrl">execUrl</keyword>
+        <keyword ref="qbluetoothsdprecord.html#fromData">fromData</keyword>
+        <keyword ref="qbluetoothsdprecord.html#fromDevice">fromDevice</keyword>
         <keyword ref="qbluetoothsdprecord.html#group">group</keyword>
         <keyword ref="qbluetoothsdprecord.html#iconUrl">iconUrl</keyword>
         <keyword ref="qbluetoothsdprecord.html#id">id</keyword>
         <keyword ref="qbluetoothsdprecord.html#isInstance">isInstance</keyword>
+        <keyword ref="qbluetoothsdprecord.html#isNull">isNull</keyword>
         <keyword ref="qbluetoothsdprecord.html#providerName">providerName</keyword>
         <keyword ref="qbluetoothsdprecord.html#recordHandle">recordHandle</keyword>
         <keyword ref="qbluetoothsdprecord.html#removeAttribute">removeAttribute</keyword>
@@ -1964,6 +1982,7 @@
         <keyword ref="qbluetoothsdprecord.html#setServiceDescription">setServiceDescription</keyword>
         <keyword ref="qbluetoothsdprecord.html#setServiceName">setServiceName</keyword>
         <keyword ref="qbluetoothsdprecord.html#operator-eq">operator=</keyword>
+        <keyword ref="qbluetoothsdprecord.html#operator-eq-eq">operator==</keyword>
         <section ref="qbluetoothsdprecord-members.html" title="List of all members"/>
     </section>
     <section ref="qbluetoothsdpsequence.html" title="QBluetoothSdpSequence Class Reference">
@@ -2355,6 +2374,7 @@
         <keyword ref="qcommdevicecontroller.html#isUp">isUp</keyword>
         <keyword ref="qcommdevicecontroller.html#powerState">powerState</keyword>
         <keyword ref="qcommdevicecontroller.html#powerStateChanged">powerStateChanged</keyword>
+        <keyword ref="qcommdevicecontroller.html#sessionsActive">sessionsActive</keyword>
         <keyword ref="qcommdevicecontroller.html#up">up</keyword>
         <section ref="qcommdevicecontroller-members.html" title="List of all members"/>
     </section>
@@ -2777,7 +2797,7 @@
         <keyword ref="qcontent.html#execute">execute</keyword>
         <keyword ref="qcontent.html#file">file</keyword>
         <keyword ref="qcontent.html#fileKnown">fileKnown</keyword>
-        <keyword ref="qcontent.html#fileNamex">fileName</keyword>
+        <keyword ref="qcontent.html#fileName">fileName</keyword>
         <keyword ref="qcontent.html#icon">icon</keyword>
         <keyword ref="qcontent.html#iconName">iconName</keyword>
         <keyword ref="qcontent.html#id">id</keyword>
@@ -2856,7 +2876,7 @@
         <keyword ref="qcontentfilter.html#arguments">arguments</keyword>
         <keyword ref="qcontentfilter.html#category">category</keyword>
         <keyword ref="qcontentfilter.html#clear">clear</keyword>
-        <keyword ref="qcontentfilter.html#fileNamex">fileName</keyword>
+        <keyword ref="qcontentfilter.html#fileName">fileName</keyword>
         <keyword ref="qcontentfilter.html#isValid">isValid</keyword>
         <keyword ref="qcontentfilter.html#mimeType">mimeType</keyword>
         <keyword ref="qcontentfilter.html#name">name</keyword>
@@ -3024,6 +3044,7 @@
         <keyword ref="qdawg.html#readFile">readFile</keyword>
         <keyword ref="qdawg.html#root">root</keyword>
         <keyword ref="qdawg.html#write">write</keyword>
+        <keyword ref="qdawg.html#writeByteSwapped">writeByteSwapped</keyword>
         <section ref="qdawg-members.html" title="List of all members"/>
     </section>
     <section ref="qdependenteventscontext.html" title="QDependentEventsContext Class Reference">
@@ -3214,12 +3235,14 @@
     </section>
     <section ref="qdocumentpropertiesdialog.html" title="QDocumentPropertiesDialog Class Reference">
         <keyword ref="qdocumentpropertiesdialog.html">QDocumentPropertiesDialog</keyword>
+        <keyword ref="qdocumentpropertiesdialog.html#document">document</keyword>
         <section ref="qdocumentpropertiesdialog-members.html" title="List of all members"/>
     </section>
     <section ref="qdocumentpropertieswidget.html" title="QDocumentPropertiesWidget Class Reference">
         <keyword ref="qdocumentpropertieswidget.html">QDocumentPropertiesWidget</keyword>
         <keyword ref="qdocumentpropertieswidget.html#applyChanges">applyChanges</keyword>
         <keyword ref="qdocumentpropertieswidget.html#beamLnk">beamLnk</keyword>
+        <keyword ref="qdocumentpropertieswidget.html#document">document</keyword>
         <keyword ref="qdocumentpropertieswidget.html#done">done</keyword>
         <keyword ref="qdocumentpropertieswidget.html#duplicateLnk">duplicateLnk</keyword>
         <keyword ref="qdocumentpropertieswidget.html#showLicenses">showLicenses</keyword>
@@ -3521,7 +3544,7 @@
         <keyword ref="qfilemonitor.html#Strategy-enum">QFileMonitor::Auto</keyword>
         <keyword ref="qfilemonitor.html#Strategy-enum">QFileMonitor::Poll</keyword>
         <keyword ref="qfilemonitor.html#fileChanged">fileChanged</keyword>
-        <keyword ref="qfilemonitor.html#fileNamex">fileName</keyword>
+        <keyword ref="qfilemonitor.html#fileName">fileName</keyword>
         <keyword ref="qfilemonitor.html#isValid">isValid</keyword>
         <keyword ref="qfilemonitor.html#strategy">strategy</keyword>
         <section ref="qfilemonitor-members.html" title="List of all members"/>
@@ -3562,16 +3585,42 @@
     </section>
     <section ref="qformlayout.html" title="QFormLayout Class Reference">
         <keyword ref="qformlayout.html">QFormLayout</keyword>
-        <keyword ref="qformlayout.html#FormStyle-enum">FormStyle</keyword>
-        <keyword ref="qformlayout.html#FormStyle-enum">QFormLayout::QtopiaDefaultStyle</keyword>
-        <keyword ref="qformlayout.html#FormStyle-enum">QFormLayout::QtopiaTwoLineStyle</keyword>
+        <keyword ref="qformlayout.html#FieldGrowthPolicy-enum">FieldGrowthPolicy</keyword>
+        <keyword ref="qformlayout.html#FieldGrowthPolicy-enum">QFormLayout::FieldsStayAtSizeHint</keyword>
+        <keyword ref="qformlayout.html#FieldGrowthPolicy-enum">QFormLayout::AllNonFixedFieldsGrow</keyword>
+        <keyword ref="qformlayout.html#FieldGrowthPolicy-enum">QFormLayout::ExpandingFieldsGrow</keyword>
+        <keyword ref="qformlayout.html#ItemRole-enum">ItemRole</keyword>
+        <keyword ref="qformlayout.html#ItemRole-enum">QFormLayout::LabelRole</keyword>
+        <keyword ref="qformlayout.html#ItemRole-enum">QFormLayout::FieldRole</keyword>
+        <keyword ref="qformlayout.html#RowWrapPolicy-enum">RowWrapPolicy</keyword>
+        <keyword ref="qformlayout.html#RowWrapPolicy-enum">QFormLayout::DontWrapRows</keyword>
+        <keyword ref="qformlayout.html#RowWrapPolicy-enum">QFormLayout::WrapLongRows</keyword>
+        <keyword ref="qformlayout.html#RowWrapPolicy-enum">QFormLayout::WrapAllRows</keyword>
+        <keyword ref="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</keyword>
+        <keyword ref="qformlayout.html#fieldGrowthPolicy-prop">setFieldGrowthPolicy</keyword>
+        <keyword ref="qformlayout.html#formAlignment-prop">formAlignment</keyword>
+        <keyword ref="qformlayout.html#formAlignment-prop">setFormAlignment</keyword>
         <keyword ref="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</keyword>
         <keyword ref="qformlayout.html#horizontalSpacing-prop">setHorizontalSpacing</keyword>
+        <keyword ref="qformlayout.html#labelAlignment-prop">labelAlignment</keyword>
+        <keyword ref="qformlayout.html#labelAlignment-prop">setLabelAlignment</keyword>
+        <keyword ref="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</keyword>
+        <keyword ref="qformlayout.html#rowWrapPolicy-prop">setRowWrapPolicy</keyword>
         <keyword ref="qformlayout.html#verticalSpacing-prop">verticalSpacing</keyword>
         <keyword ref="qformlayout.html#verticalSpacing-prop">setVerticalSpacing</keyword>
         <keyword ref="qformlayout.html#addRow">addRow</keyword>
+        <keyword ref="qformlayout.html#getItemPosition">getItemPosition</keyword>
+        <keyword ref="qformlayout.html#getLayoutPosition">getLayoutPosition</keyword>
+        <keyword ref="qformlayout.html#getWidgetPosition">getWidgetPosition</keyword>
         <keyword ref="qformlayout.html#insertRow">insertRow</keyword>
+        <keyword ref="qformlayout.html#itemAt">itemAt</keyword>
+        <keyword ref="qformlayout.html#labelForField">labelForField</keyword>
         <keyword ref="qformlayout.html#rowCount">rowCount</keyword>
+        <keyword ref="qformlayout.html#setItem">setItem</keyword>
+        <keyword ref="qformlayout.html#setLayout">setLayout</keyword>
+        <keyword ref="qformlayout.html#setSpacing">setSpacing</keyword>
+        <keyword ref="qformlayout.html#setWidget">setWidget</keyword>
+        <keyword ref="qformlayout.html#spacing">spacing</keyword>
         <section ref="qformlayout-members.html" title="List of all members"/>
     </section>
     <section ref="qglobalpixmapcache.html" title="QGlobalPixmapCache Class Reference">
@@ -3774,7 +3823,7 @@
         <keyword ref="qimpencharset.html#count">count</keyword>
         <keyword ref="qimpencharset.html#description">description</keyword>
         <keyword ref="qimpencharset.html#down">down</keyword>
-        <keyword ref="qimpencharset.html#filename">filename</keyword>
+        <keyword ref="qimpencharset.html#filenamex">filename</keyword>
         <keyword ref="qimpencharset.html#isEmpty">isEmpty</keyword>
         <keyword ref="qimpencharset.html#load">load</keyword>
         <keyword ref="qimpencharset.html#match">match</keyword>
@@ -3910,6 +3959,16 @@
         <keyword ref="qirsocket.html#waitForDisconnected">waitForDisconnected</keyword>
         <section ref="qirsocket-members.html" title="List of all members"/>
     </section>
+    <section ref="qkeyboardlock.html" title="QKeyboardLock Class Reference">
+        <keyword ref="qkeyboardlock.html">QKeyboardLock</keyword>
+        <keyword ref="qkeyboardlock.html#exemptions">exemptions</keyword>
+        <keyword ref="qkeyboardlock.html#isLocked">isLocked</keyword>
+        <keyword ref="qkeyboardlock.html#lock">lock</keyword>
+        <keyword ref="qkeyboardlock.html#lockedKeyEvent">lockedKeyEvent</keyword>
+        <keyword ref="qkeyboardlock.html#setExemptions">setExemptions</keyword>
+        <keyword ref="qkeyboardlock.html#unlock">unlock</keyword>
+        <section ref="qkeyboardlock-members.html" title="List of all members"/>
+    </section>
     <section ref="qkeypadlightaccessory.html" title="QKeypadLightAccessory Class Reference">
         <keyword ref="qkeypadlightaccessory.html">QKeypadLightAccessory</keyword>
         <keyword ref="qkeypadlightaccessory.html#on">on</keyword>
@@ -3933,6 +3992,7 @@
         <keyword ref="qmailaddress.html#isNull">isNull</keyword>
         <keyword ref="qmailaddress.html#isPhoneNumber">isPhoneNumber</keyword>
         <keyword ref="qmailaddress.html#matchContact">matchContact</keyword>
+        <keyword ref="qmailaddress.html#matchesExistingContact">matchesExistingContact</keyword>
         <keyword ref="qmailaddress.html#name">name</keyword>
         <keyword ref="qmailaddress.html#removeComments">removeComments</keyword>
         <keyword ref="qmailaddress.html#removeWhitespace">removeWhitespace</keyword>
@@ -3982,6 +4042,7 @@
         <keyword ref="qmailcomposerinterface.html#messageType">messageType</keyword>
         <keyword ref="qmailcomposerinterface.html#name">name</keyword>
         <keyword ref="qmailcomposerinterface.html#setMessage">setMessage</keyword>
+        <keyword ref="qmailcomposerinterface.html#setSignature">setSignature</keyword>
         <keyword ref="qmailcomposerinterface.html#setText">setText</keyword>
         <keyword ref="qmailcomposerinterface.html#widget">widget</keyword>
         <section ref="qmailcomposerinterface-members.html" title="List of all members"/>
@@ -4028,6 +4089,7 @@
         <keyword ref="qmailfolderkey.html#Property-enum">QMailFolderKey::Id</keyword>
         <keyword ref="qmailfolderkey.html#Property-enum">QMailFolderKey::ParentId</keyword>
         <keyword ref="qmailfolderkey.html#Property-enum">QMailFolderKey::Name</keyword>
+        <keyword ref="qmailfolderkey.html#isEmpty">isEmpty</keyword>
         <keyword ref="qmailfolderkey.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qmailfolderkey.html#operator-and">operator&amp;</keyword>
         <keyword ref="qmailfolderkey.html#operator-and-eq">operator&amp;=</keyword>
@@ -4044,6 +4106,7 @@
         <keyword ref="qmailfoldersortkey.html#Property-enum">QMailFolderSortKey::Id</keyword>
         <keyword ref="qmailfoldersortkey.html#Property-enum">QMailFolderSortKey::ParentId</keyword>
         <keyword ref="qmailfoldersortkey.html#Property-enum">QMailFolderSortKey::Name</keyword>
+        <keyword ref="qmailfoldersortkey.html#isEmpty">isEmpty</keyword>
         <keyword ref="qmailfoldersortkey.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qmailfoldersortkey.html#operator-and">operator&amp;</keyword>
         <keyword ref="qmailfoldersortkey.html#operator-and-eq">operator&amp;=</keyword>
@@ -4070,9 +4133,14 @@
     </section>
     <section ref="qmailmessage.html" title="QMailMessage Class Reference">
         <keyword ref="qmailmessage.html">QMailMessage</keyword>
+        <keyword ref="qmailmessage.html#AttachmentsAction-enum">AttachmentsAction</keyword>
+        <keyword ref="qmailmessage.html#AttachmentsAction-enum">QMailMessage::LinkToAttachments</keyword>
+        <keyword ref="qmailmessage.html#AttachmentsAction-enum">QMailMessage::CopyAttachments</keyword>
+        <keyword ref="qmailmessage.html#AttachmentsAction-enum">QMailMessage::CopyAndDeleteAttachments</keyword>
         <keyword ref="qmailmessage.html#EncodingFormat-enum">EncodingFormat</keyword>
         <keyword ref="qmailmessage.html#EncodingFormat-enum">QMailMessage::IdentityFormat</keyword>
         <keyword ref="qmailmessage.html#EncodingFormat-enum">QMailMessage::HeaderOnlyFormat</keyword>
+        <keyword ref="qmailmessage.html#EncodingFormat-enum">QMailMessage::SerializationFormat</keyword>
         <keyword ref="qmailmessage.html#EncodingFormat-enum">QMailMessage::TransmissionFormat</keyword>
         <keyword ref="qmailmessage.html#EncodingFormat-enum">QMailMessage::StorageFormat</keyword>
         <keyword ref="qmailmessage.html#MailDataSelection-enum">MailDataSelection</keyword>
@@ -4169,7 +4237,7 @@
         <keyword ref="qmailmessagecontentdisposition.html#DispositionType-enum">QMailMessageContentDisposition::None</keyword>
         <keyword ref="qmailmessagecontentdisposition.html#DispositionType-enum">QMailMessageContentDisposition::Inline</keyword>
         <keyword ref="qmailmessagecontentdisposition.html#creationDate">creationDate</keyword>
-        <keyword ref="qmailmessagecontentdisposition.html#filename">filename</keyword>
+        <keyword ref="qmailmessagecontentdisposition.html#filenamex">filename</keyword>
         <keyword ref="qmailmessagecontentdisposition.html#modificationDate">modificationDate</keyword>
         <keyword ref="qmailmessagecontentdisposition.html#readDate">readDate</keyword>
         <keyword ref="qmailmessagecontentdisposition.html#setCreationDate">setCreationDate</keyword>
@@ -4201,7 +4269,6 @@
         <keyword ref="qmailmessageheaderfield.html#FieldType-enum">FieldType</keyword>
         <keyword ref="qmailmessageheaderfield.html#FieldType-enum">QMailMessageHeaderField::StructuredField</keyword>
         <keyword ref="qmailmessageheaderfield.html#FieldType-enum">QMailMessageHeaderField::UnstructuredField</keyword>
-        <keyword ref="qmailmessageheaderfield.html#ParameterType-typedef">ParameterType</keyword>
         <keyword ref="qmailmessageheaderfield.html#content">content</keyword>
         <keyword ref="qmailmessageheaderfield.html#decodeContent">decodeContent</keyword>
         <keyword ref="qmailmessageheaderfield.html#decodeParameter">decodeParameter</keyword>
@@ -4235,10 +4302,10 @@
         <keyword ref="qmailmessagekey.html#Operand-enum">QMailMessageKey::GreaterThanEqual</keyword>
         <keyword ref="qmailmessagekey.html#Operand-enum">QMailMessageKey::Equal</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">Property</keyword>
+        <keyword ref="qmailmessagekey.html#Property-enum">Properties</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::TimeStamp</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Size</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::ServerUid</keyword>
-        <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Flags</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Sender</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Subject</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::FromMailbox</keyword>
@@ -4247,6 +4314,7 @@
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Recipients</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Id</keyword>
         <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::FromAccount</keyword>
+        <keyword ref="qmailmessagekey.html#Property-enum">QMailMessageKey::Status</keyword>
         <keyword ref="qmailmessagekey.html#isEmpty">isEmpty</keyword>
         <keyword ref="qmailmessagekey.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qmailmessagekey.html#operator-and">operator&amp;</keyword>
@@ -4323,7 +4391,6 @@
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::TimeStamp</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Size</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::ServerUid</keyword>
-        <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Flags</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Sender</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Subject</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::FromMailbox</keyword>
@@ -4332,6 +4399,8 @@
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Recipients</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Id</keyword>
         <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::FromAccount</keyword>
+        <keyword ref="qmailmessagesortkey.html#Property-enum">QMailMessageSortKey::Status</keyword>
+        <keyword ref="qmailmessagesortkey.html#isEmpty">isEmpty</keyword>
         <keyword ref="qmailmessagesortkey.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qmailmessagesortkey.html#operator-and">operator&amp;</keyword>
         <keyword ref="qmailmessagesortkey.html#operator-and-eq">operator&amp;=</keyword>
@@ -4355,20 +4424,32 @@
     </section>
     <section ref="qmailstore.html" title="QMailStore Class Reference">
         <keyword ref="qmailstore.html">QMailStore</keyword>
+        <keyword ref="qmailstore.html#ReturnOption-enum">ReturnOption</keyword>
+        <keyword ref="qmailstore.html#ReturnOption-enum">QMailStore::ReturnAll</keyword>
+        <keyword ref="qmailstore.html#ReturnOption-enum">QMailStore::ReturnDistinct</keyword>
         <keyword ref="qmailstore.html#addFolder">addFolder</keyword>
         <keyword ref="qmailstore.html#addMessage">addMessage</keyword>
         <keyword ref="qmailstore.html#countFolders">countFolders</keyword>
         <keyword ref="qmailstore.html#countMessages">countMessages</keyword>
         <keyword ref="qmailstore.html#folder">folder</keyword>
+        <keyword ref="qmailstore.html#foldersAdded">foldersAdded</keyword>
+        <keyword ref="qmailstore.html#foldersRemoved">foldersRemoved</keyword>
+        <keyword ref="qmailstore.html#foldersUpdated">foldersUpdated</keyword>
         <keyword ref="qmailstore.html#instance">instance</keyword>
         <keyword ref="qmailstore.html#message">message</keyword>
         <keyword ref="qmailstore.html#messageHeader">messageHeader</keyword>
+        <keyword ref="qmailstore.html#messageHeaders">messageHeaders</keyword>
+        <keyword ref="qmailstore.html#messagesAdded">messagesAdded</keyword>
+        <keyword ref="qmailstore.html#messagesRemoved">messagesRemoved</keyword>
+        <keyword ref="qmailstore.html#messagesUpdated">messagesUpdated</keyword>
         <keyword ref="qmailstore.html#queryFolders">queryFolders</keyword>
         <keyword ref="qmailstore.html#queryMessages">queryMessages</keyword>
         <keyword ref="qmailstore.html#removeFolder">removeFolder</keyword>
         <keyword ref="qmailstore.html#removeMessage">removeMessage</keyword>
+        <keyword ref="qmailstore.html#sizeOfMessages">sizeOfMessages</keyword>
         <keyword ref="qmailstore.html#updateFolder">updateFolder</keyword>
         <keyword ref="qmailstore.html#updateMessage">updateMessage</keyword>
+        <keyword ref="qmailstore.html#updateMessages">updateMessages</keyword>
         <section ref="qmailstore-members.html" title="List of all members"/>
     </section>
     <section ref="qmailtimestamp.html" title="QMailTimeStamp Class Reference">
@@ -4378,7 +4459,7 @@
         <keyword ref="qmailtimestamp.html#isValid">isValid</keyword>
         <keyword ref="qmailtimestamp.html#toLocalTime">toLocalTime</keyword>
         <keyword ref="qmailtimestamp.html#toString">toString</keyword>
-        <keyword ref="qmailtimestamp.html#toUTCx">toUTC</keyword>
+        <keyword ref="qmailtimestamp.html#toUTC">toUTC</keyword>
         <keyword ref="qmailtimestamp.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qmailtimestamp.html#operator-lt">operator&lt;</keyword>
         <keyword ref="qmailtimestamp.html#operator-lt-eq">operator&lt;=</keyword>
@@ -4446,6 +4527,19 @@
         <keyword ref="qmediaabstractcontrolserver.html#setValue">setValue</keyword>
         <section ref="qmediaabstractcontrolserver-members.html" title="List of all members"/>
     </section>
+    <section ref="qmediacodecplugin.html" title="QMediaCodecPlugin Class Reference">
+        <keyword ref="qmediacodecplugin.html">QMediaCodecPlugin</keyword>
+        <keyword ref="qmediacodecplugin.html#canDecode">canDecode</keyword>
+        <keyword ref="qmediacodecplugin.html#canEncode">canEncode</keyword>
+        <keyword ref="qmediacodecplugin.html#comment">comment</keyword>
+        <keyword ref="qmediacodecplugin.html#decoder">decoder</keyword>
+        <keyword ref="qmediacodecplugin.html#encoder">encoder</keyword>
+        <keyword ref="qmediacodecplugin.html#fileExtensions">fileExtensions</keyword>
+        <keyword ref="qmediacodecplugin.html#mimeTypes">mimeTypes</keyword>
+        <keyword ref="qmediacodecplugin.html#name">name</keyword>
+        <keyword ref="qmediacodecplugin.html#version">version</keyword>
+        <section ref="qmediacodecplugin-members.html" title="List of all members"/>
+    </section>
     <section ref="qmediacontent.html" title="QMediaContent Class Reference">
         <keyword ref="qmediacontent.html">QMediaContent</keyword>
         <keyword ref="qmediacontent.html#controlAvailable">controlAvailable</keyword>
@@ -4465,10 +4559,6 @@
         <keyword ref="qmediacontentcontext.html#removeObject">removeObject</keyword>
         <keyword ref="qmediacontentcontext.html#setMediaContent">setMediaContent</keyword>
         <section ref="qmediacontentcontext-members.html" title="List of all members"/>
-    </section>
-    <section ref="qmediacontentplayer.html" title="QMediaContentPlayer Class Reference">
-        <keyword ref="qmediacontentplayer.html">QMediaContentPlayer</keyword>
-        <section ref="qmediacontentplayer-members.html" title="List of all members"/>
     </section>
     <section ref="qmediacontrol.html" title="QMediaControl Class Reference">
         <keyword ref="qmediacontrol.html">QMediaControl</keyword>
@@ -4506,23 +4596,25 @@
         <keyword ref="qmediadecoder.html">QMediaDecoder</keyword>
         <keyword ref="qmediadecoder.html#isMuted">isMuted</keyword>
         <keyword ref="qmediadecoder.html#length">length</keyword>
+        <keyword ref="qmediadecoder.html#lengthChanged">lengthChanged</keyword>
         <keyword ref="qmediadecoder.html#pause">pause</keyword>
+        <keyword ref="qmediadecoder.html#playerStateChanged">playerStateChanged</keyword>
+        <keyword ref="qmediadecoder.html#positionChanged">positionChanged</keyword>
         <keyword ref="qmediadecoder.html#seek">seek</keyword>
         <keyword ref="qmediadecoder.html#setMuted">setMuted</keyword>
         <keyword ref="qmediadecoder.html#setVolume">setVolume</keyword>
         <keyword ref="qmediadecoder.html#start">start</keyword>
         <keyword ref="qmediadecoder.html#stop">stop</keyword>
         <keyword ref="qmediadecoder.html#volume">volume</keyword>
+        <keyword ref="qmediadecoder.html#volumeChanged">volumeChanged</keyword>
+        <keyword ref="qmediadecoder.html#volumeMuted">volumeMuted</keyword>
         <section ref="qmediadecoder-members.html" title="List of all members"/>
     </section>
     <section ref="qmediadevice.html" title="QMediaDevice Class Reference">
         <keyword ref="qmediadevice.html">QMediaDevice</keyword>
-        <keyword ref="qmediadevice.html#connectInputPipe">connectInputPipe</keyword>
-        <keyword ref="qmediadevice.html#connectOutputPipe">connectOutputPipe</keyword>
-        <keyword ref="qmediadevice.html#disconnectInputPipe">disconnectInputPipe</keyword>
-        <keyword ref="qmediadevice.html#disconnectOutputPipe">disconnectOutputPipe</keyword>
-        <keyword ref="qmediadevice.html#setValue">setValue</keyword>
-        <keyword ref="qmediadevice.html#value">value</keyword>
+        <keyword ref="qmediadevice.html#connectToInput">connectToInput</keyword>
+        <keyword ref="qmediadevice.html#dataType">dataType</keyword>
+        <keyword ref="qmediadevice.html#disconnectFromInput">disconnectFromInput</keyword>
         <section ref="qmediadevice-members.html" title="List of all members"/>
     </section>
     <section ref="qmediaengine.html" title="QMediaEngine Class Reference">
@@ -4557,14 +4649,6 @@
         <keyword ref="qmediahelixsettingscontrol.html#optionValue">optionValue</keyword>
         <keyword ref="qmediahelixsettingscontrol.html#setOption">setOption</keyword>
         <section ref="qmediahelixsettingscontrol-members.html" title="List of all members"/>
-    </section>
-    <section ref="qmediapipe.html" title="QMediaPipe Class Reference">
-        <keyword ref="qmediapipe.html">QMediaPipe</keyword>
-        <keyword ref="qmediapipe.html#bytesWritten">bytesWritten</keyword>
-        <keyword ref="qmediapipe.html#read">read</keyword>
-        <keyword ref="qmediapipe.html#readyRead">readyRead</keyword>
-        <keyword ref="qmediapipe.html#write">write</keyword>
-        <section ref="qmediapipe-members.html" title="List of all members"/>
     </section>
     <section ref="qmediaprogresslabel.html" title="QMediaProgressLabel Class Reference">
         <keyword ref="qmediaprogresslabel.html">QMediaProgressLabel</keyword>
@@ -4847,6 +4931,10 @@
     </section>
     <section ref="qmodempreferrednetworkoperators.html" title="QModemPreferredNetworkOperators Class Reference">
         <keyword ref="qmodempreferrednetworkoperators.html">QModemPreferredNetworkOperators</keyword>
+        <keyword ref="qmodempreferrednetworkoperators.html#deleteBeforeUpdate">deleteBeforeUpdate</keyword>
+        <keyword ref="qmodempreferrednetworkoperators.html#quoteOperatorNumber">quoteOperatorNumber</keyword>
+        <keyword ref="qmodempreferrednetworkoperators.html#setDeleteBeforeUpdate">setDeleteBeforeUpdate</keyword>
+        <keyword ref="qmodempreferrednetworkoperators.html#setQuoteOperatorNumber">setQuoteOperatorNumber</keyword>
         <section ref="qmodempreferrednetworkoperators-members.html" title="List of all members"/>
     </section>
     <section ref="qmodemrffunctionality.html" title="QModemRfFunctionality Class Reference">
@@ -5370,6 +5458,7 @@
         <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Connecting</keyword>
         <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Ready</keyword>
         <keyword ref="qobexpushservice.html#State-enum">QObexPushService::Streaming</keyword>
+        <keyword ref="qobexpushservice.html#abort">abort</keyword>
         <keyword ref="qobexpushservice.html#acceptFile">acceptFile</keyword>
         <keyword ref="qobexpushservice.html#businessCard">businessCard</keyword>
         <keyword ref="qobexpushservice.html#businessCardRequested">businessCardRequested</keyword>
@@ -5877,14 +5966,6 @@
         <keyword ref="qphonerffunctionality.html#setLevelResult">setLevelResult</keyword>
         <section ref="qphonerffunctionality-members.html" title="List of all members"/>
     </section>
-    <section ref="qphonesocket.html" title="QPhoneSocket Class Reference">
-        <keyword ref="qphonesocket.html">QPhoneSocket</keyword>
-        <keyword ref="qphonesocket.html#closed">closed</keyword>
-        <keyword ref="qphonesocket.html#incoming">incoming</keyword>
-        <keyword ref="qphonesocket.html#received">received</keyword>
-        <keyword ref="qphonesocket.html#send">send</keyword>
-        <section ref="qphonesocket-members.html" title="List of all members"/>
-    </section>
     <section ref="qphonestatus.html" title="QPhoneStatus Class Reference">
         <keyword ref="qphonestatus.html">QPhoneStatus</keyword>
         <keyword ref="qphonestatus.html#StatusItem-enum">StatusItem</keyword>
@@ -5912,10 +5993,13 @@
         <keyword ref="qphonestyle.html#PhoneStyleHint-enum">PhoneStyleHint</keyword>
         <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_PopupShadows</keyword>
         <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_ScrollbarLineStepButtons</keyword>
-        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FullWidthMenus</keyword>
+        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormLayoutLabelAlignment</keyword>
         <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_HideMenuIcons</keyword>
+        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FullWidthMenu</keyword>
         <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_ExtendedFocusHighlight</keyword>
-        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormStyle</keyword>
+        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormLayoutFieldGrowthPolicy</keyword>
+        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormLayoutWrapPolicy</keyword>
+        <keyword ref="qphonestyle.html#PhoneStyleHint-enum">QPhoneStyle::SH_FormLayoutFormAlignment</keyword>
         <section ref="qphonestyle-members.html" title="List of all members"/>
     </section>
     <section ref="qphonetypeselector.html" title="QPhoneTypeSelector Class Reference">
@@ -6967,6 +7051,7 @@
         <keyword ref="qsoftmenubar.html#setHelpEnabled">setHelpEnabled</keyword>
         <keyword ref="qsoftmenubar.html#setInputMethodEnabled">setInputMethodEnabled</keyword>
         <keyword ref="qsoftmenubar.html#setLabel">setLabel</keyword>
+        <keyword ref="qsoftmenubar.html#widgetsFor">widgetsFor</keyword>
         <section ref="qsoftmenubar-members.html" title="List of all members"/>
     </section>
     <section ref="qsoftmenubarprovider.html" title="QSoftMenuBarProvider Class Reference">
@@ -6997,6 +7082,7 @@
         <keyword ref="qspeeddial.html#find">find</keyword>
         <keyword ref="qspeeddial.html#possibleInputs">possibleInputs</keyword>
         <keyword ref="qspeeddial.html#remove">remove</keyword>
+        <keyword ref="qspeeddial.html#selectWithDialog">selectWithDialog</keyword>
         <keyword ref="qspeeddial.html#set">set</keyword>
         <section ref="qspeeddial-members.html" title="List of all members"/>
     </section>
@@ -7009,9 +7095,12 @@
         <keyword ref="qspeeddiallist.html#clearItem">clearItem</keyword>
         <keyword ref="qspeeddiallist.html#currentRowChanged">currentRowChanged</keyword>
         <keyword ref="qspeeddiallist.html#editItem">editItem</keyword>
+        <keyword ref="qspeeddiallist.html#isBlankSetEnabled">isBlankSetEnabled</keyword>
+        <keyword ref="qspeeddiallist.html#itemSelected">itemSelected</keyword>
         <keyword ref="qspeeddiallist.html#reload">reload</keyword>
         <keyword ref="qspeeddiallist.html#rowClicked">rowClicked</keyword>
         <keyword ref="qspeeddiallist.html#rowInput">rowInput</keyword>
+        <keyword ref="qspeeddiallist.html#setBlankSetEnabled">setBlankSetEnabled</keyword>
         <keyword ref="qspeeddiallist.html#setCurrentInput">setCurrentInput</keyword>
         <section ref="qspeeddiallist-members.html" title="List of all members"/>
     </section>
@@ -7447,7 +7536,7 @@
         <keyword ref="qtimezone.html#standardAbbreviation">standardAbbreviation</keyword>
         <keyword ref="qtimezone.html#toCurrent">toCurrent</keyword>
         <keyword ref="qtimezone.html#toTime_t">toTime_t</keyword>
-        <keyword ref="qtimezone.html#toUtc">toUtc</keyword>
+        <keyword ref="qtimezone.html#toUtcx">toUtc</keyword>
         <keyword ref="qtimezone.html#utc">utc</keyword>
         <keyword ref="qtimezone.html#utcDateTime">utcDateTime</keyword>
         <keyword ref="qtimezone.html#operator-not-eq">operator!=</keyword>
@@ -7716,6 +7805,20 @@
         <keyword ref="qtopiaitemdelegate.html#paint">paint</keyword>
         <keyword ref="qtopiaitemdelegate.html#sizeHint">sizeHint</keyword>
         <section ref="qtopiaitemdelegate-members.html" title="List of all members"/>
+    </section>
+    <section ref="qtopiamedia.html" title="QtopiaMedia Class Reference">
+        <keyword ref="qtopiamedia.html">QtopiaMedia</keyword>
+        <keyword ref="qtopiamedia.html#Offset-enum">Offset</keyword>
+        <keyword ref="qtopiamedia.html#Offset-enum">QtopiaMedia::Current</keyword>
+        <keyword ref="qtopiamedia.html#Offset-enum">QtopiaMedia::End</keyword>
+        <keyword ref="qtopiamedia.html#Offset-enum">QtopiaMedia::Beginning</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">State</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">QtopiaMedia::Error</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">QtopiaMedia::Playing</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">QtopiaMedia::Stopped</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">QtopiaMedia::Paused</keyword>
+        <keyword ref="qtopiamedia.html#State-enum">QtopiaMedia::Buffering</keyword>
+        <section ref="qtopiamedia-members.html" title="List of all members"/>
     </section>
     <section ref="qtopianetwork.html" title="QtopiaNetwork Class Reference">
         <keyword ref="qtopianetwork.html">QtopiaNetwork</keyword>
@@ -8425,6 +8528,12 @@
         <keyword ref="securitymonitortask.html">SecurityMonitorTask</keyword>
         <section ref="securitymonitortask-members.html" title="List of all members"/>
     </section>
+    <section ref="servercontactmodel.html" title="ServerContactModel Class Reference">
+        <keyword ref="servercontactmodel.html">ServerContactModel</keyword>
+        <keyword ref="servercontactmodel.html#instance">instance</keyword>
+        <keyword ref="servercontactmodel.html#readSettings">readSettings</keyword>
+        <section ref="servercontactmodel-members.html" title="List of all members"/>
+    </section>
     <section ref="qphoneprofile-setting.html" title="Setting Class Reference">
         <keyword ref="qphoneprofile-setting.html">Setting</keyword>
         <keyword ref="qphoneprofile-setting.html#applicationName">applicationName</keyword>
@@ -8540,6 +8649,11 @@
         <keyword ref="sxeprograminfo.html#QSXE_SET_QL_KEY">QSXE_SET_QL_KEY</keyword>
         <section ref="sxeprograminfo-members.html" title="List of all members"/>
     </section>
+    <section ref="sysmessagesservice.html" title="SysMessagesService Class Reference">
+        <keyword ref="sysmessagesservice.html">SysMessagesService</keyword>
+        <keyword ref="sysmessagesservice.html#showDialog">showDialog</keyword>
+        <section ref="sysmessagesservice-members.html" title="List of all members"/>
+    </section>
     <section ref="systemshutdownhandler.html" title="SystemShutdownHandler Class Reference">
         <keyword ref="systemshutdownhandler.html">SystemShutdownHandler</keyword>
         <keyword ref="systemshutdownhandler.html#proceed">proceed</keyword>
@@ -8563,6 +8677,13 @@
         <keyword ref="systemsuspendhandler.html#suspend">suspend</keyword>
         <keyword ref="systemsuspendhandler.html#wake">wake</keyword>
         <section ref="systemsuspendhandler-members.html" title="List of all members"/>
+    </section>
+    <section ref="taskmanagerentry.html" title="TaskManagerEntry Class Reference">
+        <keyword ref="taskmanagerentry.html">TaskManagerEntry</keyword>
+        <keyword ref="taskmanagerentry.html#activated">activated</keyword>
+        <keyword ref="taskmanagerentry.html#hide">hide</keyword>
+        <keyword ref="taskmanagerentry.html#show">show</keyword>
+        <section ref="taskmanagerentry-members.html" title="List of all members"/>
     </section>
     <section ref="taskmanagerservice.html" title="TaskManagerService Class Reference">
         <keyword ref="taskmanagerservice.html">TaskManagerService</keyword>
@@ -8616,7 +8737,6 @@
     </section>
     <section ref="themecontrol.html" title="ThemeControl Class Reference">
         <keyword ref="themecontrol.html">ThemeControl</keyword>
-        <keyword ref="themecontrol.html#currentTheme">currentTheme</keyword>
         <keyword ref="themecontrol.html#exportBackground">exportBackground</keyword>
         <keyword ref="themecontrol.html#instance">instance</keyword>
         <keyword ref="themecontrol.html#refresh">refresh</keyword>
@@ -8916,9 +9036,6 @@
         <keyword ref="virtualkeyboardservice.html#sendKeyEvent">sendKeyEvent</keyword>
         <section ref="virtualkeyboardservice-members.html" title="List of all members"/>
     </section>
-    <section ref="vobjectlegal.html" title="VObjectLegal Class Reference">
-        <keyword ref="vobjectlegal.html">VObjectLegal</keyword>
-    </section>
     <section ref="voicerecordingservice.html" title="VoiceRecordingService Class Reference">
         <keyword ref="voicerecordingservice.html">VoiceRecordingService</keyword>
         <keyword ref="voicerecordingservice.html#recordAudio">recordAudio</keyword>
@@ -8935,11 +9052,14 @@
         <keyword ref="voipmanager.html#startMonitoring">startMonitoring</keyword>
         <section ref="voipmanager-members.html" title="List of all members"/>
     </section>
+    <section ref="waitindicator.html" title="WaitIndicator Class Reference">
+        <keyword ref="waitindicator.html">WaitIndicator</keyword>
+        <section ref="waitindicator-members.html" title="List of all members"/>
+    </section>
     <section ref="webaccessservice.html" title="WebAccessService Class Reference">
         <keyword ref="webaccessservice.html">WebAccessService</keyword>
-        <keyword ref="webaccessservice.html#getURL">getURL</keyword>
+        <keyword ref="webaccessservice.html#clearSession">clearSession</keyword>
         <keyword ref="webaccessservice.html#openURL">openURL</keyword>
-        <keyword ref="webaccessservice.html#retrieveURL">retrieveURL</keyword>
         <section ref="webaccessservice-members.html" title="List of all members"/>
     </section>
     <section ref="qwindowdecorationinterface-windowdata.html" title="WindowData Class Reference">
@@ -8993,12 +9113,18 @@
         <keyword ref="custom-h.html#QTOPIA_COMPATIBLE_DEVICES">QTOPIA_COMPATIBLE_DEVICES</keyword>
         <keyword ref="custom-h.html#QTOPIA_ENABLE_EXPORTED_BACKGROUNDS">QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</keyword>
         <keyword ref="custom-h.html#QTOPIA_ENABLE_GLOBAL_BACKGROUNDS">QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</keyword>
-        <keyword ref="custom-h.html#QTOPIA_ENABLE_GLOBAL_BACKGROUNDS-2">QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</keyword>
         <keyword ref="custom-h.html#QTOPIA_PHONE_DEVICE">QTOPIA_PHONE_DEVICE</keyword>
         <keyword ref="custom-h.html#QTOPIA_PHONE_MUX">QTOPIA_PHONE_MUX</keyword>
         <keyword ref="custom-h.html#QTOPIA_PHONE_VENDOR">QTOPIA_PHONE_VENDOR</keyword>
         <keyword ref="custom-h.html#QTOPIA_ZONEINFO_PATH">QTOPIA_ZONEINFO_PATH</keyword>
         <keyword ref="custom-h.html#V4L_VIDEO_DEVICE">V4L_VIDEO_DEVICE</keyword>
+    </section>
+    <section ref="version-h.html" title="&lt;version.h&gt; - Version defines">
+        <keyword ref="version-h.html">&lt;version.h&gt; - Version defines</keyword>
+        <keyword ref="version-h.html#QPE_VERSION">QPE_VERSION</keyword>
+        <keyword ref="version-h.html#QTOPIA_COMPATIBLE_VERSIONS">QTOPIA_COMPATIBLE_VERSIONS</keyword>
+        <keyword ref="version-h.html#QTOPIA_VERSION">QTOPIA_VERSION</keyword>
+        <keyword ref="version-h.html#QTOPIA_VERSION_STR">QTOPIA_VERSION_STR</keyword>
     </section>
     <section ref="abstractwidgets.html" title="Abstract Widget Classes">
         <keyword ref="abstractwidgets.html">Abstract Widget Classes</keyword>
@@ -9063,6 +9189,9 @@
     <section ref="qtopiaserver-control.html" title="Control Classes">
         <keyword ref="qtopiaserver-control.html">Control Classes</keyword>
     </section>
+    <section ref="syscust-volumemanager.html" title="Controlling the Volume Widget">
+        <keyword ref="syscust-volumemanager.html">Controlling the Volume Widget</keyword>
+    </section>
     <section ref="syscust-qvfb-skin.html" title="Customizing a Skin for QVFb">
         <keyword ref="syscust-qvfb-skin.html">Customizing a Skin for QVFb</keyword>
     </section>
@@ -9086,6 +9215,9 @@
     </section>
     <section ref="styleguide.html" title="Designing Applications">
         <keyword ref="styleguide.html">Designing Applications</keyword>
+    </section>
+    <section ref="desktopfiles.html" title="Desktop File Standard">
+        <keyword ref="desktopfiles.html">Desktop File Standard</keyword>
     </section>
     <section ref="syscust-partitionlayout.html" title="Device Partition Layout">
         <keyword ref="syscust-partitionlayout.html">Device Partition Layout</keyword>
@@ -9159,8 +9291,8 @@
     <section ref="building-guide.html" title="Guide to Configuring and Building Qtopia">
         <keyword ref="building-guide.html">Guide to Configuring and Building Qtopia</keyword>
     </section>
-    <section ref="syscust-guide.html" title="Handling Out Of Memory">
-        <keyword ref="syscust-guide.html">Handling Out Of Memory</keyword>
+    <section ref="syscust-oom.html" title="Handling Out Of Memory">
+        <keyword ref="syscust-oom.html">Handling Out Of Memory</keyword>
     </section>
     <section ref="hardware.html" title="Hardware">
         <keyword ref="hardware.html">Hardware</keyword>
@@ -9182,6 +9314,30 @@
     </section>
     <section ref="syscust-perform.html" title="Identifying Performance Issues">
         <keyword ref="syscust-perform.html">Identifying Performance Issues</keyword>
+    </section>
+    <section ref="tut-iviewer-part1.html" title="Image Viewer Tutorial: Part 1">
+        <keyword ref="tut-iviewer-part1.html">Image Viewer Tutorial: Part 1</keyword>
+    </section>
+    <section ref="tut-iviewer-part2.html" title="Image Viewer Tutorial: Part 2">
+        <keyword ref="tut-iviewer-part2.html">Image Viewer Tutorial: Part 2</keyword>
+    </section>
+    <section ref="tut-iviewer-part3.html" title="Image Viewer Tutorial: Part 3">
+        <keyword ref="tut-iviewer-part3.html">Image Viewer Tutorial: Part 3</keyword>
+    </section>
+    <section ref="tut-iviewer-part4.html" title="Image Viewer Tutorial: Part 4">
+        <keyword ref="tut-iviewer-part4.html">Image Viewer Tutorial: Part 4</keyword>
+    </section>
+    <section ref="tut-iviewer-part5.html" title="Image Viewer Tutorial: Part 5">
+        <keyword ref="tut-iviewer-part5.html">Image Viewer Tutorial: Part 5</keyword>
+    </section>
+    <section ref="tut-iviewer-part6.html" title="Image Viewer Tutorial: Part 6">
+        <keyword ref="tut-iviewer-part6.html">Image Viewer Tutorial: Part 6</keyword>
+    </section>
+    <section ref="tut-iviewer-part7.html" title="Image Viewer Tutorial: Part 7">
+        <keyword ref="tut-iviewer-part7.html">Image Viewer Tutorial: Part 7</keyword>
+    </section>
+    <section ref="syscust-icons.html" title="Images and Icons">
+        <keyword ref="syscust-icons.html">Images and Icons</keyword>
     </section>
     <section ref="inputmethods-description.html" title="Input Methods Documentation">
         <keyword ref="inputmethods-description.html">Input Methods Documentation</keyword>
@@ -9303,6 +9459,9 @@
     <section ref="qtopiaserver-phoneui.html" title="Phone UI classes">
         <keyword ref="qtopiaserver-phoneui.html">Phone UI classes</keyword>
     </section>
+    <section ref="phonebounce.html" title="phonebounce">
+        <keyword ref="phonebounce.html">phonebounce</keyword>
+    </section>
     <section ref="qpim-library.html" title="PIM Library">
         <keyword ref="qpim-library.html">PIM Library</keyword>
     </section>
@@ -9318,11 +9477,17 @@
     <section ref="porting2to4.html" title="Porting to Qtopia 4">
         <keyword ref="porting2to4.html">Porting to Qtopia 4</keyword>
     </section>
+    <section ref="qcop-tool.html" title="qcop tool">
+        <keyword ref="qcop-tool.html">qcop tool</keyword>
+    </section>
     <section ref="qdawggen.html" title="qdawggen">
         <keyword ref="qdawggen.html">qdawggen</keyword>
     </section>
     <section ref="qdawg-node.html" title="QDawgNode Class Reference">
         <keyword ref="qdawg-node.html">QDawgNode Class Reference</keyword>
+    </section>
+    <section ref="syscust-qpk.html" title="Qpk Packages">
+        <keyword ref="syscust-qpk.html">Qpk Packages</keyword>
     </section>
     <section ref="release-4-2-0.html" title="Qtopia - 4.2&#x2e;0 Release Notes">
         <keyword ref="release-4-2-0.html">Qtopia - 4.2&#x2e;0 Release Notes</keyword>
@@ -9339,8 +9504,14 @@
     <section ref="release-4-2-4.html" title="Qtopia - 4.2&#x2e;4 Release Notes">
         <keyword ref="release-4-2-4.html">Qtopia - 4.2&#x2e;4 Release Notes</keyword>
     </section>
+    <section ref="release-4-2-5.html" title="Qtopia - 4.2&#x2e;5 Release Notes">
+        <keyword ref="release-4-2-5.html">Qtopia - 4.2&#x2e;5 Release Notes</keyword>
+    </section>
     <section ref="release-4-3-0.html" title="Qtopia - 4.3&#x2e;0 Release Notes">
         <keyword ref="release-4-3-0.html">Qtopia - 4.3&#x2e;0 Release Notes</keyword>
+    </section>
+    <section ref="release-4-3-1.html" title="Qtopia - 4.3&#x2e;1 Release Notes">
+        <keyword ref="release-4-3-1.html">Qtopia - 4.3&#x2e;1 Release Notes</keyword>
     </section>
     <section ref="docwidget.html" title="Qtopia - Main Document Widget">
         <keyword ref="docwidget.html">Qtopia - Main Document Widget</keyword>
@@ -9363,8 +9534,8 @@
     <section ref="datasharing.html" title="Qtopia Data Sharing (QDS)">
         <keyword ref="datasharing.html">Qtopia Data Sharing (QDS)</keyword>
     </section>
-    <section ref="index.html" title="Qtopia Developer Resources (Open Source Edition)">
-        <keyword ref="index.html">Qtopia Developer Resources (Open Source Edition)</keyword>
+    <section ref="index.html" title="Qtopia Developer Resources">
+        <keyword ref="index.html">Qtopia Developer Resources</keyword>
     </section>
     <section ref="syscust-mediaplayer.html" title="Qtopia Helix Integration">
         <keyword ref="syscust-mediaplayer.html">Qtopia Helix Integration</keyword>
@@ -9462,8 +9633,8 @@
     <section ref="syscust-stdfonts.html" title="Standard Fonts">
         <keyword ref="syscust-stdfonts.html">Standard Fonts</keyword>
     </section>
-    <section ref="syscust-sxepkgmgr.html" title="SXE - Accessing Qtopia Packages Using PackageManager">
-        <keyword ref="syscust-sxepkgmgr.html">SXE - Accessing Qtopia Packages Using PackageManager</keyword>
+    <section ref="sxe-requirements.html" title="SXE - Aims and Limitations">
+        <keyword ref="sxe-requirements.html">SXE - Aims and Limitations</keyword>
     </section>
     <section ref="sxe-app-checklist.html" title="SXE - Application checklist">
         <keyword ref="sxe-app-checklist.html">SXE - Application checklist</keyword>
@@ -9474,8 +9645,11 @@
     <section ref="sxe-pkgmgr-ctlfile.html" title="SXE - Control File">
         <keyword ref="sxe-pkgmgr-ctlfile.html">SXE - Control File</keyword>
     </section>
-    <section ref="sxe-pkgmgr-dispsec.html" title="SXE - Display Security">
-        <keyword ref="sxe-pkgmgr-dispsec.html">SXE - Display Security</keyword>
+    <section ref="sxe-pkgmgr-profiles.html" title="SXE - Customizing Domains">
+        <keyword ref="sxe-pkgmgr-profiles.html">SXE - Customizing Domains</keyword>
+    </section>
+    <section ref="sxe-mac.html" title="SXE - Framework Overview">
+        <keyword ref="sxe-mac.html">SXE - Framework Overview</keyword>
     </section>
     <section ref="sxe-glossary.html" title="SXE - Glossary of Terms">
         <keyword ref="sxe-glossary.html">SXE - Glossary of Terms</keyword>
@@ -9486,29 +9660,17 @@
     <section ref="sxe-pkgmgr.html" title="SXE - Installer/Package Manager Overview">
         <keyword ref="sxe-pkgmgr.html">SXE - Installer/Package Manager Overview</keyword>
     </section>
-    <section ref="sxe-mac.html" title="SXE - Mandatory Access Control">
-        <keyword ref="sxe-mac.html">SXE - Mandatory Access Control</keyword>
-    </section>
     <section ref="sxe-pkgmgr-download.html" title="SXE - Package Download Protocols">
         <keyword ref="sxe-pkgmgr-download.html">SXE - Package Download Protocols</keyword>
     </section>
     <section ref="sxe-pkgmgr-keying.html" title="SXE - Package Keying and Manifest">
         <keyword ref="sxe-pkgmgr-keying.html">SXE - Package Keying and Manifest</keyword>
     </section>
-    <section ref="sxe-pkgtrusts.html" title="SXE - Package Trusts">
-        <keyword ref="sxe-pkgtrusts.html">SXE - Package Trusts</keyword>
+    <section ref="sxe-model.html" title="SXE - Sandbox Model">
+        <keyword ref="sxe-model.html">SXE - Sandbox Model</keyword>
     </section>
-    <section ref="sxe-pkgmgr-profiles.html" title="SXE - Policy Profiles and Domains">
-        <keyword ref="sxe-pkgmgr-profiles.html">SXE - Policy Profiles and Domains</keyword>
-    </section>
-    <section ref="sxe-requirements.html" title="SXE - Requirements">
-        <keyword ref="sxe-requirements.html">SXE - Requirements</keyword>
-    </section>
-    <section ref="sxe-sandbox.html" title="SXE - Sand-boxing">
-        <keyword ref="sxe-sandbox.html">SXE - Sand-boxing</keyword>
-    </section>
-    <section ref="sxe-sxemonitor.html" title="SXE - Security Monitor">
-        <keyword ref="sxe-sxemonitor.html">SXE - Security Monitor</keyword>
+    <section ref="sxe-sxemonitor.html" title="SXE - SxeMonitor">
+        <keyword ref="sxe-sxemonitor.html">SXE - SxeMonitor</keyword>
     </section>
     <section ref="syscust-sxe.html" title="SXE - System Integration">
         <keyword ref="syscust-sxe.html">SXE - System Integration</keyword>
@@ -9597,9 +9759,6 @@
     <section ref="tut-prelink.html" title="Tutorial: Using prelink">
         <keyword ref="tut-prelink.html">Tutorial: Using prelink</keyword>
     </section>
-    <section ref="tut-tbuild.html" title="Tutorial: Using Teambuilder to Build Qtopia">
-        <keyword ref="tut-tbuild.html">Tutorial: Using Teambuilder to Build Qtopia</keyword>
-    </section>
     <section ref="tut-winddectheme.html" title="Tutorial: Window Decoration Theme">
         <keyword ref="tut-winddectheme.html">Tutorial: Window Decoration Theme</keyword>
     </section>
@@ -9617,6 +9776,9 @@
     </section>
     <section ref="userinterface.html" title="User Interface">
         <keyword ref="userinterface.html">User Interface</keyword>
+    </section>
+    <section ref="vobjectlegal.html" title="VObject">
+        <keyword ref="vobjectlegal.html">VObject</keyword>
     </section>
     <section ref="syscust-voip.html" title="VoIP Integration">
         <keyword ref="syscust-voip.html">VoIP Integration</keyword>
@@ -9649,6 +9811,9 @@
     </section>
     <section ref="content-filtering.html" title="Tutorial: Content Filtering">
         <keyword ref="content-filtering.html">Tutorial: Content Filtering</keyword>
+    </section>
+    <section ref="bluetooth-bluetoothservice.html" title="Tutorial: Creating a Bluetooth service">
+        <keyword ref="bluetooth-bluetoothservice.html">Tutorial: Creating a Bluetooth service</keyword>
     </section>
     <section ref="application.html" title="Tutorial: Creating a New Application">
         <keyword ref="application.html">Tutorial: Creating a New Application</keyword>

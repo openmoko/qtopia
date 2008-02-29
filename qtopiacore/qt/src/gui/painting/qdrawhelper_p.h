@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -385,6 +383,84 @@ inline quint18 qt_colorConvert(quint32 color, quint18 dummy)
 
 #endif // QT_QWS_DEPTH_18
 
+#ifdef QT_QWS_DEPTH_GENERIC
+
+struct qrgb
+{
+public:
+    static int bpp;
+    static int len_red;
+    static int len_green;
+    static int len_blue;
+    static int len_alpha;
+    static int off_red;
+    static int off_green;
+    static int off_blue;
+    static int off_alpha;
+} Q_PACKED;
+
+template <typename SRC>
+static inline quint32 qt_convertToRgb(SRC color);
+
+template <>
+static inline quint32 qt_convertToRgb(quint32 color)
+{
+    const int r = qRed(color) >> (8 - qrgb::len_red);
+    const int g = qGreen(color) >> (8 - qrgb::len_green);
+    const int b = qBlue(color) >> (8 - qrgb::len_blue);
+    const int a = qAlpha(color) >> (8 - qrgb::len_alpha);
+    const quint32 v = (r << qrgb::off_red)
+                      | (g << qrgb::off_green)
+                      | (b << qrgb::off_blue)
+                      | (a << qrgb::off_alpha);
+
+    return v;
+}
+
+template <>
+static inline quint32 qt_convertToRgb(quint16 color)
+{
+    return qt_convertToRgb(qt_colorConvert<quint32, quint16>(color, 0));
+}
+
+class qrgb_generic16
+{
+public:
+    inline qrgb_generic16(quint32 color)
+    {
+        const int r = qRed(color) >> (8 - qrgb::len_red);
+        const int g = qGreen(color) >> (8 - qrgb::len_green);
+        const int b = qBlue(color) >> (8 - qrgb::len_blue);
+        const int a = qAlpha(color) >> (8 - qrgb::len_alpha);
+        data = (r << qrgb::off_red)
+               | (g << qrgb::off_green)
+               | (b << qrgb::off_blue)
+               | (a << qrgb::off_alpha);
+    }
+
+    inline operator quint16 () { return data; }
+    inline quint32 operator<<(int shift) const { return data << shift; }
+
+private:
+    quint16 data;
+} Q_PACKED;
+
+template <>
+static inline qrgb_generic16 qt_colorConvert(quint32 color, qrgb_generic16 dummy)
+{
+    Q_UNUSED(dummy);
+    return qrgb_generic16(color);
+}
+
+template <>
+static inline qrgb_generic16 qt_colorConvert(quint16 color, qrgb_generic16 dummy)
+{
+    Q_UNUSED(dummy);
+    return qrgb_generic16(qt_colorConvert<quint32, quint16>(color, 0));
+}
+
+#endif // QT_QWS_DEPTH_GENERIC
+
 template <class T>
 void qt_memfill(T *dest, T value, int count);
 
@@ -464,6 +540,16 @@ void qt_rectconvert(DST *dest, const SRC *src,
     }
 }
 
+#ifdef QT_QWS_DEPTH_GENERIC
+template <> void qt_rectconvert(qrgb *dest, const quint32 *src,
+                                int x, int y, int width, int height,
+                                int dstStride, int srcStride);
+
+template <> void qt_rectconvert(qrgb *dest, const quint16 *src,
+                                int x, int y, int width, int height,
+                                int dstStride, int srcStride);
+#endif // QT_QWS_DEPTH_GENERIC
+
 #define QT_MEMFILL_UINT(dest, length, color)            \
     qt_memfill<quint32>(dest, color, length);
 
@@ -529,6 +615,11 @@ QT_DECL_MEMROTATE(quint32, quint8);
 QT_DECL_MEMROTATE(quint16, quint8);
 QT_DECL_MEMROTATE(quint8, quint8);
 
+#if defined(QT_QWS_DEPTH_GENERIC)
+QT_DECL_MEMROTATE(quint32, qrgb_generic16);
+QT_DECL_MEMROTATE(quint16, qrgb_generic16);
+#endif
+
 #undef QT_DECL_MEMROTATE
 
 static inline int qt_div_255(int x) { return (x + (x>>8) + 0x80) >> 8; }
@@ -539,6 +630,16 @@ inline ushort qConvertRgb32To16(uint c)
        | (((c) >> 5) & 0x07e0)
        | (((c) >> 8) & 0xf800);
 }
+
+#if defined(Q_WS_QWS) || (QT_VERSION >= 0x040400)
+inline quint32 qConvertRgb32To16x2(quint64 c)
+{
+    c = (((c) >> 3) & 0x001f0000001full)
+        | (((c) >> 5) & 0x07e0000007e0ull)
+        | (((c) >> 8) & 0xf8000000f800ull);
+    return c | (c >> 16);
+}
+#endif
 
 inline QRgb qConvertRgb16To32(uint c)
 {

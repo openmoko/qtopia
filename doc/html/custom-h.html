@@ -36,7 +36,6 @@
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_COMPATIBLE_DEVICES">QTOPIA_COMPATIBLE_DEVICES</a></b></li>
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_ENABLE_EXPORTED_BACKGROUNDS">QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</a></b></li>
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_ENABLE_GLOBAL_BACKGROUNDS">QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</a></b></li>
-<li><div class="fn"/><b><a href="custom-h.html#QTOPIA_ENABLE_GLOBAL_BACKGROUNDS-2">QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</a></b></li>
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_PHONE_DEVICE">QTOPIA_PHONE_DEVICE</a></b></li>
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_PHONE_MUX">QTOPIA_PHONE_MUX</a></b></li>
 <li><div class="fn"/><b><a href="custom-h.html#QTOPIA_PHONE_VENDOR">QTOPIA_PHONE_VENDOR</a></b></li>
@@ -63,19 +62,31 @@
 <p>If present, this macro sets the default ports that Synchronization uses. Synchronization currently supports &quot;tcp&quot; and &quot;serial&quot;. The settings file overrides this default.</p>
 <p>Note that this macro must evaluate to a string list.</p>
 <p>If this macro is not present the default value is:</p>
-<pre>    QStringList() &lt;&lt; &quot;tcp&quot;</pre>
+<pre>    #ifndef QDSYNC_DEFAULT_PORTS
+    #define QDSYNC_DEFAULT_PORTS QStringList() &lt;&lt; &quot;tcp&quot;
+    #endif</pre>
 <h3 class="fn"><a name="QDSYNC_DEFAULT_SERIAL_PORT"></a>QDSYNC_DEFAULT_SERIAL_PORT</h3>
 <p>Set the serial port that Synchronization uses by default.</p>
 <p>If present, this macro sets the default serial port that Synchronization uses. The settings file overrides this default.</p>
-<p>If this macro is not present the default serial port is &quot;/dev/ttyS0&quot;.</p>
+<p>If this macro is not present the default value is:</p>
+<pre>    #ifndef QDSYNC_DEFAULT_SERIAL_PORT
+    #define QDSYNC_DEFAULT_SERIAL_PORT &quot;/dev/ttyS0&quot;
+    #endif</pre>
 <h3 class="fn"><a name="QDSYNC_DEFAULT_TCP_PORT"></a>QDSYNC_DEFAULT_TCP_PORT</h3>
 <p>Set the TCP port that Synchronization uses by default.</p>
 <p>If present, this macro sets the default TCP port that Synchronization uses. Note that the display number is added to the port so that multiple instances can run on the same machine. The default display number is 0. The settings file overrides this default.</p>
-<p>If this macro is not present the default TCP port is 4245.</p>
+<p>If this macro is not present the default value is:</p>
+<pre>    #ifndef QDSYNC_DEFAULT_TCP_PORT
+    #define QDSYNC_DEFAULT_TCP_PORT 4245
+    #endif</pre>
 <h3 class="fn"><a name="QDSYNC_MODEL"></a>QDSYNC_MODEL</h3>
 <p>Set the model that Synchronization reports.</p>
 <p>If present, this macro sets the model that Synchronization uses. This is a string that is shown to the user.</p>
-<p>If this macro is not present the default model is &quot;Unspecified Device&quot;.</p>
+<p>If this macro is not present the default value is:</p>
+<pre>    #ifndef QDSYNC_MODEL
+    #define QDSYNC_MODEL Qtopia::architecture()
+    #endif</pre>
+<p>See also <a href="qtopia.html#architecture">Qtopia::architecture</a>().</p>
 <h3 class="fn"><a name="QDSYNC_STARTUP_DELAY"></a>QDSYNC_STARTUP_DELAY</h3>
 <p>Set the delay for the initial Synchronization launch.</p>
 <p>If present, this macro sets the initial delay for Synchronization launch (in milliseconds). A freshly-booted system does not typically require synchronization capability immediately and delaying the launch of Synchronization can improve startup time.</p>
@@ -83,14 +94,14 @@
 <h3 class="fn"><a name="QDSYNC_SYSTEM"></a>QDSYNC_SYSTEM</h3>
 <p>Set the system that Synchronization reports.</p>
 <p>If present, this macro sets the system that Synchronization uses. Qtopia Sync Agent plugins may handle specific systems.</p>
-<p>If this macro is not present the default system is &quot;Qtopia&quot;.</p>
+<p>If this macro is not present the default value is:</p>
+<pre>    #ifndef QDSYNC_SYSTEM
+    #define QDSYNC_SYSTEM &quot;Qtopia&quot;
+    #endif</pre>
 <h3 class="fn"><a name="QGLOBAL_PIXMAP_CACHE_LIMIT"></a>QGLOBAL_PIXMAP_CACHE_LIMIT</h3>
-<p>This constant is provided to aid memory management for systems with large, high bit per pixel(bpp) screens. If not defined, this constant is set as follows:</p>
-<pre>    #include &quot;custom.h&quot;
-
-    #ifndef QGLOBAL_PIXMAP_CACHE_LIMIT
-        <span class="comment">//You can override this in your device profile custom.h</span>
-        #define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     <span class="comment">// 1 Mb</span>
+<p>This constant is provided to aid memory management for systems with large, high bit per pixel(bpp) screens. If this macro is not present the default value is:</p>
+<pre>    #ifndef QGLOBAL_PIXMAP_CACHE_LIMIT
+    #define QGLOBAL_PIXMAP_CACHE_LIMIT 1048576     <span class="comment">//</span> 1 Mb
     #endif</pre>
 <p>See also <a href="syscust-memusage.html#shared-memory-cache">Shared Memory Cache</a> and <a href="qglobalpixmapcache.html">QGlobalPixmapCache</a>.</p>
 <h3 class="fn"><a name="QPE_ARCHITECTURE"></a>QPE_ARCHITECTURE</h3>
@@ -103,31 +114,36 @@
 <h3 class="fn"><a name="QTOPIA_COMPATIBLE_DEVICES"></a>QTOPIA_COMPATIBLE_DEVICES</h3>
 <p>Set this macro to specify the devices whose packages are known to be compatible with this device. It is a comma delimited string and by convention the first device listed is this device.</p>
 <p>This macro is used by packagemanager as a guide to filter out packages not suitable for the device.</p>
+<p>If this macro is not present the default value is:</p>
+<pre>    #ifndef QTOPIA_COMPATIBLE_DEVICES
+    #define QTOPIA_COMPATIBLE_DEVICES &quot;Unknown&quot;
+    #endif</pre>
 <h3 class="fn"><a name="QTOPIA_ENABLE_EXPORTED_BACKGROUNDS"></a>QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</h3>
 <p>Set this macro to have the phone homescreen background used as the background for the launcher.</p>
 <h3 class="fn"><a name="QTOPIA_ENABLE_GLOBAL_BACKGROUNDS"></a>QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</h3>
 <p>Set this macro to have the phone homescreen background used as the background for all applications. This has no effect unless used with <a href="custom-h.html#QTOPIA_ENABLE_EXPORTED_BACKGROUNDS">QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</a>.</p>
-<h3 class="fn"><a name="QTOPIA_ENABLE_GLOBAL_BACKGROUNDS-2"></a>QTOPIA_ENABLE_GLOBAL_BACKGROUNDS</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Set this macro to have the phone homescreen background used as the background for all applications. This has no effect unless used with <a href="custom-h.html#QTOPIA_ENABLE_EXPORTED_BACKGROUNDS">QTOPIA_ENABLE_EXPORTED_BACKGROUNDS</a>.</p>
 <h3 class="fn"><a name="QTOPIA_PHONE_DEVICE"></a>QTOPIA_PHONE_DEVICE</h3>
-<p>Set this macro to specify the modem device to use. For example, the first physical COM port would be specified with <tt>&quot;/dev/ttyS0&quot;</tt>.</p>
-<p>See also <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a>.</p>
-<h3 class="fn"><a name="QTOPIA_PHONE_MUX"></a>QTOPIA_PHONE_MUX</h3>
-<p>Set this macro to enable multiplexing in Qtopia.</p>
+<p>Set this macro to specify the default modem device to use. For example, the first physical COM port would be specified with <tt>&quot;/dev/ttyS0&quot;</tt>. The <tt>QTOPIA_PHONE_DEVICE</tt> environment variable can override this value.</p>
 <p>See also <a href="syscust-gsm.html">GSM Modem Integration</a>.</p>
+<h3 class="fn"><a name="QTOPIA_PHONE_MUX"></a>QTOPIA_PHONE_MUX</h3>
+<p>Set this macro to the string <tt>no</tt> to disable multiplexing. The <tt>QTOPIA_PHONE_MUX</tt> environment variable can override this value.</p>
+<p>This setting is typically used for testing phone vendor plug-ins before development of the multiplexer plug-in has been finished, or to determine if a modem problem is due to problems in the multiplexer plug-in.</p>
+<p>See also <a href="syscust-gsm.html">GSM Modem Integration</a> and <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a>.</p>
 <h3 class="fn"><a name="QTOPIA_PHONE_VENDOR"></a>QTOPIA_PHONE_VENDOR</h3>
-<p>Set this macro to specify the default multiplexer to use.</p>
+<p>Set this macro to specify the default phone vendor and multiplexer plug-ins to use. The <tt>QTOPIA_PHONE_VENDOR</tt> environment variable can override this value.</p>
 <p>See also <a href="syscust-gsm.html">GSM Modem Integration</a>.</p>
 <h3 class="fn"><a name="QTOPIA_ZONEINFO_PATH"></a>QTOPIA_ZONEINFO_PATH</h3>
-<p>Set this macro to specify the location to the zoneinfo database.</p>
+<p>Set this macro to specify an alternate location to the zoneinfo database. You should set this if your zoneinfo database is not in the usual location of <tt>/usr/share/zoneinfo</tt>.</p>
 <p>See also <a href="syscust-time.html">Time on an Embedded Device</a>.</p>
 <h3 class="fn"><a name="V4L_VIDEO_DEVICE"></a>V4L_VIDEO_DEVICE</h3>
-<p>Set this macro to speicify the <a href="qtopia-dependencies.html#video4linux">Video4Linux</a> device to use in the Camera application. If not specified the Camera uses <tt>&quot;/dev/video&quot;</tt>.</p>
+<p>Set this macro to specify the <a href="qtopia-dependencies.html#video4linux">Video4Linux</a> device to use. If this macro is not present the default value is:</p>
+<pre>    #ifndef V4L_VIDEO_DEVICE
+    #define V4L_VIDEO_DEVICE &quot;/dev/video&quot;
+    #endif</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

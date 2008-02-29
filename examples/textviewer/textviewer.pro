@@ -16,4 +16,4 @@ pkg.desc=An Example Program to View Text Files
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=GPL
-pkg.domain=window
+pkg.domain=trusted

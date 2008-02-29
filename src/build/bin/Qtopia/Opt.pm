@@ -25,6 +25,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
     _resolve_to_scalar
     _resolve_to_array
     opt
+    validate
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -374,6 +375,40 @@ sub _resolve_to_array
 sub setEngine
 {
     ( $engine ) = @_;
+}
+
+# Validate one (or all) options
+sub validate
+{
+    my @check = @_;
+    if ( scalar(@check) == 0 ) {
+        @check = keys %optvar_storage
+    }
+
+    my $ok = 1;
+
+    # check input against "available", if present
+    AVAILCHECK: for my $optname ( @check ) {
+        my $optref = $optvar_storage{$optname};
+        if ( defined($optref->{"value"}) && $optref->{"available"} && ref($optref->{"available"}) ne "" ) {
+            my @available = _resolve_to_array($optref->{"available"});
+            AVAILWORD: for my $word ( split(/ /, $optref->{"value"}) ) {
+                if ( $word ) {
+                    for my $a ( @available ) {
+                        if ( $word eq $a ) {
+                            next AVAILWORD;
+                        }
+                    }
+                    warn "ERROR: Invalid value for option \"$optname\": $word\n".
+                         "       Valid values: ".join(",", @available)."\n";
+                    $ok = 0;
+                    next AVAILCHECK;
+                }
+            }
+        }
+    }
+
+    $ok;
 }
 
 # Make this file require()able.

@@ -24,4 +24,4 @@ captureService.path=/services/Settings
 INSTALLS+=captureService
 
 pkg.desc=Light and Power settings dialog for Qtopia.
-pkg.domain=window,lightandpower,profiles
+pkg.domain=trusted

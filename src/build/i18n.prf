@@ -35,9 +35,9 @@ linstall_template=$$COMMAND_HEADER\
     INSTALLS+=linstall
 
     # Update .ts files
-    translatables.CONFIG=no_link no_dependencies combine ignore_no_exist no_clean
+    translatables.CONFIG=no_link no_dependencies explicit_dependencies combine ignore_no_exist no_clean
     commands=$$COMMAND_HEADER
-    for(lang,TRANSLATIONS) {
+    for(lang,ALL_TRANSLATIONS) {
         !equals(commands,$$COMMAND_HEADER):commands+=$$LINE_SEP
         commands+=\
             cd $$SRCDIR $$COMMAND_SEP\
@@ -73,7 +73,7 @@ for(it,INSTALLS) {
         }
 
         # Update the non-code .ts file
-        eval(nct_lupdate_$${it}.CONFIG=no_link no_dependencies combine ignore_no_exist no_clean)
+        eval(nct_lupdate_$${it}.CONFIG=no_link no_dependencies explicit_dependencies combine ignore_no_exist no_clean)
         commands=$$COMMAND_HEADER\
             cd $$outdir $$COMMAND_SEP\
             $$fixpath($$QBS_BIN/nct_lupdate)
@@ -110,7 +110,7 @@ for(it,INSTALLS) {
         INSTALLS+=theme_linstall_$$it
 
         # Update the theme .ts file
-        eval(theme_lupdate_$${it}.CONFIG=no_link no_dependencies ignore_no_exist no_clean)
+        eval(theme_lupdate_$${it}.CONFIG=no_link no_dependencies explicit_dependencies ignore_no_exist no_clean)
         commands=$$COMMAND_HEADER\
             cd $$outdir $$COMMAND_SEP\
             $$fixpath($$QBS_BIN/theme_lupdate)\

@@ -1,21 +1,5 @@
 # This file contains projects that are eligable for inclusion in the Free Edition.
 
-# Qtopia Core files
-QTE_PROJECTS=\
-    libraries/qtopiacore/tools/moc\
-    libraries/qtopiacore/tools/uic\
-    libraries/qtopiacore/tools/rcc\
-    libraries/qtopiacore/corelib\
-    libraries/qtopiacore/gui\
-    libraries/qtopiacore/network\
-    libraries/qtopiacore/sql\
-    libraries/qtopiacore/xml\
-    libraries/qtopiacore/script\
-    libraries/qtopiacore/svg\
-    plugins/qtopiacore
-contains(QTE_CONFIG,opengl):QTE_PROJECTS+=libraries/qtopiacore/opengl
-PROJECTS*=$$QTE_PROJECTS
-
 # Qtopia Platform files
 PROJECTS*=\
     # A placeholder for installing Qt files
@@ -46,6 +30,7 @@ PROJECTS*=\
     3rdparty/libraries/md5\
     3rdparty/libraries/tar\
     3rdparty/libraries/crypt\
+    3rdparty/libraries/pthread\
     #obex
     3rdparty/libraries/openobex\
     3rdparty/libraries/inputmatch\
@@ -66,24 +51,31 @@ PROJECTS*=\
     libraries/qtopiapim
 
 # qtopiatest
-qtopiatest {
+!x11:qtopiatest {
+    # Qtopiatest core and plugin interfaces
     PROJECTS*=\
         libraries/qtopiacore/qtestlib\
-        libraries/qtopiatest/host \
-        libraries/qtopiatest/target \
-        libraries/qtopiatest/overrides
-    !x11 {
-        PROJECTS*=\
-            libraries/qtopiatest/plugin/app \
-            libraries/qtopiatest/plugin/server \
-            libraries/qtopiatest/qsystemtestrunner
-    }
-    !x11 {
-        # performance test stuff
-        PROJECTS*=\
-            plugins/qtopiacore/gfxdrivers/perftestqvfb \
-            plugins/qtopiacore/gfxdrivers/perftestlinuxfb
-    }
+        libraries/qtopiatest\
+        # Ugh. Why did these get moved out of the source tree?
+        ../tests/shared/qtopiaunittest\
+        ../tests/shared/qtopiadbunittest
+
+    # Qtopiatest reference implementation (plugins)
+    PROJECTS*=\
+        plugins/qtopiatest/application \
+        plugins/qtopiatest/server \
+        plugins/qtopiatest/widgets
+
+    # Qtopiatest script interpreter
+    PROJECTS*=\
+        tools/qtopiatestrunner/lib \
+        tools/qtopiatestrunner/liboverrides \
+        tools/qtopiatestrunner
+
+    # performance test helpers
+    PROJECTS*=\
+        plugins/qtopiacore/gfxdrivers/perftestqvfb \
+        plugins/qtopiacore/gfxdrivers/perftestlinuxfb
 }
 
 # non-platform stuff
@@ -104,7 +96,8 @@ qtopiatest {
         games/snake\
         games/minesweep\
         plugins/content/id3 \
-        plugins/content/exif
+        plugins/content/exif \
+        plugins/content/threegpp
 }
 
 PROJECTS*=\
@@ -149,10 +142,23 @@ enable_qtopiamedia {
     }
 
     contains(QTOPIAMEDIA_ENGINES,cruxus) {
+        PROJECTS*=plugins/mediaengines/cruxus
+        # MIDI support
         PROJECTS*=\
-            3rdparty/libraries/libtimidity \
-            3rdparty/plugins/codecs/libtimidity \
-            plugins/mediaengines/cruxus
+            3rdparty/libraries/libtimidity\
+            3rdparty/plugins/codecs/libtimidity
+        # MP3 support
+        # Removed for now, due to licensing
+        #PROJECTS*=\
+        #    3rdparty/libraries/libmad\
+        #    3rdparty/plugins/codecs/libmad
+        # OGG Vorbis support
+        PROJECTS*=\
+            3rdparty/libraries/tremor\
+            3rdparty/plugins/codecs/tremor
+        # WAV support
+        PROJECTS*=\
+            plugins/codecs/wavplay
     }
 }
 
@@ -186,7 +192,8 @@ media {
 	applications/clock \
 	applications/mediarecorder \
 	applications/photoedit \
-        plugins/content/id3
+        plugins/content/id3 \
+        plugins/content/threegpp
 
     build_helix {
         PROJECTS*=\

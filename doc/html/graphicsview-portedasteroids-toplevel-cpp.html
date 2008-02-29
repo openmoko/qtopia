@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,19 +44,17 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
- /*
+<span class="comment"> /*
   * KAsteroids - Copyright (c) Martin R. Jones 1997
   *
   * Part of the KDE project
-  */
- //      --- toplevel.cpp ---
+  */</span>
+<span class="comment"> //</span>      --- toplevel.cpp ---
  #include &lt;q3accel.h&gt;
  #include &lt;qlabel.h&gt;
  #include &lt;qlayout.h&gt;
@@ -64,7 +62,7 @@
  #include &lt;qpushbutton.h&gt;
 
  #include &lt;qapplication.h&gt;
- //Added by qt3to4:
+<span class="comment"> //</span>Added by qt3to4:
  #include &lt;Q3HBoxLayout&gt;
  #include &lt;QShowEvent&gt;
  #include &lt;Q3Frame&gt;
@@ -204,14 +202,14 @@
 
      vb-&gt;addWidget( view, 10 );
 
- // -- bottom layout:
+<span class="comment"> //</span> -- bottom layout:
      vb-&gt;addLayout( hbd );
 
      QFont smallFont( &quot;helvetica&quot;, 14 );
      hbd-&gt;addSpacing( 10 );
 
      QString sprites_prefix = &quot;:/trolltech/examples/graphicsview/portedasteroids/sprites/&quot;;
- /*
+<span class="comment"> /*
      label = new QLabel( tr( &quot;T&quot; ), mainWin );
      label-&gt;setFont( smallFont );
      label-&gt;setFixedWidth( label-&gt;sizeHint().width() );
@@ -226,7 +224,7 @@
      hbd-&gt;addWidget( teleportsLCD );
 
      hbd-&gt;addSpacing( 10 );
- */
+ */</span>
      QPixmap pm( sprites_prefix + &quot;powerups/brake.png&quot; );
      label = new QLabel( mainWin );
      label-&gt;setPixmap( pm );
@@ -421,7 +419,7 @@
          case NewGame:
              slotNewGame();
              break;
- /*
+<span class="comment"> /*
          case Pause:
              {
                  view-&gt;pause( TRUE );
@@ -431,7 +429,7 @@
                  view-&gt;pause( FALSE );
              }
              break;
- */
+ */</span>
          default:
              event-&gt;ignore();
              return;
@@ -464,7 +462,7 @@
      view-&gt;newGame();
      view-&gt;setRockSpeed( levels[0].rockSpeed );
      view-&gt;addRocks( levels[0].nrocks );
- //    view-&gt;showText( tr( &quot;Press L to launch.&quot; ), yellow );
+<span class="comment"> //</span>    view-&gt;showText( tr( &quot;Press L to launch.&quot; ), yellow );
      view-&gt;newShip();
      waitShip = FALSE;
      view-&gt;hideText();
@@ -488,7 +486,7 @@
          view-&gt;showText( tr(&quot;Game Over!&quot;), Qt::red );
          view-&gt;endGame();
          doStats();
- //        highscore-&gt;addEntry( score, level, showHiscores );
+<span class="comment"> //</span>        highscore-&gt;addEntry( score, level, showHiscores );
      }
  }
 
@@ -533,7 +531,7 @@
           r = QString::number( (double)view-&gt;hits() / view-&gt;shots() * 100.0,
                               'g', 2 );
 
- /* multi-line text broken in Qt 3
+<span class="comment"> /* multi-line text broken in Qt 3
      QString s = tr( &quot;Game Over\n\nShots fired:\t%1\n  Hit:\t%2\n  Missed:\t%3\nHit ratio:\t%4 %\n\nPress N for a new game&quot; )
        .arg(view-&gt;shots()).arg(view-&gt;hits())
        .arg(view-&gt;shots() - view-&gt;hits())
@@ -548,13 +546,13 @@
      brakesLCD-&gt;display( view-&gt;brakeCount() );
      shieldLCD-&gt;display( view-&gt;shieldCount() );
      shootLCD-&gt;display( view-&gt;shootCount() );
-<span class="comment"> //    teleportsLCD-&gt;display( view-&gt;teleportCount() );</span>
+<span class="comment"> //</span>    teleportsLCD-&gt;display( view-&gt;teleportCount() );
      powerMeter-&gt;setValue( view-&gt;power() );
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/echoplugin.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/echoplugin.qdoc -->
 <head>
   <title>Qt 4.3: Echo Plugin Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -22,6 +22,9 @@
 <li><a href="tools-echoplugin-plugin-echoplugin-cpp.html">tools/echoplugin/plugin/echoplugin.cpp</a></li>
 <li><a href="tools-echoplugin-plugin-echoplugin-h.html">tools/echoplugin/plugin/echoplugin.h</a></li>
 <li><a href="tools-echoplugin-echowindow-main-cpp.html">tools/echoplugin/echowindow/main.cpp</a></li>
+<li><a href="tools-echoplugin-echoplugin-pro.html">tools/echoplugin/echoplugin.pro</a></li>
+<li><a href="tools-echoplugin-echowindow-echowindow-pro.html">tools/echoplugin/echowindow/echowindow.pro</a></li>
+<li><a href="tools-echoplugin-plugin-plugin-pro.html">tools/echoplugin/plugin/plugin.pro</a></li>
 </ul>
 <p>This example shows how to create a Qt plugin.</p>
 <p align="center"><img src="images/echopluginexample.png" /></p><p>There are two kinds of plugins in Qt: plugins that extend Qt itself and plugins that extend applications written in Qt. In this example, we show the procedure of implementing plugins that extend applications. When you create a plugin you declare an interface, which is a class with only pure virtual functions. This interface is inherited by the class that implements the plugin. The class is stored in a shared library and can therefore be loaded by applications at run-time. When loaded, the plugin is dynamically cast to the interface using Qt's <a href="metaobjects.html">meta-object system</a>. The plugin <a href="plugins-howto.html">overview document</a> gives a high-level introduction to plugins.</p>
@@ -181,8 +184,8 @@
 <p>We give an example of a plugin that extend Qt in the <a href="tools-styleplugin.html">style plugin</a> example. The <a href="tools-plugandpaint.html">plug and paint</a> example shows how to create static plugins.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

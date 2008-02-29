@@ -28,7 +28,7 @@ depends(libraries/qtopiabase)
 depends(3rdparty/libraries/sqlite)
 
 pkg.desc=Database upgrade migration utility
-pkg.domain=docapi,cardreader,prefix
+pkg.domain=trusted
 
 dbmigrateservice.files=$$QTOPIA_DEPOT_PATH/services/DBMigrationEngine/dbmigrate
 dbmigrateservice.path=/services/DBMigrationEngine

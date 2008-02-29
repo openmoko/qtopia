@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -912,6 +912,11 @@ void QModemDataCall::dial( const QDialOptions& options )
 
     // Create the channels for data traffic and setup.
     createChannels();
+
+    if (d->channel && !d->channel->isOpen())
+        d->channel->open(QIODevice::ReadWrite);
+    if (d->setup && !d->setup->isOpen())
+        d->setup->open(QIODevice::ReadWrite);
 
     // We are now in the dialing state.
     setActions( QPhoneCallImpl::None );

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include <themedview.h>
 #include <qtopia/private/themedviewinterface_p.h>
+#include <qtopia/private/qtagmap_p.h>
 #include <qtopianamespace.h>
 #include <qpluginmanager.h>
 #include <qexpressionevaluator.h>
@@ -98,6 +99,7 @@ class ThemeAttributes
 public:
     ThemeAttributes(const QXmlStreamAttributes &atts) : m_atts(atts) {}
     QString value(const QString &key) const { return m_atts.value(key).toString(); }
+    QString value(const QLatin1String &key) const { return m_atts.value(key).toString(); }
 
 private:
     QXmlStreamAttributes m_atts;
@@ -123,8 +125,8 @@ struct ThemeItemPrivate
     bool press;
     bool focus;
     bool interactive;
-    QMap<QString,int> intattributes[3];
-    QMap<QString,QString> strattributes[3];
+    QTagMap<int> intattributes[3];
+    QTagMap<QString> strattributes[3];
     QExpressionEvaluator* activeExpr;
     QList<ThemeMessageData> message;
     bool isDataExpression;
@@ -926,6 +928,7 @@ QExpressionEvaluator* ThemeItem::createExpression(const QString &data)
     if ( !data.isEmpty() ) {
         // prepend this item's fullVSPath to any vs terms in expression
         QString expandedData = data;
+        expandedData.replace(QRegExp("'"), "\"");
         QString fp = fullVSPath();
         if ( !fp.isEmpty() && fp != "/") {
             expandedData = QString(data).replace( "@", "@"+fp );
@@ -950,7 +953,21 @@ QExpressionEvaluator* ThemeItem::createExpression(const QString &data)
 void ThemeItem::setAttribute(const QString &key, const int &value, ThemeItem::State state)
 {
     int _st = stateToIndex(state);
-    QMap<QString,int> &dataset = d->intattributes[_st];
+    QTagMap<int> &dataset = d->intattributes[_st];
+    if (dataset.contains(key))
+        dataset.remove(key);
+    dataset.insert(key, value);
+}
+
+/*!
+  Stores the integer \a value for the state \a state based on the given storage \a key.
+
+  \since 4.3.1
+*/
+void ThemeItem::setAttribute(const QLatin1String &key, const int &value, ThemeItem::State state)
+{
+    int _st = stateToIndex(state);
+    QTagMap<int> &dataset = d->intattributes[_st];
     if (dataset.contains(key))
         dataset.remove(key);
     dataset.insert(key, value);
@@ -962,7 +979,19 @@ void ThemeItem::setAttribute(const QString &key, const int &value, ThemeItem::St
 int ThemeItem::attribute(const QString &key, ThemeItem::State state) const
 {
     int _st = stateToIndex(state);
-    const QMap<QString,int> &dataset = d->intattributes[_st];
+    const QTagMap<int> &dataset = d->intattributes[_st];
+    return dataset[key];
+}
+
+/*!
+  Returns an integer value for state \a state based on the given storage \a key.
+
+  \since 4.3.1
+*/
+int ThemeItem::attribute(const QLatin1String &key, ThemeItem::State state) const
+{
+    int _st = stateToIndex(state);
+    const QTagMap<int> &dataset = d->intattributes[_st];
     return dataset[key];
 }
 
@@ -972,7 +1001,21 @@ int ThemeItem::attribute(const QString &key, ThemeItem::State state) const
 void ThemeItem::setAttribute(const QString &key, const QString &value, ThemeItem::State state)
 {
     int _st = stateToIndex(state);
-    QMap<QString,QString> &dataset = d->strattributes[_st];
+    QTagMap<QString> &dataset = d->strattributes[_st];
+    if (dataset.contains(key))
+        dataset.remove(key);
+    dataset.insert(key, value);
+}
+
+/*!
+  Stores the string \a value for state \a state based on the given storage \a key.
+
+  \since 4.3.1
+*/
+void ThemeItem::setAttribute(const QLatin1String &key, const QString &value, ThemeItem::State state)
+{
+    int _st = stateToIndex(state);
+    QTagMap<QString> &dataset = d->strattributes[_st];
     if (dataset.contains(key))
         dataset.remove(key);
     dataset.insert(key, value);
@@ -984,7 +1027,19 @@ void ThemeItem::setAttribute(const QString &key, const QString &value, ThemeItem
 QString ThemeItem::strAttribute(const QString &key, ThemeItem::State state)
 {
     int _st = stateToIndex(state);
-    const QMap<QString,QString> &dataset = d->strattributes[_st];
+    const QTagMap<QString> &dataset = d->strattributes[_st];
+    return dataset[key];
+}
+
+/*!
+  Returns the string value for state \a state based on the given storage \a key.
+
+  \since 4.3.1
+*/
+QString ThemeItem::strAttribute(const QLatin1String &key, ThemeItem::State state)
+{
+    int _st = stateToIndex(state);
+    const QTagMap<QString> &dataset = d->strattributes[_st];
     return dataset[key];
 }
 
@@ -2078,8 +2133,8 @@ QSize ThemePageItem::sizeHint() const
 
 struct ThemeGraphicItemPrivate
 {
-    QMap<QString,QColor> colors[3];
-    QMap<QString,QFont> fonts[3];
+    QTagMap<QColor> colors[3];
+    QTagMap<QFont> fonts[3];
 };
 
 /*!
@@ -2131,9 +2186,43 @@ void ThemeGraphicItem::setupColor( const QString &key, const QString &color, The
 }
 
 /*!
+  Stores the given color \a color based on the given storage \a key role key \a roleKey and state \a state.
+
+  \since 4.3.1
+*/
+void ThemeGraphicItem::setupColor( const QLatin1String &key, const QLatin1String& roleKey, const QString &color, ThemeItem::State state )
+{
+    QColor _color;
+    int role = parseColor( color, _color );
+    if ( role == QPalette::NColorRoles && state != ThemeItem::Default )
+    {
+        role = attribute( roleKey );
+        _color = this->color( key );
+    }
+    setAttribute( roleKey, role, state );
+    setColor( key, _color, state );
+}
+
+/*!
   Stores the alpha attribute \a alpha for this item based on the given storage \a key and state \a state.
 */
 void ThemeGraphicItem::setupAlpha( const QString &key, const QString &alpha, ThemeItem::State state )
+{
+    bool ok;
+    int _alpha = alpha.toInt(&ok);
+    Q_UNUSED(_alpha);
+    if (ok) {
+        //still set a string version, so can easily check for 'emptiness' in usage case
+        setAttribute( key, alpha, state );
+    }
+}
+
+/*!
+  Stores the alpha attribute \a alpha for this item based on the given storage \a key and state \a state.
+
+  \since 4.3.1
+*/
+void ThemeGraphicItem::setupAlpha( const QLatin1String &key, const QString &alpha, ThemeItem::State state )
 {
     bool ok;
     int _alpha = alpha.toInt(&ok);
@@ -2150,7 +2239,21 @@ void ThemeGraphicItem::setupAlpha( const QString &key, const QString &alpha, The
 void ThemeGraphicItem::setColor( const QString &key, const QColor &value, ThemeItem::State state )
 {
     int _st = stateToIndex( state );
-    QMap<QString,QColor> &dataset = d->colors[_st];
+    QTagMap<QColor> &dataset = d->colors[_st];
+    if ( dataset.contains( key ) )
+        dataset.remove( key );
+    dataset.insert( key, value );
+}
+
+/*!
+  Stores the color \a value based on the given storage \a key and state \a state.
+
+  \since 4.3.1
+*/
+void ThemeGraphicItem::setColor( const QLatin1String &key, const QColor &value, ThemeItem::State state )
+{
+    int _st = stateToIndex( state );
+    QTagMap<QColor> &dataset = d->colors[_st];
     if ( dataset.contains( key ) )
         dataset.remove( key );
     dataset.insert( key, value );
@@ -2162,7 +2265,19 @@ void ThemeGraphicItem::setColor( const QString &key, const QColor &value, ThemeI
 QColor ThemeGraphicItem::color( const QString &key, ThemeItem::State state ) const
 {
     int _st = stateToIndex( state );
-    const QMap<QString,QColor> &dataset = d->colors[_st];
+    const QTagMap<QColor> &dataset = d->colors[_st];
+    return dataset[key];
+}
+
+/*!
+  Returns the color for the given storage key \a key and state \a state.
+
+  \since 4.3.1
+*/
+QColor ThemeGraphicItem::color( const QLatin1String &key, ThemeItem::State state ) const
+{
+    int _st = stateToIndex( state );
+    const QTagMap<QColor> &dataset = d->colors[_st];
     return dataset[key];
 }
 
@@ -2172,7 +2287,21 @@ QColor ThemeGraphicItem::color( const QString &key, ThemeItem::State state ) con
 void ThemeGraphicItem::setFont( const QString &key, const QFont &value, ThemeItem::State state )
 {
     int _st = stateToIndex( state );
-    QMap<QString,QFont> &dataset = d->fonts[_st];
+    QTagMap<QFont> &dataset = d->fonts[_st];
+    if ( dataset.contains( key ) )
+        dataset.remove( key );
+    dataset.insert( key, value );
+}
+
+/*!
+  Stores the font \a value based on the given storage \a key and state \a state.
+
+  \since 4.3.1
+*/
+void ThemeGraphicItem::setFont( const QLatin1String &key, const QFont &value, ThemeItem::State state )
+{
+    int _st = stateToIndex( state );
+    QTagMap<QFont> &dataset = d->fonts[_st];
     if ( dataset.contains( key ) )
         dataset.remove( key );
     dataset.insert( key, value );
@@ -2184,7 +2313,19 @@ void ThemeGraphicItem::setFont( const QString &key, const QFont &value, ThemeIte
 QFont ThemeGraphicItem::font( const QString &key, ThemeItem::State state ) const
 {
     int _st = stateToIndex( state );
-    const QMap<QString,QFont> &dataset = d->fonts[_st];
+    const QTagMap<QFont> &dataset = d->fonts[_st];
+    return dataset[key];
+}
+
+/*!
+  Returns the font for the given storage \a key and state \a state.
+
+  \since 4.3.1
+*/
+QFont ThemeGraphicItem::font( const QLatin1String &key, ThemeItem::State state ) const
+{
+    int _st = stateToIndex( state );
+    const QTagMap<QFont> &dataset = d->fonts[_st];
     return dataset[key];
 }
 
@@ -2225,17 +2366,22 @@ int ThemeGraphicItem::parseColor(const QString &value, QColor &color)
 {
     int role = QPalette::NColorRoles;
     if (!value.isEmpty()) {
-        int i = 0;
-        while (colorTable[i].name) {
-            if (QString(colorTable[i].name).toLower() == value.toLower()) {
-                role = colorTable[i].role;
-                break;
-            }
-            i++;
-        }
-        if (!colorTable[i].name) {
+        if (value.startsWith(QChar('#'))) {
             role = QPalette::NColorRoles+1;
             color.setNamedColor(value);
+        } else {
+            int i = 0;
+            while (colorTable[i].name) {
+                if (QString(colorTable[i].name).toLower() == value.toLower()) {
+                    role = colorTable[i].role;
+                break;
+            }
+                i++;
+            }
+            if (!colorTable[i].name) {
+                role = QPalette::NColorRoles+1;
+                color.setNamedColor(value);
+            }
         }
     }
 
@@ -2497,8 +2643,8 @@ void ThemeTextItem::paint(QPainter *painter, const QRect &rect)
             else if (d->align & Qt::AlignVCenter)
                 y += (geometry().height()-h-1)/2;
         } else if (d->elidedMode != -1) {
-            QFontMetrics fm(fnt);
-            text = QAbstractItemDelegate::elidedText (fm, w, (Qt::TextElideMode)d->elidedMode, text);
+            QFontMetrics fm(fnt, painter->device());
+            text = fm.elidedText (text, (Qt::TextElideMode)d->elidedMode, rect.width());
         }
 
         QPalette pal(view()->palette());
@@ -2611,9 +2757,6 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
 
     // First get correct image size for DPI of target.
     QImage img(QSize(1,1), QImage::Format_ARGB32_Premultiplied);
-    // Make our image have the same DPI as our paint device.
-    img.setDotsPerMeterX(1000*painter->device()->width()/painter->device()->widthMM());
-    img.setDotsPerMeterY(1000*painter->device()->height()/painter->device()->heightMM());
     QPainter ppm(&img);
     ppm.setFont(painter->font());
     QFontMetrics fm(ppm.font());
@@ -2622,9 +2765,6 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
 
     // Now create proper image and paint.
     img = QImage(br.size(), QImage::Format_ARGB32_Premultiplied);
-    // Make our image have the same DPI as our paint device.
-    img.setDotsPerMeterX(1000*painter->device()->width()/painter->device()->widthMM());
-    img.setDotsPerMeterY(1000*painter->device()->height()/painter->device()->heightMM());
     img.fill(qRgba(0,0,0,0));
     ppm.begin(&img);
     ppm.setFont(painter->font());
@@ -2711,13 +2851,13 @@ ThemeRectItem::ThemeRectItem(ThemeItem *parent, ThemedView *view, const ThemeAtt
         onFocusAtts = parseSubAtts( atts.value(QLatin1String("onfocus")) );
     }
 
-    setupColor( QLatin1String("fg"), atts.value( QLatin1String("color") ), ThemeItem::Default );
-    setupColor( QLatin1String("fg"), onClickAtts[QLatin1String("color")], ThemeItem::Pressed );
-    setupColor( QLatin1String("fg"), onFocusAtts[QLatin1String("color")], ThemeItem::Focus );
+    setupColor( QLatin1String("fg"), QLatin1String("fgRole"), atts.value( QLatin1String("color") ), ThemeItem::Default );
+    setupColor( QLatin1String("fg"), QLatin1String("fgRole"), onClickAtts[QLatin1String("color")], ThemeItem::Pressed );
+    setupColor( QLatin1String("fg"), QLatin1String("fgRole"), onFocusAtts[QLatin1String("color")], ThemeItem::Focus );
 
-    setupColor( QLatin1String("bg"), atts.value( QLatin1String("brush") ), ThemeItem::Default );
-    setupColor( QLatin1String("bg"), onClickAtts[QLatin1String("brush")], ThemeItem::Pressed );
-    setupColor( QLatin1String("bg"), onFocusAtts[QLatin1String("brush")], ThemeItem::Focus );
+    setupColor( QLatin1String("bg"), QLatin1String("bgRole"), atts.value( QLatin1String("brush") ), ThemeItem::Default );
+    setupColor( QLatin1String("bg"), QLatin1String("bgRole"), onClickAtts[QLatin1String("brush")], ThemeItem::Pressed );
+    setupColor( QLatin1String("bg"), QLatin1String("bgRole"), onFocusAtts[QLatin1String("brush")], ThemeItem::Focus );
 
     setupAlpha( QLatin1String("alpha"), atts.value( QLatin1String("alpha") ), ThemeItem::Default );
     setupAlpha( QLatin1String("alpha"), onClickAtts[QLatin1String("alpha")], ThemeItem::Pressed );
@@ -2841,7 +2981,7 @@ struct ThemePixmapItemPrivate
     ThemePixmapItemPrivate()
     : hscale(false), vscale(false)
     {}
-    QMap<QString,Image> images[3];
+    QTagMap<Image> images[3];
     bool hscale;
     bool vscale;
 };
@@ -2898,7 +3038,20 @@ ThemePixmapItem::~ThemePixmapItem()
 QPixmap ThemePixmapItem::pixmap( const QString &key, ThemeItem::State state ) const
 {
     int _st = stateToIndex( state );
-    const QMap<QString,Image> &dataset = d->images[_st];
+    const QTagMap<Image> &dataset = d->images[_st];
+    return dataset[key].pixmap;
+}
+
+/*!
+  Returns the pixmap for the given \a key and state \a state.
+  \a state  has a default value of ThemeItem::Default.
+
+  \since 4.3.1
+*/
+QPixmap ThemePixmapItem::pixmap( const QLatin1String &key, ThemeItem::State state ) const
+{
+    int _st = stateToIndex( state );
+    const QTagMap<Image> &dataset = d->images[_st];
     return dataset[key].pixmap;
 }
 
@@ -2909,7 +3062,29 @@ QPixmap ThemePixmapItem::pixmap( const QString &key, ThemeItem::State state ) co
 void ThemePixmapItem::setPixmap( const QString &key, const QPixmap &value, ThemeItem::State state, const QString &filename )
 {
     int _st = stateToIndex( state );
-    QMap<QString,Image> &dataset = d->images[_st];
+    QTagMap<Image> &dataset = d->images[_st];
+    if ( dataset.contains( key ) ) {
+        dataset[key].pixmap = value;
+        dataset[key].filename = filename;
+    }
+    else {
+        Image image;
+        image.pixmap = value;
+        image.filename = filename;
+        dataset.insert( key, image );
+    }
+}
+
+/*!
+  Sets the pixmap \a value for the given \a key and state \a state from \a filename.
+  \a state has a default value of ThemeItem::Default.
+
+  \since 4.3.1
+*/
+void ThemePixmapItem::setPixmap( const QLatin1String &key, const QPixmap &value, ThemeItem::State state, const QString &filename )
+{
+    int _st = stateToIndex( state );
+    QTagMap<Image> &dataset = d->images[_st];
     if ( dataset.contains( key ) ) {
         dataset[key].pixmap = value;
         dataset[key].filename = filename;
@@ -3056,6 +3231,8 @@ QString imageTr( const QString& path, const QString& image, bool i18n )
 */
 QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const QColor &col, int alpha, int width, int height)
 {
+    qLog(Resource) << "ThemePixmapItem::loadImage" << filename << colorRole << col << alpha << width << height << "geometry=" << geometry();
+
     QPixmap pm;
     static QString dflt_path(QLatin1String("default/"));
 
@@ -3261,7 +3438,7 @@ bool ThemePixmapItem::verticalScale() const
 void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
 {
     for ( int i = 0; i < 3; i++ ) {
-        QMap<QString,Image> &map = d->images[i];
+        QTagMap<Image> &map = d->images[i];
         QString filename = map[key].filename;
         if ( filename.endsWith(".svg") ) {
             QColor colour = color( QLatin1String("color") );
@@ -3280,14 +3457,14 @@ void ThemePixmapItem::scaleImages( int count = 1 )
 {
     int width = 0, height = 0;
     for ( int i = 0; i < 3; i++ ) {
-        QMap<QString,Image> &dataset = d->images[i];
-        QMap<QString, Image>::iterator it;
+        QTagMap<Image> &dataset = d->images[i];
+        QTagMap<Image>::iterator it;
         for ( it = dataset.begin(); it != dataset.end(); ++it ) {
             QPixmap pm = it.value().pixmap;
             if ( horizontalScale() && pm.width() != geometry().width() * count || verticalScale() && pm.height() != geometry().height() ) {
                 width = horizontalScale() ? geometry().width() * count : pm.width();
                 height = verticalScale() ? geometry().height() : pm.height();
-                scaleImage(it.key(), width, height);
+                scaleImage(it.key().toString(), width, height);
             }
         }
     }
@@ -4122,9 +4299,9 @@ ThemeImageItem::ThemeImageItem(ThemeItem *parent, ThemedView *view, const ThemeA
         imgName = atts.value("src");
     setAttribute( "src", imgName, ThemeItem::Focus );
 
-    setupColor( QLatin1String("color"), atts.value( QLatin1String("color") ), ThemeItem::Default );
-    setupColor( QLatin1String("color"), onClickAtts[QLatin1String("color")], ThemeItem::Pressed );
-    setupColor( QLatin1String("color"), onFocusAtts[QLatin1String("color")], ThemeItem::Focus );
+    setupColor( QLatin1String("color"), QLatin1String("colorRole"), atts.value( QLatin1String("color") ), ThemeItem::Default );
+    setupColor( QLatin1String("color"), QLatin1String("colorRole"), onClickAtts[QLatin1String("color")], ThemeItem::Pressed );
+    setupColor( QLatin1String("color"), QLatin1String("colorRole"), onFocusAtts[QLatin1String("color")], ThemeItem::Focus );
     setupAlpha( QLatin1String("alpha"), atts.value( QLatin1String("alpha") ), ThemeItem::Default );
     setupAlpha( QLatin1String("alpha"), onClickAtts[QLatin1String("alpha")], ThemeItem::Pressed );
     setupAlpha( QLatin1String("alpha"), onFocusAtts[QLatin1String("alpha")], ThemeItem::Focus );

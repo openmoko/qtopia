@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1352,7 +1350,7 @@ int QHeaderView::minimumSectionSize() const
     Q_D(const QHeaderView);
     if (d->minimumSectionSize == -1) {
         QSize strut = QApplication::globalStrut();
-        int margin = style()->pixelMetric(QStyle::PM_HeaderMargin);
+        int margin = style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
         if (d->orientation == Qt::Horizontal)
             return qMax(strut.width(), (fontMetrics().maxWidth() + margin));
         return qMax(strut.height(), (fontMetrics().lineSpacing() + margin));
@@ -2401,7 +2399,7 @@ QSize QHeaderView::sectionSizeFromContents(int logicalIndex) const
     size = style()->sizeFromContents(QStyle::CT_HeaderSection, &opt, size, this);
 
     if (isSortIndicatorShown() && sortIndicatorSection() == logicalIndex) {
-        int margin = style()->pixelMetric(QStyle::PM_HeaderMargin);
+        int margin = style()->pixelMetric(QStyle::PM_HeaderMargin, &opt, this);
         if (d->orientation == Qt::Horizontal)
             size.rwidth() += size.height() + margin;
         else
@@ -2646,7 +2644,7 @@ int QHeaderViewPrivate::sectionHandleAt(int position)
         return -1;
     int log = logicalIndex(visual);
     int pos = q->sectionViewportPosition(log);
-    int grip = q->style()->pixelMetric(QStyle::PM_HeaderGripMargin);
+    int grip = q->style()->pixelMetric(QStyle::PM_HeaderGripMargin, 0, q);
     if (reverse()) {
         if (position < pos + grip)
             return log;
@@ -2815,6 +2813,7 @@ void QHeaderViewPrivate::resizeSections(QHeaderView::ResizeMode globalMode, bool
 
         if (resizeMode == QHeaderView::Stretch) {
             ++numberOfStretchedSections;
+            section_sizes.append(headerSectionSize(i));
             continue;
         }
 
@@ -2832,9 +2831,9 @@ void QHeaderViewPrivate::resizeSections(QHeaderView::ResizeMode globalMode, bool
     }
 
     // calculate the new length for all of the stretched sections
-    int stretchSectionLength = 0;
+    int stretchSectionLength = -1;
     int pixelReminder = 0;
-    if (numberOfStretchedSections > 0) {
+    if (numberOfStretchedSections > 0 && lengthToStrech > 0) { // we have room to stretch in
         int hintLengthForEveryStretchedSection = lengthToStrech / numberOfStretchedSections;
         stretchSectionLength = qMax(hintLengthForEveryStretchedSection, q->minimumSectionSize());
         pixelReminder = lengthToStrech % numberOfStretchedSections;
@@ -2862,7 +2861,7 @@ void QHeaderViewPrivate::resizeSections(QHeaderView::ResizeMode globalMode, bool
                 resizeMode = (i == stretchSection
                               ? QHeaderView::Stretch
                               : visualIndexResizeMode(i));
-            if (resizeMode == QHeaderView::Stretch) {
+            if (resizeMode == QHeaderView::Stretch && stretchSectionLength != -1) {
                 if (i == lastVisibleSection)
                     newSectionLength = qMax(stretchSectionLength, lastSectionSize);
                 else
@@ -2870,6 +2869,7 @@ void QHeaderViewPrivate::resizeSections(QHeaderView::ResizeMode globalMode, bool
                 if (pixelReminder > 0) {
                     newSectionLength += 1;
                     --pixelReminder;
+                    section_sizes.removeFirst();
                 }
             } else {
                 newSectionLength = section_sizes.front();

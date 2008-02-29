@@ -21,4 +21,4 @@ desktop.hint=desktop
 INSTALLS+=desktop
 
 pkg.desc=Beaming settings dialog for Qtopia.
-pkg.domain=window,beaming,doc_server,doc_write
+pkg.domain=trusted

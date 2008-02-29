@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,11 +23,11 @@
 #define __QTOPIA_MEDIASERVER_SESSIONMANAGER_H
 
 #include <QObject>
+#include <QList>
 
 #include <qtopiamedia/media.h>
 
 
-// pre
 class QMediaSessionRequest;
 class QMediaServerSession;
 
@@ -36,12 +36,12 @@ namespace mediaserver
 {
 
 class SessionManagerSession;
-
 class SessionManagerPrivate;
 
 class SessionManager : public QObject
 {
     Q_OBJECT
+
     friend class SessionManagerSession;
     friend class SessionManagerPrivate;
 
@@ -52,6 +52,8 @@ public:
     void destroySession(QMediaServerSession* mediaSession);
 
     static SessionManager* instance();
+
+    QList<QMediaServerSession*> const& sessions() const;
 
 signals:
     void activeSessionCountChanged(int);

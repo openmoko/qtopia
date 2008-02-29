@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -497,7 +497,7 @@ QRegion QtopiaDecoration::region(const QWidget *widget, const QRect &rect, int t
 // This is how we stop the mouse from interacting with
 // windows.  regionAt() is used to determine what area the mouse has been
 // clicked.  By returning QDecoration::None no mouse action will be performed.
-int QtopiaDecoration::regionAt(const QWidget *w, const QPoint &point)
+int QtopiaDecoration::regionAt(const QWidget * /*w*/, const QPoint & /*point*/)
 {
     return QDecoration::None;
 }

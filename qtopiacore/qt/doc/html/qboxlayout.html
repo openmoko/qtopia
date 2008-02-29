@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qboxlayout.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qboxlayout.cpp -->
 <head>
   <title>Qt 4.3: QBoxLayout Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -175,26 +175,10 @@
 <h3 class="fn"><a name="spacing"></a>int QBoxLayout::spacing () const</h3>
 <p>Reimplements <a href="qlayout.html#spacing-prop">QLayout::spacing</a>(). If the spacing property is valid, that value is returned. Otherwise, a value for the spacing property is computed and returned. Since layout spacing in a widget is style dependent, if the parent is a widget, it queries the style for the (horizontal or vertical) spacing of the layout. Otherwise, the parent is a layout, and it queries the parent layout for the spacing().</p>
 <p>See also <a href="qlayout.html#spacing-prop">QLayout::spacing</a>() and <a href="qboxlayout.html#setSpacing">setSpacing</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBoxLayout-2"></a>QBoxLayout::QBoxLayout ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, <a href="qboxlayout.html#Direction-enum">Direction</a> <i>dir</i>, int <i>margin</i> = 0, int <i>spacing</i> = -1, const char * <i>name</i> = 0 )</h3>
-<p>Constructs a new <a href="qboxlayout.html">QBoxLayout</a> with direction <i>dir</i> and main widget <i>parent</i>. <i>parent</i> may not be 0.</p>
-<p>The <i>margin</i> is the number of pixels between the edge of the widget and its managed children. The <i>spacing</i> is the default number of pixels between neighboring children. If <i>spacing</i> is -1 the value of <i>margin</i> is used for <i>spacing</i>.</p>
-<p><i>name</i> is the internal object name.</p>
-<p>See also <a href="qboxlayout.html#direction">direction</a>().</p>
-<h3 class="fn"><a name="QBoxLayout-3"></a>QBoxLayout::QBoxLayout ( <a href="qlayout.html">QLayout</a> * <i>parentLayout</i>, <a href="qboxlayout.html#Direction-enum">Direction</a> <i>dir</i>, int <i>spacing</i> = -1, const char * <i>name</i> = 0 )</h3>
-<p>Constructs a new <a href="qboxlayout.html">QBoxLayout</a> called <i>name</i>, with direction <i>dir</i>, and inserts it into <i>parentLayout</i>.</p>
-<p>The <i>spacing</i> is the default number of pixels between neighboring children. If <i>spacing</i> is -1, the layout will inherit its parent's <a href="qboxlayout.html#spacing">spacing</a>().</p>
-<h3 class="fn"><a name="QBoxLayout-4"></a>QBoxLayout::QBoxLayout ( <a href="qboxlayout.html#Direction-enum">Direction</a> <i>dir</i>, int <i>spacing</i>, const char * <i>name</i> = 0 )</h3>
-<p>Constructs a new <a href="qboxlayout.html">QBoxLayout</a> called <i>name</i>, with direction <i>dir</i>.</p>
-<p>If <i>spacing</i> is -1, the layout will inherit its parent's <a href="qboxlayout.html#spacing">spacing</a>(); otherwise <i>spacing</i> is used.</p>
-<p>You must insert this box into another layout.</p>
-<h3 class="fn"><a name="findWidget"></a>int QBoxLayout::findWidget ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
-<p>Use indexOf(<i>widget</i>) instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

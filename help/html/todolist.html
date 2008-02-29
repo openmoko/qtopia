@@ -1,12 +1,11 @@
 <html>
 <head><title>Tasks</title></head>
 <body>
-<h3><img src=":image/todolist/TodoList">Tasks</h3>
-<!--#if expr="$INFRARED"-->
-<p><b>Tasks</b> is used to create and maintain a list of prioritized tasks. You can <a href="todolist-add.html">add</a>, <a href="todolist-edit-screen.html">edit</a>, <a href="todolist-delete.html">delete</a>, <a href="todolist-viewing.html">view</a> and <a href="todolist-beam.html">send</a> tasks.</p>
-<!--#else-->
-<p><b>Tasks</b> is used to create and maintain a list of prioritized tasks. You can <a href="todolist-add.html">add</a>, <a href="todolist-edit-screen.html">edit</a>, <a href="todolist-delete.html">delete</a> and <a href="todolist-viewing.html">view</a> tasks.</p>
+<!--#if expr="$USERGUIDE"-->
+<h3>Tasks</h3>
 <!--#endif-->
+<p><img src=":image/todolist/TodoList"></p>
+<p><b>Tasks</b> is used to create and maintain a list of prioritized tasks. You can <a href="todolist-add.html">add</a>, <a href="todolist-edit-screen.html">edit</a>, <a href="todolist-delete.html">delete</a>, <a href="todolist-viewing.html">view</a> and <a href="todolist-send.html">send</a> tasks.</p>
 <p>Tasks are displayed in a list, with the description of the task and some additional information about the task.  The additional information can include the due date of the task, if it has one, the date the task was completed, or the current status of the task.  Several icons may be displayed for each task, including:</p>
 <ul>
 <li><img src=":icon/ok"><b>OK</b>  shows that a task has been completed.</li>

@@ -100,7 +100,8 @@
 <h2>Detailed Description</h2>
 <p>The QFile class provides an interface for reading from and writing to files.</p>
 <p>QFile is an I/O device for reading and writing text and binary files and <a href="resources.html">resources</a>. A QFile may be used by itself or, more conveniently, with a <a href="qtextstream.html">QTextStream</a> or <a href="qdatastream.html">QDataStream</a>.</p>
-<p>The file name is usually passed in the constructor, but it can be set at any time using <a href="qfile.html#setFileName">setFileName</a>(). You can check for a file's existence using <a href="qfile.html#exists">exists</a>(), and remove a file using <a href="qfile.html#remove">remove</a>(). (More advanced file system related operations are provided by <a href="qfileinfo.html">QFileInfo</a> and <a href="qdir.html">QDir</a>.)</p>
+<p>The file name is usually passed in the constructor, but it can be set at any time using <a href="qfile.html#setFileName">setFileName</a>(). QFile expects the file separator to be '/' regardless of operating system. The use of other separators (e.g&#x2e;, '\') is not supported.</p>
+<p>You can check for a file's existence using <a href="qfile.html#exists">exists</a>(), and remove a file using <a href="qfile.html#remove">remove</a>(). (More advanced file system related operations are provided by <a href="qfileinfo.html">QFileInfo</a> and <a href="qdir.html">QDir</a>.)</p>
 <p>The file is opened with <a href="qfile.html#open">open</a>(), closed with <a href="qiodevice.html#close">close</a>(), and flushed with <a href="qfile.html#flush">flush</a>(). Data is usually read and written using <a href="qdatastream.html">QDataStream</a> or <a href="qtextstream.html">QTextStream</a>, but you can also call the <a href="qiodevice.html">QIODevice</a>-inherited functions <a href="qiodevice.html#read">read</a>(), <a href="qiodevice.html#readLine">readLine</a>(), <a href="qiodevice.html#readAll">readAll</a>(), <a href="qiodevice.html#write">write</a>(). QFile also inherits <a href="qiodevice.html#getChar">getChar</a>(), <a href="qiodevice.html#putChar">putChar</a>(), and <a href="qiodevice.html#ungetChar">ungetChar</a>(), which work one character at a time.</p>
 <p>The size of the file is returned by <a href="qfile.html#size">size</a>(). You can get the current file position using <a href="qiodevice.html#pos">pos</a>(), or move to a new file position using <a href="qiodevice.html#seek">seek</a>(). If you've reached the end of the file, <a href="qfile.html#atEnd">atEnd</a>() returns true.</p>
 <a name="reading-files-directly"></a>
@@ -247,7 +248,7 @@
 <p>Returns true if the file specified by <a href="qfile.html#fileName">fileName</a>() exists; otherwise returns false.</p>
 <p>See also <a href="qfile.html#fileName">fileName</a>() and <a href="qfile.html#setFileName">setFileName</a>().</p>
 <h3 class="fn"><a name="fileName"></a><a href="qstring.html">QString</a> QFile::fileName () const</h3>
-<p>Returns the name set by <a href="qfile.html#setFileName">setFileName</a>().</p>
+<p>Returns the name set by <a href="qfile.html#setFileName">setFileName</a>() or to the <a href="qfile.html">QFile</a> constructors.</p>
 <p>See also <a href="qfile.html#setFileName">setFileName</a>() and <a href="qfileinfo.html#fileName">QFileInfo::fileName</a>().</p>
 <h3 class="fn"><a name="flush"></a>bool QFile::flush ()</h3>
 <p>Flushes any buffered data to the file. Returns true if successful; otherwise returns false.</p>
@@ -287,7 +288,7 @@
  {
      QFile file;
      file.open(stderr, QIODevice::WriteOnly);
-     file.write(msg, qstrlen(msg));        <span class="comment">// write to stderr</span>
+     file.write(msg, qstrlen(msg));        <span class="comment">//</span> write to stderr
      file.close();
  }</pre>
 <p>When a <a href="qfile.html">QFile</a> is opened using this function, <a href="qiodevice.html#close">close</a>() does not actually close the file, but only flushes it.</p>
@@ -352,7 +353,7 @@
  QDir::setCurrent(&quot;/tmp&quot;);
  file.setFileName(&quot;readme.txt&quot;);
  QDir::setCurrent(&quot;/home&quot;);
- file.open(QIODevice::ReadOnly);      <span class="comment">// opens &quot;/home/readme.txt&quot; under Unix</span></pre>
+ file.open(QIODevice::ReadOnly);      <span class="comment">//</span> opens &quot;/home/readme.txt&quot; under Unix</pre>
 <p>Note that the directory separator &quot;/&quot; works for all operating systems supported by Qt.</p>
 <p>See also <a href="qfile.html#fileName">fileName</a>(), <a href="qfileinfo.html">QFileInfo</a>, and <a href="qdir.html">QDir</a>.</p>
 <h3 class="fn"><a name="setPermissions"></a>bool QFile::setPermissions ( <a href="qfile.html#Permission-enum">Permissions</a> <i>permissions</i> )</h3>
@@ -378,24 +379,10 @@
 <h3 class="fn"><a name="unsetError"></a>void QFile::unsetError ()</h3>
 <p>Sets the file's error to <a href="qfile.html#FileError-enum">QFile::NoError</a>.</p>
 <p>See also <a href="qfile.html#error">error</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QFile::name () const</h3>
-<p>Use <a href="qfile.html#fileName">fileName</a>() instead.</p>
-<p>See also <a href="qfile-qt3.html#setName">setName</a>().</p>
-<h3 class="fn"><a name="open-2"></a>bool QFile::open ( <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>flags</i>, FILE * <i>f</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use open(FILE *, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a>) instead.</p>
-<h3 class="fn"><a name="open-3"></a>bool QFile::open ( <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a> <i>flags</i>, int <i>fd</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use open(int, <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a>) instead.</p>
-<h3 class="fn"><a name="setName"></a>void QFile::setName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
-<p>Use <a href="qfile.html#setFileName">setFileName</a>() instead.</p>
-<p>See also <a href="qfile-qt3.html#name">name</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

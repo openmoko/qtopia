@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -131,7 +131,8 @@ void ThemePreview::doPreview()
     if (!themedView)
         return;
     ThemeItem *page = themedView->findItem(m_name, ThemedView::Page);
-    m_preview = QPixmap::grabWidget(themedView, page->rect());
+    if (page)
+        m_preview = QPixmap::grabWidget(themedView, page->rect());
     emit previewReady(m_preview.scaledToWidth((int)(m_width * 0.55), Qt::SmoothTransformation));
 }
 
@@ -150,8 +151,8 @@ void ThemePreview::setIconLabel(bool enable)
 static QSettings gConfig("Trolltech", "qpe");
 
 // ThemeInfo ----------------------------------------------------
-ThemeInfo::ThemeInfo( const QString &tn )
-    : name( tn ) {}
+ThemeInfo::ThemeInfo() {}
+void ThemeInfo::setThemeName(const QString &n) { name = n; }
 const QString & ThemeInfo::themeName() { return name; }
 void ThemeInfo::setStyleName( const QString sn ) { style = sn; }
 const QString & ThemeInfo::styleName() const { return style; }
@@ -169,11 +170,11 @@ QStringList ThemeInfo::backgroundImages() const { return bgImages; }
 // AppearanceSettings ----------------------------------------------------
 AppearanceSettings::AppearanceSettings( QWidget* parent, Qt::WFlags fl )
     : QDialog(parent, fl),
-    isStatusView(false), isFromActiveProfile(false)
+    mIsStatusView(false), mIsFromActiveProfile(false)
 {
     setupUi();
-    readThemeInfo();
-    readColorScheme();
+    readThemeSettings();
+    readColorSchemeSettings();
 
     // Populate the first combo box (theme).
     populate();
@@ -183,13 +184,13 @@ AppearanceSettings::AppearanceSettings( QWidget* parent, Qt::WFlags fl )
     themeSelected(mActiveThemeIndex);
 
     // Connect the combo boxes.
-    connect( themeCombo, SIGNAL(currentIndexChanged(int)),
+    connect( mThemeCombo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(themeSelected(int)) );
-    connect( colorCombo, SIGNAL(currentIndexChanged(int)),
+    connect( mColorCombo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(colorSelected(int)) );
-    connect( bgCombo, SIGNAL(currentIndexChanged(QString)),
+    connect( mBgCombo, SIGNAL(currentIndexChanged(QString)),
             this, SLOT(backgroundSelected(QString)) );
-    connect( labelCkBox, SIGNAL(toggled(bool)),
+    connect( mLabelCkBox, SIGNAL(toggled(bool)),
             this, SLOT(labelToggled(bool)) );
 
     connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
@@ -221,7 +222,7 @@ void AppearanceSettings::populate()
     gConfig.beginGroup( "ContextMenu" );
     mActiveLabelType = (QSoftMenuBar::LabelType)gConfig.value( "LabelType", QSoftMenuBar::TextLabel ).toInt();
     gConfig.endGroup();
-    labelCkBox->setCheckState( mActiveLabelType == QSoftMenuBar::IconLabel ? Qt::Checked : Qt::Unchecked );
+    mLabelCkBox->setCheckState( mActiveLabelType == QSoftMenuBar::IconLabel ? Qt::Checked : Qt::Unchecked );
     labelToggled( mActiveLabelType == QSoftMenuBar::IconLabel );
 
     // current server widgets
@@ -231,14 +232,14 @@ void AppearanceSettings::populate()
         mServerWidgets = cfg.value("Default", "Phone").toString();
 
     // populate theme combo box
-    foreach ( ThemeInfo theme, themes ) {
-        themeCombo->addItem( theme.themeName() );
+    foreach ( ThemeInfo theme, mThemes ) {
+        mThemeCombo->addItem( theme.themeName() );
         if ( theme.themeFileName() == mActiveTheme ) {
-            mActiveThemeIndex = themeCombo->count() - 1;
-            themeCombo->setCurrentIndex(mActiveThemeIndex);
+            mActiveThemeIndex = mThemeCombo->count() - 1;
+            mThemeCombo->setCurrentIndex(mActiveThemeIndex);
         }
     }
-    contextPreview->setIconLabel(mActiveLabelType == QSoftMenuBar::IconLabel);
+    mContextPreview->setIconLabel(mActiveLabelType == QSoftMenuBar::IconLabel);
 }
 
 void AppearanceSettings::accept()
@@ -246,7 +247,7 @@ void AppearanceSettings::accept()
     QPhoneProfileManager profileManager;
     QPhoneProfile activeProfile = profileManager.activeProfile();
 
-    if ( !isStatusView ) { // normal appearance setting operation
+    if ( !mIsStatusView ) { // normal appearance setting operation
         QPhoneProfile::Setting setting = activeProfile.applicationSetting("appearance");
         if ( setting != QPhoneProfile::Setting() )
             pushSettingStatus();
@@ -262,11 +263,24 @@ void AppearanceSettings::accept()
 
 void AppearanceSettings::applyStyle()
 {
-    ThemeInfo *theme = &themes[themeCombo->currentIndex()];
-    if ( !theme )
+    if (mThemeCombo->currentIndex() < 0 ||
+            mThemeCombo->currentIndex() >= mThemes.count()) {
         return;
+    }
 
-    if ( mServerWidgets != theme->serverWidget() ) {
+    const ThemeInfo &theme = mThemes[mThemeCombo->currentIndex()];
+
+    QString themeFile = findFile(QLatin1String("etc/themes/") + mActiveTheme);
+    QSettings themeCfg(themeFile, QSettings::IniFormat);
+    themeCfg.beginGroup(QLatin1String("Theme"));
+    QString activeIconPath = themeCfg.value(QLatin1String("IconPath")).toString();
+
+    // If the server widgets or IconPath changes we need to restart for
+    // all changes to be visible.
+    bool needRestart = mServerWidgets != theme.serverWidget()
+                        || activeIconPath != theme.iconPath;
+
+    if (needRestart) {
         int ret = QMessageBox::warning( this, tr( "Restart?" ),
                 tr( "Device will be restarted for theme to be fully applied.<br>Apply Now?" ),
                 QMessageBox::Yes, QMessageBox::No );
@@ -274,17 +288,40 @@ void AppearanceSettings::applyStyle()
             return;
     }
 
-    // apply only when changed
-    if ( theme->themeFileName() != mActiveTheme )
-        applyTheme();
-    if ( colorCombo->itemData(colorCombo->currentIndex()).toString() != mActiveColor )
-        applyColorScheme();
-    if ( bgCombo->currentText() != mActiveBackground )
+    bool themeChanged = ( theme.themeFileName() != mActiveTheme );
+    bool colorSchemeChanged = ( mColorCombo->itemData(mColorCombo->currentIndex()).toString() != mActiveColor );
+
+    if (themeChanged)
+        writeThemeSettings(theme);
+    if (colorSchemeChanged)
+        writeColorSchemeSettings();
+    if (themeChanged || colorSchemeChanged) {
+        QtopiaChannel::send("QPE/System", "applyStyle()");
+        if (themeChanged)
+            QtopiaChannel::send("QPE/System", "applyStyleSplash()");
+        else
+            QtopiaChannel::send("QPE/System", "applyStyleNoSplash()");
+    }
+
+    if ( mBgCombo->currentText() != mActiveBackground )
         applyBackgroundImage();
-    if ( ( labelCkBox->isChecked()
+    if ( ( mLabelCkBox->isChecked()
                 ? QSoftMenuBar::IconLabel
-                : QSoftMenuBar::TextLabel ) != mActiveLabelType )
-        applyLabel();
+                : QSoftMenuBar::TextLabel ) != mActiveLabelType ) {
+        applySoftKeyLabels();
+    }
+
+    if ( !theme.serverWidget().isEmpty() ) {
+        QSettings cfg( "Trolltech", "ServerWidgets" );
+        cfg.beginGroup( "Mapping" );
+        cfg.remove(""); //delete all entries in current grp
+        cfg.setValue("Default", theme.serverWidget());
+
+        if (needRestart) {
+            QtopiaIpcEnvelope env( "QPE/System", "restart()" );
+            QtopiaApplication::quit();
+        }
+    }
 }
 
 void AppearanceSettings::setupUi()
@@ -308,27 +345,27 @@ void AppearanceSettings::setupUi()
     QFormLayout *formLayout = new QFormLayout(appearance);
 
     // create widgets
-    themeCombo = new QComboBox( this );
-    colorCombo = new QComboBox( this );
-    bgCombo = new QComboBox( this );
+    mThemeCombo = new QComboBox( this );
+    mColorCombo = new QComboBox( this );
+    mBgCombo = new QComboBox( this );
 
     // add widgets
-    formLayout->addRow( tr( "Theme" ), themeCombo );
-    formLayout->addRow( tr( "Color" ), colorCombo );
-    formLayout->addRow( tr( "Background" ), bgCombo );
+    formLayout->addRow( tr( "Theme" ), mThemeCombo );
+    formLayout->addRow( tr( "Color" ), mColorCombo );
+    formLayout->addRow( tr( "Background" ), mBgCombo );
 
     // label option checkbox
-    labelCkBox = new QCheckBox( tr( "Use icons for soft keys" ), this );
+    mLabelCkBox = new QCheckBox( tr( "Use icons for soft keys" ), this );
     QHBoxLayout *hLayout = new QHBoxLayout();
-    hLayout->addWidget( labelCkBox, 0, Qt::AlignHCenter );
+    hLayout->addWidget( mLabelCkBox, 0, Qt::AlignHCenter );
     formLayout->addRow( hLayout );
 
     // preview
-    groupBox = new QGroupBox(this);
+    mGroupBox = new QGroupBox(this);
     QHBoxLayout *layout = new QHBoxLayout();
     layout->setMargin(10);
-    groupBox->setLayout(layout);
-    groupBox->hide();
+    mGroupBox->setLayout(layout);
+    mGroupBox->hide();
 
     QVBoxLayout *previewLayout = new QVBoxLayout();
     previewLayout->setSpacing(0);
@@ -337,55 +374,51 @@ void AppearanceSettings::setupUi()
     int width = desktop->screenGeometry(desktop->primaryScreen()).width();
     int height = desktop->screenGeometry(desktop->primaryScreen()).height();
 
-    titlePreview = new ThemePreview("title", width, height);
-    connect(titlePreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setTitlePixmap(QPixmap)));
+    mTitlePreview = new ThemePreview("title", width, height);
+    connect(mTitlePreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setTitlePixmap(QPixmap)));
 
-    contextPreview = new ThemePreview("contextbar", width, height);
-    connect(contextPreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setContextPixmap(QPixmap)));
+    mContextPreview = new ThemePreview("contextbar", width, height);
+    connect(mContextPreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setContextPixmap(QPixmap)));
 
-    previewLayout->addWidget( &titleLabel, 0, Qt::AlignHCenter );
-    previewLayout->addWidget( &contextLabel, 0, Qt::AlignHCenter );
+    previewLayout->addWidget( &mTitleLabel, 0, Qt::AlignHCenter );
+    previewLayout->addWidget( &mContextLabel, 0, Qt::AlignHCenter );
 
     layout->addStretch(1);
     layout->addLayout(previewLayout);
-    layout->addWidget(&backgroundLabel);
+    layout->addWidget(&mBackgroundLabel);
     layout->addStretch(1);
-    formLayout->addRow( groupBox );
+    formLayout->addRow( mGroupBox );
 
     l->addWidget(appearanceWrapper);
 }
 
-void AppearanceSettings::readThemeInfo()
+QString AppearanceSettings::findFile(const QString &file)
 {
-    QDir dir;
-    QString themeDataPath( Qtopia::qtopiaDir() + "etc/themes/" );
-    if ( !dir.exists( themeDataPath ) ) {
-        qLog(UI) << "Theme style configuration path not found" << themeDataPath.toLocal8Bit().data(); // No tr
-        return;
+    QStringList instPaths = Qtopia::installPaths();
+    foreach (QString path, instPaths) {
+        QString themeDataPath( path + file );
+        if (QFile::exists(themeDataPath)) {
+            return themeDataPath;
+        }
     }
 
-    QString configFileName, themeName, decorationName;
-    bool valid;
+    return QString();
+}
 
-    // read theme.conf files
-    dir.setPath( themeDataPath );
-    dir.setNameFilters( QStringList( "*.conf" )); // No tr
-
-    for (int index = 0; index < (int)dir.count(); index++) {
-        valid = true;
-        configFileName = themeDataPath + dir[index];
-        QTranslatableSettings themeConfig(configFileName, QSettings::IniFormat);
-        // Ensure that we only provide valid theme choices.
-        if ( themeConfig.status() != QSettings::NoError ) {
-            // failed to read theme.conf. try next one
-            qLog(UI) << "Failed to read, ignore" << configFileName.toLocal8Bit().data();
-            continue;
-        } else {
-            themeConfig.beginGroup( "Theme" ); // No tr
-            QString styleName = themeConfig.value("Style", "Qtopia").toString();
-            QString serverWidgetName = themeConfig.value("ServerWidget", "Phone").toString();
-            QStringList colSchemes = themeConfig.value("ColorScheme").toString().split( "|", QString::SkipEmptyParts );
-            QStringList bg = themeConfig.value("Backgrounds").toString().split( "|", QString::SkipEmptyParts );
+bool AppearanceSettings::readTheme(const QString &configFileName, ThemeInfo &theme)
+{
+    QTranslatableSettings themeConfig(configFileName, QSettings::IniFormat);
+    // Ensure that we only provide valid theme choices.
+    if ( themeConfig.status() != QSettings::NoError ) {
+        // failed to read theme.conf. try next one
+        qLog(UI) << "Failed to read, ignore" << configFileName.toLocal8Bit().data();
+        return false;
+    } else {
+        themeConfig.beginGroup( "Theme" ); // No tr
+        QString styleName = themeConfig.value("Style", "Qtopia").toString();
+        QString serverWidgetName = themeConfig.value("ServerWidget", "Phone").toString();
+        QStringList colSchemes = themeConfig.value("ColorScheme").toString().split( "|", QString::SkipEmptyParts );
+        QStringList bg = themeConfig.value("Backgrounds").toString().split( "|", QString::SkipEmptyParts );
 
 //          FIXME: We don't check the validity of the theme for performance issues...
 //             QStringList list;
@@ -412,81 +445,112 @@ void AppearanceSettings::readThemeInfo()
 //                 continue;
 //             }
 
-            if ( !themeConfig.contains( "Name" ) ) {
-                // this theme does not have a name, try next one
-                qLog(UI) << "No name, ignore" << configFileName.toLocal8Bit().data();
-                continue;
+        if ( !themeConfig.contains( "Name" ) ) {
+            // this theme does not have a name, try next one
+            qLog(UI) << "No name, ignore" << configFileName.toLocal8Bit().data();
+            return false;
+        }
+
+        theme.setThemeName( themeConfig.value( "Name" ).toString() );
+        theme.setStyleName( styleName );
+        theme.setDecorationFileName( themeConfig.value("DecorationConfig").toString() );
+        theme.setServerWidget( serverWidgetName );
+        theme.setColorSchemes( colSchemes );
+        theme.setBackgroundImages( bg );
+        theme.extendedFocusHighlight = themeConfig.value("ExtendedFocusHighlight", "1").toString();
+        theme.formStyle = themeConfig.value("FormStyle", "QtopiaDefaultStyle").toString();
+        theme.popupShadows = themeConfig.value("PopupShadows", "0").toString();
+        theme.hideMenuIcons = themeConfig.value("HideMenuIcons", "0").toString();
+        theme.fullWidthMenu = themeConfig.value("FullWidthMenu", "0").toString();
+        theme.iconPath = themeConfig.value("IconPath").toString();
+
+        return true;
+    }
+}
+
+void AppearanceSettings::readThemeSettings()
+{
+    QStringList instPaths = Qtopia::installPaths();
+    foreach (QString path, instPaths) {
+        QString themeDataPath( path + "etc/themes/" );
+        QDir dir;
+        if ( !dir.exists( themeDataPath ) ) {
+            qLog(UI) << "Theme style configuration path not found" << themeDataPath.toLocal8Bit().data(); // No tr
+            continue;
+        }
+
+        // read theme.conf files
+        dir.setPath( themeDataPath );
+        dir.setNameFilters( QStringList( "*.conf" )); // No tr
+
+        for (int index = 0; index < (int)dir.count(); index++) {
+            QString configFileName = themeDataPath + dir[index];
+            ThemeInfo theme;
+            if (readTheme(configFileName, theme)) {
+                theme.setThemeFileName(dir[index]);
+                mThemes.append( theme );
             }
-
-            themeName = themeConfig.value( "Name" ).toString();
-            decorationName = themeConfig.value("DecorationConfig").toString();
-
-            ThemeInfo theme( themeName );
-            theme.setStyleName( styleName );
-            theme.setThemeFileName( dir[index] );
-            theme.setDecorationFileName( decorationName );
-            theme.setServerWidget( serverWidgetName );
-            theme.setColorSchemes( colSchemes );
-            theme.setBackgroundImages( bg );
-            theme.extendedFocusHighlight = themeConfig.value("ExtendedFocusHighlight", "1").toString();
-            theme.formStyle = themeConfig.value("FormStyle", "QtopiaDefaultStyle").toString();
-            theme.popupShadows = themeConfig.value("PopupShadows", "0").toString();
-            theme.hideMenuIcons = themeConfig.value("HideMenuIcons", "1").toString();
-            theme.fullWidthMenu = themeConfig.value("FullWidthMenu", "1").toString();
-            themes.append( theme );
         }
     }
 }
 
-void AppearanceSettings::readColorScheme()
+void AppearanceSettings::readColorSchemeSettings()
 {
-    QDir dir;
-    QString colorSchemePath( Qtopia::qtopiaDir() + "etc/colors/" );
-    if ( !dir.exists( colorSchemePath ) ) {
-        qLog(UI) << "Color scheme configuration path not found" << colorSchemePath.toLocal8Bit().data(); // No tr
-        return;
-    }
+    QStringList instPaths = Qtopia::installPaths();
+    foreach (QString path, instPaths) {
+        QString colorSchemePath( path + "etc/colors/" );
+        QDir dir;
+        if ( !dir.exists( colorSchemePath ) ) {
+            qLog(UI) << "Color scheme configuration path not found" << colorSchemePath.toLocal8Bit().data(); // No tr
+            continue;
+        }
 
-    dir.setPath( colorSchemePath );
-    dir.setNameFilters( QStringList( "*.scheme" )); // No tr
+        dir.setPath( colorSchemePath );
+        dir.setNameFilters( QStringList( "*.scheme" )); // No tr
 
-    for (int index = 0; index < (int)dir.count(); index++) {
-        QString name = dir[index].left( dir[index].indexOf( ".scheme" ) );
-        colorListIDs.append(name);
+        for (int index = 0; index < (int)dir.count(); index++) {
+            QString name = dir[index].left( dir[index].indexOf( ".scheme" ) );
+            mColorListIDs.append(name);
+        }
     }
 }
 
 void AppearanceSettings::themeSelected( int index )
 {
-    QString dir = themes[index].themeFileName();
+    if (index >= mThemes.count())
+        return;
+
+    QString dir = mThemes[index].themeFileName();
     dir.chop(5);
 
-    titlePreview->setXmlFilename(Qtopia::qtopiaDir() + "etc/themes/" + dir + "/title.xml");
-    contextPreview->setXmlFilename(Qtopia::qtopiaDir() + "etc/themes/" + dir + "/context.xml");
+    QString themeFile = findFile(QLatin1String("etc/themes/") + dir + "/title.xml");
+    mTitlePreview->setXmlFilename(themeFile);
+    themeFile = findFile(QLatin1String("etc/themes/") + dir + "/context.xml");
+    mContextPreview->setXmlFilename(themeFile);
 
-    bgCombo->clear();
-    if ( themes[index].backgroundImages().count() ) {
-        foreach ( QString bg, themes[index].backgroundImages() ) {
-            bgCombo->addItem( bg );
+    mBgCombo->clear();
+    if ( mThemes[index].backgroundImages().count() ) {
+        foreach ( QString bg, mThemes[index].backgroundImages() ) {
+            mBgCombo->addItem( bg );
             if ( bg == mActiveBackground )
-                bgCombo->setCurrentIndex( bgCombo->count() - 1 );
+                mBgCombo->setCurrentIndex( mBgCombo->count() - 1 );
         }
     }
 
-    if ( !colorListIDs.count() )
+    if ( !mColorListIDs.count() )
         return;
 
-    colorCombo->clear();
+    mColorCombo->clear();
 
-    if ( themes[index].colorSchemes().count() ) {
-        foreach ( QString colorId, themes[index].colorSchemes() ) {
+    if ( mThemes[index].colorSchemes().count() ) {
+        foreach ( QString colorId, mThemes[index].colorSchemes() ) {
             QString col = colorId.left( colorId.indexOf( ".scheme" ) );
-            if ( colorListIDs.contains( col ) ) {
-                QTranslatableSettings scheme(Qtopia::qtopiaDir() + 
-                        "etc/colors/" + col + ".scheme", QSettings::IniFormat);
-                colorCombo->addItem( scheme.value("Global/Name", col).toString(), col );
+            if ( mColorListIDs.contains( col ) ) {
+                QString schemeFile = findFile("etc/colors/" + col + ".scheme");
+                QTranslatableSettings scheme(schemeFile, QSettings::IniFormat);
+                mColorCombo->addItem( scheme.value("Global/Name", col).toString(), col );
                 if ( col == mActiveColor )
-                    colorCombo->setCurrentIndex( colorCombo->count() - 1 );
+                    mColorCombo->setCurrentIndex( mColorCombo->count() - 1 );
             }
         }
         return;
@@ -494,86 +558,84 @@ void AppearanceSettings::themeSelected( int index )
 
     // theme doesn't have preference, show all color schemes
     int defaultIdx = 0;
-    foreach ( QString colorId, colorListIDs ) {
-        QTranslatableSettings scheme(Qtopia::qtopiaDir() + 
-                "etc/colors/" + colorId + ".scheme", QSettings::IniFormat);
-        colorCombo->addItem( scheme.value("Global/Name", colorId).toString(), colorId );
+    foreach ( QString colorId, mColorListIDs ) {
+        QString schemeFile = findFile("etc/colors/" + colorId + ".scheme");
+        QTranslatableSettings scheme(schemeFile, QSettings::IniFormat);
+        mColorCombo->addItem( scheme.value("Global/Name", colorId).toString(), colorId );
         if ( colorId == mActiveColor )
-            colorCombo->setCurrentIndex( colorCombo->count() - 1 );
+            mColorCombo->setCurrentIndex( mColorCombo->count() - 1 );
         if ( colorId == "Qtopia" )
-            defaultIdx = colorCombo->count() - 1;
+            defaultIdx = mColorCombo->count() - 1;
     }
-    if ( !colorCombo->currentIndex() )
-        colorCombo->setCurrentIndex( defaultIdx );
+    if ( !mColorCombo->currentIndex() )
+        mColorCombo->setCurrentIndex( defaultIdx );
 }
 
 void AppearanceSettings::colorSelected( int index )
 {
-    QString text = colorCombo->itemData( index ).toString();
+    QString text = mColorCombo->itemData( index ).toString();
     if (!text.isNull()) {
-        titlePreview->setColor(Qtopia::qtopiaDir() + "etc/colors/" + text + ".scheme");
-        contextPreview->setColor(Qtopia::qtopiaDir() + "etc/colors/" + text + ".scheme");
-        titlePreview->requestPreview();
-        contextPreview->requestPreview();
+        QString schemeFile = findFile("etc/colors/" + text + ".scheme");
+        mTitlePreview->setColor(schemeFile);
+        mContextPreview->setColor(schemeFile);
+        mTitlePreview->requestPreview();
+        mContextPreview->requestPreview();
     }
 }
 
 void AppearanceSettings::labelToggled( bool toggled )
 {
-    contextPreview->setIconLabel(toggled);
-    contextPreview->requestPreview();
+    mContextPreview->setIconLabel(toggled);
+    mContextPreview->requestPreview();
 }
 
 void AppearanceSettings::backgroundSelected( const QString &text )
 {
     if (text.isNull()) {
-        backgroundLabel.setPixmap(QPixmap());
+        mBackgroundLabel.setPixmap(QPixmap());
         return;
     }
 
     QString themeFileName;
 
-    foreach(ThemeInfo info, themes) {
-        if (info.themeName() == themeCombo->currentText())
+    foreach(ThemeInfo info, mThemes) {
+        if (info.themeName() == mThemeCombo->currentText())
             themeFileName = info.themeFileName();
     }
     themeFileName.chop(5);
 
     QDesktopWidget *desktop = QApplication::desktop();
     int width = desktop->screenGeometry(desktop->primaryScreen()).width();
-    QPixmap back(Qtopia::qtopiaDir() + "pics/themes/" + themeFileName + '/' + text + ".png");
-    backgroundLabel.setPixmap(back.scaledToWidth((int)(width * 0.2), Qt::SmoothTransformation));
+    QString filename = findFile("pics/themes/" + themeFileName + '/' + text + ".png");
+    QPixmap back(filename);
+    mBackgroundLabel.setPixmap(back.scaledToWidth((int)(width * 0.2), Qt::SmoothTransformation));
 }
 
 void AppearanceSettings::setTitlePixmap(const QPixmap &pixmap)
 {
-    titleLabel.setPixmap(pixmap);
-    groupBox->show();
+    mTitleLabel.setPixmap(pixmap);
+    mGroupBox->show();
 }
 
 void AppearanceSettings::setContextPixmap(const QPixmap &pixmap)
 {
-    contextLabel.setPixmap(pixmap);
-    groupBox->show();
+    mContextLabel.setPixmap(pixmap);
+    mGroupBox->show();
 }
 
-void AppearanceSettings::applyTheme()
+void AppearanceSettings::writeThemeSettings(const ThemeInfo &theme)
 {
-    ThemeInfo *theme = &themes[themeCombo->currentIndex()];
-    if ( !theme )
-        return;
-
     gConfig.beginGroup( "Appearance" );
-    if (!theme->themeFileName().isEmpty() && (theme->themeFileName() != themeCombo->currentText()) ){
-        gConfig.setValue("Style", theme->styleName());
-        gConfig.setValue("Theme", theme->themeFileName());
-        gConfig.setValue("DecorationTheme", theme->decorationFileName());
-        qLog(UI) << "Write config theme select" << theme->styleName().toLatin1().data() <<
-            themeCombo->currentText().toLatin1().data();
+    if (!theme.themeFileName().isEmpty() && (theme.themeFileName() != mThemeCombo->currentText()) ){
+        gConfig.setValue("Style", theme.styleName());
+        gConfig.setValue("Theme", theme.themeFileName());
+        gConfig.setValue("DecorationTheme", theme.decorationFileName());
+        qLog(UI) << "Write config theme select" << theme.styleName().toLatin1().data() <<
+            mThemeCombo->currentText().toLatin1().data();
     } else {
-        QString s = theme->themeFileName().isEmpty() ? themeCombo->currentText() : theme->themeFileName();
-        qLog(UI) << "Write simple config theme select" << theme->styleName().toLatin1().data() <<
-                themeCombo->currentText().toLatin1().data();
+        QString s = theme.themeFileName().isEmpty() ? mThemeCombo->currentText() : theme.themeFileName();
+        qLog(UI) << "Write simple config theme select" << theme.styleName().toLatin1().data() <<
+                mThemeCombo->currentText().toLatin1().data();
         gConfig.setValue( "Style", s );
         gConfig.setValue( "Theme", "");
         gConfig.setValue( "DecorationTheme", "");
@@ -581,47 +643,36 @@ void AppearanceSettings::applyTheme()
     gConfig.endGroup();
 
     gConfig.beginGroup("Style");
-    gConfig.setValue("ExtendedFocusHighlight", theme->extendedFocusHighlight);
-    gConfig.setValue("FormStyle", theme->formStyle);
-    gConfig.setValue("PopupShadows", theme->popupShadows);
-    gConfig.setValue("HideMenuIcons", theme->hideMenuIcons);
-    gConfig.setValue("FullWidthMenu", theme->fullWidthMenu);
+    gConfig.setValue("ExtendedFocusHighlight", theme.extendedFocusHighlight);
+    gConfig.setValue("FormStyle", theme.formStyle);
+    gConfig.setValue("PopupShadows", theme.popupShadows);
+    gConfig.setValue("HideMenuIcons", theme.hideMenuIcons);
+    gConfig.setValue("FullWidthMenu", theme.fullWidthMenu);
     gConfig.endGroup();
 
     gConfig.sync();
-
-    if ( !theme->serverWidget().isEmpty() ) {
-        QSettings cfg( "Trolltech", "ServerWidgets" );
-        cfg.beginGroup( "Mapping" );
-        cfg.remove(""); //delete all entries in current grp
-        cfg.setValue("Default", theme->serverWidget());
-
-        if (mServerWidgets != theme->serverWidget()) {
-            QtopiaIpcEnvelope env( "QPE/System", "restart()" );
-            QtopiaApplication::quit();
-        }
-    }
-
-    QtopiaChannel::send("QPE/System", "applyStyleSplash()");
 }
 
 void AppearanceSettings::applyBackgroundImage()
 {
-    QString s = bgCombo->currentText();
+    QString s = mBgCombo->currentText();
     gConfig.beginGroup( "Appearance" );
     gConfig.setValue( "BackgroundImage", s );
     gConfig.endGroup();
     gConfig.sync();
     QtopiaChannel::send("QPE/System", "applyHomeScreenImage()");
+    if (QtopiaApplication::desktop()->numScreens() > 1)
+        QtopiaChannel::send("QPE/System", "applySecondaryBackgroundImage()");
 }
 
-void AppearanceSettings::applyColorScheme()
+void AppearanceSettings::writeColorSchemeSettings()
 {
-    QString s = colorCombo->itemData( colorCombo->currentIndex() ).toString();
+    QString s = mColorCombo->itemData( mColorCombo->currentIndex() ).toString();
     gConfig.beginGroup( "Appearance" );
     gConfig.setValue( "Scheme", s );
 
-    QSettings scheme(Qtopia::qtopiaDir() + "etc/colors/" + s + ".scheme", QSettings::IniFormat);
+    QString schemeFile = findFile("etc/colors/" + s + ".scheme");
+    QSettings scheme(schemeFile, QSettings::IniFormat);
     if (scheme.status()==QSettings::NoError){
         scheme.beginGroup("Colors");
         QString color = scheme.value( "Background", "#EEEEEE" ).toString();
@@ -665,17 +716,12 @@ void AppearanceSettings::applyColorScheme()
     }
     gConfig.endGroup();
     gConfig.sync();
-
-    QtopiaChannel::send("QPE/System", "applyStyle()");
-
-    // colorize theme areas
-    QtopiaChannel::send("QPE/System", "applyStyleNoSplash()");
 }
 
-void AppearanceSettings::applyLabel()
+void AppearanceSettings::applySoftKeyLabels()
 {
     gConfig.beginGroup( "ContextMenu" );
-    gConfig.setValue( "LabelType", labelCkBox->isChecked() ? (int)QSoftMenuBar::IconLabel : (int)QSoftMenuBar::TextLabel );
+    gConfig.setValue( "LabelType", mLabelCkBox->isChecked() ? (int)QSoftMenuBar::IconLabel : (int)QSoftMenuBar::TextLabel );
     gConfig.endGroup();
     gConfig.sync();
 
@@ -699,20 +745,20 @@ void AppearanceSettings::pullSettingStatus()
 QString AppearanceSettings::status()
 {
     QString status;
-    status += QString::number( themeCombo->currentIndex() ) + ",";
-    status += QString::number( colorCombo->currentIndex() ) + ",";
-    status += QString::number( bgCombo->currentIndex() ) + ",";
-    status += QString::number( labelCkBox->isChecked() ) + ",";
+    status += QString::number( mThemeCombo->currentIndex() ) + ",";
+    status += QString::number( mColorCombo->currentIndex() ) + ",";
+    status += QString::number( mBgCombo->currentIndex() ) + ",";
+    status += QString::number( mLabelCkBox->isChecked() ) + ",";
     return status;
 }
 
 void AppearanceSettings::setStatus( const QString details )
 {
     QStringList s = details.split( ',' );
-    themeCombo->setCurrentIndex( s.at( 0 ).toInt() );
-    colorCombo->setCurrentIndex( s.at( 1 ).toInt() );
-    bgCombo->setCurrentIndex( s.at( 2 ).toInt() );
-    labelCkBox->setCheckState( s.at( 3 ).toInt() ? Qt::Checked : Qt::Unchecked );
+    mThemeCombo->setCurrentIndex( s.at( 0 ).toInt() );
+    mColorCombo->setCurrentIndex( s.at( 1 ).toInt() );
+    mBgCombo->setCurrentIndex( s.at( 2 ).toInt() );
+    mLabelCkBox->setCheckState( s.at( 3 ).toInt() ? Qt::Checked : Qt::Unchecked );
 }
 
 void AppearanceSettings::receive( const QString& msg, const QByteArray& data )
@@ -721,11 +767,11 @@ void AppearanceSettings::receive( const QString& msg, const QByteArray& data )
     if ( msg == "Settings::setStatus(bool,QString)" ) {
         // must show widget to keep running
         QtopiaApplication::instance()->showMainWidget();
-        isStatusView = true;
+        mIsStatusView = true;
         QSoftMenuBar::removeMenuFrom( this, QSoftMenuBar::menuFor( this ) );
         QSoftMenuBar::menuFor(this);
         QString details;
-        ds >> isFromActiveProfile;
+        ds >> mIsFromActiveProfile;
         ds >> details;
         setStatus( details );
         applyStyle();
@@ -741,20 +787,20 @@ void AppearanceSettings::receive( const QString& msg, const QByteArray& data )
     } else if ( msg == "Settings::activateDefault()" ) {
         hide();
         int i = 0;
-        foreach ( ThemeInfo theme, themes ) {
+        foreach ( ThemeInfo theme, mThemes ) {
             if ( theme.themeFileName() == "qtopia.conf" ) {
-                themeCombo->setCurrentIndex( i );
+                mThemeCombo->setCurrentIndex( i );
                 break;
             }
             i++;
         }
-        for ( i = 0; i < colorCombo->count(); i++ ) {
-            if ( colorCombo->itemData( i ).toString() == "Qtopia" ) {
-                colorCombo->setCurrentIndex( i );
+        for ( i = 0; i < mColorCombo->count(); i++ ) {
+            if ( mColorCombo->itemData( i ).toString() == "Qtopia" ) {
+                mColorCombo->setCurrentIndex( i );
                 break;
             }
         }
-        labelCkBox->setCheckState( Qt::Checked );
+        mLabelCkBox->setCheckState( Qt::Checked );
         applyStyle();
     }
 }

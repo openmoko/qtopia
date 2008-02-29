@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,7 @@
 #include "btdialupservice.h"
 
 #include <qtopianamespace.h>
+#include <qbluetoothsdprecord.h>
 #include <QFile>
 
 /*!
@@ -48,10 +49,13 @@ BtDialupServiceTask::BtDialupServiceTask( QObject* parent )
 {
     qLog(Bluetooth) << "Initializing Bluetooth DialupService";
 
+    QFile file(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/dun.xml");
+    file.open(QIODevice::ReadOnly);
+    QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice(&file);
+
     provider = new QBluetoothSerialPortService( QLatin1String("DialupNetworking"),
             tr("Dial-up Networking"),
-            Qtopia::qtopiaDir() + "etc/bluetooth/sdp/dun.xml",
-            2,      // the channel number stored in dun.xml
+            record,
             this );
 }
 

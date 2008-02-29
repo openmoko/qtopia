@@ -1,2 +1,7 @@
 PROJECTS*=\
-    plugins/qtopiacore/kbddrivers/nokia
+    plugins/qtopiacore/kbddrivers/nokia\
+    plugins/audiohardware/nokia\
+    plugins/qtopiacore/gfxdrivers/nokia\
+	qalsamixer \
+    devtools 
+

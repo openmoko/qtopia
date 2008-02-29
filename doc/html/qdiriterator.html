@@ -49,11 +49,11 @@
  while (it.hasNext()) {
      qDebug() &lt;&lt; it.next();
 
-     <span class="comment">// /etc/.</span>
-     <span class="comment">// /etc/..</span>
-     <span class="comment">// /etc/X11</span>
-     <span class="comment">// /etc/X11/fs</span>
-     <span class="comment">// ...</span>
+     <span class="comment">//</span> /etc/.
+     <span class="comment">//</span> /etc/..
+     <span class="comment">//</span> /etc/X11
+     <span class="comment">//</span> /etc/X11/fs
+     <span class="comment">//</span> ...
  }</pre>
 <p>The <a href="qdiriterator.html#next">next</a>() function returns the path to the next directory entry and advances the iterator. You can also call <a href="qdiriterator.html#filePath">filePath</a>() to get the current file path without advancing the iterator. The <a href="qdiriterator.html#fileName">fileName</a>() function returns only the name of the file, similar to how <a href="qdir.html#entryList">QDir::entryList</a>() works. You can also call <a href="qdiriterator.html#fileInfo">fileInfo</a>() to get a <a href="qfileinfo.html">QFileInfo</a> for the current entry.</p>
 <p>Unlike Qt's container iterators, QDirIterator is uni-directional (i.e&#x2e;, you cannot iterate directories in reverse order) and does not allow random access.</p>
@@ -112,8 +112,8 @@
 <p>Returns the base directory of the iterator.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

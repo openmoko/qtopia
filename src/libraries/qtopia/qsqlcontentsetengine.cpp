@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -111,6 +111,7 @@ QSqlContentSetEngine::QSqlContentSetEngine( const QContentFilter &filter, const 
     else
     {
         connect( this, SIGNAL(performRefresh()), this, SLOT(performUpdate()), Qt::QueuedConnection );
+        connect( this, SIGNAL(updateFinished()), this, SIGNAL(contentChanged()) );
 
         if( filter.isValid() )
             refresh();
@@ -122,8 +123,6 @@ QSqlContentSetEngine::QSqlContentSetEngine( const QContentFilter &filter, const 
     connect(QContentUpdateManager::instance(), SIGNAL(refreshRequested()),
             this, SLOT(refresh()));
 #endif
-    //connect(this, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
-    //        this, SIGNAL(contentChanged()) );
 }
 
 QSqlContentSetEngine::~QSqlContentSetEngine()
@@ -353,6 +352,8 @@ void QSqlContentSetEngine::performReset()
         }
 
         m_count = m_primaryIds.count();
+
+        emit contentChanged();
     }
 }
 

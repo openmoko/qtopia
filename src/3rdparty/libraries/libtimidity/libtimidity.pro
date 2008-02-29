@@ -1,7 +1,8 @@
 qtopia_project(external lib)
-license(LGPL)
 TARGET      =   timidity
 VERSION     =   1.0.0
+license(LGPL)
+!free_package:idep(CONFIG+=no_singleexec,CONFIG)
 
 HEADERS     = src/common.h \
                 src/dls1.h \
@@ -30,10 +31,11 @@ SOURCES = src/common.c \
             src/tables.c \
             src/timidity.c
 
-DEFINES+=LITTLE_ENDIAN
+contains(QTOPIA_TARGET_ENDIAN,little):DEFINES+=LITTLE_ENDIAN
+else:DEFINES+=BIG_ENDIAN
 
 pkg.desc=Timidity MIDI library
-pkg.domain=lib
+pkg.domain=trusted
 
 patches.files=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/libtimidity/config/*
 patches.path=/etc/timidity

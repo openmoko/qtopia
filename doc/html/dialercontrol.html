@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">DialerControl Class Reference</h1>
 <p>The DialerControl class provides a convenient interface to the phone call manager. <a href="#details">More...</a></p>
-<pre>    #include &lt;DialerControl&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;DialerControl&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="dialercontrol-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -36,7 +36,7 @@
 <li><div class="fn"/>int <b><a href="dialercontrol.html#missedCallCount">missedCallCount</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -58,7 +58,7 @@
 <li><div class="fn"/>void <b><a href="dialercontrol.html#unhold">unhold</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -81,7 +81,7 @@
 <li><div class="fn"/>void <b><a href="dialercontrol.html#stateChanged">stateChanged</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -89,15 +89,14 @@
 <li><div class="fn"/>DialerControl * <b><a href="dialercontrol.html#instance">instance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -111,13 +110,13 @@
 <p>Accepts an incoming call. Has no effect if there is no incoming call.</p>
 <h3 class="fn"><a name="activateCall"></a>void DialerControl::activateCall ( int <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Activate a specific call with the modem identifier <i>id</i>. This will typically only work with GSM calls that set the <a href="qphonecall.html#modemIdentifier">QPhoneCall::modemIdentifier</a>() value. It is used to implement the GSM <tt>2x SEND</tt> key sequence where <tt>x</tt> is the identifier.</p>
-<h3 class="fn"><a name="activeCalls"></a><a href="qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::activeCalls () const</h3>
+<h3 class="fn"><a name="activeCalls"></a><a href="./qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::activeCalls () const</h3>
 <p>Returns the list of calls in the active state (i.e&#x2e; not on hold).</p>
-<h3 class="fn"><a name="activeCallsCount"></a>uint DialerControl::activeCallsCount () const</h3>
+<h3 class="fn"><a name="activeCallsCount"></a><a href="./qtglobal.html#uint-typedef">uint</a> DialerControl::activeCallsCount () const</h3>
 <p>Returns the number of active calls (i.e&#x2e; calls not on hold).</p>
 <h3 class="fn"><a name="activeCount"></a>void DialerControl::activeCount ( int <i>activeCalls</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the number of <i>activeCalls</i> changes.</p>
-<h3 class="fn"><a name="allCalls"></a><a href="qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::allCalls () const</h3>
+<h3 class="fn"><a name="allCalls"></a><a href="./qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::allCalls () const</h3>
 <p>Returns the list of all calls in the system.</p>
 <h3 class="fn"><a name="autoAnswerCall"></a>void DialerControl::autoAnswerCall ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever auto answer is enabled and the auto answer time has elapsed.</p>
@@ -141,15 +140,15 @@
 <p>This signal is emitted when a call is considered missed. <i>call</i> is the associated <a href="qphonecall.html">QPhoneCall</a> object.</p>
 <h3 class="fn"><a name="callPutOnHold"></a>void DialerControl::callPutOnHold ( const <a href="qphonecall.html">QPhoneCall</a> &amp; <i>call</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a call is placed on hold. <i>call</i> is the associated <a href="qphonecall.html">QPhoneCall</a> object.</p>
-<h3 class="fn"><a name="callerIdNeeded"></a>bool DialerControl::callerIdNeeded ( const <a href="qstring.html">QString</a> &amp; <i>n</i> ) const</h3>
+<h3 class="fn"><a name="callerIdNeeded"></a>bool DialerControl::callerIdNeeded ( const <a href="./qstring.html">QString</a> &amp; <i>n</i> ) const</h3>
 <p>Returns true if the user wants to send callerID information to the number <i>n</i>.</p>
-<h3 class="fn"><a name="callsOnHold"></a><a href="qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::callsOnHold () const</h3>
+<h3 class="fn"><a name="callsOnHold"></a><a href="./qlist.html">QList</a>&lt;<a href="qphonecall.html">QPhoneCall</a>&gt; DialerControl::callsOnHold () const</h3>
 <p>Returns the list of calls on hold.</p>
-<h3 class="fn"><a name="callsOnHoldCount"></a>uint DialerControl::callsOnHoldCount () const</h3>
+<h3 class="fn"><a name="callsOnHoldCount"></a><a href="./qtglobal.html#uint-typedef">uint</a> DialerControl::callsOnHoldCount () const</h3>
 <p>Returns the number of calls on hold.</p>
-<h3 class="fn"><a name="deflect"></a>void DialerControl::deflect ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="deflect"></a>void DialerControl::deflect ( const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Deflect the incoming call to a new <i>number</i>.</p>
-<h3 class="fn"><a name="dial"></a>void DialerControl::dial ( const <a href="qstring.html">QString</a> &amp; <i>number</i>, bool <i>sendcallerid</i>, const <a href="qstring.html">QString</a> &amp; <i>callType</i> = &quot;Voice&quot;, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>contact</i> = QUniqueId() )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="dial"></a>void DialerControl::dial ( const <a href="./qstring.html">QString</a> &amp; <i>number</i>, bool <i>sendcallerid</i>, const <a href="./qstring.html">QString</a> &amp; <i>callType</i> = &quot;Voice&quot;, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>contact</i> = QUniqueId() )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Dials a <i>number</i> if there are no currently active calls. If a <i>contact</i> is specified, it is used as the contact to display and insert into the call history. Before calling this function, you should check that there are no incoming calls, or active calls. If <i>sendcallerid</i> is true, then send the caller's identifier as part of the dial sequence.</p>
 <p>If <i>callType</i> is &quot;Voice&quot; a GSM call will be dialed. If <i>callType</i> is &quot;VoIP&quot; a VoIP call will be dialed.</p>
 <h3 class="fn"><a name="endAllCalls"></a>void DialerControl::endAllCalls ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -204,8 +203,8 @@
 <p>Makes calls on hold active.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

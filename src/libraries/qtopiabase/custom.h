@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -18,11 +18,15 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
 #ifndef QTOPIACUSTOM_H
 #define QTOPIACUSTOM_H
 
 #include <custom-qtopia.h>
+
+// The documentation references these lines (see doc/src/syscust/custom.qdoc)
+#ifndef V4L_VIDEO_DEVICE
+#define V4L_VIDEO_DEVICE "/dev/video"
+#endif
 
 #include <qtopiaglobal.h>
 
@@ -30,4 +34,3 @@ QTOPIABASE_EXPORT int qpe_sysBrightnessSteps();
 QTOPIABASE_EXPORT void qpe_setBrightness(int bright);
 
 #endif
-

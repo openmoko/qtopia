@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -323,18 +323,29 @@ QList<QUniqueId> QPimSqlIO::recordIds(const QList<int> &rows) const
 */
 bool QPimSqlIO::removeRecords(const QList<QUniqueId> &ids)
 {
-    if (mSyncTime.isNull()) database().transaction();
+    bool doTransaction = mSyncTime.isNull();
+    if (doTransaction) {
+        mSyncTime = QTimeZone::current().toUtc(QDateTime::currentDateTime());
+        database().transaction();
+    }
 
     foreach(QUniqueId id, ids) {
         if (!removeRecord(id)) {
-            if (mSyncTime.isNull()) database().rollback();
+            if (doTransaction) {
+                database().rollback();
+                mSyncTime = QDateTime();
+            }
             return false;
         }
     }
-    if (mSyncTime.isNull() && !database().commit()) {
-        database().rollback();
-        return false;
+    if (doTransaction) {
+        mSyncTime = QDateTime();
+        if (!database().commit()) {
+            database().rollback();
+            return false;
+        }
     }
+
     return true;
 }
 
@@ -628,7 +639,7 @@ bool QPimSqlIO::insertExtraTables(uint, const QPimRecord &) { return true; }
 */
 bool QPimSqlIO::removeExtraTables(uint) { return true; }
 
-int QPimSqlIO::sourceContext(const QPimSource &source)
+int QPimSqlIO::sourceContext(const QPimSource &source, bool insert)
 {
     QUuid id = source.context;
     QString name = source.identity;
@@ -650,13 +661,16 @@ int QPimSqlIO::sourceContext(const QPimSource &source)
     }
     sourceContextQuery.reset();
 
-    QPreparedSqlQuery q(database());
-    q.prepare("INSERT INTO sqlsources (contextid, subsource) VALUES (:id, :source)");
-    q.bindValue(":id", id.toString());
-    q.bindValue(":source", name);
-    q.exec();
-    return sourceContext(source);
-
+    if (insert) {
+        // didn't exist, so create it (hopefully)
+        QPreparedSqlQuery q(database());
+        q.prepare("INSERT INTO sqlsources (contextid, subsource) VALUES (:id, :source)");
+        q.bindValue(":id", id.toString());
+        q.bindValue(":source", name);
+        if(q.exec())
+            return sourceContext(source, false); // recurse, but this time it should exist
+    }
+    return -1;
 }
 
 QDateTime QPimSqlIO::lastSyncTime(const QPimSource &source)

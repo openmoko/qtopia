@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,12 +30,13 @@
 #include <QContact>
 #include <QContactModel>
 #include "qtopiaapplication.h"
+#include <QHash>
 
 class QTextDocument;
 class QTextCursor;
 class QWidget;
 class ContactAnchorData;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 class QContent;
 #endif
 
@@ -67,6 +68,7 @@ protected:
     QTextDocument *mDocument;
     bool bDialer;
     bool voipDialer;
+    bool mRtl;
 
     // member formats
     QTextCharFormat cfNormal;
@@ -75,16 +77,15 @@ protected:
     QTextCharFormat cfBoldUnderline;
     QTextCharFormat cfSmall;
     QTextCharFormat cfSmallBold;
-    QTextCharFormat cfAnchor;
 
     QTextBlockFormat bfNormal;
     QTextBlockFormat bfCenter;
 
-    QTextTableFormat tfNoBorder;
-
     QMap<QString,ContactAnchorData *> mFields;
 
     typedef enum {NoLink = 0, Dialer, Email} LinkType;
+
+    int mIconHeight;
 
     // Document helpers
     void createContactDetailsDocument();
@@ -92,7 +93,7 @@ protected:
     // Fragment helpers
     void addPhoneFragment( QTextCursor& outCurs, const QString& img, const QString& num, LinkType link, QContactModel::Field type );
 
-    void addNameFragment( QTextCursor &curs);
+    QString nameFragment();
     void addBusinessFragment( QTextCursor &outCurs );
     void addPersonalFragment( QTextCursor &outCurs );
     void addBusinessPhoneFragment( QTextCursor &outCurs );
@@ -100,14 +101,16 @@ protected:
     void addEmailFragment( QTextCursor &outCurs );
     void addVoipFragment( QTextCursor& outCurs, const QString& img, const QString& uri, LinkType link, QContactModel::Field type );
 
+    void addCachedPixmap(const QString& url, const QString& path);
+
     // QTextCursor helpers
-    static void addTextBreak( QTextCursor &curs);
-    static void addTextLine( QTextCursor& curs, const QString& text, const QTextCharFormat& cf,
+    void addTextBreak( QTextCursor &curs);
+    void addTextLine( QTextCursor& curs, const QString& text, const QTextCharFormat& cf,
                       const QTextBlockFormat &bf, const QTextCharFormat& bcf);
-    static void addImageAndTextLine ( QTextCursor& curs, const QTextImageFormat& imf,
+    void addImageAndTextLine ( QTextCursor& curs, const QTextImageFormat& imf,
                           const QString& text, const QTextCharFormat& cf, const QTextBlockFormat& bf,
                           const QTextCharFormat& bcf);
-    static void addTextNameValue( QTextCursor& curs, const QString& name,
+    void addTextNameValue( QTextCursor& curs, const QString& name,
                       const QTextCharFormat &ncf, const QString& value, const QTextCharFormat &vcf,
                       const QTextBlockFormat& bf, const QTextCharFormat& bcf);
 
@@ -117,6 +120,8 @@ protected:
     QPixmap *getPresencePixmap(bool online);
     QStringList mMonitoredURIs;
 #endif
+
+    QHash<QString, QPixmap> mCachedPixmaps;
 
     QtopiaServiceRequest anchorService(ContactAnchorData *cfd) const;
 

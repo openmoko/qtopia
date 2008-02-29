@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2004-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2004-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &lt;math.h&gt;
  #include &lt;QtGui&gt;
@@ -103,35 +101,35 @@
          return false;
  }
 
- /*
+<span class="comment"> /*
      Returns the item that covers the coordinate given in the view.
- */
+ */</span>
 
  QModelIndex PieView::indexAt(const QPoint &amp;point) const
  {
      if (validItems == 0)
          return QModelIndex();
 
-     // Transform the view coordinates into contents widget coordinates.
+     <span class="comment">//</span> Transform the view coordinates into contents widget coordinates.
      int wx = point.x() + horizontalScrollBar()-&gt;value();
      int wy = point.y() + verticalScrollBar()-&gt;value();
 
      if (wx &lt; totalSize) {
          double cx = wx - totalSize/2;
-         double cy = totalSize/2 - wy; // positive cy for items above the center
+         double cy = totalSize/2 - wy; <span class="comment">//</span> positive cy for items above the center
 
-         // Determine the distance from the center point of the pie chart.
+         <span class="comment">//</span> Determine the distance from the center point of the pie chart.
          double d = pow(pow(cx, 2) + pow(cy, 2), 0.5);
 
          if (d == 0 || d &gt; pieSize/2)
              return QModelIndex();
 
-         // Determine the angle of the point.
+         <span class="comment">//</span> Determine the angle of the point.
          double angle = (180 / M_PI) * acos(cx/d);
          if (cy &lt; 0)
              angle = 360 - angle;
 
-         // Find the relevant slice of the pie.
+         <span class="comment">//</span> Find the relevant slice of the pie.
          double startAngle = 0.0;
 
          for (int row = 0; row &lt; model()-&gt;rowCount(rootIndex()); ++row) {
@@ -161,7 +159,7 @@
                  if (listItem == validRow)
                      return model()-&gt;index(row, 0, rootIndex());
 
-                 // Update the list index that corresponds to the next valid row.
+                 <span class="comment">//</span> Update the list index that corresponds to the next valid row.
                  validRow++;
              }
          }
@@ -170,23 +168,23 @@
      return QModelIndex();
  }
 
- bool PieView::isIndexHidden(const QModelIndex &amp; /*index*/) const
+ bool PieView::isIndexHidden(const QModelIndex &amp; <span class="comment">/*index*/</span>) const
  {
      return false;
  }
 
- /*
+<span class="comment"> /*
      Returns the rectangle of the item at position \a index in the
      model. The rectangle is in contents coordinates.
- */
+ */</span>
 
  QRect PieView::itemRect(const QModelIndex &amp;index) const
  {
      if (!index.isValid())
          return QRect();
 
-     // Check whether the index's row is in the list of rows represented
-     // by slices.
+     <span class="comment">//</span> Check whether the index's row is in the list of rows represented
+     <span class="comment">//</span> by slices.
      QModelIndex valueIndex;
 
      if (index.column() != 1)
@@ -287,7 +285,7 @@
  }
 
  QModelIndex PieView::moveCursor(QAbstractItemView::CursorAction cursorAction,
-                                 Qt::KeyboardModifiers /*modifiers*/</span>)
+                                 Qt::KeyboardModifiers <span class="comment">/*modifiers*/</span>)
  {
      QModelIndex current = currentIndex();
 
@@ -334,7 +332,7 @@
      painter.fillRect(event-&gt;rect(), background);
      painter.setPen(foreground);
 
-     <span class="comment">// Viewport rectangles</span>
+     <span class="comment">//</span> Viewport rectangles
      QRect pieRect = QRect(margin, margin, pieSize, pieSize);
      QPoint keyPoint = QPoint(totalSize - horizontalScrollBar()-&gt;value(),
                               margin - verticalScrollBar()-&gt;value());
@@ -399,7 +397,7 @@
      }
  }
 
- void PieView::resizeEvent(QResizeEvent * <span class="comment">/* event */)
+ void PieView::resizeEvent(QResizeEvent * <span class="comment">/* event */</span>)
  {
      updateGeometries();
  }
@@ -469,14 +467,14 @@
      update();
  }
 
- /*
+<span class="comment"> /*
      Find the indices corresponding to the extent of the selection.
- */
+ */</span>
 
  void PieView::setSelection(const QRect &amp;rect, QItemSelectionModel::SelectionFlags command)
  {
-     // Use content widget coordinates because we will use the itemRegion()
-     // function to check for intersections.
+     <span class="comment">//</span> Use content widget coordinates because we will use the itemRegion()
+     <span class="comment">//</span> function to check for intersections.
 
      QRect contentsRect = rect.translated(
                              horizontalScrollBar()-&gt;value(),
@@ -534,9 +532,9 @@
      return verticalScrollBar()-&gt;value();
  }
 
- /*
+<span class="comment"> /*
      Returns the position of the item in viewport coordinates.
- */
+ */</span>
 
  QRect PieView::visualRect(const QModelIndex &amp;index) const
  {
@@ -549,7 +547,7 @@
          return rect;
  }
 
- /*
+<span class="comment"> /*
      Returns a region corresponding to the selection in viewport coordinates.
  */</span>
 
@@ -574,8 +572,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

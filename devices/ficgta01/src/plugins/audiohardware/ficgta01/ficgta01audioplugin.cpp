@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,6 +25,8 @@
 #include <QAudioStateInfo>
 #include <QValueSpaceItem>
 #include <QtopiaIpcAdaptor>
+#include <QtopiaIpcEnvelope>
+
 #ifdef QTOPIA_BLUETOOTH
 #include <QBluetoothAudioGateway>
 #endif
@@ -78,14 +80,12 @@ QString m_mode;
     case 4:
         m_mode = "gsmspeakerout";
         break;
-        /*
-          case 5:
-          m_mode = "capturehandset";
-          break;
-          case 6:
-          m_mode = "captureheadset";
-          break;
-        */
+    case 5:
+        m_mode = "capturehandset";
+        break;
+    case 6:
+        m_mode = "captureheadset";
+        break;
 
     };
 
@@ -107,6 +107,9 @@ QString m_mode;
        return true;
    qLog(AudioState)<< QString("Setting audio mode to: %1 failed").arg( m_mode);
     return false;
+
+    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "changeAmpModeVS()");
+
 }
 
 #ifdef QTOPIA_BLUETOOTH
@@ -176,7 +179,7 @@ BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
     } else {
         m_info.setDomain("Media");
         m_info.setProfile("MediaBluetoothHeadset");
-        m_info.setPriority(25);
+        m_info.setPriority(150);
     }
 
     m_info.setDisplayName(tr("Bluetooth Headset"));
@@ -280,8 +283,9 @@ bool BluetoothAudioState::enter(QAudio::AudioCapability capability)
 
         m_currAudioGateway->connectAudio();
         ret = setAudioMode( mode);
-        if (ret)
+        if (ret) {
             m_isActive = true;
+        }
     }
 
     return ret;
@@ -289,15 +293,13 @@ bool BluetoothAudioState::enter(QAudio::AudioCapability capability)
 
 bool BluetoothAudioState::leave()
 {
-    bool ret = false;
-
     if (m_currAudioGateway || resetCurrAudioGateway()) {
         m_currAudioGateway->releaseAudio();
     }
 
     m_isActive = false;
 
-    return ret;
+    return true;
 }
 #endif
 
@@ -422,6 +424,71 @@ bool MediaSpeakerAudioState::enter(QAudio::AudioCapability capability)
 
 bool MediaSpeakerAudioState::leave()
 {
+    qLog(AudioState)<<"MediaSpeakerAudioState::leave";
+    return true;
+}
+
+
+class MediaCaptureAudioState : public QAudioState
+{
+    Q_OBJECT
+
+public:
+    MediaCaptureAudioState(bool isPhone, QObject *parent = 0);
+
+    QAudioStateInfo info() const;
+    QAudio::AudioCapabilities capabilities() const;
+
+    bool isAvailable() const;
+    bool enter(QAudio::AudioCapability capability);
+    bool leave();
+
+private:
+    QAudioStateInfo m_info;
+    bool m_Phone;
+};
+
+MediaCaptureAudioState::MediaCaptureAudioState(bool isPhone, QObject *parent)
+    : QAudioState(parent)
+{
+    m_Phone = isPhone;
+    qLog(AudioState)<<"MediaCaptureAudioState"<<isPhone;
+
+    m_info.setDomain("Media");
+    m_info.setProfile("MediaCapture");
+    m_info.setDisplayName(tr("Stereo Speaker"));
+
+    m_info.setPriority(150);
+
+}
+
+QAudioStateInfo MediaCaptureAudioState::info() const
+{
+    return m_info;
+}
+
+QAudio::AudioCapabilities MediaCaptureAudioState::capabilities() const
+{
+    return QAudio::InputOnly;
+}
+
+bool MediaCaptureAudioState::isAvailable() const
+{
+    return true;
+}
+
+bool MediaCaptureAudioState::enter(QAudio::AudioCapability capability)
+{
+    qLog(AudioState)<<"MediaCaptureAudioState::enter"<<"isPhone";
+
+    Q_UNUSED(capability)
+
+    return setAudioMode( 5);
+}
+
+bool MediaCaptureAudioState::leave()
+{
+    qLog(AudioState)<<"MediaCaptureAudioState::leave";
     return true;
 }
 
@@ -483,13 +550,14 @@ QAudioStateInfo HeadphonesAudioState::info() const
 
 QAudio::AudioCapabilities HeadphonesAudioState::capabilities() const
 {
-    return QAudio::InputOnly | QAudio::OutputOnly;
+    return  QAudio::InputAndOutput /*QAudio::InputOnly | QAudio::OutputOnly*/;
 }
 
 void HeadphonesAudioState::onHeadsetModified()
 {
     qLog(AudioState)<<"HeadphonesAudioState::onHeadsetModified()";
     bool avail = m_headset->value().toBool();
+
     if(avail) {
         this->enter( QAudio::OutputOnly);
       } else {
@@ -512,8 +580,11 @@ bool HeadphonesAudioState::enter(QAudio::AudioCapability capability)
 //gsmheadset.state
 
     qLog(AudioState) << "HeadphonesAudioState::enter" << capability;
-    system( "amixer -q sset \"Amp Mode\" \"Headphones\"");
-    m_info.setPriority(25);
+
+      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
+      e << QString("Headphones");
+
+      m_info.setPriority(25);
 
     return true;
 }
@@ -521,11 +592,17 @@ bool HeadphonesAudioState::enter(QAudio::AudioCapability capability)
 bool HeadphonesAudioState::leave()
 {
     qLog(AudioState)<<" HeadphonesAudioState::leave()"<<m_isPhone;
-    if(m_isPhone)
-        system("amixer -q sset \"Amp Mode\" \"Call Speaker\"");
-    else
-        system("amixer -q sset \"Amp Mode\" \"Stereo Speakers\"");
 
+    if(m_isPhone) {
+
+  QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
+  e << QString("Stereo Speakers + Headphones");
+
+    } else {
+
+      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
+      e << QString("Stereo Speakers + Headphones");
+    }
     m_info.setPriority(200);
 
     return true;
@@ -612,7 +689,7 @@ RingtoneAudioState::RingtoneAudioState(QObject *parent)
     m_info.setDomain("RingTone");
     m_info.setProfile("RingToneSpeaker");
     m_info.setDisplayName(tr("Stereo"));
-    m_info.setPriority(20);
+    m_info.setPriority(120);
 }
 
 QAudioStateInfo RingtoneAudioState::info() const
@@ -622,7 +699,7 @@ QAudioStateInfo RingtoneAudioState::info() const
 
 QAudio::AudioCapabilities RingtoneAudioState::capabilities() const
 {
-    return QAudio::OutputOnly;
+    return  QAudio::InputOnly | QAudio::OutputOnly;
 }
 
 bool RingtoneAudioState::isAvailable() const
@@ -659,6 +736,7 @@ Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent)
     m_data->m_states.push_back(new HandsetAudioState(this));
 
     m_data->m_states.push_back(new MediaSpeakerAudioState(this));
+     m_data->m_states.push_back(new MediaCaptureAudioState(this));
 
     m_data->m_states.push_back(new HeadphonesAudioState(false, this));
     m_data->m_states.push_back(new HeadphonesAudioState(true, this));

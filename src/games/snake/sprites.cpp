@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -136,13 +136,7 @@ int SpriteDB::wall(bool l, bool r, bool u, bool d)
 QAnimatedPixmapItem::QAnimatedPixmapItem( const QList<QPixmap> &animation, QGraphicsScene *scene )
         : QGraphicsItem( 0, scene ), currentFrame( 0 ), vx( 0 ), vy( 0 )
 {
-    for ( int i = 0; i < animation.size(); ++i ) {
-        QPixmap pixmap = animation.at( i );
-        Frame frame;
-        frame.pixmap = pixmap;
-        frame.boundingRect = pixmap.rect();
-        frames << frame;
-    }
+    frames = animation;
 }
 
 QAnimatedPixmapItem::QAnimatedPixmapItem(QGraphicsScene *scene)
@@ -171,22 +165,15 @@ void QAnimatedPixmapItem::advance( int phase )
 
 QRectF QAnimatedPixmapItem::boundingRect() const
 {
-    return frames.at( currentFrame ).boundingRect;
+    return frames.at( currentFrame ).rect();
 }
 
-void QAnimatedPixmapItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
+void QAnimatedPixmapItem::paint( QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/ )
 {
-    painter->drawPixmap( 0, 0, frames.at( currentFrame ).pixmap );
+    painter->drawPixmap( 0, 0, frames.at( currentFrame ) );
 }
 
 void QAnimatedPixmapItem::setSequence(const QList<QPixmap> &animation)
 {
-    frames.clear();
-    for ( int i = 0; i < animation.size(); ++i ) {
-        QPixmap pixmap = animation.at( i );
-        Frame frame;
-        frame.pixmap = pixmap;
-        frame.boundingRect = pixmap.rect();
-        frames << frame;
-    }
+    frames = animation;
 }

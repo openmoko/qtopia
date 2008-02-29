@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,7 +31,7 @@
 #include <QHash>
 #include <QFile>
 #include <QDataStream>
-
+#include <qlog.h>
 /////////////////////////////////////////////////////////////////
 //
 //  This should be thread safe on Unixes where a file handle is unique
@@ -102,7 +102,7 @@ bool targz_extract_all( const QString &tarfile, const QString &destpath, bool ve
         QFile tfs( tarfile );
         if ( !tfs.exists() )
         {
-            qWarning( "Tar extract all file %s doesnt exist", pathname );
+            qWarning( "Targz_extract_all: file %s doesnt exist", pathname );
             return false;
         }
         tfs.open(QIODevice::ReadOnly);
@@ -179,21 +179,101 @@ bool targz_archive_all( const QString &tarfile, const QString &srcpath, bool gzi
 
 qlonglong targz_archive_size( const QString &tarfile )
 {
+    TAR *tarHandle = get_tar_ptr( tarfile );
+
+    qlonglong size = 0;
+    int i;
+    while ((i = th_read(tarHandle)) == 0)
+    {
+        size += th_get_size(tarHandle);
+        if( TH_ISREG(tarHandle) )
+            tar_skip_regfile(tarHandle);
+    }
+
+    tar_close( tarHandle );
+    return size;
+}
+/* \internal
+   Checks whether a tar file is valid.
+   A valid tar file does not contains files
+   that start with ./ or contain ..
+
+   This is intended to prevent malicious packages
+   placing binaries outside of the sandbox directory
+*/
+bool check_tar_valid( const QString &tarfile )
+{
+    TAR *tarHandle = get_tar_ptr( tarfile );
+
+    bool ret=true;
+    QString filename;
+    int i;
+    while ( (i = th_read(tarHandle)) == 0)
+    {
+        filename = th_get_pathname( tarHandle );
+
+        if ( !filename.startsWith("./") || filename.contains( "..") )
+        {
+            ret = false;
+            qWarning() << "check_tar_valid:- tar contains invalid file path: "
+                << filename << "\nAll paths must begin with ./ and not contain .."  ;
+            break;
+        }
+        else if ( TH_ISBLK(tarHandle) || TH_ISCHR(tarHandle) )
+        {
+            ret = false;
+            qWarning() << "check_tar_valid:-tar invalid, contains device special file:"
+                << filename;
+            break;
+        }
+        else if ( TH_ISLNK(tarHandle) )
+        {
+            ret = false;
+            qWarning() << "check_tar_valid:-tar invalid, contains hard link:"
+                       << filename;
+            break;
+        } else if (TH_ISSYM(tarHandle) )
+        {
+            QString target;
+            if ((tarHandle->options & TAR_GNU) && tarHandle->th_buf.gnu_longlink != NULL)
+                target = tarHandle->th_buf.gnu_longlink;
+            else
+                target = tarHandle->th_buf.linkname;
+            if ( target.startsWith("/") || target.contains( "..") )
+            {
+                ret = false;
+                qWarning() << "check_tar_valid:tar invalid, contains symlink whose target"
+                           << (target.startsWith("/")?"is an absolute path.":"references "
+                              "a parent directory.")
+                           << "Link:" << filename << "Target:" << target;
+                break;
+            }
+        }
+
+
+        if( TH_ISREG(tarHandle) )
+            tar_skip_regfile(tarHandle);
+    }
+
+    tar_close( tarHandle );
+    return ret;
+}
+
+TAR * get_tar_ptr( const QString &tarfile )
+{
        QByteArray pathnameArr = tarfile.toLocal8Bit();
        char *pathname = pathnameArr.data();
-
 
        TAR *tarHandle;
        int options = TAR_GNU;
        int filemode = 0;  // only care about this if creating files (ie untar)
        tartype_t *arctype = 0;
-       
        {
            // QFile and stream go away at end of scope
            QFile tfs( tarfile );
            if ( !tfs.exists() )
            {
-               qWarning( "Tar extract all file %s doesnt exist", pathname );
+               qWarning( "get_tar_ptr(): file %s doesnt exist", pathname );
                return false;
            }
            tfs.open(QIODevice::ReadOnly);
@@ -214,16 +294,5 @@ qlonglong targz_archive_size( const QString &tarfile )
         qWarning( "error opening tar file %s: %s", pathname, strerror(errno) );
         return false;
     }
-
-    qlonglong size = 0;
-    int i;
-    while ((i = th_read(tarHandle)) == 0)
-    {
-        size += th_get_size(tarHandle);
-        if( TH_ISREG(tarHandle) )
-            tar_skip_regfile(tarHandle);
-    }
-
-    tar_close( tarHandle );
-    return size;
+    return tarHandle;
 }

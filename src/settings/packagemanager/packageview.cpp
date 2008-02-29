@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,36 +42,166 @@
 #include "packagemanagerservice.h"
 /*! \internal
     Case sensitive less than operation for two QActions.
-    Intended to be used with qSort on a list of QActions. 
+    Intended to be used with qSort on a list of QActions.
 */
 bool actionLessThan(QAction *a, QAction *b)
 {
     return a->text() < b->text();
 }
 
-PackageDetails::PackageDetails(QWidget *parent, Type type, bool modal) : QDialog(parent)
+/*!
+  \internal
+  \enum PackageDetails::Type
+
+  This enum specifies the type of dialog to be shown
+
+  \value Info
+         A information dialog should be shown
+  \value Confirm
+         A confirmation dialog should be shown (only for install)
+*/
+
+/*!
+  \internal
+  \enum PackageDetails::Option
+
+  This enum specifies options to appear in the context menu.
+  These flags are mutually exclusive so only one should
+  be used at a time.
+
+  \value None
+         specifies whether there should be no extra options available
+         in the context menu.  Only for use with the \c Info type.
+  \value Install
+         Specifies whether Install should be available in the context menu.
+         Only for use with the \c Info type.
+  \value Uninstall
+         Specifies whether Uninstall should be available in the context menu
+         Only for use with the \c Info type.
+  \value Allow
+         Specifies whether Confirm and Cancel should be available in the context
+         menu.  Only for use with the \c Confirm type.
+  \value Disallow
+         Specifies that Confirm and Cancel should \i not be available in
+         the context menu.  Only for use with the \c Confirm type.
+*/
+
+/*!
+  \internal
+  \enum PackageDetails::Result
+
+  This enum specifies extra result codes for the dialog
+
+  \value Proceed
+         Specifies whether the dialog should proceed to the next stage.
+         Depending ont the \c Type and \c Options, this can take on different meanings.
+         For a \c Confirm dialog, proceed means to install.
+         For a \c Info dialog, proceed means to confirm install/uninstall depending
+         on the \c Options
+*/
+
+/*! \internal
+    Constructs a package details dialog with the specified \a title, \a text
+    \a type, and \a options.  Only one of the possible flags and not
+    a combination should be passed to \a options.
+*/
+PackageDetails::PackageDetails(QWidget *parent,
+    const QString &title,
+    const QString &text,
+    Type type,
+    Options options)
+    :
+    QDialog(parent), m_type(type),m_options(options),
+    m_acceptAction(0), m_rejectAction(0),m_contextMenu(0)
 {
     setupUi(this);
-    setModal(modal);
+    setModal(true);
 
-    QMenu *contextMenu = new QMenu( this );
-    if ( type == PackageDetails::Install || type == PackageDetails::Uninstall ) 
-    {
-        QAction *confirmAction = new QAction( tr("Confirm"), this );
-        connect( confirmAction, SIGNAL(triggered()), this, SLOT(accept()) );
-        contextMenu->addAction( confirmAction );
-    }
-    else { //otherwise assume package info
-        description->setText("<font color=\"#000000\"> INFORMATION</font>");
-    }
+    setWindowTitle( title );
+    description->setHtml( text );
 
-    QAction *cancelInstallAction = new QAction( tr("Cancel"), this );
-    connect( cancelInstallAction, SIGNAL(triggered()), this, SLOT(reject()) );
-
-    contextMenu->addAction( cancelInstallAction );
-    QSoftMenuBar::addMenuTo( this->description, contextMenu );
+    QSoftMenuBar::setLabel(this->description, Qt::Key_Select, QSoftMenuBar::NoLabel); //shouldn't be need once
+    QSoftMenuBar::setLabel(this->description, Qt::Key_Back, QSoftMenuBar::Back);      //softkey helpers are in place
+    QtopiaApplication::setMenuLike( this, true );
+    init();
 }
 
+void PackageDetails::init()
+{
+    m_contextMenu = new QMenu( this );
+    QSoftMenuBar::addMenuTo( this->description, m_contextMenu );
+
+    QSoftMenuBar::setHelpEnabled( this->description,true);
+
+    if ( m_type == PackageDetails::Info )
+    {
+        if ( m_options & Install ) 
+            m_acceptAction = new QAction( PackageView::tr("Install"), this );
+        else if ( m_options & Uninstall )
+            m_acceptAction = new QAction( PackageView::tr("Uninstall"), this );
+    }
+    else if ( m_type == PackageDetails::Confirm )
+    {
+        if ( m_options & Allow )
+        {
+            m_acceptAction = new QAction( tr("Confirm"), this );
+        }
+        else if (m_options & Disallow )
+        {
+            QSoftMenuBar::setLabel(this->description, Qt::Key_Context1, QSoftMenuBar::NoLabel);
+            QSoftMenuBar::setHelpEnabled( this->description,false);
+        }
+    }
+
+    if ( m_acceptAction )
+    {
+        QSignalMapper *signalMapper = new QSignalMapper(this);
+        connect( m_acceptAction, SIGNAL(triggered()), signalMapper,SLOT(map()) );
+        signalMapper->setMapping( m_acceptAction, PackageDetails::Proceed );
+        connect( signalMapper, SIGNAL(mapped(int)), this, SLOT(done(int)) );
+        m_contextMenu->addAction( m_acceptAction );
+
+        if ( m_type == PackageDetails::Confirm  && (m_options & Allow) )
+        {
+            m_rejectAction = new QAction( tr("Cancel"), this );
+            connect( m_rejectAction, SIGNAL(triggered()), this, SLOT(reject()) );
+            m_contextMenu->addAction( m_rejectAction );
+            QSoftMenuBar::setLabel(this->description, Qt::Key_Back, QSoftMenuBar::Cancel);
+        }
+    }
+}
+
+
+/*
+   \internal
+   This delgate is used to display items in the downloads
+   list.  Specifically it is used to display packages
+   that have been already been downloaded as faded.
+   */
+DownloadViewDelegate::DownloadViewDelegate( QObject *parent ):
+    QtopiaItemDelegate( parent )
+{
+}
+
+void DownloadViewDelegate::paint( QPainter *painter,
+                                    const QStyleOptionViewItem &option,
+                                    const QModelIndex &index ) const
+{
+    QModelIndex parent = index.parent();
+    if ( !parent.isValid() )
+        return;
+
+    QStyleOptionViewItem options = option;
+    bool isFiltered = index.model()->data( index, AbstractPackageController::Filtered ).toBool();
+    if ( isFiltered )
+    {
+        QColor c = options.palette.color(QPalette::Text);
+        c.setAlphaF( 0.4 );
+        options.palette.setColor( QPalette::Text, c );
+        options.palette.setColor( QPalette::HighlightedText, c );
+    }
+    QItemDelegate::paint( painter, options, index );
+}
 
 const int PackageView::InstalledIndex = 0;
 const int PackageView::DownloadIndex = 1;
@@ -123,6 +253,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
             downloadView, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
     connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
             downloadView, SLOT(rowsRemoved(QModelIndex,int,int)));
+    downloadView->setItemDelegate( new DownloadViewDelegate( this ) );
 
     //setup page for downloadable packages
     QWidget *downloadPage = new QWidget(this);
@@ -240,7 +371,6 @@ void PackageView::activateItem( const QModelIndex &item )
 
 void PackageView::serverChoice( QAction *a )
 {
-    Q_UNUSED( a );
     QString server = a->text();
     model->setServer( server );
 }
@@ -361,67 +491,70 @@ void PackageView::showDetails( const QModelIndex &item , PackageDetails::Type ty
         || !model->hasIndex(item.row(), item.column(), item.parent()) )
         return;
 
-    if ( type != PackageDetails::Install && type != PackageDetails::Info )
+    if ( type != PackageDetails::Confirm && type != PackageDetails::Info )
         return;
 
     QString name = model->data( item, Qt::DisplayRole ).toString(); //package name
-
-    PackageDetails *pd = new PackageDetails( this, type, true );
-    QSoftMenuBar::setLabel(pd->description, Qt::Key_Select, QSoftMenuBar::NoLabel); //shouldn't be need once
-    QSoftMenuBar::setLabel(pd->description, Qt::Key_Back, QSoftMenuBar::Back);      //softkey helpers are in place
-    QtopiaApplication::setMenuLike( pd, true );
-
-    pd->setWindowTitle( name );
-
-    QString details;
-    if ( type == PackageDetails::Install )
+    PackageDetails::Options options;
+    QString text;
+    if ( type == PackageDetails::Confirm )
     {
+        options = PackageDetails::Allow;
 #ifndef QT_NO_SXE
-        if( model->hasSensitiveDomains(model->data(item,AbstractPackageController::Domains).toString()) )
+        if( DomainInfo::hasSensitiveDomains(model->data(item,AbstractPackageController::Domains).toString()) )
         {
-            details = QLatin1String( "<font color=\"#0000FF\">");
-            details += tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" ).arg( name );
-            details += QLatin1String("</font>");
-            pd->description->setHtml( details );
-            pd->showMaximized();
-            return;
+            text = QLatin1String( "<font color=\"#0000FF\">");
+            text += tr( "The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> as it utilizes protected resources" ).arg( name );
+            text += QLatin1String("</font>");
+            type = PackageDetails::Confirm;
+            options = PackageDetails::Disallow;
         }
         else
         {
-#endif
-
-#ifndef QT_NO_SXE
-            details = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Security Alert" ) + "</u></b></center><p>"
+            text = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Security Alert" ) + "</u></b></center><p>"
                     + QString("%1")
                     .arg( DomainInfo::explain( model->data( item, AbstractPackageController::Domains ).toString(), name ));
         }
 #else
-            details = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Confirm Install") + " </u></b></center><p>"
-                        + tr("About to install <font color=\"#0000CC\"><b> %1 </b></font>", "%1 = package name")
-                            .arg( model->data( item, Qt::DisplayRole ).toString() );
+        text = QString("<font color=\"#000000\">") + "<center><b><u>" + tr( "Confirm Install") + " </u></b></center><p>"
+                    + tr("About to install <font color=\"#0000CC\"><b> %1 </b></font>", "%1 = package name")
+                        .arg( name );
 #endif
-            details += QString("<br>") + tr( "Confirm Install?" ) + QString("</font>");
-            pd->description->setHtml( details );
-            QtopiaApplication::setMenuLike( pd, true );
+        if ( options == PackageDetails::Allow )
+            text += QString("<br>") + tr( "Confirm Install?" ) + QString("</font>");
     }
     else //must be requesting package information
     {
-        pd->description->setHtml( QString("<font color=\"#000000\">") + model->data(item, Qt::WhatsThisRole).toString() +"</font>");
-        QtopiaApplication::setMenuLike( pd, false );
+        text = QString("<font color=\"#000000\">") + model->data(item, Qt::WhatsThisRole).toString() +"</font>";
+
+        if ( tabWidget->currentIndex() == InstalledIndex )
+            options = PackageDetails::Uninstall;
+        else
+            options = PackageDetails::Install;
+#ifndef QT_NO_SXE
+        if( DomainInfo::hasSensitiveDomains(model->data(item,AbstractPackageController::Domains).toString()) )
+            options = PackageDetails::None;
+#endif
+
     }
 
     qLog(Package) << "show details" << ( name.isNull() ? "no valid name" : name );
 
+    PackageDetails *pd = new PackageDetails( this, name, text, type, options );
     pd->showMaximized();
-
     int result = pd->exec();
-    
-    if ( type == PackageDetails::Install && result == QDialog::Accepted )
-    {
-            model->activateItem( item );
-    }
-
     delete pd;
+
+    //see if the user wants to proceed to the next stage
+    if ( result == PackageDetails::Proceed )
+    {
+        if ( type == PackageDetails::Confirm )
+            model->activateItem( item ); //for a confirm dialog this means installing
+        else if ( type == PackageDetails::Info && (options & PackageDetails::Install) )
+            showDetails( item,  PackageDetails::Confirm ); //for an  (install) info dialog this means proceeding to confirm installation
+        else if ( type == PackageDetails::Info && (options & PackageDetails::Uninstall) )
+            startUninstall(); //for an (uninstall) info dialog this means starting to uninstall (which implicitly asks for confirmation)
+    }
 }
 
 void PackageView::startInstall()
@@ -429,8 +562,7 @@ void PackageView::startInstall()
     const char *dummyStr = QT_TRANSLATE_NOOP( "PackageView", "Installing..." );
     Q_UNUSED( dummyStr );
 
-    showDetails( downloadView->currentIndex(), PackageDetails::Install );
-
+    showDetails( downloadView->currentIndex(), PackageDetails::Confirm );
 }
 
 void PackageView::startUninstall()

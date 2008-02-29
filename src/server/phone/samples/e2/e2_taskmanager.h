@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,7 +22,7 @@
 #ifndef HAVE_E2TASKMANAGER_H
 #define HAVE_E2TASKMANAGER_H
 
-#include "phone/taskmanagerservice.h"
+#include "taskmanagerservice.h"
 #include "e2_frames.h"
 
 #include "applicationmonitor.h"

@@ -42,11 +42,30 @@ PROJECTS*=$$DQT_PROJECTS
 build_qtopia:!build_dqt:DQT_PROJECTS-=tools/qt/qvfb
 
 build_qtopia {
-    include(general.pri)
+    # Qtopia Core files
+    QTE_PROJECTS=\
+        libraries/qtopiacore/tools/moc\
+        libraries/qtopiacore/tools/uic\
+        libraries/qtopiacore/tools/rcc\
+        libraries/qtopiacore/corelib\
+        libraries/qtopiacore/gui\
+        libraries/qtopiacore/network\
+        libraries/qtopiacore/sql\
+        libraries/qtopiacore/xml\
+        libraries/qtopiacore/script\
+        libraries/qtopiacore/svg\
+        plugins/qtopiacore
+    contains(QTE_CONFIG,opengl):QTE_PROJECTS+=libraries/qtopiacore/opengl
+    PROJECTS*=$$QTE_PROJECTS
+
+    !no_general_pri:include(general.pri)
     # Load a device-specific file (if it exists)
     !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/projects.pri):include($$DEVICE_CONFIG_PATH/projects.pri)
     !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/custom.pri):include($$DEVICE_CONFIG_PATH/custom.pri)
     else:include(custom.pri)
     include($$QPEDIR/src/local.pri)
+} else {
+    PROJECTS*=\
+        3rdparty/libraries/pthread
 }
 

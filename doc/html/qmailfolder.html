@@ -42,7 +42,7 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailFolder"></a>QMailFolder::QMailFolder ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
 <p>Convienience constructor that creates a root <tt>QMailFolder</tt> by loading the data from the message store as specified by the <a href="qmailid.html">QMailId</a> <i>id</i>. If the folder does not exist in the message store, then this object will create an empty and invalid <a href="qmailfolder.html">QMailFolder</a>.</p>
-<h3 class="fn"><a name="QMailFolder-2"></a>QMailFolder::QMailFolder ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qmailid.html">QMailId</a> &amp; <i>parentFolderId</i> = QMailId() )</h3>
+<h3 class="fn"><a name="QMailFolder-2"></a>QMailFolder::QMailFolder ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="qmailid.html">QMailId</a> &amp; <i>parentFolderId</i> = QMailId() )</h3>
 <p>Creates a root <tt>QMailFolder</tt> object with name <i>name</i> and <tt>parent</tt> folder ID <i>parentFolderId</i>. If the parent folder ID is invalid, this folder will be a root folder when added into the message store.</p>
 <h3 class="fn"><a name="QMailFolder-3"></a>QMailFolder::QMailFolder ( const QMailFolder &amp; <i>other</i> )</h3>
 <p>Creates a copy of the <tt>QMailFolder</tt> object <i>other</i>.</p>
@@ -52,13 +52,13 @@
 <p>Returns the <tt>ID</tt> of the <tt>QMailFolder</tt> object. A <tt>QMailFolder</tt> with an invalid ID is one which does not yet exist on the message store.</p>
 <h3 class="fn"><a name="isRoot"></a>bool QMailFolder::isRoot () const</h3>
 <p>Returns <tt>true</tt> if the folder is a root folder or <tt>false</tt> otherwise. A root folder is one which has not parent.</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMailFolder::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QMailFolder::name () const</h3>
 <p>Returns the name of the folder.</p>
 <p>See also <a href="qmailfolder.html#setName">setName</a>().</p>
 <h3 class="fn"><a name="parentId"></a><a href="qmailid.html">QMailId</a> QMailFolder::parentId () const</h3>
 <p>Returns the ID of the parent folder. This folder is a root folder if the parent ID is invalid.</p>
 <p>See also <a href="qmailfolder.html#setParentId">setParentId</a>().</p>
-<h3 class="fn"><a name="setName"></a>void QMailFolder::setName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="setName"></a>void QMailFolder::setName ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Sets the name of this folder to <i>name</i>.</p>
 <p>See also <a href="qmailfolder.html#name">name</a>().</p>
 <h3 class="fn"><a name="setParentId"></a>void QMailFolder::setParentId ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
@@ -68,8 +68,8 @@
 <p>Assigns the value of the <tt>QMailFolder</tt> object <i>other</i> to this.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

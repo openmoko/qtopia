@@ -4,12 +4,12 @@
 <body>
 <!--#if expr="$USERGUIDE"-->
    <h2>Call Networks</h2>
-<!--#else -->
-   <h3>Call Networks</h3>
 <!--#endif-->
 <p><img src=":image/phonenetworks/PhoneNetworks"></p>
-<p>Shows the current status of GSM and VoIP networks and allows the user to modify network preferences.</p>
+<p>The Call Networks application shows the current status of available telephony networks and allows the user to modify network preferences.</p>
+<!--#if expr="$CELL"-->
 <p>See Also: <a href="phonenetworks-modem.html">GSM Network</a></p>
+<!--#endif-->
 <!--#if expr="$VOIP"-->
 <p>See Also: <a href="phonenetworks-voip.html">VoIP Network</a></p>
 <!--#endif-->

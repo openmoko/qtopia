@@ -25,12 +25,16 @@ sub opt_get_options
 {
     my $dohelp = 1;
     my $dieextra = 0;
+    my $dovalidate = 1;
     for ( @_ ) {
         if ( $_ eq "nohelp" ) {
             $dohelp = 0;
         }
         if ( $_ eq "noextra" ) {
             $dieextra = 1;
+        }
+        if ( $_ eq "novalidate" ) {
+            $dovalidate = 0;
         }
     }
 
@@ -118,24 +122,8 @@ sub opt_get_options
         $ok = 0;
     }
 
-    # check input against "available", if present
-    AVAILCHECK: for my $optname ( keys %optvar_storage ) {
-        my $optref = $optvar_storage{$optname};
-        if ( defined($optref->{"value"}) && $optref->{"available"} && ref($optref->{"available"}) ne "" ) {
-            my @available = _resolve_to_array($optref->{"available"});
-            AVAILWORD: for my $word ( split(/ /, $optref->{"value"}) ) {
-                if ( $word ) {
-                    for my $a ( @available ) {
-                        if ( $word eq $a ) {
-                            next AVAILWORD;
-                        }
-                    }
-                    warn "Invalid value for option \"$optname\": $word\n";
-                    $ok = 0;
-                    next AVAILCHECK;
-                }
-            }
-        }
+    if ( $dovalidate && !Qtopia::Opt::validate() ) {
+        $ok = 0;
     }
 
     if ( !$dohelp ) {

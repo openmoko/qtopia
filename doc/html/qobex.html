@@ -68,7 +68,7 @@
 <tr><td valign="top"><tt>QObex::MovedPermanently</tt></td><td align="center" valign="top"><tt>0x31</tt></td><td valign="top">Moved permanently</td></tr>
 <tr><td valign="top"><tt>QObex::MovedTemporarily</tt></td><td align="center" valign="top"><tt>0x32</tt></td><td valign="top">Moved temporarily</td></tr>
 <tr><td valign="top"><tt>QObex::SeeOther</tt></td><td align="center" valign="top"><tt>0x33</tt></td><td valign="top">See other</td></tr>
-<tr><td valign="top"><tt>QObex::NotModified</tt></td><td align="center" valign="top"><tt>0x34</tt></td><td valign="top">= Not modified</td></tr>
+<tr><td valign="top"><tt>QObex::NotModified</tt></td><td align="center" valign="top"><tt>0x34</tt></td><td valign="top">Not modified</td></tr>
 <tr><td valign="top"><tt>QObex::UseProxy</tt></td><td align="center" valign="top"><tt>0x35</tt></td><td valign="top">Use proxy</td></tr>
 <tr><td valign="top"><tt>QObex::BadRequest</tt></td><td align="center" valign="top"><tt>0x40</tt></td><td valign="top">Bad request - server couldn't understand request</td></tr>
 <tr><td valign="top"><tt>QObex::Unauthorized</tt></td><td align="center" valign="top"><tt>0x41</tt></td><td valign="top">Unauthorized</td></tr>
@@ -96,17 +96,18 @@
 <tr><td valign="top"><tt>QObex::DatabaseLocked</tt></td><td align="center" valign="top"><tt>061</tt></td><td valign="top">Database locked</td></tr>
 </table></p>
 <h3 class="flags"><a name="SetPathFlag-enum"></a>enum QObex::SetPathFlag<br />flags QObex::SetPathFlags</h3>
-<p>Defines the option flags that can be used for an OBEX <tt>SET PATH</tt> operation. An OBEX client can use these options to specify a <tt>SET PATH</tt> request in greater detail.</p>
+<p>Defines the option flags that can be used for an OBEX <tt>Set Path</tt> operation. An OBEX client can use these options to specify a <tt>Set Path</tt> request in greater detail.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QObex::BackUpOneLevel</tt></td><td align="center" valign="top"><tt>0x1</tt></td><td valign="top">The OBEX server should go back up one directory level before applying the path.</td></tr>
 <tr><td valign="top"><tt>QObex::NoPathCreation</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">The OBEX server should <i>not</i> automatically create the path if it does not exist.</td></tr>
 </table></p>
 <p>The SetPathFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;SetPathFlag&gt;. It stores an OR combination of SetPathFlag values.</p>
+<p>See also <a href="qobexclientsession.html#setPath">QObexClientSession::setPath</a>() and <a href="qobexserversession.html#setPath">QObexServerSession::setPath</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

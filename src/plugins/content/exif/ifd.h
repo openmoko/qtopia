@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -59,7 +59,12 @@ public:
         quint16 tag;
         quint16 type;
         quint32 count;
-        quint32 offset;
+        union
+        {
+            char offsetBytes[ 4 ];
+            quint16 offsetShorts[ 2 ];
+            quint32 offset;
+        };
     };
 
     struct URational

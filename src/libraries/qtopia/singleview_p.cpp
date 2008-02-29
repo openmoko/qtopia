@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -191,7 +191,7 @@ QPixmap SingleView::loadThumbnail( const QString &filename, const QSize &size )
         return QPixmap();
 }
 
-void SingleView::contentChanged(const QContentIdList &idList,const QContent::ChangeType changeType)
+void SingleView::contentChanged(const QContentIdList & /*idList*/, const QContent::ChangeType /*changeType*/)
 {
     QModelIndex idx = selectionModel()->currentIndex();
     if ( idx.isValid() ) {

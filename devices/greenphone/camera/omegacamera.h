@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,6 +34,8 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 
+#define GREENPHONE 
+
 namespace camera
 {
 
@@ -59,6 +61,7 @@ public:
     uint refocusDelay() const;
     int minimumFramePeriod() const;
 
+    int getFD() { return fd; }
 private:
     int fd;
     int width, height;

@@ -32,4 +32,4 @@ settings.path=/etc/default/Trolltech
 INSTALLS+=settings
 
 pkg.desc=Phone Network selection for Qtopia.
-pkg.domain=window,phonecomm,voip
+pkg.domain=trusted

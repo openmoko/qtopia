@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,19 +30,90 @@
 #include <qmessagebox.h>
 #include <qlineedit.h>
 #include <qmenu.h>
+#include <QtopiaItemDelegate>
+#include <QTextLayout>
+#include <QTextLine>
+#include <QTextOption>
 
 #define QTOPIA_INTERNAL_LANGLIST
 
-TemplateTextDialog::TemplateTextDialog(QWidget *parent)
+class TemplateTextDelegate : public QtopiaItemDelegate
+{
+    Q_OBJECT
+
+public:
+    TemplateTextDelegate(QWidget* parent);
+    ~TemplateTextDelegate();
+
+    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+
+private: 
+    QWidget* _parent;
+};
+
+TemplateTextDelegate::TemplateTextDelegate(QWidget* parent)
+    : QtopiaItemDelegate(parent),
+      _parent(parent)
+{
+}
+
+TemplateTextDelegate::~TemplateTextDelegate()
+{
+}
+
+void TemplateTextDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    return QtopiaItemDelegate::paint(painter, option, index);
+}
+
+// cf. QtopiaItemDelegatePrivate
+static QSizeF doTextLayout(const QString& text, int lineWidth)
+{
+    qreal height = 0;
+    qreal widthUsed = 0;
+    QTextLayout textLayout(text);
+    QTextOption option;
+    option.setWrapMode(QTextOption::WordWrap);
+    textLayout.setTextOption(option);
+    textLayout.beginLayout();
+    while (true) {
+        QTextLine line = textLayout.createLine();
+        if (!line.isValid())
+            break;
+        line.setLineWidth(lineWidth);
+        line.setPosition(QPointF(0, height));
+        height += line.height();
+        widthUsed = qMax(widthUsed, line.naturalTextWidth());
+    }
+    textLayout.endLayout();
+    return QSizeF(widthUsed, height);
+}
+
+QSize TemplateTextDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
+{
+    QString text = index.data(Qt::DisplayRole).toString();
+    return doTextLayout(text, _parent->width()).toSize();
+}
+
+
+TemplateTextDialog::TemplateTextDialog(QWidget *parent, const char* name)
     : QDialog( parent ), userTemplates( 0 )
 {
+    setObjectName(name);
     QtopiaApplication::setMenuLike( this, true );
     setWindowTitle( tr( "Templates" ));
     QGridLayout *top = new QGridLayout( this );
 
     mTemplateList = new QListWidget( this );
+    mTemplateList->setWordWrap( true );
+    mTemplateList->setUniformItemSizes( false );
+    mTemplateList->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    mTemplateList->setItemDelegate( new TemplateTextDelegate( mTemplateList ) );
+
     top->addWidget( mTemplateList, 0, 0 );
     loadTexts();
+
     connect(mTemplateList, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(selected()) );
     connect(mTemplateList, SIGNAL(currentRowChanged(int)),
@@ -56,6 +127,9 @@ TemplateTextDialog::TemplateTextDialog(QWidget *parent)
     connect(resetAction, SIGNAL(triggered()), this, SLOT(slotReset()) );
     templateContext->addAction( removeAction );
     templateContext->addAction( resetAction );
+
+    // Force the template list to resize itself around the items
+    QMetaObject::invokeMethod(mTemplateList, "doItemsLayout", Qt::QueuedConnection);
 }
 
 TemplateTextDialog::~TemplateTextDialog()
@@ -223,3 +297,4 @@ QString NewTemplateTextDialog::text()
     return mEdit->text();
 }
 
+#include "templatetext.moc"

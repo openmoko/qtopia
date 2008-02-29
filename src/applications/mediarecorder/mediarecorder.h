@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,17 +35,10 @@
 
 class QAction;
 class MediaRecorderPluginList;
-#ifdef QTOPIA4_TODO
-class MediaPlayerPluginList;
-class AudioDevice;
-#endif
 class SampleBuffer;
 class ConfigureRecorder;
 class Waveform;
 class MediaRecorderEncoder;
-#ifdef QTOPIA4_TODO
-class MediaPlayerDecoder;
-#endif
 class QtopiaChannel;
 class QDocumentSelector;
 class QContent;
@@ -99,11 +92,9 @@ private slots:
     void processAudioData();
     void configure();
     void noPluginError();
-    void audioOutputDone();
-    void audioDeviceReady();
-    void audioDeviceError();
     void documentSelected(const QContent&);
     void newSelected();
+    void currentDocumentChanged();
 
 protected:
     void closeEvent( QCloseEvent *e );
@@ -122,38 +113,24 @@ private:
     QAction *configureAction;
     QStackedWidget *stack;
     MediaRecorderPluginList *recorderPlugins;
-#ifdef QTOPIA4_TODO
-    MediaPlayerPluginList *playerPlugins;
-#endif
     QAudioInput *m_audioInput;
-#ifdef QTOPIA4_TODO
-    AudioDevice *audioOutput;
-#endif
     bool audioDeviceIsReady;
-    bool startWhenAudioDeviceReady;
 #ifdef RECORD_THEN_SAVE
     SampleBuffer *samples;
 #endif
     short *sampleBuffer;
     QIODevice *io;
     MediaRecorderEncoder *encoder;
-#ifdef QTOPIA4_TODO
-    MediaPlayerDecoder *decoder;
-#endif
     QSound *m_sound;
     QualitySetting qualities[MaxQualities];
     long recordTime;
     long maxRecordTime;
-    long samplesPlayed;
     bool recording;
     bool playing;
     QString lastSaved;
-    QTimer *lightTimer;
-    QtopiaChannel *trayChannel;
     QString recordingsCategory;
     QDSActionRequest* mRecordAudioRequest;
     QualitySetting recordQuality;
-    bool smallScreen;
 
     enum ContextKey { Select, Record, Stop, Play };
     void setContextKey( ContextKey key );
@@ -180,21 +157,17 @@ class VoiceRecordingService : public QtopiaAbstractService
     friend class MediaRecorder;
 
 public:
-
     ~VoiceRecordingService();
 
 public slots:
-
     void toggleRecording();
     void recordAudio( const QDSActionRequest& request );
 
 private:
-
-    VoiceRecordingService(MediaRecorder *parent):
-            QtopiaAbstractService("VoiceRecording", parent)
-        {
+    VoiceRecordingService(MediaRecorder *parent)
+        : QtopiaAbstractService("VoiceRecording", parent)
+    {
         this->parent = parent;
-
         publishAll();
     }
 

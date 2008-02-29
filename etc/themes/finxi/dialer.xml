@@ -74,7 +74,6 @@
 	    <group rect="0,0,120x84" name="zero" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),0">
 		<image rect="0,0,0,0" name="zero_bg" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes" />
         <text rect="45,5,-45,-40" bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">0</text>
-        <text rect="25,-40,-25,-20" bold="yes" outline="#000000" color="#888888" size="5" align="hcenter,vcenter">_</text>
 	    </group>
 	    <group rect="0,0,120x84" name="hash" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),#">
 		<image rect="0,0,0,0" name="hash_bg" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes" />

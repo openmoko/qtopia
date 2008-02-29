@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -119,6 +119,9 @@ protected:
 
     QContentEngine *contentEngine( QContent *content ) const;
 
+    void ensurePropertiesLoaded( QContentEngine *engine ) const{ if( !(engine->d_func()->loadedAttributes & QContentEngine::Properties) ) engine->loadProperties(); }
+    void ensureCategoriesLoaded( QContentEngine *engine ) const{ if( !(engine->d_func()->loadedAttributes & QContentEngine::Categories) ) engine->loadCategories(); }
+
 private:
     QString m_errorString;
 };
@@ -134,11 +137,20 @@ public:
     QContent lookup( QContentId contentId );
     void cache( const QContent &content );
     void remove( QContentId contentId );
+    void clear();
+
+    void cacheMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType, int key );
+    void cacheLocationKey( QtopiaDatabaseId databaseId, const QString &location, int key );
+
+    int lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType );
+    int lookupLocationKey( QtopiaDatabaseId databaseId, const QString &location );
 
     static QContentCache *instance();
 
 private:
     QCache< QContentId, QContent > m_cache;
+    QCache< QPair<QString, QtopiaDatabaseId>, int> m_mimeIdCache;
+    QCache< QPair<QString, QtopiaDatabaseId>, int> m_locationIdCache;
     QReadWriteLock m_lock;
 };
 

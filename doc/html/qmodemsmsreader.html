@@ -27,7 +27,7 @@
 <li><div class="fn"/>5 public functions inherited from <a href="qsmsreader.html#public-functions">QSMSReader</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -39,20 +39,19 @@
 <ul>
 <li><div class="fn"/>1 protected function inherited from <a href="qsmsreader.html#protected-functions">QSMSReader</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
 <li><div class="fn"/>5 public slots inherited from <a href="qsmsreader.html#public-slots">QSMSReader</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>4 signals inherited from <a href="qsmsreader.html#signals">QSMSReader</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -67,10 +66,10 @@
 <p>Create a new modem-based SMS request object for <i>service</i>.</p>
 <h3 class="fn"><a name="dtor.QModemSMSReader"></a>QModemSMSReader::~QModemSMSReader ()</h3>
 <p>Destroy this modem-based SMS request object.</p>
-<h3 class="fn"><a name="messageListCommand"></a><a href="qstring.html">QString</a> QModemSMSReader::messageListCommand () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="messageListCommand"></a><a href="./qstring.html">QString</a> QModemSMSReader::messageListCommand () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the command that lists the contents of an SMS message store. Normally this is <tt>AT+CMGL=4</tt>, but some modems do not support the <tt>=4</tt>.</p>
 <p>See also <a href="qmodemsmsreader.html#messageStore">messageStore</a>().</p>
-<h3 class="fn"><a name="messageStore"></a><a href="qstring.html">QString</a> QModemSMSReader::messageStore () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="messageStore"></a><a href="./qstring.html">QString</a> QModemSMSReader::messageStore () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the name of the SMS message store to scan for incoming messages. The default implementation returns <tt>SM</tt>. If this function returns an empty string, then the message store will not be changed from the modem's power-on default with an <tt>AT+CPMS</tt> command.</p>
 <p>See also <a href="qmodemsmsreader.html#messageListCommand">messageListCommand</a>().</p>
 <h3 class="fn"><a name="simDownload"></a>void QModemSMSReader::simDownload ( const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>message</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
@@ -79,8 +78,8 @@
 <p>The default implementation composes a <tt>SMS-PP DOWNLOAD</tt> envelope, according to 3GPP TS 11.14, and sends it to the modem using the <tt>AT+CSIM command</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

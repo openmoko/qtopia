@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -62,7 +62,6 @@ public:
         int keyMargin;
         int bottomMargin;
 
-        QString trieFile;
         int maxGuesses;
 
         int optionWordSpacing;
@@ -93,6 +92,7 @@ signals:
     void backspace();
     void preedit(const QString &);
     void commit(const QString &);
+    void pressedAndHeld();
 
 protected:
     virtual void paintEvent(QPaintEvent *);
@@ -114,6 +114,10 @@ public slots:
     void doBackspace();
     QRect rectForCharacter(const QChar &) const;
     QRect rectForWord(const QString &);
+    QStringList words() const;
+
+private slots:
+    void positionTimeOut();
 
 private:
     Config m_config;
@@ -169,6 +173,7 @@ private:
 
     void positionOptionsWindow();
     OptionsWindow *m_options;
+    QTimer* optionsWindowTimer;
 
     bool m_notWord;
     bool m_alphabetSet;

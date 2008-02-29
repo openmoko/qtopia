@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,12 +29,12 @@
 #include <qcopchannel_qws.h>
 #include <QSizePolicy>
 #include <QTimer>
-#include "phone/dialercontrol.h"
+#include "dialercontrol.h"
 #include <qtopia/pim/qcontactmodel.h>
 #include <qtopia/pim/qcontact.h>
 #include <QPalette>
 #include "e1_error.h"
-#include "phone/cellmodemmanager.h"
+#include "cellmodemmanager.h"
 #include <QPainter>
 
 E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)

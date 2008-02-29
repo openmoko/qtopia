@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "qmailmessage.h"
+#include "qprivateimplementationdef_p.h"
 
 #include <qtopiaapplication.h> // needed for setenv
 #include <qmimetype.h>
@@ -48,16 +49,22 @@ static const QByteArray internalPrefix()
 }
 
 template<typename CharType>
-inline char toSignedChar(CharType value)
-{
-    return value;
-}
+inline char toPlainChar(CharType value) { return value; }
 
 template<>
-inline char toSignedChar<QChar>(QChar value)
-{
-    return static_cast<char>(value.unicode() & 0x7f);
-}
+inline char toPlainChar<QChar>(QChar value) { return static_cast<char>(value.unicode() & 0x7f); }
+
+template<typename CharType>
+inline bool asciiRepresentable(const CharType& value) { return ((value <= 127) && (value >= 0)); }
+
+template<>
+inline bool asciiRepresentable<unsigned char>(const unsigned char& value) { return (value <= 127); }
+
+template<>
+inline bool asciiRepresentable<signed char>(const signed char& value) { return (value >= 0); }
+
+template<>
+inline bool asciiRepresentable<char>(const char& value) { return (value >= 0); }
 
 template<typename StringType>
 QByteArray to7BitAscii(const StringType& src)
@@ -67,11 +74,12 @@ QByteArray to7BitAscii(const StringType& src)
 
     typename StringType::const_iterator it = src.begin();
     for (const typename StringType::const_iterator end = it + src.length(); it != end; ++it)
-        if ((*it <= 127) && (*it >= 0))
-            result.append(toSignedChar(*it));
+        if (asciiRepresentable(*it))
+            result.append(toPlainChar(*it));
 
     return result;
 }
+
 
 // Parsing functions
 static int insensitiveIndexOf(const QByteArray& content, const QByteArray& container, int from = 0)
@@ -243,6 +251,7 @@ static QMailCodec* codecForEncoding(QMailMessageBody::TransferEncoding te, bool 
 {
     switch( te ) 
     {
+        case QMailMessageBody::NoEncoding:
         case QMailMessageBody::Binary:
             return new QMailPassThroughCodec();
 
@@ -255,9 +264,6 @@ static QMailCodec* codecForEncoding(QMailMessageBody::TransferEncoding te, bool 
 
         case QMailMessageBody::Base64:
             return new QMailBase64Codec(textualData ? QMailBase64Codec::Text : QMailBase64Codec::Binary);
-
-        case QMailMessageBody::NoEncoding:
-            break;
     }
 
     return 0;
@@ -862,15 +868,12 @@ QDataStream& operator<<(QDataStream& out, const DataString& dataString)
 
 
 /* QMailMessageHeaderField */
-class QMailMessageHeaderFieldPrivate : public QSharedData
+class QMailMessageHeaderFieldPrivate : public QPrivateImplementationBase
 {
 public:
     QMailMessageHeaderFieldPrivate();
     QMailMessageHeaderFieldPrivate(const QByteArray& text, bool structured);
     QMailMessageHeaderFieldPrivate(const QByteArray& name, const QByteArray& text, bool structured);
-    QMailMessageHeaderFieldPrivate(const QMailMessageHeaderFieldPrivate& other);
-
-    QMailMessageHeaderFieldPrivate& operator= (const QMailMessageHeaderFieldPrivate& other);
 
     bool operator== (const QMailMessageHeaderFieldPrivate& other) const;
 
@@ -906,19 +909,19 @@ public:
 };
 
 QMailMessageHeaderFieldPrivate::QMailMessageHeaderFieldPrivate()
-    : QSharedData(),
+    : QPrivateImplementationBase(this),
       _structured(true)
 {
 }
 
 QMailMessageHeaderFieldPrivate::QMailMessageHeaderFieldPrivate(const QByteArray& text, bool structured)
-    : QSharedData()
+    : QPrivateImplementationBase(this)
 {
     parse(text, structured);
 }
 
 QMailMessageHeaderFieldPrivate::QMailMessageHeaderFieldPrivate(const QByteArray& id, const QByteArray& text, bool structured)
-    : QSharedData()
+    : QPrivateImplementationBase(this)
 {
     _id = id;
     parse(text, structured);
@@ -1059,22 +1062,6 @@ void QMailMessageHeaderFieldPrivate::parse(const QByteArray& text, bool structur
             malformed = true;
         }
     }
-}
-
-QMailMessageHeaderFieldPrivate::QMailMessageHeaderFieldPrivate(const QMailMessageHeaderFieldPrivate& other)
-    : QSharedData(other)
-{
-    this->operator=(other);
-}
-
-QMailMessageHeaderFieldPrivate& QMailMessageHeaderFieldPrivate::operator= (const QMailMessageHeaderFieldPrivate& other)
-{
-    _id = other._id;
-    _content = other._content;
-    _structured = other._structured;
-    _parameters = other._parameters;
-
-    return *this;
 }
 
 bool QMailMessageHeaderFieldPrivate::operator== (const QMailMessageHeaderFieldPrivate& other) const
@@ -1444,6 +1431,8 @@ QString QMailMessageHeaderFieldPrivate::decodedContent() const
     return result;
 }
 
+template class QPrivatelyImplemented<QMailMessageHeaderFieldPrivate>;
+
 
 /*!
     \class QMailMessageHeaderField
@@ -1475,11 +1464,13 @@ QString QMailMessageHeaderFieldPrivate::decodedContent() const
 */
 
 /*!
-    \typedef QMailMessageHeaderField::ParameterType
+    \typedef QMailMessageHeaderField::ImplementationType
+    \internal
+*/
 
-    A typedef for QPair<QByteArray, QByteArray>.  ParameterType represents a 'parameter'
-    from the content type header field.  \c ParameterType::first contains the text of the 
-    parameter's 'name', and \c ParameterType::second contains the text of the 'value'.
+/*!
+    \typedef QMailMessageHeaderField::ParameterType
+    \internal
 */
 
 /*!
@@ -1495,8 +1486,8 @@ QString QMailMessageHeaderFieldPrivate::decodedContent() const
     Creates an uninitialised message header field object.
 */
 QMailMessageHeaderField::QMailMessageHeaderField()
+    : QPrivatelyImplemented<QMailMessageHeaderFieldPrivate>(new QMailMessageHeaderFieldPrivate())
 {
-    d = new QMailMessageHeaderFieldPrivate();
 }
 
 /*!
@@ -1506,8 +1497,8 @@ QMailMessageHeaderField::QMailMessageHeaderField()
     RFC 2183 'Content-Disposition' header fields.
 */
 QMailMessageHeaderField::QMailMessageHeaderField(const QByteArray& text, FieldType fieldType)
+    : QPrivatelyImplemented<QMailMessageHeaderFieldPrivate>(new QMailMessageHeaderFieldPrivate(text, (fieldType == StructuredField)))
 {
-    d = new QMailMessageHeaderFieldPrivate(text, (fieldType == StructuredField));
 }
 
 /*!
@@ -1517,35 +1508,14 @@ QMailMessageHeaderField::QMailMessageHeaderField(const QByteArray& text, FieldTy
     RFC 2045 'Content-Type' and RFC 2183 'Content-Disposition' header fields.
 */
 QMailMessageHeaderField::QMailMessageHeaderField(const QByteArray& id, const QByteArray& text, FieldType fieldType)
+    : QPrivatelyImplemented<QMailMessageHeaderFieldPrivate>(new QMailMessageHeaderFieldPrivate(id, text, (fieldType == StructuredField)))
 {
-    d = new QMailMessageHeaderFieldPrivate(id, text, (fieldType == StructuredField));
-}
-
-/*! \internal */
-QMailMessageHeaderField::QMailMessageHeaderField(const QMailMessageHeaderField& other)
-{
-    this->operator=(other);
-}
-
-/*!
-    Destroys a content type object.
-*/
-QMailMessageHeaderField::~QMailMessageHeaderField()
-{
-}
-
-/*! \internal */
-QMailMessageHeaderField& QMailMessageHeaderField::operator= (const QMailMessageHeaderField& other)
-{
-    d = other.d;
-
-    return *this;
 }
 
 /*! \internal */
 bool QMailMessageHeaderField::operator== (const QMailMessageHeaderField& other) const
 {
-    return d->operator==(*other.d);
+    return impl(this)->operator==(*other.impl(&other));
 }
 
 /*!
@@ -1553,7 +1523,7 @@ bool QMailMessageHeaderField::operator== (const QMailMessageHeaderField& other) 
 */
 bool QMailMessageHeaderField::isNull() const
 {
-    return d->isNull();
+    return impl(this)->isNull();
 }
 
 /*!
@@ -1561,7 +1531,7 @@ bool QMailMessageHeaderField::isNull() const
 */
 QByteArray QMailMessageHeaderField::id() const
 {
-    return d->id();
+    return impl(this)->id();
 }
 
 /*!
@@ -1569,7 +1539,7 @@ QByteArray QMailMessageHeaderField::id() const
 */
 void QMailMessageHeaderField::setId(const QByteArray& id)
 {
-    d->setId(id);
+    impl(this)->setId(id);
 }
 
 /*!
@@ -1577,7 +1547,7 @@ void QMailMessageHeaderField::setId(const QByteArray& id)
 */
 QByteArray QMailMessageHeaderField::content() const
 {
-    return d->content();
+    return impl(this)->content();
 }
 
 /*!
@@ -1585,7 +1555,7 @@ QByteArray QMailMessageHeaderField::content() const
 */
 void QMailMessageHeaderField::setContent(const QByteArray& text)
 {
-    d->setContent(text);
+    impl(this)->setContent(text);
 }
 
 /*!
@@ -1594,7 +1564,7 @@ void QMailMessageHeaderField::setContent(const QByteArray& text)
 */
 QByteArray QMailMessageHeaderField::parameter(const QByteArray& name) const
 {
-    return d->parameter(name);
+    return impl(this)->parameter(name);
 }
 
 /*!
@@ -1606,7 +1576,7 @@ QByteArray QMailMessageHeaderField::parameter(const QByteArray& name) const
 */
 void QMailMessageHeaderField::setParameter(const QByteArray& name, const QByteArray& value)
 {
-    d->setParameter(name, value);
+    impl(this)->setParameter(name, value);
 }
 
 /*!
@@ -1616,7 +1586,7 @@ void QMailMessageHeaderField::setParameter(const QByteArray& name, const QByteAr
 */
 bool QMailMessageHeaderField::isParameterEncoded(const QByteArray& name) const
 {
-    return d->isParameterEncoded(name);
+    return impl(this)->isParameterEncoded(name);
 }
 
 /*!
@@ -1625,7 +1595,7 @@ bool QMailMessageHeaderField::isParameterEncoded(const QByteArray& name) const
 */
 void QMailMessageHeaderField::setParameterEncoded(const QByteArray& name)
 {
-    d->setParameterEncoded(name);
+    impl(this)->setParameterEncoded(name);
 }
 
 /*!
@@ -1634,7 +1604,7 @@ void QMailMessageHeaderField::setParameterEncoded(const QByteArray& name)
 */
 QList<QMailMessageHeaderField::ParameterType> QMailMessageHeaderField::parameters() const
 {
-    return d->parameters();
+    return impl(this)->parameters();
 }
 
 /*!
@@ -1653,7 +1623,7 @@ QList<QMailMessageHeaderField::ParameterType> QMailMessageHeaderField::parameter
 */
 QByteArray QMailMessageHeaderField::toString(bool includeName, bool presentable) const
 {
-    return d->toString(includeName, presentable);
+    return impl(this)->toString(includeName, presentable);
 }
 
 /*!
@@ -1662,13 +1632,13 @@ QByteArray QMailMessageHeaderField::toString(bool includeName, bool presentable)
 */
 QString QMailMessageHeaderField::decodedContent() const
 {
-    return d->decodedContent();
+    return impl(this)->decodedContent();
 }
 
 /*! \internal */
 void QMailMessageHeaderField::parse(const QByteArray& text, FieldType fieldType)
 {
-    return d->parse(text, (fieldType == StructuredField));
+    return impl(this)->parse(text, (fieldType == StructuredField));
 }
 
 /*!
@@ -1764,7 +1734,7 @@ QByteArray QMailMessageHeaderField::removeWhitespace(const QByteArray& input)
 /*! \internal */
 void QMailMessageHeaderField::output(QDataStream& out) const
 {
-    d->output(out);
+    impl(this)->output(out);
 }
 
 
@@ -2134,15 +2104,11 @@ void QMailMessageContentDisposition::setSize(int size)
 
 
 /* QMailMessageHeader*/
-class QMailMessageHeaderPrivate : public QSharedData
+class QMailMessageHeaderPrivate : public QPrivateImplementationBase
 {
 public:
     QMailMessageHeaderPrivate();
     QMailMessageHeaderPrivate(const QByteArray& input);
-    QMailMessageHeaderPrivate(const QMailMessageHeaderPrivate& other);
-    ~QMailMessageHeaderPrivate();
-
-    QMailMessageHeaderPrivate& operator= (const QMailMessageHeaderPrivate& other);
 
     void update(const QByteArray &id, const QByteArray &content);
     void append(const QByteArray &id, const QByteArray &content);
@@ -2159,7 +2125,7 @@ private:
 };
 
 QMailMessageHeaderPrivate::QMailMessageHeaderPrivate()
-    : QSharedData()
+    : QPrivateImplementationBase(this)
 {
 }
 
@@ -2227,25 +2193,9 @@ static QList<QByteArray> parseHeaders(const QByteArray& input)
 }
 
 QMailMessageHeaderPrivate::QMailMessageHeaderPrivate(const QByteArray& input)
-    : QSharedData(),
+    : QPrivateImplementationBase(this),
       _headerFields(parseHeaders(input))
 {
-}
-
-QMailMessageHeaderPrivate::QMailMessageHeaderPrivate(const QMailMessageHeaderPrivate& other)
-    : QSharedData(other)
-{
-    this->operator=(other);
-}
-
-QMailMessageHeaderPrivate::~QMailMessageHeaderPrivate()
-{
-}
-
-QMailMessageHeaderPrivate& QMailMessageHeaderPrivate::operator= (const QMailMessageHeaderPrivate& other)
-{
-    _headerFields = other._headerFields;
-    return *this;
 }
 
 static QByteArray fieldId(const QByteArray &id)
@@ -2372,6 +2322,8 @@ void QMailMessageHeaderPrivate::output(QDataStream& out, const QList<QByteArray>
     }
 }
 
+template class QPrivatelyImplemented<QMailMessageHeaderPrivate>;
+
 
 /*!
     \class QMailMessageHeader
@@ -2379,42 +2331,33 @@ void QMailMessageHeaderPrivate::output(QDataStream& out, const QList<QByteArray>
 */
 
 QMailMessageHeader::QMailMessageHeader()
+    : QPrivatelyImplemented<QMailMessageHeaderPrivate>(new QMailMessageHeaderPrivate())
 {
-    d = new QMailMessageHeaderPrivate();
 }
 
 QMailMessageHeader::QMailMessageHeader(const QByteArray& input)
-{
-    d = new QMailMessageHeaderPrivate(input);
-}
-
-QMailMessageHeader::QMailMessageHeader(const QMailMessageHeader& other)
-{
-    this->operator=(other);
-}
-
-QMailMessageHeader::~QMailMessageHeader()
+    : QPrivatelyImplemented<QMailMessageHeaderPrivate>(new QMailMessageHeaderPrivate(input))
 {
 }
 
 void QMailMessageHeader::update(const QByteArray &id, const QByteArray &content)
 {
-    d->update(id, content);
+    impl(this)->update(id, content);
 }
 
 void QMailMessageHeader::append(const QByteArray &id, const QByteArray &content)
 {
-    d->append(id, content);
+    impl(this)->append(id, content);
 }
 
 void QMailMessageHeader::remove(const QByteArray &id)
 {
-    d->remove(id);
+    impl(this)->remove(id);
 }
 
 QMailMessageHeaderField QMailMessageHeader::field(const QByteArray& id) const
 {
-    QList<QMailMessageHeaderField> result = d->fields(id, 1);
+    QList<QMailMessageHeaderField> result = impl(this)->fields(id, 1);
     if (result.count())
         return result[0];
 
@@ -2423,15 +2366,15 @@ QMailMessageHeaderField QMailMessageHeader::field(const QByteArray& id) const
 
 QList<QMailMessageHeaderField> QMailMessageHeader::fields(const QByteArray& id) const
 {
-    return d->fields(id);
+    return impl(this)->fields(id);
 }
 
 QList<const QByteArray*> QMailMessageHeader::fieldList() const
 {
     QList<const QByteArray*> result;
 
-    QList<QByteArray>::ConstIterator const end = d->_headerFields.end();
-    for (QList<QByteArray>::ConstIterator it = d->_headerFields.begin(); it != end; ++it)
+    QList<QByteArray>::ConstIterator const end = impl(this)->_headerFields.end();
+    for (QList<QByteArray>::ConstIterator it = impl(this)->_headerFields.begin(); it != end; ++it)
         result.append(&(*it));
 
     return result;
@@ -2439,24 +2382,15 @@ QList<const QByteArray*> QMailMessageHeader::fieldList() const
 
 void QMailMessageHeader::output(QDataStream& out, const QList<QByteArray>& exclusions, bool stripInternal) const
 {
-    d->output(out, exclusions, stripInternal);
-}
-
-QMailMessageHeader& QMailMessageHeader::operator= (const QMailMessageHeader& other)
-{
-    d = other.d;
-    return *this;
+    impl(this)->output(out, exclusions, stripInternal);
 }
 
 
 /* QMailMessageBody */
-class QMailMessageBodyPrivate : public QSharedData
+class QMailMessageBodyPrivate : public QPrivateImplementationBase
 {
 public:
     QMailMessageBodyPrivate();
-    QMailMessageBodyPrivate(const QMailMessageBodyPrivate& other);
-
-    QMailMessageBodyPrivate& operator=(const QMailMessageBodyPrivate& other);
 
     void fromFile(const QString& filename, const QMailMessageContentType& type, QMailMessageBody::TransferEncoding encoding, QMailMessageBody::EncodingStatus status);
     void fromStream(QDataStream& in, const QMailMessageContentType& type, QMailMessageBody::TransferEncoding encoding, QMailMessageBody::EncodingStatus status);
@@ -2488,27 +2422,10 @@ private:
 
 
 QMailMessageBodyPrivate::QMailMessageBodyPrivate()
-    : QSharedData()
+    : QPrivateImplementationBase(this)
 {
     // Default encoding
     _encoding = QMailMessageBody::SevenBit;
-}
-
-QMailMessageBodyPrivate::QMailMessageBodyPrivate(const QMailMessageBodyPrivate& other)
-    : QSharedData(other)
-{
-    this->operator=(other);
-}
-
-QMailMessageBodyPrivate& QMailMessageBodyPrivate::operator=(const QMailMessageBodyPrivate& other)
-{
-    _encoding = other._encoding; 
-    _bodyData = other._bodyData; 
-    _filename = other._filename; 
-    _type = other._type; 
-    _encoded = other._encoded; 
-
-    return *this;
 }
 
 void QMailMessageBodyPrivate::fromFile(const QString& file, const QMailMessageContentType& content, QMailMessageBody::TransferEncoding te, QMailMessageBody::EncodingStatus status)
@@ -2563,6 +2480,12 @@ void QMailMessageBodyPrivate::fromStream(QTextStream& in, const QMailMessageCont
 
             // Convert the unicode string to a byte-stream, via the nominated character set
             QString charset = _type.charset();
+
+            // If no character set is specified - treat the data as UTF-8; since it is
+            // textual data, it must have some character set...
+            if (charset.isEmpty())
+                charset = "UTF-8";
+
             codec->encode(out, in, charset);
         }
         _bodyData = LongString(encoded);
@@ -2781,6 +2704,9 @@ void QMailMessageBodyPrivate::output(QDataStream& out, bool includeAttachments) 
         toStream( out, QMailMessageBody::Encoded );
 }
 
+template class QPrivatelyImplemented<QMailMessageBodyPrivate>;
+
+
 /*!
     \class QMailMessageBody
     \mainclass
@@ -2815,6 +2741,11 @@ void QMailMessageBodyPrivate::output(QDataStream& out, bool includeAttachments) 
 
     \sa QMailMessagePart, QMailMessage, QTextCodec
 */    
+
+/*!
+    \typedef QMailMessageBody::ImplementationType
+    \internal
+*/
 
 /*!
     \enum QMailMessageBody::TransferEncoding
@@ -2855,28 +2786,8 @@ void QMailMessageBodyPrivate::output(QDataStream& out, bool includeAttachments) 
     Creates an instance of QMailMessageBody.
 */
 QMailMessageBody::QMailMessageBody()
+    : QPrivatelyImplemented<QMailMessageBodyPrivate>(new QMailMessageBodyPrivate())
 {
-    d = new QMailMessageBodyPrivate();
-}
-
-/*! \internal */
-QMailMessageBody::QMailMessageBody(const QMailMessageBody& other)
-{
-    this->operator=(other);
-}
-
-/*! 
-    Destroys an instance of QMailMessageBody.
-*/
-QMailMessageBody::~QMailMessageBody()
-{
-}
-
-/*! \internal */
-QMailMessageBody& QMailMessageBody::operator=(const QMailMessageBody& other)
-{
-    d = other.d;
-    return *this;
 }
 
 /*!
@@ -2900,7 +2811,7 @@ QMailMessageBody& QMailMessageBody::operator=(const QMailMessageBody& other)
 QMailMessageBody QMailMessageBody::fromFile(const QString& filename, const QMailMessageContentType& type, TransferEncoding encoding, EncodingStatus status)
 {
     QMailMessageBody body;
-    body.d->fromFile(filename, type, encoding, status);
+    body.impl<QMailMessageBodyPrivate>()->fromFile(filename, type, encoding, status);
     return body;
 }
 
@@ -2922,7 +2833,7 @@ QMailMessageBody QMailMessageBody::fromFile(const QString& filename, const QMail
 QMailMessageBody QMailMessageBody::fromStream(QDataStream& in, const QMailMessageContentType& type, TransferEncoding encoding, EncodingStatus status)
 {
     QMailMessageBody body;
-    body.d->fromStream(in, type, encoding, status);
+    body.impl<QMailMessageBodyPrivate>()->fromStream(in, type, encoding, status);
     return body;
 }
 
@@ -2946,7 +2857,7 @@ QMailMessageBody QMailMessageBody::fromData(const QByteArray& input, const QMail
     QMailMessageBody body;
     {
         QDataStream in(input);
-        body.d->fromStream(in, type, encoding, status);
+        body.impl<QMailMessageBodyPrivate>()->fromStream(in, type, encoding, status);
     }
     return body;
 }
@@ -2965,7 +2876,7 @@ QMailMessageBody QMailMessageBody::fromData(const QByteArray& input, const QMail
 QMailMessageBody QMailMessageBody::fromStream(QTextStream& in, const QMailMessageContentType& type, TransferEncoding encoding)
 {
     QMailMessageBody body;
-    body.d->fromStream(in, type, encoding);
+    body.impl<QMailMessageBodyPrivate>()->fromStream(in, type, encoding);
     return body;
 }
 
@@ -2985,7 +2896,7 @@ QMailMessageBody QMailMessageBody::fromData(const QString& input, const QMailMes
     QMailMessageBody body;
     {
         QTextStream in(const_cast<QString*>(&input), QIODevice::ReadOnly);
-        body.d->fromStream(in, type, encoding);
+        body.impl<QMailMessageBodyPrivate>()->fromStream(in, type, encoding);
     }
     return body;
 }
@@ -3005,7 +2916,7 @@ QMailMessageBody QMailMessageBody::fromData(const QString& input, const QMailMes
 */
 bool QMailMessageBody::toFile(const QString& filename, EncodingFormat format) const
 {
-    return d->toFile(filename, format);
+    return impl(this)->toFile(filename, format);
 }
 
 /*!
@@ -3020,7 +2931,7 @@ QByteArray QMailMessageBody::data(EncodingFormat format) const
     QByteArray result;
     {
         QDataStream out(&result, QIODevice::WriteOnly);
-        d->toStream(out, format);
+        impl(this)->toStream(out, format);
 		
     }
     return result;
@@ -3037,7 +2948,7 @@ QByteArray QMailMessageBody::data(EncodingFormat format) const
 */
 bool QMailMessageBody::toStream(QDataStream& out, EncodingFormat format) const
 {
-    return d->toStream(out, format);
+    return impl(this)->toStream(out, format);
 }
 
 /*!
@@ -3054,7 +2965,7 @@ QString QMailMessageBody::data() const
     QString result;
     {
         QTextStream out(&result, QIODevice::WriteOnly);
-        d->toStream(out);
+        impl(this)->toStream(out);
     }
     return result;
 }
@@ -3071,7 +2982,7 @@ QString QMailMessageBody::data() const
 */
 bool QMailMessageBody::toStream(QTextStream& out) const
 {
-    return d->toStream(out);
+    return impl(this)->toStream(out);
 }
 
 /*!
@@ -3079,7 +2990,7 @@ bool QMailMessageBody::toStream(QTextStream& out) const
 */
 QMailMessageContentType QMailMessageBody::contentType() const
 {
-    return d->contentType();
+    return impl(this)->contentType();
 }
 
 /*!
@@ -3087,32 +2998,29 @@ QMailMessageContentType QMailMessageBody::contentType() const
 */
 QMailMessageBody::TransferEncoding QMailMessageBody::transferEncoding() const
 {
-    return d->transferEncoding();
+    return impl(this)->transferEncoding();
 }
 
 /*! \internal */
 uint QMailMessageBody::indicativeSize() const
 {
-    return d->indicativeSize();
+    return impl(this)->indicativeSize();
 }
 
 /*! \internal */
 void QMailMessageBody::output(QDataStream& out, bool includeAttachments) const
 {
-    d->output(out, includeAttachments);
+    impl(this)->output(out, includeAttachments);
 }
 
 
 /* QMailMessagePartContainer */
-class QMailMessagePartContainerPrivate : public QSharedData
+class QMailMessagePartContainerPrivate : public QPrivateImplementationBase
 {
 public:
-    QMailMessagePartContainerPrivate();
-    QMailMessagePartContainerPrivate(const QMailMessagePartContainerPrivate& other);
-    virtual ~QMailMessagePartContainerPrivate();
+    template<typename Derived>
+    QMailMessagePartContainerPrivate(Derived* p);
 
-    QMailMessagePartContainerPrivate& operator=(const QMailMessagePartContainerPrivate& other);
-    
     void setHeader(const QMailMessageHeader& header, const QMailMessagePartContainerPrivate* parent = 0);
 
     QByteArray headerField( const QByteArray &headerName ) const;
@@ -3181,35 +3089,13 @@ protected:
 // Few content messages will contain a sequence of unmatched braces?
 static const QByteArray uninitialisedBoundary = "[}<}]";
 
-QMailMessagePartContainerPrivate::QMailMessagePartContainerPrivate()
-    : QSharedData()
+template<typename Derived>
+QMailMessagePartContainerPrivate::QMailMessagePartContainerPrivate(Derived* p)
+    : QPrivateImplementationBase(p)
 {
     _multipartType = QMailMessagePartContainer::MultipartNone;
     _hasBody = false;
     _dirty = false;
-}
-
-QMailMessagePartContainerPrivate::QMailMessagePartContainerPrivate(const QMailMessagePartContainerPrivate& other)
-    : QSharedData(other)
-{
-    this->operator=(other);
-}
-
-QMailMessagePartContainerPrivate::~QMailMessagePartContainerPrivate()
-{
-}
-
-QMailMessagePartContainerPrivate& QMailMessagePartContainerPrivate::operator=(const QMailMessagePartContainerPrivate& other)
-{
-    _messageParts = other._messageParts;
-    _multipartType = other._multipartType;
-    _boundary = other._boundary;
-    _header = other._header;
-    _body = other._body;
-    _hasBody = other._hasBody;
-    _dirty = other._dirty;
-
-    return *this;
 }
 
 void QMailMessagePartContainerPrivate::setHeader(const QMailMessageHeader& partHeader, const QMailMessagePartContainerPrivate* parent)
@@ -3711,7 +3597,7 @@ bool QMailMessagePartContainerPrivate::dirty() const
         return true;
 
     foreach (const QMailMessagePart& part, _messageParts)
-        if (part.partContainerPrivate()->dirty())
+        if (part.impl<const QMailMessagePartContainerPrivate>()->dirty())
             return true;
 
     return false;
@@ -3725,9 +3611,11 @@ void QMailMessagePartContainerPrivate::setDirty(bool value, bool recursive)
     {
         const QList<QMailMessagePart>::Iterator end = _messageParts.end();
         for (QList<QMailMessagePart>::Iterator it = _messageParts.begin(); it != end; ++it)
-            (*it).partContainerPrivate()->setDirty(value, true);
+            (*it).impl<QMailMessagePartContainerPrivate>()->setDirty(value, true);
     }
 }
+
+template class QPrivatelyImplemented<QMailMessagePartContainerPrivate>;
 
 
 /*!
@@ -3758,6 +3646,11 @@ void QMailMessagePartContainerPrivate::setDirty(bool value, bool recursive)
 */    
 
 /*!
+    \typedef QMailMessagePartContainer::ImplementationType
+    \internal
+*/
+
+/*!
     \enum QMailMessagePartContainer::MultipartType
 
     This enumerated type is used to describe the multipart encoding of a message or message part.
@@ -3775,19 +3668,24 @@ void QMailMessagePartContainerPrivate::setDirty(bool value, bool recursive)
 */
 
 /*!
-    Destroys a QMailMessagePartContainer object.
+    \fn QMailMessagePartContainer::QMailMessagePartContainer(Subclass*)
+
+    Constructs an empty part container object, in the space allocated 
+    within the subclass instance at \a p.
 */
-QMailMessagePartContainer::~QMailMessagePartContainer()
+template<typename Subclass>
+QMailMessagePartContainer::QMailMessagePartContainer(Subclass* p)
+    : QPrivatelyImplemented<QMailMessagePartContainerPrivate>(p)
 {
 }
 
 /*! 
-    This should only be exposed if QMailMessageHeader is itslef...
+    This should only be exposed if QMailMessageHeader is itself...
     \internal
 */
 void QMailMessagePartContainer::setHeader(const QMailMessageHeader& partHeader, const QMailMessagePartContainerPrivate* parent)
 {
-    partContainerPrivate()->setHeader(partHeader, parent);
+    impl(this)->setHeader(partHeader, parent);
 }
 
 /*!
@@ -3795,7 +3693,7 @@ void QMailMessagePartContainer::setHeader(const QMailMessageHeader& partHeader, 
 */  
 uint QMailMessagePartContainer::partCount() const
 {
-    return partContainerPrivate()->_messageParts.count();
+    return impl(this)->_messageParts.count();
 }
 
 /*!
@@ -3803,7 +3701,7 @@ uint QMailMessagePartContainer::partCount() const
 */
 void QMailMessagePartContainer::appendPart(const QMailMessagePart &part)
 {
-    partContainerPrivate()->appendPart( part );
+    impl(this)->appendPart( part );
 }
 
 /*!
@@ -3811,7 +3709,7 @@ void QMailMessagePartContainer::appendPart(const QMailMessagePart &part)
 */
 void QMailMessagePartContainer::prependPart(const QMailMessagePart &part)
 {
-    partContainerPrivate()->prependPart( part );
+    impl(this)->prependPart( part );
 }
 
 /*!
@@ -3822,7 +3720,7 @@ void QMailMessagePartContainer::prependPart(const QMailMessagePart &part)
 */
 const QMailMessagePart& QMailMessagePartContainer::partAt(uint pos) const
 {
-    return partContainerPrivate()->_messageParts[pos];
+    return impl(this)->_messageParts[pos];
 }
 
 /*!
@@ -3833,7 +3731,7 @@ const QMailMessagePart& QMailMessagePartContainer::partAt(uint pos) const
 */
 QMailMessagePart& QMailMessagePartContainer::partAt(uint pos)
 {
-    return partContainerPrivate()->_messageParts[pos];
+    return impl(this)->_messageParts[pos];
 }
 
 /*!
@@ -3841,7 +3739,7 @@ QMailMessagePart& QMailMessagePartContainer::partAt(uint pos)
 */
 void QMailMessagePartContainer::clearParts()
 {
-    partContainerPrivate()->clear();
+    impl(this)->clear();
 }
 
 /*!
@@ -3850,7 +3748,7 @@ void QMailMessagePartContainer::clearParts()
 */  
 QMailMessagePartContainer::MultipartType QMailMessagePartContainer::multipartType() const
 {
-    return partContainerPrivate()->_multipartType;
+    return impl(this)->_multipartType;
 }
 
 /*!
@@ -3858,7 +3756,7 @@ QMailMessagePartContainer::MultipartType QMailMessagePartContainer::multipartTyp
 */
 void QMailMessagePartContainer::setMultipartType(QMailMessagePartContainer::MultipartType type)
 {
-    partContainerPrivate()->setMultipartType(type);
+    impl(this)->setMultipartType(type);
 }
 
 /*!
@@ -3866,7 +3764,7 @@ void QMailMessagePartContainer::setMultipartType(QMailMessagePartContainer::Mult
 */
 QByteArray QMailMessagePartContainer::boundary() const
 {
-    return partContainerPrivate()->boundary();
+    return impl(this)->boundary();
 }
 
 /*!
@@ -3874,7 +3772,7 @@ QByteArray QMailMessagePartContainer::boundary() const
 */
 void QMailMessagePartContainer::setBoundary(const QByteArray& text)
 {
-    partContainerPrivate()->setBoundary(text);
+    impl(this)->setBoundary(text);
 }
 
 /*!
@@ -3882,7 +3780,7 @@ void QMailMessagePartContainer::setBoundary(const QByteArray& text)
 */
 void QMailMessagePartContainer::setBody(const QMailMessageBody& body)
 {
-    partContainerPrivate()->setBody(body);
+    impl(this)->setBody(body);
 }
 
 /*!
@@ -3890,7 +3788,7 @@ void QMailMessagePartContainer::setBody(const QMailMessageBody& body)
 */
 QMailMessageBody QMailMessagePartContainer::body() const
 {
-    return partContainerPrivate()->body();
+    return impl(this)->body();
 }
 
 /*!
@@ -3898,7 +3796,7 @@ QMailMessageBody QMailMessagePartContainer::body() const
 */
 bool QMailMessagePartContainer::hasBody() const
 {
-    return partContainerPrivate()->hasBody();
+    return impl(this)->hasBody();
 }
 
 /*!
@@ -3910,7 +3808,7 @@ bool QMailMessagePartContainer::hasBody() const
 */
 QMailMessageContentType QMailMessagePartContainer::contentType() const
 {
-    return partContainerPrivate()->contentType();
+    return impl(this)->contentType();
 }
 
 /*!
@@ -3923,17 +3821,15 @@ QMailMessageContentType QMailMessagePartContainer::contentType() const
 */
 QMailMessageBody::TransferEncoding QMailMessagePartContainer::transferEncoding() const
 {
-    return partContainerPrivate()->transferEncoding();
+    return impl(this)->transferEncoding();
 }
-
-
 
 /*!
     Returns the text of the first header field with the given \a id.
 */
 QString QMailMessagePartContainer::headerFieldText( const QString &id ) const
 {
-    return partContainerPrivate()->headerFieldText(id);
+    return impl(this)->headerFieldText(id);
 }
 
 /*!
@@ -3945,7 +3841,7 @@ QString QMailMessagePartContainer::headerFieldText( const QString &id ) const
 QMailMessageHeaderField QMailMessagePartContainer::headerField( const QString &id, QMailMessageHeaderField::FieldType fieldType ) const
 {
     QByteArray plainId( to7BitAscii(id) );
-    const QByteArray& content = partContainerPrivate()->headerField( plainId );
+    const QByteArray& content = impl(this)->headerField( plainId );
     if ( !content.isEmpty() )
         return QMailMessageHeaderField( plainId, content, fieldType );
 
@@ -3959,7 +3855,7 @@ QStringList QMailMessagePartContainer::headerFieldsText( const QString &id ) con
 {
     QStringList result;
 
-    foreach (const QByteArray& item, partContainerPrivate()->headerFields( to7BitAscii(id) ))
+    foreach (const QByteArray& item, impl(this)->headerFields( to7BitAscii(id) ))
         result.append(decodedContent( id, item ));
 
     return result;
@@ -3976,7 +3872,7 @@ QList<QMailMessageHeaderField> QMailMessagePartContainer::headerFields( const QS
     QList<QMailMessageHeaderField> result;
 
     QByteArray plainId( to7BitAscii(id) );
-    foreach (const QByteArray& content, partContainerPrivate()->headerFields( plainId ))
+    foreach (const QByteArray& content, impl(this)->headerFields( plainId ))
         result.append( QMailMessageHeaderField( plainId, content, fieldType ) );
 
     return result;
@@ -3990,7 +3886,7 @@ QList<QMailMessageHeaderField> QMailMessagePartContainer::headerFields() const
 {
     QList<QMailMessageHeaderField> result;
 
-    foreach (const QByteArray& content, partContainerPrivate()->headerFields())
+    foreach (const QByteArray& content, impl(this)->headerFields())
         result.append( QMailMessageHeaderField( content, QMailMessageHeaderField::UnstructuredField) );
 
     return result;
@@ -4011,10 +3907,19 @@ QList<QMailMessageHeaderField> QMailMessagePartContainer::headerFields() const
 */
 void QMailMessagePartContainer::setHeaderField( const QString& id, const QString& value )
 {
-    int index = value.indexOf(':');
-    QString content(index == -1 ? value : value.mid(index + 1));
+    QByteArray plainId( to7BitAscii(id) );
 
-    partContainerPrivate()->updateHeaderField( to7BitAscii(id), content );
+    int index = value.indexOf(':');
+    if (index != -1 ) {
+        // Is the header field id replicated in the value?
+        QString prefix(value.left(index));
+        if ( insensitiveEqual( to7BitAscii(prefix.trimmed()), plainId.trimmed() ) ) {
+            impl(this)->updateHeaderField( plainId, value.mid(index + 1) );
+            return;
+        }
+    }
+
+    impl(this)->updateHeaderField( plainId, value );
 }
 
 /*!
@@ -4023,7 +3928,7 @@ void QMailMessagePartContainer::setHeaderField( const QString& id, const QString
 */
 void QMailMessagePartContainer::setHeaderField( const QMailMessageHeaderField& field )
 {
-    partContainerPrivate()->updateHeaderField( field.id(), field.toString(false, false) );
+    impl(this)->updateHeaderField( field.id(), field.toString(false, false) );
 }
 
 /*!
@@ -4042,10 +3947,19 @@ void QMailMessagePartContainer::setHeaderField( const QMailMessageHeaderField& f
 */
 void QMailMessagePartContainer::appendHeaderField( const QString& id, const QString& value )
 {
-    int index = value.indexOf(':');
-    QString content(index == -1 ? value : value.mid(index + 1));
+    QByteArray plainId( to7BitAscii(id) );
 
-    partContainerPrivate()->appendHeaderField( to7BitAscii(id), content );
+    int index = value.indexOf(':');
+    if (index != -1 ) {
+        // Is the header field id replicated in the value?
+        QString prefix(value.left(index));
+        if ( insensitiveEqual( to7BitAscii(prefix.trimmed()), plainId.trimmed() ) ) {
+            impl(this)->appendHeaderField( plainId, value.mid(index + 1) );
+            return;
+        }
+    }
+
+    impl(this)->appendHeaderField( plainId, value );
 }
 
 /*!
@@ -4054,7 +3968,7 @@ void QMailMessagePartContainer::appendHeaderField( const QString& id, const QStr
 */
 void QMailMessagePartContainer::appendHeaderField( const QMailMessageHeaderField& field )
 {
-    partContainerPrivate()->appendHeaderField( field.id(), field.toString(false, false) );
+    impl(this)->appendHeaderField( field.id(), field.toString(false, false) );
 }
 
 /*!
@@ -4062,25 +3976,25 @@ void QMailMessagePartContainer::appendHeaderField( const QMailMessageHeaderField
 */
 void QMailMessagePartContainer::removeHeaderField( const QString& id )
 {
-    partContainerPrivate()->removeHeaderField( to7BitAscii(id) );
+    impl(this)->removeHeaderField( to7BitAscii(id) );
 }
 
 /*! \internal */
 uint QMailMessagePartContainer::indicativeSize() const
 {
-    return partContainerPrivate()->indicativeSize();
+    return impl(this)->indicativeSize();
 }
 
 /*! \internal */
 void QMailMessagePartContainer::outputParts(QDataStream& out, bool includePreamble, bool includeAttachments, bool stripInternal) const
 {
-    partContainerPrivate()->outputParts(out, includePreamble, includeAttachments, stripInternal);
+    impl(this)->outputParts(out, includePreamble, includeAttachments, stripInternal);
 }
 
 /*! \internal */
 void QMailMessagePartContainer::outputBody( QDataStream& out, bool includeAttachments ) const
 {
-    partContainerPrivate()->outputBody( out, includeAttachments );
+    impl(this)->outputBody( out, includeAttachments );
 }
 
 
@@ -4089,9 +4003,6 @@ class QMailMessagePartPrivate : public QMailMessagePartContainerPrivate
 {
 public:
     QMailMessagePartPrivate();
-    QMailMessagePartPrivate(const QMailMessagePartPrivate& other);
-
-    QMailMessagePartPrivate& operator=(const QMailMessagePartPrivate& other);
 
     QString attachmentPath() const;
     
@@ -4108,22 +4019,9 @@ private:
 };
 
 QMailMessagePartPrivate::QMailMessagePartPrivate()
-    : QMailMessagePartContainerPrivate(),
+    : QMailMessagePartContainerPrivate(this),
       _partNumber(-1)
 {
-}
-
-QMailMessagePartPrivate::QMailMessagePartPrivate(const QMailMessagePartPrivate& other)
-    : QMailMessagePartContainerPrivate(other)
-{
-    this->operator=(other);
-}
-
-QMailMessagePartPrivate& QMailMessagePartPrivate::operator=(const QMailMessagePartPrivate& other)
-{
-    QMailMessagePartContainerPrivate::operator=(other);
-
-    return *this;
 }
 
 QString QMailMessagePartPrivate::attachmentPath() const
@@ -4167,7 +4065,15 @@ void QMailMessagePartPrivate::output(QDataStream& out, bool includePreamble, boo
     out << DataString('\n');
 
     if ( hasBody() ) {
-        outputBody( out, includeAttachments || attachmentPath().isEmpty());
+        QString attPath( attachmentPath() );
+
+        bool attachmentData( includeAttachments || attPath.isEmpty() );
+        if ( attachmentData && !stripInternal && !attPath.isEmpty() ) {
+            // We are preserving the link to the file, so omit the data
+            attachmentData = false;
+        }
+
+        outputBody( out, attachmentData );
     } else {
         outputParts( out, includePreamble, includeAttachments, stripInternal );
     }
@@ -4175,8 +4081,10 @@ void QMailMessagePartPrivate::output(QDataStream& out, bool includePreamble, boo
 
 QMailMessagePartContainerPrivate* QMailMessagePartContainerPrivate::privatePointer(QMailMessagePart& part)
 {
+    /* Nasty workaround required to access this data without detaching a copy... */
     return const_cast<QMailMessagePartPrivate*>(static_cast<const QMailMessagePartPrivate*>(part.d.constData()));
 }
+
 
 //===========================================================================
 /*      Mail Message Part   */
@@ -4202,35 +4110,16 @@ QMailMessagePartContainerPrivate* QMailMessagePartContainerPrivate::privatePoint
 */
 
 /*!
+    \typedef QMailMessagePart::ImplementationType
+    \internal
+*/
+
+/*!
     Constructs an empty message part object.
 */
 QMailMessagePart::QMailMessagePart()
-    : QMailMessagePartContainer()
+    : QMailMessagePartContainer(new QMailMessagePartPrivate)
 {
-    d = new QMailMessagePartPrivate();
-}
-
-/*! \internal */
-QMailMessagePart::QMailMessagePart(const QMailMessagePart &other)
-    : QMailMessagePartContainer(other)
-{
-    this->operator=(other);
-}
-
-/*!
-    Destructor; called immediately before the object is deleted.
-*/
-QMailMessagePart::~QMailMessagePart()
-{
-}
-
-/*! \internal */
-const QMailMessagePart& QMailMessagePart::operator= (const QMailMessagePart& other)
-{
-    QMailMessagePartContainer::operator=(other);
-
-    d = other.d;
-    return *this;
 }
 
 /*!
@@ -4412,7 +4301,7 @@ QString QMailMessagePart::contentLanguage() const
 */
 void QMailMessagePart::setPartNumber(int partNumber)
 {
-    d->_partNumber = partNumber;
+    impl(this)->_partNumber = partNumber;
 }
 
 /*!
@@ -4420,7 +4309,7 @@ void QMailMessagePart::setPartNumber(int partNumber)
 */
 int QMailMessagePart::partNumber() const
 {
-    return d->_partNumber;
+    return impl(this)->_partNumber;
 }
 
 /*!
@@ -4452,8 +4341,8 @@ QString QMailMessagePart::displayName() const
         id = contentID();
 
     if (id.isEmpty()) {
-        if (d->_partNumber != -1) {
-            id = QString::number(d->_partNumber) + " ";
+        if (impl(this)->_partNumber != -1) {
+            id = QString::number(impl(this)->_partNumber) + " ";
         }
         id += contentType().content();
     }
@@ -4479,7 +4368,7 @@ QString QMailMessagePart::identifier() const
         id = contentType().name();
 
     if (id.isEmpty())
-        id = QString::number(d->_partNumber);
+        id = QString::number(impl(this)->_partNumber);
 
     return id;
 }
@@ -4495,8 +4384,7 @@ bool QMailMessagePart::detachAttachment(const QString& path)
 {
     //check if the part has already been detached
 
-    if(!attachmentPath().isEmpty())
-    {
+    if (!attachmentPath().isEmpty()) {
         qWarning() << "Attachment already detached";
         return false;
     }
@@ -4510,12 +4398,23 @@ bool QMailMessagePart::detachAttachment(const QString& path)
                 attachmentName.remove((last - first), 1);
     }
 
-    QString filepath = path + attachmentName;
-    while (QFile::exists(filepath))
-        filepath = path + attachmentName + "."  + d->randomString(5);
+    // Put the file into a qtmail subdirectory, to avoid potential clashes
+    QString directory(path);
+    if (!directory.endsWith("/"))
+        directory.append("/");
+    directory.append("qtmail");
 
-    if(!body().toFile(filepath, QMailMessageBody::Decoded))
-    {
+    QString filepath = directory + "/" + attachmentName;
+    while (QFile::exists(filepath))
+        filepath = directory + "/" + attachmentName + "." + impl(this)->randomString(5);
+
+    if (!QDir(directory).exists()) {
+        if (!QDir(path).mkdir("qtmail")) {
+            qWarning() << "Could not create qtmail directory to save file " << filepath;
+            return false;
+        }
+    }
+    if (!body().toFile(filepath, QMailMessageBody::Decoded)) {
         qWarning() << "Could not save attachment data to file " << filepath;
         return false;
     }
@@ -4533,12 +4432,16 @@ bool QMailMessagePart::detachAttachment(const QString& path)
 
 QString QMailMessagePart::attachmentPath() const
 {
-    return d->attachmentPath();
+    return impl(this)->attachmentPath();
 }
 
 /*! internal */
 void QMailMessagePart::setAttachmentPath(const QString& path)
 {
+    // Quote the path, in case it contains illegal characters
+    QString quoted(path);
+    quoted.prepend('"').append('"');
+
     if(!attachmentPath().isEmpty())
         setHeaderField(QMailMessagePartPrivate::attachmentField(),path);
     else 
@@ -4546,21 +4449,9 @@ void QMailMessagePart::setAttachmentPath(const QString& path)
 }
 
 /*! \internal */
-QMailMessagePartContainerPrivate* QMailMessagePart::partContainerPrivate()
-{
-    return d;
-}
-
-/*! \internal */
-const QMailMessagePartContainerPrivate* QMailMessagePart::partContainerPrivate() const
-{
-    return d;
-}
-
-/*! \internal */
 void QMailMessagePart::output(QDataStream& out, bool includeAttachments, bool stripInternal) const
 {
-    return d->output(out, false, includeAttachments, stripInternal);
+    return impl(this)->output(out, false, includeAttachments, stripInternal);
 }
 
 
@@ -4569,10 +4460,6 @@ class QMailMessagePrivate : public QMailMessagePartContainerPrivate
 {
 public:
     QMailMessagePrivate();
-    QMailMessagePrivate(const QMailMessagePrivate& other);
-    ~QMailMessagePrivate();
-
-    const QMailMessagePrivate& operator=(const QMailMessagePrivate& other);
 
     void fromRfc2822(const LongString &ls);
     void toRfc2822(QDataStream& out, QMailMessage::EncodingFormat format) const;
@@ -4625,7 +4512,7 @@ private:
 };
 
 QMailMessagePrivate::QMailMessagePrivate()
-    : QMailMessagePartContainerPrivate()
+    : QMailMessagePartContainerPrivate(this)
 {
     _size = 0;
     _status = QMailMessage::Status(0);
@@ -4633,35 +4520,6 @@ QMailMessagePrivate::QMailMessagePrivate()
     _id = QMailId();
     _parentFolderId = QMailId();
     _metadataDirty = false;
-}
-
-QMailMessagePrivate::QMailMessagePrivate(const QMailMessagePrivate& other)
-    : QMailMessagePartContainerPrivate(other)
-{
-    this->operator=(other);
-}
-
-QMailMessagePrivate::~QMailMessagePrivate()
-{
-}
-
-const QMailMessagePrivate& QMailMessagePrivate::operator= (const QMailMessagePrivate& other)
-{
-    QMailMessagePartContainerPrivate::operator=(other);
-
-    _rawMessageBody = other._rawMessageBody;
-
-    _status = other._status;
-    _fromAccount = other._fromAccount;
-    _fromMailbox = other._fromMailbox;
-    _serverUid = other._serverUid;
-    _size = other._size;
-    _messageType = other._messageType;
-    _id = other._id;
-    _parentFolderId = other._parentFolderId;
-    _metadataDirty = other._metadataDirty;
-
-    return *this;
 }
 
 void QMailMessagePrivate::fromRfc2822(const LongString &ls)
@@ -4827,8 +4685,19 @@ void QMailMessagePrivate::setSize(uint size)
 
 uint QMailMessagePrivate::indicativeSize() const
 {
+    uint size = 0;
+
+    if (_status & QMailMessage::Incoming) 
+    {
+        size = 1 + (_size / QMailMessageBodyPrivate::IndicativeSizeUnit);
+    }
+    else if (_status & QMailMessage::Outgoing) 
+    {
+        size = QMailMessagePartContainerPrivate::indicativeSize();
+    }
+
     // Count the message header as one size unit
-    return (1 + QMailMessagePartContainerPrivate::indicativeSize());
+    return (size + 1);
 }
 
 void QMailMessagePrivate::toRfc2822(QDataStream& out, QMailMessage::EncodingFormat format) const
@@ -4840,14 +4709,12 @@ void QMailMessagePrivate::outputMessage(QDataStream& out, QMailMessage::Encoding
 {
     bool isOutgoing = (_status & (QMailMessage::Outgoing | QMailMessage::Sent));
 
-    bool addTimeStamp = (format != QMailMessage::IdentityFormat);
+    bool addTimeStamp = ((format != QMailMessage::IdentityFormat) && (format != QMailMessage::SerializationFormat));
     bool addContentHeaders = ((format != QMailMessage::IdentityFormat) && 
                               ((format != QMailMessage::StorageFormat) || isOutgoing || _rawMessageBody.isEmpty()));
     bool includeBcc = (format != QMailMessage::TransmissionFormat);
     bool includePreamble = (format == QMailMessage::TransmissionFormat);
-    bool includeAttachments = ((format != QMailMessage::HeaderOnlyFormat && format != QMailMessage::StorageFormat));
-    
-
+    bool includeAttachments = ((format != QMailMessage::HeaderOnlyFormat) && (format != QMailMessage::StorageFormat));
     bool stripInternal = ((format == QMailMessage::TransmissionFormat) || (format == QMailMessage::IdentityFormat));
 
     if (_messageParts.count() && boundary().isEmpty())
@@ -4955,6 +4822,11 @@ void QMailMessagePrivate::changesCommitted()
 */    
     
 /*!
+    \typedef QMailMessage::ImplementationType
+    \internal
+*/
+
+/*!
     \enum QMailMessage::MessageStatusFlag
     
     This enum type is used to describe the state and type of a message.
@@ -5002,6 +4874,7 @@ void QMailMessagePrivate::changesCommitted()
     \value StorageFormat        The message is serialized to RFC 2822 form, without attachments.
     \value TransmissionFormat   The entire message is serialized to RFC 2822 form, with additional header fields added if necessary, and 'bcc' header field omitted.
     \value IdentityFormat       The entire message is serialized to RFC 2822 form, with only Content-Type and Content-Transfer-Encoding headers added where required.
+    \value SerializationFormat  The entire message is serialized to RFC 2822 form for internal use only.
 */
 
 /*!
@@ -5014,6 +4887,23 @@ void QMailMessagePrivate::changesCommitted()
     \value HeaderAndBody Load the message header data and body data. 
 */
 
+/*!
+    \enum QMailMessage::AttachmentsAction
+
+    This enum type is used to describe the action that should be performed on 
+    each message attachment.
+
+    \value LinkToAttachments        Add a part to the message containing a link to the 
+                                    supplied attachment. If the document is removed, the 
+                                    message will no longer have access to the data.
+    \value CopyAttachments          Add a part to the message containing a copy of the
+                                    data in the supplied attachment. If the document is 
+                                    removed, the message will still contain the data.
+    \value CopyAndDeleteAttachments Add a part to the message containing a copy of the
+                                    data in the supplied attachment, then delete the
+                                    document from which the data was copied.
+*/
+
 
 
 const char QMailMessage::CarriageReturn = '\015';
@@ -5024,16 +4914,16 @@ const char* QMailMessage::CRLF = "\015\012";
     Constructs an empty message object.
 */
 QMailMessage::QMailMessage()
-    : QMailMessagePartContainer()
+    : QMailMessagePartContainer(new QMailMessagePrivate())
 {
-    d = new QMailMessagePrivate();
 }
 
 /*!
-  	Constructs a message object from data stored in the message store with QMailId \a id,
-   	and mail data selection defined by \a selection.
+    Constructs a message object from data stored in the message store with QMailId \a id,
+    and mail data selection defined by \a selection.
 */
-QMailMessage::QMailMessage(const QMailId& id, const MailDataSelection& selection)
+QMailMessage::QMailMessage(const QMailId& id, MailDataSelection selection)
+    : QMailMessagePartContainer(new QMailMessagePrivate())
 {
     if(selection == Header)
         *this = QMailStore::instance()->messageHeader(id);
@@ -5041,27 +4931,17 @@ QMailMessage::QMailMessage(const QMailId& id, const MailDataSelection& selection
         *this = QMailStore::instance()->message(id);
 }
 
-/*! \internal */
-QMailMessage::QMailMessage(const QMailMessage& other)
-    : QMailMessagePartContainer(other)
-{
-    this->operator=(other);
-}
-
 /*!
-    Destroys the mail message object.
+    Constructs a message object from data stored in the message store with the unique 
+    identifier \a uid from the account \a account, and mail data selection defined by \a selection.
 */
-QMailMessage::~QMailMessage()
+QMailMessage::QMailMessage(const QString& uid, const QString& account, MailDataSelection selection)
+    : QMailMessagePartContainer(new QMailMessagePrivate())
 {
-}
-
-/*! \internal */
-const QMailMessage& QMailMessage::operator= (const QMailMessage& other)
-{
-    QMailMessagePartContainer::operator=(other);
-    
-    d = other.d;
-    return *this;
+    if(selection == Header)
+        *this = QMailStore::instance()->messageHeader(uid, account);
+    else
+        *this = QMailStore::instance()->message(uid, account);
 }
 
 /*!
@@ -5070,7 +4950,7 @@ const QMailMessage& QMailMessage::operator= (const QMailMessage& other)
 QMailMessage QMailMessage::fromRfc2822(const QByteArray &byteArray)
 {
     QMailMessage mail;
-    mail.d->fromRfc2822( LongString( byteArray ) );
+    mail.impl<QMailMessagePrivate>()->fromRfc2822( LongString( byteArray ) );
     return mail;
 }
 
@@ -5080,7 +4960,7 @@ QMailMessage QMailMessage::fromRfc2822(const QByteArray &byteArray)
 QMailMessage QMailMessage::fromRfc2822File(const QString& fileName)
 {
     QMailMessage mail;
-    mail.d->fromRfc2822( LongString( fileName ) );
+    mail.impl<QMailMessagePrivate>()->fromRfc2822( LongString( fileName ) );
     return mail;
 }
 
@@ -5108,7 +4988,7 @@ void QMailMessage::setMessageType(QMailMessage::MessageType type)
             return;
     }
 
-    d->setMessageType(type);
+    impl(this)->setMessageType(type);
 }
 
 /*!
@@ -5118,7 +4998,7 @@ void QMailMessage::setMessageType(QMailMessage::MessageType type)
 */
 QMailMessage::MessageType QMailMessage::messageType() const
 {
-    if (d->_messageType == None)
+    if (impl(this)->_messageType == None)
     {
         if ( headerFieldText("X-Mms-Message-Type").trimmed().length() ) {
             return QMailMessage::Mms;
@@ -5133,7 +5013,7 @@ QMailMessage::MessageType QMailMessage::messageType() const
         }
     }
 
-    return d->_messageType;
+    return impl(this)->_messageType;
 }
 
 /*!
@@ -5141,7 +5021,7 @@ QMailMessage::MessageType QMailMessage::messageType() const
 */
 QMailId QMailMessage::parentFolderId() const
 {
-    return d->_parentFolderId;
+    return impl(this)->_parentFolderId;
 }
 
 /*!
@@ -5149,7 +5029,7 @@ QMailId QMailMessage::parentFolderId() const
 */
 void QMailMessage::setParentFolderId(QMailId id)
 {
-    d->setParentFolderId(id);
+    impl(this)->setParentFolderId(id);
 }
 
 /*!
@@ -5171,7 +5051,7 @@ QByteArray QMailMessage::toRfc2822(EncodingFormat format) const
 */
 void QMailMessage::toRfc2822(QDataStream& out, EncodingFormat format) const
 {
-    d->toRfc2822(out, format);
+    impl(this)->toRfc2822(out, format);
 }
 
 /*!
@@ -5179,7 +5059,7 @@ void QMailMessage::toRfc2822(QDataStream& out, EncodingFormat format) const
 */
 QMailId QMailMessage::id() const
 {
-    return d->_id;
+    return impl(this)->_id;
 }
 
 /*!
@@ -5188,7 +5068,7 @@ QMailId QMailMessage::id() const
 */
 void QMailMessage::setId(QMailId id)
 {
-    d->setId(id);
+    impl(this)->setId(id);
 }
 
 /*!
@@ -5204,7 +5084,7 @@ QMailAddress QMailMessage::from() const
 */
 void QMailMessage::setFrom(const QMailAddress &from)
 {
-    d->setFrom(from.toString());
+    impl(this)->setFrom(from.toString());
 }
 
 /*!
@@ -5220,7 +5100,7 @@ QString QMailMessage::subject() const
 */
 void QMailMessage::setSubject(const QString &subject)
 {
-    d->updateHeaderField("Subject:", subject);
+    impl(this)->updateHeaderField("Subject:", subject);
 }
 
 /*!
@@ -5237,7 +5117,7 @@ QMailTimeStamp QMailMessage::date() const
 */
 void QMailMessage::setDate(const QMailTimeStamp &timeStamp)
 {
-    d->updateHeaderField("Date:", to7BitAscii(timeStamp.toString()));
+    impl(this)->updateHeaderField("Date:", to7BitAscii(timeStamp.toString()));
 }
 
 /*! 
@@ -5257,7 +5137,7 @@ QList<QMailAddress> QMailMessage::to() const
 */
 void QMailMessage::setTo(const QList<QMailAddress>& toList)
 {
-    d->setTo(QMailAddress::toStringList(toList));
+    impl(this)->setTo(QMailAddress::toStringList(toList));
 }
 
 /*! 
@@ -5287,7 +5167,7 @@ QList<QMailAddress> QMailMessage::cc() const
 */  
 void QMailMessage::setCc(const QList<QMailAddress>& ccList)
 {
-    d->setCc(QMailAddress::toStringList(ccList));
+    impl(this)->setCc(QMailAddress::toStringList(ccList));
 }
 
 /*!
@@ -5307,7 +5187,7 @@ QList<QMailAddress> QMailMessage::bcc() const
 */  
 void QMailMessage::setBcc(const QList<QMailAddress>& bccList)
 {
-    d->setBcc(QMailAddress::toStringList(bccList));
+    impl(this)->setBcc(QMailAddress::toStringList(bccList));
 }
 
 /*!
@@ -5323,7 +5203,7 @@ QMailAddress QMailMessage::replyTo() const
 */  
 void QMailMessage::setReplyTo(const QMailAddress &address)
 {
-    d->setReplyTo(address.toString());
+    impl(this)->setReplyTo(address.toString());
 }
 
 /*!
@@ -5339,7 +5219,7 @@ QString QMailMessage::inReplyTo() const
 */
 void QMailMessage::setInReplyTo(const QString &messageId)
 {
-    d->setInReplyTo(messageId);
+    impl(this)->setInReplyTo(messageId);
 }
 
 /*!
@@ -5347,7 +5227,7 @@ void QMailMessage::setInReplyTo(const QString &messageId)
 */  
 QMailMessage::Status QMailMessage::status() const
 {
-    return d->_status;
+    return impl(this)->_status;
 }
 
 /*!
@@ -5355,7 +5235,7 @@ QMailMessage::Status QMailMessage::status() const
 */
 void QMailMessage::setStatus(Status flags)
 {
-    d->setStatus(flags);
+    impl(this)->setStatus(flags);
 }
 
 /*!
@@ -5363,13 +5243,13 @@ void QMailMessage::setStatus(Status flags)
 */
 void QMailMessage::setStatus(MessageStatusFlag flag, bool set)
 {
-    Status newStatus = d->_status;
+    Status newStatus = impl(this)->_status;
 
     if (set)
         newStatus |= flag;
     else
         newStatus &= ~(flag);
-    d->setStatus(newStatus);
+    impl(this)->setStatus(newStatus);
 }
 
 /*!
@@ -5379,7 +5259,13 @@ void QMailMessage::setStatus(MessageStatusFlag flag, bool set)
 */  
 QList<QMailAddress> QMailMessage::recipients() const
 {
-    return QMailAddress::fromStringList(headerFieldText("To") + headerFieldText("Cc") + headerFieldText("Bcc"));
+    QStringList list;
+    list.append( headerFieldText("To").trimmed() );
+    list.append( headerFieldText("Cc").trimmed() );
+    list.append( headerFieldText("Bcc").trimmed() );
+    list.removeAll( "" );
+    list.removeAll( QString::null );
+    return QMailAddress::fromStringList( list.join( ", " ) );
 }
 
 /*!
@@ -5388,7 +5274,7 @@ QList<QMailAddress> QMailMessage::recipients() const
 */  
 bool QMailMessage::hasRecipients() const
 {
-    return d->hasRecipients();
+    return impl(this)->hasRecipients();
 }
 
 /*!
@@ -5396,7 +5282,7 @@ bool QMailMessage::hasRecipients() const
 */  
 QString QMailMessage::fromAccount() const
 {
-    return d->_fromAccount;
+    return impl(this)->_fromAccount;
 }
 
 /*!
@@ -5404,7 +5290,7 @@ QString QMailMessage::fromAccount() const
 */  
 void QMailMessage::setFromAccount(const QString &account)
 {
-    d->setFromAccount(account);
+    impl(this)->setFromAccount(account);
 }
 
 /*!
@@ -5412,7 +5298,7 @@ void QMailMessage::setFromAccount(const QString &account)
 */  
 QString QMailMessage::fromMailbox() const
 {
-    return d->_fromMailbox;
+    return impl(this)->_fromMailbox;
 }
 
 /*!
@@ -5420,7 +5306,7 @@ QString QMailMessage::fromMailbox() const
 */  
 void QMailMessage::setFromMailbox(const QString &mailBox)
 {
-    d->setFromMailbox(mailBox);
+    impl(this)->setFromMailbox(mailBox);
 }
 
 /*!
@@ -5428,7 +5314,7 @@ void QMailMessage::setFromMailbox(const QString &mailBox)
 */  
 QString QMailMessage::serverUid() const
 {
-    return d->_serverUid;
+    return impl(this)->_serverUid;
 }
 
 /*!
@@ -5437,7 +5323,7 @@ QString QMailMessage::serverUid() const
 */  
 void QMailMessage::setServerUid(const QString &server)
 {
-    d->setServerUid(server);
+    impl(this)->setServerUid(server);
 }
 
 /*!
@@ -5445,7 +5331,7 @@ void QMailMessage::setServerUid(const QString &server)
 */  
 uint QMailMessage::size() const
 {
-    return d->_size;
+    return impl(this)->_size;
 }
 
 /*!
@@ -5453,43 +5339,63 @@ uint QMailMessage::size() const
 */  
 void QMailMessage::setSize(uint size)
 {
-    d->setSize(size);
+    impl(this)->setSize(size);
 }
 
 /*!
     Returns an indication of the size of the message.  This measure should be used
-    only in comparing the relative size of outgoing messages.
+    only in comparing the relative size of messages with respect to transmission.
 */  
 uint QMailMessage::indicativeSize() const
 {
-    return d->indicativeSize();
-}
-
-/*! \internal */
-QMailMessagePartContainerPrivate* QMailMessage::partContainerPrivate()
-{
-    return d;
-}
-
-/*! \internal */
-const QMailMessagePartContainerPrivate* QMailMessage::partContainerPrivate() const
-{
-    return d;
+    return impl(this)->indicativeSize();
 }
 
 bool QMailMessage::uncommittedChanges() const
 {
-    return d->uncommittedChanges();
+    return impl(this)->uncommittedChanges();
 }
 
 bool QMailMessage::uncommittedMetadataChanges() const
 {
-    return d->uncommittedMetadataChanges();
+    return impl(this)->uncommittedMetadataChanges();
 }
 
 void QMailMessage::changesCommitted()
 {
-    d->changesCommitted();
+    impl(this)->changesCommitted();
 }
 
+/*! 
+    \fn QMailMessage::serialize(Stream&) const
+    \internal 
+*/
+template <typename Stream> 
+void QMailMessage::serialize(Stream &stream) const
+{
+    // TODO: It might be better to do this memberwise...
+    stream << messageType() << toRfc2822(SerializationFormat);
+}
+
+/*! 
+    \fn QMailMessage::deserialize(Stream&)
+    \internal 
+*/
+template <typename Stream> 
+void QMailMessage::deserialize(Stream &stream)
+{
+    QMailMessage::MessageType type;
+    QByteArray data;
+    stream >> type >> data;
+
+    impl<QMailMessagePrivate>()->fromRfc2822( LongString( data ) );
+    setMessageType(type);
+}
+
+Q_IMPLEMENT_USER_METATYPE_ENUM(QMailMessage::MessageType)
+Q_IMPLEMENT_USER_METATYPE_ENUM(QMailMessage::AttachmentsAction)
+
+Q_IMPLEMENT_USER_METATYPE(QMailMessage)
+
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QMailMessageList, QMailMessageList)
 

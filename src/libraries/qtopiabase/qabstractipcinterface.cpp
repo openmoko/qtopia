@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -254,14 +254,17 @@ QAbstractIpcInterface::QAbstractIpcInterface
         d->send = new QtopiaIpcAdaptor( responseChannel, this );
         d->receive = new QtopiaIpcAdaptor( requestChannel, this );
         d->settings = new QValueSpaceObject( d->path, this );
-        d->settings->setAttribute
+        QString channelPath = d->valueSpaceLocation + "/_channels/" +
+                              interfaceName + "/" + group;
+        QValueSpaceObject *channelObject = new QValueSpaceObject( channelPath, this );
+        channelObject->setAttribute
             ( QString(".requestChannel"), requestChannel );
-        d->settings->setAttribute
+        channelObject->setAttribute
             ( QString(".responseChannel"), responseChannel );
 
     } else {
         // Client side: look up the channel to connect to.
-        QValueSpaceItem item( d->valueSpaceLocation + "/" + interfaceName );
+        QValueSpaceItem item( d->valueSpaceLocation + "/_channels/" + interfaceName );
         if ( group.isEmpty() ) {
             // Search for the default group implementing this interface.
             QStringList values = item.subPaths();
@@ -402,11 +405,11 @@ void QAbstractIpcInterface::proxy( const QByteArray& member )
     if ( d->mode == Server ) {
         if ( member.size() > 0 && member[0] == '1' ) {
             // Proxying a slot from the channel.
-            QtopiaIpcAdaptor::connect( d->receive, "2" + member.mid(1),
+            QtopiaIpcAdaptor::connect( d->receive, "3" + member.mid(1),
                                  this, member );
-        } else {
+        } else if ( member.size() > 0 && member[0] == '2' ) {
             // Proxying a signal to the channel.
-            QtopiaIpcAdaptor::connect( this, member, d->send, member );
+            QtopiaIpcAdaptor::connect( this, member, d->send, "3" + member.mid(1) );
         }
     }
 }
@@ -452,11 +455,10 @@ void QAbstractIpcInterface::proxyAll( const QMetaObject& meta )
             if ( method.methodType() == QMetaMethod::Slot &&
                  method.access() == QMetaMethod::Public ) {
                 QByteArray name = method.signature();
-                QtopiaIpcAdaptor::connect( d->receive, "2" + name, this, "1" + name );
+                QtopiaIpcAdaptor::connect( d->receive, "3" + name, this, "1" + name );
             } else if ( method.methodType() == QMetaMethod::Signal ) {
                 QByteArray name = method.signature();
-                name = "2" + name;
-                QtopiaIpcAdaptor::connect( this, name, d->send, name );
+                QtopiaIpcAdaptor::connect( this, "2" + name, d->send, "3" + name );
             }
         }
     }
@@ -478,7 +480,7 @@ void QAbstractIpcInterface::proxyAll
 
         // Add extra information under "/Communications/Interfaces"
         // to redirect clients to the original interface channels.
-        QString path = d->valueSpaceLocation + "/" + subInterfaceName + "/" +
+        QString path = d->valueSpaceLocation + "/_channels/" + subInterfaceName + "/" +
                        d->groupName;
         QString requestChannel = "QPE" + d->valueSpaceLocation + "/" +
                                  d->interfaceName + "/Request/" + d->groupName;
@@ -493,7 +495,7 @@ void QAbstractIpcInterface::proxyAll
 
         // Verify that there is a registration for the new interface name
         // that points back to the primary interface name.
-        QValueSpaceItem item( d->valueSpaceLocation + "/" +
+        QValueSpaceItem item( d->valueSpaceLocation + "/_channels/" +
                               subInterfaceName + "/" + d->groupName );
         QString path = item.value( ".valuePath" ).toString();
         if ( path != d->path ) {
@@ -697,7 +699,8 @@ void QAbstractIpcInterface::connectNotify( const char *signal )
                       this, signal );
             }
         } else if ( !d->receive->isConnected( signal ) ) {
-            QtopiaIpcAdaptor::connect( d->receive, signal, this, signal );
+            QtopiaIpcAdaptor::connect
+                ( d->receive, "3" + QByteArray(signal + 1), this, signal );
         }
     }
 

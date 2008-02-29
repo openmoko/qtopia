@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="secondaryhome" base="themes/default">
-    <image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/>
+    <group name="background">
+        <image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/>
+        <plugin name="bgplugin"/>
+    </group>
+
     <text name="time" rect="0,25%,0x20pt" align="hcenter,vcenter" size="18" bold="yes" outline="#eeeeee">
         expr:@/UI/DisplayTime/Time
     </text>

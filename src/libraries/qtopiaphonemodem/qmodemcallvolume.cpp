@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -116,6 +116,15 @@ class QModemCallVolumePrivate
 public:
     QModemService *service;
     QModemVolumeService *mvs;
+
+    void notifyAudioVolumeManager(int val)
+    {
+        QString volume;
+        volume.setNum(val);
+        QtopiaIpcEnvelope e("QPE/AudioVolumeManager","currentVolume(QString)");
+        e << volume;
+    }
+
 };
 
 
@@ -160,12 +169,15 @@ bool QModemCallVolume::hasDelayedInit() const
 */
 void QModemCallVolume::setSpeakerVolume( int volume )
 {
-    int boundedVolume = qBound(value("MinimumSpeakerVolume").toInt(), volume,
-                               value("MaximumSpeakerVolume").toInt());
+    int min = value("MinimumSpeakerVolume").toInt();
+    int max = value("MaximumSpeakerVolume").toInt();
+    int boundedVolume = qBound(min, volume, max);
 
     d->service->chat( QString("AT+VGR=%1").arg(boundedVolume) );
     setValue( "SpeakerVolume", boundedVolume );
+    d->notifyAudioVolumeManager( (100/(max-min)*boundedVolume) );
     emit speakerVolumeChanged(boundedVolume);
+
 }
 
 /*!

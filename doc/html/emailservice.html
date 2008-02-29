@@ -27,22 +27,21 @@
 <li><div class="fn"/>void <b><a href="emailservice.html#viewMail-2">viewMail</a></b> ( const QMailId &amp; <i>id</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="emailservice.html#writeMail">writeMail</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="emailservice.html#writeMail-2">writeMail</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>email</i> )</li>
-<li><div class="fn"/>void <b><a href="emailservice.html#writeMessage">writeMessage</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>email</i>, const QStringList &amp; <i>docAttachments</i>, const QStringList &amp; <i>fileAttachments</i> )</li>
+<li><div class="fn"/>void <b><a href="emailservice.html#writeMessage">writeMessage</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>email</i>, const QStringList &amp; <i>docAttachments</i>, const QStringList &amp; <i>fileAttachments</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -51,11 +50,11 @@
 <p>The <i>Email</i> service enables applications to access features of the system's e-mail application.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="cleanupMessages"></a>void EmailService::cleanupMessages ( const <a href="qdate.html">QDate</a> &amp; <i>date</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="cleanupMessages"></a>void EmailService::cleanupMessages ( const <a href="./qdate.html">QDate</a> &amp; <i>date</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This function is deprecated.</p>
 <p>Direct the <i>Email</i> service to purge all messages which are older than the given <i>date</i> and exceed the minimal mail <i>size</i>. This is typically called by the cleanup wizard.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::cleanupMessages(QDate,int)</tt>.</p>
-<h3 class="fn"><a name="emailVCard"></a>void EmailService::emailVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="emailVCard"></a>void EmailService::emailVCard ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::emailVCard(QString,QString)</tt>.</p>
 <h3 class="fn"><a name="emailVCard-3"></a>void EmailService::emailVCard ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -74,18 +73,20 @@
 <h3 class="fn"><a name="writeMail"></a>void EmailService::writeMail ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message, and then, if confirmed by the user, send the message.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::writeMail()</tt>.</p>
-<h3 class="fn"><a name="writeMail-2"></a>void EmailService::writeMail ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>email</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="writeMail-2"></a>void EmailService::writeMail ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>email</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message, and then, if confirmed by the user, send the message. The message is sent to <i>name</i> at <i>email</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::writeMail(QString,QString)</tt>.</p>
-<h3 class="fn"><a name="writeMessage"></a>void EmailService::writeMessage ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>email</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>docAttachments</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>fileAttachments</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message, and then, if confirmed by the user, send the message. The message is sent to <i>name</i> at <i>email</i>. The initial body of the message will be based on <i>docAttachments</i> and <i>fileAttachments</i>.</p>
+<h3 class="fn"><a name="writeMessage"></a>void EmailService::writeMessage ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>email</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>docAttachments</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>fileAttachments</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This function is deprecated.</p>
+<p>Clients of this service should instead use <tt>Messages::composeMessage(QMailMessage::MessageType, QMailAddressList, QString, QString, QContentList, QMailMessage::AttachmentsAction)</tt>.</p>
+<p>Direct the <i>Email</i> service to interact with the user to compose a new e-mail message, and then, if confirmed by the user, send the message. The message is sent to <i>name</i> at <i>email</i>. The initial body of the message will be based on <i>docAttachments</i> and <i>fileAttachments</i>. The resulting message will contains links to the files passed as attachments, unless the attached files are under the path returned by <tt>Qtopia::tempDir()</tt>. In this case, the data of the files is copied into the resulting message. Linked attachment files must remain accessible to qtmail until the message is transmitted.</p>
 <p>This message will choose the best message transport for the message, which may be e-mail, SMS, MMS, etc. This is unlike <a href="emailservice.html#writeMail">writeMail</a>(), which will always use e-mail.</p>
 <p>This slot corresponds to the QCop service message <tt>Email::writeMessage(QString,QString,QStringList,QStringList)</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

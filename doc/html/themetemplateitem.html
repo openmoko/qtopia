@@ -30,14 +30,14 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>17 protected functions inherited from <a href="themeitem.html#protected-functions">ThemeItem</a></li>
+<li><div class="fn"/>21 protected functions inherited from <a href="themeitem.html#protected-functions">ThemeItem</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The ThemeTemplateItem class represents a theme template in a <a href="themedview.html">ThemedView</a>.</p>
 <p>The ThemeTemplateItem class implements the <a href="themed-view-elements.html#themetemplateelement">template element</a> from the theme XML.</p>
-<p>A theme template item records the type, structure and attributes of its child theme items. Using this information, it can then create instances of these theme items dynamically through <a href="themetemplateitem.html#createInstance">createInstance</a>(). Theme templates are used to describe theme visuals, without creating any specific instance of that visual. Therefore, instances of the visual descriptions can be created as necessary, and drawn to custom locations. <a href="themelistmodel.html">ThemeListModel</a> makes use of templates to theme items in a <a href="qlistview.html">QListView</a>.</p>
+<p>A theme template item records the type, structure and attributes of its child theme items. Using this information, it can then create instances of these theme items dynamically through <a href="themetemplateitem.html#createInstance">createInstance</a>(). Theme templates are used to describe theme visuals, without creating any specific instance of that visual. Therefore, instances of the visual descriptions can be created as necessary, and drawn to custom locations. <a href="themelistmodel.html">ThemeListModel</a> makes use of templates to theme items in a <a href="./qlistview.html">QListView</a>.</p>
 <p>See also <a href="themelistmodel.html">ThemeListModel</a> and <a href="themed-view-elements.html#themetemplateelement">template element</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -45,12 +45,12 @@
 <p>Constructs a <a href="themetemplateitem.html">ThemeTemplateItem</a>. <i>parent</i>, <i>view</i> and <i>atts</i> are passed to the base class constructor.</p>
 <h3 class="fn"><a name="dtor.ThemeTemplateItem"></a>ThemeTemplateItem::~ThemeTemplateItem ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="themetemplateitem.html">ThemeTemplateItem</a>.</p>
-<h3 class="fn"><a name="createInstance"></a><a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a> * ThemeTemplateItem::createInstance ( const <a href="qstring.html">QString</a> &amp; <i>uid</i> )</h3>
+<h3 class="fn"><a name="createInstance"></a><a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a> * ThemeTemplateItem::createInstance ( const <a href="./qstring.html">QString</a> &amp; <i>uid</i> )</h3>
 <p>Creates a new <a href="themetemplateinstanceitem.html">ThemeTemplateInstanceItem</a> from this <a href="themetemplateitem.html">ThemeTemplateItem</a> with the given <i>uid</i>. The template instance item is parented to the parent of this template item.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

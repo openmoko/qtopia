@@ -4,20 +4,10 @@ CONFIG+=qtopia_main
 
 HEADERS		= helpbrowser.h \
 		    helppreprocessor.h \
-		navigationbar_p.h \
-		bookmarksui.h \
-                bookmark.h \
-		bookmarkmodel.h \
-		bookmarkdelegate.h \
-		bookmarklist.h
+		navigationbar_p.h
 SOURCES		= helpbrowser.cpp main.cpp \
 		    helppreprocessor.cpp \
-		navigationbar_p.cpp \
-		bookmarksui.cpp \
-                bookmark.cpp \
-		bookmarkmodel.cpp \
-		bookmarkdelegate.cpp \
-		bookmarklist.cpp
+		navigationbar_p.cpp
 
 # See $QTOPIA_SOURCE_TREE/src/server/server.pro for the definition of extra html help files
 #    not associted with a specific application. Each application is responsible 
@@ -43,4 +33,4 @@ helpservice.path=/services/Help
 INSTALLS+=helpservice
 
 pkg.desc=Help browser for Qtopia.
-pkg.domain=window,doc_server
+pkg.domain=trusted

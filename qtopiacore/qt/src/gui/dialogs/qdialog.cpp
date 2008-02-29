@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -136,6 +134,14 @@
 
     Modeless dialogs are displayed using show(), which returns control
     to the caller immediately.
+
+    If you invoke the \l{QWidget::show()}{show()} function after hiding
+    a dialog, the dialog will be displayed in its original position. This is
+    because the window manager decides the position for windows that
+    have no been explicitly placed by the programmer. To preserve the
+    position of a dialog that has been moved by the user, save its position
+    in your \l{QWidget::closeEvent()}{closeEvent()}  handler and then
+    move the dialog to that position, before showing it again.
 
     \target default
     \section1 Default Button

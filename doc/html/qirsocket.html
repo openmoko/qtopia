@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QIrSocket Class Reference</h1>
 <p>The QIrSocket class represents an Infrared client socket. <a href="#details">More...</a></p>
-<pre>    #include &lt;QIrSocket&gt;</pre><p>Inherits <a href="qiodevice.html">QIODevice</a>.</p>
+<pre>    #include &lt;QIrSocket&gt;</pre><p>Inherits <a href="./qiodevice.html">QIODevice</a>.</p>
 <ul>
 <li><a href="qirsocket-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -47,8 +47,8 @@
 <li><div class="fn"/>bool <b><a href="qirsocket.html#waitForDisconnected">waitForDisconnected</a></b> ( int <i>msecs</i> = 30000 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>54 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="./qiodevice.htmlqiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -59,19 +59,18 @@
 <li><div class="fn"/>void <b><a href="qirsocket.html#stateChanged">stateChanged</a></b> ( QIrSocket::SocketState <i>socketState</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="./qiodevice.htmlqiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="./qiodevice.htmlqiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -80,14 +79,14 @@
 <p>At any time, the QIrSocket has a state (returned by <a href="qirsocket.html#state">state</a>()). Upon creation, the initial state is <a href="qirsocket.html#SocketState-enum">QIrSocket::UnconnectedState</a>.</p>
 <p>After calling <a href="qirsocket.html#connect">connect</a>(), the socket enters the <a href="qirsocket.html#SocketState-enum">QIrSocket::ConnectingState</a>. If connection is established, the socket enters <a href="qirsocket.html#SocketState-enum">QIrSocket::ConnectedState</a> and emits <a href="qirsocket.html#connected">connected</a>().</p>
 <p>If an error occurs at any time, the <a href="qirsocket.html#error">error</a>() signal is emitted. Whenever the state changes, <a href="qirsocket.html#stateChanged">stateChanged</a>() is emitted. For convenience, isValid() returns true if the socket is ready for reading and writing.</p>
-<p>Read or write data to/from the socket by calling <a href="qiodevice.html#read">read</a>() or <a href="qiodevice.html#write">write</a>(), or use the convenience functions <a href="qiodevice.html#readLine">readLine</a>() and <a href="qiodevice.html#readAll">readAll</a>(). QIrSocket also inherits <a href="qiodevice.html#getChar">getChar</a>(), <a href="qiodevice.html#putChar">putChar</a>(), and <a href="qiodevice.html#ungetChar">ungetChar</a>() from <a href="qiodevice.html">QIODevice</a>, which work on single bytes. For every chunk of data that has been written to the socket, the <a href="qiodevice.html#bytesWritten">bytesWritten</a>() signal is emitted.</p>
-<p>The <a href="qiodevice.html#readyRead">readyRead</a>() signal is emitted every time a new chunk of data has arrived. <a href="qirsocket.html#bytesAvailable">bytesAvailable</a>() then returns the number of bytes that are available for reading. Typically, you would connect the <a href="qiodevice.html#readyRead">readyRead</a>() signal to a slot and read all available data there. If you don't read all the data at once, the remaining data will still be available later, and any new incoming data will be appended to QIrSocket's internal read buffer. To limit the size of the read buffer, call <a href="qirsocket.html#setReadBufferSize">setReadBufferSize</a>().</p>
+<p>Read or write data to/from the socket by calling <a href="./qiodevice.html#read">read</a>() or <a href="./qiodevice.html#write">write</a>(), or use the convenience functions <a href="./qiodevice.html#readLine">readLine</a>() and <a href="./qiodevice.html#readAll">readAll</a>(). QIrSocket also inherits <a href="./qiodevice.html#getChar">getChar</a>(), <a href="./qiodevice.html#putChar">putChar</a>(), and <a href="./qiodevice.html#ungetChar">ungetChar</a>() from <a href="./qiodevice.html">QIODevice</a>, which work on single bytes. For every chunk of data that has been written to the socket, the <a href="./qiodevice.html#bytesWritten">bytesWritten</a>() signal is emitted.</p>
+<p>The <a href="./qiodevice.html#readyRead">readyRead</a>() signal is emitted every time a new chunk of data has arrived. <a href="qirsocket.html#bytesAvailable">bytesAvailable</a>() then returns the number of bytes that are available for reading. Typically, you would connect the <a href="./qiodevice.html#readyRead">readyRead</a>() signal to a slot and read all available data there. If you don't read all the data at once, the remaining data will still be available later, and any new incoming data will be appended to QIrSocket's internal read buffer. To limit the size of the read buffer, call <a href="qirsocket.html#setReadBufferSize">setReadBufferSize</a>().</p>
 <p>To close the socket, call <a href="qirsocket.html#disconnect">disconnect</a>(). Once <a href="qirsocket.html#disconnect">disconnect</a>() is called, QIrSocket enters the <a href="qirsocket.html#SocketState-enum">QIrSocket::ClosingState</a> and emits the <a href="qirsocket.html#stateChanged">stateChanged</a>() signal. After all pending data has been written to the socket, QIrSocket actually closes the socket, enters the QIrSocket::ClosedState, and emits <a href="qirsocket.html#disconnected">disconnected</a>(). If no data is pending when <a href="qirsocket.html#disconnect">disconnect</a>() is called, the connection is disconnected immediately. If you want to abort a connection immediately, discarding all pending data, call <a href="qirsocket.html#abort">abort</a>() instead.</p>
 <p>QIrSocket provides a set of functions that suspend the calling thread until certain signals are emitted. These functions can be used to implement blocking sockets:</p>
 <ul>
 <li><a href="qirsocket.html#waitForConnected">waitForConnected</a>() blocks until a connection has been established.</li>
-<li><a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a>() blocks until new data is available for reading.</li>
-<li><a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>() blocks until one payload of data has been written to the socket.</li>
+<li><a href="./qiodevice.html#waitForReadyRead">waitForReadyRead</a>() blocks until new data is available for reading.</li>
+<li><a href="./qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>() blocks until one payload of data has been written to the socket.</li>
 <li><a href="qirsocket.html#waitForDisconnected">waitForDisconnected</a>() blocks until the connection has closed.</li>
 </ul>
 <p>See also <a href="qirserver.html">QIrServer</a>.</p>
@@ -126,30 +125,30 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QIrSocket"></a>QIrSocket::QIrSocket ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a new <a href="qirsocket.html">QIrSocket</a> with <i>parent</i>. The socket is not connected. The <i>parent</i> specifies the <a href="qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QIrSocket"></a>QIrSocket::QIrSocket ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new <a href="qirsocket.html">QIrSocket</a> with <i>parent</i>. The socket is not connected. The <i>parent</i> specifies the <a href="./qobject.html">QObject</a> parent.</p>
 <h3 class="fn"><a name="dtor.QIrSocket"></a>QIrSocket::~QIrSocket ()</h3>
 <p>Deconstructs a <a href="qirsocket.html">QIrSocket</a>. If the socket is in any state other than <a href="qirsocket.html#SocketState-enum">UnconnectedState</a>, the current connection is aborted.</p>
 <h3 class="fn"><a name="abort"></a>void QIrSocket::abort ()</h3>
 <p>Aborts the current connection and resets the socket. Unlike <a href="qirsocket.html#disconnect">disconnect</a>(), this function immediately closes the socket, clearing any pending data in the write buffer.</p>
 <p>See also <a href="qirsocket.html#disconnect">disconnect</a>() and <a href="qirsocket.html#close">close</a>().</p>
-<h3 class="fn"><a name="bytesAvailable"></a>qint64 QIrSocket::bytesAvailable () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="bytesAvailable"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QIrSocket::bytesAvailable () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the number of bytes that are waiting to be read.</p>
-<p>Reimplemented from <a href="qiodevice.html#bytesAvailable">QIODevice</a>.</p>
-<p>See also <a href="qirsocket.html#bytesToWrite">bytesToWrite</a>() and <a href="qiodevice.html#read">read</a>().</p>
-<h3 class="fn"><a name="bytesToWrite"></a>qint64 QIrSocket::bytesToWrite () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="./qiodevice.html#bytesAvailable">QIODevice</a>.</p>
+<p>See also <a href="qirsocket.html#bytesToWrite">bytesToWrite</a>() and <a href="./qiodevice.html#read">read</a>().</p>
+<h3 class="fn"><a name="bytesToWrite"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QIrSocket::bytesToWrite () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the number of bytes which are pending to be written.</p>
-<p>Reimplemented from <a href="qiodevice.html#bytesToWrite">QIODevice</a>.</p>
-<p>See also <a href="qirsocket.html#bytesAvailable">bytesAvailable</a>() and <a href="qiodevice.html#write">write</a>().</p>
+<p>Reimplemented from <a href="./qiodevice.html#bytesToWrite">QIODevice</a>.</p>
+<p>See also <a href="qirsocket.html#bytesAvailable">bytesAvailable</a>() and <a href="./qiodevice.html#write">write</a>().</p>
 <h3 class="fn"><a name="canReadLine"></a>bool QIrSocket::canReadLine () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if a line of data can be read from the socket; otherwise returns false.</p>
-<p>Reimplemented from <a href="qiodevice.html#canReadLine">QIODevice</a>.</p>
-<p>See also <a href="qiodevice.html#readLine">readLine</a>().</p>
+<p>Reimplemented from <a href="./qiodevice.html#canReadLine">QIODevice</a>.</p>
+<p>See also <a href="./qiodevice.html#readLine">readLine</a>().</p>
 <h3 class="fn"><a name="close"></a>void QIrSocket::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Closes the socket. This is the same as <a href="qirsocket.html#disconnect">disconnect</a>()</p>
-<p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
+<p>Reimplemented from <a href="./qiodevice.html#close">QIODevice</a>.</p>
 <p>See also <a href="qirsocket.html#abort">abort</a>() and <a href="qirsocket.html#disconnect">disconnect</a>().</p>
-<h3 class="fn"><a name="connect"></a>bool QIrSocket::connect ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>service</i>, quint32 <i>remote</i> )</h3>
+<h3 class="fn"><a name="connect"></a>bool QIrSocket::connect ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>service</i>, <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>remote</i> )</h3>
 <p>Attempts to open an Infrared connection between the local device and the remote device with address <i>remote</i>. The underlying channel will be selected based on <i>service</i> parameter. The service parameter will be looked up in the remote device's IAS Database. This function should generally return immediately, and the socket will enter into the <tt>ConnectingState</tt>.</p>
 <p>The function returns true if the connection process could be started, and false otherwise.</p>
 <p>Note that the connection could still fail, the state of the socket will be sent in the <a href="qirsocket.html#stateChanged">stateChanged</a>() signal.</p>
@@ -171,21 +170,21 @@
 <h3 class="fn"><a name="error-2"></a>void QIrSocket::error ( <a href="qirsocket.html#SocketError-enum">QIrSocket::SocketError</a> <i>socketError</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This signal is emitted after an error occurred. The <i>socketError</i> parameter describes the type of error that has occurred.</p>
-<p>See also <a href="qirsocket.html#error">error</a>() and <a href="qiodevice.html#errorString">errorString</a>().</p>
+<p>See also <a href="qirsocket.html#error">error</a>() and <a href="./qiodevice.html#errorString">errorString</a>().</p>
 <h3 class="fn"><a name="flush"></a>bool QIrSocket::flush ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function writes as much as possible from the internal write buffer to the underlying network socket, without blocking. If any data was written, this function returns true; otherwise false is returned.</p>
-<p>See also <a href="qiodevice.html#write">write</a>() and <a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
-<h3 class="fn"><a name="readBufferSize"></a>qint64 QIrSocket::readBufferSize () const</h3>
-<p>Returns the size of the internal read buffer. This limits the amount of data that the client can receive before you call <a href="qiodevice.html#read">read</a>() or <a href="qiodevice.html#readAll">readAll</a>().</p>
+<p>See also <a href="./qiodevice.html#write">write</a>() and <a href="./qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
+<h3 class="fn"><a name="readBufferSize"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QIrSocket::readBufferSize () const</h3>
+<p>Returns the size of the internal read buffer. This limits the amount of data that the client can receive before you call <a href="./qiodevice.html#read">read</a>() or <a href="./qiodevice.html#readAll">readAll</a>().</p>
 <p>A read buffer size of 0 (the default) means that the buffer has no size limit, ensuring that no data is lost.</p>
-<p>See also <a href="qirsocket.html#setReadBufferSize">setReadBufferSize</a>() and <a href="qiodevice.html#read">read</a>().</p>
-<h3 class="fn"><a name="remoteAddress"></a>quint32 QIrSocket::remoteAddress () const</h3>
+<p>See also <a href="qirsocket.html#setReadBufferSize">setReadBufferSize</a>() and <a href="./qiodevice.html#read">read</a>().</p>
+<h3 class="fn"><a name="remoteAddress"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QIrSocket::remoteAddress () const</h3>
 <p>Returns the address of the remote device this socket is connected to. If the socket is not connected, this returns 0.</p>
 <p>See also <a href="qirsocket.html#connect">connect</a>().</p>
-<h3 class="fn"><a name="setReadBufferSize"></a>void QIrSocket::setReadBufferSize ( qint64 <i>size</i> )</h3>
+<h3 class="fn"><a name="setReadBufferSize"></a>void QIrSocket::setReadBufferSize ( <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>size</i> )</h3>
 <p>Sets the capacity of <a href="qirsocket.html">QIrSocket</a>'s internal read buffer to be <i>size</i> bytes. If <i>size</i> is 0 the buffer has unlimited capacity. This is the default.</p>
 <p>See also <a href="qirsocket.html#readBufferSize">readBufferSize</a>().</p>
-<h3 class="fn"><a name="setSocketDescriptor"></a>bool QIrSocket::setSocketDescriptor ( int <i>socketDescriptor</i>, <a href="qirsocket.html#SocketState-enum">QIrSocket::SocketState</a> <i>state</i>, <a href="qiodevice.html#OpenMode-typedef">QIODevice::OpenMode</a> <i>openMode</i> = QIODevice::ReadWrite )</h3>
+<h3 class="fn"><a name="setSocketDescriptor"></a>bool QIrSocket::setSocketDescriptor ( int <i>socketDescriptor</i>, <a href="qirsocket.html#SocketState-enum">QIrSocket::SocketState</a> <i>state</i>, <a href="./qiodevice.html#openmode-typedef">QIODevice::OpenMode</a> <i>openMode</i> = QIODevice::ReadWrite )</h3>
 <p>Initializes the <a href="qirsocket.html">QIrSocket</a> with the native descriptor <i>socketDescriptor</i>. The socket is put into the <i>state</i> and opened in <i>openMode</i>.</p>
 <p>Returns true on successful completion of the request; otherwise returns false.</p>
 <p>See also <a href="qirsocket.html#socketDescriptor">socketDescriptor</a>().</p>
@@ -208,8 +207,8 @@
 <p>See also <a href="qirsocket.html#disconnect">disconnect</a>(), <a href="qirsocket.html#close">close</a>(), and <a href="qirsocket.html#disconnected">disconnected</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

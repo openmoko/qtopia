@@ -28,19 +28,18 @@
 <li><div class="fn"/>void <b><a href="modememulatorservice.html#removeTcpPort">removeTcpPort</a></b> ( int <i>tcpPort</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -49,10 +48,10 @@
 <p>The <i>ModemEmulator</i> service enables applications to register serial devices and TCP ports with the modem emulator to allow external devices to access Qtopia via AT commands.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="addSerialPort"></a>void ModemEmulatorService::addSerialPort ( const <a href="qstring.html">QString</a> &amp; <i>deviceName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="addSerialPort"></a>void ModemEmulatorService::addSerialPort ( const <a href="./qstring.html">QString</a> &amp; <i>deviceName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Add <i>deviceName</i> to the list of serial ports that are being monitored for AT sessions. The device name will be something like <tt>/dev/ttyS1:115200</tt>, indicating the kernel device and baud rate to use. Returns false if the device could not be opened.</p>
 <p>See also <a href="modememulatorservice.html#removeSerialPort">removeSerialPort</a>().</p>
-<h3 class="fn"><a name="addSerialPort-2"></a>void ModemEmulatorService::addSerialPort ( const <a href="qstring.html">QString</a> &amp; <i>deviceName</i>, const <a href="qstring.html">QString</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="addSerialPort-2"></a>void ModemEmulatorService::addSerialPort ( const <a href="./qstring.html">QString</a> &amp; <i>deviceName</i>, const <a href="./qstring.html">QString</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Add <i>deviceName</i> to the list of serial ports that are being monitored for AT sessions. The <i>options</i> parameter specifies additional options to configure the initial AT command settings.</p>
 <p>See also <a href="modememulatorservice.html#removeSerialPort">removeSerialPort</a>().</p>
@@ -61,11 +60,11 @@
 <p>This is typically used for debugging the AT interface. A program such as <tt>telnet</tt> can be used to connect to the port for issuing AT commands manually.</p>
 <p>Applications can use this for non-debugging access if they connect to the port using <a href="qserialsocket.html">QSerialSocket</a>.</p>
 <p>See also <a href="modememulatorservice.html#removeTcpPort">removeTcpPort</a>().</p>
-<h3 class="fn"><a name="addTcpPort-2"></a>void ModemEmulatorService::addTcpPort ( int <i>tcpPort</i>, bool <i>localHostOnly</i>, const <a href="qstring.html">QString</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="addTcpPort-2"></a>void ModemEmulatorService::addTcpPort ( int <i>tcpPort</i>, bool <i>localHostOnly</i>, const <a href="./qstring.html">QString</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Add <i>tcpPort</i> to the list of TCP ports that are being monitored for incoming AT sessions. If <i>localHostOnly</i> is true, then only allow processes on the local host to connect. Returns false if the TCP port could not be bound. The <i>options</i> parameter specifies additional options to configure the initial AT command settings.</p>
 <p>See also <a href="modememulatorservice.html#removeTcpPort">removeTcpPort</a>().</p>
-<h3 class="fn"><a name="removeSerialPort"></a>void ModemEmulatorService::removeSerialPort ( const <a href="qstring.html">QString</a> &amp; <i>deviceName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="removeSerialPort"></a>void ModemEmulatorService::removeSerialPort ( const <a href="./qstring.html">QString</a> &amp; <i>deviceName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Remove <i>deviceName</i> from the list of serial ports that are being monitored for AT sessions. All active sessions associated with the device will be destroyed.</p>
 <p>See also <a href="modememulatorservice.html#addSerialPort">addSerialPort</a>().</p>
 <h3 class="fn"><a name="removeTcpPort"></a>void ModemEmulatorService::removeTcpPort ( int <i>tcpPort</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -73,8 +72,8 @@
 <p>See also <a href="modememulatorservice.html#addTcpPort">addTcpPort</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

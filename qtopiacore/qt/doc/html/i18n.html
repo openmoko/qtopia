@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/i18n.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/i18n.qdoc -->
 <head>
   <title>Qt 4.3: Internationalization with Qt</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -205,13 +205,13 @@
 <h4>Support for Encodings</h4>
 <p>The <a href="qtextcodec.html">QTextCodec</a> class and the facilities in <a href="qtextstream.html">QTextStream</a> make it easy to support many input and output encodings for your users' data. When an application starts, the locale of the machine will determine the 8-bit encoding used when dealing with 8-bit data: such as for font selection, text display, 8-bit text I/O, and character input.</p>
 <p>The application may occasionally require encodings other than the default local 8-bit encoding. For example, an application in a Cyrillic KOI8-R locale (the de-facto standard locale in Russia) might need to output Cyrillic in the ISO 8859-5 encoding. Code for this would be:</p>
-<pre>     QString string = ...; <span class="comment">// some Unicode text</span>
+<pre>     QString string = ...; <span class="comment">//</span> some Unicode text
 
      QTextCodec *codec = QTextCodec::codecForName(&quot;ISO 8859-5&quot;);
      QByteArray encodedString = codec-&gt;fromUnicode(string);</pre>
 <p>For converting Unicode to local 8-bit encodings, a shortcut is available: the <a href="qstring.html#toLocal8Bit">QString::toLocal8Bit</a>() function returns such 8-bit data. Another useful shortcut is <a href="qstring.html#toUtf8">QString::toUtf8</a>(), which returns text in the 8-bit UTF-8 encoding: this perfectly preserves Unicode information while looking like plain ASCII if the text is wholly ASCII.</p>
 <p>For converting the other way, there are the <a href="qstring.html#fromUtf8">QString::fromUtf8</a>() and <a href="qstring.html#fromLocal8Bit">QString::fromLocal8Bit</a>() convenience functions, or the general code, demonstrated by this conversion from ISO 8859-5 Cyrillic to Unicode conversion:</p>
-<pre>     QByteArray encodedString = ...; <span class="comment">// some ISO 8859-5 encoded text</span>
+<pre>     QByteArray encodedString = ...; <span class="comment">//</span> some ISO 8859-5 encoded text
 
      QTextCodec *codec = QTextCodec::codecForName(&quot;ISO 8859-5&quot;);
      QString string = codec-&gt;toUnicode(encodedString);</pre>
@@ -224,9 +224,9 @@
 <pre>     void Clock::setTime(const QTime &amp;time)
      {
          if (tr(&quot;AMPM&quot;) == &quot;AMPM&quot;) {
-             <span class="comment">// 12-hour clock</span>
+             <span class="comment">//</span> 12-hour clock
          } else {
-             <span class="comment">// 24-hour clock</span>
+             <span class="comment">//</span> 24-hour clock
          }
      }</pre>
 <p>In the example, for the US we would leave the translation of &quot;AMPM&quot; as it is and thereby use the 12-hour clock branch; but in Europe we would translate it as something else and this will make the code use the 24-hour clock branch.</p>
@@ -294,8 +294,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

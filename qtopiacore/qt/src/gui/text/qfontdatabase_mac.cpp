@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -83,6 +81,7 @@ static void initializeDb()
         return;
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5) {
     QCFType<CTFontCollectionRef> collection = CTFontCollectionCreateFromAvailableFonts(0);
     if(!collection)
         return;
@@ -140,7 +139,9 @@ static void initializeDb()
             //qDebug() << "WTF?";
         }
     }
-#else
+} else 
+#endif
+{ 
     FMFontIterator it;
     if (!FMCreateFontIterator(0, 0, kFMUseGlobalScopeOption, &it)) {
         while (true) {
@@ -199,7 +200,7 @@ static void initializeDb()
         }
         FMDisposeFontIterator(&it);
     }
-#endif
+}
 }
 
 static inline void load(const QString & = QString(), int = -1)
@@ -341,13 +342,16 @@ static void registerFont(QFontDatabasePrivate::ApplicationFont *fnt)
 
     if(fnt->data.isEmpty()) {
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5) {
         extern OSErr qt_mac_create_fsref(const QString &, FSRef *); // qglobal.cpp
         FSRef ref;
         if(qt_mac_create_fsref(fnt->fileName, &ref) != noErr)
             return;
 
         ATSFontActivateFromFileReference(&ref, kATSFontContextLocal, kATSFontFormatUnspecified, 0, kATSOptionFlagsDefault, &handle);
-#else
+} else 
+#endif
+{
         extern Q_CORE_EXPORT OSErr qt_mac_create_fsspec(const QString &, FSSpec *); // global.cpp
         FSSpec spec;
         if(qt_mac_create_fsspec(fnt->fileName, &spec) != noErr)
@@ -355,7 +359,7 @@ static void registerFont(QFontDatabasePrivate::ApplicationFont *fnt)
 
         e = ATSFontActivateFromFileSpecification(&spec, kATSFontContextLocal, kATSFontFormatUnspecified,
                                            0, kATSOptionFlagsDefault, &handle);
-#endif
+}
     } else {
         e = ATSFontActivateFromMemory((void *)fnt->data.constData(), fnt->data.size(), kATSFontContextLocal,
                                            kATSFontFormatUnspecified, 0, kATSOptionFlagsDefault, &handle);

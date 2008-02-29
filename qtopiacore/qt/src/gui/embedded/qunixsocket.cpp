@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -857,7 +855,7 @@ signals:
 
 public slots:
     void readActivated();
-    void writeActivated();
+    qint64 writeActivated();
 };
 
 /*!
@@ -1184,16 +1182,20 @@ void QUnixSocket::close()
 }
 
 /*!
-  Writes all unsent data to the socket, and blocks until transmission has
-  completed.
-
-  \b {Warning:} Calling this function from your main (GUI) thread may cause
-  your user interface to freeze.
-  */
-void QUnixSocket::flush()
+    This function writes as much as possible from the internal write buffer to
+    the underlying socket, without blocking. If any data was written, this 
+    function returns true; otherwise false is returned.
+*/
+// Note! docs partially copied from QAbstractSocket::flush()
+bool QUnixSocket::flush()
 {
-    while(!d->writeQueue.isEmpty())
-        d->writeActivated();
+    // This needs to have the same semantics as QAbstractSocket, if it is to
+    // be used interchangeably with that class.
+    if (d->writeQueue.isEmpty())
+        return false;
+
+    d->writeActivated();
+    return true;
 }
 
 /*!
@@ -1531,9 +1533,34 @@ bool QUnixSocket::waitForBytesWritten(int msecs)
                 // timeout
                 return false;
             case 1:
-                // ok
-                d->writeActivated();
-                return true;
+            {
+                // ok to write
+                qint64 bytesWritten = d->writeActivated();
+                if (bytesWritten == 0) {
+                    // We need to retry
+                    unsigned int delay = 1;
+                    do {
+                        if (-1 != msecs) {
+                            timeout = msecs - stopWatch.elapsed();
+                            if (timeout <= 0) {
+                                // We have exceeded our allotted time
+                                return false;
+                            } else {
+                                if (delay > timeout)
+                                    delay = timeout;
+                            }
+                        }
+
+                        // Pause before we make another attempt to send
+                        ::usleep(delay * 1000);
+                        if (delay < 1024) 
+                            delay *= 2;
+
+                        bytesWritten = d->writeActivated();
+                    } while (bytesWritten == 0);
+                }
+                return (bytesWritten != -1);
+            }
             default:
                 // error - or an uncaught signal!!!!!!!!!
                 if ( rv == EINTR )
@@ -1586,7 +1613,7 @@ qint64 QUnixSocket::writeData (const char * data, qint64 maxSize)
     return write(QUnixSocketMessage(QByteArray(data, maxSize)));
 }
 
-void QUnixSocketPrivate::writeActivated()
+qint64 QUnixSocketPrivate::writeActivated()
 {
     writeNotifier->setEnabled(false);
 
@@ -1660,7 +1687,7 @@ void QUnixSocketPrivate::writeActivated()
 #endif
 
     if(-1 == s) {
-        if(EAGAIN == errno || EWOULDBLOCK == errno) {
+        if(EAGAIN == errno || EWOULDBLOCK == errno || EINTR == errno) {
             writeNotifier->setEnabled(true);
         } else if(EPIPE == errno) {
 #ifdef QUNIXSOCKET_DEBUG
@@ -1686,7 +1713,7 @@ void QUnixSocketPrivate::writeActivated()
         m.d->removeBytes( s );
         writeQueueBytes -= s;
         emit bytesWritten(s);
-        return;
+        return s;
 
     } else {
 
@@ -1700,9 +1727,15 @@ void QUnixSocketPrivate::writeActivated()
 
     delete [] (char *)sendmessage.msg_control;
     if(-1 != s && !writeQueue.isEmpty())
-        writeActivated();
+        return writeActivated();
     else if(QUnixSocket::ClosingState == me->state() && writeQueue.isEmpty())
         me->abort();
+
+    if((-1 == s) && (EAGAIN == errno || EWOULDBLOCK == errno || EINTR == errno))
+        // Return zero bytes written to indicate retry may be required
+        return 0;
+    else
+        return s;
 }
 
 void QUnixSocketPrivate::readActivated()

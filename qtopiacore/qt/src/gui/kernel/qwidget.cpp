@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -114,6 +112,9 @@ QWidgetPrivate::QWidgetPrivate(int version) :
 #endif
 #if defined(Q_WS_X11)
         ,picture(0)
+#endif
+#ifdef Q_WS_MAC
+        ,isGLWidget(0)
 #endif
         ,polished(0)
 
@@ -1913,6 +1914,10 @@ void QWidget::createWinId()
     The style sheet contains a textual description of customizations to the
     widget's style, as described in the \l{Qt Style Sheets} document.
 
+    \note Qt style sheets are currently not supported for QMacStyle
+    (the default style on Mac OS X). We plan to address this in some future
+    release.
+    
     \sa setStyle(), QApplication::styleSheet, {Qt Style Sheets}
 */
 QString QWidget::styleSheet() const
@@ -5438,6 +5443,10 @@ void QWidgetPrivate::show_helper()
 
     Hides the widget. This function is equivalent to
     setVisible(false).
+    
+    \note If you are working with QDialog or its subclasses and you invoke
+    the show() function after this function, the dialog will be displayed in
+    its original position.
 
     \sa hideEvent(), isHidden(), show(), setVisible(), isVisible(), close()
 */
@@ -7031,7 +7040,7 @@ void QWidget::dragEnterEvent(QDragEnterEvent *)
     \fn void QWidget::dragMoveEvent(QDragMoveEvent *event)
 
     This event handler is called if a drag is in progress, and when
-    any of the following conditions occurs: the cursor enters this widget,
+    any of the following conditions occur: the cursor enters this widget,
     the cursor moves within this widget, or a modifier key is pressed on
     the keyboard while this widget has the focus. The event is passed
     in the \a event parameter.
@@ -7065,7 +7074,7 @@ void QWidget::dragLeaveEvent(QDragLeaveEvent *)
     \fn void QWidget::dropEvent(QDropEvent *event)
 
     This event handler is called when the drag is dropped on this
-    widget which are passed in the \a event parameter.
+    widget. The event is passed in the \a event parameter.
 
     See the \link dnd.html Drag-and-drop documentation\endlink for an
     overview of how to provide drag-and-drop in your application.
@@ -7801,7 +7810,7 @@ void QWidget::scroll(int dx, int dy, const QRect &r)
 void QWidget::repaint()
 {
     Q_D(QWidget);
-    repaint(d->clipRect());
+    repaint(QRegion(d->clipRect()));
 }
 
 /*! \overload
@@ -9156,6 +9165,15 @@ QWidgetData *qt_qwidget_data(QWidget *widget)
 {
     return widget->data;
 }
+
+#ifdef Q_WS_MAC
+/*! \internal
+*/
+QWidgetPrivate * qt_widget_private(QWidget *widget)
+{
+    return widget->d_func();
+}
+#endif
 
 void QWidgetPrivate::getLayoutItemMargins(int *left, int *top, int *right, int *bottom) const
 {

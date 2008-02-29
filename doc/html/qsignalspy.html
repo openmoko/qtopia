@@ -47,18 +47,18 @@
 <pre> QCheckBox *box = ...;
  QSignalSpy spy(box, SIGNAL(clicked(bool)));
 
-<span class="comment"> // do something that triggers the signal</span>
+<span class="comment"> //</span> do something that triggers the signal
  box-&gt;animateClick();
 
- QCOMPARE(spy.count(), 1); <span class="comment">// make sure the signal was emitted exactly one time</span>
- QList&lt;QVariant&gt; arguments = spy.takeFirst(); <span class="comment">// take the first signal</span>
+ QCOMPARE(spy.count(), 1); <span class="comment">//</span> make sure the signal was emitted exactly one time
+ QList&lt;QVariant&gt; arguments = spy.takeFirst(); <span class="comment">//</span> take the first signal
 
- QVERIFY(arguments.at(0).toBool() == true); <span class="comment">// verify the first argument</span></pre>
+ QVERIFY(arguments.at(0).toBool() == true); <span class="comment">//</span> verify the first argument</pre>
 <p><tt>spy.takeFirst()</tt> returns the arguments for the first emitted signal, as a list of <a href="qvariant.html">QVariant</a> objects. The <tt>clicked()</tt> signal has a single bool argument, which is stored as the first entry in the list of arguments.</p>
 <p>The example below catches a signal from a custom object:</p>
 <pre> QSignalSpy spy(myCustomObject, SIGNAL(mySignal(int, QString, double)));
 
- myCustomObject-&gt;doSomething(); <span class="comment">// trigger emission of the signal</span>
+ myCustomObject-&gt;doSomething(); <span class="comment">//</span> trigger emission of the signal
 
  QList&lt;QVariant&gt; arguments = spy.takeFirst();
  QVERIFY(arguments.at(0).type() == QVariant::Int);
@@ -68,7 +68,7 @@
 <pre> qRegisterMetaType&lt;QModelIndex&gt;(&quot;QModelIndex&quot;);
  QSignalSpy spy(&amp;model, SIGNAL(whatever(QModelIndex)));</pre>
 <p>To retrieve the <tt>QModelIndex</tt>, you can use qvariant_cast:</p>
-<pre><span class="comment"> // get the first argument from the first received signal:</span>
+<pre><span class="comment"> //</span> get the first argument from the first received signal:
  QModelIndex result = qvariant_cast&lt;QModelIndex&gt;(spy.at(0).at(0));</pre>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -82,8 +82,8 @@
 <p>Returns the normalized signal the spy is currently listening to.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

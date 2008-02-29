@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,16 +60,26 @@
 class QTransformedScreenPrivate
 {
 public:
-    QTransformedScreenPrivate(QTransformedScreen *parent)
-        : transformation(QTransformedScreen::None), subscreen(0), q(parent) {}
+    QTransformedScreenPrivate(QTransformedScreen *parent);
 
     void configure();
 
     QTransformedScreen::Transformation transformation;
+#ifdef QT_QWS_DEPTH_GENERIC
+    bool doGenericColors;
+#endif
     QScreen *subscreen;
     QTransformedScreen *q;
 };
 
+QTransformedScreenPrivate::QTransformedScreenPrivate(QTransformedScreen *parent)
+    : transformation(QTransformedScreen::None),
+#ifdef QT_QWS_DEPTH_GENERIC
+      doGenericColors(false),
+#endif
+      subscreen(0), q(parent)
+{
+}
 
 // Global function -----------------------------------------------------------
 static QTransformedScreen *qt_trans_screen = 0;
@@ -223,6 +231,11 @@ bool QTransformedScreen::connect(const QString &displaySpec)
 
     const int id = getDisplayId(dspec);
     d_ptr->subscreen = qt_get_screen(id, dspec.toLatin1().constData());
+
+#ifdef QT_QWS_DEPTH_GENERIC
+    d_ptr->doGenericColors = dspec.contains(QLatin1String("genericcolors"));
+#endif
+
     d_ptr->configure();
 
     // XXX
@@ -366,6 +379,14 @@ void QTransformedScreen::blit(const QImage &image, const QPoint &topLeft,
                         & QRect(topLeft, image.size());
 
     BlitFunc func = 0;
+#ifdef QT_QWS_DEPTH_GENERIC
+    if (d_ptr->doGenericColors && depth() == 16) {
+        if (image.depth() == 16)
+            SET_BLIT_FUNC(qrgb_generic16, quint16, trans, func);
+        else
+            SET_BLIT_FUNC(qrgb_generic16, quint32, trans, func);
+    } else
+#endif
     switch (depth()) {
 #ifdef QT_QWS_DEPTH_32
     case 32:

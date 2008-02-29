@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -325,12 +325,23 @@ void QMailComposerInterface::setText( const QString& text, const QString &type )
 }
 
 /*!
-    Adds \a item as an attachment to the message in the composer.
+    Adds \a item as an attachment to the message in the composer. The \a action parameter
+    specifies what the composer should do with \a item.
 */
-void QMailComposerInterface::attach( const QContent& item )
+void QMailComposerInterface::attach( const QContent& item, QMailMessage::AttachmentsAction action )
 {
     // default implementation does nothing
     Q_UNUSED(item)
+    Q_UNUSED(action)
+}
+
+/*!
+    Sets the composer to append \a signature to the body of the message, when creating a message.
+*/
+void QMailComposerInterface::setSignature( const QString& signature )
+{
+    // default implementation does nothing
+    Q_UNUSED(signature)
 }
 
 /*!

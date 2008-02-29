@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,8 +21,6 @@
 
 #include "helpbrowser.h"
 #include "helppreprocessor.h"
-#include "bookmarksui.h"
-#include "bookmark.h"
 
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
@@ -108,6 +106,7 @@ QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
 QString MagicTextBrowser::generate( const QString& name )
 {
     QString s;
+    int size = style()->pixelMetric(QStyle::PM_ListViewIconSize);
     QContentSet lnkset( QContentFilter::Category, name );
     typedef QMap<QString,QContent> OrderingMap;
     OrderingMap ordered;
@@ -131,10 +130,21 @@ QString MagicTextBrowser::generate( const QString& name )
                 break;
         }
         if (it != helpPath.end()) {
-            s += QString("<br><a href=") + prefix[pref] + helpFile + "><img src=" + icon + "> " + name + "</a>\n";
+            // SVG/PIC images are forced to load at a particular size (see above)
+            // Force all app icons to be this size (to prevent them from being
+            // different sizes, not all app icons are SVG/PIC).
+            s += QString("<br><a href=%1%2><img src=%3 width=%4 height=%5> %6</a>\n")
+                .arg( prefix[pref] )
+                .arg( helpFile )
+                .arg( icon )
+                .arg( size )
+                .arg( size )
+                .arg( name );
 #ifdef DEBUG
         } else {
-            s += "<br>No <tt>" + helpFile + "</tt> for " + name + "\n";
+            s += QString("<br>No <tt>%1</tt> for %2\n")
+                .arg( helpFile )
+                .arg( name );
 #endif
         }
     }
@@ -162,13 +172,10 @@ void MagicTextBrowser::emitHistoryChanged()
 
 HelpBrowser::~HelpBrowser()
 {
-    if ( bookmarksUI ) {
-        delete bookmarksUI;
-    }
 }
 
 HelpBrowser::HelpBrowser( QWidget* parent, Qt::WFlags f )
-    : QMainWindow( parent, f ), bookmarksUI(0)
+    : QMainWindow( parent, f )
 {
     init();
 }
@@ -215,7 +222,7 @@ void HelpBrowser::init()
     helpPath.append("pics");
     browser->setSearchPaths(helpPath);
     connect( browser, SIGNAL(sourceChanged(QUrl)),
-             this, SLOT(textChanged()) );
+             this, SLOT(textChanged(QUrl)) );
 
     setCentralWidget( box );
 
@@ -224,23 +231,15 @@ void HelpBrowser::init()
 
     backAction = new QAction(QIcon(":icon/i18n/previous"), tr("Back"), this);
     backAction->setWhatsThis(tr("Move backward one page."));
-    backAction->setEnabled( false );
+    backAction->setVisible( false );
     connect( backAction, SIGNAL(triggered()), browser, SLOT(backward()) );
-    connect( browser, SIGNAL(backwardAvailable(bool)), backAction, SLOT(setEnabled(bool)) );
+    connect( browser, SIGNAL(backwardAvailable(bool)), backAction, SLOT(setVisible(bool)) );
 
     forwardAction = new QAction(QIcon(":icon/i18n/next"), tr("Forward"), this );
     forwardAction->setWhatsThis( tr( "Move forward one page." ) );
-    forwardAction->setEnabled( false );
+    forwardAction->setVisible( false );
     connect( forwardAction, SIGNAL(triggered()), browser, SLOT(forward()) );
-    connect( browser, SIGNAL(forwardAvailable(bool)), forwardAction, SLOT(setEnabled(bool)) );
-
-    QAction *bookmarksAction = new QAction(QIcon(":icon/list"), tr("Bookmarks"), this );
-    bookmarksAction->setWhatsThis( tr( "Go to Bookmarks listing." ) );
-    connect( bookmarksAction, SIGNAL(triggered()), this, SLOT(bookmarks()) );
-
-    QAction *addBookmarkAction = new QAction(QIcon(":icon/new"),tr("Add Bookmark"),this);
-    addBookmarkAction->setWhatsThis( tr( "Add this page to your set of bookmarks." ) );
-    connect( addBookmarkAction, SIGNAL(triggered()), this, SLOT(addBookmark()) );
+    connect( browser, SIGNAL(forwardAvailable(bool)), forwardAction, SLOT(setVisible(bool)) );
 
     QAction *homeAction = new QAction(QIcon(":icon/home"), tr("Home"), this );
     homeAction->setWhatsThis( tr( "Go to the home page." ) );
@@ -248,11 +247,9 @@ void HelpBrowser::init()
 
     contextMenu = QSoftMenuBar::menuFor(this);
 
+    contextMenu->addAction( homeAction );
     contextMenu->addAction( backAction );
     contextMenu->addAction( forwardAction );
-    contextMenu->addAction( bookmarksAction );
-    contextMenu->addAction( addBookmarkAction );
-    contextMenu->addAction( homeAction );
 
     setFocusProxy( browser );
     browser->setFrameStyle( QFrame::NoFrame );
@@ -262,22 +259,6 @@ void HelpBrowser::init()
     if (browser->document())
         browser->document()->setDefaultStyleSheet(sheet);
     browser->setSource( HOMEPAGE );
-}
-
-// Fetches 'bookmarksUI', creating it if necessary.
-BookmarksUI *HelpBrowser:: getBookmarksUI()
-{
-    if ( bookmarksUI ) {
-        return bookmarksUI;
-    }
-
-    // Create the UI on an as-needed basis.
-    bookmarksUI = new BookmarksUI(this);
-    // Ensure that when the user chooses a Bookmark for display within the BookmarksUI, the
-    // appropriate handler is called to display that Bookmark within this browser.
-    connect(bookmarksUI,SIGNAL(bookmarkSelected(Bookmark)),this,SLOT(bookmarkSelected(Bookmark)));
-
-    return bookmarksUI;
 }
 
 void HelpBrowser::setDocument( const QString &doc )
@@ -290,63 +271,21 @@ void HelpBrowser::setDocument( const QString &doc )
     }
 }
 
-/*! \fn void HelpBrowser::bookmarkSelected(Bookmark bookmark)
-  Handles the event that a Bookmark has been chosen for display within the BookmarksUI.
-  Assumes that the BookmarksUI has been closed.
-*/
-void HelpBrowser::bookmarkSelected(Bookmark bookmark)
-{
-    // Clear out history.
-    browser->clearHistory();
-    // Display the Url.
-    browser->setSource(bookmark.getUrl());
-}
-
 void HelpBrowser::goHome()
 {
     browser->setSource( HOMEPAGE );
 }
 
-// Displays 'bookmarksUI', creating it if necessary.
-void HelpBrowser::bookmarks()
-{
-    // Display the BookmarksUI in place of this HelpBrowser.
-    BookmarksUI *ui = getBookmarksUI();
-
-    // Ensure that the ui will always start in Navigation mode.
-    ui->setReorganise(false);
-
-    ui->setWindowTitle(tr("Bookmarks"));
-    setWindowTitle(tr("Bookmarks"));
-
-    ui->showMaximized();
-}
-
-// Adds the current page as a new bookmark.
-void HelpBrowser::addBookmark()
-{
-    // Add the current filename as a bookmark, with the current title, if there is one.
-    QString title;
-    if ( browser->documentTitle().isNull() ) {
-        title = browser->source().path().section('/',-1);
-    } else {
-        title = browser->documentTitle();
-    }
-
-    // Ask the UI to create a new Bookmark.
-    getBookmarksUI()->addBookmark(browser->source(),title);
-}
-
 // Private slot to handle browser's sourceChanged() signal. Ensures the browser's
 // title and the debug location's filename are up-to-date.
-void HelpBrowser::textChanged()
+void HelpBrowser::textChanged(QUrl url)
 {
     if ( browser->documentTitle().isNull() )
         setWindowTitle( tr("Help Browser") );
     else
         setWindowTitle( browser->documentTitle() ) ;
 #ifdef DEBUG
-    location->setText( browser->source().toString() );
+    location->setText( url.toString() );
 #endif
 }
 

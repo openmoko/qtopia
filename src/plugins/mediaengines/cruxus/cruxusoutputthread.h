@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,7 +24,6 @@
 
 #include <QMediaDevice>
 
-class QMediaDecoder;
 
 namespace cruxus
 {
@@ -39,23 +38,22 @@ public:
     OutputThread();
     ~OutputThread();
 
-    void connectInputPipe(QMediaPipe* inputPipe);
-    void connectOutputPipe(QMediaPipe* outputPipe);
+    QMediaDevice::Info const& dataType() const;
 
-    void disconnectInputPipe(QMediaPipe* inputPipe);
-    void disconnectOutputPipe(QMediaPipe* outputPipe);
+    bool connectToInput(QMediaDevice* input);
+    void disconnectFromInput(QMediaDevice* input);
 
-    void setValue(QString const& name, QVariant const& value);
-    QVariant value(QString const& name);
+    bool open(QIODevice::OpenMode mode);
+    void close();
 
 private slots:
-    void readFromPipe();
+    void deviceReady();
 
 private:
-    qint64 readData( char *data, qint64 maxlen );
-    qint64 writeData( const char *data, qint64 len );
+    qint64 readData(char *data, qint64 maxlen);
+    qint64 writeData(const char *data, qint64 len);
 
-    OutputThreadPrivate*    d;
+    OutputThreadPrivate* d;
 };
 
 }   // ns cruxus

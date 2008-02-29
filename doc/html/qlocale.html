@@ -103,24 +103,24 @@
 </ul>
 <p>The following example illustrates how to use QLocale directly:</p>
 <pre> QLocale::setDefault(QLocale(QLocale::Hebrew, QLocale::Israel));
- QLocale hebrew; <span class="comment">// Constructs a default QLocale</span>
+ QLocale hebrew; <span class="comment">//</span> Constructs a default QLocale
  QString s1 = hebrew.toString(15714.3, 'e');
 
  bool ok;
  double d;
 
  QLocale::setDefault(QLocale::C);
- d = QString(&quot;1234,56&quot;).toDouble(&amp;ok);   <span class="comment">// ok == false</span>
- d = QString(&quot;1234.56&quot;).toDouble(&amp;ok);   <span class="comment">// ok == true, d == 1234.56</span>
+ d = QString(&quot;1234,56&quot;).toDouble(&amp;ok);   <span class="comment">//</span> ok == false
+ d = QString(&quot;1234.56&quot;).toDouble(&amp;ok);   <span class="comment">//</span> ok == true, d == 1234.56
 
  QLocale::setDefault(QLocale::German);
- d = QString(&quot;1234,56&quot;).toDouble(&amp;ok);   <span class="comment">// ok == true, d == 1234.56</span>
- d = QString(&quot;1234.56&quot;).toDouble(&amp;ok);   <span class="comment">// ok == true, d == 1234.56</span>
+ d = QString(&quot;1234,56&quot;).toDouble(&amp;ok);   <span class="comment">//</span> ok == true, d == 1234.56
+ d = QString(&quot;1234.56&quot;).toDouble(&amp;ok);   <span class="comment">//</span> ok == true, d == 1234.56
 
  QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
  str = QString(&quot;%1 %L2 %L3&quot;)
        .arg(12345).arg(12345).arg(12345, 0, 16);
-<span class="comment"> // str == &quot;12345 12,345 3039&quot;</span></pre>
+<span class="comment"> //</span> str == &quot;12345 12,345 3039&quot;</pre>
 <p>When a language/country pair is specified in the constructor, one of three things can happen:</p>
 <ul>
 <li>If the language/country pair is found in the database, it is used.</li>
@@ -689,16 +689,16 @@
  double d;
 
  QLocale c(QLocale::C);
- d = c.toDouble( &quot;1234.56&quot;, &amp;ok );  <span class="comment">// ok == true, d == 1234.56</span>
- d = c.toDouble( &quot;1,234.56&quot;, &amp;ok ); <span class="comment">// ok == true, d == 1234.56</span>
- d = c.toDouble( &quot;1234,56&quot;, &amp;ok );  <span class="comment">// ok == false</span>
+ d = c.toDouble( &quot;1234.56&quot;, &amp;ok );  <span class="comment">//</span> ok == true, d == 1234.56
+ d = c.toDouble( &quot;1,234.56&quot;, &amp;ok ); <span class="comment">//</span> ok == true, d == 1234.56
+ d = c.toDouble( &quot;1234,56&quot;, &amp;ok );  <span class="comment">//</span> ok == false
 
  QLocale german(QLocale::German);
- d = german.toDouble( &quot;1234,56&quot;, &amp;ok );  <span class="comment">// ok == true, d == 1234.56</span>
- d = german.toDouble( &quot;1.234,56&quot;, &amp;ok ); <span class="comment">// ok == true, d == 1234.56</span>
- d = german.toDouble( &quot;1234.56&quot;, &amp;ok );  <span class="comment">// ok == false</span>
+ d = german.toDouble( &quot;1234,56&quot;, &amp;ok );  <span class="comment">//</span> ok == true, d == 1234.56
+ d = german.toDouble( &quot;1.234,56&quot;, &amp;ok ); <span class="comment">//</span> ok == true, d == 1234.56
+ d = german.toDouble( &quot;1234.56&quot;, &amp;ok );  <span class="comment">//</span> ok == false
 
- d = german.toDouble( &quot;1.234&quot;, &amp;ok );    <span class="comment">// ok == true, d == 1234.0</span></pre>
+ d = german.toDouble( &quot;1.234&quot;, &amp;ok );    <span class="comment">//</span> ok == true, d == 1234.0</pre>
 <p>Notice that the last conversion returns 1234.0, because '.' is the thousands group separator in the German locale.</p>
 <p>This function ignores leading and trailing whitespace.</p>
 <p>See also <a href="qlocale.html#toFloat">toFloat</a>(), <a href="qlocale.html#toInt">toInt</a>(), and <a href="qlocale.html#toString">toString</a>().</p>
@@ -792,8 +792,8 @@
 <p>Returns true if the <a href="qlocale.html">QLocale</a> object is the same as the <i>other</i> locale specified; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

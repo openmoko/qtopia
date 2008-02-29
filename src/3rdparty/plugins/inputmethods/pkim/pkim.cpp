@@ -508,7 +508,7 @@ void QWSScreenStroke::paintWithoutCompositionModes(QPaintEvent *e)
     , allowHandwriting(true)
 #endif
     , active(false), lastUnicode(0), status(0), tip(0)
-    , tid_abcautoend(0), waitforrelease(false), symbolPicker(0)
+    , tid_abcautoend(0), symbolPicker(0)
     , wordPicker(0), charList(0), microX(0), microY(0), strokeThreshold(0)
     , actionsSinceChangeMode(0), mPasswordHint(false)
     , key_hold_status(null)
@@ -1056,6 +1056,7 @@ void PkIM::endWord()
             l = word[wl-1];
         }
 
+#ifndef NO_DICT_MODE
         // Don't add in Dict mode, because most cases will be false
         // positives (eg. user didn't look at screen), and the consequence
         // is bad (garbage match next time).
@@ -1064,6 +1065,7 @@ void PkIM::endWord()
             qLog(Input) << "adding "<<word<<" to dictionary";
             addWordToDictionary(word);
         };
+#endif
     }
     word.clear();
 }
@@ -1392,118 +1394,153 @@ bool PkIM::filter(const QPoint &posIn, int state, int w)
 
     if(qt_screenstroke)
         pos = qt_screenstroke->mapFromGlobal(posIn);
+#ifdef DEBUG_PKIM
     else
         qLog(Input) << "qt_screenstroke not instantiated. Failing to translate mouse pos";
+#endif
 
     if (state & Qt::LeftButton) {
-        if(lStrokeTimer->isActive())lStrokeTimer->stop();
-        if (ignoreNextMouse) {
-            ignoreNextMouse = false;
-            // XXX updateStatusIcon();
-            // since ingore next forces a mouse event, something would
-            // have got focus.  Hence we didn't get the rest of that stroke,
-            // hence we do want his one.
-        }
-        if (midStroke) {
-            // mouse move
-            Q_ASSERT(inputStroke);
-            if (could_be_left_click && (pos-inputStroke->startingPoint()).manhattanLength() > strokeThreshold) {
-                lClickTimer->stop();
-                could_be_left_click = false;
-#ifdef DEBUG_PKIM               
-                qLog(Input) << "PkIM::filter() - could_be_left_click = false.  Stroke distance = "<<(pos-inputStroke->startingPoint()).manhattanLength();
-#endif // DEBUG_PKIM
-            }
-            int dx = qAbs( pos.x() - lastPoint.x() );
-            int dy = qAbs( pos.y() - lastPoint.y() );
-            if ( dx + dy > 1 ) {
-                inputStroke->addPoint( pos );
-            }
-        } else {
-            if (qApp) {
-                /* first check largest scroll bar size (1/8th of screen)
-                   then check actual scroll bar size */
-                int dw = QApplication::desktop()->availableGeometry().width();
-                if (pos.x() > dw - (dw >> 3)
-                        // QStyle::PM_ScrollBarExtent
-                        && pos.x() > dw - qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent))
-                    return false;
-            }
-#ifndef QT_NO_QWS_CURSOR
-            qwsServer->setCursorVisible(false);
-#endif
-            // mouse press
-            lClickTimer->start(profile->ignoreStrokeTimeout()); // make configurable
-            could_be_left_click = !lStrokeTimer->isActive();
-#ifdef DEBUG_PKIM            
-            qLog(Input) << "PkIM::filter() - could_be_left_click=!lStrokeTimer->isActive() is "<<could_be_left_click;
-#endif // DEBUG_PKIM
-            lStrokeTimer->stop();
-            inputStroke = new QIMPenStroke;
-            // should be configurable.  canvas height should be user-drawing height.
-            inputStroke->setCanvasHeight(canvasHeight);
-            inputStroke->beginInput(pos);
-            midStroke = true;
-        }
-        fs_append_stroke(pos);
-        lastPoint = pos;
+        return filterMouseButtonDown(pos, state, w);
     } else {
-        // take the first (released) mouse event,
-        // but not the rest.
-        if (!midStroke)
-            return false;
-        midStroke = false;
+        return filterMouseButtonUp(pos, state, w);
+    };
+}
 
-        if (inputStroke) {
-            inputStroke->endInput();
+
+/*!
+    A helper function that implements the logic for handling mouse input 
+    while the mouse button is pressed.  Returns true if the mouse event is 
+    consumed, or false if the event is rejected (and should be passed on 
+    to the system).
+*/
+bool PkIM::filterMouseButtonDown(const QPoint &pos, int state, int w)
+{
+    Q_UNUSED(state);
+    Q_UNUSED(w);
+    if(lStrokeTimer->isActive())lStrokeTimer->stop();
+    if (ignoreNextMouse) {
+        // ignore mouse events until mouse release
+        return false;
+        // XXX updateStatusIcon();
+    }
+    if (midStroke) {
+        // mouse move
+        Q_ASSERT(inputStroke);
+        if (could_be_left_click && (pos-inputStroke->startingPoint()).manhattanLength() > strokeThreshold) {
+            lClickTimer->stop();
+            could_be_left_click = false;
+#ifdef DEBUG_PKIM               
+            qLog(Input) << "PkIM::filter() - could_be_left_click = false.  Stroke distance = "<<(pos-inputStroke->startingPoint()).manhattanLength();
+#endif // DEBUG_PKIM
+        }
+        int dx = qAbs( pos.x() - lastPoint.x() );
+        int dy = qAbs( pos.y() - lastPoint.y() );
+        if ( dx + dy > 1 ) {
+            inputStroke->addPoint( pos );
+        }
+    } else {
+        // Mouse pressed and not already tracking stroke, so start a new
+        // stroke.
+
+        if (qApp) {
+            /* first check largest scroll bar size (1/8th of screen)
+               then check actual scroll bar size */
+            int dw = QApplication::desktop()->availableGeometry().width();
+            if (pos.x() > dw - (dw >> 3)
+                    // QStyle::PM_ScrollBarExtent
+                    && pos.x() > dw - qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent))
+                return false;
+        }
+#ifndef QT_NO_QWS_CURSOR
+        qwsServer->setCursorVisible(false);
+#endif
+        // mouse press
+        lClickTimer->start(profile->ignoreStrokeTimeout()); // make configurable
+        could_be_left_click = !lStrokeTimer->isActive();
+#ifdef DEBUG_PKIM            
+        qLog(Input) << "PkIM::filter() - could_be_left_click=!lStrokeTimer->isActive() is "<<could_be_left_click;
+#endif // DEBUG_PKIM
+        lStrokeTimer->stop();
+        inputStroke = new QIMPenStroke;
+        // should be configurable.  canvas height should be user-drawing height.
+        inputStroke->setCanvasHeight(canvasHeight);
+        inputStroke->beginInput(pos);
+        midStroke = true;
+    }
+    fs_append_stroke(pos);
+    lastPoint = pos;
+    return true;
+}
+
+/*!
+    A helper function that implements the logic for handling mouse input
+    while the mouse button is not pressed.  Returns true if the mouse event
+    is consumed,  or false if the event is rejected (and should be passed on to the system).
+*/
+bool PkIM::filterMouseButtonUp(const QPoint &pos, int state, int w)
+{
+    Q_UNUSED(pos);
+    Q_UNUSED(state);
+    // take the first (released) mouse event,
+    // but not the rest.
+    if (ignoreNextMouse) {
+        // !((state & Qt::LeftButton) marks the end of a stroke, 
+        // so we've finished ignoring a mouse stroke.
+        ignoreNextMouse = false;
+    }
+    if (!midStroke)
+        return false;
+    midStroke = false;
+
+    if (inputStroke) {
+        inputStroke->endInput();
 
 #ifndef QT_NO_QWS_CURSOR
-            qwsServer->setCursorVisible(true);
+        qwsServer->setCursorVisible(true);
 #endif
-            lClickTimer->stop();
-            fs_fade_stroke();
-            if (could_be_left_click) {
+        lClickTimer->stop();
+        fs_fade_stroke();
+        if (could_be_left_click) {
 #ifdef DEBUG_PKIM                
-                qLog(Input) << "PkIM::filter() - if (could_be_left_click) is true- sending mouse event";
+            qLog(Input) << "PkIM::filter() - if (could_be_left_click) is true- sending mouse event";
 #endif // DEBUG_PKIM
-                fs_end_stroke(); // not a stroke (it's a click-through), so end
-                // this hides the fullscreen widget so it doesn't get 
-                // the mouse events about to be created
+            fs_end_stroke(); // not a stroke (it's a click-through), so end
+            // this hides the fullscreen widget so it doesn't get 
+            // the mouse events about to be created
 
-                protectInputStroke = true;
-                // send mouse
-                // must have started a stroke, so we'll assume we've got a qt_screenstroke
-                if(qt_screenstroke){
-                    sendAndEnd();
-                    sendMouseEvent(qt_screenstroke->mapToGlobal(
-                                inputStroke->startingPoint()), Qt::LeftButton, w);
-                    sendMouseEvent(qt_screenstroke->mapToGlobal(
-                                inputStroke->startingPoint()), Qt::NoButton, w); 
-                } else
-                {
-                    qWarning() << "PkIM: qt_screenstroke not instantiated when it should be";
-                    sendMouseEvent(inputStroke->startingPoint(), Qt::LeftButton, w);
-                    sendMouseEvent(inputStroke->startingPoint(), Qt::NoButton, w); 
-                }
-                protectInputStroke = false;
-            } else {
-                processStroke(inputStroke);
-                int lch = penMatcher->lastCanvasHeight();
-                // ignore outriders.
-                if (lch && (lch >> 1) < canvasHeight && (canvasHeight >> 1) < lch) {
-                    // um, may modify ratio to make slower or faster adjustment?
-                    canvasHeight = int(float(canvasHeight)*0.9+float(lch)*0.1);
-                }
-                // end of stroke, start lStrokeTimer
-                lStrokeTimer->start(multiStrokeTimeout); // make configurable
+            protectInputStroke = true;
+            // send mouse
+            // must have started a stroke, so we'll assume we've got a qt_screenstroke
+            if(qt_screenstroke){
+                sendAndEnd();
+                sendMouseEvent(qt_screenstroke->mapToGlobal(
+                            inputStroke->startingPoint()), Qt::LeftButton, w);
+                sendMouseEvent(qt_screenstroke->mapToGlobal(
+                            inputStroke->startingPoint()), Qt::NoButton, w); 
+            } else
+            {
+                qWarning() << "PkIM: qt_screenstroke not instantiated when it should be";
+                sendMouseEvent(inputStroke->startingPoint(), Qt::LeftButton, w);
+                sendMouseEvent(inputStroke->startingPoint(), Qt::NoButton, w); 
             }
-            delete inputStroke;
-            inputStroke = 0;
+            protectInputStroke = false;
         } else {
-            return false;
-        };
-    }
-    return true;
+            processStroke(inputStroke);
+            int lch = penMatcher->lastCanvasHeight();
+            // ignore outriders.
+            if (lch && (lch >> 1) < canvasHeight && (canvasHeight >> 1) < lch) {
+                // um, may modify ratio to make slower or faster adjustment?
+                canvasHeight = int(float(canvasHeight)*0.9+float(lch)*0.1);
+            }
+            // end of stroke, start lStrokeTimer
+            lStrokeTimer->start(multiStrokeTimeout); // make configurable
+        }
+        delete inputStroke;
+        inputStroke = 0;
+        return true;
+    } else {
+        return false;
+    };
 }
 
 #ifdef PKIM_VERBOSE_OUTPUT 
@@ -1537,10 +1574,8 @@ bool PkIM::processInputMatcherChar(InputMatcher* matcher, int unicode, int keyco
                     // send the hold characer
                     text += item.holdarg;
                     sendAndEnd();
-                    waitforrelease = true;
                 } else if (item.holdfunc != noFunction) {
                     applyFunction(item.holdfunc);
-                    waitforrelease = true;
                 }
 
                 return true;
@@ -1729,9 +1764,8 @@ bool PkIM::filter(int unicode, int keycode, int modifiers,
 
     if (Qt::Key_Select == keycode && !text.isEmpty()) {
         sendAndEnd();
-        waitforrelease = true;
-        REPORT_FILTER_KEY_RESULT_MACRO(" - Key_Select while preediting, commiting word and rejecting key");
-        return false;
+        REPORT_FILTER_KEY_RESULT_MACRO(" - Key_Select while preediting, commiting word and consuming key");
+        return true;
     };
     /*if (autoRepeat && unicode) {
         REPORT_FILTER_KEY_RESULT_MACRO(" - rejected, autorepeat without hold function");

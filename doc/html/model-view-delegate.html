@@ -67,8 +67,8 @@
 <h3>Providing an Editor</h3>
 <p>In this example, when the table view needs to provide an editor, it asks the delegate to provide an editor widget that is appropriate for the item being modified. The <a href="qabstractitemdelegate.html#createEditor">createEditor()</a> function is supplied with everything that the delegate needs to be able to set up a suitable widget:</p>
 <pre> QWidget *SpinBoxDelegate::createEditor(QWidget *parent,
-     const QStyleOptionViewItem &amp;/* option */,
-     const QModelIndex &amp;/* index */) const
+     const QStyleOptionViewItem &amp;<span class="comment">/* option */</span>,
+     const QModelIndex &amp;<span class="comment">/* index */</span>) const
  {
      QSpinBox *editor = new QSpinBox(parent);
      editor-&gt;setMinimum(0);
@@ -108,7 +108,7 @@
 <h3>Updating the Editor's Geometry</h3>
 <p>It is the responsibility of the delegate to manage the editor's geometry. The geometry must be set when the editor is created, and when the item's size or position in the view is changed. Fortunately, the view provides all the necessary geometry information inside a <a href="qstyleoptionviewitem.html">view option</a> object.</p>
 <pre> void SpinBoxDelegate::updateEditorGeometry(QWidget *editor,
-     const QStyleOptionViewItem &amp;option, const QModelIndex &amp;/* index */</span>) const
+     const QStyleOptionViewItem &amp;option, const QModelIndex &amp;<span class="comment">/* index */</span>) const
  {
      editor-&gt;setGeometry(option.rect);
  }</pre>
@@ -126,8 +126,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

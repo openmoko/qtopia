@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the Qt Designer of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -108,7 +106,8 @@ void EditorWithReset::setChildEditor(QWidget *child_editor)
 QPropertyEditorDelegate::QPropertyEditorDelegate(QObject *parent)
     : QItemDelegate(parent),
       m_readOnly(false),
-      m_syncing(false)
+      m_syncing(false),
+      m_lastEdited(0)
 {
 }
 
@@ -217,6 +216,14 @@ void QPropertyEditorDelegate::setReadOnly(bool readOnly)
     m_readOnly = readOnly;
 }
 
+void QPropertyEditorDelegate::slotDestroyed(QObject *object)
+{
+    if (m_lastEdited == object) {
+        m_lastEdited = 0;
+        emit editorClosed();
+    }
+}
+
 QWidget *QPropertyEditorDelegate::createEditor(QWidget *parent,
                                 const QStyleOptionViewItem &option,
                                 const QModelIndex &index) const
@@ -253,7 +260,12 @@ QWidget *QPropertyEditorDelegate::createEditor(QWidget *parent,
         }
     }
 
+    connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotDestroyed(QObject *)));
 
+    QPropertyEditorDelegate *that = const_cast<QPropertyEditorDelegate *>(this);
+    if (!m_lastEdited)
+        emit that->editorOpened();
+    m_lastEdited = editor;
     return editor;
 }
 

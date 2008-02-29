@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -85,14 +85,10 @@ enum TelnetOption
     This serial port abstraction implements the telnet protocol (RFC 854),
     to make it easy to debug AT command handlers using a telnet client.
 
-\if defined(QTOPIA_OPENSOURCE)
-    \sa QSerialSocketServer, QSerialIODevice
-\else
     The QSerialSocket class is also used by data calls initiated by QPhoneCall
     to pass the raw modem data and handshaking signals to client applications.
 
     \sa QSerialSocketServer, QSerialIODevice, QPhoneCall
-\endif
 */
 #include <QDebug>
 class QSerialSocketPrivate
@@ -166,8 +162,9 @@ QSerialSocket::~QSerialSocket()
 }
 
 /*!
-    Open this serial I/O device in \a mode.  This just sets the
+    Opens this serial I/O device in \a mode.  This just sets the
     device to open.  The actual connect is done during the constructor.
+    Returns true if the device can be opened; false otherwise.
 */
 bool QSerialSocket::open( OpenMode mode )
 {
@@ -178,7 +175,7 @@ bool QSerialSocket::open( OpenMode mode )
 }
 
 /*!
-    Close this serial I/O device.  The socket will remain connected
+    Closes this serial I/O device.  The socket will remain connected
     until this object is destroyed.
 */
 void QSerialSocket::close()
@@ -201,7 +198,7 @@ bool QSerialSocket::waitForReadyRead(int msecs)
 */
 qint64 QSerialSocket::bytesAvailable() const
 {
-    return d->bufLen;
+    return d->bufLen - d->bufPosn;
 }
 
 /*!
@@ -342,7 +339,7 @@ qint64 QSerialSocket::writeData( const char *data, qint64 len )
                         written += temp;
                     break;
                 }
-                written += temp;
+                ++written;
                 data = s;
                 len -= temp;
             } else {
@@ -350,7 +347,7 @@ qint64 QSerialSocket::writeData( const char *data, qint64 len )
                 temp = d->socket->write( "\377\377", 2 );
                 if ( temp != 2 )
                     break;
-                written += temp;
+                ++written;
                 ++data;
                 --len;
                 s = (const char *)::memchr( data, (char)0xFF, (int)len );
@@ -440,6 +437,9 @@ void QSerialSocket::socketReadyRead()
         memmove( d->buffer, d->buffer + d->bufPosn, d->bufLen - d->bufPosn );
         d->bufLen -= d->bufPosn;
         d->bufPosn = 0;
+    } else if ( d->bufPosn > 0 && d->bufPosn == d->bufLen ) {
+        d->bufPosn = 0;
+        d->bufLen = 0;
     }
     if ( d->bufLen >= (int)sizeof( d->buffer ) ) {
         // Buffer is full!  Notify the higher layers to read it and then exit.

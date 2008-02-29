@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -47,6 +45,7 @@
 #include <qitemdelegate.h>
 #include <qstandarditemmodel.h>
 #include <qmap.h>
+#include <qmenu.h>
 #include <qevent.h>
 #include <qlayout.h>
 #include <qscrollbar.h>
@@ -333,6 +332,22 @@ void QComboBoxPrivateContainer::timerEvent(QTimerEvent *timerEvent)
             combo->update();
         }
     }
+}
+
+void QComboBoxPrivateContainer::resizeEvent(QResizeEvent *e)
+{
+    QStyleOptionComboBox opt = comboStyleOption();
+    if (combo->style()->styleHint(QStyle::SH_ComboBox_Popup, &opt, combo)) {
+        QStyleOption myOpt;
+        myOpt.initFrom(this);
+        QStyleHintReturnMask mask;
+        if (combo->style()->styleHint(QStyle::SH_Menu_Mask, &myOpt, this, &mask)) {
+            setMask(mask.region);
+        }
+    } else {
+        clearMask();
+    }
+    QFrame::resizeEvent(e);
 }
 
 void QComboBoxPrivateContainer::leaveEvent(QEvent *)
@@ -2337,9 +2352,23 @@ void QComboBox::changeEvent(QEvent *e)
         if (!isEnabled())
             hidePopup();
         break;
-    case QEvent::PaletteChange:
-        d->viewContainer()->setPalette(palette());
+    case QEvent::PaletteChange: {
+        QStyleOptionComboBox opt;
+        initStyleOption(&opt);
+#ifndef QT_NO_MENU
+        if (style()->styleHint(QStyle::SH_ComboBox_Popup, &opt, this)) {
+            QMenu menu;
+            menu.ensurePolished();
+            d->viewContainer()->setPalette(menu.palette());
+            d->viewContainer()->setWindowOpacity(menu.windowOpacity());
+        } else
+#endif
+        {
+            d->viewContainer()->setPalette(palette());
+            d->viewContainer()->setWindowOpacity(1.0);
+        }
         break;
+    }
     case QEvent::FontChange:
         d->sizeHint = QSize(); // invalidate size hint
         d->viewContainer()->setFont(font());

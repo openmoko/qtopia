@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qsplitter.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/widgets/qsplitter.cpp -->
 <head>
   <title>Qt 4.3: QSplitter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -225,7 +225,7 @@
 <h3 class="fn"><a name="setSizes"></a>void QSplitter::setSizes ( const <a href="qlist.html">QList</a>&lt;int&gt; &amp; <i>list</i> )</h3>
 <p>Sets the size parameters to the values given in the <i>list</i>. If the splitter is horizontal, the values set the widths of each widget going from left to right. If the splitter is vertical, the values set the heights of each widget going from top to bottom. Extra values in the <i>list</i> are ignored.</p>
 <p>If <i>list</i> contains too few values, the result is undefined but the program will still be well-behaved.</p>
-<p>The values in <i>list</i> should be the height or width (depending on <a href="qsplitter.html#orientation-prop">orientation</a>()) that the widgets should be resized to.</p>
+<p>The values in <i>list</i> should be the height or width (depending on <a href="qsplitter.html#orientation-prop">orientation</a>()) that the widgets should be resized to. If you specify a size of 0, the widget will be invisible.</p>
 <p>See also <a href="qsplitter.html#sizes">sizes</a>().</p>
 <h3 class="fn"><a name="setStretchFactor"></a>void QSplitter::setStretchFactor ( int <i>index</i>, int <i>stretch</i> )</h3>
 <p>Updates the size policy of the widget at position <i>index</i> to have a stretch factor of <i>stretch</i>.</p>
@@ -240,6 +240,7 @@
 <p>Returns a list of the size parameters of all the widgets in this splitter.</p>
 <p>If the splitter's orientation is horizontal, the list is a list of widget widths; if the orientation is vertical, the list is a list of widget heights.</p>
 <p>Giving the values to another splitter's <a href="qsplitter.html#setSizes">setSizes</a>() function will produce a splitter with the same layout as this one.</p>
+<p>Note that invisible widgets have a size of 0.</p>
 <p>The easiest way to iterate over the list is to use the Java-style iterators.</p>
 <pre>     QListIterator&lt;int&gt; it(splitter-&gt;sizes());
      while (it.hasNext())
@@ -252,51 +253,10 @@
 <h3 class="fn"><a name="widget"></a><a href="qwidget.html">QWidget</a> * QSplitter::widget ( int <i>index</i> ) const</h3>
 <p>Returns the widget at the given <i>index</i> in the splitter's layout.</p>
 <p>See also <a href="qsplitter.html#count">count</a>(), <a href="qsplitter.html#handle">handle</a>(), <a href="qsplitter.html#indexOf">indexOf</a>(), and <a href="qsplitter.html#insertWidget">insertWidget</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="ResizeMode-enum"></a>enum QSplitter::ResizeMode</h3>
-<p>This enum describes the different resizing behaviors child widgets can have:</p>
-<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
-<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QSplitter::Auto</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The widget will be resized according to the stretch factors set in its <a href="qwidget.html#sizePolicy-prop">sizePolicy</a>().</td></tr>
-<tr><td valign="top"><tt>QSplitter::Stretch</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The widget will be resized when the splitter itself is resized.</td></tr>
-<tr><td valign="top"><tt>QSplitter::KeepSize</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top"><a href="qsplitter.html">QSplitter</a> will try to keep the widget's size unchanged.</td></tr>
-<tr><td valign="top"><tt>QSplitter::FollowSizeHint</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top"><a href="qsplitter.html">QSplitter</a> will resize the widget when the widget's size hint changes.</td></tr>
-</table></p>
-<p>Use <a href="qsplitter.html#setStretchFactor">setStretchFactor</a>() instead.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSplitter-3"></a>QSplitter::QSplitter ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="QSplitter-4"></a>QSplitter::QSplitter ( <a href="qt.html#Orientation-enum">Qt::Orientation</a> <i>orientation</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use one of the constructors that don't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
-<h3 class="fn"><a name="margin"></a>int QSplitter::margin () const</h3>
-<p>Returns the with of the the margin around the contents of the widget.</p>
-<p>Use <a href="qwidget.html#getContentsMargins">QWidget::getContentsMargins</a>() instead.</p>
-<p>See also <a href="qsplitter-qt3.html#setMargin">setMargin</a>() and <a href="qwidget.html#getContentsMargins">QWidget::getContentsMargins</a>().</p>
-<h3 class="fn"><a name="moveToFirst"></a>void QSplitter::moveToFirst ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
-<p>Use insertWidget(0, <i>widget</i>) instead.</p>
-<h3 class="fn"><a name="moveToLast"></a>void QSplitter::moveToLast ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
-<p>Use addWidget(<i>widget</i>) instead.</p>
-<h3 class="fn"><a name="setCollapsible-2"></a>void QSplitter::setCollapsible ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, bool <i>collapsible</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use setCollapsible(indexOf(<i>widget</i>, <i>collapsible</i>)) instead.</p>
-<h3 class="fn"><a name="setMargin"></a>void QSplitter::setMargin ( int <i>margin</i> )</h3>
-<p>Sets the width of the margin around the contents of the widget to <i>margin</i>.</p>
-<p>Use <a href="qwidget.html#setContentsMargins">QWidget::setContentsMargins</a>() instead.</p>
-<p>See also <a href="qsplitter-qt3.html#margin">margin</a>() and <a href="qwidget.html#setContentsMargins">QWidget::setContentsMargins</a>().</p>
-<h3 class="fn"><a name="setResizeMode"></a>void QSplitter::setResizeMode ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, <a href="qsplitter-qt3.html#ResizeMode-enum">ResizeMode</a> <i>mode</i> )</h3>
-<p>Use <a href="qsplitter.html#setStretchFactor">setStretchFactor</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> splitter-&gt;setResizeMode(firstChild, QSplitter::KeepSize);
- splitter-&gt;setResizeMode(secondChild, QSplitter::Stretch);</font></pre>
-<p>you can rewrite it as</p>
-<pre> splitter-&gt;setStretchFactor(splitter-&gt;indexOf(firstChild), 0);
- splitter-&gt;setStretchFactor(splitter-&gt;indexOf(secondChild), 1);</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

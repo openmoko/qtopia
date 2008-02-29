@@ -14,26 +14,17 @@ Qtopia::Paths::get_paths();
 # Windows depot builds use the perl scripts directly rather than the compiled code
 if ( $isWindows ) {
     check_script($0, "$depotpath/src/build/bin", $ARGV[0]);
+} else {
+    # This file is not maintained for non-Windows platforms
+    die "This script is not maintained for non-Windows platforms. Use runwithvars.sh instead.";
 }
 
 
 use constant OUTPUT => 0;
 use constant DEBUG => 0;
 
-my $n = "\n";
-my $export = "export";
-if ( $isWindows ) {
-    $n = "\r\n";
-    $export = "set";
-}
+my $command = "\@echo off\r\n";
 
-my $command = "";
-
-if ( $isWindows ) {
-    $command .= "\@echo off$n";
-} else {
-    #$command .= "set -x$n";
-}
 while ( @ARGV ) {
     my $bit = shift @ARGV;
     DEBUG and print "bit $bit\n";
@@ -41,10 +32,7 @@ while ( @ARGV ) {
         unshift(@ARGV, $bit);
         last;
     }
-    $command .= "$export $bit$n";
-}
-if ( !$isWindows ) {
-    $command .= '[ -n "$DEVICE_CONFIG_PATH" ] && [ -f "$DEVICE_CONFIG_PATH/environment" ] && . "$DEVICE_CONFIG_PATH/environment"'.$n;
+    $command .= "set $bit\r\n";
 }
 my @args = @ARGV;
 for ( @args ) {
@@ -52,22 +40,16 @@ for ( @args ) {
         $_ = '"'.$_.'"';
     }
 }
-$command .= join(" ", @args).$n;
+$command .= join(" ", @args)."\r\n";
 # Without this the batch files do not propogate errors
-if ( $isWindows ) {
-    $command .= "if errorlevel 1 return 1$n";
-}
+$command .= "if errorlevel 1 return 1\r\n";
 
-if ( $isWindows ) {
-    mkpath("$QPEDIR/src/build/bin/tmp");
-    my $tmpbat = fixpath("$QPEDIR/src/build/bin/tmp/").$$.".bat";
-    open OUT, ">$tmpbat" or die "Can't write $tmpbat";
-    print OUT $command;
-    close OUT;
-    my $ret = system($tmpbat);
-    unlink $tmpbat;
-    exit ( $ret != 0 );
-} else {
-    exec $command;
-}
+mkpath("$QPEDIR/src/build/bin/tmp");
+my $tmpbat = fixpath("$QPEDIR/src/build/bin/tmp/").$$.".bat";
+open OUT, ">$tmpbat" or die "Can't write $tmpbat";
+print OUT $command;
+close OUT;
+my $ret = system($tmpbat);
+unlink $tmpbat;
+exit ( $ret != 0 );
 

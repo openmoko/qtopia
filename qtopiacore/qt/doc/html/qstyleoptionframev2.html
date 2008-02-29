@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/styles/qstyleoption.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/styles/qstyleoption.cpp -->
 <head>
   <title>Qt 4.3: QStyleOptionFrameV2 Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -52,7 +52,7 @@
 <h2>Detailed Description</h2>
 <p>The QStyleOptionFrameV2 class is used to describe the parameters necessary for drawing a frame in Qt 4.1 or above.</p>
 <p>QStyleOptionFrameV2 inherits <a href="qstyleoptionframe.html">QStyleOptionFrame</a> which is used for drawing several built-in Qt widgets, including <a href="qframe.html">QFrame</a>, <a href="qgroupbox.html">QGroupBox</a>, <a href="qlineedit.html">QLineEdit</a>, and <a href="qmenu.html">QMenu</a>.</p>
-<p>An instance of the QStyleOptionFrameV2 class has <a href="qstyleoption.html#type-varx">type</a> <a href="qstyleoption.html#OptionType-enum">SO_Frame</a> and <a href="qstyleoption.html#version-var">version</a> 2. The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles. The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally don't need to check it.</p>
+<p>An instance of the QStyleOptionFrameV2 class has <a href="qstyleoption.html#type-var">type</a> <a href="qstyleoption.html#OptionType-enum">SO_Frame</a> and <a href="qstyleoption.html#version-var">version</a> 2. The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles. The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally don't need to check it.</p>
 <p>If you create your own <a href="qstyle.html">QStyle</a> subclass, you should handle both <a href="qstyleoptionframe.html">QStyleOptionFrame</a> and QStyleOptionFrameV2. One way to achieve this is to use the QStyleOptionFrameV2 copy constructor. For example:</p>
 <pre>     QStyleOptionFrame *option;
 
@@ -60,7 +60,7 @@
             qstyleoption_cast&lt;const QStyleOptionFrame *&gt;(option)) {
          QStyleOptionFrameV2 frameOptionV2(*frameOption);
 
-         <span class="comment">// draw the frame using frameOptionV2</span>
+         <span class="comment">//</span> draw the frame using frameOptionV2
      }</pre>
 <p>In the example above: If the <tt>frameOption</tt>'s version is 1, <a href="qstyleoptionframev2.html#FrameFeature-enum">FrameFeature</a> is set to <a href="qstyleoptionframev2.html#FrameFeature-enum">None</a> for <tt>frameOptionV2</tt>. If <tt>frameOption</tt>'s version is 2, the constructor will simply copy the <tt>frameOption</tt>'s <a href="qstyleoptionframev2.html#FrameFeature-enum">FrameFeature</a> value.</p>
 <p>For an example demonstrating how style options can be used, see the <a href="widgets-styles.html">Styles</a> example.</p>
@@ -103,8 +103,8 @@
 <p>See also <a href="qstyleoptionframev2.html#FrameFeature-enum">FrameFeature</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

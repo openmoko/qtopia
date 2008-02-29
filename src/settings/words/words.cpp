@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,6 +29,7 @@
 #include <QLayout>
 #include <QLabel>
 #include <QListWidget>
+#include <QTextDocument>
 #include <QKeyEvent>
 #include <QPainter>
 #include <QMenu>
@@ -72,7 +73,6 @@ void WordListDelegate::paint(QPainter *painter,
         return;
     }
     static QRect emptyRect;
-    static QPoint pt;
 
     QVariant word = index.model()->data(index, Qt::DisplayRole);
     QVariant lang = index.model()->data(index, WordListItem::LanguageRole);
@@ -80,41 +80,28 @@ void WordListDelegate::paint(QPainter *painter,
     int maxLength = index.model()->data(index, WordListItem::MaxLengthRole).toInt();
 
     QString label;
-    QSize sz(0,0);
     QFont f;
     if (word.isValid()) {
         f = painter->font();
         f.setBold(true);
         QFontMetrics fm(f);
         label = word.toString();
-        sz = fm.size(0, label);
+        label = "<b>" + label.left(maxLength) + "</b>"
+                + label.mid(maxLength);
     } else { //in case sth went wrong
         QItemDelegate::paint(painter, option, index);
         return;
     }
 
-    int langLength = 0;
-    if (lang.isValid()) {
-        if (font.isValid())
-            f = qvariant_cast<QFont>(font);
-        f.setItalic(true);
-        QFontMetrics fm(f);
-        QString langString = lang.toString();
-        if (!langString.isNull())
-            langString = QString(" ("+langString+")");
-        langLength = langString.length();
-        QSize langSize = fm.size(0, langString);
-        label+=langString;
-        sz.setHeight(qMax(langSize.height(), sz.height()));
-        sz.setWidth(langSize.width()+sz.width());
-    }
+    QString langString = lang.toString();
+    if (!langString.isNull())
+        label += QString(" ("+langString+")");
 
     // Layout text
-    QRect textRect(pt, sz + QSize(2,2));
+    QRect textRect;
     doLayout(option, &emptyRect, &emptyRect, &textRect, false);
 
     // draw the item
-
     QPen pen = painter->pen();
     QPalette::ColorGroup cg = option.state & QStyle::State_Enabled
                               ? QPalette::Normal : QPalette::Disabled;
@@ -132,34 +119,11 @@ void WordListDelegate::paint(QPainter *painter,
         painter->restore();
     }
 
-    QFont painterFont = painter->font();
-    QRect textRt = textRect.adjusted(2, 0, -2, 0); // remove width padding
-
-    // render pattern part of word bold
-    painterFont.setBold(true);
-    painter->setFont(painterFont);
-    painter->drawText(textRt, option.displayAlignment, label.left(maxLength));
-    textRt.moveRight(textRt.right() + QFontMetrics(painterFont).width(label.left(maxLength)));
-
-    // render other part of word
-    painterFont.setBold(false);
-    painter->setFont(painterFont);
-    painter->drawText(textRt, option.displayAlignment, label.mid(maxLength, label.length() - langLength - maxLength));
-    textRt.moveRight(textRt.right() + QFontMetrics(painterFont).width(label.mid(maxLength, label.length() - langLength - maxLength)));
-
-    // render language italic
-    if (langLength)
-    {
-        painterFont.setItalic(true);
-        painter->setFont(painterFont);
-        painter->drawText(textRt, option.displayAlignment, label.right(langLength));
-
-        // restore font to original state
-        painterFont.setItalic(false);
-        painter->setFont(painterFont);
-    }
-
-    painter->setPen(pen);
+    QTextDocument doc;
+    doc.setHtml(label);
+    painter->translate(textRect.topLeft());
+    doc.drawContents(painter);
+    painter->translate(-textRect.topLeft());
 }
 
 QSize WordListDelegate::sizeHint(const QStyleOptionViewItem &option,
@@ -306,11 +270,10 @@ bool Words::eventFilter(QObject* watched, QEvent* e)
     Q_UNUSED(e);
     if(e->type() == QEvent::InputMethod)
     {
+        QInputMethodEvent* ime =  (QInputMethodEvent*)e;
 
-    QInputMethodEvent* ime =  (QInputMethodEvent*)e;
-
-    if(ime->commitString().isEmpty())
-        lookup (line->text().insert(line->cursorPosition(),ime->preeditString()));
+        if(ime->commitString().isEmpty())
+            lookup (line->text().insert(line->cursorPosition(),ime->preeditString()));
     }
     return false;
 };
@@ -359,7 +322,7 @@ void Words::search(const QString& in)
     QString pattern = in;
     QStringList langs = InputMatcher::chosenLanguages();
     QSet<QString> seen;
-    for (int prefix=0; prefix<=(pattern.length()>3?1:0); prefix++) {
+    for (int prefix=0; prefix<=(pattern.length()>4?1:0); prefix++) {
         bool firstlang=true;
         QString fl = languageName(*langs.begin(),0,0);
         foreach(QString lit, langs) {
@@ -440,7 +403,7 @@ void Words::lookup(const QString &in)
             search(pattern);
             tooltip->hide();
         }
-        if ( pattern.length() <= 3 && box->count() == 0 ) {
+        if ( pattern.length() <= 1 && box->count() == 0 ) {
             tooltip->setText(tr("Type numbers to match."));
             tooltip->resize(tooltip->maximumWidth(), tooltip->heightForWidth(tooltip->maximumWidth()));
             tooltip->raise();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,12 +35,10 @@
     discovery mechanisms to allow one interface in a group to quickly locate
     another via the interface() method.
 
-\if !defined(QTOPIA_OPENSOURCE)
     The most extensive use of this class is for Qtopia telephony services, which
     create a large number of related interfaces for network registration, phone
     call management, call forwarding settings, SIM file contents, and so on.
     See QTelephonyService for more information.
-\endif
 
     It isn't necessary that QAbstractIpcInterface instances be part of a group;
     they can be standalone.
@@ -48,11 +46,7 @@
     The QAbstractIpcInterfaceGroupManager class can be used to receive run time
     notification of when groups are added and removed from the system.
 
-\if defined(QTOPIA_OPENSOURCE)
-    \sa QAbstractIpcInterface, QAbstractIpcInterfaceGroupManager
-\else
     \sa QAbstractIpcInterface, QAbstractIpcInterfaceGroupManager, QTelephonyService
-\endif
     \ingroup ipc
 */
 

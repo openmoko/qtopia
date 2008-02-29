@@ -45,7 +45,7 @@
 <p>If this is your first encounter with Qtopia and/or cross-compiling then it might be best to start with experimenting on the desktop and when you are comfortable with that, start running Qtopia on a device.</p>
 <a name="prefix-vs-image"></a>
 <h2>Prefix vs Image</h2>
-<p>Qtopia installs into the <tt>image</tt> directory but it expects to be run from the <tt>prefix</tt> directory. If you are unfamiliar with how these locations are handled, please see <a href="buildsystem/chlog-4-2-0-1.html#image-prefix-and-sdk-location">http://doc.trolltech.com/qtopia4.3/buildsystem/chlog-4-2-0-1.html</a>.</p>
+<p>Qtopia installs into the <tt>image</tt> directory but it expects to be run from the <tt>prefix</tt> directory. If you are unfamiliar with how these locations are handled, please see <a href="buildsystem/over-image-prefix-and-sdk-location-1.html">http://doc.trolltech.com/qtopia4.3/buildsystem/chlog-4-2-0-1.html</a>.</p>
 <p>If you are building against the Greenphone SDK, the <tt>image</tt> is located at <tt>/opt/Qtopia/SDK/&lt;version&gt;/&lt;device&gt;/image</tt>. Note that <tt>device</tt> is either <tt>x86</tt> or <tt>greenphone</tt>.</p>
 <p>If the <tt>prefix</tt> is not the same as the <tt>image</tt>, you will need to move your files before you can run them. Qtopia cannot run from a directory other than the <tt>prefix</tt>.</p>
 <a name="environment-settings-to-run-qtopia"></a>
@@ -53,7 +53,7 @@
 <p>There are no specific environment variables required to run Qtopia, however there are some that can be set to control Qtopia's features.</p>
 <p>If you specified <tt>-no-rpath</tt> you will need to set LD_LIBRARY_PATH so that the libraries can be found.</p>
 <p>Qtopia does not require <tt>PATH</tt> to be set but third party applications may expect it to include <tt>&lt;prefix&gt;/bin</tt>.</p>
-<p>You may wish to set some environment variables to configure <a href="qtopiacore-envvars.html">Qtopia Core</a>. You may also need to set QTOPIA_PHONE_DEVICE. See <a href="integration-guide.html#setting-environment-variables">Setting Environment Variables</a> for details on how to set environment variables.</p>
+<p>You may wish to set some environment variables to configure <a href="./qtopiacore-envvars.html">Qtopia Core</a>. You may also need to set <a href="integration-guide.html#modem-integration">QTOPIA_PHONE_DEVICE</a>. See <a href="integration-guide.html#qtopia-environment-variables">Qtopia Environment Variables</a> for details on how to set environment variables.</p>
 <a name="running-qtopia-on-the-desktop-machine"></a>
 <h2>Running Qtopia on the Desktop Machine</h2>
 <p>To run Qtopia on the desktop a <tt>runqtopia</tt> script is provided. The exact location of the script depends on the package:</p>
@@ -65,7 +65,7 @@
 <p>where <tt>&lt;qtopia-root-dir&gt;</tt> is the install location of the source package.</p>
 <p>The <i>runqtopia</i> script is designed to ease the burden of running multiple Qtopia versions on a single machine. It launches QVFb and ensures that Qtopia can talk to it by setting <tt>QWS_DISPLAY</tt>. It also changes the value of HOME since running multiple Qtopia versions with the same HOME directory can cause problems.</p>
 <p>To quit Qtopia and close all Qtopia applications close the virtual framebuffer.</p>
-<p>QVFb is run using a skin to make it feel more like a real device. A skin is simply a set of XML files that define the look and feel of QVFb. You may use a different skin, or create your own to replicate your target device. If you are not familiar with QVFb please refer to: <a href="qtopiacore-qvfb.html">Qtopia QVFb </a> before continuing.</p>
+<p>QVFb is run using a skin to make it feel more like a real device. A skin is simply a set of XML files that define the look and feel of QVFb. You may use a different skin, or create your own to replicate your target device. If you are not familiar with QVFb please refer to: <a href="./qtopiacore-qvfb.html">Qtopia QVFb </a> before continuing.</p>
 <p>In practice the <tt>runqtopia</tt> script can be used in all cases to conveniently start Qtopia. In cases where the script does not perform as expected, it is is advisable to take the script as the starting point and modify the procedure to meet your specific requirements.</p>
 <p>For further information and a description of environment variables used by the script, use the command:</p>
 <pre>    runqtopia -help</pre>
@@ -78,7 +78,7 @@
 <a name="running-qtopia-on-an-embedded-device"></a>
 <h2>Running Qtopia on an Embedded Device</h2>
 <p>This section describes the procedure to run Qtopia on a device and is the same for all Qtopia editions.</p>
-<p><b>Note:</b> The <b>$<a href="qtopiacore-envvars.html#qws-display">QWS_DISPLAY</a></b> environment variable must specify a value for <b>mmWidth</b> and <b>mmHeight</b> so that the screen DPI can be correctly calculated.</p>
+<p><b>Note:</b> The <b>$<a href="./qtopiacore-envvars.html">QWS_DISPLAY</a></b> environment variable must specify a value for <b>mmWidth</b> and <b>mmHeight</b> so that the screen DPI can be correctly calculated.</p>
 <p>Qtopia can made available into the device in the following ways:</p>
 <ul>
 <li><a href="#using-an-nfs-mount-partition">Using an NFS Mount Partition</a></li>
@@ -162,8 +162,8 @@
 <pre>         export QTOPIA_PHONE_MUX=no</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

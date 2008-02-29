@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qevent.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qevent.cpp -->
 <head>
   <title>Qt 4.3: QKeyEvent Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -41,8 +41,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>bool <b><a href="qkeyevent.html#operator-eq-eq-46">operator==</a></b> ( QKeyEvent * <i>e</i>, QKeySequence::StandardKey <i>key</i> )</li>
-<li><div class="fn"/>bool <b><a href="qkeyevent.html#operator-eq-eq-47">operator==</a></b> ( QKeySequence::StandardKey <i>key</i>, QKeyEvent * <i>e</i> )</li>
+<li><div class="fn"/>bool <b><a href="qkeyevent.html#operator-eq-eq">operator==</a></b> ( QKeyEvent * <i>e</i>, QKeySequence::StandardKey <i>key</i> )</li>
+<li><div class="fn"/>bool <b><a href="qkeyevent.html#operator-eq-eq-3">operator==</a></b> ( QKeySequence::StandardKey <i>key</i>, QKeyEvent * <i>e</i> )</li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
@@ -98,28 +98,17 @@
 <p>See also <a href="qt.html#WidgetAttribute-enum">Qt::WA_KeyCompression</a>.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-eq-eq-46"></a>bool operator== ( QKeyEvent * <i>e</i>, <a href="qkeysequence.html#StandardKey-enum">QKeySequence::StandardKey</a> <i>key</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq"></a>bool operator== ( QKeyEvent * <i>e</i>, <a href="qkeysequence.html#StandardKey-enum">QKeySequence::StandardKey</a> <i>key</i> )</h3>
+<p>Returns true if <i>key</i> is currently bound to the key combination specified by <i>e</i>.</p>
+<p>Equivalent to <tt>e-&gt;matches(key)</tt>.</p>
+<h3 class="fn"><a name="operator-eq-eq-3"></a>bool operator== ( <a href="qkeysequence.html#StandardKey-enum">QKeySequence::StandardKey</a> <i>key</i>, QKeyEvent * <i>e</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>key</i> is currently bound to the key combination specified by <i>e</i>.</p>
 <p>Equivalent to <tt>e-&gt;matches(key)</tt>.</p>
-<h3 class="fn"><a name="operator-eq-eq-47"></a>bool operator== ( <a href="qkeysequence.html#StandardKey-enum">QKeySequence::StandardKey</a> <i>key</i>, QKeyEvent * <i>e</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Returns true if <i>key</i> is currently bound to the key combination specified by <i>e</i>.</p>
-<p>Equivalent to <tt>e-&gt;matches(key)</tt>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QKeyEvent-2"></a>QKeyEvent::QKeyEvent ( <a href="qevent.html#Type-enum">Type</a> <i>type</i>, int <i>key</i>, int <i>ascii</i>, int <i>modifiers</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> = QString(), bool <i>autorep</i> = false, <a href="qtglobal.html#ushort-typedef">ushort</a> <i>count</i> = 1 )</h3>
-<p>Use one of the other constructors instead.</p>
-<h3 class="fn"><a name="ascii"></a>int QKeyEvent::ascii () const</h3>
-<p>Use <a href="qkeyevent.html#text">text</a>() instead.</p>
-<h3 class="fn"><a name="state"></a><a href="qt-qt3.html#ButtonState-typedef">Qt::ButtonState</a> QKeyEvent::state () const</h3>
-<p>Use <a href="qinputevent.html#modifiers">QInputEvent::modifiers</a>() instead.</p>
-<h3 class="fn"><a name="stateAfter"></a><a href="qt-qt3.html#ButtonState-typedef">Qt::ButtonState</a> QKeyEvent::stateAfter () const</h3>
-<p>Use <a href="qkeyevent.html#modifiers">modifiers</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

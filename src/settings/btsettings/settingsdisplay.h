@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,15 +32,17 @@ namespace Ui {
 class LocalServicesDialog;
 class QBluetoothLocalDevice;
 class QAction;
+class QEvent;
 
 class SettingsDisplay : public QWidget
 {
     Q_OBJECT
 public:
-    SettingsDisplay(QBluetoothLocalDevice *local, QWidget *parent = 0);
+    SettingsDisplay(QBluetoothLocalDevice *local, QCommDeviceController *controller, QWidget *parent = 0);
     ~SettingsDisplay();
 
 private slots:
+    bool eventFilter(QObject *watched, QEvent *event);
     void toggleLocalPowerState(bool enable);
     void toggleLocalVisibility(bool visible);
     void nameEditingFinished();
@@ -50,7 +52,8 @@ private slots:
     void deviceStateChanged(QBluetoothLocalDevice::State state);
 
     void showDetailsDialog();
-
+    void showMyServices();
+    void init();
 
 private:
     int getTimeout();

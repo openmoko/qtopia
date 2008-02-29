@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,8 @@
 #define __QTOPIA_MEDIA_DEFAULTVOLUMEPROVIDER_H
 
 #include <qtopiaipcadaptor.h>
+
+class GreenphoneVolumeServicePrivate;
 
 class GreenphoneVolumeService : public QtopiaIpcAdaptor
 {
@@ -49,6 +51,8 @@ private:
 
     int m_leftChannelVolume;
     int m_rightChannelVolume;
+
+    GreenphoneVolumeServicePrivate *m_d;
 };
 
 

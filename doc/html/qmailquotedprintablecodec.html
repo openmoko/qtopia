@@ -46,8 +46,8 @@
 <p>An instance of QMailQuotedPrintableCodec contains state information about the encoding or decoding operation it performs, so an instance should be used for a single coding operation only:</p>
 <pre>    QByteArray asciiData = acquireInput();
 
-<span class="comment">    // We know the data is text in Latin-1 encoding, so decode the data from</span>
-<span class="comment">    // quoted printable ASCII encoding, and then decode from Latin-1 to unicode</span>
+<span class="comment">    //</span> We know the data is text in Latin-1 encoding, so decode the data from
+<span class="comment">    //</span> quoted printable ASCII encoding, and then decode from Latin-1 to unicode
     QMailQuotedPrintableCodec decoder(QMailQuotedPrintableCodec::Text, QMailQuotedPrintableCodec::Rfc2045);
     QString textData = decoder.decode(asciiData, &quot;ISO-8859-1&quot;);</pre>
 <p>See also <a href="qmailcodec.html">QMailCodec</a>.</p>
@@ -76,8 +76,8 @@
 <p>The maximum number of encoded output characters per line can be specified as <i>maximumLineLength</i>. If not specified, or specified to a non-positive value, a default value will be used.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

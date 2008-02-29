@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">GsmKeyFilter Class Reference</h1>
 <p>The GsmKeyFilter class filters key sequences looking for GSM control actions. <a href="#details">More...</a></p>
-<pre>    #include &lt;GsmKeyFilter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;GsmKeyFilter&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="gsmkeyfilter-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>bool <b><a href="gsmkeyfilter.html#filter">filter</a></b> ( const QString &amp; <i>digits</i>, Flags <i>flags</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -52,17 +52,16 @@
 <li><div class="fn"/>void <b><a href="gsmkeyfilter.html#transfer">transfer</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -107,31 +106,31 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="GsmKeyFilter"></a>GsmKeyFilter::GsmKeyFilter ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="GsmKeyFilter"></a>GsmKeyFilter::GsmKeyFilter ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a GSM key filter and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.GsmKeyFilter"></a>GsmKeyFilter::~GsmKeyFilter ()</h3>
 <p>Destroy this GSM key filter.</p>
 <h3 class="fn"><a name="activate"></a>void GsmKeyFilter::activate ( int <i>call</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the <tt>2X SEND</tt> key sequence is encountered while on a call, where <tt>X</tt> is the <i>call</i> identifier. This will activate the indicated call, putting other calls on hold.</p>
-<h3 class="fn"><a name="addAction"></a>void GsmKeyFilter::addAction ( const <a href="qstring.html">QString</a> &amp; <i>digits</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Immediate )</h3>
+<h3 class="fn"><a name="addAction"></a>void GsmKeyFilter::addAction ( const <a href="./qstring.html">QString</a> &amp; <i>digits</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Immediate )</h3>
 <p>Add <i>digits</i> as an action which will cause <i>slot</i> to be invoked on <i>target</i> when the specified string of <i>digits</i> is entered.</p>
 <p>The <i>flags</i> modifies when the action will be accepted or ignored. For example, setting <tt>Send</tt> will require that the <tt>SEND</tt> key be pressed to terminate the sequence; setting <tt>Incoming</tt> will require that there be an incoming call.</p>
-<p>The prototype for <i>slot</i> should be <tt>action()</tt> or <tt>action(QString)</tt> where <tt>action</tt> is the name of the slot. The digit sequence entered will be passed to the slot if it has a <a href="qstring.html">QString</a> argument.</p>
+<p>The prototype for <i>slot</i> should be <tt>action()</tt> or <tt>action(QString)</tt> where <tt>action</tt> is the name of the slot. The digit sequence entered will be passed to the slot if it has a <a href="./qstring.html">QString</a> argument.</p>
 <p>Actions are matched in the order in which they were added.</p>
-<h3 class="fn"><a name="addAction-2"></a>void GsmKeyFilter::addAction ( const <a href="qregexp.html">QRegExp</a> &amp; <i>regex</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Immediate )</h3>
+<h3 class="fn"><a name="addAction-2"></a>void GsmKeyFilter::addAction ( const <a href="./qregexp.html">QRegExp</a> &amp; <i>regex</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Immediate )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Add <i>regex</i> as an action which will cause <i>slot</i> to be invoked on <i>target</i> when a string of digits is entered which matches <i>regex</i>.</p>
 <p>The <i>flags</i> modifies when the action will be accepted or ignored. For example, setting <tt>Send</tt> will require that the <tt>SEND</tt> key be pressed to terminate the sequence; setting <tt>Incoming</tt> will require that there be an incoming call. All specified flags must be present.</p>
-<p>The prototype for <i>slot</i> should be <tt>action()</tt> or <tt>action(QString)</tt> where <tt>action</tt> is the name of the slot. The digit sequence entered will be passed to the slot if it has a <a href="qstring.html">QString</a> argument.</p>
+<p>The prototype for <i>slot</i> should be <tt>action()</tt> or <tt>action(QString)</tt> where <tt>action</tt> is the name of the slot. The digit sequence entered will be passed to the slot if it has a <a href="./qstring.html">QString</a> argument.</p>
 <p>If <i>regex</i> includes a capture specification between parentheses, then only that part of the digit string will be passed to the slot. For example, <tt>4*([0-9]+)</tt> indicates that only the digits after the <tt>4*</tt> prefix should be passed to the slot.</p>
 <p>Actions are matched in the order in which they were added.</p>
-<h3 class="fn"><a name="addService"></a>void GsmKeyFilter::addService ( const <a href="qstring.html">QString</a> &amp; <i>code</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Send )</h3>
+<h3 class="fn"><a name="addService"></a>void GsmKeyFilter::addService ( const <a href="./qstring.html">QString</a> &amp; <i>code</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="gsmkeyfilter.html#Flag-enum">GsmKeyFilter::Flags</a> <i>flags</i> = GsmKeyFilter::Send )</h3>
 <p>Add action filters for the supplementary service associated with <i>code</i> and call <i>slot</i> on <i>target</i> when the action is encountered.</p>
 <p>The prototype for <i>slot</i> should be <tt>action(GsmKeyFilter::ServiceAction, QStringList)</tt> where <tt>action</tt> is the name of the slot. The first parameter will be the type of action to be taken, and the second parameter will be the list of <tt>*</tt>-separated parameters that were supplied to the action, starting with the service code.</p>
 <p>The <i>flags</i> modifies when the action will be accepted or ignored. For example, setting <tt>Send</tt> will require that the <tt>SEND</tt> key be pressed to terminate the sequence; setting <tt>Incoming</tt> will require that there be an incoming call. All specified flags must be present.</p>
-<h3 class="fn"><a name="deflect"></a>void GsmKeyFilter::deflect ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="deflect"></a>void GsmKeyFilter::deflect ( const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the <tt>4*NUM SEND</tt> key sequence is encountered when there was an incoming call, which indicates that the incoming call should be deflected to <tt>NUM</tt>. The <tt>NUM</tt> value is supplied in the <i>number</i> parameter to the signal.</p>
-<h3 class="fn"><a name="filter"></a>bool GsmKeyFilter::filter ( const <a href="qstring.html">QString</a> &amp; <i>digits</i>, <a href="gsmkeyfilter.html#Flag-enum">Flags</a> <i>flags</i> )</h3>
+<h3 class="fn"><a name="filter"></a>bool GsmKeyFilter::filter ( const <a href="./qstring.html">QString</a> &amp; <i>digits</i>, <a href="gsmkeyfilter.html#Flag-enum">Flags</a> <i>flags</i> )</h3>
 <p>Filter the supplied string of <i>digits</i> to determine if it corresponds to a GSM control action. The <i>flags</i> indicate the context within which <i>digits</i> should be interpreted.</p>
 <p>Returns false if the digit sequence is not recognized by the filter. The filter will be called again when there are more digits (or less if a backspace was encountered).</p>
 <p>Returns true if the digit sequence was recognized and acted upon. The caller should clear the digit buffer.</p>
@@ -153,8 +152,8 @@
 <p>Signal that is emitted when the <tt>4 SEND</tt> key sequence is encountered while on a call, which indicates that the active and held calls should be joined together into a single multi-party call, and then the local user should be detached.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

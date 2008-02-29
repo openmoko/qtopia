@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -127,14 +127,15 @@ launcher
 
 */
 
+/* some of these fields are not used and are deprecated*/
 struct domain_run
 {
-    const char *dom;      /* the name of the domain for this run                     */
+    const char *dom;      /* the name of the domain for this run (Deprecated)        */
     int fds[3];           /* the file descriptors as above                           */
     FILE *streams[2];     /* file streams for policy and installs files              */
-    const char *script;   /* the path to the script to run                           */
-    int prog_ids[ID_MAX]; /* list of M prog ids which have domain "dom"              */
-    int ids_count;        /* length M of program_ids list                            */
+    const char *script;   /* the path to the script to run (Deprecated)              */
+    int prog_ids[ID_MAX]; /* list of M prog ids which have domain "dom"(Deprecated)  */
+    int ids_count;        /* length M of program_ids list (Deprecated)               */
 };
 
 void usage( const char *msg )
@@ -243,6 +244,7 @@ int get_actual_path( char *path_buf, struct stat *bin_stat )
 
 /*
    Run the script stored in run, passing binary as the env var "BIN"
+   (This function is deprecated)
 */
 void run_scripts_for_binary( struct domain_run *run, const char *bin )
 {
@@ -285,6 +287,9 @@ void run_scripts_for_binary( struct domain_run *run, const char *bin )
     }
 }
 
+/*
+   (This function is deprecated)
+*/
 void clear_run( struct domain_run *dr )
 {
     dr->ids_count = 0;
@@ -298,6 +303,7 @@ void clear_run( struct domain_run *dr )
    * Opened stream on the policy file in run->streams[POLICY_IX]
 
    Find all program ids which have the domain run->dom;
+   (this function is deprecated)
 */
 void get_prog_ids_for_domain( struct domain_run *run )
 {
@@ -342,6 +348,7 @@ void get_prog_ids_for_domain( struct domain_run *run )
    Search for prog_ids in the manifest file and find corresponding
    install ids.  Look up install ids in installs file to find binaries
    and add to binaries list.
+   (This function is deprecated)
 */
 void process_binaries_for_prog_ids( struct domain_run *run )
 {
@@ -403,7 +410,6 @@ void process_binaries_for_prog_ids( struct domain_run *run )
         {
             if ( install_ids[i] == install_id )
             {
-                run_scripts_for_binary( run, buf );
                 check_install_ids[i] = 1;  /* tick that one off */
                 checked_install_count++;
             }
@@ -549,13 +555,6 @@ int main( int argc, char *argv[] )
     char manifest_path[ MAX_PATH_LEN ];
     char policy_path[ MAX_PATH_LEN ];
 
-    /* allow for "/sbin:" on the front */
-    char env_path[ MAX_PATH_LEN + 6 ];
-
-    /* domain scripts are stored in a directory */
-    char domains_path[ MAX_PATH_LEN ];
-    DIR *domains_dir = 0;
-    struct dirent *ent = 0;
     struct domain_run run;
 
     /* handle the qtopia paths */
@@ -655,49 +654,11 @@ int main( int argc, char *argv[] )
         }
     }
 
-    strncpy( domains_path, notional_install_path, dir_path_len );
-    strncat( domains_path, DOMAINS, DOMAINS_LEN );
-    domains_dir = opendir( domains_path );
-    if ( domains_dir == NULL )
-    {
-        perror( domains_path );
-        usage( "Could not open domains policy script dir" );
-    }
-
     sanity_checks( &run );
 
     printf( "SXE policy runner updating database\n" );
 
     update_dev_and_ino( &run );
-
-    /* Set path to "/sbin:/path/to/Qtopia/etc/sxe_scripts" so scripts can
-       be run with just name of script.  /sbin is needed for the LIDS binaries */
-    strncpy( env_path, "/sbin:", 6 );
-    strncat( env_path, domains_path, DOMAINS_LEN + dir_path_len );
-    setenv( "PATH", env_path, 1 );
-    setenv( "QTOPIA_DIR", notional_install_path, 1 );
-
-    fprintf( stderr, "SXE policy runner updating rules\n" );
-    fprintf( stderr, "===============================================\n" );
-
-    while (( ent = readdir( domains_dir )))
-    {
-        if ( strncmp( ent->d_name, SCRIPT_PREFIX, SCRIPT_PREFIX_LEN ) != 0 )
-        {
-            fprintf( stderr, "Ignoring %s entry %s\n", domains_path, ent->d_name );
-            continue;
-        }
-        run.script = ent->d_name;
-        run.dom = ent->d_name + SCRIPT_PREFIX_LEN;
-        fprintf( stderr, "Script %s/%s - running for programs with domain %s\n",
-                domains_path, ent->d_name, run.dom );
-        get_prog_ids_for_domain( &run );
-        process_binaries_for_prog_ids( &run );
-        clear_run( &run );
-    }
-
-    fprintf( stderr, "===============================================\n" );
-    fprintf( stderr, "SXE policy runner finished rules\n" );
 
     exit( 0 );
 }

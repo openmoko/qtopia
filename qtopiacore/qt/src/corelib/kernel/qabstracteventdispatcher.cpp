@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -60,7 +58,7 @@ void QAbstractEventDispatcherPrivate::init()
 
 /*!
     \class QAbstractEventDispatcher
-    \brief The QAbstractEventDispatcher class manages Qt's event queue, excluding GUI-related events.
+    \brief The QAbstractEventDispatcher class provides an interface to manage Qt's event queue.
 
     \ingroup application
     \ingroup events

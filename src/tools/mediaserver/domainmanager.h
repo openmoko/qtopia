@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,44 +22,34 @@
 #ifndef __MEDIASERVER_DOMAINMANAGER_H
 #define __MEDIASERVER_DOMAINMANAGER_H
 
-#include <qaudiodomain.h>
+#include <QObject>
 
 namespace mediaserver
 {
 
-class DomainManagerCallback
-{
-public:
-    virtual ~DomainManagerCallback();
-
-    virtual void domainChange(QStringList const& activeDomains,
-                              QStringList const& inactiveDomains) = 0;
-};
-
-
 class DomainManagerPrivate;
 
-class DomainManager
+class DomainManager : public QObject
 {
+    Q_OBJECT
+
+    friend class DomainManagerPrivate;
+
 public:
     ~DomainManager();
 
-    bool activateDomain(QString const& name,
-                        QAudioCapabilities capabilities = Output);
+    bool activateDomain(QString const& name);
     void deactivateDomain(QString const& name);
 
     bool isActiveDomain(QString const& name);
-    bool isActionableDomain(QString const& name);
-    int priorityForDomain(QString const& name);
 
-    QStringList availableDomains();
     QStringList activeDomains();
     QStringList inactiveDomains();
 
-    void addCallback(DomainManagerCallback* callback);
-    void removeCallback(DomainManagerCallback* callback);
-
     static DomainManager* instance();
+
+signals:
+    void domainStatusChange(QStringList const& activeDomains, QStringList const& inactiveDomains);
 
 private:
     DomainManager();
@@ -67,6 +57,6 @@ private:
     DomainManagerPrivate*   d;
 };
 
-}
+}   // ns mediaserver
 
 #endif  // __MEDIASERVER_DOMAINMANAGER_H

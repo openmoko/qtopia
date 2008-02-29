@@ -1,22 +1,6 @@
 #!/bin/sh
-
-export TOOLCHAIN=/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux
-
-if [ -d /opt/teambuilder ]; then
-    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:$TOOLCHAIN/bin:$PATH"
-    echo "$TEAMBUILDER_CC_VERSION" | grep ':' >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        export TEAMBUILDER_CC_VERSION="arm-linux-*:4.1.1;$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux[^:]*:[[digit].][[digit].]*;*//')"
-    else
-        export TEAMBUILDER_CC_VERSION="arm-linux-*:4.1.1;*:$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux[^:]*:[[digit].][[digit].]*;*//')"
-    fi
-    if [ "$TEAMBUILDER_SYSTEM" = 'arm:greenphone' ]; then
-        unset TEAMBUILDER_SYSTEM
-    fi
-else
-    # don't destroy the environment if $TOOLCHAIN/bin is already somewhere in the $PATH
-    if ! echo "$PATH" | grep "$TOOLCHAIN/bin" ; then
-        export PATH="$TOOLCHAIN/bin:$PATH"
-    fi
-fi
-
+TOOLCHAIN=/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux
+USE_TB=1
+TB_CC_PREFIX=arm-linux-
+TB_CC_VER=auto
+TB_SYS=arm:greenphone

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,6 +32,8 @@ struct CharacterProcessor
         
     void processCharacters(const QString& input);
     virtual void process(QChar, bool, bool, int) = 0;
+
+    virtual void finished();
 };
 
 CharacterProcessor::~CharacterProcessor()
@@ -72,6 +74,12 @@ void CharacterProcessor::processCharacters(const QString& input)
 
         escaped = false;
     }
+
+    finished();
+}
+
+void CharacterProcessor::finished()
+{
 }
 
 struct Decommentor : public CharacterProcessor
@@ -111,53 +119,115 @@ static QString removeComments(const QString& input, bool (QChar::*classifier)() 
 
 struct AddressSeparator : public CharacterProcessor
 {
+    enum TokenType { Unknown = 0, Address, Name, Suffix, Comment, Group, TypeCount };
+
     AddressSeparator();
 
     virtual void process(QChar, bool, bool, int);
+    virtual void finished();
 
     virtual void accept(QChar) = 0;
-    virtual void complete() = 0;
+    virtual void complete(TokenType type, bool) = 0;
 
 private:
+    void separator(bool);
+
     bool _inAddress;
     bool _inGroup;
+    bool _tokenStarted;
+    bool _tokenCompleted;
+    TokenType _type;
 };
 
 AddressSeparator::AddressSeparator()
     : _inAddress(false),
-      _inGroup(false)
+      _inGroup(false),
+      _tokenStarted(false),
+      _tokenCompleted(false),
+      _type(Unknown)
 {
 }
 
 void AddressSeparator::process(QChar character, bool quoted, bool escaped, int commentDepth)
 {
-    if ( character == ',' && !_inGroup && !quoted && !escaped && commentDepth == 0 ) {
-        complete();
+    if (_tokenCompleted && (!character.isSpace())) {
+        separator(false);
+    }
+
+    // RFC 2822 requires comma as the separator, but we'll allow the semi-colon as well.
+    if ( ( character == ',' || character == ';' || character.isSpace()) && 
+         !_inGroup && !quoted && !escaped && commentDepth == 0 ) {
+        if (character.isSpace()) {
+            // We'll also attempt to separate on whitespace, but we need to append it to 
+            // the token to preserve the input data
+            accept(character);
+            _tokenCompleted = true;
+        } else {
+            separator(true);
+        }
     }
     else {
-        accept(character);
+        if (commentDepth && _type == Unknown && _tokenStarted == false) {
+            // This could be a purely comment element
+            _type = Comment;
+        }
+        else if (quoted && (_type == Unknown || _type == Comment)) {
+            // This must be a name element
+            _type = Name;
+        }
 
-        if ( character == '<' && !_inAddress && !quoted && !escaped && commentDepth == 0 )
+        accept(character);
+        _tokenStarted = true;
+
+        if ( character == '<' && !_inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inAddress = true;
-        else if ( character == '>' && _inAddress && !quoted && !escaped && commentDepth == 0 )
+
+            if (_type == Unknown || _type == Comment)
+                _type = Address;
+        } else if ( character == '>' && _inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inAddress = false;
-        else if ( character == ':' && !_inGroup && !_inAddress && !escaped && commentDepth == 0 )
+        } else if ( character == ':' && !_inGroup && !_inAddress && !escaped && commentDepth == 0 ) {
             _inGroup = true;
-        else if ( character == ';' && _inGroup && !_inAddress && !escaped && commentDepth == 0 )
+            _type = Group;
+        } else if ( character == ';' && _inGroup && !_inAddress && !escaped && commentDepth == 0 ) {
             _inGroup = false;
+
+            // This is a soft separator, because the group construct could have a trailing comment
+            separator(false);
+        }
     }
+}
+
+void AddressSeparator::separator(bool hardSeparator)
+{
+    complete(_type, hardSeparator);
+
+    _tokenStarted = false;
+    _tokenCompleted = false;
+    _type = Unknown;
+}
+
+void AddressSeparator::finished()
+{
+    complete(_type, true);
 }
 
 
 struct AddressListGenerator : public AddressSeparator
 {
     virtual void accept(QChar);
-    virtual void complete();
+    virtual void complete(TokenType, bool);
 
     QStringList result();
 
 private:
+    typedef QPair<TokenType, QString> Token;
+
+    int combinableElements();
+    void processPending();
+
     QStringList _result;
+    QList<Token> _pending;
     QString _partial;
 };
 
@@ -166,18 +236,114 @@ void AddressListGenerator::accept(QChar character)
     _partial.append(character);
 }
 
-void AddressListGenerator::complete()
+void AddressListGenerator::complete(TokenType type, bool hardSeparator)
 {
     if (_partial.trimmed().length()) {
-        _result.append(_partial);
+        if (type == Unknown) {
+            // We need to know what type of token this is
+
+            // Test whether the token is a suffix
+            QRegExp suffixPattern("\\s*/TYPE=.*");
+            if (suffixPattern.exactMatch(_partial)) {
+                type = Suffix;
+            } 
+            else {
+                // See if the token is a bare email address; otherwise it must be a name element
+                QRegExp emailPattern(QMailAddress::emailAddressPattern());
+                type = (emailPattern.exactMatch(_partial.trimmed()) ? Address : Name);
+            }
+        }
+
+        _pending.append(qMakePair(type, _partial));
         _partial.clear();
+    }
+
+    if (hardSeparator) {
+        // We know that this is a boundary between addresses
+        processPending();
+    }
+}
+
+int AddressListGenerator::combinableElements()
+{
+    bool used[TypeCount] = { false };
+
+    int combinable = 0;
+    int i = _pending.count();
+    while (i > 0) {
+        int type = _pending.value(i - 1).first;
+
+        // If this type has already appeared in this address, this must be part of the preceding address
+        if (used[type])
+            return combinable;
+
+        // A suffix can only appear at the end of an address
+        if (type == Suffix && (combinable > 0))
+            return combinable;
+
+        if (type == Comment) {
+            // Comments can be combined with anything else...
+        } else {
+            // Everything else can be used once at most, and not with groups
+            if (used[Group])
+                return combinable;
+
+            if (type == Group) {
+                // Groups can only be combined with comments
+                if (used[Name] || used[Address] || used[Suffix])
+                    return combinable;
+            }
+
+            used[type] = true;
+        }
+
+        // Combine this element
+        ++combinable;
+        --i;
+    }
+
+    return combinable;
+}
+
+void AddressListGenerator::processPending()
+{
+    if (!_pending.isEmpty()) {
+        // Compress any consecutive name parts into a single part
+        for (int i = 1; i < _pending.count(); ) {
+            TokenType type = _pending.value(i).first;
+            // Also, a name could precede a group part, since the group name may contain multiple atoms
+            if ((_pending.value(i - 1).first == Name) && ((type == Name) || (type == Group))) {
+                _pending.replace(i - 1, qMakePair(type, _pending.value(i - 1).second + _pending.value(i).second));
+                _pending.removeAt(i);
+            } 
+            else {
+                ++i;
+            }
+        }
+
+        // Combine the tokens as necessary, proceding in reverse from the known boundary at the end
+        QStringList addresses;
+        int combinable = 0;
+        while ((combinable = combinableElements()) != 0) {
+            QString combined;
+            while (combinable) {
+                combined.prepend(_pending.last().second);
+                _pending.removeLast();
+                --combinable;
+            }
+            addresses.append(combined);
+        }
+
+        // Add the address to the result set, in the original order
+        for (int i = addresses.count(); i > 0; --i)
+            _result.append(addresses.value(i - 1));
+
+        _pending.clear();
     }
 }
 
 QStringList AddressListGenerator::result()
 {
-    complete();
-
     return _result;
 }
 
@@ -188,37 +354,12 @@ static QStringList generateAddressList(const QString& list)
     return generator.result();
 }
 
-
-struct FieldCounter : public AddressSeparator
-{
-    FieldCounter();
-
-    virtual void accept(QChar);
-    virtual void complete();
-
-    int _fieldCount;
-};
-
-FieldCounter::FieldCounter()
-    : _fieldCount(1)
-{
-}
-
-void FieldCounter::accept(QChar character)
-{
-    Q_UNUSED(character)
-}
-
-void FieldCounter::complete()
-{
-    ++_fieldCount;
-}
-
 static bool containsMultipleFields(const QString& input)
 {
-    FieldCounter counter;
-    counter.processCharacters(input);
-    return (counter._fieldCount > 1);
+    // There is no shortcut; we have to parse the addresses
+    AddressListGenerator generator;
+    generator.processCharacters(input);
+    return (generator.result().count() > 1);
 }
 
 
@@ -298,6 +439,8 @@ public:
     bool isGroup() const;
     QList<QMailAddress> groupMembers() const;
 
+    QString name() const;
+
     QString displayName() const;
     QString displayName(QContactModel& fromModel) const;
     QContact matchContact() const;
@@ -316,6 +459,12 @@ public:
     bool _group;
 
     bool operator==(const QMailAddressPrivate& other) const;
+
+    template <typename Stream> 
+    void serialize(Stream &stream) const;
+
+    template <typename Stream> 
+    void deserialize(Stream &stream);
 
 private:
     void setComponents(const QString& nameText, const QString& addressText);
@@ -537,6 +686,11 @@ QContact QMailAddressPrivate::matchContact(QContactModel& fromModel) const
     return QContact();
 }
 
+QString QMailAddressPrivate::name() const
+{
+    return QMail::unquoteString(_name);
+}
+
 QString QMailAddressPrivate::displayName() const
 {
     if (!_searchCompleted)
@@ -544,7 +698,7 @@ QString QMailAddressPrivate::displayName() const
 
     QString result(_contact.label());
     if (result.isEmpty())
-        result = _name;
+        result = name();
 
     return result;
 }
@@ -555,7 +709,7 @@ QString QMailAddressPrivate::displayName(QContactModel& fromModel) const
 
     QString result(contact.label());
     if (result.isEmpty())
-        result = _name;
+        result = name();
 
     return result;
 }
@@ -651,6 +805,22 @@ QString QMailAddressPrivate::toString() const
     return result;
 }
 
+template <typename Stream> 
+void QMailAddressPrivate::serialize(Stream &stream) const
+{
+    stream << _name << _address << _suffix << _group;
+}
+
+template <typename Stream> 
+void QMailAddressPrivate::deserialize(Stream &stream)
+{
+    _searchCompleted = false;
+    _contact = QContact();
+
+    stream >> _name >> _address >> _suffix >> _group;
+}
+
+
 /*!
     \class QMailAddress
     \mainclass
@@ -733,7 +903,7 @@ bool QMailAddress::isNull() const
 */
 QString QMailAddress::name() const
 {
-    return QMail::unquoteString(d->_name);
+    return d->name();
 }
 
 /*!
@@ -816,15 +986,26 @@ QString QMailAddress::minimalPhoneNumber() const
 
 /*!
     Find the stored Contact whose email address or phone number matches the address component 
-    of the address text. If no matching contact is found, a null Contact is returned. 
+    of the address text. If no matching contact is found, an empty Contact is returned. 
 
     \sa displayName()
+    \sa matchesExistingContact()
     \sa QContactModel::matchPhoneNumber()
     \sa QContactModel::matchEmailAddress()
 */
 QContact QMailAddress::matchContact() const
 {
     return d->matchContact();
+}
+
+/*!
+    Returns true if there exists a stored Contact whose email address or phone number matches the address component of the address text; otherwise returns false.
+    
+    \sa matchContact()
+*/
+bool QMailAddress::matchesExistingContact() const
+{
+    return !d->matchContact().uid().isNull();
 }
 
 /*!
@@ -931,15 +1112,55 @@ QString QMailAddress::phoneNumberPattern()
 /*! \internal */
 QString QMailAddress::emailAddressPattern()
 {
-    // Taken from: http://www.regular-expressions.info/email.html
-    static const QString pattern("[a-z0-9!#$%&'*+/=?^_`{|}~-]+"              // one-or-more: legal chars
-                                 "(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*"      // zero-or-more: ('.', one-or-more: legal chars)
-                                 "@"                                         // '@'
-                                 "(?:"                                       // zero-or-one: 
-                                     "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\."       // one: legal char, zero-or-one:(zero-or-more: (legal char or '-'), one: legal char)
-                                 ")+"                                        //
-                                 "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");         // as above - alphanumeric, including '-' so long as it isn't the first or last char
+    // Taken from: http://www.regular-expressions.info/email.html, but 
+    // modified to accept uppercase characters as well as lower-case
+    // Also - RFC 1034 seems to prohibit domain name elements beginning
+    // with digits, but they exist in practise...
+    static const QString pattern("[A-Za-z\\d!#$%&'*+/=?^_`{|}~-]+"      // one-or-more: legal chars (some punctuation permissible)
+                                 "(?:"                                  // zero-or-more: 
+                                     "\\."                                  // '.',
+                                     "[A-Za-z\\d!#$%&'*+/=?^_`{|}~-]+"      // one-or-more: legal chars
+                                 ")*"                                   // end of optional group
+                                 "@"                                    // '@'
+                                 "(?:"                                  // one-or-more: 
+                                     "[A-Za-z\\d]"                          // one: legal char, 
+                                     "(?:"                                  // zero-or-one:
+                                         "[A-Za-z\\d-]*[A-Za-z\\d]"             // (zero-or-more: (legal char or '-'), one: legal char)
+                                     ")?"                                   // end of optional group
+                                     "\\."                                  // '.'
+                                 ")+"                                   // end of mandatory group
+                                 "[A-Za-z\\d]"                          // one: legal char
+                                 "(?:"                                  // zero-or-one:
+                                     "[A-Za-z\\d-]*[A-Za-z\\d]"             // (zero-or-more: (legal char or '-'), one: legal char)
+                                 ")?");                                 // end of optional group
 
     return pattern;
 }
+
+/*! 
+    \fn QMailAddress::serialize(Stream&) const
+    \internal 
+*/
+template <typename Stream> 
+void QMailAddress::serialize(Stream &stream) const
+{
+    d->serialize(stream);
+}
+
+/*! 
+    \fn QMailAddress::deserialize(Stream&)
+    \internal 
+*/
+template <typename Stream> 
+void QMailAddress::deserialize(Stream &stream)
+{
+    d->deserialize(stream);
+}
+
+
+Q_IMPLEMENT_USER_METATYPE(QMailAddress)
+
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QMailAddressList, QMailAddressList)
+
+//Q_IMPLEMENT_USER_METATYPE_NO_OPERATORS(QList<QMailAddress>)
 

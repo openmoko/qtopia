@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,20 +23,21 @@
 #include <qtopia/private/qperformancelog_p.h>
 
 #include <QThread>
-#include <QTime>
 #include <QTimer>
 #include <QStringList>
 #include <QApplication>
+#include <sys/times.h>
+#include <unistd.h>
 
 #ifdef QTOPIA_TEST_HOST
 # include <QDebug>
 # define qLog(A) qDebug()
 # define qLogEnabled(A) (true)
 #else
-#ifndef Q_WS_X11
-# include <qtopia/private/testslaveinterface_p.h>
-# define QTOPIA_USE_TEST_SLAVE 1
-#endif
+# ifndef Q_WS_X11
+#  include <qtopia/private/testslaveinterface_p.h>
+#  define QTOPIA_USE_TEST_SLAVE 1
+# endif
 # include <qtopia/qtopiaapplication.h>
 # include <qtopiabase/qtopialog.h>
 # include <qtopiabase/Qtopia>
@@ -44,7 +45,7 @@
 # include <sys/shm.h>
 # include <errno.h>
 # define SHMKEY 45628540
-#endif
+#endif // ! QTOPIA_TEST_HOST
 
 
 const int QPerformanceLogData::Timeout = 2000;
@@ -59,7 +60,6 @@ class QPerformanceLogPrivate : public QObject
 Q_OBJECT
 public:
     void send( const QPerformanceLogData &msg );
-    void adjustTimezone( QTime &preAdjustTime );
 
     static QPerformanceLogPrivate *instance();
 
@@ -75,15 +75,10 @@ private:
 };
 #include "qperformancelog.moc"
 
-inline uint qtimeToMsecs(const QTime &t) {
-    return 1000*( 60*( 60*t.hour() + t.minute() ) + t.second() ) + t.msec();
-};
-inline QTime qtimeFromMsecs(uint ms) {
-    return QTime(0,0,0,0).addMSecs(ms);
-};
-
-static uint start_time = qtimeToMsecs(QTime::currentTime());
-static uint *server_start_time;
+static struct tms dummy;
+static clock_t start_time = times(&dummy);
+static clock_t *server_start_time;
+static qreal ticks_to_ms = 1000.0/qreal(sysconf(_SC_CLK_TCK));
 
 #ifndef QTOPIA_TEST_HOST
 class StartTimeSetup
@@ -102,9 +97,9 @@ StartTimeSetup::StartTimeSetup()
     boss = false;
     /* Create or open shared memory.  If we successfully create "exclusively", we created
        rather than opened, so we are the "server" process. */
-    shmid = shmget(SHMKEY, sizeof(uint), IPC_CREAT | IPC_EXCL | 00777);
+    shmid = shmget(SHMKEY, sizeof(clock_t), IPC_CREAT | IPC_EXCL | 00777);
     if (-1 == shmid) {
-        shmid = shmget(SHMKEY, sizeof(uint), IPC_CREAT | 00777);
+        shmid = shmget(SHMKEY, sizeof(clock_t), IPC_CREAT | 00777);
         if (-1 == shmid) {
             qWarning("%s:%d shmget failed: %s\n", __FILE__, __LINE__, strerror(errno));
         }
@@ -119,7 +114,7 @@ StartTimeSetup::StartTimeSetup()
 
     ptr = shmat(shmid, 0, (!boss) ? SHM_RDONLY : 0);
     if (-1 == (long)ptr) qWarning("%s:%d shmat failed: %s\n", __FILE__, __LINE__, strerror(errno));
-    server_start_time = static_cast<uint*>(ptr);
+    server_start_time = static_cast<clock_t*>(ptr);
 
     if (boss) {
         bool set = false;
@@ -141,13 +136,18 @@ StartTimeSetup::StartTimeSetup()
                 s = tl[2].toInt(&ok); if (!ok) break;
             }
 
-            *server_start_time = ((h*60 + m)*60 + s)*1000 + ms;
+            uint launchMs = ((h*60 + m)*60 + s)*1000 + ms;
+            QTime now(QTime::currentTime());
+            uint nowMs = ((now.hour()*60 + now.minute())*60 + now.second())*1000 + now.msec();
+            *server_start_time = clock_t(times(&dummy) - (nowMs - launchMs)/ticks_to_ms);
+
             set = true;
 
         } while(0);
 
         if (!set)
-            *server_start_time = qtimeToMsecs(QTime::currentTime());
+            *server_start_time = times(&dummy);
+        QPerformanceLog() << "QPerformanceLog server_start_time set to " << QString::number(*server_start_time);
     }
 }
 
@@ -176,20 +176,6 @@ QPerformanceLogPrivate::QPerformanceLogPrivate() : QObject()
 QPerformanceLogPrivate::~QPerformanceLogPrivate()
 {
     sendUnsent();
-}
-
-void QPerformanceLogPrivate::adjustTimezone( QTime &preAdjustTime )
-{
-    // TODO: Need to also compensate for timezone or time changes later in the life cycle
-    int offset = preAdjustTime.msecsTo( QTime::currentTime() );
-    //offset = offset - (offset % 100);
-    // adjust the start time so that the change of timezone doesn't effect measured values.
-    start_time = start_time + offset;
-
-#ifndef QTOPIA_TEST_HOST
-    if (time_setup.boss)
-        *server_start_time = *server_start_time + offset;
-#endif
 }
 
 void QPerformanceLogPrivate::sendUnsent()
@@ -243,17 +229,18 @@ void QPerformanceLogPrivate::send( const QPerformanceLogData &data )
   \class QPerformanceLog
   \brief The QPerformanceLog class implements a performance logging mechanism available to all Qtopia applications.
 \if defined(QTOPIA_TEST)
-  \ingroup qtopiatest
   \ingroup qtopiatest_systemtest
 \endif
 
   It provides a similar behaviour to qDebug() and qLog(), but every
   message automatically contains two timestamps: milliseconds since the current application
   has started, and milliseconds since the Qtopia Core window server has started.
-  Messages are output via qLog(Performance), respecting the qLog() settings.
 
-  If QtopiaTest is enabled, messages will also be sent to a connected system test
-  if qLog(Performance) is enabled or the QTOPIA_PERFTEST environment variable is set to "1".
+  By default, messages are output via qLog(Performance), respecting the qLog() settings.
+
+  If the QTOPIA_PERFTEST environment variable is set, messages will also be sent to
+  a connected QtopiaTest system test (if any), and will always be output to the local
+  console, overriding qLog() settings.
 
   Any string data can be output in a performance log.  To make log parsing easier,
   some predefined values are provided for events which are commonly of interest for
@@ -271,22 +258,6 @@ void QPerformanceLogPrivate::send( const QPerformanceLogData &data )
     }
     QPerformanceLog() << QPerformanceLog::End << "walk to park";
     // Outputs 'Dog Walker : <ms_since_appstart> : <ms_since_qpestart> : end walk to park'
-  \endcode
-
-  Example code in a Qtopia system test:
-  \code
-    QVERIFY( startWindowedApp("Dog Walker") );
-
-    // Add code here to simulate the actions necessary to execute
-    // the code in the previous example...
-
-    waitPerformance();
-    // Verify that we actually got "walk to park" logs
-    QVERIFY( -1 != getPerformanceInterval("walk to park") );
-
-    // It MUST take less than 2 minutes to walk to the park,
-    // otherwise fail the test
-    QVERIFY( getPerformanceInterval("walk to park") < 2*60*1000 );
   \endcode
 
 \if defined(QTOPIA_TEST)
@@ -325,11 +296,16 @@ QPerformanceLog::QPerformanceLog( QString const &applicationName )
         data = new QPerformanceLogData;
         data->event = NoEvent;
         data->ident = ((applicationName.isEmpty() && qApp) ? qApp->applicationName() : applicationName);
-        uint now = qtimeToMsecs(QTime::currentTime());
-        if (start_time > now || *server_start_time > now)
-            qWarning("QPerformanceLog: start time seems to be in the future!");
-        data->appTime = now - start_time;
-        data->serverTime = now - *server_start_time;
+        clock_t now = times(&dummy);
+        {
+            static char warned = 0;
+            if (start_time > now || *server_start_time > now && !warned) {
+                warned = 1;
+                qWarning("QPerformanceLog: start time seems to be in the future!");
+            }
+        }
+        data->appTime = quint64((quint64(now) - quint64(start_time))*ticks_to_ms);
+        data->serverTime = quint64((quint64(now) - quint64(*server_start_time))*ticks_to_ms);
     }
 }
 
@@ -346,7 +322,7 @@ QPerformanceLog::~QPerformanceLog()
 #endif
 
     if (data) {
-        qLog(Performance) << qPrintable(data->toString());
+        qDebug() << qPrintable(data->toString());
         delete data;
     }
 }
@@ -358,7 +334,7 @@ QPerformanceLog::~QPerformanceLog()
 */
 bool QPerformanceLog::enabled()
 {
-    static bool ret = qLogEnabled(Performance) || (qgetenv("QTOPIA_PERFTEST").startsWith("1"));
+    static bool ret = qLogEnabled(Performance) || (!qgetenv("QTOPIA_PERFTEST").isEmpty());
     return ret;
 }
 
@@ -402,14 +378,11 @@ QString QPerformanceLog::stringFromEvent(Event const &event)
 
 /*!
     \internal
+    \deprecated
+    Can't remove, BIC.
 */
 void QPerformanceLog::adjustTimezone( QTime &preAdjustTime )
 {
-#ifndef QTOPIA_TEST_HOST
-    if (QPerformanceLogPrivate::instance())
-        QPerformanceLogPrivate::instance()->adjustTimezone(preAdjustTime);
-#else
     Q_UNUSED(preAdjustTime);
-#endif
 }
 

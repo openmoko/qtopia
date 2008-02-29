@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -88,7 +86,7 @@ static inline QDebug operator<<(QDebug dbg, const QDBusConnectionPrivate *conn)
     return dbg.space();
 }
 
-QDBUS_EXPORT void qdbusDefaultThreadDebug(int action, int condition, QDBusConnectionPrivate *conn)
+Q_AUTOTEST_EXPORT void qdbusDefaultThreadDebug(int action, int condition, QDBusConnectionPrivate *conn)
 {
     qDBusDebug() << QThread::currentThread()
                  << "QtDBus threading action" << action
@@ -107,7 +105,7 @@ QDBUS_EXPORT void qdbusDefaultThreadDebug(int action, int condition, QDBusConnec
                      "condition unknown")
                  << "in connection" << conn;
 }
-QDBUS_EXPORT qdbusThreadDebugFunc qdbusThreadDebug = qdbusDefaultThreadDebug;
+Q_AUTOTEST_EXPORT qdbusThreadDebugFunc qdbusThreadDebug = qdbusDefaultThreadDebug;
 #endif
 
 typedef void (*QDBusSpyHook)(const QDBusMessage&);
@@ -629,9 +627,9 @@ static int findSlot(const QMetaObject *mo, const QByteArray &name, int flags,
     return -1;
 }
 
-CallDeliveryEvent* QDBusConnectionPrivate::prepareReply(QObject *object, int idx,
-                                                        const QList<int> &metaTypes,
-                                                        const QDBusMessage &msg)
+QDBusCallDeliveryEvent* QDBusConnectionPrivate::prepareReply(QObject *object, int idx,
+                                                             const QList<int> &metaTypes,
+                                                             const QDBusMessage &msg)
 {
     Q_ASSERT(object);
     Q_UNUSED(object);
@@ -648,7 +646,7 @@ CallDeliveryEvent* QDBusConnectionPrivate::prepareReply(QObject *object, int idx
 
     // we can deliver
     // prepare for the call
-    return new CallDeliveryEvent(QDBusConnection(this), idx, this, msg, metaTypes);
+    return new QDBusCallDeliveryEvent(QDBusConnection(this), idx, this, msg, metaTypes);
 }
 
 void QDBusConnectionPrivate::activateSignal(const QDBusConnectionPrivate::SignalHook& hook,
@@ -661,7 +659,7 @@ void QDBusConnectionPrivate::activateSignal(const QDBusConnectionPrivate::Signal
     // Slots can have less parameters than there are on the message
     // Slots can optionally have one final parameter that is a QDBusMessage
     // Slots receive read-only copies of the message (i.e., pass by value or by const-ref)
-    CallDeliveryEvent *call = prepareReply(hook.obj, hook.midx, hook.params, msg);
+    QDBusCallDeliveryEvent *call = prepareReply(hook.obj, hook.midx, hook.params, msg);
     if (call)
         postEventToThread(ActivateSignalAction, hook.obj, call);
 }
@@ -900,6 +898,20 @@ QDBusConnectionPrivate::~QDBusConnectionPrivate()
     server = 0;
 }
 
+void QDBusConnectionPrivate::deleteYourself()
+{
+    if (thread() && thread() != QThread::currentThread()) {
+        // last reference dropped while not in the correct thread
+        // ask the correct thread to delete
+
+        // note: since we're posting an event to another thread, we
+        // must consider deleteLater() to take effect immediately
+        deleteLater();
+    } else {
+        delete this;
+    }
+}
+
 void QDBusConnectionPrivate::closeConnection()
 {
     QDBusWriteLocker locker(CloseConnectionAction, this);
@@ -1115,7 +1127,7 @@ bool QDBusConnectionPrivate::prepareHook(QDBusConnectionPrivate::SignalHook &hoo
     }
     if (hook.midx < minMIdx) {
         if (hook.midx == -1)
-            ;//qWarning("No such slot '%s' while connecting D-Bus", normalizedName.constData());
+        {}
         return false;
     }
 
@@ -1329,13 +1341,14 @@ void QDBusConnectionPrivate::handleObjectCall(const QDBusMessage &msg)
             // external incoming message
             // post it and forget
             postEventToThread(HandleObjectCallPostEventAction, result.obj,
-                              new ActivateObjectEvent(QDBusConnection(this), this, result, usedLength, msg));
+                              new QDBusActivateObjectEvent(QDBusConnection(this), this, result,
+                                                           usedLength, msg));
             return;
         } else if (objThread != QThread::currentThread()) {
             // synchronize with other thread
             postEventToThread(HandleObjectCallPostEventAction, result.obj,
-                              new ActivateObjectEvent(QDBusConnection(this), this, result,
-                                                      usedLength, msg, &sem));
+                              new QDBusActivateObjectEvent(QDBusConnection(this), this, result,
+                                                           usedLength, msg, &sem));
             semWait = true;
         } else {
             semWait = false;
@@ -1348,7 +1361,7 @@ void QDBusConnectionPrivate::handleObjectCall(const QDBusMessage &msg)
         activateObject(result, msg, usedLength);
 }
 
-ActivateObjectEvent::~ActivateObjectEvent()
+QDBusActivateObjectEvent::~QDBusActivateObjectEvent()
 {
     if (!handled) {
         // we're being destroyed without delivering
@@ -1360,7 +1373,7 @@ ActivateObjectEvent::~ActivateObjectEvent()
     // semaphore releasing happens in ~QMetaCallEvent
 }
 
-int ActivateObjectEvent::placeMetaCall(QObject *)
+int QDBusActivateObjectEvent::placeMetaCall(QObject *)
 {
     QDBusConnectionPrivate *that = QDBusConnectionPrivate::d(connection);
 
@@ -1523,8 +1536,8 @@ void QDBusConnectionPrivate::messageResultReceived(DBusPendingCall *pending, voi
                 .pendingCallError(QDBusError(msg), call->message);
             emit connection->callWithCallbackFailed(QDBusError(msg), call->message);
         } else {
-            CallDeliveryEvent *e = connection->prepareReply(call->receiver, call->methodIdx,
-                                                            call->metaTypes, msg);
+            QDBusCallDeliveryEvent *e = connection->prepareReply(call->receiver, call->methodIdx,
+                                                                 call->metaTypes, msg);
             if (e)
                 connection->postEventToThread(MessageResultReceivedAction, call->receiver, e);
             else

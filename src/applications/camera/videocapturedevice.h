@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,17 +24,8 @@
 
 #include <qimage.h>
 
-#ifndef V4L_VIDEO_DEVICE
-#define V4L_VIDEO_DEVICE "/dev/video"
-#endif
-
 namespace camera
 {
-
-/*!
- * \class VideoCaptureDevice
- *
- */
 
 class VideoCaptureDevice
 {
@@ -57,6 +48,7 @@ public:
 
     virtual uint refocusDelay() const = 0;
     virtual int minimumFramePeriod() const = 0;
+    virtual int getFD()  = 0;
 };
 
 }   // ns camera

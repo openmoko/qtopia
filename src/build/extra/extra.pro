@@ -181,6 +181,7 @@ unix {
     qtdocs.commands=$$COMMAND_HEADER\
         cp -Rf $$QT_DEPOT_PATH/doc/html $(INSTALL_ROOT)/$$qtdocs.path
     qtdocs.hint=sdk
+    qtdocs.depends=install_qtopiadocs
     INSTALLS+=qtdocs
 
     qconfig.files=$$QTOPIA_DEPOT_PATH/qtopiacore/qconfig-qpe.h
@@ -206,13 +207,14 @@ unix {
     configureoptions.hint=sdk
     INSTALLS+=configureoptions
 
-    # device directory
-    !isEmpty(DEVICE_CONFIG_PATH) {
-        device.files=$$DEVICE_CONFIG_PATH
-        device.path=/devices/$$tail($$DEVICE_CONIG_PATH)
-        device.hint=sdk
-        INSTALLS+=device
-    }
+    # default device directory
+    device.files=$$QTOPIA_DEPOT_PATH/devices/default
+    device.path=/devices
+    device.hint=sdk
+    INSTALLS+=device
+
+    # current device directory
+    !isEmpty(DEVICE_CONFIG_PATH):device.files+=$$DEVICE_CONFIG_PATH
 
     # fix up the config.cache file and then generate a new config.pri
     configpri.commands=$$COMMAND_HEADER\

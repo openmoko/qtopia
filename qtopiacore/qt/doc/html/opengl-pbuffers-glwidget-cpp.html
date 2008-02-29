@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2005-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -88,7 +86,7 @@
  GLWidget::GLWidget(QWidget *parent)
    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
  {
-     <span class="comment">// create the pbuffer</span>
+     <span class="comment">//</span> create the pbuffer
      pbuffer = new QGLPixelBuffer(QSize(512, 512), format(), this);
      timerId = startTimer(20);
      setWindowTitle(tr(&quot;OpenGL pbuffers&quot;));
@@ -135,23 +133,23 @@
 
  void GLWidget::paintGL()
  {
-     <span class="comment">// draw a spinning cube into the pbuffer..</span>
+     <span class="comment">//</span> draw a spinning cube into the pbuffer..
      pbuffer-&gt;makeCurrent();
      glBindTexture(GL_TEXTURE_2D, cubeTexture);
      glCallList(pbufferList);
      glFlush();
 
  #if  defined(Q_WS_X11)
-     <span class="comment">// rendering directly to a texture is not supported on X11, unfortunately</span>
+     <span class="comment">//</span> rendering directly to a texture is not supported on X11, unfortunately
      pbuffer-&gt;updateDynamicTexture(dynamicTexture);
  #endif
-     <span class="comment">// ..and use the pbuffer contents as a texture when rendering the</span>
-     <span class="comment">// background and the bouncing cubes</span>
+     <span class="comment">//</span> ..and use the pbuffer contents as a texture when rendering the
+     <span class="comment">//</span> background and the bouncing cubes
      makeCurrent();
      glBindTexture(GL_TEXTURE_2D, dynamicTexture);
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-     <span class="comment">// draw the background</span>
+     <span class="comment">//</span> draw the background
      glMatrixMode(GL_MODELVIEW);
      glPushMatrix();
      glLoadIdentity();
@@ -176,7 +174,7 @@
      glMatrixMode(GL_MODELVIEW);
      glPopMatrix();
 
-     <span class="comment">// draw the bouncing cubes</span>
+     <span class="comment">//</span> draw the bouncing cubes
      drawCube(0, 0.0f, 1.5f, 2.5f, 1.5f);
      drawCube(1, 1.0f, 2.0f, 2.5f, 2.0f);
      drawCube(2, 2.0f, 3.5f, 2.5f, 2.5f);
@@ -223,7 +221,7 @@
 
  void GLWidget::initPbuffer()
  {
-     <span class="comment">// set up the pbuffer context</span>
+     <span class="comment">//</span> set up the pbuffer context
      pbuffer-&gt;makeCurrent();
      initCommon();
 
@@ -240,7 +238,7 @@
      {
          glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-         <span class="comment">// draw cube background</span>
+         <span class="comment">//</span> draw cube background
          glPushMatrix();
          glLoadIdentity();
          glTranslatef(0.5f, 0.5f, -2.0f);
@@ -253,7 +251,7 @@
          glEnable(GL_TEXTURE_2D);
          glPopMatrix();
 
-         <span class="comment">// draw cube</span>
+         <span class="comment">//</span> draw cube
          glTranslatef(0.5f, 0.5f, 0.5f);
          glRotatef(3.0f, 1.0f, 1.0f, 1.0f);
          glTranslatef(-0.5f, -0.5f, -0.5f);
@@ -261,17 +259,17 @@
          glDrawArrays(GL_QUADS, 0, 24);
      }
      glEndList();
-     <span class="comment">// generate a texture that has the same size/format as the pbuffer</span>
+     <span class="comment">//</span> generate a texture that has the same size/format as the pbuffer
      dynamicTexture = pbuffer-&gt;generateDynamicTexture();
 
-     <span class="comment">// bind the dynamic texture to the pbuffer - this is a no-op under X11</span>
+     <span class="comment">//</span> bind the dynamic texture to the pbuffer - this is a no-op under X11
      pbuffer-&gt;bindToDynamicTexture(dynamicTexture);
      makeCurrent();
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

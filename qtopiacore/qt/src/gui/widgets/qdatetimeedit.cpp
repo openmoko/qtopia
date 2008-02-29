@@ -1,6 +1,6 @@
 /****************************************************************************)
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -920,7 +918,6 @@ void QDateTimeEdit::keyPressEvent(QKeyEvent *event)
     bool select = true;
     bool inserted = false;
 
-    bool forward = true;
     switch (event->key()) {
 #ifdef QT_KEYPAD_NAVIGATION
     case Qt::Key_NumberSign:    //shortcut to popup calendar
@@ -964,37 +961,48 @@ void QDateTimeEdit::keyPressEvent(QKeyEvent *event)
         event->ignore();
         emit editingFinished();
         return;
-#ifndef QT_KEYPAD_NAVIGATION
-    case Qt::Key_Left:
-        forward = false;
-    case Qt::Key_Right:
-#endif
-        if (!(event->modifiers() & Qt::ControlModifier)) {
-            select = false;
-            break;
-        }
-#ifdef Q_WS_MAC
-        else {
-            select = (event->modifiers() & Qt::ShiftModifier);
-            break;
-        }
-#endif
-
     default:
+#ifdef QT_KEYPAD_NAVIGATION
+        if (QApplication::keypadNavigationEnabled() && !hasEditFocus()
+            && !event->text().isEmpty() && event->text().at(0).isLetterOrNumber()) {
+            setEditFocus(true);
+            
+            //hide cursor
+            d->edit->d_func()->setCursorVisible(false);
+            if (d->edit->d_func()->cursorTimer > 0)
+                killTimer(d->edit->d_func()->cursorTimer);
+            d->edit->d_func()->cursorTimer = 0;
+
+            d->setSelected(0);
+            oldCurrent = 0;
+        }
+#endif
         if (!d->isSeparatorKey(event)) {
             inserted = select = !event->text().isEmpty() && event->text().at(0).isPrint() && !(event->modifiers() & ~Qt::ShiftModifier);
             break;
         }
+    case Qt::Key_Left:
+    case Qt::Key_Right:
+        if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) {
 #ifdef QT_KEYPAD_NAVIGATION
-   case Qt::Key_Left:
-        forward = false;
-   case Qt::Key_Right:
-       if (!QApplication::keypadNavigationEnabled() || !hasEditFocus()) {
-           select = false;
-           break;
-       }
-       // else fall through
+            if (!QApplication::keypadNavigationEnabled() || !hasEditFocus()) {
+                select = false;
+                break;
+            }
+#else
+            if (!(event->modifiers() & Qt::ControlModifier)) {
+                select = false;
+                break;
+            }
+#ifdef Q_WS_MAC
+            else {
+                select = (event->modifiers() & Qt::ShiftModifier);
+                break;
+            }
 #endif
+#endif // QT_KEYPAD_NAVIGATION
+        }
+        // else fall through
     case Qt::Key_Backtab:
     case Qt::Key_Tab: {
         event->accept();
@@ -1002,10 +1010,8 @@ void QDateTimeEdit::keyPressEvent(QKeyEvent *event)
             d->edit->setSelection(d->edit->cursorPosition(), 0);
             return;
         }
-        if (event->key() == Qt::Key_Backtab || (event->key() == Qt::Key_Tab && event->modifiers() & Qt::ShiftModifier)) {
-            forward = false;
-        }
-
+        const bool forward = event->key() != Qt::Key_Left && event->key() != Qt::Key_Backtab
+                             && (event->key() != Qt::Key_Tab || !(event->modifiers() & Qt::ShiftModifier));
         int newSection = d->nextPrevSection(d->currentSectionIndex, forward);
 #ifdef QT_KEYPAD_NAVIGATION
         if (QApplication::keypadNavigationEnabled()) {

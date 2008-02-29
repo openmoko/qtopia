@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -45,7 +45,7 @@ PopClient::~PopClient()
 void PopClient::newConnection()
 {
     if (receiving) {
-        qWarning("transport in use, connection refused");
+        qLog(POP) << "transport in use, connection refused";
         return;
     }
 
@@ -64,7 +64,6 @@ void PopClient::newConnection()
     selected = false;
     awaitingData = false;
     newMessages = 0;
-    mailDropSize = 0;
     messageCount = 0;
     internalId = QMailId();
     deleteList.clear();
@@ -84,7 +83,7 @@ void PopClient::newConnection()
     transport->open(*account);
 }
 
-void PopClient::setAccount(MailAccount *_account)
+void PopClient::setAccount(QMailAccount *_account)
 {
     account = _account;
     lastUidl = account->getUidlList();
@@ -102,7 +101,6 @@ void PopClient::setSelectedMails(MailList *list, bool connected)
     mailList = list;
 
     messageCount = 0;
-    mailDropSize = 0;
     newMessages = 0;
 
     if (connected) {
@@ -131,25 +129,42 @@ void PopClient::quit()
     }
 }
 
+void PopClient::sendCommand(const QString& cmd)
+{
+    transport->stream() << cmd << "\r\n" << flush;
+    
+    if (cmd.length())
+        qLog(POP) << "SEND:" << qPrintable(cmd);
+}
+
+QString PopClient::readResponse() 
+{
+    QString response = transport->readLine();
+
+    if (response.length() > 1)
+        qLog(POP) << "RECV:" << qPrintable(response.left(response.length() - 2));
+
+    return response;
+}
+
 void PopClient::incomingData()
 {
     QString response, temp;
-    QTextStream& stream = transport->stream();
 
     if ( (status != Dele) && (status != Quit) )
-        response = transport->readLine();
+        response = readResponse();
 
     if (status == Init) {
         emit updateStatus(tr("Logging in"));
-        stream.setCodec("UTF-8");
-        stream << "USER " << account->mailUserName() << "\r\n" << flush;
+        transport->stream().setCodec("UTF-8");
+        sendCommand("USER " + account->mailUserName());
         status = Pass;
     } else if (status == Pass) {
         if (response[0] != '+') {
             errorHandling(ErrLoginFailed, "");
             return;
         }
-        stream << "PASS " << account->mailPassword() << "\r\n" << flush;
+        sendCommand("PASS " + account->mailPassword());
         status = Uidl;
     } else if (status == Uidl) {
         if (response[0] != '+') {
@@ -159,7 +174,7 @@ void PopClient::incomingData()
 
         status = Guidl;
         awaitingData = false;
-        stream << "UIDL\r\n" << flush;
+        sendCommand("UIDL");
         return;
     } else if (status == Guidl) {           //get list of uidls
 
@@ -172,14 +187,14 @@ void PopClient::incomingData()
 
             awaitingData = true;
             if ( transport->canReadLine() ) {
-                response = transport->readLine();
+                response = readResponse();
             } else {
                 return;
             }
         }
         uidlList.append( response.mid(0, response.length() - 2) );
         while ( transport->canReadLine() ) {
-            response = transport->readLine();
+            response = readResponse();
             uidlList.append( response.mid(0, response.length() - 2) );
         }
         if (response == ".\r\n") {
@@ -191,7 +206,7 @@ void PopClient::incomingData()
     }
 
     if (status == List) {
-        stream << "LIST\r\n" << flush;
+        sendCommand("LIST");
         awaitingData = false;
         status = Size;
         return;
@@ -207,12 +222,12 @@ void PopClient::incomingData()
 
             awaitingData = true;
             if ( transport->canReadLine() )
-                response = transport->readLine();
+                response = readResponse();
             else return;
         }
         sizeList.append( response.mid(0, response.length() - 2) );
         while ( transport->canReadLine() ) {
-            response = transport->readLine();
+            response = readResponse();
             sizeList.append( response.mid(0, response.length() - 2) );
         }
         if (response == ".\r\n") {
@@ -239,16 +254,18 @@ void PopClient::incomingData()
                 }
             }
 
-            temp.setNum(msgNum);
-            if (!selected)
-                emit updateStatus(tr("Retrieving %1").arg(temp));
-            else
-                emit updateStatus(tr("Completing %1").arg(temp));
+            if (!selected) {
+                if (messageCount == 1)
+                    emit updateStatus( tr("Previewing ") + QString::number( uniqueUidlList.count() ) );
+            } else {
+                emit updateStatus( tr("Completing %1 / %2").arg( messageCount ).arg( mailList->count() ) );
+            }
 
+            temp.setNum(msgNum);
             if (!preview || mailSize <= headerLimit) {
-                stream << "RETR " << msgNum << "\r\n" << flush;
+                sendCommand("RETR " + temp);
             } else {                                //only header
-                stream << "TOP " << msgNum << " 0\r\n" << flush;
+                sendCommand("TOP " + temp + " 0");
             }
 
             status = Ignore;
@@ -265,13 +282,12 @@ void PopClient::incomingData()
             status = Read;
             if (!transport->canReadLine())    //sync. problems
                 return;
-            response = transport->readLine();
+            response = readResponse();
         } else errorHandling(ErrUnknownResponse, response);
     }
 
     if (status == Read) {
         message += response;
-        QString rn = QString::fromLatin1( "\r\n" );
         d->append( response );
         if (d->status() == LongStream::OutOfSpace) {
             errorHandling(ErrFileSystemFull, LongStream::errorMessage( "\n" ));
@@ -279,7 +295,7 @@ void PopClient::incomingData()
         }
 
         while ( transport->canReadLine()) {
-            response = transport->readLine();
+            response = readResponse();
             message += response;
             message = message.right( 100 );
             d->append( response );
@@ -288,25 +304,32 @@ void PopClient::incomingData()
                 return;
             }
         }
-        message = message.right( 100 ); // 100 > 5 need at least 5 chars
-        emit downloadedSize(mailDropSize + d->length());
 
-        int x = message.indexOf("\r\n.\r\n",-5);
-        if (x == -1)
+        message = message.right( 100 ); // 100 > 5 need at least 5 chars
+        if (message.indexOf("\r\n.\r\n", -5) == -1) {
+            // We have an incomplete message 
+            if (!retrieveUid.isEmpty() && retrieveLength) {
+                uint percentage = qMin<uint>(d->length() * 100 / retrieveLength, 100);
+                emit retrievalProgress(retrieveUid, percentage);
+            }
             return;
+        }
 
         createMail();
 
-        // in case user jumps out, don't dowwload message on next entry
+        // in case user jumps out, don't download message on next entry
         if (preview) {
             lastUidl.append(msgUidl);
             account->setUidlList(lastUidl);
-            mailDropSize += headerLimit;
-        } else {
-            mailDropSize += mailSize;
         }
 
         newMessages++;
+
+        // We have now retrieved the entire message
+        if (!retrieveUid.isEmpty()) {
+            emit messageProcessed(retrieveUid);
+            retrieveUid = QString();
+        }
 
         if(!preview || (preview && mailSize <= headerLimit) && account->deleteMail())
             account->deleteMsg(msgUidl,0);
@@ -331,13 +354,13 @@ void PopClient::incomingData()
 
     if (status == Dele) {
         if ( awaitingData ) {
-            response = transport->readLine();
+            response = readResponse();
             if ( response[0] != '+' ) {
                 errorHandling(ErrUnknownResponse, response);
                 return;
             }
         } else {
-            qWarning( (QString::number( deleteList.count() ) + " messages in mailbox to be deleted").toAscii());
+            qLog(POP) << qPrintable(QString::number( deleteList.count() ) + " messages in mailbox to be deleted");
             emit updateStatus(tr("Removing old messages"));
         }
 
@@ -351,10 +374,10 @@ void PopClient::incomingData()
 
             if ( !strPos.isEmpty() ) {
                 awaitingData = true;
-                qWarning(("deleting message at pos: " + strPos ).toAscii());
-                stream << "DELE " << strPos << "\r\n" << flush;
+                qLog(POP) << qPrintable("deleting message at pos: " + strPos);
+                sendCommand("DELE " + strPos);
             } else {
-                qWarning(("delete failed on message: " + str ).toAscii());
+                qLog(POP) << qPrintable("unable to delete unlisted message: " + str);
                 incomingData();
                 return;
             }
@@ -371,9 +394,8 @@ void PopClient::incomingData()
     }
 
     if (status == Quit) {
-        qWarning("quit sent");
         status = Exit;
-        transport->stream() << "QUIT\r\n" << flush;
+        sendCommand("QUIT");
         return;
     }
 
@@ -398,7 +420,8 @@ QString PopClient::getUidl(QString uidl)
 
 QString PopClient::msgPosFromUidl(QString uidl)
 {
-    QStringList list = uidlList.filter(uidl);
+    QRegExp exactUid("\\b" + uidl + "\\b");
+    QStringList list = uidlList.filter(exactUid);
     if ( list.count() != 1 )        //should be only 1 match
         return QString::null;
 
@@ -433,6 +456,7 @@ int PopClient::nextMsgServerPos()
             messageCount = 1;
             mPtr = mailList->first();
         } else {
+            ++messageCount;
             mPtr = mailList->next();
         }
 
@@ -441,7 +465,8 @@ int PopClient::nextMsgServerPos()
         // if requested mail is not on server, try to get
         // a new mail from the list
         while ( (mPtr != NULL) && (ref.count() == 0) ) {
-            ref = uidlList.filter(*mPtr);
+            QRegExp exactUid("\\b" + *mPtr + "\\b");
+            ref = uidlList.filter(exactUid);
 
             if (ref.count() != 1) {
                 unresolvedUidl.append(*mPtr);
@@ -457,6 +482,10 @@ int PopClient::nextMsgServerPos()
             return thisMsg;
 
         internalId = mailList->currentId();
+        if ((mPtr != NULL) && !preview) {
+            retrieveUid = *mPtr;
+            retrieveLength = mailList->currentSize();
+        }
     }
 
     getSize(thisMsg);
@@ -509,16 +538,13 @@ void PopClient::uidlIntegrityCheck()
 
             if ( (lastUidl.filter(thisUidl)).count() == 0 ) {
                 uniqueUidlList.append(*it);
-                mailDropSize += headerLimit;
             } else {
                 previousList.append(*it);
             }
 
         }
         lastUidl = previousList;
-        emit mailboxSize(mailDropSize);
         messageCount = 0;
-        mailDropSize = 0;
     }
 }
 

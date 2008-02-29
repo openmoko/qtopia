@@ -25,4 +25,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Date/time setting dialog for Qtopia.
-pkg.domain=window,alarm,datetime,launcher
+pkg.domain=trusted

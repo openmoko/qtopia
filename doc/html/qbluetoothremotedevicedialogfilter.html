@@ -50,7 +50,7 @@
 <p>Constructs a <a href="qbluetoothremotedevicedialogfilter.html">QBluetoothRemoteDeviceDialogFilter</a> that will accept all devices.</p>
 <h3 class="fn"><a name="dtor.QBluetoothRemoteDeviceDialogFilter"></a>QBluetoothRemoteDeviceDialogFilter::~QBluetoothRemoteDeviceDialogFilter ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the dialog filter.</p>
-<h3 class="fn"><a name="acceptedDeviceMajors"></a><a href="qset.html">QSet</a>&lt;<a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a>&gt; QBluetoothRemoteDeviceDialogFilter::acceptedDeviceMajors () const</h3>
+<h3 class="fn"><a name="acceptedDeviceMajors"></a><a href="./qset.html">QSet</a>&lt;<a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a>&gt; QBluetoothRemoteDeviceDialogFilter::acceptedDeviceMajors () const</h3>
 <p>Returns the device majors that are accepted by this filter. By default, this value is an empty set (i.e&#x2e; the filter will accept devices with any device major).</p>
 <p>See also <a href="qbluetoothremotedevicedialogfilter.html#setAcceptedDeviceMajors">setAcceptedDeviceMajors</a>().</p>
 <h3 class="fn"><a name="acceptedServiceClasses"></a><a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> QBluetoothRemoteDeviceDialogFilter::acceptedServiceClasses () const</h3>
@@ -59,7 +59,7 @@
 <h3 class="fn"><a name="filterAcceptsDevice"></a>bool QBluetoothRemoteDeviceDialogFilter::filterAcceptsDevice ( const <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns whether this filter allows the device <i>device</i> to be displayed in the associated device selector.</p>
 <p>If the accepted service class is <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::AllServiceClasses</a>, the default implementation will also accept devices that have invalid service class values.</p>
-<h3 class="fn"><a name="setAcceptedDeviceMajors"></a>void QBluetoothRemoteDeviceDialogFilter::setAcceptedDeviceMajors ( const <a href="qset.html">QSet</a>&lt;<a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a>&gt; &amp; <i>deviceMajors</i> )</h3>
+<h3 class="fn"><a name="setAcceptedDeviceMajors"></a>void QBluetoothRemoteDeviceDialogFilter::setAcceptedDeviceMajors ( const <a href="./qset.html">QSet</a>&lt;<a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a>&gt; &amp; <i>deviceMajors</i> )</h3>
 <p>Sets the filter to accept devices that match at least one of the device majors contained in <i>deviceMajors</i>. If a device does not match at least one of the specified device majors, it will not be displayed in the associated device selector.</p>
 <p>For example, to create a filter that only accepts computers and phones:</p>
 <pre>    QBluetoothRemoteDeviceDialogFilter filter;
@@ -78,8 +78,8 @@
 <p>See also <a href="qbluetoothremotedevicedialogfilter.html#acceptedServiceClasses">acceptedServiceClasses</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

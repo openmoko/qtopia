@@ -49,4 +49,4 @@ pkg.desc=Message Viewer Application
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=Commercial
-pkg.domain=window,pim,phonecomm,msg
+pkg.domain=trusted

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/painting/qcolor.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/painting/qcolor.cpp -->
 <head>
   <title>Qt 4.3: QColor Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -124,8 +124,8 @@
 <li><div class="fn"/>int <b><a href="qcolor.html#qRed">qRed</a></b> ( QRgb <i>rgb</i> )</li>
 <li><div class="fn"/>QRgb <b><a href="qcolor.html#qRgb">qRgb</a></b> ( int <i>r</i>, int <i>g</i>, int <i>b</i> )</li>
 <li><div class="fn"/>QRgb <b><a href="qcolor.html#qRgba">qRgba</a></b> ( int <i>r</i>, int <i>g</i>, int <i>b</i>, int <i>a</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-lt-lt-80">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-gt-gt-50">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QColor &amp; <i>color</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-lt-lt-134">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qcolor.html#operator-gt-gt-75">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QColor &amp; <i>color</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -156,11 +156,11 @@
 <a name="alpha-blended-drawing"></a>
 <h3>Alpha-Blended Drawing</h3>
 <p>QColor also support alpha-blended outlining and filling. The alpha channel of a color specifies the transparency effect, 0 represents a fully transparent color, while 255 represents a fully opaque color. For example:</p>
-<pre><span class="comment"> // Specfiy semi-transparent red</span>
+<pre><span class="comment"> //</span> Specfiy semi-transparent red
  painter.setBrush(QColor(255, 0, 0, 127));
  painter.drawRect(0, 0, width()/2, height());
 
-<span class="comment"> // Specify semi-transparend blue</span>
+<span class="comment"> //</span> Specify semi-transparend blue
  painter.setBrush(QColor(0, 0, 255, 127));
  painter.drawRect(0, 0, width(), height()/2);</pre>
 <p>The code above produces the following output:</p>
@@ -234,6 +234,7 @@
 <p>See also <a href="qcolor.html#isValid">isValid</a>() and <a href="qcolor.html#predefined-colors">Predefined Colors</a>.</p>
 <h3 class="fn"><a name="allowX11ColorNames"></a>bool QColor::allowX11ColorNames ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if <a href="qcolor.html#setNamedColor">setNamedColor</a>() is allowed to look up colors in the X11 color database. By default, this function returns false.</p>
+<p><b>Note:</b> This function is only available on the X11 platform.</p>
 <p>See also <a href="qcolor.html#setAllowX11ColorNames">setAllowX11ColorNames</a>().</p>
 <h3 class="fn"><a name="alpha"></a>int QColor::alpha () const</h3>
 <p>Returns the alpha color component of this color.</p>
@@ -378,6 +379,7 @@
 <p>See also <a href="qcolor.html#saturation">saturation</a>(), <a href="qcolor.html#getHsvF">getHsvF</a>(), and <a href="qcolor.html#the-hsv-color-model">The HSV Color Model</a>.</p>
 <h3 class="fn"><a name="setAllowX11ColorNames"></a>void QColor::setAllowX11ColorNames ( bool <i>enabled</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Allow <a href="qcolor.html#setNamedColor">setNamedColor</a>() to look up colors in the X11 color database if <i>enabled</i>. By default, <a href="qcolor.html#setNamedColor">setNamedColor</a>() does <i>not</i> look up colors in the X11 color database.</p>
+<p><b>Note:</b> This function is only available on the X11 platform.</p>
 <p>See also <a href="qcolor.html#setNamedColor">setNamedColor</a>() and <a href="qcolor.html#allowX11ColorNames">allowX11ColorNames</a>().</p>
 <h3 class="fn"><a name="setAlpha"></a>void QColor::setAlpha ( int <i>alpha</i> )</h3>
 <p>Sets the alpha of this color to <i>alpha</i>. Integer alpha is specified in the range 0-255.</p>
@@ -512,42 +514,18 @@
 <h3 class="fn"><a name="qRgba"></a><a href="qcolor.html#QRgb-typedef">QRgb</a> qRgba ( int <i>r</i>, int <i>g</i>, int <i>b</i>, int <i>a</i> )</h3>
 <p>Returns the ARGB quadruplet (<i>a</i>, <i>r</i>, <i>g</i>, <i>b</i>).</p>
 <p>See also <a href="qcolor.html#qRgb">qRgb</a>(), <a href="qcolor.html#qRed">qRed</a>(), <a href="qcolor.html#qGreen">qGreen</a>(), and <a href="qcolor.html#qBlue">qBlue</a>().</p>
-<h3 class="fn"><a name="operator-lt-lt-80"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-134"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QColor &amp; <i>color</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the <i>color</i> to the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-50"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QColor &amp; <i>color</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-75"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QColor &amp; <i>color</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the <i>color</i> from the <i>stream</i>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QColor-8"></a>QColor::QColor ( int <i>x</i>, int <i>y</i>, int <i>z</i>, <a href="qcolor.html#Spec-enum">Spec</a> <i>colorSpec</i> )</h3>
-<p>Use one of the other <a href="qcolor.html">QColor</a> constructors, or one of the static convenience functions, instead.</p>
-<h3 class="fn"><a name="getRgba"></a>void QColor::getRgba ( int * <i>r</i>, int * <i>g</i>, int * <i>b</i>, int * <i>a</i> ) const</h3>
-<p>Use <a href="qcolor.html#getRgb">getRgb</a>() instead.</p>
-<h3 class="fn"><a name="hsv"></a>void QColor::hsv ( int * <i>h</i>, int * <i>s</i>, int * <i>v</i> ) const</h3>
-<p>Use <a href="qcolor.html#getHsv">getHsv</a>() instead.</p>
-<p>See also <a href="qcolor.html#setHsv">setHsv</a>().</p>
-<h3 class="fn"><a name="pixel"></a><a href="qtglobal.html#uint-typedef">uint</a> QColor::pixel ( int <i>screen</i> = -1 ) const</h3>
-<p>Returns the pixel value used by the underlying window system to refer to a color.</p>
-<p>Use <a href="qcolormap.html#pixel">QColormap::pixel</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QColor myColor;
- uint pixel = myColor.pixel(screen);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QColormap cmap = QColormap::instance(screen);
- uint pixel  = cmap.pixel(*this);</pre>
-<h3 class="fn"><a name="rgb-2"></a>void QColor::rgb ( int * <i>r</i>, int * <i>g</i>, int * <i>b</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qcolor.html#getRgb">getRgb</a>() instead.</p>
-<h3 class="fn"><a name="setRgba-2"></a>void QColor::setRgba ( int <i>r</i>, int <i>g</i>, int <i>b</i>, int <i>a</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qcolor.html#setRgb">setRgb</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

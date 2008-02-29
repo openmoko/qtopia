@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSignalIntercepter Class Reference</h1>
 <p>The QSignalIntercepter class provides an interface for intercepting signals as meta-calls <a href="#details">More...</a></p>
-<pre>    #include &lt;QSignalIntercepter&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QSignalIntercepter&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qsignalintercepter-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,7 +27,7 @@
 <li><div class="fn"/>QByteArray <b><a href="qsignalintercepter.html#signal">signal</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>int * <b><a href="qsignalintercepter.html#connectionTypes">connectionTypes</a></b> ( const QByteArray &amp; <i>member</i>, int &amp; <i>nargs</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -43,16 +43,15 @@
 <li><div class="fn"/>virtual void <b><a href="qsignalintercepter.html#activated">activated</a></b> ( const QList&lt;QVariant&gt; &amp; <i>args</i> ) = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -63,24 +62,24 @@
 <p>See also <a href="qslotinvoker.html">QSlotInvoker</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSignalIntercepter"></a>QSignalIntercepter::QSignalIntercepter ( <a href="qobject.html">QObject</a> * <i>sender</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>signal</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSignalIntercepter"></a>QSignalIntercepter::QSignalIntercepter ( <a href="./qobject.html">QObject</a> * <i>sender</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>signal</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a new signal intercepter which traps <i>signal</i> on <i>sender</i>. The object will be attached to <i>parent</i>, if present.</p>
 <h3 class="fn"><a name="dtor.QSignalIntercepter"></a>QSignalIntercepter::~QSignalIntercepter ()</h3>
 <p>Destroy a signal intercepter.</p>
-<h3 class="fn"><a name="activated"></a>void QSignalIntercepter::activated ( const <a href="qlist.html">QList</a>&lt;<a href="qvariant.html">QVariant</a>&gt; &amp; <i>args</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="activated"></a>void QSignalIntercepter::activated ( const <a href="./qlist.html">QList</a>&lt;<a href="./qvariant.html">QVariant</a>&gt; &amp; <i>args</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Called when the signal that is being intercepted is activated. The arguments to the signal are passed in the list <i>args</i>.</p>
-<h3 class="fn"><a name="connectionTypes"></a>int * QSignalIntercepter::connectionTypes ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>member</i>, int &amp; <i>nargs</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="connectionTypes"></a>int * QSignalIntercepter::connectionTypes ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>member</i>, int &amp; <i>nargs</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the connection types associated with a signal or slot <i>member</i> specification. The array of types is returned from this function, and the number of arguments is returned in <i>nargs</i>. Returns null if <i>member</i> is invalid. The return value must be freed with qFree().</p>
 <h3 class="fn"><a name="isValid"></a>bool QSignalIntercepter::isValid () const</h3>
 <p>Returns true if this signal intercepter is valid; that is, there was a signal present with the specified parameters when this object was constructed.</p>
-<h3 class="fn"><a name="sender"></a><a href="qobject.html">QObject</a> * QSignalIntercepter::sender () const</h3>
+<h3 class="fn"><a name="sender"></a><a href="./qobject.html">QObject</a> * QSignalIntercepter::sender () const</h3>
 <p>Returns the sender that this signal interceptor is attached to.</p>
-<h3 class="fn"><a name="signal"></a><a href="qbytearray.html">QByteArray</a> QSignalIntercepter::signal () const</h3>
+<h3 class="fn"><a name="signal"></a><a href="./qbytearray.html">QByteArray</a> QSignalIntercepter::signal () const</h3>
 <p>Returns the name of the signal that this signal interceptor is attached to.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

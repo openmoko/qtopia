@@ -20,4 +20,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Homescreen settings dialog for Qtopia.
-pkg.domain=window,lightandpower,profiles,drm,doc_server,doc_write,pictures,qds,camera
+pkg.domain=trusted

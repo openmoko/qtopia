@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -126,7 +126,7 @@ bool InstalledPackageScanner::isPackageEnabled( const InstallControl::PackageInf
 
 bool InstalledPackageScanner::isPackageInstalled( const InstallControl::PackageInfo &pkgInfo )
 {
-    QDir controlsDir( Qtopia::packagePath() + "/controls" );
+    QDir controlsDir( AbstractPackageController::INSTALLED_INFO_FILES_LOC );
     QFileInfoList flist = controlsDir.entryInfoList();
 
     InstallControl::PackageInfo pkgInfoControl;

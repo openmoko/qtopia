@@ -8,4 +8,4 @@ SOURCES		= \
 pkg.desc=Phone bounce daemon
 
 target.hint+=sxe
-target.domain=modem
+target.domain=trusted

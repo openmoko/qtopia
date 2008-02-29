@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -149,6 +149,9 @@ QContent QSqlContentStore::contentFromFileName( const QString &fileName, LookupF
 
         QtopiaDatabaseId dbId = QtopiaSql::instance()->databaseIdForPath( fileName );
 
+        if( dbId == quint32(-1) )
+            return QContent();
+
         QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
         selectQuery.prepare( selectString );
 
@@ -272,11 +275,22 @@ bool QSqlContentStore::commitContent( QContent *content )
         {
             return updateContent( contentEngine( content ) );
         }
-        else
+        else if( dbId == quint32(-1) )
         {
             uninstallContent( content->id() );
 
-            return insertContent( contentEngine( content ), dbId );
+            return false;
+        }
+        else
+        {
+            QContentEngine *engine = contentEngine( content );
+
+            ensurePropertiesLoaded( engine );
+            ensureCategoriesLoaded( engine );
+
+            uninstallContent( content->id() );
+
+            return insertContent( engine, dbId );
         }
     }
 }
@@ -465,9 +479,12 @@ bool QSqlContentStore::uninstallContent( QContentId contentId )
         return false;
     }
 
-    bool succeeded = true;
-
     QSqlDatabase db = QtopiaSql::instance()->database( contentId.first );
+
+    if( !db.isValid() )
+        return false;
+
+    bool succeeded = true;
 
     {
         static const QString deletePropertyString = QLatin1String(
@@ -609,23 +626,27 @@ QStringList QSqlContentStore::contentCategories( QContentId contentId )
             "from mapCategoryToContent "
             "where cid = :cid" );
 
-    QSqlQuery selectQuery( QtopiaSql::instance()->database( contentId.first ) );
-    selectQuery.prepare( selectString );
+    QSqlDatabase database = QtopiaSql::instance()->database( contentId.first );
 
-    selectQuery.bindValue( QLatin1String( ":cid" ), contentId.second );
-
-    QtopiaSql::instance()->logQuery( selectQuery );
-
-    if ( !selectQuery.exec() )
+    if( database.isValid() )
     {
-        logError( __PRETTY_FUNCTION__, "selectQuery", contentId.first, selectQuery.lastError() );
+        QSqlQuery selectQuery( database );
+        selectQuery.prepare( selectString );
 
-        return categories;
+        selectQuery.bindValue( QLatin1String( ":cid" ), contentId.second );
+
+        QtopiaSql::instance()->logQuery( selectQuery );
+
+        if ( !selectQuery.exec() )
+        {
+            logError( __PRETTY_FUNCTION__, "selectQuery", contentId.first, selectQuery.lastError() );
+
+            return categories;
+        }
+
+        while ( selectQuery.next() )
+            categories << selectQuery.value( 0 ).toString();
     }
-
-    while ( selectQuery.next() )
-        categories << selectQuery.value( 0 ).toString();
-
     return categories;
 }
 
@@ -644,23 +665,27 @@ QContentEnginePropertyCache QSqlContentStore::contentProperties( QContentId cont
             "from contentProps "
             "where cid = :cid" );
 
-    QSqlQuery selectQuery( QtopiaSql::instance()->database( contentId.first ) );
-    selectQuery.prepare( selectString );
+    QSqlDatabase database = QtopiaSql::instance()->database( contentId.first );
 
-    selectQuery.bindValue( QLatin1String( ":cid" ), contentId.second );
-
-    QtopiaSql::instance()->logQuery( selectQuery );
-
-    if( !selectQuery.exec() )
+    if( database.isValid() )
     {
-        logError( __PRETTY_FUNCTION__, "selectQuery", contentId.first, selectQuery.lastError() );
+        QSqlQuery selectQuery( database );
+        selectQuery.prepare( selectString );
 
-        return properties;
+        selectQuery.bindValue( QLatin1String( ":cid" ), contentId.second );
+
+        QtopiaSql::instance()->logQuery( selectQuery );
+
+        if( !selectQuery.exec() )
+        {
+            logError( __PRETTY_FUNCTION__, "selectQuery", contentId.first, selectQuery.lastError() );
+
+            return properties;
+        }
+
+        while( selectQuery.next() )
+            properties[ selectQuery.value( 0 ).toString() ][ selectQuery.value( 1 ).toString() ] = selectQuery.value( 2 ).toString();
     }
-
-    while( selectQuery.next() )
-        properties[ selectQuery.value( 0 ).toString() ][ selectQuery.value( 1 ).toString() ] = selectQuery.value( 2 ).toString();
-
     return properties;
 }
 
@@ -689,6 +714,9 @@ QStringList QSqlContentStore::contentMimeTypes( QContentId contentId )
 */
 bool QSqlContentStore::insertContent( QContentEngine *engine, QtopiaDatabaseId dbId )
 {
+    if( dbId == quint32(-1) )
+        return false;
+
     static const QString insertString = QLatin1String(
             "insert into content( uiName, uiNameSortOrder, mType, drmFlags, docStatus, path, location, icon, lastUpdated ) "
             "values( :uiName, :uiNameSortOrder, :mType, :drmFlags, :docStatus, :path, :location, :icon, :lastUpdated )" );
@@ -722,8 +750,7 @@ bool QSqlContentStore::insertContent( QContentEngine *engine, QtopiaDatabaseId d
 
     if( !insertQuery.exec() )
     {
-        logError( __PRETTY_FUNCTION__, "insertQuery", dbId,
-                    insertQuery.lastError() );
+        logError( __PRETTY_FUNCTION__, "insertQuery", *engine, dbId, insertQuery.lastError() );
 
         return false;
     }
@@ -760,7 +787,12 @@ bool QSqlContentStore::updateContent( QContentEngine *engine )
             "location = :location, icon = :icon, lastUpdated = :lastUpdated "
             "where cid = :cid" );
 
-    QSqlQuery updateQuery( QtopiaSql::instance()->database( engine->id().first ) );
+    QSqlDatabase database = QtopiaSql::instance()->database( engine->id().first );
+
+    if( !database.isValid() )
+        return false;
+
+    QSqlQuery updateQuery( database );
     updateQuery.prepare( updateString );
 
     updateQuery.bindValue( QLatin1String( ":uiName" ), engine->name() );
@@ -790,7 +822,7 @@ bool QSqlContentStore::updateContent( QContentEngine *engine )
 
     if( !updateQuery.exec() )
     {
-        logError( __PRETTY_FUNCTION__, "updateQuery", engine->id().first, updateQuery.lastError() );
+        logError( __PRETTY_FUNCTION__, "updateQuery", *engine, engine->id().first, updateQuery.lastError() );
 
         return false;
     }
@@ -1330,62 +1362,77 @@ QString QSqlContentStore::convertRole( QContent::Role role ) const
 */
 int QSqlContentStore::mimeId( const QString &type, QtopiaDatabaseId dbId )
 {
-    static QCache< QPair<QString, QtopiaDatabaseId>, int> mimeIdCache;
-    if(mimeIdCache.contains(qMakePair(type, dbId)))
-       return *mimeIdCache[qMakePair(type, dbId)];
+    int key = QContentCache::instance()->lookupMimeTypeKey( dbId, type );
+
+    if( key != -1 )
+        return key;
+
+    key = queryMimeId( type, dbId );
+
+    if( key != -1 )
+        return key;
+
+    static const QString insertString = QLatin1String(
+            "insert into mimeTypeLookup( mimeType ) "
+            "values( :type )" );
+
+    QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
+    insertQuery.prepare( insertString );
+
+    insertQuery.bindValue( QLatin1String( ":type" ), type );
+
+    QtopiaSql::instance()->logQuery( insertQuery );
+
+    if( !insertQuery.exec() )
     {
-        static const QString selectString = QLatin1String(
-                "select pKey "
-                "from mimeTypeLookup "
-                "where mimeType = :type" );
+        logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
 
-        QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
-        selectQuery.prepare( selectString );
-
-        selectQuery.bindValue( QLatin1String( ":type" ), type );
-
-        QtopiaSql::instance()->logQuery( selectQuery );
-
-        if( !selectQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
-
-            return 0;
-        }
-
-        if( selectQuery.first() )
-        {
-            int *value=new int;
-            *value = selectQuery.value( 0 ).toInt();
-            mimeIdCache.insert(qMakePair(type, dbId), value);
-            return *value;
-        }
+        return 0;
     }
 
+    key = insertQuery.lastInsertId().toInt();
+
+    QContentCache::instance()->cacheMimeTypeKey( dbId, type, key );
+
+    return key;
+}
+
+/*!
+    Queries the database for the primary key for a mime \a type in the database with the id \a dbId.
+
+    Returns the primary key if one exists and -1 otherwise.
+*/
+int QSqlContentStore::queryMimeId( const QString &type, QtopiaDatabaseId dbId )
+{
+    static const QString selectString = QLatin1String(
+            "select pKey "
+            "from mimeTypeLookup "
+            "where mimeType = :type" );
+
+    QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
+    selectQuery.prepare( selectString );
+
+    selectQuery.bindValue( QLatin1String( ":type" ), type );
+
+    QtopiaSql::instance()->logQuery( selectQuery );
+
+    if( !selectQuery.exec() )
     {
-        static const QString insertString = QLatin1String(
-                "insert into mimeTypeLookup( mimeType ) "
-                "values( :type )" );
+        logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
 
-        QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
-        insertQuery.prepare( insertString );
-
-        insertQuery.bindValue( QLatin1String( ":type" ), type );
-
-        QtopiaSql::instance()->logQuery( insertQuery );
-
-        if( !insertQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
-
-            return 0;
-        }
-
-        int *value=new int;
-        *value = insertQuery.lastInsertId().toInt();
-        mimeIdCache.insert(qMakePair(type, dbId), value);
-        return *value;
+        return -1;
     }
+
+    if( selectQuery.first() )
+    {
+        int key = selectQuery.value( 0 ).toInt();
+
+        QContentCache::instance()->cacheMimeTypeKey( dbId, type, key );
+
+        return key;
+    }
+
+    return -1;
 }
 
 /*!
@@ -1393,62 +1440,77 @@ int QSqlContentStore::mimeId( const QString &type, QtopiaDatabaseId dbId )
  */
 int QSqlContentStore::locationId( const QString &location, QtopiaDatabaseId dbId )
 {
-    static QCache< QPair<QString, QtopiaDatabaseId>, int> locationIdCache;
-    if(locationIdCache.contains(qMakePair(location, dbId)))
-       return *locationIdCache[qMakePair(location, dbId)];
+    int key = QContentCache::instance()->lookupLocationKey( dbId, location );
+
+    if( key != -1 )
+        return key;
+
+    key = queryLocationId( location, dbId );
+
+    if( key != -1 )
+        return key;
+
+    static const QString insertString = QLatin1String(
+            "insert into locationLookup( location ) "
+            "values( :location )" );
+
+    QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
+    insertQuery.prepare( insertString );
+
+    insertQuery.bindValue( QLatin1String( ":location" ), location );
+
+    QtopiaSql::instance()->logQuery( insertQuery );
+
+    if( !insertQuery.exec() )
     {
-        static const QString selectString = QLatin1String(
-                "select pKey "
-                "from locationLookup "
-                "where location = :location" );
+        logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
 
-        QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
-        selectQuery.prepare( selectString );
-
-        selectQuery.bindValue( QLatin1String( ":location" ), location );
-
-        QtopiaSql::instance()->logQuery( selectQuery );
-
-        if( !selectQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
-
-            return 0;
-        }
-
-        if( selectQuery.first() )
-        {
-            int *value=new int;
-            *value = selectQuery.value( 0 ).toInt();
-            locationIdCache.insert(qMakePair(location, dbId), value);
-            return *value;
-        }
+        return -1;
     }
 
+    key = insertQuery.lastInsertId().toInt();
+
+    QContentCache::instance()->cacheLocationKey( dbId, location, key );
+
+    return key;
+}
+
+/*!
+    Queries the database for the primary key for the directory \a location in the database with the id \a dbId.
+
+    Returns the primary key if one exists or -1 otherwise.
+*/
+int QSqlContentStore::queryLocationId( const QString &location, QtopiaDatabaseId dbId )
+{
+    static const QString selectString = QLatin1String(
+            "select pKey "
+            "from locationLookup "
+            "where location = :location" );
+
+    QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
+    selectQuery.prepare( selectString );
+
+    selectQuery.bindValue( QLatin1String( ":location" ), location );
+
+    QtopiaSql::instance()->logQuery( selectQuery );
+
+    if( !selectQuery.exec() )
     {
-        static const QString insertString = QLatin1String(
-                "insert into locationLookup( location ) "
-                "values( :location )" );
+        logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
 
-        QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
-        insertQuery.prepare( insertString );
-
-        insertQuery.bindValue( QLatin1String( ":location" ), location );
-
-        QtopiaSql::instance()->logQuery( insertQuery );
-
-        if( !insertQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
-
-            return 0;
-        }
-
-        int *value=new int;
-        *value = insertQuery.lastInsertId().toInt();
-        locationIdCache.insert(qMakePair(location, dbId), value);
-        return *value;
+        return -1;
     }
+
+    if( selectQuery.first() )
+    {
+        int key = selectQuery.value( 0 ).toInt();
+
+        QContentCache::instance()->cacheLocationKey( dbId, location, key );
+
+        return key;
+    }
+
+    return -1;
 }
 
 /*!
@@ -1660,6 +1722,30 @@ QContent QSqlContentStore::executableContent( const QString &fileName )
     }
 
     return QContent();
+}
+
+/*!
+    Writes an sql \a error that occurred at the given \a location to debug output and sets the content store error string.
+*/
+void QSqlContentStore::logError( const char *signature, const char *query, const QContent &content, QtopiaDatabaseId databaseId, const QSqlError &error )
+{
+    qWarning() << signature << databaseId << query;
+    qWarning() << error.text();
+    qWarning() << content;
+
+    setErrorString( error.text() );
+}
+
+/*!
+    Writes an sql \a error that occurred at the given \a location to debug output and sets the content store error string.
+*/
+void QSqlContentStore::logError( const char *signature, const char *query, const QContentEngine &content, QtopiaDatabaseId databaseId, const QSqlError &error )
+{
+    qWarning() << signature << databaseId << query;
+    qWarning() << error.text();
+    qWarning() << content;
+
+    setErrorString( error.text() );
 }
 
 /*!
@@ -2424,7 +2510,7 @@ QStringList QSqlContentStore::mimeFilterMatches( const QContentFilter &filter, c
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 "
                     "where %2 "
-                    "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
+                    "order by mimeTypeLookup.mimeType" );
         }
         else
         {
@@ -2432,7 +2518,7 @@ QStringList QSqlContentStore::mimeFilterMatches( const QContentFilter &filter, c
                     "select distinct mimeTypeLookup.mimeType "
                     "from %1 left join mimeTypeLookup on content.mType = mimeTypeLookup.pKey "
                     "where %2 "
-                    "order by mimeTypeLookup.mimeType COLLATE localeAwareCompare" );
+                    "order by mimeTypeLookup.mimeType" );
         }
 
         queryString = buildQuery( mimeQuery, filter, &parameters );
@@ -2442,7 +2528,7 @@ QStringList QSqlContentStore::mimeFilterMatches( const QContentFilter &filter, c
         queryString = QLatin1String(
                 "select distinct mimeType "
                 "from mimeTypeLookup "
-                "order by mimeType COLLATE localeAwareCompare" );
+                "order by mimeType" );
     }
 
     QMap< QString, QString > filters;
@@ -2490,7 +2576,7 @@ QStringList QSqlContentStore::syntheticFilterGroups( const QContentFilter &filte
                 "select distinct contentProps.grp "
                 "from %1 left join contentProps on content.cid = contentProps.cid "
                 "where %2 "
-                "order by contentProps.grp COLLATE localeAwareCompare" );
+                "order by contentProps.grp" );
 
         queryString = buildQuery( groupQuery, filter, &parameters );
     }
@@ -2499,7 +2585,7 @@ QStringList QSqlContentStore::syntheticFilterGroups( const QContentFilter &filte
         queryString = QLatin1String(
                 "select distinct grp "
                 "from contentProps "
-                "order by grp COLLATE localeAwareCompare" );
+                "order by grp" );
     }
 
     QMap< QString, QString > groups;
@@ -2547,7 +2633,7 @@ QStringList QSqlContentStore::syntheticFilterKeys( const QContentFilter &filter,
                 "select distinct contentProps.name "
                 "from %2 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group "
                 "where %3 "
-                "order by contentProps.name COLLATE localeAwareCompare" );
+                "order by contentProps.name" );
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
 
@@ -2608,7 +2694,7 @@ QStringList QSqlContentStore::syntheticFilterMatches( const QContentFilter &filt
                 "select distinct contentProps.value "
                 "from %1 left join contentProps on content.cid = contentProps.cid and contentProps.grp = :group and contentProps.name = :key "
                 "where %2 "
-                "order by contentProps.value COLLATE localeAwareCompare");
+                "order by contentProps.value");
 
         parameters.append( Parameter( QLatin1String( "group" ), group ) );
         parameters.append( Parameter( QLatin1String( "key" ), key ) );
@@ -2680,7 +2766,7 @@ QStringList QSqlContentStore::categoryFilterMatches( const QContentFilter &filte
                 "from %2 inner join mapCategoryToContent as category on content.cid = category.cid "
                 "inner join categories on category.categoryid = categories.categoryid and %1 "
                 "where %3 "
-                "order by categories.categorytext COLLATE localeAwareCompare")
+                "order by categories.categorytext")
                 .arg( scopeClause );
 
         queryString = buildQuery( queryString, filter, &parameters );

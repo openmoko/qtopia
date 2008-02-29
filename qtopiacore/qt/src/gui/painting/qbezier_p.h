@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -64,8 +62,13 @@ public:
     static QBezier fromPoints(const QPointF &p1, const QPointF &p2,
                               const QPointF &p3, const QPointF &p4);
 
+    static void coefficients(qreal t, qreal &a, qreal &b, qreal &c, qreal &d);
+
     inline QPointF pointAt(qreal t) const;
     inline QPointF normalVector(qreal t) const;
+
+    inline QPointF derivedAt(qreal t) const;
+    inline QPointF secondDerivedAt(qreal t) const;
 
     QPolygonF toPolygon() const;
     void addToPolygon(QPolygonF *p) const;
@@ -76,6 +79,9 @@ public:
     void addIfClose(qreal *length, qreal error) const;
 
     qreal tAtLength(qreal len) const;
+
+    int stationaryYPoints(qreal &t0, qreal &t1) const;
+    qreal tForY(qreal t0, qreal t1, qreal y) const;
 
     QPointF pt1() const { return QPointF(x1, y1); }
     QPointF pt2() const { return QPointF(x2, y2); }
@@ -99,6 +105,9 @@ public:
 
     static QVector< QList<qreal> > findIntersections(const QBezier &a,
                                                      const QBezier &b);
+
+    static bool findIntersections(const QBezier &a, const QBezier &b,
+                                  QVector<qreal> &ta, QVector<qreal> &tb);
 
     qreal x1, y1, x2, y2, x3, y3, x4, y4;
 };
@@ -134,6 +143,17 @@ inline QLineF QBezier::endTangent() const
     if (tangent.isNull())
         tangent = QLineF(pt4(), pt1());
     return tangent;
+}
+
+inline void QBezier::coefficients(qreal t, qreal &a, qreal &b, qreal &c, qreal &d)
+{
+    qreal m_t = 1. - t;
+    b = m_t * m_t;
+    c = t * t;
+    d = c * t;
+    a = b * m_t;
+    b *= 3. * t;
+    c *= 3. * m_t;
 }
 
 inline QPointF QBezier::pointAt(qreal t) const
@@ -178,6 +198,32 @@ inline QPointF QBezier::normalVector(qreal t) const
     qreal c = t * t;
 
     return QPointF((y2-y1) * a + (y3-y2) * b + (y4-y3) * c,  -(x2-x1) * a - (x3-x2) * b - (x4-x3) * c);
+}
+
+inline QPointF QBezier::derivedAt(qreal t) const
+{
+    // p'(t) = 3 * (-(1-2t+t^2) * p0 + (1 - 4 * t + 3 * t^2) * p1 + (2 * t - 3 * t^2) * p2 + t^2 * p3)
+
+    qreal m_t = 1. - t;
+
+    qreal d = t * t;
+    qreal a = -m_t * m_t;
+    qreal b = 1 - 4 * t + 3 * d;
+    qreal c = 2 * t - 3 * d;
+
+    return 3 * QPointF(a * x1 + b * x2 + c * x3 + d * x4,
+                       a * y1 + b * y2 + c * y3 + d * y4);
+}
+
+inline QPointF QBezier::secondDerivedAt(qreal t) const
+{
+    qreal a = 2. - 2. * t;
+    qreal b = -4 + 6 * t;
+    qreal c = 2 - 6 * t;
+    qreal d = 2 * t;
+
+    return 3 * QPointF(a * x1 + b * x2 + c * x3 + d * x4,
+                       a * y1 + b * y2 + c * y3 + d * y4);
 }
 
 inline void QBezier::split(QBezier *firstHalf, QBezier *secondHalf) const

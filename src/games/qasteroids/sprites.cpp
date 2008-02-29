@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -60,12 +60,12 @@ double KRock::rockSpeed_ = 0.0;
 
 bool KSprite::dying_ = false;
 bool KSprite::shipKilled_ = false;
+bool KSprite::spritesLoaded_ = false;
 KShip* KSprite::ship_ = 0;
 KShield* KSprite::shield_ = 0;
 QGraphicsScene*	KSprite::scene_ = 0;
 KAsteroidsView*	KSprite::view_ = 0;
 
-QMap<int,QList<QPixmap> > KSprite::map_;
 QMap<int,QList<KSprite::Frame> > KSprite::shapemap_;
 
 static struct
@@ -218,7 +218,11 @@ void KSprite::advanceImage()
 const QList<KSprite::Frame>& KSprite::frames() const
 {
     if ( !frameshape )
+    {
+        if(!spritesLoaded_)
+            loadSprites();
         frameshape = &shapemap_[type()];
+    }
     return *frameshape;
 }
 
@@ -449,6 +453,8 @@ KSprite::wrap()
  */
 void KSprite::reset()
 {
+    if(!spritesLoaded_)
+        KSprite::loadSprites();
     dying_ = false;
     KRock::reset();
     KMissile::reset();
@@ -495,7 +501,6 @@ void KSprite::loadSprites()
 	    QPixmap pixmap(file_name);
 	    p.insert(0,pixmap);
 	}
-	map_.insert(animations_[i].id_,p);
 
         QList<Frame> frameshape;
         for (int f = 0; f < p.size(); ++f) {
@@ -516,6 +521,7 @@ void KSprite::loadSprites()
 
         i++;
     }
+    spritesLoaded_ = true;
 }
 
 /*!

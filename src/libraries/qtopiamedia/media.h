@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,9 +29,15 @@
 #define QTOPIA_MEDIALIBRARY_CHANNEL "QPE/MediaLibrary/%1"
 #define QT_MEDIASERVER_CHANNEL      "QPE/MediaServer"
 
+#ifndef Q_QDOC
 namespace QtopiaMedia
 {
-enum State { Playing, Paused, Stopped, Buffering, Error};
+#else
+class QtopiaMedia
+{
+public:
+#endif
+enum State { Playing, Paused, Stopped, Buffering, Error };
 enum Offset { Beginning, Current, End };
 }
 

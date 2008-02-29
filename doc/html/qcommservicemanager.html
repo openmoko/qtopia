@@ -26,7 +26,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>5 public functions inherited from <a href="qabstractipcinterfacegroupmanager.html#public-functions">QAbstractIpcInterfaceGroupManager</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -37,17 +37,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>3 signals inherited from <a href="qabstractipcinterfacegroupmanager.html#signals">QAbstractIpcInterfaceGroupManager</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -59,17 +58,17 @@
 <p>See also <a href="qcomminterface.html">QCommInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QCommServiceManager"></a>QCommServiceManager::QCommServiceManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QCommServiceManager"></a>QCommServiceManager::QCommServiceManager ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a new communications service manager and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QCommServiceManager"></a>QCommServiceManager::~QCommServiceManager ()</h3>
 <p>Destroy this communications service manager.</p>
-<h3 class="fn"><a name="serviceAdded"></a>void QCommServiceManager::serviceAdded ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="serviceAdded"></a>void QCommServiceManager::serviceAdded ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when <i>service</i> is added. A service is considered to have been added when its first interface is constructed.</p>
 <p>See also <a href="qcommservicemanager.html#services">services</a>().</p>
-<h3 class="fn"><a name="serviceRemoved"></a>void QCommServiceManager::serviceRemoved ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="serviceRemoved"></a>void QCommServiceManager::serviceRemoved ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when <i>service</i> is removed. A service is considered to have been removed when its last interface is deleted.</p>
 <p>See also <a href="qcommservicemanager.html#services">services</a>().</p>
-<h3 class="fn"><a name="services"></a><a href="qstringlist.html">QStringList</a> QCommServiceManager::services () const</h3>
+<h3 class="fn"><a name="services"></a><a href="./qstringlist.html">QStringList</a> QCommServiceManager::services () const</h3>
 <p>Get the list of all services that are currently active within the system.</p>
 <p>See also <a href="qcommservicemanager.html#servicesChanged">servicesChanged</a>(), <a href="qcommservicemanager.html#serviceAdded">serviceAdded</a>(), and <a href="qcommservicemanager.html#serviceRemoved">serviceRemoved</a>().</p>
 <h3 class="fn"><a name="servicesChanged"></a>void QCommServiceManager::servicesChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -77,8 +76,8 @@
 <p>See also <a href="qcommservicemanager.html#services">services</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

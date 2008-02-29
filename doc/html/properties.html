@@ -31,7 +31,7 @@
 <p>Properties can be read and written through generic functions in <a href="qobject.html">QObject</a> without knowing anything about the class in use. In the code snippet below, the <a href="qobject.html#setProperty">QObject::setProperty</a>() call is equivalent to the <a href="qabstractbutton.html#down-prop">QAbstractButton::setDown</a>() call:</p>
 <pre> QPushButton *button = new QPushButton;
  QObject *object = button;
-<span class="comment"> // button and object point to the same object</span>
+<span class="comment"> //</span> button and object point to the same object
 
  button-&gt;setDown(true);
  object-&gt;setProperty(&quot;down&quot;, true);</pre>
@@ -112,8 +112,8 @@
 <p>See also <a href="metaobjects.html">Meta-Object System</a> and <a href="signalsandslots.html">Signals and Slots</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

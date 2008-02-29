@@ -16,6 +16,7 @@
 <p>Files:</p>
 <ul>
 <li><a href="activeqt-comapp-main-cpp.html">activeqt/comapp/main.cpp</a></li>
+<li><a href="activeqt-comapp-comapp-pro.html">activeqt/comapp/comapp.pro</a></li>
 </ul>
 <p>The COM App example shows how to use <a href="activeqt.html#activeqt">ActiveQt</a> to develop a Qt application that can be automated via COM. Different <a href="qobject.html">QObject</a> based classes are exposed as COM objects that communicate with the GUI of the running Qt application. The APIs of those COM objects has been designed to resemble the APIs of standard COM applications; i.e&#x2e; those from Microsoft Office.</p>
 <pre> class Application : public QObject
@@ -211,11 +212,11 @@
      QApplication app(argc, argv);
      app.setQuitOnLastWindowClosed(false);
 
-     <span class="comment">// started by COM - don't do anything</span>
+     <span class="comment">//</span> started by COM - don't do anything
      if (QAxFactory::isServer())
          return app.exec();
 
-     <span class="comment">// started by user</span>
+     <span class="comment">//</span> started by user
      Application appobject(0);
      appobject.setObjectName(&quot;From Application&quot;);
 
@@ -272,8 +273,8 @@
 <p>To build the example you must first build the <a href="qaxserver.html">QAxServer</a> library. Then run <tt>qmake</tt> and your make tool in <tt>examples\activeqt\comapp</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

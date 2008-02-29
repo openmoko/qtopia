@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/styles/qstyle.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/styles/qstyle.cpp -->
 <head>
   <title>Qt 4.3: QStyle Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -178,7 +178,7 @@
              points[0] = QPoint(x, y + h);
              points[1] = QPoint(x + w, y + h);
              points[2] = QPoint(x + w / 2, y);
-         } else { <span class="comment">// PE_SpinBoxDown</span>
+         } else { <span class="comment">//</span> PE_SpinBoxDown
              points[0] = QPoint(x, y);
              points[1] = QPoint(x + w, y);
              points[2] = QPoint(x + w / 2, y + h);
@@ -859,17 +859,20 @@
 <tr valign="top" class="odd"><td rowspan="2"><a href="qstyle.html#ControlElement-enum">CE_ProgressBarContents</a>, <a href="qstyle.html#ControlElement-enum">CE_ProgressBarLabel</a>, <a href="qstyle.html#ControlElement-enum">CE_ProgressBarGroove</a></td><td rowspan="2"><a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a></td><td><a href="qstyle.html#StateFlag-enum">State_Enabled</a></td><td>Set if the progress bar is enabled.</td></tr>
 <tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_HasFocus</a></td><td>Set if the progress bar has input focus.</td></tr>
 <tr valign="top" class="odd"><td><a href="qstyle.html#ControlElement-enum">CE_Header</a>, <a href="qstyle.html#ControlElement-enum">CE_HeaderSection</a>, <a href="qstyle.html#ControlElement-enum">CE_HeaderLabel</a></td><td><a href="qstyleoptionheader.html">QStyleOptionHeader</a></td><td></td><td></td></tr>
-<tr valign="top" class="even"><td rowspan="7"><a href="qstyle.html#ControlElement-enum">CE_ToolButtonLabel</a></td><td rowspan="7"><a href="qstyleoptiontoolbutton.html">QStyleOptionToolButton</a></td><td><a href="qstyle.html#StateFlag-enum">State_Enabled</a></td><td>Set if the tool button is enabled.</td></tr>
-<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_HasFocus</a></td><td>Set if the tool button has input focus.</td></tr>
-<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_Sunken</a></td><td>Set if the tool button is down (i.e&#x2e;, a mouse button or the space bar is pressed).</td></tr>
-<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_On</a></td><td>Set if the tool button is a toggle button and is toggled on.</td></tr>
-<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_AutoRaise</a></td><td>Set if the tool button has auto-raise enabled.</td></tr>
-<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_MouseOver</a></td><td>Set if the mouse pointer is over the tool button.</td></tr>
-<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_Raised</a></td><td>Set if the button is not down and is not on.</td></tr>
-<tr valign="top" class="odd"><td><a href="qstyle.html#ControlElement-enum">CE_ToolBoxTab</a></td><td><a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a></td><td><a href="qstyle.html#StateFlag-enum">State_Selected</a></td><td>The tab is the currently selected tab.</td></tr>
-<tr valign="top" class="even"><td rowspan="3"><a href="qstyle.html#ControlElement-enum">CE_HeaderSection</a></td><td rowspan="3"><a href="qstyleoptionheader.html">QStyleOptionHeader</a></td><td><a href="qstyle.html#StateFlag-enum">State_Sunken</a></td><td>Indicates that the section is pressed.</td></tr>
-<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_UpArrow</a></td><td>Indicates that the sort indicator should be pointing up.</td></tr>
-<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_DownArrow</a></td><td>Indicates that the sort indicator should be pointing down.</td></tr>
+<tr valign="top" class="even"><td rowspan="3"><a href="qstyle.html#ControlElement-enum">CE_TabBarTab</a>, <a href="qstyle.html#ControlElement-enum">CE_TabBarTabShape</a>, <a href="qstyle.html#ControlElement-enum">CE_TabBarTabLabel</a></td><td rowspan="3"><a href="qstyleoptiontab.html">QStyleOptionTab</a></td><td><a href="qstyle.html#StateFlag-enum">State_Enabled</a></td><td>Set if the tab bar is enabled.</td></tr>
+<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_Selected</a></td><td>The tab bar is the currently selected tab bar.</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_HasFocus</a></td><td>Set if the tab bar tab has input focus.</td></tr>
+<tr valign="top" class="odd"><td rowspan="7"><a href="qstyle.html#ControlElement-enum">CE_ToolButtonLabel</a></td><td rowspan="7"><a href="qstyleoptiontoolbutton.html">QStyleOptionToolButton</a></td><td><a href="qstyle.html#StateFlag-enum">State_Enabled</a></td><td>Set if the tool button is enabled.</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_HasFocus</a></td><td>Set if the tool button has input focus.</td></tr>
+<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_Sunken</a></td><td>Set if the tool button is down (i.e&#x2e;, a mouse button or the space bar is pressed).</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_On</a></td><td>Set if the tool button is a toggle button and is toggled on.</td></tr>
+<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_AutoRaise</a></td><td>Set if the tool button has auto-raise enabled.</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_MouseOver</a></td><td>Set if the mouse pointer is over the tool button.</td></tr>
+<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_Raised</a></td><td>Set if the button is not down and is not on.</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#ControlElement-enum">CE_ToolBoxTab</a></td><td><a href="qstyleoptiontoolbox.html">QStyleOptionToolBox</a></td><td><a href="qstyle.html#StateFlag-enum">State_Selected</a></td><td>The tab is the currently selected tab.</td></tr>
+<tr valign="top" class="odd"><td rowspan="3"><a href="qstyle.html#ControlElement-enum">CE_HeaderSection</a></td><td rowspan="3"><a href="qstyleoptionheader.html">QStyleOptionHeader</a></td><td><a href="qstyle.html#StateFlag-enum">State_Sunken</a></td><td>Indicates that the section is pressed.</td></tr>
+<tr valign="top" class="even"><td><a href="qstyle.html#StateFlag-enum">State_UpArrow</a></td><td>Indicates that the sort indicator should be pointing up.</td></tr>
+<tr valign="top" class="odd"><td><a href="qstyle.html#StateFlag-enum">State_DownArrow</a></td><td>Indicates that the sort indicator should be pointing down.</td></tr>
 </table></p>
 <p>See also <a href="qstyle.html#drawPrimitive">drawPrimitive</a>() and <a href="qstyle.html#drawComplexControl">drawComplexControl</a>().</p>
 <h3 class="fn"><a name="drawItemPixmap"></a>void QStyle::drawItemPixmap ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i>, int <i>alignment</i>, const <a href="qpixmap.html">QPixmap</a> &amp; <i>pixmap</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -1051,8 +1054,8 @@
 <p>See also <a href="qwidget.html#layoutDirection-prop">QWidget::layoutDirection</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

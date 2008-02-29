@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,7 @@
 
 
 #include "qtmailwindow.h"
+#include "statusdisplay.h"
 #include "writemail.h"
 
 #include <qtopiaipcenvelope.h>
@@ -29,13 +30,16 @@
 #include <qdatetime.h>
 #include <qtimer.h>
 #include <QDebug>
-#include <QDrmContentPlugin>
+#include <QStackedWidget>
+
 
 QTMailWindow *QTMailWindow::self = 0;
 
 QTMailWindow::QTMailWindow(QWidget *parent, Qt::WFlags fl)
-    : QMainWindow(parent, fl), parentWidget( this ), noShow(false)
+    : QMainWindow(parent, fl), noShow(false)
 {
+    qLog(Messaging) << "QTMailWindow ctor begin";
+
     QtopiaApplication::loadTranslations("libqtopiamail");
     init();
 }
@@ -43,9 +47,8 @@ QTMailWindow::QTMailWindow(QWidget *parent, Qt::WFlags fl)
 void QTMailWindow::init()
 {
     self = this;
-    views = new QStackedWidget(parentWidget);
 
-#if 0
+#ifdef THIS_BUG_HAS_BEEN_FIXED
     // Passing the correct parent for EmailClient does NOT work
     // doing so causes a blank screen to be shown
     emailClient = new EmailClient(views, "client"); // No tr
@@ -57,22 +60,43 @@ void QTMailWindow::init()
     // This seems to be a QMainWindow in a QStackedWidget bug
     emailClient = new EmailClient(this, "client"); // No tr
 #endif
+
+    status = new StatusDisplay;
+
     connect(emailClient, SIGNAL(raiseWidget(QWidget*,QString)),
             this, SLOT(raiseWidget(QWidget*,QString)) );
-    views->addWidget(emailClient);
+    connect(emailClient, SIGNAL(statusVisible(bool)),
+            status, SLOT(showStatus(bool)) );
+    connect(emailClient, SIGNAL(updateStatus(QString)),
+            status, SLOT(displayStatus(QString)) );
+    connect(emailClient, SIGNAL(updateProgress(uint, uint)),
+            status, SLOT(displayProgress(uint, uint)) );
+    connect(emailClient, SIGNAL(clearStatus()),
+            status, SLOT(clearStatus()) );
 
+    views = new QStackedWidget;
+    views->addWidget(emailClient);
     views->setCurrentWidget(emailClient);
 
-    setCentralWidget(views);
-    setWindowTitle( emailClient->windowTitle() );
+    QFrame* vbox = new QFrame(this);
+    vbox->setFrameStyle(QFrame::NoFrame);
 
-    QDrmContentPlugin::initialize();
+    QVBoxLayout* vboxLayout = new QVBoxLayout(vbox);
+    vboxLayout->setContentsMargins( 0, 0, 0, 0 );
+    vboxLayout->setSpacing( 0 );
+    vboxLayout->addWidget( views );
+    vboxLayout->addWidget( status );
+
+    setCentralWidget( vbox );
+    setWindowTitle( emailClient->windowTitle() );
 }
 
 QTMailWindow::~QTMailWindow()
 {
     if (emailClient)
         emailClient->cleanExit( true );
+
+    qLog(Messaging) << "QTMailWindow dtor end";
 }
 
 void QTMailWindow::closeEvent(QCloseEvent *e)

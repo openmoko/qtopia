@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <QProcess>
+#include <QTimer>
 
 struct Ficgta01Input {
     unsigned int   dummy1;
@@ -78,6 +79,10 @@ Ficgta01KbdHandler::Ficgta01KbdHandler()
     if(err !=0)
         return;
     shift = false;
+
+    keytimer = new QTimer(this);
+    connect( keytimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
+    keytimer->setSingleShot(true);
 
 }
 
@@ -158,29 +163,33 @@ void Ficgta01KbdHandler::readPowerKbdData()
 
     switch(event.code)
     {
-    case 0x74:
+    case 0x74: //116
         qtKeyCode = Qt::Key_Hangup;
+        keytimer->start(1000);
         break;
     default:
-        //       qWarning("Dropped!");
+//         qWarning("Dropped!");
         return; //drop any other bits
         break;
     }
 
-
-
-    processKeyEvent(unicode, qtKeyCode, Qt::NoModifier, isPress, false);
-
-    if(isPress!=0) {
-        //       qWarning("Start manual repeat");
-        beginAutoRepeat(unicode, qtKeyCode, Qt::NoModifier);
+    if(isPress) {
+       beginAutoRepeat(unicode, qtKeyCode, Qt::NoModifier);
     } else {
-//        qWarning("End manual repeat");
+        keytimer->stop();
         endAutoRepeat();
     }
 }
 
 
+void Ficgta01KbdHandler::timerUpdate()
+{
+    int unicode = 0xffff;
+    int qtKeyCode =  Qt::Key_Hangup; //we have only one purpose here
+    bool isPress = true;
+
+    processKeyEvent(unicode, qtKeyCode, Qt::NoModifier, isPress, false);
+}
 
 
 #endif // QT_QWS_FICGTA01

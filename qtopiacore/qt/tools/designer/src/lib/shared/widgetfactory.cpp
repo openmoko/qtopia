@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the Qt Designer of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -297,7 +295,14 @@ QLayout *WidgetFactory::createLayout(QWidget *widget, QLayout *parentLayout, int
     QDesignerMetaDataBaseInterface *metaDataBase = core()->metaDataBase();
 
     if (parentLayout == 0) {
-        widget = containerOfWidget(widget);
+        QWidget *page = containerOfWidget(widget);
+        if (page) {
+            widget = page;
+        } else {
+            const QString msg = QObject::tr("The current page of the container '%1' (%2) could not be determined while creating a layout."
+"This indicates an inconsistency in the ui-file, probably a layout being constructed on a container widget.").arg(widget->objectName()).arg(classNameOf(core(), widget));
+            designerWarning(msg);
+        }
     }
 
     Q_ASSERT(metaDataBase->item(widget) != 0); // ensure the widget is managed

@@ -3,23 +3,6 @@
 
 #include "timidity.h"
 
-#if  defined(__i386__) || defined(__ia64__) || defined(WIN32) || \
-    (defined(__alpha__) || defined(__alpha)) || \
-     defined(__arm__) || \
-    (defined(__mips__) && defined(__MIPSEL__)) || \
-     defined(__SYMBIAN32__) || \
-     defined(__x86_64__) || \
-     defined(__LITTLE_ENDIAN__)
-#ifndef LITTLE_ENDIAN
-#define LITTLE_ENDIAN
-#endif
-#undef BIG_ENDIAN
-#else
-#ifndef BIG_ENDIAN
-#define BIG_ENDIAN
-#endif
-#undef LITTLE_ENDIAN
-#endif
 
 /* Instrument files are little-endian, MIDI files big-endian, so we
    need to do some conversions. */

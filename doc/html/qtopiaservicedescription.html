@@ -46,40 +46,40 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QtopiaServiceDescription"></a>QtopiaServiceDescription::QtopiaServiceDescription ()</h3>
 <p>Constructs an empty <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a>.</p>
-<h3 class="fn"><a name="QtopiaServiceDescription-2"></a>QtopiaServiceDescription::QtopiaServiceDescription ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>request</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, const <a href="qstring.html">QString</a> &amp; <i>icon</i>, const QVariantMap &amp; <i>optionalProperties</i> = QVariantMap() )</h3>
+<h3 class="fn"><a name="QtopiaServiceDescription-2"></a>QtopiaServiceDescription::QtopiaServiceDescription ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>request</i>, const <a href="./qstring.html">QString</a> &amp; <i>label</i>, const <a href="./qstring.html">QString</a> &amp; <i>icon</i>, const <a href="./qvariant.html#qvariantmap-typedef">QVariantMap</a> &amp; <i>optionalProperties</i> = QVariantMap() )</h3>
 <p>Constructs a <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a>, which describes an action called <i>label</i>, with the display icon found in the file specified by <i>icon</i>, which initiates <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> <i>request</i> when activated. The optional properties in the constructed object are initialized from <i>optionalProperties</i>.</p>
 <h3 class="fn"><a name="QtopiaServiceDescription-3"></a>QtopiaServiceDescription::QtopiaServiceDescription ( const QtopiaServiceDescription &amp; <i>other</i> )</h3>
 <p>Create a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QtopiaServiceDescription"></a>QtopiaServiceDescription::~QtopiaServiceDescription ()</h3>
 <p>Destroys this <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a>.</p>
-<h3 class="fn"><a name="iconName"></a><a href="qstring.html">QString</a> QtopiaServiceDescription::iconName () const</h3>
+<h3 class="fn"><a name="iconName"></a><a href="./qstring.html">QString</a> QtopiaServiceDescription::iconName () const</h3>
 <p>Returns the icon name describing the request.</p>
 <p>See also <a href="qtopiaservicedescription.html#setIconName">setIconName</a>().</p>
-<h3 class="fn"><a name="label"></a><a href="qstring.html">QString</a> QtopiaServiceDescription::label () const</h3>
+<h3 class="fn"><a name="label"></a><a href="./qstring.html">QString</a> QtopiaServiceDescription::label () const</h3>
 <p>Returns the display label describing the request.</p>
 <p>See also <a href="qtopiaservicedescription.html#setLabel">setLabel</a>().</p>
-<h3 class="fn"><a name="optionalProperties"></a>QVariantMap QtopiaServiceDescription::optionalProperties () const</h3>
+<h3 class="fn"><a name="optionalProperties"></a><a href="./qvariant.html#qvariantmap-typedef">QVariantMap</a> QtopiaServiceDescription::optionalProperties () const</h3>
 <p>Returns the entire collection of optional properties describing this service request.</p>
 <p>See also <a href="qtopiaservicedescription.html#setOptionalProperties">setOptionalProperties</a>().</p>
-<h3 class="fn"><a name="optionalProperty"></a><a href="qvariant.html">QVariant</a> QtopiaServiceDescription::optionalProperty ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
+<h3 class="fn"><a name="optionalProperty"></a><a href="./qvariant.html">QVariant</a> QtopiaServiceDescription::optionalProperty ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> ) const</h3>
 <p>Returns an optional property with the given <i>name</i> that describes the service request.</p>
 <p>See also <a href="qtopiaservicedescription.html#setOptionalProperty">setOptionalProperty</a>() and <a href="qtopiaservicedescription.html#removeOptionalProperty">removeOptionalProperty</a>().</p>
-<h3 class="fn"><a name="removeOptionalProperty"></a>void QtopiaServiceDescription::removeOptionalProperty ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="removeOptionalProperty"></a>void QtopiaServiceDescription::removeOptionalProperty ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Removes any optional properties with the given <i>name</i> describing this service request.</p>
 <p>See also <a href="qtopiaservicedescription.html#setOptionalProperty">setOptionalProperty</a>() and <a href="qtopiaservicedescription.html#optionalProperty">optionalProperty</a>().</p>
 <h3 class="fn"><a name="request"></a><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> QtopiaServiceDescription::request () const</h3>
 <p>Returns the <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> described.</p>
 <p>See also <a href="qtopiaservicedescription.html#setRequest">setRequest</a>().</p>
-<h3 class="fn"><a name="setIconName"></a>void QtopiaServiceDescription::setIconName ( const <a href="qstring.html">QString</a> &amp; <i>iconName</i> )</h3>
+<h3 class="fn"><a name="setIconName"></a>void QtopiaServiceDescription::setIconName ( const <a href="./qstring.html">QString</a> &amp; <i>iconName</i> )</h3>
 <p>Sets the display icon to <i>iconName</i>.</p>
 <p>See also <a href="qtopiaservicedescription.html#iconName">iconName</a>().</p>
-<h3 class="fn"><a name="setLabel"></a>void QtopiaServiceDescription::setLabel ( const <a href="qstring.html">QString</a> &amp; <i>label</i> )</h3>
+<h3 class="fn"><a name="setLabel"></a>void QtopiaServiceDescription::setLabel ( const <a href="./qstring.html">QString</a> &amp; <i>label</i> )</h3>
 <p>Sets the display label to <i>label</i>.</p>
 <p>See also <a href="qtopiaservicedescription.html#label">label</a>().</p>
-<h3 class="fn"><a name="setOptionalProperties"></a>void QtopiaServiceDescription::setOptionalProperties ( QVariantMap <i>properties</i> )</h3>
+<h3 class="fn"><a name="setOptionalProperties"></a>void QtopiaServiceDescription::setOptionalProperties ( <a href="./qvariant.html#qvariantmap-typedef">QVariantMap</a> <i>properties</i> )</h3>
 <p>Sets the entire collection of optional properties describing this service request to <i>properties</i>.</p>
 <p>See also <a href="qtopiaservicedescription.html#optionalProperties">optionalProperties</a>().</p>
-<h3 class="fn"><a name="setOptionalProperty"></a>void QtopiaServiceDescription::setOptionalProperty ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setOptionalProperty"></a>void QtopiaServiceDescription::setOptionalProperty ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i> )</h3>
 <p>Sets an optional property describing this service request with the given <i>name</i> and <i>value</i>.</p>
 <p>See also <a href="qtopiaservicedescription.html#removeOptionalProperty">removeOptionalProperty</a>() and <a href="qtopiaservicedescription.html#optionalProperty">optionalProperty</a>().</p>
 <h3 class="fn"><a name="setRequest"></a>void QtopiaServiceDescription::setRequest ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>request</i> )</h3>
@@ -89,8 +89,8 @@
 <p>Assign <i>other</i> to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

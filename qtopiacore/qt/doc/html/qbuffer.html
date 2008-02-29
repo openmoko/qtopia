@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qbuffer.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/io/qbuffer.cpp -->
 <head>
   <title>Qt 4.3: QBuffer Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -58,10 +58,10 @@
      buffer.open(QBuffer::ReadWrite);
      buffer.write(&quot;Qt rocks!&quot;);
      buffer.seek(0);
-     buffer.getChar(&amp;ch);  <span class="comment">// ch == 'Q'</span>
-     buffer.getChar(&amp;ch);  <span class="comment">// ch == 't'</span>
-     buffer.getChar(&amp;ch);  <span class="comment">// ch == ' '</span>
-     buffer.getChar(&amp;ch);  <span class="comment">// ch == 'r'</span></pre>
+     buffer.getChar(&amp;ch);  <span class="comment">//</span> ch == 'Q'
+     buffer.getChar(&amp;ch);  <span class="comment">//</span> ch == 't'
+     buffer.getChar(&amp;ch);  <span class="comment">//</span> ch == ' '
+     buffer.getChar(&amp;ch);  <span class="comment">//</span> ch == 'r'</pre>
 <p>By default, an internal <a href="qbytearray.html">QByteArray</a> buffer is created for you when you create a QBuffer. You can access this buffer directly by calling <a href="qbuffer.html#buffer">buffer</a>(). You can also use QBuffer with an existing <a href="qbytearray.html">QByteArray</a> by calling <a href="qbuffer.html#setBuffer">setBuffer</a>(), or by passing your array to QBuffer's constructor.</p>
 <p>Call <a href="qiodevice.html#open">open</a>() to open the buffer. Then call <a href="qiodevice.html#write">write</a>() or <a href="qiodevice.html#putChar">putChar</a>() to write to the buffer, and <a href="qiodevice.html#read">read</a>(), <a href="qiodevice.html#readLine">readLine</a>(), <a href="qiodevice.html#readAll">readAll</a>(), or <a href="qiodevice.html#getChar">getChar</a>() to read from it. <a href="qiodevice.html#size">size</a>() returns the current size of the buffer, and you can seek to arbitrary positions in the buffer by calling <a href="qiodevice.html#seek">seek</a>(). When you are done with accessing the buffer, call <a href="qiodevice.html#close">close</a>().</p>
 <p>The following code snippet shows how to write data to a <a href="qbytearray.html">QByteArray</a> using <a href="qdatastream.html">QDataStream</a> and QBuffer:</p>
@@ -96,7 +96,7 @@
      buffer.seek(3);
      buffer.write(&quot;def&quot;, 3);
      buffer.close();
-     <span class="comment">// byteArray == &quot;abcdef&quot;</span></pre>
+     <span class="comment">//</span> byteArray == &quot;abcdef&quot;</pre>
 <p>See also <a href="qiodevice.html#open">open</a>(), <a href="qbuffer.html#setBuffer">setBuffer</a>(), and <a href="qbuffer.html#setData">setData</a>().</p>
 <h3 class="fn"><a name="dtor.QBuffer"></a>QBuffer::~QBuffer ()</h3>
 <p>Destroys the buffer.</p>
@@ -122,7 +122,7 @@
      buffer.seek(3);
      buffer.write(&quot;def&quot;, 3);
      buffer.close();
-     <span class="comment">// byteArray == &quot;abcdef&quot;</span></pre>
+     <span class="comment">//</span> byteArray == &quot;abcdef&quot;</pre>
 <p>If <i>byteArray</i> is 0, the buffer creates its own internal <a href="qbytearray.html">QByteArray</a> to work on. This byte array is initially empty.</p>
 <p>See also <a href="qbuffer.html#buffer">buffer</a>(), <a href="qbuffer.html#setData">setData</a>(), and <a href="qiodevice.html#open">open</a>().</p>
 <h3 class="fn"><a name="setData"></a>void QBuffer::setData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
@@ -134,8 +134,8 @@
 <p>Sets the contents of the internal buffer to be the first <i>size</i> bytes of <i>data</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

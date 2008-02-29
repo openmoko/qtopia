@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 
 #include <alsa/asoundlib.h>
 #include <QtopiaIpcAdaptor>
+#include <QValueSpaceObject>
 
 
 class Ficgta01VolumeService : public QtopiaIpcAdaptor
@@ -47,6 +48,14 @@ public slots:
 
     void adjustMicrophoneVolume(int volume);
 
+    void setAmpMode(bool);
+
+   void changeAmpModeVS();
+
+    void setAmp(QString);
+
+    void toggleAmpMode();
+
 private slots:
     void registerService();
     void setCallDomain();
@@ -58,6 +67,7 @@ private:
     int m_rightChannelVolume;
 
     QtopiaIpcAdaptor *adaptor;
+    QValueSpaceObject *vsoVolumeObject;
 
 
 protected:
@@ -67,7 +77,7 @@ protected:
 
     int minOutputVolume;
     int maxOutputVolume;
-    
+
     int minInputVolume;
     int maxInputVolume;
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,10 +50,10 @@ public:
     typedef uint MailStatus;
 
     void reset();
-    bool matches(const QMailMessage& in);
+    bool matches(const QMailMessage& in) const;
     void setMailbox(QString mailbox);
-    QString mailbox();
-    QString name();
+    QString mailbox() const;
+    QString name() const;
     void setName(QString in);
     void setMailFrom(QString from);
     void setMailTo(QString to);
@@ -65,32 +65,30 @@ public:
     void setFromFolder(QString _folder);
     void setFromAccount(QString _fromAccount);
 
-    uint status();
-    QString getFrom();
-    QString getTo();
-    QString getSubject();
-    QString getBody();
-    QDate getBeforeDate();
-    QDate getAfterDate();
+    uint status() const;
+    QString getFrom() const;
+    QString getTo() const;
+    QString getSubject() const;
+    QString getBody() const;
+    QDate getBeforeDate() const;
+    QDate getAfterDate() const;
 
     void readSettings(QSettings*);
     void saveSettings(QSettings*);
 
 private:
-    bool matchesTo();
-    bool matchesBody();
-    bool matchesStatus();
+    bool matchesTo(const QMailMessage& mail) const;
+    bool matchesBody(const QMailMessage& mail) const;
+    bool matchesStatus(const QMailMessage& mail) const;
 
-    bool matchesBeforeDate();
-    bool matchesAfterDate();
-    bool matchesFolder();
-    bool matchesAccount();
+    bool matchesBeforeDate(const QMailMessage& mail) const;
+    bool matchesAfterDate(const QMailMessage& mail) const;
+    bool matchesFolder(const QMailMessage& mail) const;
+    bool matchesAccount(const QMailMessage& mail) const;
 
-    bool match(const QString &source, const QString &target);
+    static bool match(const QString &source, const QString &target);
 
 private:
-    QMailMessage mail;
-
     uint _status;
     QString _name, fromMail, recipient, subject, body, folder;
     QString fromAccount;

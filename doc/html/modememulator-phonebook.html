@@ -65,12 +65,16 @@
 <p>The set command sets the selected phonebook memroy to &lt;storage&gt;. A list of available phonebook memories can be obtained when using the test command.</p>
 <p>The Read command returns the currently selected storage and the used/total number of locations in the selected memory.</p>
 <p>This implementation is not entirely conform with 3GPP TS 27.007. It is not possible to set a password for phone book stores.</p>
-<p><b>AT+CPBR Write phonebook entry</b></p>
+<p><b>AT+CPBW Write phonebook entry</b></p>
 <p>The <tt>AT+CPBW</tt> command allows for writing of the phonebook entries from the current phonebook memory storage selected with <tt>+CPBS</tt>.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CBPW=[&lt;index&gt;],[&lt;number&gt;[,&lt;type&gt;,&lt;text&gt;]]</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CPBW=?</tt></td><td><tt>+CPBW (list of supported &lt;index&gt;s), [&lt;nlength&gt;], (list of supported &lt;type&gt;s), [&lt;tlength&gt;]</tt>, <tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CBPW=[&lt;index&gt;][,&lt;number&gt;[,&lt;type&gt;,&lt;text&gt;]]</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CPBW=?</tt></td><td><ul>
+<li><tt>+CPBW (list of supported &lt;index&gt;s), [&lt;nlength&gt;], (list of supported &lt;type&gt;s), [&lt;tlength&gt;]</tt></li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
 </table></p>
 <p>Test command returns the available location indices, the maximum length of phone number fields, the supported number formats of the storage and the maximum length of text fields.</p>
 <p>The set command expects a set of four parameters. <tt>&lt;index&gt;</tt> determines the location where the current write operation takes place. In addition the entry field contains the phone number <tt>&lt;number&gt;</tt> (in the format <tt>&lt;type&gt;</tt>), and the text associated with the given number. If these fields are omitted the phonebook entry at <tt>&lt;index&gt;</tt> is deleted. If <tt>&lt;index&gt;</tt> is omitted but <tt>&lt;number&gt;</tt> is given the entry is saved at the first free location in the phonebook.</p>
@@ -91,8 +95,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

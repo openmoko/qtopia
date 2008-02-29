@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1680,7 +1678,6 @@ void QMenu::popup(const QPoint &p, QAction *atAction)
         }
     }
     setGeometry(QRect(pos, size));
-
 #ifndef QT_NO_EFFECTS
     int hGuess = qApp->layoutDirection() == Qt::RightToLeft ? QEffects::LeftScroll : QEffects::RightScroll;
     int vGuess = QEffects::DownScroll;
@@ -2123,10 +2120,16 @@ QMenu::event(QEvent *e)
             internalDelayedPopup();
         }
         break;
-    case QEvent::Resize:
+    case QEvent::Resize: {
+        QStyleHintReturnMask menuMask;
+        QStyleOption option;
+        option.initFrom(this);
+        if (style()->styleHint(QStyle::SH_Menu_Mask, &option, this, &menuMask)) {
+            setMask(menuMask.region);
+        }
         d->itemsDirty = 1;
         d->updateActions();
-        break;
+        break; }
     case QEvent::Show:
         d->mouseDown = 0;
         d->updateActions();

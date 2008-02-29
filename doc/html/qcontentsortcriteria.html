@@ -72,29 +72,29 @@
 <tr><td valign="top"><tt>QContentSortCriteria::Name</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The user visible <a href="qcontent.html#name">name</a> of the content.</td></tr>
 <tr><td valign="top"><tt>QContentSortCriteria::MimeType</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The <a href="qcontent.html#type">type</a> of the content.</td></tr>
 <tr><td valign="top"><tt>QContentSortCriteria::Property</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">A <a href="qcontent.html#property">property</a> of the content. The group and key for the property must be supplied as an scope of the sort as a string of the form <tt>[group]/[key]</tt></td></tr>
-<tr><td valign="top"><tt>QContentSortCriteria::FileName</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The <a href="qcontent.html#fileNamex">file name</a> of the content.</td></tr>
+<tr><td valign="top"><tt>QContentSortCriteria::FileName</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The <a href="qcontent.html#fileName">file name</a> of the content.</td></tr>
 <tr><td valign="top"><tt>QContentSortCriteria::LastUpdated</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The time and date the content record was <a href="qcontent.html#lastUpdated">last updated</a>.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QContentSortCriteria"></a>QContentSortCriteria::QContentSortCriteria ()</h3>
 <p>Constructs a null sort criteria.</p>
-<h3 class="fn"><a name="QContentSortCriteria-2"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="QContentSortCriteria-2"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>Constructs a sort criteria that sorts a set by an <i>attribute</i> in the given sort <i>order</i>.</p>
-<h3 class="fn"><a name="QContentSortCriteria-3"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="QContentSortCriteria-3"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>Constructs a sort criteria that sorts a set by an <i>attribute</i> with a <i>scope</i> in the given sort <i>order</i>.</p>
-<h3 class="fn"><a name="QContentSortCriteria-4"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="QContentSortCriteria-4"></a>QContentSortCriteria::QContentSortCriteria ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>Constructs a sort criteria that sorts a set by <i>property</i> in the given sort <i>order</i>.</p>
 <h3 class="fn"><a name="QContentSortCriteria-5"></a>QContentSortCriteria::QContentSortCriteria ( const QContentSortCriteria &amp; <i>other</i> )</h3>
 <p>Constructs a copy of the sort criteria <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QContentSortCriteria"></a>QContentSortCriteria::~QContentSortCriteria ()</h3>
 <p>Destroys a sort criteria.</p>
-<h3 class="fn"><a name="addSort"></a>void QContentSortCriteria::addSort ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="addSort"></a>void QContentSortCriteria::addSort ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>Adds an <i>attribute</i> to sort by in the given <i>order</i> to the end of the sort criteria.</p>
-<h3 class="fn"><a name="addSort-2"></a>void QContentSortCriteria::addSort ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="addSort-2"></a>void QContentSortCriteria::addSort ( <a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> <i>attribute</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds an <i>attribute</i> with a <i>scope</i> to sort by in the given <i>order</i> to the end of the sort criteria.</p>
-<h3 class="fn"><a name="addSort-3"></a>void QContentSortCriteria::addSort ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
+<h3 class="fn"><a name="addSort-3"></a>void QContentSortCriteria::addSort ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Adds a <i>property</i> to sort by in the given <i>order</i> to the end of the sort criteria.</p>
 <h3 class="fn"><a name="attribute"></a><a href="qcontentsortcriteria.html#Attribute-enum">Attribute</a> QContentSortCriteria::attribute ( int <i>index</i> ) const</h3>
@@ -107,9 +107,9 @@
 <p>Compares the <i>left</i> and <i>right</i> contents using the sorting criteria and returns true if the left is greater than the right and false otherwise.</p>
 <h3 class="fn"><a name="lessThan"></a>bool QContentSortCriteria::lessThan ( const <a href="qcontent.html">QContent</a> &amp; <i>left</i>, const <a href="qcontent.html">QContent</a> &amp; <i>right</i> ) const</h3>
 <p>Compares the <i>left</i> and <i>right</i> contents using the sorting criteria and returns true if the left is less than the right and false otherwise.</p>
-<h3 class="fn"><a name="order"></a><a href="qt.html#SortOrder-enum">Qt::SortOrder</a> QContentSortCriteria::order ( int <i>index</i> ) const</h3>
+<h3 class="fn"><a name="order"></a><a href="./qt.html#sortorder-enum">Qt::SortOrder</a> QContentSortCriteria::order ( int <i>index</i> ) const</h3>
 <p>Returns the order the attribute at the given <i>index</i> is sorted by.</p>
-<h3 class="fn"><a name="scope"></a><a href="qstring.html">QString</a> QContentSortCriteria::scope ( int <i>index</i> ) const</h3>
+<h3 class="fn"><a name="scope"></a><a href="./qstring.html">QString</a> QContentSortCriteria::scope ( int <i>index</i> ) const</h3>
 <p>Returns the scope of the attribute sorted by at the given <i>index</i>.</p>
 <h3 class="fn"><a name="sortCount"></a>int QContentSortCriteria::sortCount () const</h3>
 <p>Returns the number of attributes the sorting criteria sorts on.</p>
@@ -121,8 +121,8 @@
 <p>Compares <i>other</i> to a sort criteria. Returns true if it is equal; false otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

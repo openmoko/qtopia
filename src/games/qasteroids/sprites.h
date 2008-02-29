@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -127,11 +127,11 @@ class KSprite : public QGraphicsPixmapItem
  protected:
     static bool				dying_;
     static bool				shipKilled_;
+    static bool                         spritesLoaded_;
     static KShip*			ship_;
     static KShield*			shield_;
     static QGraphicsScene*		scene_;
     static KAsteroidsView*		view_;
-    static QMap<int,QList<QPixmap> >	map_;
     static QMap<int,QList<Frame> >	shapemap_;
 
  protected:

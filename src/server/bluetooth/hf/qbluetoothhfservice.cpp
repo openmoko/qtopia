@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,19 +22,20 @@
 #include <qtopia/comm/qbluetoothaudiogateway.h>
 #include "qbluetoothhfservice_p.h"
 #include "qbluetoothhfagserver_p.h"
-#include <qtopia/comm/qbluetoothrfcommserver.h>
-#include <qtopia/comm/qbluetoothrfcommsocket.h>
-#include <qtopia/comm/qbluetoothrfcommserialport.h>
-#include <qtopia/comm/qbluetoothscosocket.h>
-#include <qtopia/comm/qbluetoothscoserver.h>
-#include <qtopia/comm/qbluetoothlocaldevice.h>
+#include <qbluetoothrfcommserver.h>
+#include <qbluetoothrfcommsocket.h>
+#include <qbluetoothrfcommserialport.h>
+#include <qbluetoothscosocket.h>
+#include <qbluetoothscoserver.h>
+#include <qbluetoothlocaldevice.h>
+#include <qbluetoothsdprecord.h>
 #include <qtopiacomm/private/qbluetoothnamespace_p.h>
 #include <qtopianamespace.h>
 #include <qtopiaservices.h>
 #include <qtopialog.h>
-#include <qtopia/comm/qbluetoothaddress.h>
+#include <qbluetoothaddress.h>
 #include <qvaluespace.h>
-#include <qtopia/comm/qcommdevicesession.h>
+#include <qcommdevicesession.h>
 #include <QStringList>
 
 #include <bluetooth/bluetooth.h>
@@ -248,11 +249,19 @@ void QBluetoothHandsfreeService::start()
         return;
     }
 
+    m_data->m_sdpRecordHandle = 0;
+    QBluetoothSdpRecord sdpRecord;
+
     // register the SDP service
-    m_data->m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hfag.xml");
+    QFile sdpRecordFile(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hfag.xml");
+    if (sdpRecordFile.open(QIODevice::ReadOnly)) {
+        sdpRecord = QBluetoothSdpRecord::fromDevice(&sdpRecordFile);
+        if (!sdpRecord.isNull())
+            m_data->m_sdpRecordHandle = registerRecord(sdpRecord);
+    }
+
     if (m_data->m_sdpRecordHandle == 0) {
-        emit started(true,
-                     tr("Error registering with SDP server"));
+        emit started(true, tr("Error registering with SDP server"));
         return;
     }
 
@@ -263,11 +272,8 @@ void QBluetoothHandsfreeService::start()
         return;
     }
 
-    // For now, hard code in the channel, which has to be the same channel as
-    // the one in the XML file passed in the registerRecord() call above
-    int channel = 6;
-
-    if (!m_data->m_server->listen(QBluetoothAddress::any, channel)) {
+    if (!m_data->m_server->listen(QBluetoothAddress::any,
+                QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {
         unregisterRecord(m_data->m_sdpRecordHandle);
         emit started(true,
                      tr("Could not listen on channel."));
@@ -339,6 +345,7 @@ void QBluetoothHandsfreeService::sessionOpen()
 
 /*!
     \internal
+            m_data->m_connectInProgress = false;
 */
 void QBluetoothHandsfreeService::sessionFailed()
 {
@@ -552,6 +559,8 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
 
             m_data->m_interface->setValue("AudioEnabled", false);
             emit audioStateChanged();
+            break;
+        default:
             break;
     };
 }

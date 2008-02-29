@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,7 @@ public:
     };
 
 public:
+    QMailFolderSortKey();
     QMailFolderSortKey(const Property& p, const Qt::SortOrder& order = Qt::AscendingOrder);
     QMailFolderSortKey(const QMailFolderSortKey& other);
     virtual ~QMailFolderSortKey();
@@ -51,8 +52,7 @@ public:
 
     QMailFolderSortKey& operator=(const QMailFolderSortKey& other);
 
-private:
-    QMailFolderSortKey();
+    bool isEmpty() const;
 
 private:
 	friend class QMailStore;

@@ -22,15 +22,12 @@ depends(libraries/qtopiacomm/network)
 depends(libraries/qtopiacomm/bluetooth)
                 
 conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/bluetoothDUN.conf
-
 conf.path	= /etc/network
 INSTALLS+=conf
 
-bin.files   = $$QTOPIA_DEPOT_PATH/src/plugins/network/bluetooth/btdun-network
-bin.path    = /bin
-bin.hint=script
-INSTALLS+=bin
-
+script=$$PWD/btdun-network
+variable=$$BLUETOOTH_NETWORK_SCRIPT
+include(../network_script.pri)
 
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/bluetooth/*  
 pics.path	= /pics/Network/bluetooth

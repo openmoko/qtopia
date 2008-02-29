@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qt Toolkit.
 **
@@ -50,6 +50,8 @@ public:
 protected:
     virtual void drawDisplay(QPainter *painter, const QStyleOptionViewItem &option,
                              const QRect &rect, const QString &text) const;
+    virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option,
+                                const QRect &rect, const QPixmap &pm) const;
     virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option,
                                 const QRect &rect, const QVariant &decoration) const;
     virtual void drawAdditionalDecoration(QPainter *painter, const QStyleOptionViewItem &option,

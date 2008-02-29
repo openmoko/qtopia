@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtSVG module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -140,7 +138,6 @@ static inline QPaintEngine::PaintEngineFeatures svgEngineFeatures()
         & ~QPaintEngine::PerspectiveTransform
         & ~QPaintEngine::ConicalGradientFill
         & ~QPaintEngine::PorterDuff);
-
 }
 
 class QSvgPaintEngine : public QPaintEngine
@@ -189,13 +186,14 @@ public:
     void saveLinearGradientBrush(const QGradient *g)
     {
         QTextStream str(&d_func()->defs, QIODevice::Append);
-        str << QLatin1String("<linearGradient gradientUnits=\"userSpaceOnUse\" ");
         const QLinearGradient *grad = static_cast<const QLinearGradient*>(g);
+        str << QLatin1String("<linearGradient ");
+        saveGradientUnits(str, g);
         if (grad) {
-            str << QLatin1String("x1 = \"") <<grad->start().x()<< QLatin1String("\" ")
-                << QLatin1String("y1 = \"") <<grad->start().y()<< QLatin1String("\" ")
-                << QLatin1String("x2 = \"") <<grad->finalStop().x() << QLatin1String("\" ")
-                << QLatin1String("y2 = \"") <<grad->finalStop().y() << QLatin1String("\" ");
+            str << QLatin1String("x1=\"") <<grad->start().x()<< QLatin1String("\" ")
+                << QLatin1String("y1=\"") <<grad->start().y()<< QLatin1String("\" ")
+                << QLatin1String("x2=\"") <<grad->finalStop().x() << QLatin1String("\" ")
+                << QLatin1String("y2=\"") <<grad->finalStop().y() << QLatin1String("\" ");
         }
 
         str << QLatin1String("id=\"") << d_func()->generateGradientName() << QLatin1String("\">\n");
@@ -205,16 +203,17 @@ public:
     void saveRadialGradientBrush(const QGradient *g)
     {
         QTextStream str(&d_func()->defs, QIODevice::Append);
-        str << QLatin1String("<radialGradient gradientUnits=\"userSpaceOnUse\"");
         const QRadialGradient *grad = static_cast<const QRadialGradient*>(g);
+        str << QLatin1String("<radialGradient ");
+        saveGradientUnits(str, g);
         if (grad) {
-            str << QLatin1String("cx = \"") <<grad->center().x()<< QLatin1String("\" ")
-                << QLatin1String("cy = \"") <<grad->center().y()<< QLatin1String("\" ")
-                << QLatin1String("r = \"") <<grad->radius() << QLatin1String("\" ")
-                << QLatin1String("fx = \"") <<grad->focalPoint().x() << QLatin1String("\" ")
-                << QLatin1String("fy = \"") <<grad->focalPoint().y() << QLatin1String("\" ");
+            str << QLatin1String("cx=\"") <<grad->center().x()<< QLatin1String("\" ")
+                << QLatin1String("cy=\"") <<grad->center().y()<< QLatin1String("\" ")
+                << QLatin1String("r=\"") <<grad->radius() << QLatin1String("\" ")
+                << QLatin1String("fx=\"") <<grad->focalPoint().x() << QLatin1String("\" ")
+                << QLatin1String("fy=\"") <<grad->focalPoint().y() << QLatin1String("\" ");
         }
-        str << QLatin1String(" xml:id=\"") <<d_func()->generateGradientName()<< QLatin1String("\">\n");
+        str << QLatin1String("xml:id=\"") <<d_func()->generateGradientName()<< QLatin1String("\">\n");
         saveGradientStops(str, g);
         str << QLatin1String("</radialGradient>") << endl;
     }
@@ -236,6 +235,17 @@ public:
                 << QLatin1String("stop-opacity=\"") << stop.second.alphaF() <<QLatin1String("\" />\n");
         }
     }
+
+    void saveGradientUnits(QTextStream &str, const QGradient *gradient)
+    {
+        str << QLatin1String("gradientUnits=\"");
+        if (gradient && gradient->coordinateMode() == QGradient::ObjectBoundingMode)
+            str << QLatin1String("objectBoundingBox");
+        else
+            str << QLatin1String("userSpaceOnUse");
+        str << QLatin1String("\" ");
+    }
+
     void generateQtDefaults()
     {
         *d_func()->stream << QLatin1String("fill=\"none\" ");

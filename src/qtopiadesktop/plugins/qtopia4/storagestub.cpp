@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -43,10 +43,14 @@ public:
         return bytes;
     }
 
-    void performSync(const QDateTime &);
+    void fetchChangesSince(const QDateTime &);
     void createClientRecord(const QByteArray &);
     void replaceClientRecord(const QByteArray &);
     void removeClientRecord(const QString &);
+
+    void beginTransaction(const QDateTime &) {}
+    void abortTransaction() {}
+    void commitTransaction() {}
 
 private:
     int syncIteration;
@@ -54,25 +58,25 @@ private:
 
 QD_REGISTER_PLUGIN(StorageTestStub)
 
-void StorageTestStub::createClientRecord(const QByteArray &record)
+void StorageTestStub::createClientRecord(const QByteArray & /*record*/)
 {
     // do nothing
     //qDebug() << "create record" << QString::fromUtf8(record);
 }
 
-void StorageTestStub::replaceClientRecord(const QByteArray &record)
+void StorageTestStub::replaceClientRecord(const QByteArray & /*record*/)
 {
     // do nothing
     //qDebug() << "update record" << QString::fromUtf8(record);
 }
 
-void StorageTestStub::removeClientRecord(const QString &identifier)
+void StorageTestStub::removeClientRecord(const QString & /*identifier*/)
 {
     // do nothing
     //qDebug() << "remove record" << identifier;
 }
 
-void StorageTestStub::performSync(const QDateTime &timestamp)
+void StorageTestStub::fetchChangesSince(const QDateTime &timestamp)
 {
     int item;
     if (timestamp.isNull()) {

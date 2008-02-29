@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,6 +31,7 @@
 
 class QModemNetworkRegistration;
 class QWaitWidget;
+class TwoLineFloatingTextList;
 
 class ModemNetworkRegister : public QListWidget
 {
@@ -55,7 +56,7 @@ private:
     QBandSelection::BandMode m_curBandMode;
     QWaitWidget *m_waitWidget;
     QDialog *m_opDlg;
-    QListWidget *m_opList;
+    TwoLineFloatingTextList *m_opList;
     QListWidgetItem *m_originalOp;
     QList<QNetworkRegistration::AvailableOperator> m_result;
 
@@ -95,14 +96,21 @@ private:
     void updateIndex( int, bool );
     void checkIndex();
     bool isPreferred( unsigned int );
+    void initAddNetworkDlg();
 
-    QListWidget *m_list;
+    TwoLineFloatingTextList *m_list;
     QPreferredNetworkOperators *m_PNOClient;
     QList<QPreferredNetworkOperators::NameInfo> m_operatorNames;
     QList<QPreferredNetworkOperators::Info> m_currentOpers;
     QList<QPreferredNetworkOperators::Info> m_originalOpers;
     QWaitWidget *m_waitWidget;
     QAction *m_add, *m_remove, *m_up, *m_down;
+    QDialog *m_addNetworkDlg;
+    TwoLineFloatingTextList *m_addNetworkList;
+
+    // ugly hack to make the Select Position dialog sane.
+    bool eventFilter(QObject *obj, QEvent *event);
+    int savedPrefNetOpLoc;
 };
 
 #endif /* MODEMNETWORKREGISTER_H */

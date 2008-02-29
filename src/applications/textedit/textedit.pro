@@ -25,4 +25,4 @@ viewservice.path=/services/View/text/plain
 INSTALLS+=viewservice
 
 pkg.description=Text editor for Qtopia.
-pkg.domain=window,cardreader,print,input,doc_server,doc_write
+pkg.domain=trusted

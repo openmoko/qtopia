@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1240,9 +1238,9 @@ void QDate::julianToGregorian(uint jd, int &y, int &m, int &d)
 /*!
     \fn QTime::QTime()
 
-    Constructs a null time object. A null time is identical to a
-    QTime(0, 0, 0, 0) (i.e., midnight), except that isNull() and
-    isValid() return false.
+    Constructs a null time object. A null time can be a QTime(0, 0, 0, 0)
+    (i.e., midnight) object, except that isNull() returns true and isValid()
+    returns false.
 
     \sa isNull(), isValid()
 */
@@ -4628,7 +4626,7 @@ int QDateTimeParser::potentialValueHelper(const QString &str, int min, int max, 
 {
     if (str.size() == size) {
         const int val = str.toInt();
-        if (val < min || val > max)
+        if ((val < min && min != -1) || (val > max && max != -1))
             return -1;
         QDTPDEBUG << "SUCCESS" << val << "is >=" << min << "and <=" << max;
         return val;

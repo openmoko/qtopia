@@ -27,7 +27,7 @@
 		</image>
 	    </group>
 	    <group name="caption" transient="yes" active="expr:@/UI/ActiveWindow/Caption != false">
-		<text rect="2.27%,0,-58%,95.24%" name="caption" size="5" outline="Highlight" bold="yes" color="HighlightedText" align="left,vcenter" elided="right" transient="yes">
+		<text rect="2.27%,0,-58%,95.24%" name="caption" outline="Highlight" bold="yes" color="HighlightedText" align="left,vcenter" elided="right" transient="yes">
 		    expr:@/UI/ActiveWindow/Caption 
 		</text>
 		<image rect="-56.82%,14.29%,-14.77%,80.95%" src="statusbar.svg" scale="yes">

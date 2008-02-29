@@ -14,8 +14,19 @@ fi
 
 cat license.txt
 more release.txt
-clear
-echo "Qtopia Greenphone SDK Linux Installation"
+
+# try to be tricky here....
+VMXFILE=`ls *.vmx`
+BASE=`echo $VMXFILE | sed -e 's/\..*//'`
+
+char=${BASE:0:1}
+string=${BASE:1}
+CHAR=`echo "$char" | tr a-z A-Z`
+
+SDKNAME="$CHAR$string"
+
+
+echo "Qtopia $SDKNAME SDK Linux Installation"
 echo
 if [ ! -n "$VMPLAYER_DIR" ] ; then
     echo "Installation of vmplayer"
@@ -25,7 +36,7 @@ if [ ! -n "$VMPLAYER_DIR" ] ; then
     echo -n "Unable to find vmplayer. Have you installed vmplayer? (y/n) : "
     read option
     if [ "$option" != "y" ] ; then
-        echo "Qtopia Greenphone SDK requires vmplayer or equivalent to be installed."
+        echo "Qtopia $SDKNAME SDK requires vmplayer or equivalent to be installed."
         echo
         exit
     fi
@@ -35,12 +46,12 @@ fi
 echo
 echo "NOTE: SDK requires 3.2GB free disk space and 512MB RAM"
 echo
-echo -n "What directory would you like to install the SDK? [$HOME/QtopiaGreenphoneSDK] : "
+echo -n "What directory would you like to install the SDK? [$HOME/Qtopia"$SDKNAME"SDK] : "
 read dir
 if [ ! -n "$dir" ] ; then
-    dir="$HOME/QtopiaGreenphoneSDK"
+    dir="$HOME/Qtopia"$SDKNAME"SDK"
 fi
-if [ ! -e "$dir" ] ; then
+if [ ! -e "$dir" ] && [ ! -L "$dir" ] ; then
     echo
     echo -n "Directory does not exist. Do you wish to create the directory $dir? (y/n) : "
     read option
@@ -51,11 +62,19 @@ if [ ! -e "$dir" ] ; then
     fi
     mkdir -p "$dir"
 fi
+
 if [ ! -w "$dir" ] ; then
+		if [ -L "$dir" ] ; then
+				echo
+				echo "$dir is a symbolic link. Please choose a directory you have permission to write to."
+				echo
+				exit 1
+		fi 
+
     echo
     echo "Please choose a directory you have permission to write to."
     echo
-    exit
+    exit 1
 fi 
 echo
 echo "Directory to install to: $dir"
@@ -68,20 +87,20 @@ if [ "$option" != "y" ] ; then
     exit
 fi
 
-clear
-echo "Installing Qtopia Greenphone SDK....please wait"
-#mkdir -p $dir
+
+echo "Installing $SDKNAME Qtopia SDK....please wait"
+
 if [ -e "$dir/release.html" ]; then
   rm -f "$dir/release.html"
 fi
 cp release.html "$dir"
 chmod 664 "$dir/release.html"
 
-if [ -e "$dir/greenphone.vmx" ]; then
-  rm -f "$dir/greenphone.vmx"
+if [ -e "$dir/$VMXFILE" ]; then
+  rm -f "$dir/$VMXFILE"
 fi
 cp greenphone.vmx "$dir"
-chmod 664 "$dir/greenphone.vmx"
+chmod 664 "$dir/$VMXFILE"
 
 if [ -e "$dir/license.txt" ]; then
   rm -f "$dir/license.txt"
@@ -96,26 +115,27 @@ ERROR="0"
 
 function unpack()
 {
-if ! tar -xjf "$1" >"$dir"/.install.log 2>"$dir"/.install.log
+if ! tar -xvjf "$1" 
       then
       ERROR="1"
       echo "FAILED!"
       rm -f "$1"
+      exit 1
   fi
 }
 
 if [ "$ERROR" -ne "1" ]; then
-  echo "Installing qtopia SDK...4.0 minutes remaining"
+  echo "Installing qtopia SDK... Part 1/6"
   unpack "$currentdir/qtopia.dat"
 fi
 
 if [ "$ERROR" -ne "1" ]; then
-  echo "Installing qtopia src...2.5 minutes remaining"
+  echo "Installing qtopia src... Part 2/6"
   unpack "$currentdir/qtopiasrc.dat"
 fi
 
 if [ "$ERROR" -ne "1" ]; then
-  echo "Installing toolchain....2.0 minutes remaining"
+  echo "Installing toolchain.... Part 3/6"
   unpack "$currentdir/toolchain.dat"
 fi
 
@@ -124,11 +144,11 @@ if [ "$ERROR" -ne "1" ]; then
     echo -n "Do you want to update the home directory and settings? (y/n) : "
     read option
     if [ "$option" != "n" ] ; then
-        echo "Updating home.........1.5 minutes remaining"
+        echo "Updating home........... Part 4/6"
         unpack "$currentdir/home.dat"
     fi
   else
-     echo "Installing home.........1.5 minutes remaining"
+     echo "Installing home......... Part 4/6"
      unpack "$currentdir/home.dat"
   fi
 fi
@@ -138,14 +158,13 @@ if [ "$ERROR" -ne "1" ]; then
     echo -n "Do you want to update the root filesystem? (y/n) : "
     read option
     if [ "$option" != "n" ] ; then
-      echo "Updating rootfs.......1.0 minutes remaining"
+      echo "Updating rootfs......... Part 5/6"
       unpack "$currentdir/rootfs.dat"
     fi
   else
-    echo "Installing rootfs.......1.0 minutes remaining"
+    echo "Installing rootfs....... Part 5/6"
     unpack "$currentdir/rootfs.dat"
   fi
-
 fi
 
 if [ "$ERROR" -ne "1" ]; then
@@ -153,15 +172,23 @@ if [ "$ERROR" -ne "1" ]; then
     echo -n "Do you want to update the Qtopia update iso? (y/n) : "
     read option
     if [ "$option" != "n" ] ; then
-      echo "Updating qtopia iso.......1.0 minutes remaining"
+			if !	rm -f "$dir/qtopia.iso"
+					then
+						ERROR="1"
+						exit 1
+				fi
+      echo "Updating qtopia iso..... Part 6/6"
       cp "$currentdir/qtopia.iso" "$dir"
+      chmod 664 "$dir/qtopia.iso"
     fi
   else
-    echo "Installing qtopia iso.......1.0 minutes remaining"
+    echo "Installing qtopia iso....... Part 6/6"
       cp "$currentdir/qtopia.iso" "$dir"
+      chmod 664 "$dir/qtopia.iso"
   fi
 
 fi
+
 
 if [ "$ERROR" -ne "1" ]; then
 
@@ -170,10 +197,10 @@ if [ -e "$dir/home.vmdk" ] ; then
     if [ -e "$dir/qtopia.vmdk" ] ; then
       if [ -e "$dir/toolchain.vmdk" ] ; then
         if [ -e "$dir/rootfs.vmdk" ] ; then
-          if [ -e "$dir/greenphone.vmx" ] ; then
+          if [ -e "$dir/$VMXFILE" ] ; then
             echo 
             echo "Installation successful."
-            echo "to start cd \"$dir\";vmplayer greenphone.vmx"
+            echo "to start cd \"$dir\";vmplayer $VMXFILE"
             echo
             exit
           fi

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">OomManager Class Reference</h1>
 <p>The OomManager class manages low and out of memory situations. <a href="#details">More...</a></p>
-<pre>    #include &lt;OomManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;OomManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="oommanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -38,24 +38,23 @@
 <li><div class="fn"/>void <b><a href="oommanager.html#remove">remove</a></b> ( const QString &amp; <i>app</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The OomManager class manages low and out of memory situations.</p>
-<p>This class is a wrapper for Qtopia's <a href="syscust-guide.html">Out-of-memory manager</a>. It is used in sublasses of the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> class that launch applications as linux processes. It is also used in <a href="applicationlauncher.html">ApplicationLauncher</a> and <a href="lowmemorytask.html">LowMemoryTask</a>.</p>
+<p>This class is a wrapper for Qtopia's <a href="syscust-oom.html">Out-of-memory manager</a>. It is used in sublasses of the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> class that launch applications as linux processes. It is also used in <a href="applicationlauncher.html">ApplicationLauncher</a> and <a href="lowmemorytask.html">LowMemoryTask</a>.</p>
 <p>This class contains three sets of application names. The first set is called <tt>critical</tt>. It contains the names of all the Qtopia applications that must not be killed, when Qtopia runs out of memory, eg Qtopia itself (qpe) is in the critical set.</p>
 <p>The second set is called <tt>expendable</tt>. It contains the names of the applications that the user wants killed first, when Qtopia runs out of memory.</p>
 <p>The third set is called <tt>important</tt>. It contains the names of applications the user wants to avoid killing, if possible, when Qtopia runs out of memory. Important processes will not be killed if there are expendable processes running, but expendable processes can be killed. Only critical processes are not killable.</p>
@@ -98,29 +97,29 @@
 <p>This constrcutor creates a new <a href="oommanager.html">OomManager</a> instance.</p>
 <h3 class="fn"><a name="dtor.OomManager"></a>OomManager::~OomManager ()</h3>
 <p>Destroys the <a href="oommanager.html">OomManager</a> instance.</p>
-<h3 class="fn"><a name="expendableProcs"></a>const <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, int&gt; &amp; OomManager::expendableProcs () const</h3>
+<h3 class="fn"><a name="expendableProcs"></a>const <a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, int&gt; &amp; OomManager::expendableProcs () const</h3>
 <p>Returns a reference to the map of expendable processes. that maps application name to process id. The map can be empty.</p>
 <h3 class="fn"><a name="hasExpendableProcs"></a>bool OomManager::hasExpendableProcs () const</h3>
 <p>Returns true if at least one of the running process is marked as being expendable.</p>
 <h3 class="fn"><a name="hasImportantProcs"></a>bool OomManager::hasImportantProcs () const</h3>
 <p>Returns true if at least one of the running process is marked as being important.</p>
-<h3 class="fn"><a name="importantProcs"></a>const <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, int&gt; &amp; OomManager::importantProcs () const</h3>
+<h3 class="fn"><a name="importantProcs"></a>const <a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, int&gt; &amp; OomManager::importantProcs () const</h3>
 <p>Returns a reference to the map of important processes. that maps application name to process id. The map can be empty.</p>
-<h3 class="fn"><a name="insert"></a>void OomManager::insert ( const <a href="qstring.html">QString</a> &amp; <i>app</i>, int <i>pid</i> )</h3>
+<h3 class="fn"><a name="insert"></a>void OomManager::insert ( const <a href="./qstring.html">QString</a> &amp; <i>app</i>, int <i>pid</i> )</h3>
 <p>Insert a mapping from <i>app</i> to <i>pid</i>. The process <i>pid</i> must be in the running state, and it must be an instance of <i>app</i>. This function must be called when process <i>pid</i> enters the running state.</p>
 <p>The value in <tt>/proc/pid/oom_adj</tt> is set to a value read from oom.conf according to whether the process is a critical, expendable, or important process.</p>
-<h3 class="fn"><a name="isExpendable"></a>bool OomManager::isExpendable ( const <a href="qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
+<h3 class="fn"><a name="isExpendable"></a>bool OomManager::isExpendable ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
 <p>Returns true if <i>app</i> is not marked important or critical.</p>
-<h3 class="fn"><a name="isImportant"></a>bool OomManager::isImportant ( const <a href="qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
+<h3 class="fn"><a name="isImportant"></a>bool OomManager::isImportant ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
 <p>Returns true if <i>app</i> is marked important.</p>
-<h3 class="fn"><a name="procWithBiggestScore"></a><a href="qstring.html">QString</a> OomManager::procWithBiggestScore ( <a href="oommanager.html#Importance-enum">Importance</a> <i>t</i> ) const</h3>
+<h3 class="fn"><a name="procWithBiggestScore"></a><a href="./qstring.html">QString</a> OomManager::procWithBiggestScore ( <a href="oommanager.html#Importance-enum">Importance</a> <i>t</i> ) const</h3>
 <p>Returns the application name of the process marked as <i>t</i> that has the biggest OOM score.</p>
-<h3 class="fn"><a name="remove"></a>void OomManager::remove ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
+<h3 class="fn"><a name="remove"></a>void OomManager::remove ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> )</h3>
 <p>Remove the mapping from application <i>app</i> to its process id. This function must be called for any linux process started by the <a href="applicationlauncher.html">ApplicationLauncher</a>, when the process is terminated for any reason.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

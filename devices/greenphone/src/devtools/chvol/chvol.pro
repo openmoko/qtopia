@@ -4,4 +4,4 @@ CONFIG-=enable_singleexec
 
 SOURCES=chvol.c
 
-pkg.domain=none
+pkg.domain=trusted

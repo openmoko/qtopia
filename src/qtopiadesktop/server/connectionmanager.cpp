@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,8 @@
 #include <qdplugin.h>
 #include "pluginmanager.h"
 #include <DesktopSettings>
+
+QD_LOG_OPTION(ConnectionManager)
 
 #ifndef RETRY_INTERVAL
 #define RETRY_INTERVAL (DesktopSettings::debugMode()?DesktopSettings("settings").value("retry_interval",5000).toInt():500)
@@ -88,7 +90,7 @@ void ConnectionManager::stop()
 
 void ConnectionManager::timerEvent( QTimerEvent * /*e*/ )
 {
-    TRACE(QDA) << "ConnectionManager::timerEvent";
+    TRACE(ConnectionManager) << "ConnectionManager::timerEvent";
 
     killTimer( d->timerId );
     d->timerId = 0;
@@ -131,7 +133,7 @@ void ConnectionManager::timerEvent( QTimerEvent * /*e*/ )
 
 void ConnectionManager::nextLink()
 {
-    TRACE(QDA) << "ConnectionManager::nextLink";
+    TRACE(ConnectionManager) << "ConnectionManager::nextLink";
     bool next = false;
     foreach ( QDLinkPlugin *plugin, qdPluginManager()->linkPlugins() ) {
         if ( d->currentLink == 0 || next ) {
@@ -151,7 +153,7 @@ void ConnectionManager::nextLink()
 
 void ConnectionManager::nextConnection()
 {
-    TRACE(QDA) << "ConnectionManager::nextConnection";
+    TRACE(ConnectionManager) << "ConnectionManager::nextConnection";
     bool next = false;
     foreach ( QDConPlugin *plugin, qdPluginManager()->conPlugins() ) {
         if ( d->currentConnection == 0 || next ) {
@@ -171,7 +173,7 @@ void ConnectionManager::nextConnection()
 
 void ConnectionManager::setLinkState( QDLinkPlugin *link, int state )
 {
-    TRACE(QDA) << "ConnectionManager::setLinkState" << "link" << link->displayName() << "state" << state;
+    TRACE(ConnectionManager) << "ConnectionManager::setLinkState" << "link" << link->displayName() << "state" << state;
     if ( link != d->currentLink ) {
         LOG() << link->displayName() << "sent state" << state << "when it wasn't the current link";
         return;
@@ -200,7 +202,7 @@ void ConnectionManager::setLinkState( QDLinkPlugin *link, int state )
 
 void ConnectionManager::setConnectionState( QDConPlugin *connection, int state )
 {
-    TRACE(QDA) << "ConnectionManager::setConnectionState" << "connection" << connection->displayName() << "state" << state;
+    TRACE(ConnectionManager) << "ConnectionManager::setConnectionState" << "connection" << connection->displayName() << "state" << state;
     if ( connection != d->currentConnection ) {
         LOG() << connection->displayName() << "sent state" << state << "when it wasn't the current connection";
         return;

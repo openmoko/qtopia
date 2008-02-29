@@ -35,19 +35,18 @@
 <li><div class="fn"/>void <b><a href="contactsservice.html#updateContact">updateContact</a></b> ( const QContact &amp; <i>contact</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -64,12 +63,12 @@
 <p>Adds a <i>contact</i>, and invokes a dialog with the user to then edit the contact, for example to fill in any additional fields not supplied by the caller.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::addAndEditContact(QContact)</tt>.</p>
 <h3 class="fn"><a name="addContact"></a>void ContactsService::addContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Adds a <i>contact</i>. This is not normally used by applications, which should use the AddressBookAccess class.</p>
+<p>Adds a <i>contact</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::addContact(QContact)</tt>.</p>
-<h3 class="fn"><a name="addPhoneNumberToContact"></a>void ContactsService::addPhoneNumberToContact ( const <a href="qstring.html">QString</a> &amp; <i>phoneNumber</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="addPhoneNumberToContact"></a>void ContactsService::addPhoneNumberToContact ( const <a href="./qstring.html">QString</a> &amp; <i>phoneNumber</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Prompts the user to assign the given <i>phoneNumber</i> to a contact of their choice, or to a new contact they then create. The phone number might for example have been supplied by phone network calling-number-identification.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::addPhoneNumberToContact(QString)</tt>.</p>
-<h3 class="fn"><a name="createNewContact"></a>void ContactsService::createNewContact ( const <a href="qstring.html">QString</a> &amp; <i>phoneNumber</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="createNewContact"></a>void ContactsService::createNewContact ( const <a href="./qstring.html">QString</a> &amp; <i>phoneNumber</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Prompts the user to create a new contact with given <i>phoneNumber</i>. The user will need to select a phone type for <i>phoneNumber</i> first and then edit the new contact.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::createNewContact(QString)</tt>.</p>
 <h3 class="fn"><a name="editPersonal"></a>void ContactsService::editPersonal ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -79,13 +78,13 @@
 <p>Invokes a dialog with the user, allowing them to enter their personal details as a Contact entry. The main application window will be closed, with only the dialog displayed.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::editPersonalAndClose()</tt>.</p>
 <h3 class="fn"><a name="removeContact"></a>void ContactsService::removeContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Removes a <i>contact</i>. This is not normally used by applications, which should use the AddressBookAccess class.</p>
+<p>Removes a <i>contact</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::removeContact(QContact)</tt>.</p>
 <h3 class="fn"><a name="requestLinks"></a>void ContactsService::requestLinks ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Request for one or more QDL links using the hint contained within <i>request</i>.</p>
 <p>This slot corresponds to a QDS service with a request data type of &quot;text/x-qstring&quot; and response data type of <a href="qdllink.html#listMimeType">QDLLink::listMimeType</a>().</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::requestLinks(QDSActionRequest)</tt>.</p>
-<h3 class="fn"><a name="setContactImage"></a>void ContactsService::setContactImage ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setContactImage"></a>void ContactsService::setContactImage ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Prompts the user to assign the image in <i>filename</i> to a contact of their choice. The image might, for example, have been recently taken by a built-in camera.</p>
 <p>The file is owned by the application that sent it. The Contacts application will make a copy if it could later delete the image.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::setContactImage(QString)</tt>.</p>
@@ -98,12 +97,12 @@
 <p>Shows details of the contact identified by <i>uid</i> to the user.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::showContact(QUniqueId)</tt>.</p>
 <h3 class="fn"><a name="updateContact"></a>void ContactsService::updateContact ( const <a href="qcontact.html">QContact</a> &amp; <i>contact</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Updates a <i>contact</i>. This is not normally used by applications, which should use the AddressBookAccess class.</p>
+<p>Updates a <i>contact</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Contacts::updateContact(QContact)</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

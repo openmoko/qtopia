@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -104,6 +104,8 @@ KeyboardFrame::KeyboardFrame(QWidget* parent, Qt::WFlags f) :
     unicode(-1), qkeycode(0), modifiers(Qt::NoModifier), pressTid(0), pressed(false),
     positionTop(true)
 {
+    setAttribute(Qt::WA_InputMethodTransparent, true);
+
     setPalette(QPalette(QColor(220,220,220))); // Gray
     setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     setFrameStyle(QFrame::Plain | QFrame::Box);

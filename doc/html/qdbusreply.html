@@ -39,10 +39,10 @@
 <p>It can be used in the following manner:</p>
 <pre> QDBusReply&lt;QString&gt; reply = interface-&gt;call(&quot;RemoteMethod&quot;);
  if (reply.isValid())
-     <span class="comment">// use the returned value</span>
+     <span class="comment">//</span> use the returned value
      useValue(reply.value());
  else
-     <span class="comment">// call failed. Show an error condition.</span>
+     <span class="comment">//</span> call failed. Show an error condition.
      showError(reply.error());</pre>
 <p>If the remote method call cannot fail, you can skip the error checking:</p>
 <pre> QString reply = interface-&gt;call(&quot;RemoteMethod&quot;);</pre>
@@ -78,8 +78,8 @@
 <p>Makes this object be a copy of the object <i>other</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,13 +56,28 @@
     \value Recipients The message recipient address string.
     \value Subject The message subject string.
     \value TimeStamp The message timestamp
-    \value Flags The message status flags.
+    \value Status The message status flags.
     \value FromAccount The name of the account the mesasge was downloaded from.
     \value FromMailbox The imap mailbox the message was downloaded from. 
     \value ServerUid The IMAP server UID of the message.
     \value Size The size of the message.
 */
 
+/*!
+    Create a QMailMessageSortKey with specifying matching parameters.
+
+    A default-constructed key (one for which isEmpty() returns true) sorts no messages. 
+
+    The result of combining an empty key with a non-empty key is the same as the original 
+    non-empty key.
+
+    The result of combining two empty keys is an empty key.
+*/
+
+QMailMessageSortKey::QMailMessageSortKey()
+{
+	d = new QMailMessageSortKeyPrivate();
+}
 
 /*!
     Construct a QMailMessageSortKey which sorts a set of results based on the  
@@ -146,14 +161,14 @@ QMailMessageSortKey& QMailMessageSortKey::operator=(const QMailMessageSortKey& o
     return *this;
 }
 
-
 /*!
-    \internal
+    Returns true if the key remains empty after default construction; otherwise returns false.
 */
 
-QMailMessageSortKey::QMailMessageSortKey()
+bool QMailMessageSortKey::isEmpty() const
 {
-	d = new QMailMessageSortKeyPrivate();
+    return d->arguments.isEmpty();
 }
+
 
 

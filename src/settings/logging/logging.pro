@@ -23,4 +23,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Logging settings dialog for Qtopia.
-pkg.domain=window
+pkg.domain=trusted

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -125,7 +125,8 @@ QAbstractIpcInterfaceGroupManager::QAbstractIpcInterfaceGroupManager
         ( const QString& valueSpaceLocation, QObject *parent )
     : QObject( parent )
 {
-    d = new QAbstractIpcInterfaceGroupManagerPrivate( valueSpaceLocation );
+    d = new QAbstractIpcInterfaceGroupManagerPrivate
+        ( valueSpaceLocation + QLatin1String("/_channels") );
     connect( d->item, SIGNAL(contentsChanged()),
              this, SLOT(groupsChangedInner()) );
 }
@@ -163,10 +164,11 @@ QAbstractIpcInterfaceGroupManager::QAbstractIpcInterfaceGroupManager
     : QObject( parent )
 {
     if ( interface.isEmpty() ) {
-        d = new QAbstractIpcInterfaceGroupManagerPrivate( valueSpaceLocation );
+        d = new QAbstractIpcInterfaceGroupManagerPrivate
+            ( valueSpaceLocation + QLatin1String("/_channels") );
     } else {
         d = new QAbstractIpcInterfaceGroupManagerPrivate( 
-                valueSpaceLocation + QChar('/') + interface );
+                valueSpaceLocation + QLatin1String("/_channels/") + interface );
         d->interfaceFilter = interface;
     }
     connect( d->item, SIGNAL(contentsChanged()),

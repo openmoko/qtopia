@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,15 +21,19 @@
 
 #include <custom.h>
 #include <qtopianamespace.h>
+#include <QtopiaServiceRequest>
+#include <QtopiaIpcEnvelope>
 
 #include <qwindowsystem_qws.h>
 #include <QValueSpaceItem>
+#include <QValueSpaceObject>
 #include <stdio.h>
 #include <stdlib.h>
 #include <QProcess>
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+
 
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
@@ -44,9 +48,9 @@ QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
     maxBrightness.close();
     }
 
-    if(strvalue.isEmpty())
-        value = 3957;
-    else
+//     if(strvalue.isEmpty())
+//         value = 3957;
+//     else
         value = strvalue.toInt();
 
     return value;
@@ -57,8 +61,39 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
     char cmd[80];
 
-    if(b == 1) b = 519;
-    else if (b == -1) b = qpe_sysBrightnessSteps();
+    qWarning() <<"setBrightness"<<b <<  qpe_sysBrightnessSteps();
+
+    if(b == 1) {
+        // dim
+        b = 519;
+    }
+    else if (b == -1) {
+        //bright
+        b = qpe_sysBrightnessSteps();
+//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
+//         e << true;
+//         qWarning()<<"amp mode on";
+
+    }
+
+    else if( b == 0) {
+     //blanking screen
+//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
+//         e << false;
+//       qWarning()<<"amp mode off";
+
+    } else if( b ==  qpe_sysBrightnessSteps() ) {
+//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
+//         e << true;
+//         qWarning()<<"amp mode on";
+
+    }
+    else {
+//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
+//         e << true;
+//         qWarning()<<"amp mode on";
+
+    }
 
     QFile brightness("/sys/class/backlight/gta01-bl/brightness");
     if( !brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {

@@ -33,7 +33,7 @@ FORMS += actiondialog.ui
 
 depends(libraries/qtopiaphone)
 
-enable_cell|enable_voip {
+enable_telephony {
     !enable_singleexec {
         SOURCES += ../../settings/ringprofile/ringtoneeditor.cpp
         HEADERS += ../../settings/ringprofile/ringtoneeditor.h
@@ -74,10 +74,7 @@ help.files=addressbook*
 help.hint=help
 INSTALLS+=help
 
-pics.files=$$QTOPIA_DEPOT_PATH/pics/addressbook/*
-pics.path=/pics/addressbook
-pics.hint=pics
-INSTALLS+=pics
+# pics are installed by libqtopiapim since they're shared
 
 im.files=named_addressbook-*.conf
 im.path=/etc/im/pkim
@@ -100,4 +97,4 @@ enable_cell {
 }
 
 pkg.desc=Contacts for Qtopia.
-pkg.domain=pim,alarm,window,qdl,qds,beaming,bluetooth,phonecomm,pictures,msg,cardreader,camera,pictures,mediarecorder,doc_server,doc_write,mediasession,profiles,callhistory
+pkg.domain=trusted

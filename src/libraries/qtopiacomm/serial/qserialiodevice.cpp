@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -550,7 +550,8 @@ QNullSerialIODevice::~QNullSerialIODevice()
 }
 
 /*!
-    Open this null serial device in \a mode.
+    Opens this null serial device in \a mode.  Returns true if the
+    device can be opened; false otherwise.
 */
 bool QNullSerialIODevice::open( OpenMode mode )
 {
@@ -559,7 +560,7 @@ bool QNullSerialIODevice::open( OpenMode mode )
 }
 
 /*!
-    Close this null serial device.
+    Closes this null serial device.
 */
 void QNullSerialIODevice::close()
 {

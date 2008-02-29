@@ -25,16 +25,16 @@
 <pre>    Exec=jvm appname</pre>
 <p>.</p>
 </td></tr>
-<tr valign="top" class="odd"><td>Use <a href="qtopiaapplication.html">QtopiaApplication</a></td><td><a href="qtopiaapplication.html">QtopiaApplication</a> must be used, not <a href="qapplication.html">QApplication</a>, otherwise all the framework provided for Qtopia will not function correctly. In particular, <a href="qtopiaapplication.html">QtopiaApplication</a> communicates with the launcher via <tt>QCop</tt> to handle things such as the <tt>taskbar</tt> icon, raising, quitting, opening documents and changing styles and fonts.</td></tr>
+<tr valign="top" class="odd"><td>Use <a href="qtopiaapplication.html">QtopiaApplication</a></td><td><a href="qtopiaapplication.html">QtopiaApplication</a> must be used, not <a href="./qapplication.html">QApplication</a>, otherwise all the framework provided for Qtopia will not function correctly. In particular, <a href="qtopiaapplication.html">QtopiaApplication</a> communicates with the launcher via <tt>QCop</tt> to handle things such as the <tt>taskbar</tt> icon, raising, quitting, opening documents and changing styles and fonts.</td></tr>
 <tr valign="top" class="even"><td>Use <a href="qtopiaapplication.html#exec">QtopiaApplication::exec</a>()</td><td>This ensures that functionality such as <tt>QCop</tt> processing is initiated. If you must use your own event loop rather than <tt>exec()</tt>, you must at least call <a href="qtopiaapplication.html#setMainWidget">QtopiaApplication::setMainWidget</a>(). If is not possible, additional functionality will need to be added to <a href="qtopiaapplication.html">QtopiaApplication</a> to support your event loop.</td></tr>
-<tr valign="top" class="odd"><td>Follow Qtopia Conventions</td><td>The widget toolkit or bindings used by the JVM should follow the Qtopia conventions. For example, it should use <a href="qtopiaapplication.html#execDialog">QtopiaApplication::execDialog</a>() rather than <a href="qdialog.html#exec">QDialog::exec</a>().</td></tr>
+<tr valign="top" class="odd"><td>Follow Qtopia Conventions</td><td>The widget toolkit or bindings used by the JVM should follow the Qtopia conventions. For example, it should use <a href="qtopiaapplication.html#execDialog">QtopiaApplication::execDialog</a>() rather than <a href="./qdialog.html#exec">QDialog::exec</a>().</td></tr>
 </table></p>
 <p><b>Note:</b> These items are listed in order of the Qtopia application execution control flow and so correspond to the order in which they can be easily tested.</p>
 <p>The above rules can be relaxed to some extent, however additional integration coding will be required in <a href="qtopiaapplication.html">QtopiaApplication</a> and the Qtopia launcher (<tt>qpe</tt>) process.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

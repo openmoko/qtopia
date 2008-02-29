@@ -26,7 +26,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qserialiodevicemultiplexer.html#public-functions">QSerialIODeviceMultiplexer</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -35,7 +35,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>3 static public members inherited from <a href="qserialiodevicemultiplexer.html#static-public-members">QSerialIODeviceMultiplexer</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -44,16 +44,15 @@
 <li><div class="fn"/>void <b><a href="qgsm0710multiplexer.html#reinit">reinit</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -64,12 +63,12 @@
 <p>See also <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a>, <a href="qmultiportmultiplexer.html">QMultiPortMultiplexer</a>, and <a href="qserialiodevicemultiplexerplugin.html">QSerialIODeviceMultiplexerPlugin</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QGsm0710Multiplexer"></a>QGsm0710Multiplexer::QGsm0710Multiplexer ( <a href="qserialiodevice.html">QSerialIODevice</a> * <i>device</i>, int <i>frameSize</i> = 31, bool <i>advanced</i> = false, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QGsm0710Multiplexer"></a>QGsm0710Multiplexer::QGsm0710Multiplexer ( <a href="qserialiodevice.html">QSerialIODevice</a> * <i>device</i>, int <i>frameSize</i> = 31, bool <i>advanced</i> = false, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a new GSM 07.10 multiplexer around <i>device</i> and attach it to <i>parent</i>. The size of frames is <i>frameSize</i>. If <i>advanced</i> is true, then use the Advanced multiplexing option; otherwise use the Basic multiplexing option.</p>
 <p>Ownership of <i>device</i> will pass to this object; it will be deleted when this object is deleted.</p>
 <h3 class="fn"><a name="dtor.QGsm0710Multiplexer"></a>QGsm0710Multiplexer::~QGsm0710Multiplexer ()</h3>
 <p>Destruct this GSM 07.10 multiplexer, closing the session.</p>
-<h3 class="fn"><a name="channelNumber"></a>int QGsm0710Multiplexer::channelNumber ( const <a href="qstring.html">QString</a> &amp; <i>name</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="channelNumber"></a>int QGsm0710Multiplexer::channelNumber ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the GSM 07.10 channel number associated with the channel <i>name</i>. Returns -1 if the channel name is not recognized. The default channel assignment is as follows:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Name</th><th>Number</th></tr></thead>
@@ -91,8 +90,8 @@
 <p>Re-initialize the multiplexing session. This is called by subclasses that have detected that the modem has dropped out of multiplexing mode.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMediaServerSession Class Reference</h1>
 <p>The QMediaServerSession class is used to represent and control a session registered in Qtopia's Media server. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMediaServerSession&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
-<p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="mediaserver-drmsession.html">mediaserver::DrmSession</a>, <a href="mediaserver-mediaagentsession.html">mediaserver::MediaAgentSession</a>, <a href="mediaserver-sessionmanagersession.html">mediaserver::SessionManagerSession</a>, and <a href="qtopia-helix-helixsession.html">qtopia_helix::HelixSession</a>.</p>
 <ul>
 <li><a href="qmediaserversession-members.html">List of all members, including inherited members</a></li>
@@ -43,7 +43,7 @@
 <li><div class="fn"/>virtual int <b><a href="qmediaserversession.html#volume">volume</a></b> () const = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -57,17 +57,16 @@
 <li><div class="fn"/>void <b><a href="qmediaserversession.html#volumeMuted">volumeMuted</a></b> ( bool <i>muted</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -78,24 +77,24 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.QMediaServerSession"></a>QMediaServerSession::~QMediaServerSession ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroy a <a href="qmediaserversession.html">QMediaServerSession</a> object.</p>
-<h3 class="fn"><a name="domain"></a><a href="qstring.html">QString</a> QMediaServerSession::domain () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="domain"></a><a href="./qstring.html">QString</a> QMediaServerSession::domain () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the audio domain for this session.</p>
 <p>See also <a href="qmediaserversession.html#setDomain">setDomain</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QMediaServerSession::errorString ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QMediaServerSession::errorString ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>If the session is in the error state, a generic error string may be provided through this function.</p>
-<h3 class="fn"><a name="id"></a><a href="qstring.html">QString</a> QMediaServerSession::id () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="id"></a><a href="./qstring.html">QString</a> QMediaServerSession::id () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function should return the Id of the session.</p>
-<h3 class="fn"><a name="interfaceAvailable"></a>void QMediaServerSession::interfaceAvailable ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="interfaceAvailable"></a>void QMediaServerSession::interfaceAvailable ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Inform listeners that an interface has been made available. The interface can be referenced in the media system by <i>name</i>.</p>
-<h3 class="fn"><a name="interfaceUnavailable"></a>void QMediaServerSession::interfaceUnavailable ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="interfaceUnavailable"></a>void QMediaServerSession::interfaceUnavailable ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Inform listeners that an interface is no longer available for use. The interfaces is referenced in the media system by <i>name</i></p>
-<h3 class="fn"><a name="interfaces"></a><a href="qstringlist.html">QStringList</a> QMediaServerSession::interfaces ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="interfaces"></a><a href="./qstringlist.html">QStringList</a> QMediaServerSession::interfaces ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function should return the names of the interfaces supported by this session.</p>
 <h3 class="fn"><a name="isMuted"></a>bool QMediaServerSession::isMuted () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the current mute state of the session.</p>
-<h3 class="fn"><a name="length"></a>quint32 QMediaServerSession::length ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="length"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QMediaServerSession::length ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the length of the content.</p>
-<h3 class="fn"><a name="lengthChanged"></a>void QMediaServerSession::lengthChanged ( quint32 <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="lengthChanged"></a>void QMediaServerSession::lengthChanged ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Inform listeners the length of the content is changed to <i>ms</i> milliseconds long.</p>
 <h3 class="fn"><a name="pause"></a>void QMediaServerSession::pause ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function is called when the user is trying to pause the session. For some session types this may mean pausing decoding content, for others simply muting data.</p>
@@ -103,15 +102,15 @@
 <p>Return the current state of the session.</p>
 <h3 class="fn"><a name="playerStateChanged"></a>void QMediaServerSession::playerStateChanged ( <a href="qtopiamedia.html#State-enum">QtopiaMedia::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Inform listeners that the current state of the session has changed. The new state is indicated by <i>state</i>.</p>
-<h3 class="fn"><a name="positionChanged"></a>void QMediaServerSession::positionChanged ( quint32 <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="positionChanged"></a>void QMediaServerSession::positionChanged ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Inform listeners that the current play position in the content has changed to <i>ms</i>, from the beginning.</p>
-<h3 class="fn"><a name="reportData"></a><a href="qstring.html">QString</a> QMediaServerSession::reportData () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>This is a general reporting mechanisim, the <a href="qstring.html">QString</a> from this function will be placed in Qtopia's value space for inspection.</p>
+<h3 class="fn"><a name="reportData"></a><a href="./qstring.html">QString</a> QMediaServerSession::reportData () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>This is a general reporting mechanisim, the <a href="./qstring.html">QString</a> from this function will be placed in Qtopia's value space for inspection.</p>
 <h3 class="fn"><a name="resume"></a>void QMediaServerSession::resume ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>After a suspend, resume() is called to return the session to its previous state.</p>
-<h3 class="fn"><a name="seek"></a>void QMediaServerSession::seek ( quint32 <i>ms</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="seek"></a>void QMediaServerSession::seek ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Seek the content to <i>ms</i> milliseconds from the beginning. If the session is not seekable it may ignore this function.</p>
-<h3 class="fn"><a name="setDomain"></a>void QMediaServerSession::setDomain ( <a href="qstring.html">QString</a> const &amp; <i>domain</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="setDomain"></a>void QMediaServerSession::setDomain ( <a href="./qstring.html">QString</a> const &amp; <i>domain</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Sets the audio domain in which this session is active to <i>domain</i>.</p>
 <p>See also <a href="qmediaserversession.html#domain">domain</a>().</p>
 <h3 class="fn"><a name="setMuted"></a>void QMediaServerSession::setMuted ( bool <i>mute</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
@@ -135,8 +134,8 @@
 <p>Inform listeners that the mute state of the session has changed to <i>muted</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

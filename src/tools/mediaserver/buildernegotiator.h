@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -41,7 +41,7 @@ class BuilderNegotiator : public QMediaSessionBuilder
 public:
     virtual ~BuilderNegotiator();
 
-    virtual void addBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder) = 0;
+    virtual void addBuilder(QString const& tag, int priority, QMediaSessionBuilder* sessionBuilder) = 0;
     virtual void removeBuilder(QString const& tag, QMediaSessionBuilder* sessionBuilder) = 0;
 };
 

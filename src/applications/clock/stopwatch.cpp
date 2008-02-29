@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -65,7 +65,7 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
     stopwatchLcd = new QLCDNumber( swFrame );
     stopwatchLcd->setFrameStyle( QFrame::NoFrame );
     stopwatchLcd->setSegmentStyle( QLCDNumber::Flat );
-    stopwatchLcd->setSizePolicy( QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred) );
+    stopwatchLcd->setSizePolicy( QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding) );
 
     connect( stopStart, SIGNAL(clicked()), SLOT(stopStartStopWatch()) );
     connect( reset, SIGNAL(clicked()), SLOT(resetStopWatch()) );

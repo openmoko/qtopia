@@ -895,7 +895,7 @@ diff -Nur kernel/fs/buffer.c kernel/fs/buffer.c
  		/* do_exit directly and let kupdate to do its work alone. */
 diff -Nur kernel/fs/exec.c kernel/fs/exec.c
 --- kernel/fs/exec.c	2006-12-12 08:32:09.000000000 +1000
-+++ kernel/fs/exec.c	2007-09-03 10:03:44.000000000 +1000
++++ kernel/fs/exec.c	2008-01-17 14:11:00.000000000 +1000
 @@ -48,6 +48,10 @@
  
  int core_uses_pid;
@@ -907,7 +907,41 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  static struct linux_binfmt *formats;
  static rwlock_t binfmt_lock = RW_LOCK_UNLOCKED;
  
-@@ -687,6 +691,10 @@
+@@ -343,6 +347,7 @@
+ 	struct inode *inode;
+ 	struct file *file;
+ 	int err = 0;
++    int error;
+ 
+ 	if (path_init(name, LOOKUP_FOLLOW|LOOKUP_POSITIVE, &nd))
+ 		err = path_walk(name, &nd);
+@@ -357,6 +362,25 @@
+ 				err = -EACCES;
+ 			file = ERR_PTR(err);
+ 			if (!err) {
++#ifdef CONFIG_LIDS
++                error = lids_check_base(nd.dentry, LIDS_READONLY);
++                if (error) {
++                    if (nd.dentry->d_inode) {
++                        lids_alert(LIDS_READONLY, nd.dentry,
++                                nd.dentry->d_inode->i_ino,
++                                nd.dentry->d_inode->i_dev,
++                                (char *) name, "exec");
++                    }
++
++                    error = (lids_acl_discovery ? 0 : -EPERM);
++                    if (error) {
++                        err = -EACCES;
++                        file = ERR_PTR(err);
++                        goto out;
++                    }
++                }
++#endif
++
+ 				file = dentry_open(nd.dentry, nd.mnt, O_RDONLY);
+ 				if (!IS_ERR(file)) {
+ 					err = deny_write_access(file);
+@@ -687,6 +711,10 @@
  {
  	kernel_cap_t new_permitted, working;
  	int do_unlock = 0;
@@ -918,7 +952,7 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  
  	new_permitted = cap_intersect(bprm->cap_permitted, cap_bset);
  	working = cap_intersect(bprm->cap_inheritable,
-@@ -698,6 +706,16 @@
+@@ -698,6 +726,16 @@
                  current->mm->dumpable = 0;
  		
  		lock_kernel();
@@ -935,7 +969,7 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  		if (must_not_trace_exec(current)
  		    || atomic_read(&current->fs->count) > 1
  		    || atomic_read(&current->files->count) > 1
-@@ -729,6 +747,38 @@
+@@ -729,6 +767,38 @@
          current->suid = current->euid = current->fsuid = bprm->e_uid;
          current->sgid = current->egid = current->fsgid = bprm->e_gid;
  
@@ -974,7 +1008,7 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  	if(do_unlock)
  		unlock_kernel();
  	current->keep_capabilities = 0;
-@@ -862,6 +912,11 @@
+@@ -862,6 +932,11 @@
  	struct file *file;
  	int retval;
  	int i;
@@ -986,7 +1020,7 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  
  	file = open_exec(filename);
  
-@@ -869,6 +924,12 @@
+@@ -869,6 +944,12 @@
  	if (IS_ERR(file))
  		return retval;
  
@@ -999,7 +1033,7 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
  	bprm.p = PAGE_SIZE*MAX_ARG_PAGES-sizeof(void *);
  	memset(bprm.page, 0, MAX_ARG_PAGES*sizeof(bprm.page[0])); 
  
-@@ -906,6 +967,181 @@
+@@ -906,6 +987,196 @@
  	if (retval < 0) 
  		goto out; 
  
@@ -1019,13 +1053,6 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
 +			goto out;
 +		}
 +	}
-+
-+	/*
-+	 * if current is sandboxed, sandbox the program in
-+	 * the same sandbox as well.
-+	 */
-+	if (lids_sandboxed(current))
-+		goto lids_sandbox_out;
 +
 +        lids_init_key(&bprm, current);
 +
@@ -1048,6 +1075,21 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
 +			retval = -EPERM;
 +			goto out;
 +		}
++
++		/*
++		 * if current is sandboxed, sandbox the program in
++		 * the same sandbox as well.
++		 */
++		if (lids_sandboxed(current)) {
++			if (!new_sys_acl) {
++				lids_free_lids_task_acl(&computed_acl);
++				goto lids_sandbox_out;
++			}
++			if (!test_bit(LIDS_SANDBOX, &(new_sys_acl->socket))) {
++                lids_free_lids_task_acl(&computed_acl);
++                goto lids_sandbox_out;
++            }
++        }
 +
 +		/*
 +		 * if LD_PRELOAD, LD_LIBRARY_PATH, etc are set but
@@ -1089,6 +1131,13 @@ diff -Nur kernel/fs/exec.c kernel/fs/exec.c
 +		lids_free_lids_task_acl(&current_acl);
 +	/* if dentry is not protected clear inherited ACLs, capabilities. */
 +	} else {
++		/*
++		 * if current is sandboxed, sandbox the program in
++		 * the same sandbox as well.
++		 */
++		if (lids_sandboxed(current)) {
++			goto lids_sandbox_out;
++        }
 +
 +		LIDS_DBG("%s (dev %d:%d inode %ld) is not protected\n",
 +			 filename, MAJOR(dentry->d_inode->i_dev),

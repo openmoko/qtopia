@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,6 +56,8 @@ public:
     };
     Pending *firstPending;
     Pending *lastPending;
+    bool deleteBeforeUpdate;
+    bool quoteOperatorNumber;
 };
 
 /*!
@@ -73,6 +75,8 @@ QModemPreferredNetworkOperators::QModemPreferredNetworkOperators
     d->selectedList = QPreferredNetworkOperators::Current;
     d->firstPending = 0;
     d->lastPending = 0;
+    d->deleteBeforeUpdate = false;
+    d->quoteOperatorNumber = false;
 }
 
 /*!
@@ -257,6 +261,59 @@ void QModemPreferredNetworkOperators::cpolSet2( bool, const QAtResult& result )
     writeNextPreferredOperator();
 }
 
+/*!
+    Returns a flag indicating if a preferred network operator entry should
+    be deleted before it is updated.  This may be necessary for modems that
+    do not support direct modification of an entry by index using \c{AT+CPOL}.
+    The default value is false.
+
+    \sa setDeleteBeforeUpdate()
+    \since 4.3.1
+*/
+bool QModemPreferredNetworkOperators::deleteBeforeUpdate() const
+{
+    return d->deleteBeforeUpdate;
+}
+
+/*!
+    Sets a flag indicating if a preferred network operator entry should
+    be deleted before it is updated to \a value.  This may be necessary for
+    modems that do not support direct modification of an entry by index
+    using \c{AT+CPOL}.
+
+    \sa deleteBeforeUpdate()
+    \since 4.3.1
+*/
+void QModemPreferredNetworkOperators::setDeleteBeforeUpdate( bool value )
+{
+    d->deleteBeforeUpdate = value;
+}
+
+/*!
+    Returns a flag indicating if operator numbers should be quoted when
+    modifying preferred operator entries with \c{AT+CPOL}.  The default
+    value is false.
+
+    \sa setQuoteOperatorNumber()
+    \since 4.3.1
+*/
+bool QModemPreferredNetworkOperators::quoteOperatorNumber() const
+{
+    return d->quoteOperatorNumber;
+}
+
+/*!
+    Sets a flag indicating if operator numbers should be quoted when
+    modifying preferred operator entries with \c{AT+CPOL} to \a value.
+
+    \sa quoteOperatorNumber()
+    \since 4.3.1
+*/
+void QModemPreferredNetworkOperators::setQuoteOperatorNumber( bool value )
+{
+    d->quoteOperatorNumber = value;
+}
+
 uint QModemPreferredNetworkOperators::listNumber
             ( QPreferredNetworkOperators::List list )
 {
@@ -298,23 +355,49 @@ void QModemPreferredNetworkOperators::writeNextPreferredOperator()
 
     // Construct the AT+CPOL command to use to modify the operator setting.
     QString command = "AT+CPOL=";
+    bool needTechnologies = true;
     if ( oper.index != 0 ) {
         if ( oper.format == 2 && oper.id != 0 ) {
             // Update an existing numeric entry.
-            command += QString::number( oper.index ) + ",2," +
-                       QString::number( oper.id );
+            if ( d->deleteBeforeUpdate ) {
+                d->service->secondaryAtChat()->chat
+                    ( "AT+CPOL=" + QString::number( oper.index ) );
+                if ( d->quoteOperatorNumber )
+                    command += ",2,\"" + QString::number( oper.id ) + "\"";
+                else
+                    command += ",2," + QString::number( oper.id );
+            } else {
+                if ( d->quoteOperatorNumber ) {
+                    command += QString::number( oper.index ) + ",2,\"" +
+                               QString::number( oper.id ) + "\"";
+                } else {
+                    command += QString::number( oper.index ) + ",2," +
+                               QString::number( oper.id );
+                }
+            }
         } else if ( oper.format < 2 && oper.name.length() != 0 ) {
             // Update an existing alphabetic entry.
-            command += QString::number( oper.index ) + "," +
-                       QString::number( oper.format ) + ",\"" +
-                       QAtUtils::quote( oper.name ) + "\"";
+            if ( d->deleteBeforeUpdate ) {
+                d->service->secondaryAtChat()->chat
+                    ( "AT+CPOL=" + QString::number( oper.index ) );
+                command += "," + QString::number( oper.format ) + ",\"" +
+                           QAtUtils::quote( oper.name ) + "\"";
+            } else {
+                command += QString::number( oper.index ) + "," +
+                           QString::number( oper.format ) + ",\"" +
+                           QAtUtils::quote( oper.name ) + "\"";
+            }
         } else {
             // Delete an entry.
             command += QString::number( oper.index );
+	    needTechnologies = false;
         }
     } else if ( oper.format == 2 && oper.id != 0 ) {
         // Add a new numeric entry in a free location.
-        command += ",2," + QString::number( oper.id );
+        if ( d->quoteOperatorNumber )
+            command += ",2,\"" + QString::number( oper.id ) + "\"";
+        else
+            command += ",2," + QString::number( oper.id );
     } else if ( oper.format < 2 && oper.name.length() != 0 ) {
         // Add a new alphabetic entry in a free location.
         command += "," + QString::number( oper.format ) + ",\"" +
@@ -329,18 +412,20 @@ void QModemPreferredNetworkOperators::writeNextPreferredOperator()
     QString basicModify = command;
 
     // Add the technology flags.
-    if ( oper.technologies.contains( "GSM" ) )      // No tr
-        command += ",2";
-    else
-        command += ",0";
-    if ( oper.technologies.contains( "GSMCompact" ) )      // No tr
-        command += ",3";
-    else
-        command += ",0";
-    if ( oper.technologies.contains( "UTRAN" ) )      // No tr
-        command += ",1";
-    else
-        command += ",0";
+    if ( needTechnologies ) {
+        if ( oper.technologies.contains( "GSM" ) )      // No tr
+            command += ",2";
+        else
+            command += ",0";
+        if ( oper.technologies.contains( "GSMCompact" ) )      // No tr
+            command += ",3";
+        else
+            command += ",0";
+        if ( oper.technologies.contains( "UTRAN" ) )      // No tr
+            command += ",1";
+        else
+            command += ",0";
+    }
 
     // Set the AT+CPOL command to the modem.
     d->service->secondaryAtChat()->chat

@@ -67,4 +67,7 @@ include(../component.pri)
 
 target.path=$$[QT_INSTALL_LIBS]
 INSTALLS        += target
-
+win32 {
+    dlltarget.path=$$[QT_INSTALL_BINS]
+    INSTALLS += dlltarget
+}

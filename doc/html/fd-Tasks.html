@@ -32,7 +32,7 @@ manage due dates and, when appropriate, mark tasks as completed.
 </ul><h3><a name="Add_Task">Add Task</a></h3>
 <p>It is possible to add tasks. The application does not add a task without a description.
 <h3><a name="Beaming">Beaming</a></h3>
-<p>It is possible to beam a single task to or from another device using IR.
+<p>It is possible to beam tasks to or from another device using Bluetooth, IR, and other mechanisms supported by the <span class="nobr"><a href="qtopiasendvia.html">QtopiaSendVia<sup></sup></a></span> mechanism.
 <h3><a name="Categories">Categories</a></h3>
 <p>It is possible to categorize tasks.
 <h3><a name="Data_Model">Data Model</a></h3>
@@ -99,8 +99,10 @@ storage for the description, plus approximately 16 bytes per category membership
 <h4><a name="SortedList"></a>Sorted List</h4>
 
 <p>The primary display of the application shows a sorted list of tasks. In this<br/>
-list a user is able to change the priority of a task, mark a task Completed<br/>
-or view additional details of the task.</p>
+list a user is able to mark a task Completed (or Incomplete),<br/>
+and view additional details of the task.  The list of tasks displays the<br/>
+description of the task, as well as brief information about the task<br/>
+like status or due date.</p>
 
 <p>The sorting order of the tasks is:</p>
 
@@ -111,13 +113,12 @@ or view additional details of the task.</p>
 </ul>
 
 
-
 <p>From the sorted list view the user is able to:</p>
 
 <ul>
 	<li>Create a new task through the Edit View of the task.</li>
 	<li>View the details for the task through the Detailed View of the task.</li>
-	<li>Mark tasks as completed.</li>
+	<li>Mark tasks as completed or incomplete.</li>
 	<li>Filter the list of tasks shown according to a specified category.</li>
 </ul>
 
@@ -128,12 +129,14 @@ or view additional details of the task.</p>
 <p>The detailed view of a task shows data for a single task.  This is shown as<br/>
 rich text.  All the information for the task is formatted for optimum readability.</p>
 
-<p>From the sorted list view the user is able to:</p>
+<p>From the details view the user is able to:</p>
 
 <ul>
 	<li>Edit the current task through the Edit View of the task.</li>
 	<li>Delete the current task.</li>
-	<li>Beam the current task using IR.</li>
+	<li>Beam the current task.</li>
+	<li>Mark the task as complete or incomplete.</li>
+	<li>Navigate to other tasks in the sorted list in order.</li>
 </ul>
 
 
@@ -141,14 +144,14 @@ rich text.  All the information for the task is formatted for optimum readabilit
 <h4><a name="EditView"></a>Edit View</h4>
 
 <p>The edit view of a task allows the user to specify the data for a new task<br/>
-or modify that of an old task.</p>
+or modify that of an existing task.</p>
 
-<p>Non-applicable values are disabled. For example, the start date field is disabled if the the task status is marked as Not Started.</p>
+<p>Non-applicable values are disabled or adjusted as the data changes. For example, the start date field is disabled if the the task status is marked as Not Started, and conversely, enabling the start date field will mark the task status as In Progress.</p>
 
 <p>When the editing has been completed the user is able to either accept or cancel the changes they have made.</p>
-<td width=10></table><hr /><div align="center">
+<hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div>

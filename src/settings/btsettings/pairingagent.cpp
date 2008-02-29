@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,13 +24,6 @@
 #include <qtopialog.h>
 
 #include <QTimer>
-
-
-// TODO could make own passkey agent for this, so that when you
-// have entered the pin, the wait widget says "waiting for other device..." or
-// something instead of just "pairing..." (which sounds like this device is still
-// doing something)
-
 
 
 PairingAgent::PairingAgent(QBluetoothLocalDevice *local, QObject *parent)
@@ -92,7 +85,8 @@ void PairingAgent::pairingFailed(const QBluetoothAddress &)
     if (!m_running)
         return;
 
-    qLog(Bluetooth) << "PairingAgent: pairing failed!" << m_local->error();
+    qLog(Bluetooth) << "PairingAgent: pairing failed!"
+            << m_local->error() << m_local->errorString();
 
     // if got InProgress error, try pairing again later (you can always 
     // call cancel())

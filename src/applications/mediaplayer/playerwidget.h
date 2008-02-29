@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 
 #include "playercontrol.h"
 #include "statewidget.h"
+#include "playlist.h"
 
 #include <media.h>
 #include <qmediacontent.h>
@@ -32,8 +33,6 @@
 #include <private/activitymonitor_p.h>
 
 #include <QtGui>
-
-class Playlist;
 
 class VisualizationWidget;
 
@@ -60,9 +59,9 @@ public:
     PlayerWidget( PlayerControl* control, QWidget* parent = 0 );
     ~PlayerWidget();
 
-   Playlist* playlist() const { return m_playlist; }
+   QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
     // Set playlist and begin playback
-    void setPlaylist( Playlist* playlist );
+    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
 
     bool eventFilter( QObject* o, QEvent* e );
 
@@ -111,6 +110,8 @@ private slots:
 
     void execRepeatDialog();
 
+    void delayMenuCreation();
+
 protected:
     void keyPressEvent( QKeyEvent* e );
     void keyReleaseEvent( QKeyEvent* e );
@@ -139,8 +140,6 @@ private:
     QMediaControl *m_mediacontrol;
     QMediaContentContext *m_context;
 
-    QDialog *m_settingsdialog;
-
 #ifdef QTOPIA_KEYPAD_NAVIGATION
 #ifndef NO_HELIX
     QAction *m_settingsaction;
@@ -167,7 +166,7 @@ private:
 
     ThrottleKeyMapper *m_mapper;
 
-    Playlist *m_playlist;
+    QExplicitlySharedDataPointer< Playlist > m_playlist;
     QPersistentModelIndex m_currenttrack;
 
     bool m_continue;
@@ -186,5 +185,31 @@ private:
     RepeatState *m_repeatstate;
     RepeatDialog *m_repeatdialog;
 };
+
+#ifndef NO_HELIX
+class MediaPlayerSettingsDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    MediaPlayerSettingsDialog( QWidget* parent = 0 );
+
+    // QDialog
+    void accept();
+
+private:
+    void readConfig();
+    void writeConfig();
+
+    void applySettings();
+
+    QMediaContent *m_content;
+
+    QComboBox *m_speedcombo;
+
+    QLineEdit *m_connecttimeout;
+    QLineEdit *m_servertimeout;
+    QValidator *m_validator;
+};
+#endif
 
 #endif // PLAYERWIDGET_H

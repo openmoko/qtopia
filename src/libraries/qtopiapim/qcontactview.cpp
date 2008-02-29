@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -197,10 +197,11 @@ void QContactDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOption
     if (!trailingdecoration.isNull()) {
         drawRect = option.rect;
         ths = trailingdecoration.size();
+
         if (rtl)
-            drawRect.setWidth(ths.width() + 2);
+            drawRect.setWidth(ths.width() + 4);
         else
-            drawRect.setLeft(drawRect.right() - ths.width() - 2);
+            drawRect.setLeft(drawRect.right() - ths.width() - 4);
 
         // Center the thumbnail
         QPoint drawOffset = QPoint(drawRect.left() + (drawRect.width() - ths.width())/2, drawRect.top() + (drawRect.height() - ths.height())/2);
@@ -809,6 +810,18 @@ void QContactSelector::completed()
 */
 
 
+// A QListWidget with a useful size hint.
+class TightListWidget : public QListWidget {
+public:
+    TightListWidget(QWidget* parent) : QListWidget(parent) {}
+    QSize sizeHint() const
+    {
+        // Assumes all rows/columns similar enough to #0.
+        return QSize(sizeHintForColumn(0)*model()->columnCount(),
+                     sizeHintForRow(0)*model()->rowCount());
+    }
+};
+
 /***************************
   * Phone type Selector
   ***********************/
@@ -820,7 +833,7 @@ public:
         : mToolTip(0), mContact( cnt ), mNumber(number), mAllowedPhoneTypes(allowedTypes) {}
 
     QLabel *mLabel, *mToolTip;
-    QListWidget *mPhoneType;
+    TightListWidget *mPhoneType;
     QMap<QListWidgetItem *, QContact::PhoneType> mItemToPhoneType;
     const QContact mContact;
     const QString mNumber;
@@ -959,7 +972,7 @@ void QPhoneTypeSelector::init()
     d->mLabel = new QLabel( this );
     d->mLabel->setWordWrap( true );
     l->addWidget(d->mLabel);
-    d->mPhoneType = new QListWidget( this );
+    d->mPhoneType = new TightListWidget( this );
     d->mPhoneType->setFrameStyle(QFrame::NoFrame);
     l->addWidget(d->mPhoneType);
     d->mPhoneType->setItemDelegate(new QtopiaItemDelegate(this));

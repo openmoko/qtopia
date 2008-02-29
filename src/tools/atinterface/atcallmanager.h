@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -63,6 +63,7 @@ public:
     QAtResult::ResultCode activate( int callID );
     QAtResult::ResultCode join();
     QAtResult::ResultCode transfer();
+    QAtResult::ResultCode transferIncoming( const QString& number );
     QAtResult::ResultCode tone( const QString& value );
 
     QStringList formatCallList();
@@ -94,6 +95,8 @@ signals:
                        const QString& number, const QString& type );
     void deferredResult( AtCommands *handler, QAtResult::ResultCode result );
     void ring( const QString& number, const QString& type );
+    void dialingOut( bool asynchronous, bool transparent, bool GPRS );
+    void outgoingConnected( const QString& number );
     void callWaiting( const QString& number, const QString& type );
     void noCarrier();
     void setOnCall( bool value );

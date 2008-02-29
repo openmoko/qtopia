@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -92,13 +92,16 @@ void Ficgta01Hardware::readAuxKbdData()
     if(event.type != 5)
         return;
 
+    qWarning("keypressed: type=%03d, code=%03d, value=%03d (%s)",
+              event.type, event.code,event.value,((event.value)!=0) ? "Down":"Up");
+
     switch(event.code) {
     case 0x02: //headphone insert
     {
         //  type=005, code=002, value=000 (Up) //insert
         //  type=005, code=002, value=001 (Down) //out
 
-        if(event.value != 1) {
+        if(event.value != 0x01) {
             vsoPortableHandsfree.setAttribute("Present", true);
             vsoPortableHandsfree.sync();
         } else {
@@ -115,6 +118,8 @@ void Ficgta01Hardware::shutdownRequested()
 {
     qLog(PowerManagement)<<" Ficgta01Hardware::shutdownRequested";
 
+    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
+    e << false;
 
     QFile powerFile("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
     if( !powerFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
@@ -134,7 +139,6 @@ void Ficgta01Hardware::shutdownRequested()
         powerFile.close();
     }
 
-    system( "amixer -q sset \"Amp Mode\" \"Off\"");
 
 
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);

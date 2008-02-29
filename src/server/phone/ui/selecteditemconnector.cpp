@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,6 +46,14 @@ SelectedItemConnector::SelectedItemConnector(SelectedItem *_selectedItem)
     , selectedItem(_selectedItem)
 {
 }
+
+/*!
+  \internal
+  \fn void SelectedItemConnector::itemPressed(GridItem *)
+  The given GridItem object is about to be "invoked".
+  Emitted as a result of the key press which is about to
+  cause itemSelected() to be emitted.
+*/
 
 /*!
   \internal
@@ -150,6 +158,16 @@ void SelectedItemConnector::animationError(QImageReader::ImageReaderError error)
 void SelectedItemConnector::triggerItemSelected(GridItem *item)
 {
     emit itemSelected(item);
+}
+
+/*!
+  \internal
+  \fn void SelectedItemConnector::triggerItemPressed(GridItem *item)
+  Triggers the \l{function}{SelectedItemConnector::triggerItemPressed(GridItem *item)} signal.
+*/
+void SelectedItemConnector::triggerItemPressed(GridItem *item)
+{
+    emit itemPressed(item);
 }
 
 /*!

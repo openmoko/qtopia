@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -145,7 +145,7 @@ void MotionTimeLine::accel(qreal velocity, qreal accel)
     if((velocity > 0.0f) ==  (accel > 0.0f))
         accel = accel * -1.0f;
 
-    int time = -1000 * velocity / accel;
+    int time = static_cast<int>(-1000 * velocity / accel);
 
     Op op = { Op::Accel, m_totalTime, time, velocity, accel };
     m_ops.append(op);
@@ -164,7 +164,7 @@ void MotionTimeLine::accel(qreal velocity, qreal accel, qreal maxDistance)
     if((velocity > 0.0f) ==  (accel > 0.0f))
         accel = accel * -1.0f;
 
-    int time = -1000 * velocity / accel;
+    int time = static_cast<int>(-1000 * velocity / accel);
 
     Op op = { Op::Accel, m_totalTime, time, velocity, accel };
     m_ops.append(op);
@@ -175,7 +175,7 @@ void MotionTimeLine::accelDistance(qreal velocity, qreal distance)
 {
     Q_ASSERT((distance >= 0.0f) == (velocity >= 0.0f));
 
-    int time = 1000 * (2.0f * distance) / velocity;
+    int time = static_cast<int>(1000 * (2.0f * distance) / velocity);
 
     Op op = { Op::AccelDistance, m_totalTime, time, velocity, distance };
     m_ops.append(op);

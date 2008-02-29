@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -14,7 +14,8 @@
 **
 **
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** This file is provided AS IS with NO WARRANTY OF ANY
+  KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
@@ -22,6 +23,7 @@
 #include <QtGui>
 #include <QDateTime>
 #include <QColorSelector>
+#include <QLayout>
 #include <QColorSelectorDialog>
 #include <QSpinBox>
 #include <QDialog>
@@ -31,6 +33,8 @@
 #include <qtopia/qsoftmenubar.h>
 #include <QDocumentSelectorService>
 #include <QMimeType>
+#include <QImageDocumentSelectorDialog>
+#include <QContent>
 
 #include "mainwindow.h"
 #include "scribblearea.h"
@@ -60,12 +64,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::open()
 {
-    createSelector();
+    QImageDocumentSelectorDialog selectorDialog;
 
-    if (selector->openDocument(this)) {
-        QByteArray format = QMimeType::fromId(selector->selectedDocument().type()).extension().toUpper().toLatin1();
+    if(QtopiaApplication::execDialog( &selectorDialog ) == QDialog::Accepted) {
 
-        scribbleArea->openImage(selector->selectedDocumentData(), format.constData());
+        QContent document = selectorDialog.selectedDocument();
+        QByteArray format = QMimeType::fromId( document.type()).extension().toUpper().toLatin1();
+
+        scribbleArea->openImage( document.fileName());
     }
 }
 
@@ -94,15 +100,9 @@ bool MainWindow::saveAs()
     QContent document = selector->selectedDocument();
 
     if (document.isNull()) {
-        QString date;
-        QDateTime dt = QDateTime::currentDateTime();
-        date = dt.toString( );
-        date.replace(QRegExp("'"),"");
-        date.replace(QRegExp(" "),"");
-        date.replace(QRegExp(":"),"");
-        date.replace(QRegExp(","),"");
+        QString date = QString("Scribble %1").arg(QTimeString::localYMDHMS(QDateTime::currentDateTime(),QTimeString::Short));
 
-        if (selector->newDocument(date,saveTypes,this)) {
+        if (selector->newDocument( date,saveTypes,this)) {
             QByteArray format = QMimeType::fromId( selector->selectedDocument().type() ).extension().toUpper().toLatin1();
 
             return scribbleArea->saveImage(selector->selectedDocumentData(), format.constData());
@@ -126,18 +126,20 @@ void MainWindow::penColor()
 
 void MainWindow::penWidth()
 {
-  dialog = new QDialog(this);
-  dialog->setWindowTitle(tr("Pen Width"));
-  dialog->resize(100,75);
+    dialog = new QDialog(this);
+    dialog->setWindowTitle(tr("Pen Width"));
 
-  spinbox = new QSpinBox(dialog);
-  spinbox->setMinimum(1);
+    QLayout *layout;
+    layout = new QVBoxLayout(dialog);
 
-  connect(dialog,SIGNAL(accepted()),this,SLOT(setPenWidth()));
+    spinbox = new QSpinBox(dialog);
+    spinbox->setMinimum(1);
+    layout->addWidget(spinbox);
 
-   dialog->show();
-   dialog->raise();
-   dialog->activateWindow();
+    connect(dialog,SIGNAL(accepted()),this,SLOT(setPenWidth()));
+
+    dialog->showMaximized();
+
 }
 
 void MainWindow::about()
@@ -159,10 +161,6 @@ void MainWindow::createActions()
 
 //     printPdfAct = new QAction(tr("&Print as PDF"), this);
 //     connect(printPdfAct, SIGNAL(triggered()), scribbleArea, SLOT(printPdf()));
-
-    exitAct = new QAction(tr("Exit"), this);
-
-    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
     penColorAct = new QAction(tr("Pen Color..."), this);
     connect(penColorAct, SIGNAL(triggered()), this, SLOT(penColor()));
@@ -197,22 +195,22 @@ void MainWindow::createMenus()
 
       //   fileMenu = QSoftMenuBar::menuFor(this);
     contextMenu->addSeparator();
-    contextMenu->addAction(exitAct);
 }
 
 bool MainWindow::maybeSave()
 {
     if (scribbleArea->isModified()) {
-         QMessageBox box( tr("Save?"),
+         QMessageBox *box = new QMessageBox( tr("Save?"),
                           tr("<qt>The image changed.<br>"
                              "Save it?</qt>"),
                           QMessageBox::Warning,
                           QMessageBox::Yes | QMessageBox::Default,
                           QMessageBox::No,
-                          QMessageBox::Cancel | QMessageBox::Escape, this);
-        box.resize(box.sizeHint()); //needs this otherwise shows offscreen
+                          QMessageBox::Cancel | QMessageBox::Escape, 0);
 
-        switch(box.exec()) {
+         int result = QtopiaApplication::execDialog(box, true);
+
+        switch(result) {
             case QMessageBox::Yes:
                   return save();
                   break;
@@ -252,8 +250,7 @@ void MainWindow::colorSelected(const QColor &newColor)
 {
   cselect->hide();
   scribbleArea->setPenColor(newColor);
-  delete cselect;
-  cselect = 0;
+  cselect->close();
 
 }
 
@@ -262,8 +259,7 @@ void MainWindow::setPenWidth()
 {
   dialog->hide();
   scribbleArea->setPenWidth( spinbox->value());
+  dialog->close();
 
-  delete dialog;
-  dialog = 0;
-
+  scribbleArea->setFocus();
 }

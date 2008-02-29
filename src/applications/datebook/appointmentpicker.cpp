@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -122,7 +122,8 @@ void AppointmentPicker::initDay()
     if ( !dayView ) {
         dayView = new DayView(0, QCategoryFilter(), mSources);
         views->addWidget( dayView );
-        dayView->setDaySpan( datebook->startTime, 17 );
+        int endTime = qMin(qMax(datebook->startTime + 8, 17), 24);
+        dayView->setDaySpan( datebook->startTime, endTime );
         QSoftMenuBar::setLabel(dayView, Qt::Key_Back, QSoftMenuBar::Back);
         connect( dayView, SIGNAL(showDetails()),
                 this, SLOT(accept()) );

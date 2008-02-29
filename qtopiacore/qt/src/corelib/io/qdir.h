@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -246,10 +244,12 @@ public:
 Q_DECLARE_OPERATORS_FOR_FLAGS(QDir::Filters)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QDir::SortFlags)
 
+#ifdef QT3_SUPPORT
 #ifndef QT_NO_DEBUG_STREAM
 class QDebug;
 Q_CORE_EXPORT QDebug operator<<(QDebug debug, QDir::Filters filters);
 Q_CORE_EXPORT QDebug operator<<(QDebug debug, const QDir &dir);
+#endif
 #endif
 
 QT_END_HEADER

@@ -27,14 +27,14 @@
 <li><div class="fn"/>bool <b><a href="qserialport.html#flowControl">flowControl</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qserialport.html#flush">flush</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qserialport.html#keepOpen">keepOpen</a></b> () const</li>
-<li><div class="fn"/>virtual bool <b><a href="qserialport.html#open">open</a></b> ( OpenMode <i>mode</i> )</li>
+<li><div class="fn"/>bool <b><a href="qserialport.html#open">open</a></b> ( OpenMode <i>mode</i> )</li>
 <li><div class="fn"/>void <b><a href="qserialport.html#setFlowControl">setFlowControl</a></b> ( bool <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qserialport.html#setKeepOpen">setKeepOpen</a></b> ( bool <i>value</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>16 public functions inherited from <a href="qserialiodevice.html#public-functions">QSerialIODevice</a></li>
-<li><div class="fn"/>54 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="./qiodevice.htmlqiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -42,21 +42,20 @@
 <li><div class="fn"/>QSerialPort * <b><a href="qserialport.html#create">create</a></b> ( const QString &amp; <i>name</i>, int <i>defaultRate</i> = 115200, bool <i>flowControl</i> = false )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>4 signals inherited from <a href="qserialiodevice.html#signals">QSerialIODevice</a></li>
-<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="./qiodevice.htmlqiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="./qiodevice.htmlqiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>1 protected slot inherited from <a href="qserialiodevice.html#protected-slots">QSerialIODevice</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -67,7 +66,7 @@
 <p>See also <a href="qserialport.html#create">QSerialPort::create</a>() and <a href="qserialiodevice.html">QSerialIODevice</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSerialPort"></a>QSerialPort::QSerialPort ( const <a href="qstring.html">QString</a> &amp; <i>device</i>, int <i>rate</i> = 38400, bool <i>trackStatus</i> = false )</h3>
+<h3 class="fn"><a name="QSerialPort"></a>QSerialPort::QSerialPort ( const <a href="./qstring.html">QString</a> &amp; <i>device</i>, int <i>rate</i> = 38400, bool <i>trackStatus</i> = false )</h3>
 <p>Construct a new serial device handler object for the specified <i>device</i> at the given <i>rate</i>. After construction, it is necessary to call <a href="qserialport.html#open">QSerialPort::open</a>() to complete initialization.</p>
 <p>If <i>trackStatus</i> is true, then the device should attempt to track changes in DSR, DCD, and CTS. This may require the use of a regular timeout, which will be detrimental to battery life.</p>
 <p>Status tracking should only be enabled when absolutely required. It isn't required for modems that support GSM 07.10 multiplexing, as the multiplexing mechanism has its own method of tracking status changes that does not require the use of a timeout.</p>
@@ -75,9 +74,9 @@
 <h3 class="fn"><a name="dtor.QSerialPort"></a>QSerialPort::~QSerialPort ()</h3>
 <p>Destruct this serial device. If the device is currently open, it will be closed.</p>
 <h3 class="fn"><a name="close"></a>void QSerialPort::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Close the serial device.</p>
-<p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
-<h3 class="fn"><a name="create"></a>QSerialPort * QSerialPort::create ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, int <i>defaultRate</i> = 115200, bool <i>flowControl</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Closes the serial device.</p>
+<p>Reimplemented from <a href="./qiodevice.html#close">QIODevice</a>.</p>
+<h3 class="fn"><a name="create"></a>QSerialPort * QSerialPort::create ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, int <i>defaultRate</i> = 115200, bool <i>flowControl</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Create and open a serial device from a <i>name</i> of the form <tt>device:rate</tt>. Returns NULL if the device could not be opened. The <i>defaultRate</i> parameter indicates the default rate to use if <tt>:rate</tt> was not included in the device name. If <i>flowControl</i> is true, then CTS/RTS flow control should be enabled on the device.</p>
 <p>The <i>name</i> parameter can have the special form <tt>sim:hostname</tt>, where <tt>hostname</tt> is the name of a host running a phone simulator daemon (usually <tt>localhost</tt>). The phone simulator mode is intended for debugging purposes only.</p>
 <h3 class="fn"><a name="fd"></a>int QSerialPort::fd () const</h3>
@@ -94,9 +93,8 @@
 <p>For Bluetooth RFCOMM sockets, keepOpen() should be false.</p>
 <p>The keepOpen() state is ignored if the underlying serial device is a socket connection to a phone simulator.</p>
 <p>See also <a href="qserialport.html#setKeepOpen">setKeepOpen</a>().</p>
-<h3 class="fn"><a name="open"></a>bool QSerialPort::open ( <a href="qiodevice.html#OpenMode-typedef">OpenMode</a> <i>mode</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Open the serial device with the specified <i>mode</i>.</p>
-<p>Reimplemented from <a href="qiodevice.html#open">QIODevice</a>.</p>
+<h3 class="fn"><a name="open"></a>bool QSerialPort::open ( <a href="./qiodevice.html#openmode-typedef">OpenMode</a> <i>mode</i> )</h3>
+<p>Opens the serial device with the specified <i>mode</i>. Returns true if the device could be opened; false otherwise.</p>
 <h3 class="fn"><a name="setFlowControl"></a>void QSerialPort::setFlowControl ( bool <i>value</i> )</h3>
 <p>Sets the state of CTS/RTS flow control on the serial device to <i>value</i>. This must be called before <a href="qserialport.html#open">QSerialPort::open</a>(). Changes to the value after opening will be ignored.</p>
 <p>See also <a href="qserialport.html#flowControl">flowControl</a>().</p>
@@ -108,8 +106,8 @@
 <p>See also <a href="qserialport.html#keepOpen">keepOpen</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -49,6 +49,7 @@ public:
     void setRecipients(const QString &emails, const QString &numbers);
     void setRecipient(const QString &recipient);
     bool readyToSend() const;
+    void setSubject(const QString &subject);
     void setBody(const QString &text, const QString &type);
     bool hasContent();
 #ifndef QTOPIA_NO_SMS
@@ -72,7 +73,7 @@ public slots:
     void reset();
     void discard();
     bool draft();
-    void composerSelected(const QString &key);
+    bool composerSelected(const QString &key);
     void selectionCanceled();
 
 signals:
@@ -83,9 +84,8 @@ signals:
     void noSendAccount(QMailMessage::MessageType);
 
 public slots:
-    void newMail( const QString &cmpsr = QString(), bool detailsOnly = false );
-    void attach( const QContent &dl );
-    void attach( const QString &fileName );
+    bool newMail( const QString &cmpsr = QString(), bool detailsOnly = false );
+    void attach( const QContent &dl, QMailMessage::AttachmentsAction );
 
 protected slots:
     void previousStage();
@@ -105,6 +105,9 @@ private:
 
     bool buildMail();
     void init();
+    QString signature() const;
+
+    void showDetailsPage();
 
     QMailMessage mail;
 
@@ -124,6 +127,7 @@ private:
     ComposeAction _action;
     QWidget *_selectComposer;
     SelectListWidget *_composerList;
+    QList<QMailMessage::MessageType> _sendTypes;
 };
 
 #endif // WRITEMAIL_H

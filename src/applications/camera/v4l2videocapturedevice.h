@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,11 +33,6 @@ namespace camera
 
 class FormatConverter;
 
-/*!
- * \class V4L2VideoCaptureDevice
- *
- */
-
 class V4L2VideoCaptureDevice : public VideoCaptureDevice
 {
 public:
@@ -60,7 +55,7 @@ public:
 
     uint refocusDelay() const;
     int minimumFramePeriod() const;
-    
+    int getFD() { return m_fd; }    
 private:
 
     void setupCamera();

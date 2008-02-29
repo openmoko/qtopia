@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,7 +30,6 @@
 #include "sessionmanagersession.h"
 
 #include "sessionmanager.h"
-
 
 
 namespace mediaserver
@@ -91,7 +90,6 @@ void SessionStatusMonitor::sessionDestroyed()
 }
 // }}}
 
-
 // {{{ SessionInfo
 class SessionInfo
 {
@@ -100,16 +98,12 @@ public:
 
     SessionInfo():state(Stopped) {}
 
-    void addSession(SessionManagerSession);
-
     SessionState    state;
 };
 // }}}
 
 // {{{ SessionManagerPrivate
-class SessionManagerPrivate :
-    public QObject,
-    public DomainManagerCallback
+class SessionManagerPrivate : public QObject
 {
     Q_OBJECT
 
@@ -119,24 +113,21 @@ public:
     SessionManagerPrivate(SessionManager* manager);
     ~SessionManagerPrivate();
 
-    void domainChange(QStringList const& newDomains, QStringList const& oldDomains);
-
 public slots:
     void sessionStateChange(QtopiaMedia::State state);
+    void domainStatusChange(QStringList const& newDomains, QStringList const& oldDomains);
 
 public:
-    bool                wrapSessions;
     int                 activePlayingSessions;
     MediaAgent*         mediaAgent;
     DomainManager*      domainManager;
     SessionManager*     sessionManager;
     ManagedSessions     managedSessions;
     QValueSpaceObject*  status;
+    QList<QMediaServerSession*> sessions;
 };
 
-
 SessionManagerPrivate::SessionManagerPrivate(SessionManager* manager):
-    wrapSessions(false),
     activePlayingSessions(0),
     sessionManager(manager)
 {
@@ -145,24 +136,8 @@ SessionManagerPrivate::SessionManagerPrivate(SessionManager* manager):
 
     status = new QValueSpaceObject("/Media/Sessions");
 
-    // Should Wrap?
-    QStringList const& audioDomains = domainManager->availableDomains();
-
-    if (audioDomains.size() > 1)
-    {
-        QStringList::const_iterator it = audioDomains.begin();
-        int priority = domainManager->priorityForDomain(*it);
-
-        for (++it; it != audioDomains.end(); ++it)
-        {
-            if (priority != domainManager->priorityForDomain(*it))
-            {
-                wrapSessions = true;
-                domainManager->addCallback(this);
-                break;
-            }
-        }
-    }
+    connect(domainManager, SIGNAL(domainStatusChange(QStringList,QStringList)),
+            this, SLOT(domainStatusChange(QStringList,QStringList)));
 }
 
 SessionManagerPrivate::~SessionManagerPrivate()
@@ -170,7 +145,7 @@ SessionManagerPrivate::~SessionManagerPrivate()
     delete status;
 }
 
-void SessionManagerPrivate::domainChange
+void SessionManagerPrivate::domainStatusChange
 (
  QStringList const& activeDomains,
  QStringList const& inactiveDomains
@@ -217,6 +192,9 @@ void SessionManagerPrivate::domainChange
             }
         }
     }
+
+    Q_UNUSED(activeDomains);
+    Q_UNUSED(inactiveDomains);
 }
 
 SessionManager* SessionManager::instance()
@@ -226,7 +204,6 @@ SessionManager* SessionManager::instance()
     return &self;
 }
 
-// {{{ state change
 void SessionManagerPrivate::sessionStateChange(QtopiaMedia::State state)
 {
     int current = activePlayingSessions;
@@ -252,7 +229,6 @@ void SessionManagerPrivate::sessionStateChange(QtopiaMedia::State state)
     if (current != activePlayingSessions)
         sessionManager->activeSessionCountChanged(activePlayingSessions);
 }
-// }}}
 // }}}
 
 // {{{ SessionManager
@@ -288,14 +264,13 @@ QMediaServerSession* SessionManager::createSession(QMediaSessionRequest const& s
         new SessionStatusMonitor(d->status, mediaSession, this);
 
         // Wrap
-        if (d->wrapSessions)
-        {
-            SessionManagerSession*  session = new SessionManagerSession(this, mediaSession);
+        SessionManagerSession*  session = new SessionManagerSession(this, mediaSession);
 
-            d->managedSessions.insert(session, SessionInfo());
+        d->managedSessions.insert(session, SessionInfo());
 
-            mediaSession = session;
-        }
+        mediaSession = session;
+
+        d->sessions.append(mediaSession);
     }
 
     return mediaSession;
@@ -303,28 +278,23 @@ QMediaServerSession* SessionManager::createSession(QMediaSessionRequest const& s
 
 void SessionManager::destroySession(QMediaServerSession* mediaSession)
 {
-    QMediaServerSession*    session = mediaSession;
+    // Unwrap
+    SessionManagerSession*  wrapper = qobject_cast<SessionManagerSession*>(mediaSession);
+    QMediaServerSession*    session = wrapper->wrappedSession();
 
-    if (d->wrapSessions)
-    {
-        SessionManagerSession*  wrapper = qobject_cast<SessionManagerSession*>(mediaSession);
-
-        d->managedSessions.remove(wrapper);
-
-        session = wrapper->wrappedSession();
-
-        delete wrapper;
-    }
+    d->managedSessions.remove(wrapper);
+    delete wrapper;
 
     // send to agent to remove
     d->mediaAgent->destroySession(session);
+
+    d->sessions.removeAll(mediaSession);
 }
 
 bool SessionManager::sessionCanStart(SessionManagerSession* session)
 {
     bool            rc = false;
     SessionInfo&    info = d->managedSessions[session];
-
 
     switch (info.state)
     {
@@ -350,6 +320,11 @@ void SessionManager::sessionStopped(SessionManagerSession* session)
 {
     d->domainManager->deactivateDomain(session->domain());
     d->managedSessions[session].state = SessionInfo::Stopped;
+}
+
+QList<QMediaServerSession*> const& SessionManager::sessions() const
+{
+    return d->sessions;
 }
 // }}} SessionManager
 

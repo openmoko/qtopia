@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 #include <qtopiacomm/private/qatchat_p.h>
 #include <qtopialog.h>
 #include <qtimer.h>
+#include <qdatetime.h>
 
 /*!
     \class QAtChat
@@ -115,6 +116,10 @@ public:
         retryOnNonEcho = -1;
         retryTimer = new QTimer();
         retryTimer->setSingleShot( true );
+        wakeupTime = 0;
+        wakeupActive = false;
+        wakeupInProgress = false;
+        lastSendTime.start();
     }
     ~QAtChatPrivate()
     {
@@ -148,6 +153,11 @@ public:
     QTimer *deadTimer;
     QAtChatLineRequest *requestor;
     QTimer *retryTimer;
+    QString wakeupCommand;
+    int wakeupTime;
+    bool wakeupActive;
+    bool wakeupInProgress;
+    QTime lastSendTime;
 };
 
 static QString toHex( const QByteArray& binary )
@@ -241,6 +251,7 @@ QAtChat::QAtChat( QSerialIODevice *device )
     d->matcher->add( "NO ANSWER", QPrefixMatcher::TerminatorOrNotification );
     d->matcher->add( "BUSY", QPrefixMatcher::TerminatorOrNotification );
     d->matcher->add( "NO DIALTONE", QPrefixMatcher::TerminatorOrNotification );
+    d->matcher->add( "VCON", QPrefixMatcher::TerminatorOrNotification );
     d->matcher->add( "AT", QPrefixMatcher::CommandEcho );
 
     // Work arounds for Wavecom modems.  (a) Error 515 is actually an
@@ -568,6 +579,20 @@ void QAtChat::registerErrorPrefix( const QString& type )
 }
 
 /*!
+    Registers \a cmd as a command to be sent to wake up the modem if no
+    commands have been sent in the last \a wakeupTime milliseconds.
+
+    \since 4.3.1
+*/
+void QAtChat::registerWakeupCommand( const QString& cmd, int wakeupTime )
+{
+    d->wakeupCommand = cmd;
+    d->wakeupTime = wakeupTime;
+    d->wakeupActive = true;
+    d->lastSendTime.start();
+}
+
+/*!
     \fn void QAtChat::pduNotification( const QString& type, const QByteArray& pdu )
 
     This signal is emitted when a PDU notification such as \c{+CMT},
@@ -756,6 +781,7 @@ bool QAtChat::processLine( const QString& line )
                  ( d->first->d->command.startsWith( "ATD" ) ||
                    d->first->d->command.startsWith( "ATA" ) ||
                    d->first->d->command.startsWith( "ATH" ) ||
+                   d->first->d->command.startsWith( "ATO" ) ||
                    d->first->d->command.startsWith( "AT+CHLD=" ) ) ) {
                 qLog(AtChat) << d->fromChar << ":" << line;
                 d->first->d->result.setResult( line );
@@ -834,7 +860,12 @@ void QAtChat::incoming()
             // LF terminates the line.
             buf[posn] = '\0';
             d->line += buf;
-            resetTimer |= processLine( d->line );
+            if ( !d->wakeupInProgress ) {
+                resetTimer |= processLine( d->line );
+            } else {
+                // Discard response lines while a wakeup is in progress.
+                qLog(AtChat) << "W :" << d->line;
+            }
             d->line = "";
             posn = 0;
         } else if ( ch != 0x00 && ch != 0x0D ) {
@@ -896,6 +927,20 @@ void QAtChat::retryTimeout()
     prime();
 }
 
+void QAtChat::performWakeup()
+{
+    d->wakeupInProgress = true;
+    writeLine( d->wakeupCommand );
+    d->lastSendTime.restart();
+    QTimer::singleShot( 500, this, SLOT(wakeupFinished()) );
+}
+
+void QAtChat::wakeupFinished()
+{
+    d->wakeupInProgress = false;
+    prime();
+}
+
 void QAtChat::prime()
 {
     QAtChatCommand *cmd = d->first;
@@ -903,6 +948,15 @@ void QAtChat::prime()
     // Bail out if there are no commands to be sent.
     if ( !cmd ) {
         return;
+    }
+
+    // Do we need to perform a wakeup on the device?
+    if ( d->wakeupActive ) {
+        if ( d->lastSendTime.elapsed() >= d->wakeupTime ) {
+            performWakeup();
+            return;
+        }
+        d->lastSendTime.restart();
     }
 
     // Write the command to the serial output stream.

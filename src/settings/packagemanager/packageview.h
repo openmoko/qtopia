@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 #include <QtopiaAbstractService>
 #include <QDSActionRequest>
 #include <QTabWidget>
+#include <QtopiaItemDelegate>
 
 class PackageModel;
 class QTreeView;
@@ -40,11 +41,46 @@ class QWaitWidget;
 #include "ui_packagedetails.h"
 class PackageDetails : public QDialog, public Ui::PackageDetails
 {
-public:
-    enum Type { Info, Install, Uninstall, Reenable };
-    PackageDetails(QWidget *parent, Type type = Info, bool modal = true);
-
     Q_OBJECT
+public:
+    enum Type { Info, Confirm };
+    enum Result { Proceed = QDialog::Accepted + 1};
+    enum Option {
+                    //used for Info type
+                    None        = 0x0,
+                    Install     = 0x1,
+                    Uninstall   = 0x2,
+
+                    //used for Confirm type
+                    Allow       = 0x4,
+                    Disallow    = 0x8
+                };
+    Q_DECLARE_FLAGS( Options, Option );
+
+    PackageDetails(QWidget *parent,
+                   const QString &title,
+                   const QString &text,
+                   Type type,
+                   Options options);
+    void init();
+
+private:
+    Type m_type;
+    Options m_options;
+
+    QAction *m_acceptAction;
+    QAction *m_rejectAction;
+    QMenu *m_contextMenu;
+};
+Q_DECLARE_OPERATORS_FOR_FLAGS(PackageDetails::Options);
+
+class DownloadViewDelegate: public QtopiaItemDelegate
+{
+    public:
+        DownloadViewDelegate( QObject *parent = 0 );
+        virtual void paint( QPainter *painter,
+                        const QStyleOptionViewItem &option,
+                        const QModelIndex &index ) const;
 };
 
 class PackageView : public QMainWindow

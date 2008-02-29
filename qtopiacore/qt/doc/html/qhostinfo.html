@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/network/qhostinfo.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/network/qhostinfo.cpp -->
 <head>
   <title>Qt 4.3: QHostInfo Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -57,11 +57,11 @@
 <p>QHostInfo uses the lookup mechanisms provided by the operating system to find the IP address(es) associated with a host name, or the host name associated with an IP address. The class provides two static convenience functions: one that works asynchronously and emits a signal once the host is found, and one that blocks and returns a QHostInfo object.</p>
 <p>To look up a host's IP addresses asynchronously, call <a href="qhostinfo.html#lookupHost">lookupHost</a>(), which takes the host name or IP address, a receiver object, and a slot signature as arguments and returns an ID. You can abort the lookup by calling <a href="qhostinfo.html#abortHostLookup">abortHostLookup</a>() with the lookup ID.</p>
 <p>Example:</p>
-<pre><span class="comment"> // To find the IP address of www.trolltech.com</span>
+<pre><span class="comment"> //</span> To find the IP address of www.trolltech.com
  QHostInfo::lookupHost(&quot;www.trolltech.com&quot;,
                        this, SLOT(printResults(QHostInfo)));
 
-<span class="comment"> // To find the host name for 4.2.2.1</span>
+<span class="comment"> //</span> To find the host name for 4.2.2.1
  QHostInfo::lookupHost(&quot;4.2.2.1&quot;,
                        this, SLOT(printResults(QHostInfo)));</pre>
 <p>The slot is invoked when the results are ready. (If you use Qtopia Core and disabled multithread support by defining <tt>QT_NO_THREAD</tt>, <a href="qhostinfo.html#lookupHost">lookupHost</a>() will block until the lookup has finished.) The results are stored in a QHostInfo object. Call <a href="qhostinfo.html#addresses">addresses</a>() to get the list of IP addresses for the host, and <a href="qhostinfo.html#hostName">hostName</a>() to get the host name that was looked up.</p>
@@ -101,7 +101,7 @@
  ...
  if (!info.addresses().isEmpty()) {
      QHostAddress address = info.addresses().first();
-     <span class="comment">// use the first IP address</span>
+     <span class="comment">//</span> use the first IP address
  }</pre>
 <p>See also <a href="qhostinfo.html#setAddresses">setAddresses</a>(), <a href="qhostinfo.html#hostName">hostName</a>(), and <a href="qhostinfo.html#error">error</a>().</p>
 <h3 class="fn"><a name="error"></a><a href="qhostinfo.html#HostInfoError-enum">HostInfoError</a> QHostInfo::error () const</h3>
@@ -162,8 +162,8 @@
 <p>Assigns the data of the <i>other</i> object to this host info object, and returns a reference to it.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -64,7 +64,7 @@
 #include <QSimToolkit>
 #endif
 
-#include "ui/delayedwaitdialog.h"
+#include "delayedwaitdialog.h"
 
 static const int  MAX_JOINED_CALLS = 5;
 static const uint SECS_PER_HOUR= 3600;
@@ -503,7 +503,7 @@ class MouseControlDialog : public QDialog
     Q_OBJECT
 public:
     MouseControlDialog( QWidget* parent = 0, Qt::WFlags fl = 0 )
-        : QDialog(parent, fl), m_tid(0)
+        : QDialog(parent, fl), m_tid(0), m_parent(parent), m_mouseUnlocked(false)
     {
         QColor c(Qt::black);
         c.setAlpha(180);
@@ -515,7 +515,7 @@ public:
         setPalette(p);
 
         QVBoxLayout *vBox = new QVBoxLayout(this);
-        QHBoxLayout *hBox = new QHBoxLayout(this);
+        QHBoxLayout *hBox = new QHBoxLayout;
 
         QIcon icon(":icon/select");
 
@@ -558,6 +558,8 @@ public:
         height += QApplication::style()->pixelMetric(QStyle::PM_LayoutTopMargin);
         height += QApplication::style()->pixelMetric(QStyle::PM_LayoutBottomMargin);
         setGeometry(20*dw/100, (dh - height)/2, 60*dw/100, height);
+
+        m_parent->installEventFilter(this);
     }
 
     static const int TIMEOUT = 2000;
@@ -584,6 +586,7 @@ protected:
 
     void showEvent( QShowEvent *e )
     {
+        m_mouseUnlocked = false;
         if (Qtopia::mousePreferred()) {
             m_slider->grabMouse();
             m_slider->setValue(0);
@@ -596,6 +599,7 @@ protected:
     void keyPressEvent( QKeyEvent *e )
     {
         if ( e->key() == Qt::Key_Down ) {
+            m_mouseUnlocked = true;
             emit releaseMouse();
             close();
         }
@@ -603,6 +607,18 @@ protected:
 
     bool eventFilter( QObject *o, QEvent *e )
     {
+        if ( o == m_parent ) {
+            if ( e->type() == QEvent::WindowActivate ) {
+                if ( !m_mouseUnlocked )
+                   emit grabMouse();
+            } else if ( e->type() == QEvent::WindowDeactivate ) {
+                if ( !isVisible() ) {
+                    m_mouseUnlocked = false;
+                    emit releaseMouse();
+                }
+            }
+        }
+
         if ( Qtopia::mousePreferred() && o == m_slider ) {
             // do not allow to move slider with key press
             if ( e->type() == QEvent::KeyPress
@@ -632,6 +648,8 @@ private slots:
 private:
     int m_tid;
     QSlider *m_slider;
+    QWidget *m_parent;
+    bool m_mouseUnlocked;
 };
 
 class CallScreenKeyboardFilter : public QtopiaKeyboardFilter
@@ -684,16 +702,6 @@ protected:
     */
 
 /*!
-  \fn void CallScreen::increaseCallVolume()
-  \internal
-  */
-
-/*!
-  \fn void CallScreen::decreaseCallVolume()
-  \internal
-  */
-
-/*!
   \fn void CallScreen::muteRing()
   \internal
   */
@@ -726,7 +734,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     : PhoneThemedView(parent, fl), control(ctrl), digits(0), listView(0), actionGsm(0),
     activeCount(0), holdCount(0) , keypadVisible(false), mLayout( 0 ),
     updateTimer( 0 ), gsmActionTimer(0), secondaryCallScreen(0), m_model(0), m_callAudioHandler(0),
-    videoWidget(0), simMsgBox(0), showWaitDlg(false), symbolTimer(0)
+    videoWidget(0), simMsgBox(0), showWaitDlg(false), symbolTimer(0), m_mouseCtrlDlg(0)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -828,6 +836,9 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     QObject::connect( VideoRingtone::instance(), SIGNAL(videoWidgetReady()),
             this, SLOT(setVideoWidget()) );
     QObject::connect( VideoRingtone::instance(), SIGNAL(videoRingtoneStopped()),
+            this, SLOT(deleteVideoWidget()) );
+    // delete the video widget once call is answered
+    connect( this, SIGNAL(acceptIncoming()),
             this, SLOT(deleteVideoWidget()) );
 
 #ifdef QTOPIA_CELL
@@ -1136,15 +1147,14 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     digits->show();
 
     // if video widget is shown reduce the size
-    if ( VideoRingtone::instance()->videoWidget() ) {
-        QWidget *widget = VideoRingtone::instance()->videoWidget();
+    if ( videoWidget ) {
 
-        QRect curGeometry = widget->geometry();
+        QRect curGeometry = videoWidget->geometry();
         QRect digitsRect = digits->geometry();
 
         curGeometry.setBottom( digitsRect.top() );
 
-        widget->setGeometry( curGeometry );
+        videoWidget->setGeometry( curGeometry );
     }
 
     manualLayout();
@@ -1551,12 +1561,16 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     }
     else if (item->itemName() == "hold")
     {
+        if (!control->hasActiveCalls())
+            return;
         item->setActive(false);
         setItemActive("resume", true);
         actionHold->trigger();
     }
     else if (item->itemName() == "resume")
     {
+        if (!control->hasCallsOnHold())
+            return;
         item->setActive(false);
         setItemActive("hold", true);
         actionResume->trigger();
@@ -1679,6 +1693,7 @@ void CallScreen::showEvent( QShowEvent *e )
     updateTimer->start(1000);
     ThemedView::showEvent( e );
     manualLayout();
+    QTimer::singleShot(0, this, SLOT(initializeMouseControlDialog()));
 }
 
 /*!
@@ -1730,12 +1745,6 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
             QKeyEvent *ke = (QKeyEvent *)e;
             if (listView->selectionMode() == QAbstractItemView::NoSelection) {
                 if (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down) {
-                    return true;
-                } else if (ke->key() == Qt::Key_Left) {
-                    emit decreaseCallVolume();
-                    return true;
-                } else if (ke->key() == Qt::Key_Right) {
-                    emit increaseCallVolume();
                     return true;
                 } else if (ke->key() == Qt::Key_Select) {
                     // gsm key select
@@ -1892,20 +1901,26 @@ void CallScreen::releaseMouse()
         PhoneThemedView::releaseMouse();
 }
 
+void CallScreen::initializeMouseControlDialog()
+{
+    // Do not use screen lock if touch screen only
+    if (Qtopia::mousePreferred())
+        return;
+
+    if ( !m_mouseCtrlDlg ) {
+        m_mouseCtrlDlg = new MouseControlDialog(this, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        connect( m_mouseCtrlDlg, SIGNAL(releaseMouse()), this, SLOT(releaseMouse()) );
+        connect( m_mouseCtrlDlg, SIGNAL(grabMouse()), this, SLOT(grabMouse()) );
+    }
+}
+
 /*! \internal */
-void CallScreen::mouseReleaseEvent(QMouseEvent *e)
+void CallScreen::mousePressEvent(QMouseEvent *e)
 {
     // if touch screen is not locked no need to show unlock dialog
     if ( !QWidget::mouseGrabber() ) {
-        PhoneThemedView::mouseReleaseEvent(e);
+        PhoneThemedView::mousePressEvent(e);
         return;
-    }
-
-    static MouseControlDialog *md = 0;
-    if ( !md ) {
-        md = new MouseControlDialog(0, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        connect( md, SIGNAL(releaseMouse()), this, SLOT(releaseMouse()) );
-        connect( md, SIGNAL(grabMouse()), this, SLOT(grabMouse()) );
     }
 
     // if touch screen only phone, the mouse control dialog need to grab mouse
@@ -1913,7 +1928,8 @@ void CallScreen::mouseReleaseEvent(QMouseEvent *e)
     if ( Qtopia::mousePreferred() )
         releaseMouse();
 
-    md->show();
+    if ( m_mouseCtrlDlg )
+        m_mouseCtrlDlg->show();
 }
 
 /*! \internal */
@@ -1937,16 +1953,21 @@ void CallScreen::callConnected(const QPhoneCall &)
 /*! \internal */
 void CallScreen::callDropped(const QPhoneCall &)
 {
-    setItemActive("hold", false);
-    setItemActive("endcall", false);
-    setItemActive("resume", false);
-    setItemActive("answer", true);
-    setItemActive("sendbusy", true);
+    if (control->hasActiveCalls()) {
+        setItemActive("hold", true);
+        setItemActive("endcall", true);
+    } else if (control->hasCallsOnHold()) {
+        setItemActive("resume", true);
+        setItemActive("answer", true);
+    } else {
+        setItemActive("menu-box", false);
+    }
 }
 
 /*! \internal */
 void CallScreen::callDialing(const QPhoneCall &)
 {
+    setItemActive("menu-box", true);
     setItemActive("answer", false);
     setItemActive("endcall", true);
     setItemActive("resume", false);
@@ -1973,6 +1994,7 @@ void CallScreen::callIncoming(const QPhoneCall &)
     else
         showWaitDlg = true;
 
+    setItemActive("menu-box", true);
     setItemActive("hold", false);
     setItemActive("endcall", false);
     setItemActive("resume", false);

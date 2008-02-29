@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,6 +28,7 @@
 #include <qmodemsimtoolkit.h>
 #include <qmodemphonebook.h>
 #include <qmodempinmanager.h>
+#include <qmodempreferrednetworkoperators.h>
 #include <qbandselection.h>
 #include <qvibrateaccessory.h>
 
@@ -140,6 +141,7 @@ public:
 
 private slots:
     void csq( const QString& msg );
+    void firstCsqQuery();
 
     void ctzv( const QString& msg );
     void configureDone( bool ok );
@@ -207,6 +209,14 @@ private:
     Ficgta01SimInfoPrivate *d;
 
     static QString extractIdentity( const QString& content );
+};
+
+class Ficgta01PreferredNetworkOperators : public QModemPreferredNetworkOperators
+{
+    Q_OBJECT
+public:
+    explicit Ficgta01PreferredNetworkOperators( QModemService *service );
+    ~Ficgta01PreferredNetworkOperators();
 };
 
 

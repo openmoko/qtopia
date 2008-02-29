@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,6 +42,7 @@
 #include <QValueSpaceObject>
 
 #include "phonelauncher.h"
+#include "touchscreenlockdlg.h"
 #include "qtopiainputevents.h"
 #ifdef QTOPIA_CELL
 #include "cellmodemmanager.h"
@@ -153,7 +154,11 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
     contextMenu->installEventFilter(this);
 
     actionLock = new QAction(QIcon(":icon/padlock"), tr("Key Lock"), this);
-    connect(actionLock, SIGNAL(triggered()), keyLock, SLOT(lock()));
+    if (Qtopia::mousePreferred()) {
+        connect(actionLock, SIGNAL(triggered()), this, SLOT(lockScreen()));
+    } else {
+        connect(actionLock, SIGNAL(triggered()), keyLock, SLOT(lock()));
+    }
     contextMenu->addAction(actionLock);
 
     QAction *actionProfile = new QAction(QIcon(":icon/Note"), tr("Profile..."), this);
@@ -209,12 +214,14 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
 
     connect(obexmgr, SIGNAL(receiveInitiated(int,QString,QString,QString)),
             recvWindow, SLOT(receiveInitiated(int,QString,QString,QString)));
-    connect(obexmgr, SIGNAL(sendInitiated(int,QString,QString)),
-            recvWindow, SLOT(sendInitiated(int,QString,QString)));
+    connect(obexmgr, SIGNAL(sendInitiated(int,QString,QString,QString)),
+            recvWindow, SLOT(sendInitiated(int,QString,QString,QString)));
     connect(obexmgr, SIGNAL(progress(int,qint64,qint64)),
             recvWindow, SLOT(progress(int,qint64,qint64)));
     connect(obexmgr, SIGNAL(completed(int,bool)),
             recvWindow, SLOT(completed(int,bool)));
+    connect(recvWindow, SIGNAL(abortTransfer(int)),
+            obexmgr, SLOT(abortTransfer(int)));
 #endif
 
     installEventFilter(this);
@@ -312,9 +319,11 @@ void QAbstractHomeScreen::setSmsMemoryFull(bool full)
 /*!
   \internal
   */
-void QAbstractHomeScreen::setContextBarLocked(bool locked)
+void QAbstractHomeScreen::setContextBarLocked(bool lock, bool waiting)
 {
-    if (locked) {
+    if ( lock || waiting ) {
+        // set the phone to locked - we do it both when we _require_ a lock
+        // and when we are not yet sure if we need to lock (waiting).
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
         QSoftMenuBar::setLabel(this, BasicKeyLock::lockKey(), "unlock", tr("Unlock"));
 
@@ -327,6 +336,14 @@ void QAbstractHomeScreen::setContextBarLocked(bool locked)
                 QSoftMenuBar::setLabel(this, Qt::Key_Back, "phone/calls", tr("Calls"));
             else
                 QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::NoLabel);
+
+        // now blank out the context menu while we wait for the modem to respond.
+        if ( waiting ) {
+            // We have not yet decided whether we need a PIN or not.  Blank context menu.
+            QSoftMenuBar::setLabel(this, BasicKeyLock::lockKey(), QSoftMenuBar::NoLabel);
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
+            QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::NoLabel);
+        }
     } else {
         QSoftMenuBar::setLabel(this, Qt::Key_Select, "qpe/menu", tr("Menu"));
         if (BasicKeyLock::lockKey() == QSoftMenuBar::menuKey()) {
@@ -354,8 +371,10 @@ void QAbstractHomeScreen::showLockInformation()
 {
 #ifdef QTOPIA_CELL
     bool lock = keyLock->locked() || !simLock->open();
+    bool waiting = simLock->state() == BasicSimPinLock::Waiting;
 #else
     bool lock = keyLock->locked();
+    bool waiting = false;
 #endif
     emit keyLockedChanged(lock);
 
@@ -369,9 +388,9 @@ void QAbstractHomeScreen::showLockInformation()
             QtopiaInputEvents::suspendMouse();
 
         m_contextMenu->hide();
-        setContextBarLocked(true);
+        setContextBarLocked(lock, waiting);
     } else {
-        setContextBarLocked(false);
+        setContextBarLocked(lock, waiting);
     }
 
     if (!lock) {
@@ -814,6 +833,14 @@ uint QAbstractHomeScreen::showInformation(const QString &pix, const QString &tex
     updateInformation();
 
     return info.id;
+}
+
+/*!
+  \internal
+  */
+void QAbstractHomeScreen::lockScreen()
+{
+    new TouchScreenLockDialog(0, Qt::WindowStaysOnTopHint);
 }
 
 /*!

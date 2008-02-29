@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -70,7 +70,7 @@ public:
     // Return true if save successful
     // If save not supported, ignore overwrite and save using default format
     // Pre: image was loaded from file
-    bool save( const QImage&, bool overwrite = true );
+    QContent save( const QImage&, bool overwrite = true );
 
     // Return level closest to given reduction factor
     // Levels are numbered 0 .. n-1, 0 being the original image

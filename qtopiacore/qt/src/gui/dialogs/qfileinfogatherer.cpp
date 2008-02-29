@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -207,9 +205,7 @@ QFile::Permissions QFileInfoGatherer::translatePermissions(const QFileInfo &file
     return permissions;
 #else
     QFile::Permissions p = permissions;
-    p ^= !QFile::ReadUser;
-    p ^= !QFile::WriteUser;
-    p ^= !QFile::ExeUser;
+    p &= ~(QFile::ReadUser|QFile::WriteUser|QFile::ExeUser);
     if (                                     permissions & QFile::ReadOther
         || (fileInfo.ownerId() == userId  && permissions & QFile::ReadOwner)
         || (fileInfo.groupId() == groupId && permissions & QFile::ReadGroup))
@@ -260,7 +256,7 @@ QExtendedInformation QFileInfoGatherer::getInfo(const QFileInfo &fileInfo) const
         QFileInfo resolvedInfo(fileInfo.symLinkTarget());
         resolvedInfo = resolvedInfo.canonicalFilePath();
         if (resolvedInfo.exists()) {
-            emit nameResolved(fileInfo.fileName(), resolvedInfo.fileName());
+            emit nameResolved(fileInfo.filePath(), resolvedInfo.fileName());
         } else {
             info.fileType = QExtendedInformation::System;
         }
@@ -312,11 +308,9 @@ void QFileInfoGatherer::getFileInfos(const QString &path, const QStringList &fil
                 infoList << QFileInfo(files.at(i));
         }
         for (int i = infoList.count() - 1; i >= 0; --i) {
-            QExtendedInformation info = getInfo(infoList.at(i));
-            info.isHidden = false; // windows file engine says drives are hidden, open bug
             QString driveName = translateDriveName(infoList.at(i));
-            QList<QPair<QString,QExtendedInformation> > updatedFiles;
-            updatedFiles.append(QPair<QString,QExtendedInformation>(driveName, info));
+            QList<QPair<QString,QFileInfo> > updatedFiles;
+            updatedFiles.append(QPair<QString,QFileInfo>(driveName, infoList.at(i)));
             emit updates(path, updatedFiles);
         }
         return;
@@ -325,7 +319,7 @@ void QFileInfoGatherer::getFileInfos(const QString &path, const QStringList &fil
     QTime base = QTime::currentTime();
     QFileInfo fileInfo;
     bool firstTime = true;
-    QList<QPair<QString,QExtendedInformation> > updatedFiles;
+    QList<QPair<QString, QFileInfo> > updatedFiles;
     QStringList filesToCheck = files;
 
     QString itPath = QDir::fromNativeSeparators(files.isEmpty() ? path : QLatin1String(""));
@@ -350,9 +344,8 @@ void QFileInfoGatherer::getFileInfos(const QString &path, const QStringList &fil
         emit updates(path, updatedFiles);
 }
 
-void QFileInfoGatherer::fetch(const QFileInfo &fileInfo, QTime &base, bool &firstTime, QList<QPair<QString,QExtendedInformation> > &updatedFiles, const QString &path) {
-    QExtendedInformation info = getInfo(fileInfo);
-    updatedFiles.append(QPair<QString,QExtendedInformation>(fileInfo.fileName(), info));
+void QFileInfoGatherer::fetch(const QFileInfo &fileInfo, QTime &base, bool &firstTime, QList<QPair<QString, QFileInfo> > &updatedFiles, const QString &path) {
+    updatedFiles.append(QPair<QString, QFileInfo>(fileInfo.fileName(), fileInfo));
     QTime current = QTime::currentTime();
     if ((firstTime && updatedFiles.count() > 100) || base.msecsTo(current) > 1000) {
         emit updates(path, updatedFiles);

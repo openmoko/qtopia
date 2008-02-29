@@ -32,7 +32,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -41,7 +41,7 @@
 <li><div class="fn"/>virtual void <b><a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a></b> ( QServiceNumbers::NumberId <i>id</i>, const QString &amp; <i>number</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -51,17 +51,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -82,7 +81,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QServiceNumbers"></a>QServiceNumbers::QServiceNumbers ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QServiceNumbers"></a>QServiceNumbers::QServiceNumbers ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new service number object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports service numbers. If there is more than one service that supports service numbers, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qservicenumbers.html">QServiceNumbers</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
@@ -91,10 +90,10 @@
 <h3 class="fn"><a name="requestServiceNumber"></a>void QServiceNumbers::requestServiceNumber ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Request the current value of service number <i>id</i>. The service responds by emitting the <a href="qservicenumbers.html#serviceNumber">serviceNumber</a>() signal.</p>
 <p>See also <a href="qservicenumbers.html#serviceNumber">serviceNumber</a>() and <a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a>().</p>
-<h3 class="fn"><a name="serviceNumber"></a>void QServiceNumbers::serviceNumber ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="serviceNumber"></a>void QServiceNumbers::serviceNumber ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to <a href="qservicenumbers.html#requestServiceNumber">requestServiceNumber</a>(), to report the <i>number</i> associated with <i>id</i>. If <i>number</i> is empty, then the number is not set.</p>
 <p>See also <a href="qservicenumbers.html#requestServiceNumber">requestServiceNumber</a>() and <a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a>().</p>
-<h3 class="fn"><a name="setServiceNumber"></a>void QServiceNumbers::setServiceNumber ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setServiceNumber"></a>void QServiceNumbers::setServiceNumber ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the value of service number <i>id</i> to <i>number</i>. The service responds by emitting the <a href="qservicenumbers.html#setServiceNumberResult">setServiceNumberResult</a>() signal.</p>
 <p>See also <a href="qservicenumbers.html#setServiceNumberResult">setServiceNumberResult</a>(), <a href="qservicenumbers.html#requestServiceNumber">requestServiceNumber</a>(), and <a href="qservicenumbers.html#serviceNumber">serviceNumber</a>().</p>
 <h3 class="fn"><a name="setServiceNumberResult"></a>void QServiceNumbers::setServiceNumberResult ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -102,8 +101,8 @@
 <p>See also <a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

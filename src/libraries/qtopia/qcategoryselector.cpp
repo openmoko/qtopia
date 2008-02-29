@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -671,6 +671,7 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         listView = new QCategoryListView();
         int sz = listView->style()->pixelMetric(QStyle::PM_SmallIconSize);
         listView->setIconSize(QSize(sz,sz));
+        listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         listView->setItemDelegate(new QCategoryListDelegate());
         listView->setModel(model);
         listView->setSelectionMode(QListView::SingleSelection);
@@ -1267,14 +1268,7 @@ QCategoryFilter QCategorySelector::selectedFilter() const
 */
 QSize QCategorySelector::sizeHint () const
 {
-    // FIXME - HACK for list not showing when items above 4
-    if( d->listView && d->model->rowCount() > 4 )
-    {
-        QDesktopWidget *desktop = QApplication::desktop();
-        return desktop->availableGeometry(desktop->screenNumber(this)).size();
-    }
-    else
-        return QWidget::sizeHint();
+    return QWidget::sizeHint();
 }
 
 /*!
@@ -1314,6 +1308,7 @@ void QCategorySelector::showDialog()
 {
     QCategoryDialog dlg(d->scope, QCategoryDialog::Editor, (QWidget*)parent());
     dlg.setModal(true);
+    dlg.showMaximized();
 
     // XXX not enough.  need to select all and unfiled appropriately as well
 

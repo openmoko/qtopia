@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,15 +31,6 @@
 #include <openobex/obex.h>
 
 
-//#define QOBEXSOCKET_DEBUG
-
-#ifdef QOBEXSOCKET_DEBUG
-#   include <QDebug>
-#endif
-
-
-//===================================================================
-
 static int qobexsocket_getCmd(QObex::Request request)
 {
     switch (request) {
@@ -66,33 +57,21 @@ struct q_custom_context
 
 static int _q_cust_obex_connect(obex_t *, void *)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Connect";
-#endif
     return 0;
 }
 
 static int _q_cust_obex_disconnect(obex_t *, void *)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Disconnect";
-#endif
     return 0;
 }
 
 static int _q_cust_obex_listen(obex_t *, void *)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Listen";
-#endif
     return 0;
 }
 
 static int _q_cust_obex_write(obex_t *, void * customdata, uint8_t *buf, int buflen)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Write" << buflen;
-#endif
     q_custom_context *context = reinterpret_cast<q_custom_context *>(customdata);
     if (!context->device)
         return -1;
@@ -109,21 +88,12 @@ static int _q_cust_obex_write(obex_t *, void * customdata, uint8_t *buf, int buf
 
 static int _q_cust_obex_handleinput(obex_t *handle, void * customdata, int /*secs*/)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Handleinput";
-#endif
-
     q_custom_context *context = reinterpret_cast<q_custom_context *>(customdata);
     if (!context->device)
         return -1;
 
     char buf[1024];
     qint64 len = context->device->read(buf, sizeof(buf));
-
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: Custom Obex Handleinput() read len:" << len
-            << "still available:" << context->device->bytesAvailable();
-#endif
 
     if (len <= 0)
         return len;
@@ -132,12 +102,8 @@ static int _q_cust_obex_handleinput(obex_t *handle, void * customdata, int /*sec
     int r = 0;
 
     while (numFed < len) {
-        if (!context->device || !context->device->isOpen()) {
-#ifdef QOBEXSOCKET_DEBUG
-            qDebug() << "QObexSocket: transport closed, don't feed more data";
-#endif
+        if (!context->device || !context->device->isOpen())
             return -1;
-        }
 
         r = OBEX_CustomDataFeed(handle,
                                 reinterpret_cast<uint8_t *>(&buf[numFed]),
@@ -218,9 +184,6 @@ QObexSocket::~QObexSocket()
     prepareToClose();
 
     if (m_handle) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket: clean up OBEX handle";
-#endif
         OBEX_Cleanup(m_handle);
         m_handle = 0;
     }
@@ -246,36 +209,18 @@ bool QObexSocket::sendRequest(QObex::Request request, const QObexHeader &header,
     if (!isValid())
         return false;
 
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: sendRequest()" << request
-            << "with" << header.size() << "headers";
-#endif
-
     obex_object_t *obj = OBEX_ObjectNew(m_handle, qobexsocket_getCmd(request));
-    if (!obj) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket: error creating OBEX request object";
-#endif
+    if (!obj)
         return false;
-    }
 
     if (!QObexHeaderPrivate::writeOpenObexHeaders(m_handle, obj,
             QObexHeaderPrivate::requestShouldFitOnePacket(request), header)) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket::sendRequest() error writing headers:" << header
-                << "with flags:"
-                << QObexHeaderPrivate::requestShouldFitOnePacket(request);
-#endif
         return false;
     }
 
     if (nonHeaderData && nonHeaderDataSize > 0) {
         if (OBEX_ObjectSetNonHdrData(obj, reinterpret_cast<const uint8_t*>(nonHeaderData),
                 nonHeaderDataSize) < 0) {
-#ifdef QOBEXSOCKET_DEBUG
-            qDebug() << "QObexSocket: error writing non-header data of size"
-                    << nonHeaderDataSize;
-#endif
             return false;
         }
     }
@@ -285,26 +230,16 @@ bool QObexSocket::sendRequest(QObex::Request request, const QObexHeader &header,
         hv.bs = 0;
         if (OBEX_ObjectAddHeader(m_handle, obj, OBEX_HDR_BODY, hv, 0,
                             OBEX_FL_STREAM_START) < 0) {
-#ifdef QOBEXSOCKET_DEBUG
-            qDebug() << "QObexSocket: error setting OBEX_FL_STREAM_START flag for Put";
-#endif
             return false;
         }
     } else if (request == QObex::Get) {
         if (OBEX_ObjectReadStream(m_handle, obj, 0) < 0) {
-#ifdef QOBEXSOCKET_DEBUG
-            qDebug() << "QObexSocket: error setting openobex to stream data for Get";
-#endif
             return false;
         }
     }
 
-    if (OBEX_Request(m_handle, obj) < 0) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket: OBEX_Request() failed!";
-#endif
+    if (OBEX_Request(m_handle, obj) < 0)
         return false;
-    }
 
     return true;
 }
@@ -323,10 +258,6 @@ bool QObexSocket::abortCurrentRequest()
  */
 void QObexSocket::connectionEvent(obex_object_t *obj, int mode, int event, int obex_cmd, int obex_rsp)
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug("OBEX event: %d - %s", event, (mode == OBEX_CLIENT ? "client" : "server"));
-#endif
-
     /*
     A server receiving a Put request with body data in the first packet
     will get events in this order:
@@ -400,9 +331,9 @@ void QObexSocket::connectionEvent(obex_object_t *obj, int mode, int event, int o
         if (mode == OBEX_CLIENT && m_client) {
             QObexHeader header;
             if (!QObexHeaderPrivate::readOpenObexHeaders(header, m_handle, obj)) {
-#ifdef QOBEXSOCKET_DEBUG
-                qDebug() << "QObexSocket: error reading server response headers (REQDONE)";
-#endif
+                m_client->errorOccurred(QObexClientSession::UnknownError,
+                        qApp->translate("QObexClientSession", "Unknown error"));
+                return;
             }
             if (header.size() > 0)
                 m_client->requestResponseHeaderReceived(header);
@@ -459,9 +390,6 @@ void QObexSocket::connectionEvent(obex_object_t *obj, int mode, int event, int o
         break;
     default:
         // includes OBEX_EV_UNEXPECTED and OBEX_EV_REQCHECK
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket not handling event" << event;
-#endif
         break;
     }
 }
@@ -505,9 +433,10 @@ void QObexSocket::handleReq(int obex_cmd, obex_object_t *obj)
     // Notify server that request has finished.
     QObexHeader requestHeader;
     if (!QObexHeaderPrivate::readOpenObexHeaders(requestHeader, m_handle, obj)) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket::handleReq() error reading client request headers";
-#endif
+        m_server->errorOccurred(QObexServerSession::UnknownError,
+                qApp->translate("QObexClientSession", "Unknown error"));
+        setNextResponse(obj, QObex::InternalServerError);
+        return;
     }
     QObexHeader responseHeader;
     QByteArray bytes;
@@ -522,11 +451,11 @@ void QObexSocket::handleReq(int obex_cmd, obex_object_t *obj)
     // Write the response headers.
     if (!QObexHeaderPrivate::writeOpenObexHeaders(m_handle, obj,
             (obex_cmd != QObex::Get), responseHeader))  {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket::handleReq() error writing response headers";
-#endif
+        m_server->errorOccurred(QObexServerSession::UnknownError,
+                qApp->translate("QObexClientSession", "Unknown error"));
+        setNextResponse(obj, QObex::InternalServerError);
+        return;
     }
-
 
     setNextResponse(obj, response);
 
@@ -546,9 +475,9 @@ void QObexSocket::handleStreamAvailable(int mode, obex_object_t *obj)
         // Pass on last received headers e.g. for initial Get response headers
         QObexHeader header;
         if (!QObexHeaderPrivate::readOpenObexHeaders(header, m_handle, obj)) {
-#ifdef QOBEXSOCKET_DEBUG
-            qDebug() << "QObexSocket::handleStreamAvailable() error reading server response headers";
-#endif
+            m_client->errorOccurred(QObexClientSession::UnknownError,
+                    qApp->translate("QObexClientSession", "Unknown error"));
+            return;
         }
         if (header.size() > 0) {
             m_client->requestResponseHeaderReceived(header);
@@ -575,9 +504,10 @@ void QObexSocket::handleStreamAvailable(int mode, obex_object_t *obj)
             // headers in the packet).
             QObexHeader header;
             if (!QObexHeaderPrivate::readOpenObexHeaders(header, m_handle, obj)) {
-#ifdef QOBEXSOCKET_DEBUG
-                qDebug() << "QObexSocket::handleStreamAvailable() error reading client request headers";
-#endif
+                m_server->errorOccurred(QObexServerSession::UnknownError,
+                        qApp->translate("QObexClientSession", "Unknown error"));
+                setNextResponse(obj, QObex::InternalServerError);
+                return;
             }
 
             QPointer<QObexSocket> ptr(this);
@@ -592,9 +522,10 @@ void QObexSocket::handleStreamAvailable(int mode, obex_object_t *obj)
             // Write the response headers.
             if (!QObexHeaderPrivate::writeOpenObexHeaders(m_handle, obj,
                    true, responseHeader)) {
-#ifdef QOBEXSOCKET_DEBUG
-                qDebug() << "QObexSocket::handleStreamAvailable() error writing server response headers";
-#endif
+                m_server->errorOccurred(QObexServerSession::UnknownError,
+                        qApp->translate("QObexClientSession", "Unknown error"));
+                setNextResponse(obj, QObex::InternalServerError);
+                return;
             }
             if (response != QObex::Success) {
                 setNextResponse(obj, response);
@@ -648,10 +579,6 @@ void QObexSocket::handleStreamEmpty(int mode, obex_object_t *obj)
     }
 
     OBEX_ObjectAddHeader(m_handle, obj, OBEX_HDR_BODY, hv, bufSize, flags);
-
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: done handleStreamEmpty(), bufsize:" << bufSize << "mode:" << mode;
-#endif
 }
 
 /*
@@ -713,14 +640,8 @@ void QObexSocket::setNextResponse(obex_object_t *obj, QObex::ResponseCode respon
         return;
 
     if (response == QObex::Success || response == OBEX_RSP_CONTINUE) {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug() << "QObexSocket: accepting request...";
-#endif
         OBEX_ObjectSetRsp(obj, OBEX_RSP_CONTINUE, OBEX_RSP_SUCCESS);
     } else {
-#ifdef QOBEXSOCKET_DEBUG
-        qDebug("QObexSocket: refusing request with 0x%02d...", int(response));
-#endif
         m_serverRefusedRequest = true;
         OBEX_ObjectSetRsp(obj, int(response), int(response));
     }
@@ -728,9 +649,6 @@ void QObexSocket::setNextResponse(obex_object_t *obj, QObex::ResponseCode respon
 
 void QObexSocket::processInput()
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "OBEX socket handling input...";
-#endif
     // Need while loop because of how custom transport is implemented -
     // otherwise it will only process the first part.
     while (OBEX_HandleInput(m_handle, 0) > 0);
@@ -738,10 +656,6 @@ void QObexSocket::processInput()
 
 void QObexSocket::prepareToClose()
 {
-#ifdef QOBEXSOCKET_DEBUG
-    qDebug() << "QObexSocket: prepareToClose()";
-#endif
-
     if (m_cleanedUp)
         return;
 

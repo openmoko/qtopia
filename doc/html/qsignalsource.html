@@ -34,7 +34,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -44,18 +44,17 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,7 +72,7 @@
     QHardwareManager* manager = new QHardwareManager(&quot;QSignalSource&quot;, this);
     QStringList providers = man-&gt;providers();
 
-<span class="comment">    //find a WLAN signal source</span>
+<span class="comment">    //</span>find a WLAN signal source
     foreach( QString signalSourceId, providers )
     {
         src = new QSignalSource( signalSourceId, this );
@@ -86,11 +85,11 @@
     }
 
     if ( !src ) {
-        <span class="comment">//could not find signal source for WLAN</span>
-        <span class="comment">//fall back to virtual default signal source</span>
+        <span class="comment">//</span>could not find signal source for WLAN
+        <span class="comment">//</span>fall back to virtual default signal source
         src = new QSignalSource( &quot;DefaultSignal&quot;, this );
         if ( src-&gt;availability() == QSignalSource::Invalid ) {
-            <span class="comment">//no signal source available at all</span>
+            <span class="comment">//</span>no signal source available at all
         }
     }</pre>
 <p>New signal sources can be added to Qtopia via the <a href="qsignalsourceprovider.html">QSignalSourceProvider</a> class.</p>
@@ -107,7 +106,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSignalSource"></a>QSignalSource::QSignalSource ( const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSignalSource"></a>QSignalSource::QSignalSource ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new signal source for provider <i>id</i> with the specified <i>parent</i>.</p>
 <p>If <i>id</i> is empty, this class will use the default signal source.</p>
 <h3 class="fn"><a name="dtor.QSignalSource"></a>QSignalSource::~QSignalSource ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -120,12 +119,12 @@
 <p>Returns the signal source strength as a percentage of the maximum strength, or -1 if the strength is unavailable or invalid.</p>
 <h3 class="fn"><a name="signalStrengthChanged"></a>void QSignalSource::signalStrengthChanged ( int <i>signalStrength</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the strength of the signal changes; <i>signalStrength</i> is the new value.</p>
-<h3 class="fn"><a name="type"></a><a href="qstring.html">QString</a> QSignalSource::type () const</h3>
+<h3 class="fn"><a name="type"></a><a href="./qstring.html">QString</a> QSignalSource::type () const</h3>
 <p>Returns the type of the signal source, e.g&#x2e; <tt>&quot;wlan&quot;</tt>, <tt>&quot;modem&quot;</tt>, or an empty string if this signal source is invalid.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

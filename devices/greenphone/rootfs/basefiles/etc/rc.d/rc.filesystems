@@ -29,7 +29,7 @@ tar -C /var -xzf /var.tar.gz
 splash -p + "Checking filesystems"
 
 # check ext2 and vfat filesystems in parallel
-if fsck -a -A -P -t ext2,vfat 2>&1 | grep REBOOT; then
+if fsck -y -A -P -t ext2,vfat 2>&1 | grep REBOOT; then
     splash -now "Filesystem errors" "detected, rebooting"
     reboot
 fi
@@ -60,7 +60,7 @@ fi
 
 BDADDR=`/usr/bin/tat bdaddr`
 if [ $BDADDR != "" ] && [ ! -f /etc/bluetooth/lib/bluetooth/$BDADDR/config ] ; then
-    splash -p - "Creating default Bluetooth configuration"
+    splash -p - Configuring Bluetooth
     mkdir -p /etc/bluetooth/lib/bluetooth/$BDADDR
     echo "mode off" > /etc/bluetooth/lib/bluetooth/$BDADDR/config
 fi

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -67,7 +67,6 @@ class QAction;
 class CallScreen;
 class QuickDial;
 class CallHistory;
-class EarpieceVolume;
 class QExportedBackground;
 class QAbstractDialerScreen;
 class TouchscreenDialer;
@@ -81,7 +80,9 @@ class QSpeedDialFeedback : public QFrame {
 public:
     QSpeedDialFeedback();
 
+    void setBlindFeedback(bool on);
     void show(QWidget* center, const QString& input, const QtopiaServiceDescription&);
+
 signals:
     void requestSent();
 
@@ -95,6 +96,7 @@ private:
     QLabel *icon;
     QLabel *label;
     int timerId;
+    bool blind;
 };
 
 class PhoneLauncher : public QAbstractServerInterface
@@ -164,7 +166,7 @@ protected slots:
     void showRunningTasks();
     void keyStateChanged(bool);
     void updateBackground();
-    void updateSecondaryBackground();
+    void applySecondaryBackgroundImage();
 #ifdef QTOPIA_CELL
     void cellBroadcast(CellBroadcastControl::Type, const QString &, const QString &);
 #endif
@@ -193,8 +195,6 @@ private slots:
     void speedDialActivated();
 #endif
     void speedDial( const QString& input );
-    void increaseEarVolume();
-    void decreaseEarVolume();
     void rejectModalDialog();
     void newMessagesChanged();
 
@@ -230,7 +230,6 @@ private:
     QAbstractMessageBox *serviceMsgBox;
     QAbstractMessageBox *CBSMessageBox;
 #endif
-    EarpieceVolume *volumeScreen;
 
 #ifdef QTOPIA_PHONEUI
     mutable CallScreen *mCallScreen;

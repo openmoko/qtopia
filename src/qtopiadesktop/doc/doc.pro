@@ -38,6 +38,7 @@ win32:mkdocs=$$fixpath($$QBS_BIN/runsyncqt) $$mkdocs
 
 mkdocs.commands=$$COMMAND_HEADER\
     $$MAKE_RULE $$LINE_SEP\
+    echo Building docs... $$LINE_SEP\
     $$mkdocs $$MKDOCS_SOURCEDIR\
         $$MKDOCS_DESTDIR\
         $$MKDOCS_GENDIR\
@@ -56,10 +57,9 @@ win32:create_raw_dependency(mkdocs,FORCE)
 else:create_raw_dependency(.PHONY,mkdocs)
 
 win32:link_qd_docs.commands=$$COMMAND_HEADER\
-    $$fixpath($$DQTDIR/bin/assistant) -addContentFile $$fixpath($$MKDOCS_DESTDIR/$${MKDOCS_CONF}.dcf)
+    $$fixpath($$DQTDIR/bin/assistant) -addContentFile $$fixpath($$QPEDIR/doc/html/$$MKDOCS_CONF/$${MKDOCS_CONF}.dcf)
 else:link_qd_docs.commands=$$COMMAND_HEADER\
-    [ -f $$DQTDIR/bin/assistant ] && $$DQTDIR/bin/assistant -addContentFile $$MKDOCS_DESTDIR/$${MKDOCS_CONF}.dcf; true $$LINE_SEP\
-    [ -f $$QPEDIR/doc/html/qtopiadesktop/qtopiadesktop.dcf ] && rm $$QPEDIR/doc/html/qtopiadesktop/qtopiadesktop.dcf; true
+    [ -f $$DQTDIR/bin/assistant ] && $$DQTDIR/bin/assistant -addContentFile $$fixpath($$QPEDIR/doc/html/$$MKDOCS_CONF/$${MKDOCS_CONF}.dcf); true
 QMAKE_EXTRA_TARGETS+=link_qd_docs
 link_qd_docs.depends+=mkdocs
 ALL_DEPS+=link_qd_docs

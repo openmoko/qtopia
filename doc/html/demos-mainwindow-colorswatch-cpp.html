@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2004-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2004-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the demonstration applications of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -182,7 +180,7 @@
      p.setPen(Qt::black);
      p.drawRect(r);
      p.drawText(rect(), Qt::AlignLeft|Qt::AlignTop, text);
- #endif <span class="comment">// DEBUG_SIZEHINTS</span>
+ #endif <span class="comment">//</span> DEBUG_SIZEHINTS
  }
 
  static QSpinBox *createSpinBox(int value, QWidget *parent, int max = 1000)
@@ -421,7 +419,7 @@
      } else {
          floatableAction-&gt;setChecked(features() &amp; QDockWidget::DockWidgetFloatable);
          floatingAction-&gt;setChecked(isWindow());
-         <span class="comment">// done after floating, to get 'floatable' correctly initialized</span>
+         <span class="comment">//</span> done after floating, to get 'floatable' correctly initialized
          movableAction-&gt;setChecked(features() &amp; QDockWidget::DockWidgetMovable);
          verticalTitleBarAction
              -&gt;setChecked(features() &amp; QDockWidget::DockWidgetVerticalTitleBar);
@@ -466,8 +464,8 @@
      splitVMenu-&gt;clear();
      QList&lt;ColorSwatch*&gt; dock_list = qFindChildren&lt;ColorSwatch*&gt;(mainWindow);
      foreach (ColorSwatch *dock, dock_list) {
-<span class="comment"> //        if (!dock-&gt;isVisible() || dock-&gt;isFloating())</span>
-<span class="comment"> //            continue;</span>
+<span class="comment"> //</span>        if (!dock-&gt;isVisible() || dock-&gt;isFloating())
+<span class="comment"> //</span>            continue;
          tabMenu-&gt;addAction(dock-&gt;objectName());
          splitHMenu-&gt;addAction(dock-&gt;objectName());
          splitVMenu-&gt;addAction(dock-&gt;objectName());
@@ -596,8 +594,8 @@
  #include &quot;colorswatch.moc&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

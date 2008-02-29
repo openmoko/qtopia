@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -114,7 +114,8 @@ public:
         profileManager(0),
         priorityPlay(false),
         videoTone(false),
-        videoToneFailed(false)
+        videoToneFailed(false),
+        messageWaiting(false)
 #ifdef MEDIA_SERVER
         , soundcontrol(0)
 #elif defined(Q_WS_QWS)
@@ -140,6 +141,7 @@ public:
     bool priorityPlay;
     bool videoTone;
     bool videoToneFailed;
+    bool messageWaiting;
 #ifdef MEDIA_SERVER
     QSoundControl *soundcontrol;
 #elif defined(Q_WS_QWS)
@@ -703,7 +705,9 @@ void RingControl::stateChanged()
 {
     DialerControl*  dialerControl = DialerControl::instance();
 
-    if (dialerControl->hasIncomingCall())
+    if (dialerControl->hasIncomingCall() &&
+            !dialerControl->hasActiveCalls() &&
+            !dialerControl->hasCallsOnHold())
     {
         if (ringType() != RingControl::Call)
             startRinging(Call);
@@ -716,6 +720,12 @@ void RingControl::stateChanged()
                 VideoRingtone::instance()->stopVideo();
 #endif
             stopRing();
+        }
+
+        if (!dialerControl->allCalls().count() &&
+                d->messageWaiting ) {
+            d->messageWaiting = false;
+            startRinging(Msg);
         }
     }
 
@@ -768,12 +778,16 @@ void RingControl::videoRingtoneFailed()
 void RingControl::startMessageRingtone()
 {
     // Doesn't apply if already ringing
-    if (ringType() == RingControl::NotRinging) {
+    if (ringType() == RingControl::NotRinging &&
+            !DialerControl::instance()->hasActiveCalls() &&
+            !DialerControl::instance()->hasCallsOnHold()) {
         setSoundPriority(true);
         startRinging(Msg);
 
         // Ensure that we eventually stop the ring
         QTimer::singleShot(NotificationTimeout, this, SLOT(stopMessageAlert()));
+    } else {
+        d->messageWaiting = true;
     }
 }
 

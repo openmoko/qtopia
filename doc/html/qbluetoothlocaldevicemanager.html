@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothLocalDeviceManager Class Reference</h1>
 <p>The QBluetoothLocalDeviceManager class provides access to local Bluetooth devices. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothLocalDeviceManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothLocalDeviceManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbluetoothlocaldevicemanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <li><div class="fn"/>QStringList <b><a href="qbluetoothlocaldevicemanager.html#devices">devices</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -36,17 +36,16 @@
 <li><div class="fn"/>void <b><a href="qbluetoothlocaldevicemanager.html#deviceRemoved">deviceRemoved</a></b> ( const QString &amp; <i>device</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -58,30 +57,30 @@
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothLocalDeviceManager"></a>QBluetoothLocalDeviceManager::QBluetoothLocalDeviceManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothLocalDeviceManager"></a>QBluetoothLocalDeviceManager::QBluetoothLocalDeviceManager ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs the device manager for local Bluetooth devices. The <i>parent</i> parameter specifies the parent.</p>
 <h3 class="fn"><a name="dtor.QBluetoothLocalDeviceManager"></a>QBluetoothLocalDeviceManager::~QBluetoothLocalDeviceManager ()</h3>
 <p>Destroys the device manager.</p>
-<h3 class="fn"><a name="defaultDevice"></a><a href="qstring.html">QString</a> QBluetoothLocalDeviceManager::defaultDevice ()</h3>
+<h3 class="fn"><a name="defaultDevice"></a><a href="./qstring.html">QString</a> QBluetoothLocalDeviceManager::defaultDevice ()</h3>
 <p>Returns a device name of the default Bluetooth adapter. This is typically 'hci0'. Returns a null string if no device is installed.</p>
 <p>The <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> default constructor can be used to construct an instance of the default local device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#QBluetoothLocalDevice">QBluetoothLocalDevice::QBluetoothLocalDevice</a>(), <a href="qbluetoothlocaldevicemanager.html#devices">devices</a>(), and <a href="qbluetoothlocaldevicemanager.html#defaultDeviceChanged">defaultDeviceChanged</a>().</p>
-<h3 class="fn"><a name="defaultDeviceChanged"></a>void QBluetoothLocalDeviceManager::defaultDeviceChanged ( const <a href="qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="defaultDeviceChanged"></a>void QBluetoothLocalDeviceManager::defaultDeviceChanged ( const <a href="./qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the default device has changed. The <i>device</i> parameter contains the representation of the new default device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> and <a href="qbluetoothlocaldevicemanager.html#defaultDevice">defaultDevice</a>().</p>
-<h3 class="fn"><a name="deviceAdded"></a>void QBluetoothLocalDeviceManager::deviceAdded ( const <a href="qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="deviceAdded"></a>void QBluetoothLocalDeviceManager::deviceAdded ( const <a href="./qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a new device has been added to the system. The <i>device</i> parameter contains the representation of the device which can be passed to the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> and <a href="qbluetoothlocaldevicemanager.html#devices">devices</a>().</p>
-<h3 class="fn"><a name="deviceRemoved"></a>void QBluetoothLocalDeviceManager::deviceRemoved ( const <a href="qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="deviceRemoved"></a>void QBluetoothLocalDeviceManager::deviceRemoved ( const <a href="./qstring.html">QString</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a device has been removed from the system. The <i>device</i> parameter contains the representation of the device which was removed.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> and <a href="qbluetoothlocaldevicemanager.html#devices">devices</a>().</p>
-<h3 class="fn"><a name="devices"></a><a href="qstringlist.html">QStringList</a> QBluetoothLocalDeviceManager::devices ()</h3>
+<h3 class="fn"><a name="devices"></a><a href="./qstringlist.html">QStringList</a> QBluetoothLocalDeviceManager::devices ()</h3>
 <p>Returns a list of all Bluetooth devices found on the system. The list typically consists of hci0, hci1, ..&#x2e;, hciN, depending on the number of devices.</p>
 <p>See also <a href="qbluetoothlocaldevicemanager.html#defaultDevice">defaultDevice</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

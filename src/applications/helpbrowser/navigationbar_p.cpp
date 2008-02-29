@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include "navigationbar_p.h"
 
+#include <qtopianamespace.h>
 #include <QGridLayout>
 #include <QToolButton>
 #include <QApplication>
@@ -83,10 +84,13 @@ QToolButton *NavigationBar::createButton(Qt::ArrowType arrowType)
     policy.setHorizontalPolicy(QSizePolicy::Expanding);
     bn->setSizePolicy(policy);
 
-    // Reduce the default height of the widget.
-    int height = bn->fontMetrics().size(0,"Qg").height();
-    bn->setMaximumHeight(height);
-    bn->setMinimumHeight(height);
+    if ( !Qtopia::mousePreferred() ) {
+        // Just for context not pressing,
+        // so reduce the default height of the widget.
+        int height = bn->fontMetrics().size(0,"Qg").height();
+        bn->setMaximumHeight(height);
+        bn->setMinimumHeight(height);
+    }
 
     return bn;
 }

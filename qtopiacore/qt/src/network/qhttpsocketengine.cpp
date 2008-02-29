@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -330,9 +328,8 @@ bool QHttpSocketEngine::waitForWrite(int msecs, bool *timedOut) const
     // If we're not connected yet, wait until we are, and until bytes have
     // been received (i.e., the socket has connected, we have sent the
     // greeting, and then received the response).
-    if (d->socket->state() != QAbstractSocket::ConnectedState) {
-        if (!d->socket->waitForReadyRead(qt_timeout_value(msecs, stopWatch.elapsed())))
-            return false;
+    while (d->state != Connected && d->socket->waitForReadyRead(qt_timeout_value(msecs, stopWatch.elapsed()))) {
+        // Loop while the protocol handshake is taking place.
     }
 
     // Report any error that may occur.
@@ -531,6 +528,9 @@ void QHttpSocketEngine::slotSocketReadNotification()
                     d->state = ReadResponseContent;
                     d->pendingResponseData = contentLength;
                     goto readResponseContent;
+                } else {
+                    d->state = SendAuthentication;
+                    slotSocketConnected();
                 }
             }
             return;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1021,6 +1019,10 @@ QPixmap *QItemDelegate::selected(const QPixmap &pixmap, const QPalette &palette,
         painter.end();
 
         QPixmap selected = QPixmap(QPixmap::fromImage(img));
+        int n = (img.numBytes() >> 10) + 1;
+        if (QPixmapCache::cacheLimit() < n)
+            QPixmapCache::setCacheLimit(n);
+
         QPixmapCache::insert(key, selected);
         pm = QPixmapCache::find(key);
     }
@@ -1225,6 +1227,8 @@ bool QItemDelegate::editorEvent(QEvent *event,
     if ((event->type() == QEvent::MouseButtonRelease)
         || (event->type() == QEvent::MouseButtonDblClick)) {
         QRect checkRect = check(option, option.rect, Qt::Checked);
+        QRect emptyRect;
+        doLayout(option, &checkRect, &emptyRect, &emptyRect, false);
         if (!checkRect.contains(static_cast<QMouseEvent*>(event)->pos()))
             return false;
 

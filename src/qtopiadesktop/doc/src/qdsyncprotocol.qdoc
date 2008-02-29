@@ -1,11 +1,13 @@
 /*!
 
-\overview qdsync Protocol
+\group qdsync_commands
+\title qdsync Protocol
+\ingroup overviews
 \brief A description of the protocol used between Qtopia Sync Agent and the Synchronization application.
 
 \section1 Overview
 
-This page describes how the qdsync protocol works. Individual commands are documented in \l{qdsync Protocol Commands}.
+This page describes how the qdsync protocol works. Individual commands are documented below.
 
 The qdsync protocol is a line-oriented protocol that can be implemented on top of a socket.
 It consists of a number of required commands and some optional commands.
@@ -13,6 +15,9 @@ It consists of a number of required commands and some optional commands.
 \section1 State Machine
 
 While there is no formal state machine there is an expected order of message arrival.
+The basic process looks like this.
+
+\image qdsyncprotocol.png qdsync protocol diagram
 
 \list
 \o When a connection is initiated the device will send a \l 220 message.
@@ -21,7 +26,7 @@ While there is no formal state machine there is an expected order of message arr
 \o The desktop sends a \l PASS message.
 \o The device responds with a \l 230 message.
 \o The desktop and device can now send \l CALL or \l CALLB messages.
-\o The device responds to these with \l 200 messages.
+\o The device responds to these with \l 200 messages (unless disabled with \l HELPER_INIT).
 \o The connection is ended when the desktop sends a \l QUIT message.
 \endlist
 
@@ -30,16 +35,11 @@ of some kind within the specified duration period. The \l HELPER_PING and \l HEL
 this purpose. The \l HELPER_QUIT command is used by the device to indicate failure to send a command in the
 specified time.
 
-*/
-
-/*!
-
-\group qdsync_commands
-\title qdsync Protocol Commands
+\section1 Commands
 
 \generatelist related
 
-\sa {qdsync Protocol}
+\sa Overviews
 
 */
 
@@ -70,6 +70,13 @@ Qtopia Sync Agent expects the following key/value pairs to be sent:
 \o system This is a string describing the system installed on the device.
 \o model This is a string describing the device that may be displayed to the user.
 \o hexversion This is the version number as a hexadecimal number. It should be comparable to the QTOPIA_VERSION macro.
+\endlist
+
+Additionally, the \c qtopia4 plugin expects to see:
+
+\list type=dl
+\o datasets A list of datasets the device supports (proxy QDClientSyncPlugin instances
+   will be created for them).
 \endlist
 
 After this command is sent the device expects to receive a \l USER command.

@@ -34,18 +34,18 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.QContentPlugin"></a>QContentPlugin::~QContentPlugin ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys a <a href="qcontentplugin.html">QContentPlugin</a>.</p>
-<h3 class="fn"><a name="installContent"></a>bool QContentPlugin::installContent ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, <a href="qcontent.html">QContent</a> * <i>content</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="installContent"></a>bool QContentPlugin::installContent ( const <a href="./qstring.html">QString</a> &amp; <i>fileName</i>, <a href="qcontent.html">QContent</a> * <i>content</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Populates <i>content</i> with data from the file with the file name <i>fileName</i>. Returns true if the content plug-in successfully populated the <a href="qcontent.html">QContent</a>.</p>
 <p>Installation is only performed when the content is first identified by the content system, if the file changes after installation <a href="qcontentplugin.html#updateContent">updateContent</a>() will be called to ensure the content data is up to date; otherwise returns false</p>
-<h3 class="fn"><a name="keys"></a><a href="qstringlist.html">QStringList</a> QContentPlugin::keys () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="keys"></a><a href="./qstringlist.html">QStringList</a> QContentPlugin::keys () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a list of the file extensions the <a href="qcontentplugin.html">QContentPlugin</a> instance can report on.</p>
 <h3 class="fn"><a name="updateContent"></a>bool QContentPlugin::updateContent ( <a href="qcontent.html">QContent</a> * <i>content</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Refreshes the content data of <i>content</i> following a change to the file it references.</p>
 <p>Returns true if the content data has been ensured to be up to date; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

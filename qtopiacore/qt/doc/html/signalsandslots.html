@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/signalsandslots.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/signalsandslots.qdoc -->
 <head>
   <title>Qt 4.3: Signals and Slots</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -87,8 +87,8 @@
      QObject::connect(&amp;a, SIGNAL(valueChanged(int)),
                       &amp;b, SLOT(setValue(int)));
 
-     a.setValue(12);     <span class="comment">// a.value() == 12, b.value() == 12</span>
-     b.setValue(48);     <span class="comment">// a.value() == 12, b.value() == 48</span></pre>
+     a.setValue(12);     <span class="comment">//</span> a.value() == 12, b.value() == 12
+     b.setValue(48);     <span class="comment">//</span> a.value() == 12, b.value() == 48</pre>
 <p>Calling <tt>a.setValue(12)</tt> makes <tt>a</tt> emit a <tt>valueChanged(12)</tt> signal, which <tt>b</tt> will receive in its <tt>setValue()</tt> slot, i.e&#x2e; <tt>b.setValue(12)</tt> is called. Then <tt>b</tt> emits the same <tt>valueChanged()</tt> signal, but since no slot has been connected to <tt>b</tt>'s <tt>valueChanged()</tt> signal, the signal is ignored.</p>
 <p>Note that the <tt>setValue()</tt> function sets the value and emits the signal only if <tt>value != m_value</tt>. This prevents infinite looping in the case of cyclic connections (e.g&#x2e;, if <tt>b.valueChanged()</tt> were connected to <tt>a.setValue()</tt>).</p>
 <p>A signal is emitted for every connection you make; if you duplicate a connection, two signals will be emitted. You can always break a connection using <a href="qobject.html#disconnect">QObject::disconnect</a>().</p>
@@ -165,8 +165,8 @@
 <p>See also <a href="metaobjects.html">Meta-Object System</a> and <a href="properties.html">Qt's Property System</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

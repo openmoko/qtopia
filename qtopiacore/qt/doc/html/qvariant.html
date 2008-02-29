@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/kernel/qvariant.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/kernel/qvariant.cpp -->
 <head>
   <title>Qt 4.3: QVariant Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -123,8 +123,8 @@
 <li><div class="fn"/>void <b><a href="qvariant.html#qVariantSetValue">qVariantSetValue</a></b> ( QVariant &amp; <i>variant</i>, const T &amp; <i>value</i> )</li>
 <li><div class="fn"/>T <b><a href="qvariant.html#qVariantValue">qVariantValue</a></b> ( const QVariant &amp; <i>value</i> )</li>
 <li><div class="fn"/>T <b><a href="qvariant.html#qvariant_cast">qvariant_cast</a></b> ( const QVariant &amp; <i>value</i> )</li>
-<li><div class="fn"/>bool <b><a href="qvariant.html#operator-not-eq-9">operator!=</a></b> ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qvariant.html#operator-eq-eq-10">operator==</a></b> ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qvariant.html#operator-not-eq-21">operator!=</a></b> ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qvariant.html#operator-eq-eq-32">operator==</a></b> ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -135,29 +135,29 @@
 <p>The methods named toT() (e.g&#x2e;, <a href="qvariant.html#toInt">toInt</a>(), <a href="qvariant.html#toString">toString</a>()) are const. If you ask for the stored type, they return a copy of the stored object. If you ask for a type that can be generated from the stored type, toT() copies and converts and leaves the object itself unchanged. If you ask for a type that cannot be generated from the stored type, the result depends on the type; see the function documentation for details.</p>
 <p>Here is some example code to demonstrate the use of QVariant:</p>
 <pre> QDataStream out(...);
- QVariant v(123);                <span class="comment">// The variant now contains an int</span>
- int x = v.toInt();              <span class="comment">// x = 123</span>
- out &lt;&lt; v;                       <span class="comment">// Writes a type tag and an int to out</span>
- v = QVariant(&quot;hello&quot;);          <span class="comment">// The variant now contains a QByteArray</span>
- v = QVariant(tr(&quot;hello&quot;));      <span class="comment">// The variant now contains a QString</span>
- int y = v.toInt();              <span class="comment">// y = 0 since v cannot be converted to an int</span>
- QString s = v.toString();       <span class="comment">// s = tr(&quot;hello&quot;)  (see QObject::tr())</span>
- out &lt;&lt; v;                       <span class="comment">// Writes a type tag and a QString to out</span>
+ QVariant v(123);                <span class="comment">//</span> The variant now contains an int
+ int x = v.toInt();              <span class="comment">//</span> x = 123
+ out &lt;&lt; v;                       <span class="comment">//</span> Writes a type tag and an int to out
+ v = QVariant(&quot;hello&quot;);          <span class="comment">//</span> The variant now contains a QByteArray
+ v = QVariant(tr(&quot;hello&quot;));      <span class="comment">//</span> The variant now contains a QString
+ int y = v.toInt();              <span class="comment">//</span> y = 0 since v cannot be converted to an int
+ QString s = v.toString();       <span class="comment">//</span> s = tr(&quot;hello&quot;)  (see QObject::tr())
+ out &lt;&lt; v;                       <span class="comment">//</span> Writes a type tag and a QString to out
  ...
- QDataStream in(...);            <span class="comment">// (opening the previously written stream)</span>
- in &gt;&gt; v;                        <span class="comment">// Reads an Int variant</span>
- int z = v.toInt();              <span class="comment">// z = 123</span>
- qDebug(&quot;Type is %s&quot;,            <span class="comment">// prints &quot;Type is int&quot;</span>
+ QDataStream in(...);            <span class="comment">//</span> (opening the previously written stream)
+ in &gt;&gt; v;                        <span class="comment">//</span> Reads an Int variant
+ int z = v.toInt();              <span class="comment">//</span> z = 123
+ qDebug(&quot;Type is %s&quot;,            <span class="comment">//</span> prints &quot;Type is int&quot;
          v.typeName());
- v = v.toInt() + 100;            <span class="comment">// The variant now hold the value 223</span>
+ v = v.toInt() + 100;            <span class="comment">//</span> The variant now hold the value 223
  v = QVariant(QStringList());</pre>
 <p>You can even store <a href="qlist.html">QList</a>&lt;QVariant&gt; and <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, QVariant&gt; values in a variant, so you can easily construct arbitrarily complex data structures of arbitrary types. This is very powerful and versatile, but may prove less memory and speed efficient than storing specific types in standard data structures.</p>
 <p>QVariant also supports the notion of null values, where you have a defined type with no value set.</p>
 <pre> QVariant x, y(QString()), z(QString(&quot;&quot;));
  x.convert(QVariant::Int);
-<span class="comment"> // x.isNull() == true</span>
-<span class="comment"> // y.isNull() == true, z.isNull() == false</span>
-<span class="comment"> // y.isEmpty() == true, z.isEmpty() == true</span></pre>
+<span class="comment"> //</span> x.isNull() == true
+<span class="comment"> //</span> y.isNull() == true, z.isNull() == false
+<span class="comment"> //</span> y.isEmpty() == true, z.isEmpty() == true</pre>
 <p>QVariant can be extended to support other types than those mentioned in the <a href="qvariant.html#Type-enum">Type</a> enum. See the <a href="qmetatype.html">QMetaType</a> documentation for details.</p>
 <a name="a-note-on-gui-types"></a>
 <h3>A Note on GUI Types</h3>
@@ -343,14 +343,14 @@
 <p>Example:</p>
 <pre> QVariant v = 42;
 
- v.canConvert&lt;int&gt;();              <span class="comment">// returns true</span>
- v.canConvert&lt;QString&gt;();          <span class="comment">// returns true</span>
+ v.canConvert&lt;int&gt;();              <span class="comment">//</span> returns true
+ v.canConvert&lt;QString&gt;();          <span class="comment">//</span> returns true
 
  MyCustomStruct s;
  v.setValue(s);
 
- v.canConvert&lt;int&gt;();              <span class="comment">// returns false</span>
- v.canConvert&lt;MyCustomStruct&gt;();   <span class="comment">// returns true</span></pre>
+ v.canConvert&lt;int&gt;();              <span class="comment">//</span> returns false
+ v.canConvert&lt;MyCustomStruct&gt;();   <span class="comment">//</span> returns true</pre>
 <p><b>Warning:</b> This function is not available with MSVC 6. Use <a href="qvariant.html#qVariantCanConvert">qVariantCanConvert</a>() instead if you need to support that version of the compiler.</p>
 <p>See also <a href="qvariant.html#convert">convert</a>().</p>
 <h3 class="fn"><a name="clear"></a>void QVariant::clear ()</h3>
@@ -378,8 +378,8 @@
 <pre> QVariant v;
 
  v.setValue(5);
- int i = v.toInt();         <span class="comment">// i is now 5</span>
- QString s = v.toString()   <span class="comment">// s is now &quot;5&quot;</span>
+ int i = v.toInt();         <span class="comment">//</span> i is now 5
+ QString s = v.toString()   <span class="comment">//</span> s is now &quot;5&quot;
 
  MyCustomStruct c;
  v.setValue(c);
@@ -501,9 +501,9 @@
      c = v.value&lt;MyCustomStruct&gt;(v);
 
  v = 7;
- int i = v.value&lt;int&gt;();                        <span class="comment">// same as v.toInt()</span>
- QString s = v.value&lt;QString&gt;();                <span class="comment">// same as v.toString(), s is now &quot;7&quot;</span>
- MyCustomStruct c2 = v.value&lt;MyCustomStruct&gt;(); <span class="comment">// conversion failed, c2 is empty</span></pre>
+ int i = v.value&lt;int&gt;();                        <span class="comment">//</span> same as v.toInt()
+ QString s = v.value&lt;QString&gt;();                <span class="comment">//</span> same as v.toString(), s is now &quot;7&quot;
+ MyCustomStruct c2 = v.value&lt;MyCustomStruct&gt;(); <span class="comment">//</span> conversion failed, c2 is empty</pre>
 <p><b>Warning:</b> This function is not available with MSVC 6. Use <a href="qvariant.html#qVariantValue">qVariantValue</a>() or <a href="qvariant.html#qvariant_cast">qvariant_cast</a>() instead if you need to support that version of the compiler.</p>
 <p>See also <a href="qvariant.html#setValue">setValue</a>(), <a href="qvariant.html#fromValue">fromValue</a>(), and <a href="qvariant.html#canConvert">canConvert</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QVariant::operator!= ( const QVariant &amp; <i>v</i> ) const</h3>
@@ -543,66 +543,18 @@
 <p>Returns the given <i>value</i> converted to the template type <tt>T</tt>.</p>
 <p>This function is equivalent to <a href="qvariant.html#qVariantValue">qVariantValue</a>().</p>
 <p>See also <a href="qvariant.html#qVariantValue">qVariantValue</a>() and <a href="qvariant.html#value">QVariant::value</a>().</p>
-<h3 class="fn"><a name="operator-not-eq-9"></a>bool operator!= ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-21"></a>bool operator!= ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns false if <i>v1</i> and <i>v2</i> are equal; otherwise returns true.</p>
 <p><b>Warning:</b> This function doesn't support custom types registered with <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>().</p>
-<h3 class="fn"><a name="operator-eq-eq-10"></a>bool operator== ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-32"></a>bool operator== ( const QVariant &amp; <i>v1</i>, const QVariant &amp; <i>v2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>v1</i> and <i>v2</i> are equal; otherwise returns false.</p>
 <p><b>Warning:</b> This function doesn't support custom types registered with <a href="qmetatype.html#qRegisterMetaType">qRegisterMetaType</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QVariant-36"></a>QVariant::QVariant ( bool <i>b</i>, int <i>dummy</i> )</h3>
-<p>Use the <a href="qvariant.html">QVariant</a>(bool) constructor instead.</p>
-<h3 class="fn"><a name="asBitArray"></a><a href="qbitarray.html">QBitArray</a> &amp; QVariant::asBitArray ()</h3>
-<p>Use <a href="qvariant.html#toBitArray">toBitArray</a>() instead.</p>
-<h3 class="fn"><a name="asBool"></a>bool &amp; QVariant::asBool ()</h3>
-<p>Use <a href="qvariant.html#toBool">toBool</a>() instead.</p>
-<h3 class="fn"><a name="asByteArray"></a><a href="qbytearray.html">QByteArray</a> &amp; QVariant::asByteArray ()</h3>
-<p>Use <a href="qvariant.html#toByteArray">toByteArray</a>() instead.</p>
-<h3 class="fn"><a name="asCString"></a><a href="qbytearray.html">QByteArray</a> &amp; QVariant::asCString ()</h3>
-<p>Use <a href="qvariant.html#toByteArray">toByteArray</a>() instead.</p>
-<h3 class="fn"><a name="asDate"></a><a href="qdate.html">QDate</a> &amp; QVariant::asDate ()</h3>
-<p>Use <a href="qvariant.html#toDate">toDate</a>() instead.</p>
-<h3 class="fn"><a name="asDateTime"></a><a href="qdatetime.html">QDateTime</a> &amp; QVariant::asDateTime ()</h3>
-<p>Use <a href="qvariant.html#toDateTime">toDateTime</a>() instead.</p>
-<h3 class="fn"><a name="asDouble"></a>double &amp; QVariant::asDouble ()</h3>
-<p>Use <a href="qvariant.html#toDouble">toDouble</a>() instead.</p>
-<h3 class="fn"><a name="asInt"></a>int &amp; QVariant::asInt ()</h3>
-<p>Use <a href="qvariant.html#toInt">toInt</a>() instead.</p>
-<h3 class="fn"><a name="asList"></a><a href="qlist.html">QList</a>&lt;QVariant&gt; &amp; QVariant::asList ()</h3>
-<p>Use <a href="qvariant.html#toList">toList</a>() instead.</p>
-<h3 class="fn"><a name="asLongLong"></a><a href="qtglobal.html#qlonglong-typedef">qlonglong</a> &amp; QVariant::asLongLong ()</h3>
-<p>Use <a href="qvariant.html#toLongLong">toLongLong</a>() instead.</p>
-<h3 class="fn"><a name="asMap"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, QVariant&gt; &amp; QVariant::asMap ()</h3>
-<p>Use <a href="qvariant.html#toMap">toMap</a>() instead.</p>
-<h3 class="fn"><a name="asPoint"></a><a href="qpoint.html">QPoint</a> &amp; QVariant::asPoint ()</h3>
-<p>Use <a href="qvariant.html#toPoint">toPoint</a>() instead.</p>
-<h3 class="fn"><a name="asRect"></a><a href="qrect.html">QRect</a> &amp; QVariant::asRect ()</h3>
-<p>Use <a href="qvariant.html#toRect">toRect</a>() instead.</p>
-<h3 class="fn"><a name="asSize"></a><a href="qsize.html">QSize</a> &amp; QVariant::asSize ()</h3>
-<p>Use <a href="qvariant.html#toSize">toSize</a>() instead.</p>
-<h3 class="fn"><a name="asString"></a><a href="qstring.html">QString</a> &amp; QVariant::asString ()</h3>
-<p>Use <a href="qvariant.html#toString">toString</a>() instead.</p>
-<h3 class="fn"><a name="asStringList"></a><a href="qstringlist.html">QStringList</a> &amp; QVariant::asStringList ()</h3>
-<p>Use <a href="qvariant.html#toStringList">toStringList</a>() instead.</p>
-<h3 class="fn"><a name="asTime"></a><a href="qtime.html">QTime</a> &amp; QVariant::asTime ()</h3>
-<p>Use <a href="qvariant.html#toTime">toTime</a>() instead.</p>
-<h3 class="fn"><a name="asUInt"></a><a href="qtglobal.html#uint-typedef">uint</a> &amp; QVariant::asUInt ()</h3>
-<p>Use <a href="qvariant.html#toUInt">toUInt</a>() instead.</p>
-<h3 class="fn"><a name="asULongLong"></a><a href="qtglobal.html#qulonglong-typedef">qulonglong</a> &amp; QVariant::asULongLong ()</h3>
-<p>Use <a href="qvariant.html#toULongLong">toULongLong</a>() instead.</p>
-<h3 class="fn"><a name="canCast"></a>bool QVariant::canCast ( <a href="qvariant.html#Type-enum">Type</a> <i>t</i> ) const</h3>
-<p>Use <a href="qvariant.html#canConvert">canConvert</a>() instead.</p>
-<h3 class="fn"><a name="cast"></a>bool QVariant::cast ( <a href="qvariant.html#Type-enum">Type</a> <i>t</i> )</h3>
-<p>Use <a href="qvariant.html#convert">convert</a>() instead.</p>
-<h3 class="fn"><a name="toCString"></a>const <a href="qbytearray.html">QByteArray</a> QVariant::toCString () const</h3>
-<p>Use <a href="qvariant.html#toByteArray">toByteArray</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

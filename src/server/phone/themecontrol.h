@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -38,8 +38,6 @@ public:
 
     void registerThemedView(ThemedView *, const QString &);
     bool exportBackground() const;
-    QString themeDir() const;
-    QString currentTheme() const;
 
     void refresh();
 
@@ -50,13 +48,12 @@ signals:
     void themeChanged();
 
 private:
+    QString findFile(const QString &) const;
     void doTheme(ThemedView *, const QString &);
     void doThemeWidgets(ThemedView *view);
 
     ThemeControl();
 
-    QString m_themeDir;
-    QString m_theme;
     QString m_themeName;
     bool m_exportBackground;
 

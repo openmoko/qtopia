@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -77,15 +77,17 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
                 progress.adjust( 1, 1, -1, -1 );
             }
 
-            if( progress.isValid() ) {
-                if( opt->state == QStyle::State_Sunken ) {
+            if( opt->state == QStyle::State_Sunken ) {
+                if( progress.isValid() ) {
                     if( m_silhouettebuffer.isNull() || rect.size() != m_silhouettebuffer.size() ) {
                         QColor color = opt->palette.color( QPalette::Highlight );
                         m_silhouettebuffer = generate_progress_bar( color, color.dark( 150 ), rect.size() );
                     }
 
                     p->drawPixmap( progress, m_silhouettebuffer );
-                } else {
+                }
+            } else {
+                if( progress.isValid() ) {
                     if( m_barbuffer.isNull() || rect.size() != m_barbuffer.size() ) {
                         QColor color = opt->palette.color( QPalette::Highlight );
                         m_barbuffer = generate_progress_bar( color, color.dark( 150 ), rect.size() );
@@ -97,12 +99,12 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
                     p->drawPixmap( progress, m_barbuffer );
                     p->drawPixmap( QRect( QPoint( progress.right() + 1, rect.top() + 1 ),
                         QPoint( rect.right() - 1, rect.bottom() - 1 ) ), m_groovebuffer );
+                } else {
+                    if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
+                        p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
+                    }
+                    p->drawPixmap( rect.adjusted( 1, 1, -1, -1 ), m_groovebuffer );
                 }
-            } else {
-                if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
-                    p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
-                }
-                p->drawPixmap( rect.adjusted( 1, 1, -1, -1 ), m_groovebuffer );
             }
         }
         }

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -104,8 +104,8 @@ void QMediaAbstractControl::proxyAll()
         switch (method.methodType())
         {
         case QMetaMethod::Signal:
-            QtopiaIpcAdaptor::connect(d->recieve, method.signature(),
-                                      this, (QString("%1").arg(QSIGNAL_CODE) + method.signature()).toLatin1());
+            QtopiaIpcAdaptor::connect(d->recieve, QByteArray::number(QMESSAGE_CODE) + method.signature(),
+                                      this, QByteArray::number(QSIGNAL_CODE) + method.signature());
             break;
 
         case QMetaMethod::Slot:

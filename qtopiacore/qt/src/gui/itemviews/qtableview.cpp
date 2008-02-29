@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -354,10 +352,7 @@ QBitArray QTableViewPrivate::drawAndClipSpans(const QRect &area, QPainter *paint
         drawCell(painter, opt, index);
         region -= rect;
     }
-    if (region != viewport->rect())
-        painter->setClipRegion(region);
-    else
-        painter->setClipRegion(QRegion(), Qt::NoClip);
+    painter->setClipRegion(region);
     return cells;
 }
 
@@ -706,18 +701,18 @@ void QTableView::paintEvent(QPaintEvent *event)
     if (horizontalHeader->count() == 0 || verticalHeader->count() == 0 || !d->itemDelegate)
         return;
 
-    int x = horizontalHeader->length() - horizontalHeader->offset() - 1;
-    int y = verticalHeader->length() - verticalHeader->offset() - 1;
+    uint x = horizontalHeader->length() - horizontalHeader->offset() - 1;
+    uint y = verticalHeader->length() - verticalHeader->offset() - 1;
 
     QVector<QRect> rects = event->region().rects();
     for (int i = 0; i < rects.size(); ++i) {
         QRect dirtyArea = rects.at(i);
         dirtyArea.translate(offset);
-        dirtyArea.setBottom(qMin(dirtyArea.bottom(), y));
+        dirtyArea.setBottom(qMin((uint)dirtyArea.bottom(), y));
         if (rightToLeft) {
-            dirtyArea.setLeft(qMax(dirtyArea.left(), d->viewport->width() - x));
+            dirtyArea.setLeft(qMax((uint)dirtyArea.left(), d->viewport->width() - x));
         } else {
-            dirtyArea.setRight(qMin(dirtyArea.right(), x));
+            dirtyArea.setRight(qMin((uint)dirtyArea.right(), x));
         }
 
         QBitArray paintedCells;
@@ -1292,6 +1287,9 @@ void QTableView::columnCountChanged(int, int)
 void QTableView::updateGeometries()
 {
     Q_D(QTableView);
+    if (d->geometryRecursionBlock)
+        return;
+    d->geometryRecursionBlock = true;
 
     int width = 0;
     if (!d->verticalHeader->isHidden()) {
@@ -1387,6 +1385,7 @@ void QTableView::updateGeometries()
         verticalScrollBar()->setRange(0, verticalLength - vsize.height());
     }
 
+    d->geometryRecursionBlock = false;
     QAbstractItemView::updateGeometries();
 }
 

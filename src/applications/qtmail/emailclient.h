@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,8 @@
 #include "writemail.h"
 #include "account.h"
 
+#include <QMailStore>
+
 #include <quuid.h>
 
 #include <qlist.h>
@@ -61,13 +63,13 @@
 #include <qtopiaabstractservice.h>
 #include <qtopiachannel.h>
 
-class StatusProgressBar;
 class Folder;
 class AccountList;
 class QDSActionRequest;
 class QtopiaChannel;
 class QListWidget;
 class FolderListView;
+class SearchView;
 
 class EmailClient : public QMainWindow
 {
@@ -80,6 +82,8 @@ class EmailClient : public QMainWindow
     enum InitialAction { None = 0, IncomingMessages, View, Compose, Cleanup };
 
 public:
+    enum MessageListContent { Messages = 0, Emails, SearchResults }; 
+
     EmailClient(QWidget* parent, const QString name, Qt::WFlags fl = 0 );
     ~EmailClient();
 
@@ -91,7 +95,7 @@ public:
     void update();
     bool isTransmitting();
 
-    void delayedShowMessage(MailAccount::AccountType acct, QMailId id, bool userRequest);
+    void delayedShowMessage(QMailAccount::AccountType acct, QMailId id, bool userRequest);
 
     // Structure to store error strings as plain untranslated strings so they're ROM-able
     struct ErrorEntry { int code; const char* text; };
@@ -100,6 +104,11 @@ public:
 signals:
     void raiseWidget(QWidget *, const QString &);
     void messageCountUpdated();
+
+    void statusVisible(bool);
+    void updateStatus(const QString&);
+    void updateProgress(uint, uint);
+    void clearStatus();
 
 public slots:
     void setDocument(const QString &);
@@ -135,7 +144,9 @@ protected slots:
     void queryItemSelected();
     void resetNewMessages();
     bool moveMailToFolder(const QMailId& id, EmailFolderList *source, EmailFolderList *target);
-    bool copyMailToFolder(const QMailId& id, EmailFolderList *source, EmailFolderList *target);
+    bool copyMailToFolder(const QMailId& id, EmailFolderList *target);
+    bool removeMailFromFolder(const QMailId& id, EmailFolderList* location);
+    bool emptyTrashItem(const QMailId& id, EmailFolderList *);
     void emptyTrashFolder();
 
     // Currently disabled:
@@ -143,10 +154,12 @@ protected slots:
 
     bool confirmDeleteWithoutSIM(int);
     void deleteMailItem();
-    void moveMailItem(int);
-    void copyMailItem(int);
+    void moveMailItem(EmailFolderList* destination);
+    void copyMailItem(EmailFolderList* destination);
+    /* Currently disabled:
     void moveMailItem(QAction*);
     void copyMailItem(QAction*);
+    */
     void moveMessage();
     void copyMessage();
     void selectAll();
@@ -160,8 +173,11 @@ protected slots:
     void updateSendStatusLabel(const Client*, const QString&);
     void updateReceiveStatusLabel(const Client*, const QString&);
 
+    /* Currently disabled:
     void rebuildMoveCopyMenus(const Folder *folder);
+    */
     void folderSelected(Folder *);
+    void folderModified(Folder *);
     void imapServerFolders();
     void failedList(QStringList &);
 
@@ -183,7 +199,7 @@ protected slots:
     void updateGetMailButton(bool enable);
     void updateAccounts();
 
-    void messageChanged();
+    void showMessageStatus();
 
     void smtpError(int code, QString &);
     void popError(int code, QString &);
@@ -193,8 +209,10 @@ protected slots:
     void setStatusText(QString &);
 
     void cornerButtonClicked();
-    void findMatchingMessages();
+    QMailIdList findMatchingMessages(const Search* search);
     void search();
+    void searchInitiated();
+    void searchSelected(int);
 
     void automaticFetch();
 
@@ -219,8 +237,8 @@ protected slots:
     void readReplyRequested(const QMailMessage&);
 
     void settings();
-    void changedAccount(MailAccount *);
-    void deleteAccount(MailAccount *);
+    void changedAccount(QMailAccount *);
+    void deleteAccount(QMailAccount *);
 
     void selectAccountTimeout();
     FolderListView *folderView();
@@ -250,6 +268,14 @@ private slots:
     void mmsMessage(const QDSActionRequest&);
 #endif
     void nonexistentMessage(const QMailId&);
+    void expiredMessages(const QStringList&, const QString&, bool);
+    void composeMessage(QMailMessage::MessageType, 
+                        const QMailAddressList&, 
+                        const QString&, 
+                        const QString&, 
+                        const QContentList&, 
+                        QMailMessage::AttachmentsAction);
+    void composeMessage(const QMailMessage&);
 
 protected:
     friend class QTMailWindow;
@@ -291,7 +317,7 @@ private:
     bool verifyAccounts(bool outgoing);
 
     void addMailToDownloadList(const QMailMessage& message);
-    MailAccount* smtpForMail(QMailMessage& message);
+    QMailAccount* smtpForMail(QMailMessage& message);
 
     void updateQuery(const QMailMessage& message, const QString &mailbox);
 
@@ -300,8 +326,10 @@ private:
     void suspendOk(bool y);
     void moveOutboxMailsToDrafts();
 
-    void updateFolderCount(const QString &mailbox, bool folderListOnly = false);
-    int currentMailboxWidgetId();
+    void updateFolderCount(const QString &mailbox);
+    void updateFolderCounts();
+
+    int currentMailboxWidgetId() const;
     void setCurrentMailboxWidget(int);
     int currentMessageId() { return messageId; }
     int currentFolderId() { return folderId; }
@@ -309,28 +337,43 @@ private:
     void appendErrorText(QString& message, const int code, const ErrorMap& map);
     QString mailType(const QMailMessage& mail);
 
-    void showMessageList(bool email, bool recordLocation);
+    void populateMessageView(MessageListContent content);
+
+    void showMessageList(MessageListContent content, bool recordLocation);
     void showWidget(QWidget*, const QString& = QString());
 
     void setActionVisible(QAction*, bool);
 
-    void deleteMail(const QMailStore::DeletionProperties& properties, bool deleting, EmailFolderList* srcFolder);
+    void deleteMail(const QMailMessage& deleteHeader, bool deleting, EmailFolderList* srcFolder);
 
     bool deleteMailList(QList<EmailListItem*>& deleteList);
-    bool moveMailListToFolder(QList<EmailListItem*>& moveList, EmailFolderList *source, EmailFolderList *target);
-    bool copyMailListToFolder(QList<EmailListItem*>& copyList, EmailFolderList *source, EmailFolderList *target);
+    bool moveMailListToFolder(QList<EmailListItem*>& moveList, EmailFolderList *target);
+    bool copyMailListToFolder(const QList<EmailListItem*>& copyList, EmailFolderList *target);
 
-    bool moveMailListToFolder(const QMailIdList& list, EmailFolderList *source, EmailFolderList *target);
+    bool moveMailListToFolder(const QMailIdList& list, EmailFolderList *target);
 
-    bool foreachListElement(bool (EmailClient::*func)(const QMailId&, EmailFolderList*, EmailFolderList*), 
-                            QList<EmailListItem*>& list, EmailFolderList *source, EmailFolderList *target, const QString& caption);
+    bool foreachListElement(bool (EmailClient::*func)(const QMailId&, EmailFolderList*), 
+                            const QMailIdList& list, EmailFolderList *target);
+    bool foreachListElement(bool (EmailClient::*func)(const QMailId&, EmailFolderList*), 
+                            const QList<EmailListItem*>& list, EmailFolderList *target);
+
+    void showFolderStatus(const Folder* folder);
+
+    static QString describeFolderCount(uint all, uint sub = 0, const QString& type = QString());
+    void setFolderStatus(const Folder* folder, const QString& status);
+
+    void contextStatusUpdate();
+
+    Folder* currentFolder() const;
+    int folderType(const Folder* folder) const;
+    EmailFolderList* containingFolder(const QMailId& id);
+
+    void applyToSelectedMessages(void (EmailClient::*function)(EmailFolderList*));
 
 private:
     int folderId, messageId, actionId;
 
     QMainWindow *mainView;
-    QFrame *vbox;
-    QVBoxLayout *vboxLayout;
 
     QString appTitle;
     bool filesRead;
@@ -340,7 +383,7 @@ private:
 
     int newAccountId, mailIdCount;
     int accountIdCount;
-    int queueStatus, downloadSize, totalSize;
+    int queueStatus, totalSize;
     AccountList *accountList;
 
     EditAccount *editAccountView;
@@ -352,10 +395,9 @@ private:
     MailList mailDownloadList;
     bool sending, receiving, previewingMail, allAccounts, sendSingle;
     bool quitSent;
-    MailAccount *mailAccount, *smtpAccount;
+    QMailAccount *mailAccount, *smtpAccount;
 
     QToolBar *bar;
-    StatusProgressBar *progressBar;
     QAction *getMailButton;
     QAction *sendMailButton;
     QAction *composeButton;
@@ -370,9 +412,11 @@ private:
     QMenu *configure;
     QMenu *selectAccountMenu;
 
+    /* Currently disabled:
     QMenu *movePop, *copyPop;
-    QMap< QAction*, int > actionMap;
     QMap< QAction*, int > moveMap;
+    */
+    QMap< QAction*, int > actionMap;
 
     QStackedWidget *mailboxView;
     QAction *newAccountAction;
@@ -391,7 +435,7 @@ private:
     QTimer showMessageTimer;
     bool showMsgList;
     int showMsgRetryCount;
-    MailAccount::AccountType showMessageType;
+    QMailAccount::AccountType showMessageType;
     QMailId showMsgId;
     QString showServerId;
     bool waitingForNewMessage;
@@ -418,12 +462,19 @@ private:
 
     InitialAction initialAction;
 
-    QList<QContent> temporaries;
     QList<QMailId> unreadSmsIds;
 
     QMap<QAction*, bool> actionVisibility;
 
     Search *lastSearch;
+    SearchView *searchView;
+    int preSearchWidgetId;
+    const Folder* messageListFolder;
+    MessageListContent messageListContent;
+
+    QString emailStatusText;
+
+    QList<EmailFolderList*> locationList;
 };
 
 class EmailService : public QtopiaAbstractService
@@ -517,10 +568,28 @@ private:
 signals:
     void newMessages(bool);
     void message(QMailId);
+    void compose(QMailMessage::MessageType, 
+                 const QMailAddressList&, 
+                 const QString&, 
+                 const QString&, 
+                 const QContentList&, 
+                 QMailMessage::AttachmentsAction);
+    void compose(const QMailMessage&);
 
 public slots:
     void viewNewMessages(bool userRequest);
     void viewMessage(QMailId id);
+    void composeMessage(QMailMessage::MessageType, 
+                        QMailAddressList, 
+                        QString, 
+                        QString);
+    void composeMessage(QMailMessage::MessageType, 
+                        QMailAddressList, 
+                        QString, 
+                        QString, 
+                        QContentList, 
+                        QMailMessage::AttachmentsAction);
+    void composeMessage(QMailMessage);
 };
 
 #endif // EMAILCLIENT_H

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,6 +38,36 @@
 #include "qnetworkinterface_p.h"
 
 #include "qdebug.h"
+
+static QList<QNetworkInterfacePrivate *> postProcess(QList<QNetworkInterfacePrivate *> list)
+{
+    // Some platforms report a netmask but don't report a broadcast address
+    // Go through all available addresses and calculate the broadcast address
+    // from the IP and the netmask
+    //
+    // This is an IPv4-only thing -- IPv6 has no concept of broadcasts
+    // The math is:
+    //    broadcast = IP | ~netmask
+
+    QList<QNetworkInterfacePrivate *>::Iterator it = list.begin();
+    const QList<QNetworkInterfacePrivate *>::Iterator end = list.end();
+    for ( ; it != end; ++it) {
+        QList<QNetworkAddressEntry>::Iterator addr_it = (*it)->addressEntries.begin();
+        const QList<QNetworkAddressEntry>::Iterator addr_end = (*it)->addressEntries.end();
+        for ( ; addr_it != addr_end; ++addr_it) {
+            if (addr_it->ip().protocol() != QAbstractSocket::IPv4Protocol)
+                continue;
+
+            if (!addr_it->netmask().isNull() && addr_it->broadcast().isNull()) {
+                QHostAddress bcast = addr_it->ip();
+                bcast = QHostAddress(bcast.toIPv4Address() | ~addr_it->netmask().toIPv4Address());
+                addr_it->setBroadcast(bcast);
+            }
+        }
+    }
+
+    return list;
+}
 
 Q_GLOBAL_STATIC(QNetworkInterfaceManager, manager)
 
@@ -75,7 +103,7 @@ QSharedDataPointer<QNetworkInterfacePrivate> QNetworkInterfaceManager::interface
 
 QList<QSharedDataPointer<QNetworkInterfacePrivate> > QNetworkInterfaceManager::allInterfaces()
 {
-    QList<QNetworkInterfacePrivate *> list = scan();
+    QList<QNetworkInterfacePrivate *> list = postProcess(scan());
     QList<QSharedDataPointer<QNetworkInterfacePrivate> > result;
 
     foreach (QNetworkInterfacePrivate *ptr, list)

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/io/qtemporaryfile.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/io/qtemporaryfile.cpp -->
 <head>
   <title>Qt 4.3: QTemporaryFile Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -68,10 +68,10 @@
 <pre> {
      QTemporaryFile file;
      if (file.open()) {
-         <span class="comment">// file.fileName() returns the unique file name</span>
+         <span class="comment">//</span> file.fileName() returns the unique file name
      }
 
-     <span class="comment">// the QTemporaryFile destructor removes the temporary file</span>
+     <span class="comment">//</span> the QTemporaryFile destructor removes the temporary file
  }</pre>
 <p>Reopening a QTemporaryFile after calling <a href="qiodevice.html#close">close</a>() is safe. For as long as the QTemporaryFile object itself is not destroyed, the unique temporary file will exist and be kept open internally by QTemporaryFile.</p>
 <p>A temporary file will have some static part of the name and some part that is calculated to be unique. The default filename qt_temp will be placed into the temporary path as returned by <a href="qdir.html#tempPath">QDir::tempPath</a>().</p>
@@ -123,8 +123,8 @@
 <p>See also <a href="qtemporaryfile.html#fileTemplate">fileTemplate</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

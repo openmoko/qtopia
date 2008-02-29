@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -109,7 +109,7 @@ static QByteArray toHexDump( const char *in, int size, int offset = 0 )
 
 // This is an example of how to implement a comms driver for MMS.
 
-MmsCommsHttp::MmsCommsHttp(MailAccount *acc, QObject *parent)
+MmsCommsHttp::MmsCommsHttp(QMailAccount *acc, QObject *parent)
     : MmsComms(acc, parent), rhttp(0), shttp(0), rId(0), sId(0),
       rStatus(200), sStatus(200)
 {

@@ -1,7 +1,7 @@
 qtopia_project(qtopia plugin)
 TARGET=mmscomposer
 
-enable_modem:contains(PROJECTS,libraries/qtopiasmil) {
+enable_cell:contains(PROJECTS,libraries/qtopiasmil) {
 
     HEADERS+=\
         mmscomposer.h

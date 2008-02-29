@@ -1,6 +1,8 @@
 qtopia_project(qtopia plugin)
 TARGET=pim
-CONFIG+=no_tr no_pkg
+CONFIG+=no_tr
+# Packaged by tools/qdsync/app
+CONFIG+=no_pkg
 plugin_type=qdsync
 
 DEFINES+=PIMXML_NAMESPACE=QDSync
@@ -9,12 +11,10 @@ VPATH+=..
 INCLUDEPATH+=..
 
 HEADERS+=\
-    qpimsync_p.h\
     qpimsyncstorage.h\
     qpimxml_p.h\
 
 SOURCES+=\
-    qpimsync.cpp\
     qpimsyncstorage.cpp\
     qpimxml.cpp\
 

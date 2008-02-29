@@ -83,13 +83,16 @@
 <p>Trolltech currently tests the following compilers:</p>
 <ul>
 <li>Intel(R) C++ Compiler for applications running on IA-32, Version 10.0 Build 20070809 Package ID: l_cc_c_10.0.026</li>
+<li>Intel(R) C++ Compiler for applications running on IA-32, Version 10.1 Build 20070913 Package ID: l_cc_p_10.1.008</li>
 <li>Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.0 Build 20070809 Package ID: l_cc_c_10.0.026</li>
+<li>Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1 Build 20070913 Package ID: l_cc_p_10.1.008</li>
 </ul>
 <a name="known-issues-with-intel-c-compiler-for-linux"></a>
 <h4>Known issues with Intel C++ Compiler for Linux</h4>
 <ul>
 <li>Precompiled header support does not work prior in version 10.0&#x2e;025 and older. For these compilers, you should configure Qt with -no-pch. Precompiled header support works properly in version 10.0&#x2e;026.</li>
 <li>Version 10.0&#x2e;026 for Intel 64 is known to miscompile qmake when building in release mode. For now, configure Qt with -debug. This issue has been reported to Intel and is awaiting resolution.</li>
+<li>Version 10.1&#x2e;008 for both IA-32 and Intel 64 is known crash with &quot;(0): internal error: 0_47021&quot; when compiling Designer in release mode. For now, configure Qt with -debug. This issue has been reported to Intel and is awaiting resolution.</li>
 </ul>
 <a name="intel-c-compiler-windows-altix"></a>
 <h4>Intel C++ Compiler (Windows, Altix)</h4>
@@ -136,8 +139,8 @@
 <p>Make sure you have the <a href="http://www-1.ibm.com/support/search.wss?rs=32&tc=SSEP5D&dc=D400">latest upgrades</a> installed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

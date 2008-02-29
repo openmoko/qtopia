@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -263,14 +263,25 @@ bool QtopiaSendVia::isFileSupported()
 */
 bool QtopiaSendVia::sendData(QWidget *parent, const QByteArray &data, const QString &mimetype)
 {
-    if (!isDataSupported(mimetype))
+    QDSServices services(mimetype,
+                    QString( "" ),
+                    QStringList( QString ( "send" ) ) );
+
+    if (services.count() == 0)
         return false;
 
-    QtopiaSendViaDialog *dlg = new QtopiaSendViaDialog(data, mimetype, parent);
+    if (services.count() > 1) {
+        QtopiaSendViaDialog *dlg = new QtopiaSendViaDialog(data, mimetype, parent);
 
-    QtopiaApplication::setMenuLike( dlg, true );
-    QtopiaApplication::execDialog( dlg );
-    delete dlg;
+        QtopiaApplication::setMenuLike( dlg, true );
+        QtopiaApplication::execDialog( dlg );
+        delete dlg;
+    } else {
+        QDSData qdsdata = QDSData( data, QMimeType( mimetype ) );
+        QDSServiceInfo serviceinfo = services.at(0);
+        QDSAction action(serviceinfo);
+        action.invoke(qdsdata);
+    }
 
     return true;
 }
@@ -307,11 +318,22 @@ bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QSt
     if (!isFileSupported())
         return false;
 
+#if defined(QTOPIA_BLUETOOTH) && defined(QTOPIA_INFRARED) // Present a choice
     QtopiaSendFileDialog *dlg = new QtopiaSendFileDialog(parent, filename, mimetype, description, autodelete);
 
     QtopiaApplication::setMenuLike( dlg, true );
     QtopiaApplication::execDialog( dlg );
     delete dlg;
+#elif defined(QTOPIA_BLUETOOTH) // send straight to bluetooth
+    QtopiaServiceRequest req("BluetoothPush", "pushFile(QString,QString,QString,bool)");
+    req << filename << mimetype << description << autodelete;
+    req.send();
+#elif defined(QTOPIA_INFRARED) // send straight to infrared
+    QtopiaServiceRequest req("InfraredBeaming", "beamFile(QString,QString,QString,bool)");
+    req << filename << mimetype << description << autodelete;
+    req.send();
+#endif
+
 #else
     Q_UNUSED(parent);
     Q_UNUSED(filename);

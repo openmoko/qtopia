@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,8 +44,6 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
@@ -56,16 +54,16 @@
 
  static inline int blendComponent( int v, int av, int s, int as )
  {
-     <span class="comment">//shadow gets a color inversely proportional to the</span>
-     <span class="comment">//alpha value</span>
+     <span class="comment">//</span>shadow gets a color inversely proportional to the
+     <span class="comment">//</span>alpha value
      s = (s*(255-as))/255;
-     <span class="comment">//then do standard blending</span>
+     <span class="comment">//</span>then do standard blending
      return as*s + av*v -(av*as*s)/255;
  }
 
  static inline QRgb blendShade( QRgb v, QRgb s )
  {
-     <span class="comment">//pick a number: shadow is 1/3 of object</span>
+     <span class="comment">//</span>pick a number: shadow is 1/3 of object
      int as = qAlpha(s)/3;
      int av = qAlpha(v);
      if ( as == 0 || av == 255 )
@@ -110,7 +108,7 @@
                  b = (b*255)/(max-min);
              }
              int a = 255-min;
-             a -=  (max-min)/3; <span class="comment">//hack more transparency for colors.</span>
+             a -=  (max-min)/3; <span class="comment">//</span>hack more transparency for colors.
              line[x] = qRgba( r, g, b, a );
          }
      }
@@ -144,8 +142,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

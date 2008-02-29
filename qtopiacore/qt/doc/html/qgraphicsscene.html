@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/graphicsview/qgraphicsscene.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/graphicsview/qgraphicsscene.cpp -->
 <head>
   <title>Qt 4.3: QGraphicsScene Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -74,7 +74,7 @@
 <li><div class="fn"/>bool <b><a href="qgraphicsscene.html#hasFocus">hasFocus</a></b> () const</li>
 <li><div class="fn"/>qreal <b><a href="qgraphicsscene.html#height">height</a></b> () const</li>
 <li><div class="fn"/>virtual QVariant <b><a href="qgraphicsscene.html#inputMethodQuery">inputMethodQuery</a></b> ( Qt::InputMethodQuery <i>query</i> ) const</li>
-<li><div class="fn"/>void <b><a href="qgraphicsscene.html#invalidate">invalidate</a></b> ( qreal <i>x</i>, qreal <i>y</i>, qreal <i>w</i>, qreal <i>h</i>, SceneLayers <i>layers</i> = AllLayers )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscene.html#invalidate-2">invalidate</a></b> ( qreal <i>x</i>, qreal <i>y</i>, qreal <i>w</i>, qreal <i>h</i>, SceneLayers <i>layers</i> = AllLayers )</li>
 <li><div class="fn"/>QGraphicsItem * <b><a href="qgraphicsscene.html#itemAt">itemAt</a></b> ( const QPointF &amp; <i>position</i> ) const</li>
 <li><div class="fn"/>QGraphicsItem * <b><a href="qgraphicsscene.html#itemAt-2">itemAt</a></b> ( qreal <i>x</i>, qreal <i>y</i> ) const</li>
 <li><div class="fn"/>ItemIndexMethod <b><a href="qgraphicsscene.html#itemIndexMethod-prop">itemIndexMethod</a></b> () const</li>
@@ -112,7 +112,7 @@
 <h3>Public Slots</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="qgraphicsscene.html#advance">advance</a></b> ()</li>
-<li><div class="fn"/>void <b><a href="qgraphicsscene.html#invalidate-2">invalidate</a></b> ( const QRectF &amp; <i>rect</i> = QRectF(), SceneLayers <i>layers</i> = AllLayers )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscene.html#invalidate">invalidate</a></b> ( const QRectF &amp; <i>rect</i> = QRectF(), SceneLayers <i>layers</i> = AllLayers )</li>
 <li><div class="fn"/>void <b><a href="qgraphicsscene.html#update-2">update</a></b> ( const QRectF &amp; <i>rect</i> = QRectF() )</li>
 </ul>
 <ul>
@@ -217,10 +217,10 @@
  QGraphicsView view(&amp;scene);
  view.show();
 
-<span class="comment"> // a blue background</span>
+<span class="comment"> //</span> a blue background
  scene.setBackgroundBrush(Qt::blue);
 
-<span class="comment"> // a gradient background</span>
+<span class="comment"> //</span> a gradient background
  QRadialGradient gradient(0, 0, 10);
  gradient.setSpread(QGradient::RepeatSpread);
  scene.setBackgroundBrush(gradient);</pre>
@@ -254,10 +254,10 @@
  QGraphicsView view(&amp;scene);
  view.show();
 
-<span class="comment"> // a white semi-transparent foreground</span>
+<span class="comment"> //</span> a white semi-transparent foreground
  scene.setForegroundBrush(QColor(255, 255, 255, 127));
 
-<span class="comment"> // a grid foreground</span>
+<span class="comment"> //</span> a grid foreground
  scene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));</pre>
 <p><a href="qgraphicsscene.html#render">QGraphicsScene::render</a>() calls <a href="qgraphicsscene.html#drawForeground">drawForeground</a>() to draw the scene foreground. For more detailed control over how the foreground is drawn, you can reimplement the <a href="qgraphicsscene.html#drawForeground">drawForeground</a>() function in a <a href="qgraphicsscene.html">QGraphicsScene</a> subclass.</p>
 <p>Access functions:</p>
@@ -360,7 +360,7 @@
 <p>See also <a href="qgraphicsitem.html#advance">QGraphicsItem::advance</a>(), <a href="qgraphicsitemanimation.html">QGraphicsItemAnimation</a>, and <a href="qtimeline.html">QTimeLine</a>.</p>
 <h3 class="fn"><a name="changed"></a>void QGraphicsScene::changed ( const <a href="qlist.html">QList</a>&lt;<a href="qrectf.html">QRectF</a>&gt; &amp; <i>region</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted by <a href="qgraphicsscene.html">QGraphicsScene</a> when control reaches the event loop, if the scene content changes. The <i>region</i> parameter contains a list of scene rectangles that indicate the area that has been changed.</p>
-<p>See also <a href="qwidget.html#update">QGraphicsView::update</a>().</p>
+<p>See also <a href="qgraphicsview.html#updateScene">QGraphicsView::updateScene</a>().</p>
 <h3 class="fn"><a name="clearFocus"></a>void QGraphicsScene::clearFocus ()</h3>
 <p>Clears focus from the scene. If any item has focus when this function is called, it will lose focus, and regain focus again once the scene regains focus.</p>
 <p>A scene that does not have focus ignores key events.</p>
@@ -395,10 +395,12 @@
 <h3 class="fn"><a name="drawBackground"></a>void QGraphicsScene::drawBackground ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Draws the background of the scene using <i>painter</i>, before any items and the foreground are drawn. Reimplement this function to provide a custom background for the scene.</p>
 <p>All painting is done in <i>scene</i> coordinates. The <i>rect</i> parameter is the exposed rectangle.</p>
+<p>If all you want is to define a color, texture, or gradient for the background, you can call <a href="qgraphicsscene.html#backgroundBrush-prop">setBackgroundBrush</a>() instead.</p>
 <p>See also <a href="qgraphicsscene.html#drawForeground">drawForeground</a>() and <a href="qgraphicsscene.html#drawItems">drawItems</a>().</p>
 <h3 class="fn"><a name="drawForeground"></a>void QGraphicsScene::drawForeground ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Draws the foreground of the scene using <i>painter</i>, after the background and all items have been drawn. Reimplement this function to provide a custom foreground for the scene.</p>
 <p>All painting is done in <i>scene</i> coordinates. The <i>rect</i> parameter is the exposed rectangle.</p>
+<p>If all you want is to define a color, texture or gradient for the foreground, you can call <a href="qgraphicsscene.html#foregroundBrush-prop">setForegroundBrush</a>() instead.</p>
 <p>See also <a href="qgraphicsscene.html#drawBackground">drawBackground</a>() and <a href="qgraphicsscene.html#drawItems">drawItems</a>().</p>
 <h3 class="fn"><a name="drawItems"></a>void QGraphicsScene::drawItems ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, int <i>numItems</i>, <a href="qgraphicsitem.html">QGraphicsItem</a> *[] <i>items</i>, const <a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a>[] <i>options</i>, <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Paints the given <i>items</i> using the provided <i>painter</i>, after the background has been drawn, and before the foreground has been drawn. All painting is done in <i>scene</i> coordinates. Before drawing each item, the painter must be transformed using <a href="qgraphicsitem-obsolete.html#sceneMatrix">QGraphicsItem::sceneMatrix</a>().</p>
@@ -411,7 +413,7 @@
                              QWidget *widget)
  {
      for (int i = 0; i &lt; numItems; ++i) {
-          <span class="comment">// Draw the item</span>
+          <span class="comment">//</span> Draw the item
           painter-&gt;save();
           painter-&gt;setMatrix(items[i]-&gt;sceneMatrix(), true);
           items[i]-&gt;paint(painter, &amp;options[i], widget);
@@ -457,23 +459,19 @@
 <p>This method is used by input methods to query a set of properties of the scene to be able to support complex input method operations as support for surrounding text and reconversions.</p>
 <p>The <i>query</i> parameter specifies which property is queried.</p>
 <p>See also <a href="qwidget.html#inputMethodQuery">QWidget::inputMethodQuery</a>().</p>
-<h3 class="fn"><a name="invalidate"></a>void QGraphicsScene::invalidate ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>x</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>y</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>w</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>h</i>, <a href="qgraphicsscene.html#SceneLayer-enum">SceneLayers</a> <i>layers</i> = AllLayers )</h3>
-<p>This convenience function is equivalent to calling invalidate(<a href="qrectf.html">QRectF</a>(<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>), <i>layers</i>);</p>
-<p>This function was introduced in Qt 4.3.</p>
-<h3 class="fn"><a name="invalidate-2"></a>void QGraphicsScene::invalidate ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> = QRectF(), <a href="qgraphicsscene.html#SceneLayer-enum">SceneLayers</a> <i>layers</i> = AllLayers )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
+<h3 class="fn"><a name="invalidate"></a>void QGraphicsScene::invalidate ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> = QRectF(), <a href="qgraphicsscene.html#SceneLayer-enum">SceneLayers</a> <i>layers</i> = AllLayers )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Invalidates and schedules a redraw of the <i>layers</i> in <i>rect</i> on the scene. Any cached content in <i>layers</i> is unconditionally invalidated and redrawn.</p>
 <p>You can use this function overload to notify <a href="qgraphicsscene.html">QGraphicsScene</a> of changes to the background or the foreground of the scene. This function is commonly used for scenes with tile-based backgrounds to notify changes when <a href="qgraphicsview.html">QGraphicsView</a> has enabled <a href="qgraphicsview.html#CacheModeFlag-enum">CacheBackground</a>.</p>
 <p>Example:</p>
 <pre> QRectF TileScene::rectForTile(int x, int y) const
  {
-     <span class="comment">// Return the rectangle for the tile at position (x, y).</span>
+     <span class="comment">//</span> Return the rectangle for the tile at position (x, y).
      return QRectF(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
  }
 
  void TileScene::setTile(int x, int y, const QPixmap &amp;pixmap)
  {
-     <span class="comment">// Sets or replaces the tile at position (x, y) with pixmap.</span>
+     <span class="comment">//</span> Sets or replaces the tile at position (x, y) with pixmap.
      if (x &gt;= 0 &amp;&amp; x &lt; numTilesH &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; numTilesV) {
          tiles[y][x] = pixmap;
          invalidate(rectForTile(x, y), BackgroundLayer);
@@ -482,7 +480,7 @@
 
  void TileScene::drawBackground(QPainter *painter, const QRectF &amp;exposed)
  {
-     <span class="comment">// Draws all tiles that intersect the exposed area.</span>
+     <span class="comment">//</span> Draws all tiles that intersect the exposed area.
      for (int y = 0; y &lt; numTilesV; ++y) {
          for (int x = 0; x &lt; numTilesH; ++x) {
              QRectF rect = rectForTile(x, y);
@@ -491,8 +489,12 @@
          }
      }
  }</pre>
-<p>Note that <a href="qgraphicsview.html">QGraphicsView</a> currently supports background caching only (see QGraphicsView::CachedBackground). This function is equivalent to calling <a href="qgraphicsscene.html#update">update</a>() if any layer but <a href="qgraphicsscene.html#SceneLayer-enum">BackgroundLayer</a> is passed.</p>
+<p>Note that <a href="qgraphicsview.html">QGraphicsView</a> currently supports background caching only (see <a href="qgraphicsview.html#CacheModeFlag-enum">QGraphicsView::CacheBackground</a>). This function is equivalent to calling <a href="qgraphicsscene.html#update">update</a>() if any layer but <a href="qgraphicsscene.html#SceneLayer-enum">BackgroundLayer</a> is passed.</p>
 <p>See also <a href="qgraphicsview.html#resetCachedContent">QGraphicsView::resetCachedContent</a>().</p>
+<h3 class="fn"><a name="invalidate-2"></a>void QGraphicsScene::invalidate ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>x</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>y</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>w</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>h</i>, <a href="qgraphicsscene.html#SceneLayer-enum">SceneLayers</a> <i>layers</i> = AllLayers )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>This convenience function is equivalent to calling invalidate(<a href="qrectf.html">QRectF</a>(<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>), <i>layers</i>);</p>
+<p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="itemAt"></a><a href="qgraphicsitem.html">QGraphicsItem</a> * QGraphicsScene::itemAt ( const <a href="qpointf.html">QPointF</a> &amp; <i>position</i> ) const</h3>
 <p>Returns the topmost visible item at the specified <i>position</i>, or 0 if there are no items at this position.</p>
 <p>See also <a href="qgraphicsscene.html#items">items</a>() and <a href="qgraphicsscene.html#collidingItems">collidingItems</a>().</p>
@@ -630,8 +632,8 @@
 <p>See also <a href="qgraphicsscene.html#height">height</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

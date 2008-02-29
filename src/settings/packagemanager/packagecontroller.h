@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,11 +54,13 @@ public:
 
     enum Role {
         Domains = Qt::UserRole + 1, 
-        Md5Sum = Qt::UserRole + 2
+        Md5Sum = Qt::UserRole + 2,
+        Filtered = Qt::UserRole + 3
     };
 
     static const QString INFORMATION_FILE;
     static const QString PACKAGE_SUMMARY_FILE;
+    static const QString INSTALLED_INFO_FILES_LOC;
     static AbstractPackageController *factory( PCType t, PackageModel *parent = 0 );
 
     int numberPackages() const;
@@ -268,18 +270,20 @@ inline QVariant AbstractPackageController::data( int role ) const
 inline QVariant AbstractPackageController::data( int row, int column, int role ) const
 {
     InstallControl::PackageInfo pi = packageInfo( row );
-    if ( role == Qt::DisplayRole )  
+    if ( role == Qt::DisplayRole ) 
         return ( column == 0 ) ? pi.name : pi.description;
-    if ( role == Qt::DecorationRole )  
-        return dataIcon( row ); 
+    if ( role == Qt::DecorationRole )
+        return dataIcon( row );
     if ( role == Qt::WhatsThisRole )//package domain is returned
-        return packageDetails(row); 
+        return packageDetails(row);
     if ( role == Qt::StatusTipRole )//is packge enabled
         return true; //always true for general case
     if ( role == AbstractPackageController::Domains )
         return pi.domain;
     if ( role == AbstractPackageController::Md5Sum )
         return pi.md5Sum;
+    if ( role == AbstractPackageController::Filtered )
+        return QVariant(filteredOutPkgList.contains( pi ));
     return QVariant();
 }
 

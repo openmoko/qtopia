@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -18,16 +18,16 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopiaapplication.h>
-#include <QDrmContentPlugin>
-#include <custom-qtopia.h>
 
+#include <QtopiaApplication>
+#include <QDrmContentPlugin>
+#include <custom.h>
+
+#include "domainmanager.h"
 #include "sessionmanager.h"
 #include "qtopiamediaprovider.h"
 #include "qsoundprovider.h"
-#include "domainmanagerservice.h"
-#include "qaudiostatemanager.h"
-
+#include "mediavolumecontrol.h"
 
 #ifndef QTOPIA_NO_MEDIAPOWERCONTROL
 #include "mediapowercontrol.h"
@@ -41,7 +41,6 @@ QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,mediaserver)
 #endif
 
 using namespace mediaserver;
-
 
 
 QSXE_APP_KEY
@@ -58,11 +57,11 @@ int MAIN_FUNC(int argc, char** argv)
     app.setSxeAuthorizerRole( QtopiaApplication::SxeAuthorizerServerAndClient );
 #endif
 
-    QAudioStateManager audiomgr;
+    DomainManager::instance();  // force construct of DomainManager
 
     QtopiaMediaProvider     qmp(SessionManager::instance());
     QSoundProvider          qsp(SessionManager::instance());
-    DomainManagerService    dms;
+    //MediaVolumeControl      mvc(SessionManager::instance());
 
 #ifndef QTOPIA_NO_MEDIAPOWERCONTROL
     MediaPowerControl       mpc;

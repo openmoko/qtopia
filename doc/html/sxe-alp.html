@@ -13,76 +13,59 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Application Level Policy<br /><span class="subtitle"></span>
 </h1>
-<ul><li><a href="#introduction">Introduction</a></li>
-<li><a href="#service-access-control">Service Access Control</a></li>
-<li><a href="#request-processing">Request Processing</a></li>
-<li><a href="#authentication-and-authorization-procedure">Authentication and Authorization Procedure</a></li>
+<ul><li><a href="#service-access-control">Service Access Control</a></li>
+<li><a href="#request-authentication-and-authorization-procedure">Request Authentication and Authorization Procedure</a></li>
 <li><a href="#program-identification">Program Identification</a></li>
 </ul>
-<a name="introduction"></a>
-<h2>Introduction</h2>
-<p>For the purposes of SXE a program is:</p>
-<p><i>&quot;a collection of application binaries and scripts which all operate with the same security profile&quot;</i>.</p>
-<p>The SXE applies policy rules to each program component. This overcomes the issue presented by sand-boxing, which prevents programs from unauthorized access to system resources and hence, from being able to function.</p>
 <a name="service-access-control"></a>
 <h2>Service Access Control</h2>
-<p>In general programs may access services. For example, a messaging application on a phone sending an SMS or MMS transmission, or requesting a browser window that opens an internet URL. Service access is achieved by sending IPC calls to the Qtopia system, for example via <tt>QCop</tt> messages.</p>
-<p>In the current implementation of Qtopiacore these calls are in the form of streamed data sent through a Unix Domain Socket (UDS). Currently the entire graphics subsystem is implemented via a system of <tt>QWSCommands</tt> over this socket, combined with reads/writes to a piece of shared memory.</p>
+<p>In general programs may access services, which in the context of the SXE, can mean low level graphical display services provided by QWS to high level <a href="services.html">Application Services</a>. Service access is achieved by sending IPC calls to the Qtopia system, for example via <tt>QCop</tt> messages. Application level policy refers to policy which dictates what services a program may and may not access.</p>
+<p>In the current implementation of Qtopiacore the IPC calls are in the form of streamed data sent through a Unix Domain Socket (UDS). Currently the entire graphics subsystem is implemented via a system of <tt>QWSCommands</tt> over this socket, combined with reads/writes to a piece of shared memory.</p>
 <p>Because a program requires access to the well known path to the Unix Domain Socket for the <tt>QCop</tt> system in order to send low-level requests to the Qtopia windowing system, it is not practical to use MAC file system rules to control access to services.</p>
-<p>Control of access to services involves two important steps: and authorization, defined as:</p>
+<p>Control of access to services involves two important steps:</p>
 <ol type="1">
-<li><b>authentication</b> : positively identify the program which sent the request</li>
-<li><b>authorization</b> : apply a policy rule specific to that program and that request</li>
+<li><b>authentication</b> : identify profile of the program which sent the request</li>
+<li><b>authorization</b> : check the policy rule for that profile and request</li>
 </ol>
 <p>Now the terms <b>program</b> and <b>request</b> require definition.</p>
 <p>A downloaded application package may be thought of as containing one <b>program</b> such as a game, or an image manager.</p>
-<p>That application may however be made up of a number of binaries, scripts and other files. In some cases a single binary may make up the totality of the package but generally the picture is more complex than that.</p>
-<p>For example, a game may have a level editor, the main game binary, and a daemon process while the game itself and the level editor may also be thought of separate applications.</p>
-<p>The SXE system applies policy rules to each <b>program</b> component by using the <b>program identity</b> or <tt>progId</tt> which applies to all the components of that application.</p>
-<p>When a program wants to access functionality available via Qtopia in general it must use the <tt>QWSCommand</tt> system, or send a <tt>QCop</tt> message or otherwise ask for a service. Generally these accesses can be expressed as a string for example in the case of a <tt>QCop</tt> message requesting a wait indicator to be displayed: <tt>QPE/System/notBusy()</tt></p>
-<p>Such an access, and the string representing it, is referred to as a <b>request</b>.</p>
-<a name="request-processing"></a>
-<h2>Request Processing</h2>
-<p>Once the SXE has determined the <i>program identity</i> that is the source of the service request the next step is to examine the policy to see if the request will be actioned. If not, the SXE will raise an alert, by showing an alert icon, or by putting a system message in the users email <tt>inbox</tt>, or both. Additional actions may include killing the process/es the program is running as, or disabling it from automatically launching again.</p>
-<p>Deleting or uninstalling the application automatically may not be desirable as:</p>
-<ul>
-<li>if the application is DRM controlled, removal of the rights object may mean the application cannot be accessed by the user without paying for the DRM controlled package again</li>
-<li>if the user has created content using the application that content may be inaccessible after uninstalling the application</li>
-<li>given that the program is flawed or malicious the SXE system could ask the user to forward the package for analysis:<ul>
-<li>to protect the user from for example being unfairly billed by a network provider</li>
-<li>to counter further spread or activity of the program.</li>
-</ul>
-</li>
-</ul>
-<a name="authentication-and-authorization-procedure"></a>
-<h2>Authentication and Authorization Procedure</h2>
+<p>That application may however be made up of a number of binaries, and other files. In some cases a single binary may make up the totality of the package but somtimes the picture is more complex than that.</p>
+<p>For example, a game may have a level editor, the main game binary, and a daemon process. While the game itself and the level editor may also be thought of separate applications, both are considered to be part of the same program.</p>
+<p>The SXE system applies policy rules to each <b>program</b> component by associating a <tt>progId</tt> with all the components of that application. The <tt>progId</tt> has a one to one relationship with the domain the application operates under, therefore all untrusted applications have the same <tt>progId</tt> while all trusted applications have another.</p>
+<p>When a program wants to access functionality available via Qtopia in general it must use the <tt>QWSCommand</tt> system, or send a <tt>QCop</tt> message or otherwise ask for an application service. Generally these accesses can be expressed as a string for example in the case of a <tt>QCop</tt> message requesting a wait indicator to be displayed: <tt>QPE/System/notBusy()</tt></p>
+<p>Such an access for a service, and the string representing it, is referred to as a <b>request</b>.</p>
+<a name="request-authentication-and-authorization-procedure"></a>
+<h2>Request Authentication and Authorization Procedure</h2>
 <p>The procedure for authentication and authorization is presented in the following steps:</p>
 <ol type="1">
 <li>Process an incoming message:<ul>
 <li>Verify that the message is a valid message</li>
-<li>If the transport is untrusted confirming validity requires a Message Authentication Code.</li>
+<li>If the transport is untrusted, confirming validity requires a Message Authentication Code.</li>
 <li>Check if authentication information is included</li>
 <li>Un-marshall the message and prepare to process the request</li>
 <li>if the request is in an <b>allow</b> whitelist, procedure complete, process request</li>
 </ul>
 </li>
-<li>Determine the <i>program identity</i> that is sending an incoming message:<ul>
-<li>if the message transport is connection oriented the program identity may be cached against the file descriptor or other identifier for the connection.</li>
-<li>the program identity can be extracted from authentication information included in the message once validity is confirmed</li>
+<li>Determine the <i>progId</i> and hence profile of the program that is sending an incoming message:<ul>
 <li>if the message transport is trusted either a simple shared secret or Unix domain socket ancillary data identification will suffice.</li>
+<li>if the message transport is connection oriented the program identity may be cached against the file descriptor or other identifier for the connection.</li>
+<li>the program identity need only be extracted from authentication information included in the message once validity is confirmed</li>
+<li>if the shared secret is incorrect then<ul>
+<li>deny any requests not in the allow list.</li>
+<li>if a threshold of 5 or more failed authentications in minute occurs, log a security breach to lockdown all downloaded applications. See <a href="sxe-sxemonitor.html">SxeMonitor</a></li>
 </ul>
 </li>
-<li>Apply the policy using the program identity:<ul>
-<li>look up the list of security profiles awarded to that <tt>progId</tt> in sxe.profiles:</li>
+</ul>
+</li>
+<li>Check the policy for the request using the <tt>progId</tt>:<ul>
+<li>look up the security profile/domain awarded to that <tt>progId</tt> in sxe.policy.</li>
+<li>look up the list of requests allowed for that profile in sxe.profiles.</li>
+<li>if the request is in one of the profiles the message is processed normally.</li>
 <li>if the request is not in one of those profiles:<ul>
-<li>the message is denied and not processed</li>
-<li>the program is disabled and prevented from restarting</li>
-<li>a mechanism is supplied for the user to undo the disable</li>
-<li>alert icon and/or message to users SMS/email <i>Inbox</i></li>
-<li>return immediately.</li>
+<li>deny the request</li>
+<li>log the security breach so that <a href="sxe-sxemonitor.html">SxeMonitor</a> can respond</li>
 </ul>
 </li>
-<li>if the message policy code is in one of the profiles the message is processed normally.</li>
 </ul>
 </li>
 </ol>
@@ -123,8 +106,8 @@
 <p>In several scenarios where one or two of these assumptions are not valid the password based mechanism can be simply expanded to HMAC-MD5 message authentication.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

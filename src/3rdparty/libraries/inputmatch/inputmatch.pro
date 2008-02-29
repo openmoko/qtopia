@@ -1,5 +1,7 @@
 qtopia_project(qtopia lib)
 TARGET=inputmatch
+license(FREEWARE)
+
 CONFIG+=no_tr
 
 HEADERS = pkimmatcher.h symbolpicker.h wordpicker.h picker.h inputmatchglobal.h

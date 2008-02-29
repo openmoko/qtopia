@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QPackageRegistry Class Reference</h1>
 <p>The QPackageRegistry class provides a mechanism for managing software installed on the qtopia device <a href="#details">More...</a></p>
-<pre>    #include &lt;QPackageRegistry&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QPackageRegistry&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qpackageregistry-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>bool <b><a href="qpackageregistry.html#unregisterPackageBinaries">unregisterPackageBinaries</a></b> ( const QString &amp; <i>packagePath</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -45,7 +45,7 @@
 <li><div class="fn"/>void <b><a href="qpackageregistry.html#unlockManifest">unlockManifest</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -58,16 +58,15 @@
 <li><div class="fn"/>const QString <b><a href="qpackageregistry.html#qlLibInstallPath-var">qlLibInstallPath</a></b></li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -100,12 +99,12 @@
 <tr valign="top" class="even"><td colspan="4" rowspan=" 1">Pseudo-code for binary file data record formats: See <tt>$QT_SOURCE_PATH/src/gui/embedded/qtransportauth_qws_p.h</tt> for concrete details. <tt>usr_key_entry</tt> is from the kernel file include/linux/lidsext.h and is duplicated in the qtransportauth_qws_p.h</td></tr>
 <tr valign="top" class="odd"><td><pre>    struct usr_key_entry
         char key[QSXE_KEY_LEN];
-        ino_t ino;              <span class="comment">// typically 4 bytes</span>
-        dev_t dev;              <span class="comment">// typically 8 bytes</span></pre>
+        ino_t ino;              <span class="comment">//</span> typically 4 bytes
+        dev_t dev;              <span class="comment">//</span> typically 8 bytes</pre>
 </td><td><pre>    struct AuthRecord
       16 byte key
       program id
-      change time   <span class="comment">// deprecated</span></pre>
+      change time   <span class="comment">//</span> deprecated</pre>
 </td><td><pre>    struct IdBlock
         quint64 inode
         quint64 device
@@ -160,7 +159,7 @@
 <p>See also <a href="qpackageregistry.html#getInstance">getInstance</a>().</p>
 <h3 class="fn"><a name="dtor.QPackageRegistry"></a>QPackageRegistry::~QPackageRegistry ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroy the <a href="qpackageregistry.html">QPackageRegistry</a> object</p>
-<h3 class="fn"><a name="bootstrap"></a>int QPackageRegistry::bootstrap ( const <a href="qstring.html">QString</a> &amp; <i>installRoot</i> )</h3>
+<h3 class="fn"><a name="bootstrap"></a>int QPackageRegistry::bootstrap ( const <a href="./qstring.html">QString</a> &amp; <i>installRoot</i> )</h3>
 <p>Bootstrap the qtopia image with sxe control files.</p>
 <p>Creates (or truncates) new empty SXE control files, ready to be updated by the scanner. If the <i>installRoot</i> already contains non-empty files then it will refuse to overwrite them.</p>
 <p>The return code of this is used as a unix exec return code, ie 0 is success non-zero is failure.</p>
@@ -191,37 +190,37 @@
 <p>Note that binaries with the same domain (SXE policy profile) and binaries from the same package are coalesced into the same Program Id, and thus use the same secret key.</p>
 <p>The <a href="sxeprograminfo.html">SxeProgramInfo</a> <i>pi</i> if uninitialised is modified by creating a new random key and program id. The id and key fields if initialised are used to register the binary.</p>
 <p>See also <a href="sxeprograminfo.html">SxeProgramInfo</a>.</p>
-<h3 class="fn"><a name="sxeConfPath"></a><a href="qstring.html">QString</a> QPackageRegistry::sxeConfPath () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="sxeConfPath"></a><a href="./qstring.html">QString</a> QPackageRegistry::sxeConfPath () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Return the authoritative path for where the SXE database files, such as installs, and manifest, are stored.</p>
 <p>The directory must be writeable.</p>
 <p>Current implementation is simply <a href="qtopia.html#qtopiaDir">Qtopia::qtopiaDir</a>() + &quot;etc&quot;</p>
 <h3 class="fn"><a name="unlockManifest"></a>void QPackageRegistry::unlockManifest ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Release the lock on the manifest file.</p>
 <p>See also <a href="qpackageregistry.html#lockManifest">lockManifest</a>().</p>
-<h3 class="fn"><a name="unregisterPackageBinaries"></a>bool QPackageRegistry::unregisterPackageBinaries ( const <a href="qstring.html">QString</a> &amp; <i>packagePath</i> )</h3>
+<h3 class="fn"><a name="unregisterPackageBinaries"></a>bool QPackageRegistry::unregisterPackageBinaries ( const <a href="./qstring.html">QString</a> &amp; <i>packagePath</i> )</h3>
 <p>Unregisters a package's binaries from the SXE system for the given <i>packagePath</i></p>
 <p>returns true if the removal of the registration was successful; otherwise returns false</p>
 <hr />
 <h2>Member Variable Documentation</h2>
-<h3 class="fn"><a name="binInstallPath-var"></a>const <a href="qstring.html">QString</a> QPackageRegistry::binInstallPath</h3>
-<p>returns the <a href="qstring.html">QString</a> name of the <b>relative</b> <i>binary path</i>, where SXE controlled executables are installed. Concatenate this with paths from installPaths() to find full paths which may contain binaries.</p>
+<h3 class="fn"><a name="binInstallPath-var"></a>const <a href="./qstring.html">QString</a> QPackageRegistry::binInstallPath</h3>
+<p>returns the <a href="./qstring.html">QString</a> name of the <b>relative</b> <i>binary path</i>, where SXE controlled executables are installed. Concatenate this with paths from installPaths() to find full paths which may contain binaries.</p>
 <p>See also <a href="qtopia.html#installPaths">Qtopia::installPaths</a>().</p>
-<h3 class="fn"><a name="installsFileName-var"></a>const <a href="qstring.html">QString</a> QPackageRegistry::installsFileName</h3>
-<p>returns the <a href="qstring.html">QString</a> name of the <i>installs file</i>, part of the SXE database</p>
+<h3 class="fn"><a name="installsFileName-var"></a>const <a href="./qstring.html">QString</a> QPackageRegistry::installsFileName</h3>
+<p>returns the <a href="./qstring.html">QString</a> name of the <i>installs file</i>, part of the SXE database</p>
 <p>See also <a href="qpackageregistry.html#sxeConfPath">sxeConfPath</a>().</p>
-<h3 class="fn"><a name="manifestFileName-var"></a>const <a href="qstring.html">QString</a> QPackageRegistry::manifestFileName</h3>
-<p>returns the <a href="qstring.html">QString</a> name of the <i>manifest file</i>, part of the SXE database</p>
+<h3 class="fn"><a name="manifestFileName-var"></a>const <a href="./qstring.html">QString</a> QPackageRegistry::manifestFileName</h3>
+<p>returns the <a href="./qstring.html">QString</a> name of the <i>manifest file</i>, part of the SXE database</p>
 <p>See also <a href="qpackageregistry.html#sxeConfPath">sxeConfPath</a>().</p>
-<h3 class="fn"><a name="profilesFileName-var"></a>const <a href="qstring.html">QString</a> QPackageRegistry::profilesFileName</h3>
-<p>returns the <a href="qstring.html">QString</a> name of the <i>profiles file</i>, part of the SXE database</p>
+<h3 class="fn"><a name="profilesFileName-var"></a>const <a href="./qstring.html">QString</a> QPackageRegistry::profilesFileName</h3>
+<p>returns the <a href="./qstring.html">QString</a> name of the <i>profiles file</i>, part of the SXE database</p>
 <p>See also <a href="qpackageregistry.html#sxeConfPath">sxeConfPath</a>().</p>
-<h3 class="fn"><a name="qlLibInstallPath-var"></a>const <a href="qstring.html">QString</a> QPackageRegistry::qlLibInstallPath</h3>
-<p>returns the <a href="qstring.html">QString</a> name of the <b>relative</b> <i>quicklaunch binary path</i>, where SXE controlled quicklaunched executables are installed. Concatenate this with paths from installPaths() to find full paths which may contain <tt>.so</tt> files.</p>
+<h3 class="fn"><a name="qlLibInstallPath-var"></a>const <a href="./qstring.html">QString</a> QPackageRegistry::qlLibInstallPath</h3>
+<p>returns the <a href="./qstring.html">QString</a> name of the <b>relative</b> <i>quicklaunch binary path</i>, where SXE controlled quicklaunched executables are installed. Concatenate this with paths from installPaths() to find full paths which may contain <tt>.so</tt> files.</p>
 <p>See also <a href="qtopia.html#installPaths">Qtopia::installPaths</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

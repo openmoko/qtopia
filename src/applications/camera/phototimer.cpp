@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include "phototimer.h"
 #include "minsecspinbox.h"
+#include "noeditspinbox.h"
 
 // Qt includes
 #include <QTimer>
@@ -32,7 +33,7 @@
 
 // Qtopia includes
 #include <QAnalogClock>
-
+#include <QtopiaApplication>
 
 PhotoTimer::PhotoTimer( int timeout,
                         int number,
@@ -94,6 +95,7 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
     layout->addWidget( new QLabel( tr( "Timeout" ) ), 0, 0 );
     QSpinBox* timeout = new CameraMinSecSpinBox( this );
     timeout->setMinimum( 1 );
+    timeout->setMaximum( 120 );
     timeout->setValue( mTimeout );
     layout->addWidget( timeout, 0, 1 );
     connect( timeout,
@@ -102,8 +104,9 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
              SLOT(timeoutChanged(int)) );
 
     layout->addWidget( new QLabel( tr( "Photos" ) ), 1, 0 );
-    QSpinBox* number = new QSpinBox( this );
+    QSpinBox* number = new NoEditSpinBox(this);
     number->setMinimum( 1 );
+    number->setMaximum( 50 );
     number->setValue( mNumber );
     layout->addWidget( number, 1, 1 );
     connect( number,
@@ -114,6 +117,7 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
     layout->addWidget( new QLabel( tr( "Interval" ) ), 2, 0 );
     mIntervalSpin = new CameraMinSecSpinBox( this );
     mIntervalSpin->setMinimum( 1 );
+    mIntervalSpin->setMaximum( 120 );
     mIntervalSpin->setValue( mInterval );
     mIntervalSpin->setEnabled( false );
     layout->addWidget( mIntervalSpin, 2, 1 );
@@ -123,6 +127,10 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
              SLOT(intervalChanged(int)) );
 
     setLayout( layout );
+    
+    QtopiaApplication::setInputMethodHint(timeout,QtopiaApplication::AlwaysOff);
+    QtopiaApplication::setInputMethodHint(number,QtopiaApplication::AlwaysOff);
+    QtopiaApplication::setInputMethodHint(mIntervalSpin,QtopiaApplication::AlwaysOff);
 
 }
 

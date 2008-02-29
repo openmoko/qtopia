@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -24,39 +24,38 @@
     ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
     ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
     **
-    ****************************************************************************/
+    ****************************************************************************/</span>
 
     #include &quot;example.h&quot;
     #include &lt;qpushbutton.h&gt;
     #include &lt;qsoftmenubar.h&gt;
 
-    /*
+<span class="comment">    /*
      *  Constructs a Example which is a child of 'parent', with the
      *  name 'name' and widget flags set to 'f'
-     */
+     */</span>
     Example::Example(QWidget *parent, Qt::WFlags f)
         : QWidget(parent, f)
     {
-        setupUi(this); // reads the .ui file to determine widgets and layout
-        // Construct context menu, available to the user via Qtopia's soft menu bar.
+        setupUi(this); <span class="comment">//</span> reads the .ui file to determine widgets and layout
+        <span class="comment">//</span> Construct context menu, available to the user via Qtopia's soft menu bar.
         QMenu *menu = QSoftMenuBar::menuFor(this);
-        Q_UNUSED(menu); // Normally, we would use &quot;menu&quot; to add more actions.
-        // The context menu will not be active unless it has at least one action.
-        // Tell Qtopia to provide the &quot;Help&quot; option, which will enable the user to
-        // read the Help documentation for this application.
+        Q_UNUSED(menu); <span class="comment">//</span> Normally, we would use &quot;menu&quot; to add more actions.
+        <span class="comment">//</span> The context menu will not be active unless it has at least one action.
+        <span class="comment">//</span> Tell Qtopia to provide the &quot;Help&quot; option, which will enable the user to
+        <span class="comment">//</span> read the Help documentation for this application.
         QSoftMenuBar::setHelpEnabled(this,true);
-        // To add further actions, see QWidget::insertAction(QAction *,QAction *)
     }
 
-    /*
+<span class="comment">    /*
      *  Destroys the object and frees any allocated resources
-     */
+     */</span>
     Example::~Example()
     {
-        // no need to delete child widgets, Qt does it all for us
+        <span class="comment">//</span> no need to delete child widgets, Qt does it all for us
     }
 
-    /*
+<span class="comment">    /*
      *  Every time the quit button is clicked, this slot will be invoked
      *  (see QMetaObject::connectSlotsByName()).
      */</span>
@@ -66,8 +65,8 @@
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

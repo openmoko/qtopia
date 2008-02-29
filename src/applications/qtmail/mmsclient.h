@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,7 +33,7 @@
 #include <QTimer>
 #include <QtopiaNetworkInterface>
 
-class MailAccount;
+class QMailAccount;
 class MailList;
 class MMSMessage;
 class MmsComms;
@@ -55,7 +55,7 @@ public:
     void quit();
     void setSelectedMails(MailList *list, bool connected);
     bool addMail(const QMailMessage &);
-    void setAccount(MailAccount *_account);
+    void setAccount(QMailAccount *_account);
     void sendNotifyResp(const QMailMessage &, const QString &status);
     void resetNewMailCount();
     int unreadMmsCount();
@@ -107,7 +107,7 @@ private:
     bool raiseNetwork();
 
 private:
-    MailAccount *account;
+    QMailAccount *account;
     MmsComms *comms;
     MailList *mailList;
     QList<MMSMessage> outgoing;

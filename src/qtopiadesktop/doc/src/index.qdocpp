@@ -1,14 +1,9 @@
 /*!
 
-\page index.html
+\group index
 \title Qtopia Sync Agent Documentation
 
-\list
-\o \l Classes
-\o \l Headers
-\o \l Overviews
-\o \l{What's New?}
-\endlist
+\generatelist related
 
 */
 
@@ -16,6 +11,7 @@
 
 \page classes.html
 \title Classes
+\ingroup index
 
 \generatelist classes
 
@@ -25,6 +21,7 @@
 
 \group headers
 \title Headers
+\ingroup index
 
 \generatelist related
 
@@ -45,12 +42,7 @@ Please refer to the \l{Qtopia Sync Agent Documentation}.
 
 \group overviews
 \title Overviews
-
-\section1 Overview
-
-These are topical overviews relating to Qtopia Sync Agent.
-
-\section1 Overviews
+\ingroup index
 
 \generatelist related
 
@@ -60,6 +52,7 @@ These are topical overviews relating to Qtopia Sync Agent.
 
 \group changes
 \title What's new?
+\ingroup index
 
 \section1 Overview
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,7 @@
 #include <QPainter>
 #include <QTextEdit>
 #include <QWidget>
+#include <QTimer>
 #include <QCoreApplication>
 #include <QInputContext>
 #include "proxyscreen.h"
@@ -187,6 +188,7 @@ AcceptWindow::AcceptWindow(int time)
     p.setBrush(backgroundRole(), QColor(0,0,0,0));
     setPalette(p);
 #endif
+    setAttribute(Qt::WA_InputMethodTransparent, true);
 
     m_anim.setCurveShape(QTimeLine::EaseInCurve);
     QObject::connect(&m_anim, SIGNAL(valueChanged(qreal)),
@@ -1030,7 +1032,7 @@ KeyboardWidget::KeyboardWidget(const Config &config,
   m_currentBoard(0),
   m_pressAndHold(false),m_animate_accept(true), m_charWindow(0),
   m_boardChangeTimeline(config.boardChangeTime),
-  m_ignoreMouse(false), m_ignore(false),
+  m_ignoreMouse(false), m_ignore(false), optionsWindowTimer(0),
   m_notWord(false), m_alphabetSet(false),
   m_predict(0), m_autoCap(false), m_autoCapitaliseEveryWord(false),
   m_preeditSpace(false), m_dontAddPreeditSpace(false)
@@ -1038,7 +1040,6 @@ KeyboardWidget::KeyboardWidget(const Config &config,
     setAttribute(Qt::WA_InputMethodTransparent, true);
 
     WordPredict::Config wconfig;
-    wconfig.trie = m_config.trieFile;
     wconfig.reallyNoMoveSensitivity = m_config.reallyNoMoveSensitivity;
     wconfig.moveSensitivity = m_config.moveSensitivity;
     wconfig.excludeDistance = m_config.excludeDistance;
@@ -1460,6 +1461,14 @@ QRect KeyboardWidget::rectForWord(const QString &word)
     return ret;
 }
 
+/*
+ * Returns the words currently shown to the user.
+ */
+QStringList KeyboardWidget::words() const
+{
+    return m_words;
+}
+
 QPoint KeyboardWidget::toBoardPoint(const QPoint &p) const
 {
     QPoint rv = p;
@@ -1738,6 +1747,8 @@ void KeyboardWidget::pressAndHold()
     }
 
     update();
+
+    emit pressedAndHeld();
 }
 
 /* 
@@ -1821,13 +1832,28 @@ void KeyboardWidget::moveEvent(QMoveEvent *)
     positionOptionsWindow();
 }
 
+// Start a zero timer to reposition the options window (zero timer is
+// needed to allow windowmanager time to finish docking keyboard widget).
 void KeyboardWidget::positionOptionsWindow()
+{
+    if(!optionsWindowTimer)
+    {
+        optionsWindowTimer = new QTimer(0);
+        optionsWindowTimer->setInterval(0);
+        optionsWindowTimer->setSingleShot(true);
+        connect(optionsWindowTimer, SIGNAL(timeout()),this, SLOT(positionTimeOut()));
+    }
+    optionsWindowTimer->start();
+}
+
+// Position the options window immediately.
+void KeyboardWidget::positionTimeOut()
 {
     int oheight = m_config.optionsWindowHeight;
     
     if(oheight == -1) {
         int bottom = QApplication::desktop()->availableGeometry().bottom();
-        oheight = QApplication::desktop()->height() - bottom - 1;
+        oheight = pos().y() - bottom - 1;
         if(oheight <= 0)
             oheight = 50; 
     }
@@ -2022,19 +2048,10 @@ bool KeyboardWidget::filter ( int unicode, int keycode, int modifiers, bool isPr
         return false;
 
     if(keycode == Qt::Key_Select) {
-        if(m_preeditSpace){
-            m_preeditSpace = false;
-            emit commit(QString()); //clear preedit
-            return false;
-        };
-
-        // not just preedit space, so commit text but let the key go through,
-        // so the select key accepts the text, and leaves edit focus,
-        // leaving the widget with navigation focus
-        m_dontAddPreeditSpace = true;
+        // on release, commit text
+        if (isPress) return true;
         acceptWord();
-        m_dontAddPreeditSpace = false;
-        return false;
+        return true;
     }
 
     //Handle backspace

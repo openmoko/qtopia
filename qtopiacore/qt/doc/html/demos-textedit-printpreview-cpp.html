@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2004-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2004-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the demonstration applications of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
  #include &quot;printpreview.h&quot;
 
@@ -183,15 +181,15 @@
      QAbstractTextDocumentLayout::PaintContext ctx;
      ctx.clip = docRect;
 
-     // don't use the system palette text as default text color, on HP/UX
-     // for example that's white, and white text on white paper doesn't
-     // look that nice
+     <span class="comment">//</span> don't use the system palette text as default text color, on HP/UX
+     <span class="comment">//</span> for example that's white, and white text on white paper doesn't
+     <span class="comment">//</span> look that nice
      ctx.palette.setColor(QPalette::Text, Qt::black);
 
      painter-&gt;translate(0, - page * pgSize.height());
 
      painter-&gt;translate(printPreview-&gt;pageTopLeft);
-     painter-&gt;setClipRect(docRect);//.translated(printPreview-&gt;pageTopLeft));
+     painter-&gt;setClipRect(docRect);<span class="comment">//</span>.translated(printPreview-&gt;pageTopLeft));
      doc-&gt;documentLayout()-&gt;draw(painter, ctx);
  }
 
@@ -254,7 +252,7 @@
      doc-&gt;setUseDesignMetrics(true);
      doc-&gt;documentLayout()-&gt;setPaintDevice(view-&gt;viewport());
 
-     // add a nice 2 cm margin
+     <span class="comment">//</span> add a nice 2 cm margin
      const qreal margin = inchesToPixels(mmToInches(20), this);
      QTextFrameFormat fmt = doc-&gt;rootFrame()-&gt;frameFormat();
      fmt.setMargin(margin);
@@ -270,7 +268,7 @@
      tb-&gt;setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
      QAction *a;
-     a = new QAction(/*QIcon(rsrcPath + &quot;/fileprint.png&quot;),*/</span> tr(&quot;&amp;Print...&quot;), this);
+     a = new QAction(<span class="comment">/*QIcon(rsrcPath + &quot;/fileprint.png&quot;),*/</span> tr(&quot;&amp;Print...&quot;), this);
      a-&gt;setShortcut(Qt::CTRL + Qt::Key_P);
      connect(a, SIGNAL(triggered()), this, SLOT(print()));
      tb-&gt;addAction(a);
@@ -314,7 +312,7 @@
      page.setWidth(page.width() * view-&gt;logicalDpiX() / printer.logicalDpiX());
      page.setHeight(page.height() * view-&gt;logicalDpiY() / printer.logicalDpiY());
 
-     <span class="comment">// add a nice 2 cm margin</span>
+     <span class="comment">//</span> add a nice 2 cm margin
      const qreal margin = inchesToPixels(mmToInches(20), this);
      QTextFrameFormat fmt = doc-&gt;rootFrame()-&gt;frameFormat();
      fmt.setMargin(margin);
@@ -349,8 +347,8 @@
  #include &quot;printpreview.moc&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

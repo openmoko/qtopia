@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/sql-driver.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/sql-driver.qdoc -->
 <head>
   <title>Qt 4.3: SQL Database Drivers</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -120,7 +120,7 @@
      q.exec(&quot;call qtestproc (@outval1, @outval2)&quot;);
      q.exec(&quot;select @outval1, @outval2&quot;);
      q.next();
-     qDebug() &lt;&lt; q.value(0) &lt;&lt; q.value(1); <span class="comment">// outputs &quot;42&quot; and &quot;43&quot;</span></pre>
+     qDebug() &lt;&lt; q.value(0) &lt;&lt; q.value(1); <span class="comment">//</span> outputs &quot;42&quot; and &quot;43&quot;</pre>
 <p><b>Note:</b> <tt>@outval1</tt> and <tt>@outval2</tt> are variables local to the current connection and will not be affected by queries sent from another host or connection.</p>
 <a name="embedded-mysql-server"></a>
 <h5>Embedded MySQL Server</h5>
@@ -340,7 +340,7 @@
 <a name="qibase-unicode-support-and-text-encoding"></a>
 <h5>QIBASE Unicode Support and Text Encoding</h5>
 <p>By default the driver connects to the database using UNICODE_FSS. This can be overridden by setting the ISC_DPB_LC_CTYPE parameter with <a href="qsqldatabase.html#setConnectOptions">QSqlDatabase::setConnectOptions</a>() before opening the connection.</p>
-<pre>    <span class="comment">// connect to database using the Latin-1 character set</span>
+<pre>    <span class="comment">//</span> connect to database using the Latin-1 character set
     db.setConnectOptions(&quot;ISC_DPB_LC_CTYPE=Latin1&quot;);
     db.open();</pre>
 <p>If Qt doesn't support the given text encoding the driver will issue a warning message and connect to the database using UNICODE_FSS.</p>
@@ -351,7 +351,7 @@
 <pre> QSqlQuery q;
  q.exec(&quot;execute procedure my_procedure&quot;);
  q.next();
- qDebug() &lt;&lt; q.value(0); <span class="comment">// outputs the first RETURN/OUT value</span></pre>
+ qDebug() &lt;&lt; q.value(0); <span class="comment">//</span> outputs the first RETURN/OUT value</pre>
 <a name="how-to-build-the-qibase-plugin-on-unix-and-mac-os-x"></a>
 <h5>How to Build the QIBASE Plugin on Unix and Mac OS X</h5>
 <p>The following assumes InterBase or Firebird is installed in <tt>/opt/interbase</tt>:</p>
@@ -359,7 +359,7 @@
 <pre>     cd $QTDIR/src/plugins/sqldrivers/ibase
      qmake -o Makefile &quot;INCLUDEPATH+=/opt/interbase/include&quot; &quot;LIBS+=-L/opt/interbase/lib&quot; ibase.pro
      make</pre>
-<p>If you are using Firebird, the Firebird library has to be set explicitely:</p>
+<p>If you are using Firebird, the Firebird library has to be set explicitly:</p>
 <pre>     cd $QTDIR/src/plugins/sqldrivers/ibase
      qmake -o Makefile &quot;INCLUDEPATH+=/opt/interbase/include&quot; &quot;LIBS+=-L/opt/interbase/lib -lfbclient&quot; ibase.pro
      make</pre>
@@ -407,10 +407,10 @@
      ~XyzResult() {}
 
  protected:
-     QVariant data(int <span class="comment">/* index */) { return QVariant(); }
-     bool isNull(int /* index */) { return false; }
-     bool reset(const QString &amp; /* query */) { return false; }
-     bool fetch(int /* index */) { return false; }
+     QVariant data(int <span class="comment">/* index */</span>) { return QVariant(); }
+     bool isNull(int <span class="comment">/* index */</span>) { return false; }
+     bool reset(const QString &amp; <span class="comment">/* query */</span>) { return false; }
+     bool fetch(int <span class="comment">/* index */</span>) { return false; }
      bool fetchFirst() { return false; }
      bool fetchLast() { return false; }
      int size() { return 0; }
@@ -424,18 +424,18 @@
      XyzDriver() {}
      ~XyzDriver() {}
 
-     bool hasFeature(DriverFeature /* feature */) const { return false; }
-     bool open(const QString &amp; /* db */, const QString &amp; /* user */,
-               const QString &amp; /* password */, const QString &amp; /* host */,
-               int /* port */, const QString &amp; /* options */</span>)
+     bool hasFeature(DriverFeature <span class="comment">/* feature */</span>) const { return false; }
+     bool open(const QString &amp; <span class="comment">/* db */</span>, const QString &amp; <span class="comment">/* user */</span>,
+               const QString &amp; <span class="comment">/* password */</span>, const QString &amp; <span class="comment">/* host */</span>,
+               int <span class="comment">/* port */</span>, const QString &amp; <span class="comment">/* options */</span>)
          { return false; }
      void close() {}
      QSqlResult *createResult() const { return new XyzResult(this); }
  };</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

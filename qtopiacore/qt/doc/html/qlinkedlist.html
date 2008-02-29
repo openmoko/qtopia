@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qlinkedlist.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/tools/qlinkedlist.cpp -->
 <head>
   <title>Qt 4.3: QLinkedList Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -94,8 +94,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlinkedlist.html#operator-lt-lt-7">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QLinkedList&lt;T&gt; &amp; <i>list</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qlinkedlist.html#operator-gt-gt-7">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QLinkedList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlinkedlist.html#operator-lt-lt-48">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QLinkedList&lt;T&gt; &amp; <i>list</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qlinkedlist.html#operator-gt-gt-33">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QLinkedList&lt;T&gt; &amp; <i>list</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -114,7 +114,7 @@
 <p>QLinkedList stores a list of items. The default constructor creates an empty list. To insert items into the list, you can use operator&lt;&lt;():</p>
 <pre> QLinkedList&lt;QString&gt; list;
  list &lt;&lt; &quot;one&quot; &lt;&lt; &quot;two&quot; &lt;&lt; &quot;three&quot;;
-<span class="comment"> // list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</pre>
 <p>If you want to get the first or last item in a linked list, use <a href="qlinkedlist.html#first">first</a>() or <a href="qlinkedlist.html#last">last</a>(). If you want to remove an item from either end of the list, use <a href="qlinkedlist.html#removeFirst">removeFirst</a>() or <a href="qlinkedlist.html#removeLast">removeLast</a>(). If you want to remove all occurrences of a given value in the list, use <a href="qlinkedlist.html#removeAll">removeAll</a>().</p>
 <p>A common requirement is to remove the first or last item in the list and do something with it. For this, QLinkedList provides <a href="qlinkedlist.html#takeFirst">takeFirst</a>() and <a href="qlinkedlist.html#takeLast">takeLast</a>(). Here's a loop that removes the items from a list one at a time and calls <tt>delete</tt> on them:</p>
 <pre> QLinkedList&lt;QWidget *&gt; list;
@@ -161,7 +161,7 @@
  list.append(&quot;one&quot;);
  list.append(&quot;two&quot;);
  list.append(&quot;three&quot;);
-<span class="comment"> // list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;]</pre>
 <p>This is the same as list.insert(<a href="qlinkedlist.html#end">end</a>(), <i>value</i>).</p>
 <p>See also <a href="qlinkedlist.html#operator-lt-lt">operator&lt;&lt;</a>(), <a href="qlinkedlist.html#prepend">prepend</a>(), and <a href="qlinkedlist.html#insert">insert</a>().</p>
 <h3 class="fn"><a name="back"></a>T &amp; QLinkedList::back ()</h3>
@@ -248,7 +248,7 @@
  list.prepend(&quot;one&quot;);
  list.prepend(&quot;two&quot;);
  list.prepend(&quot;three&quot;);
-<span class="comment"> // list: [&quot;three&quot;, &quot;two&quot;, &quot;one&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;three&quot;, &quot;two&quot;, &quot;one&quot;]</pre>
 <p>This is the same as list.insert(<a href="qlinkedlist.html#begin">begin</a>(), <i>value</i>).</p>
 <p>See also <a href="qlinkedlist.html#append">append</a>() and <a href="qlinkedlist.html#insert">insert</a>().</p>
 <h3 class="fn"><a name="push_back"></a>void QLinkedList::push_back ( const T &amp; <i>value</i> )</h3>
@@ -261,7 +261,7 @@
 <pre> QList&lt;QString&gt; list;
  list &lt;&lt; &quot;sun&quot; &lt;&lt; &quot;cloud&quot; &lt;&lt; &quot;sun&quot; &lt;&lt; &quot;rain&quot;;
  list.removeAll(&quot;sun&quot;);
-<span class="comment"> // list: [&quot;cloud&quot;, &quot;rain&quot;]</span></pre>
+<span class="comment"> //</span> list: [&quot;cloud&quot;, &quot;rain&quot;]</pre>
 <p>This function requires the value type to have an implementation of <tt>operator==()</tt>.</p>
 <p>See also <a href="qlinkedlist.html#insert">insert</a>().</p>
 <h3 class="fn"><a name="removeFirst"></a>void QLinkedList::removeFirst ()</h3>
@@ -319,73 +319,20 @@
 <p>See also <a href="qlinkedlist.html#operator-not-eq">operator!=</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-7"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QLinkedList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-48"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QLinkedList&lt;T&gt; &amp; <i>list</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the linked list <i>list</i> to stream <i>out</i>.</p>
 <p>This function requires the value type to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-7"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QLinkedList&lt;T&gt; &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-33"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QLinkedList&lt;T&gt; &amp; <i>list</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a linked list from stream <i>in</i> into <i>list</i>.</p>
 <p>This function requires the value type to implement <tt>operator&gt;&gt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="find"></a><a href="qlinkedlist-iterator.html">iterator</a> QLinkedList::find ( <a href="qlinkedlist-iterator.html">iterator</a> <i>from</i>, const T &amp; <i>t</i> )</h3>
-<p>If you need random access to a data structure then <a href="qlist.html">QList</a>, <a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>, or <a href="qhash.html">QHash</a>, are all better choices than <a href="qlinkedlist.html">QLinkedList</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QLinkedList::iterator i = list-&gt;find(from, value);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QLinkedList::iterator i = from;
- while (i != list-&gt;end() &amp;&amp; *i != value)
-     ++i;</pre>
-<h3 class="fn"><a name="find-2"></a><a href="qlinkedlist-iterator.html">iterator</a> QLinkedList::find ( const T &amp; <i>t</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>If you need random access to a data structure then <a href="qlist.html">QList</a>, <a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>, or <a href="qhash.html">QHash</a>, are all better choices than <a href="qlinkedlist.html">QLinkedList</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QLinkedList::iterator i = list-&gt;find(value);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QLinkedList::iterator i = list-&gt;begin();
- while (i != list-&gt;end() &amp;&amp; *i != value)
-     ++i;</pre>
-<h3 class="fn"><a name="find-3"></a><a href="qlinkedlist-const-iterator.html">const_iterator</a> QLinkedList::find ( <a href="qlinkedlist-const-iterator.html">const_iterator</a> <i>from</i>, const T &amp; <i>t</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>If you need random access to a data structure then <a href="qlist.html">QList</a>, <a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>, or <a href="qhash.html">QHash</a>, are all better choices than <a href="qlinkedlist.html">QLinkedList</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QLinkedList::const_iterator i = list-&gt;find(from, value);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QLinkedList::const_iterator i = from;
- while (i != list-&gt;end() &amp;&amp; *i != value)
-     ++i;</pre>
-<h3 class="fn"><a name="find-4"></a><a href="qlinkedlist-const-iterator.html">const_iterator</a> QLinkedList::find ( const T &amp; <i>t</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>If you need random access to a data structure then <a href="qlist.html">QList</a>, <a href="qvector.html">QVector</a>, <a href="qmap.html">QMap</a>, or <a href="qhash.html">QHash</a>, are all better choices than <a href="qlinkedlist.html">QLinkedList</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QLinkedList::const_iterator i = list-&gt;find(value);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QLinkedList::const_iterator i = list-&gt;begin();
- while (i != list-&gt;end() &amp;&amp; *i != value)
-     ++i;</pre>
-<h3 class="fn"><a name="findIndex"></a>int QLinkedList::findIndex ( const T &amp; <i>t</i> ) const</h3>
-<p>If you need indexes then <a href="qlist.html">QList</a> or <a href="qvector.html">QVector</a> are better choices than <a href="qlinkedlist.html">QLinkedList</a>.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> int index = list-&gt;findIndex(value);</font></pre>
-<p>you can rewrite it as</p>
-<pre> int index = 0;
- bool found = false;
- for (const_iterator i = list-&gt;begin(); i != list-&gt;end(); ++i; ++index)
-     if (*i == value) {
-         found = true;
-         break;
-     }
- if (!found)
-     index = -1;</pre>
-<h3 class="fn"><a name="remove"></a><a href="qlinkedlist-iterator.html">iterator</a> QLinkedList::remove ( <a href="qlinkedlist-iterator.html">iterator</a> <i>pos</i> )</h3>
-<p>Use <a href="qlinkedlist.html#erase">erase</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

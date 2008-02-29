@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -24,7 +24,7 @@
     ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
     ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
     **
-    ****************************************************************************/
+    ****************************************************************************/</span>
 
     #include &quot;notesdemo.h&quot;
     #include &lt;QStackedLayout&gt;
@@ -34,7 +34,7 @@
     #include &lt;QTimeString&gt;
     #include &lt;QtDebug&gt;
 
-    /*!
+<span class="comment">    /*!
         \class NotesDemo
         \brief The NotesDemo application is a simple text editor demonstrating the use of a QDocumentSelector.
 
@@ -43,91 +43,91 @@
         or creating a new document will display the document in the text editor.  Accepting or canceling the
         editor will return to the document selector, saving the document if it was accepted, and accepting or
         canceling the document selector will exit the application.
-    */
+    */</span>
 
-    /*!
+<span class="comment">    /*!
         Constructs a NotesDemo dialog which is a child of \a parent and has the given window
         \a flags.
-     */
+     */</span>
     NotesDemo::NotesDemo( QWidget *parent, Qt::WindowFlags flags )
         : QDialog( parent, flags )
     {
-        // Create a new document selector which lists documents with the MIME type text/plain
-        // sorted so the most recently edited documents appear first.
+        <span class="comment">//</span> Create a new document selector which lists documents with the MIME type text/plain
+        <span class="comment">//</span> sorted so the most recently edited documents appear first.
         documentSelector = new QDocumentSelector;
 
         documentSelector-&gt;setFilter( QContentFilter::mimeType( &quot;text/plain&quot; ) );
         documentSelector-&gt;setSortMode( QDocumentSelector::ReverseChronological );
 
-        // Enable the new document option so a 'New' document selection appears at the start of the
-        // documents list and in the context menu.
+        <span class="comment">//</span> Enable the new document option so a 'New' document selection appears at the start of the
+        <span class="comment">//</span> documents list and in the context menu.
         documentSelector-&gt;enableOptions( QDocumentSelector::NewDocument );
 
-        // Connect to the newSelected() and documentSelected() signal so we're notified when the user
-        // selects a document.
+        <span class="comment">//</span> Connect to the newSelected() and documentSelected() signal so we're notified when the user
+        <span class="comment">//</span> selects a document.
         connect( documentSelector, SIGNAL(newSelected()),
                  this, SLOT(newDocument()) );
         connect( documentSelector, SIGNAL(documentSelected(QContent)),
                  this, SLOT(openDocument(QContent)) );
 
-        // Construct the text editor widget.
+        <span class="comment">//</span> Construct the text editor widget.
         editor = new QTextEdit;
 
-        // Create a new stacked layout and add the document selector and text editor widgets to it.
-        // As the layout is given the dialog as a parent it is automatically set as the layout for
-        // the dialog, and the widgets added to it are re-parented to the dialog.  The document
-        // will be the initial widget shown as it was added to the layout first.
+        <span class="comment">//</span> Create a new stacked layout and add the document selector and text editor widgets to it.
+        <span class="comment">//</span> As the layout is given the dialog as a parent it is automatically set as the layout for
+        <span class="comment">//</span> the dialog, and the widgets added to it are re-parented to the dialog.  The document
+        <span class="comment">//</span> will be the initial widget shown as it was added to the layout first.
         layout = new QStackedLayout( this );
 
         layout-&gt;addWidget( documentSelector );
         layout-&gt;addWidget( editor );
     }
 
-    /*!
+<span class="comment">    /*!
         Creates a new text document and displays the text editor.
-    */
+    */</span>
     void NotesDemo::newDocument()
     {
-        // Set the current document to a new QContent, and set it's name and type.
-        // We're just using the time and date for the name but another application
-        // may want to prompt the user for a name, or use the first bit of text in
-        // the document.
+        <span class="comment">//</span> Set the current document to a new QContent, and set it's name and type.
+        <span class="comment">//</span> We're just using the time and date for the name but another application
+        <span class="comment">//</span> may want to prompt the user for a name, or use the first bit of text in
+        <span class="comment">//</span> the document.
         currentDocument = QContent();
 
         currentDocument.setName( &quot;Note &quot; + QTimeString::localYMDHMS( QDateTime::currentDateTime() ) );
         currentDocument.setType( &quot;text/plain&quot; );
 
-        // Display the editor.
+        <span class="comment">//</span> Display the editor.
         layout-&gt;setCurrentWidget( editor );
     }
 
-    /*!
+<span class="comment">    /*!
         Opens a text \a document selected from the QDocumentSelector and displays the text editor.
-    */
+    */</span>
     void NotesDemo::openDocument( const QContent &amp;document )
     {
-        // Sets the current document to the one selected.
+        <span class="comment">//</span> Sets the current document to the one selected.
         currentDocument = document;
 
-        // Read in the text from the document, if the read is successful display the text editor.
+        <span class="comment">//</span> Read in the text from the document, if the read is successful display the text editor.
         if ( readContent( editor-&gt;document(), &amp;currentDocument ) ) {
             layout-&gt;setCurrentWidget( editor );
         }
     }
 
-    /*!
+<span class="comment">    /*!
         Closes the currently displayed widget.  If that is editor widget and the \a result
         is QDialog::Accepted the changes made in the editor will be saved.
 
         Closing the editor widget will return the document selector to the display, and closing
         the document selector will close the application.
-    */
+    */</span>
     void NotesDemo::done( int result )
     {
         if ( layout-&gt;currentWidget() == editor ) {
-            // The current widget is the editor so finish editing the document and return to
-            // the document selector. If the dialog was accepted write the changes to the
-            // document, and commit the document QContent.
+            <span class="comment">//</span> The current widget is the editor so finish editing the document and return to
+            <span class="comment">//</span> the document selector. If the dialog was accepted write the changes to the
+            <span class="comment">//</span> document, and commit the document QContent.
             if ( result == QDialog::Accepted ) {
                 if ( !writeContent(editor-&gt;document(), &amp;currentDocument ) ) {
                     qWarning() &lt;&lt; &quot;Writing the content failed&quot;;
@@ -140,21 +140,21 @@
 
             layout-&gt;setCurrentWidget( documentSelector );
         } else {
-            // The current widget is the document selector, so close the dialog and the application.
+            <span class="comment">//</span> The current widget is the document selector, so close the dialog and the application.
             QDialog::done( result );
         }
     }
 
-    /*!
+<span class="comment">    /*!
         Reads the contents of the text document \a content into \a document.
 
         Returns true if the read was successful and false otherwise.
-    */
+    */</span>
     bool NotesDemo::readContent( QTextDocument *document, QContent *content )
     {
-        // Attempt to open the content in read-only mode.  If the open succeeds QContent
-        // will construct a new I/O device and return a pointer to it, the caller takes
-        // ownership of the I/O device and is responsible for deleting it.
+        <span class="comment">//</span> Attempt to open the content in read-only mode.  If the open succeeds QContent
+        <span class="comment">//</span> will construct a new I/O device and return a pointer to it, the caller takes
+        <span class="comment">//</span> ownership of the I/O device and is responsible for deleting it.
         QIODevice *ioDevice = content-&gt;open( QIODevice::ReadOnly );
         if ( !ioDevice ) {
             qWarning() &lt;&lt; &quot;Could not open the new content object to read from!!&quot;;
@@ -162,18 +162,18 @@
         }
         QByteArray bytes = ioDevice-&gt;readAll();
 
-        // Convert the string from an 8-bit ASCII byte array and set it as the plain text
-        // content of the document.
+        <span class="comment">//</span> Convert the string from an 8-bit ASCII byte array and set it as the plain text
+        <span class="comment">//</span> content of the document.
         document-&gt;setPlainText( QString::fromAscii( bytes ) );
 
-        // Close the I/O device and destroy it.
+        <span class="comment">//</span> Close the I/O device and destroy it.
         ioDevice-&gt;close();
         delete ioDevice;
 
         return true;
     }
 
-    /*!
+<span class="comment">    /*!
         Writes the contents of \a document to the text document \a content.  It is left up to the
         calling code to \l {QContent::commit()}{commit} the changes in \a content to the document
         system.
@@ -182,22 +182,22 @@
     */</span>
     bool NotesDemo::writeContent( QTextDocument *document, QContent *content )
     {
-        <span class="comment">// Attempt to open the content in write-only mode.  If the open succeeds QContent</span>
-        <span class="comment">// will construct a new I/O device and return a pointer to it, the caller takes</span>
-        <span class="comment">// ownership of the I/O device and is responsible for deleting it.</span>
+        <span class="comment">//</span> Attempt to open the content in write-only mode.  If the open succeeds QContent
+        <span class="comment">//</span> will construct a new I/O device and return a pointer to it, the caller takes
+        <span class="comment">//</span> ownership of the I/O device and is responsible for deleting it.
         QIODevice *ioDevice = content-&gt;open( QIODevice::WriteOnly );
         if ( !ioDevice ) {
             qWarning() &lt;&lt; &quot;Could not open the new content object to write to!!&quot;;
             return false;
         }
 
-        <span class="comment">// Gets the plain text content of the text document and converts it to an 8-bit</span>
-        <span class="comment">// ASCII byte array before writing it to the I/O device.</span>
-        <span class="comment">// (This assumes that the notes are short enough to fit into memory. For longer</span>
-        <span class="comment">// documents, use QTextDocument::begin(), QTextDocument::end() and QTextDocument::findBlock(int).)</span>
+        <span class="comment">//</span> Gets the plain text content of the text document and converts it to an 8-bit
+        <span class="comment">//</span> ASCII byte array before writing it to the I/O device.
+        <span class="comment">//</span> (This assumes that the notes are short enough to fit into memory. For longer
+        <span class="comment">//</span> documents, use QTextDocument::begin(), QTextDocument::end() and QTextDocument::findBlock(int).)
         int bytesWritten = ioDevice-&gt;write( document-&gt;toPlainText().toAscii() );
 
-        <span class="comment">// Close the I/O device and delete it.</span>
+        <span class="comment">//</span> Close the I/O device and delete it.
         ioDevice-&gt;close();
         delete ioDevice;
 
@@ -210,8 +210,8 @@
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

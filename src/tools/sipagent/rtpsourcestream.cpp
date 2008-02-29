@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -100,7 +100,11 @@ void RtpSourceStream::codecDestroyed()
 
 void RtpSourceStream::readyToRead()
 {
+    int count=0;
+
     while ( socket->hasPendingDatagrams() ) {
+        if(count > 20) break;
+        count++;
         qint64 len = socket->readDatagram( buffer, sizeof( buffer ) );
         if ( len >= 12 ) {
             int type = ( buffer[1] & 0x7F );
@@ -109,7 +113,8 @@ void RtpSourceStream::readyToRead()
                                << "]: rtp packet" << type;
             if ( type == cachedPayloadType ) {
                 // Same as last time, so quickly call what we already found.
-                cached->write( buffer + 12, len - 12 );
+                if(count < 2)
+                    cached->write( buffer + 12, len - 12 );
             } else {
                 // Different payload type, so search for an appropriate codec.
                 bool handled = false;

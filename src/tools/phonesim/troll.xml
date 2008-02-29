@@ -274,6 +274,13 @@
 <unsolicited delay="500" once="true">+CREG: 2</unsolicited>
 <unsolicited delay="5000" once="true">+CREG: 1</unsolicited>
 
+<!-- Time -->
+<!-- Enable for testing
+<unsolicited delay="3000" once="true">*TTZ: 2, "11/25/2007, 12:12:12+40", 0</unsolicited>
+<unsolicited delay="3000" once="true">*TTZ: 2, "Cingluar", 0</unsolicited>
+-->
+
+
 <!-- GSM 07.07: General commands -->
 
 <chat>
@@ -890,7 +897,7 @@
 <chat>
   <!-- Request preferred operators -->
   <command>AT+CPOL?</command>
-  <response delay="2000">+CPOL: ${PO1}\n+CPOL: ${PO2}\n+CPOL: ${PO3}\n+CPOL: ${PO4}\n+CPOL: ${PO5}\n+CPOL: ${PO6}\n+CPOL: ${PO7}\n+CPOL: ${PO8}\nOK</response>
+  <response delay="2000">+CPOL: ${PO1}\n+CPOL: ${PO2}\nOK</response>
 </chat>
 
 <chat>
@@ -898,6 +905,13 @@
   <command>AT+CPOL=1,2,*</command>
   <response>OK</response>
   <set name="PO1" value="1,2,${*}"/>
+</chat>
+
+<chat>
+  <!-- Remove preferred operator 1 -->
+  <command>AT+CPOL=1</command>
+  <response>OK</response>
+  <set name="PO1" value=""/>
 </chat>
 
 <chat>
@@ -909,9 +923,9 @@
 
 <chat>
   <!-- Remove preferred operator 2 -->
-  <command>AT+CPOL=2,0,0,0</command>
+  <command>AT+CPOL=2</command>
   <response>OK</response>
-  <set name="PO2" value="2,0,0,0"/>
+  <set name="PO2" value=""/>
 </chat>
 
 <chat>
@@ -923,9 +937,9 @@
 
 <chat>
   <!-- Remove preferred operator 3 -->
-  <command>AT+CPOL=3,0,0,0</command>
+  <command>AT+CPOL=3</command>
   <response>OK</response>
-  <set name="PO3" value="3,0,0,0"/>
+  <set name="PO3" value=""/>
 </chat>
 
 <chat>
@@ -937,9 +951,9 @@
 
 <chat>
   <!-- Remove preferred operator 4 -->
-  <command>AT+CPOL=4,0,0,0</command>
+  <command>AT+CPOL=4</command>
   <response>OK</response>
-  <set name="PO4" value="4,0,0,0"/>
+  <set name="PO4" value=""/>
 </chat>
 
 <chat>
@@ -951,9 +965,9 @@
 
 <chat>
   <!-- Remove preferred operator 5 -->
-  <command>AT+CPOL=5,0,0,0</command>
+  <command>AT+CPOL=5</command>
   <response>OK</response>
-  <set name="PO5" value="5,0,0,0"/>
+  <set name="PO5" value=""/>
 </chat>
 
 <chat>
@@ -965,9 +979,9 @@
 
 <chat>
   <!-- Remove preferred operator 6 -->
-  <command>AT+CPOL=6,0,0,0</command>
+  <command>AT+CPOL=6</command>
   <response>OK</response>
-  <set name="PO6" value="6,0,0,0"/>
+  <set name="PO6" value=""/>
 </chat>
 
 <chat>
@@ -979,9 +993,9 @@
 
 <chat>
   <!-- Remove preferred operator 7 -->
-  <command>AT+CPOL=7,0,0,0</command>
+  <command>AT+CPOL=7</command>
   <response>OK</response>
-  <set name="PO7" value="7,0,0,0"/>
+  <set name="PO7" value=""/>
 </chat>
 
 <chat>
@@ -993,9 +1007,9 @@
 
 <chat>
   <!-- Remove preferred operator 8 -->
-  <command>AT+CPOL=8,0,0,0</command>
+  <command>AT+CPOL=8</command>
   <response>OK</response>
-  <set name="PO8" value="8,0,0,0"/>
+  <set name="PO8" value=""/>
 </chat>
 
 <!-- ******************* CALL BARRING *****************************-->

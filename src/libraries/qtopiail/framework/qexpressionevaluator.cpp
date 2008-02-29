@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -172,6 +172,66 @@ private:
 
 //+========================================================================================================================+
 
+// Replacement for QBuffer that does away with the
+// overhead of QIODevice::getChar().
+class ExpressionBuffer
+{
+public:
+    ExpressionBuffer()
+    {
+	start = 0;
+	end = 0;
+    }
+
+    void setData(const QByteArray& data)
+    {
+	start = data.constData();
+	end = start + data.size();
+    }
+
+    inline bool atEnd() const
+    {
+	return (start >= end);
+    }
+
+    inline bool getChar(char *c)
+    {
+	if (start < end) {
+	    *c = *start++;
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    inline void ungetChar(char)
+    {
+	--start;
+    }
+
+    inline QByteArray peek(int length) const
+    {
+	if (length <= (int)(end - start))
+	    return QByteArray(start, length);
+	else
+	    return QByteArray();
+    }
+
+    inline int peek(char *c) const
+    {
+	if (start < end) {
+	    *c = *start;
+	    return 1;
+	} else {
+	    return -1;
+	}
+    }
+
+private:
+    const char *start;
+    const char *end;
+};
+
 //========================================
 //= ExpressionTokenizer Declaration
 //=======================================
@@ -207,7 +267,7 @@ private:
     int m_curToken;
 
     QByteArray m_expressionData;
-    QBuffer m_idevice;
+    ExpressionBuffer m_idevice;
 };
 
 //+========================================================================================================================+
@@ -757,6 +817,7 @@ bool ExpressionTokenizer::tokenize() {
 
                     // unknown tokens, assume pluggable term
                     QByteArray term;
+                    term.reserve(64);   // reserve space to make term.append more efficient
                     term.append( c );
                     // FIXME : should switch to IL term interface to do simple parsing, instead of relying on space as delimiter
                     do {
@@ -807,18 +868,15 @@ void ExpressionTokenizer::setExpression( const QByteArray& data ) {
 #ifdef EXPRESSION_TESTING
     qWarning("ExpressionTokenizer::setExpression( %s )", data.constData());
 #endif
-    m_idevice.close();
     m_expressionData = data;
-    m_idevice.setBuffer( &m_expressionData );
-    m_idevice.open(QIODevice::ReadOnly);
-    Q_ASSERT(m_idevice.isOpen() == true);
+    m_idevice.setData(data);
 }
 
 /* Private Methods */
 bool ExpressionTokenizer::testChar( const char* tc, bool& ok ) {
     char c = 0;
     ok = true;
-    int r = m_idevice.peek( &c, 1 );
+    int r = m_idevice.peek( &c );
     if( r < 0 ) {
         // XXX error: Input error
         qWarning("Expression Input Error1");

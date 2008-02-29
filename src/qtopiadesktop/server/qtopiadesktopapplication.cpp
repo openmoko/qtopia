@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,6 +56,12 @@ class SingleWindow : public QStackedWidget
 public:
     SingleWindow() : QStackedWidget()
     {
+        loadGeometry();
+        connect( this, SIGNAL(currentChanged(int)), this, SLOT(refreshWindow(int)) );
+    }
+
+    void loadGeometry()
+    {
         // Set the geometry (can be overridden from the commandline)
         DesktopSettings settings( "singlewindow" );
         QRect desk = qApp->desktop()->availableGeometry();
@@ -70,7 +76,6 @@ public:
         setGeometry( r );
         QPoint p = settings.value( "pos", r.topLeft() ).toPoint();
         move( p );
-        connect( this, SIGNAL(currentChanged(int)), this, SLOT(refreshWindow(int)) );
     }
 
 private slots:
@@ -89,6 +94,7 @@ private slots:
         TRACE(QDA) << "SingleWindow::turnOnUpdates";
         setUpdatesEnabled( true );
     }
+
 private:
     void closeEvent( QCloseEvent *e )
     {
@@ -169,10 +175,8 @@ void QtopiaDesktopApplication::initialize()
 
     processArgs( arguments() );
 
-#ifdef DEBUG
     if ( waitForDebugger )
         QMessageBox::information(0, "Waiting for debugger", "Attach the debugger now.", QMessageBox::Ok);
-#endif
 
     init();
 }
@@ -215,7 +219,7 @@ void QtopiaDesktopApplication::processArgs( const QStringList &args )
                 "--wait: Delay at startup so that a debugger can attach.\n"
                 "--safe: Force safe mode (No plugins are loaded).\n"
                 "\n";
-            printf( "%s\n", usage.toLatin1().constData() );
+            qWarning() << usage;
             ::exit( 2 );
         }
     }
@@ -323,6 +327,10 @@ void QtopiaDesktopApplication::reinit()
                 "You should choose which plugins to load from the settings dialog "
                 "and restart.")
           << QString("safe mode");
+        QMessageBox::information( 0, "", QString("<qt>%1").arg(
+             tr("Qtopia Sync Manager was started in safe mode. "
+                "You should choose which plugins to load from the settings dialog "
+                "and restart.")) );
     }
 
     QCopChannel *chan = new QCopChannel( "QD/Server", this );
@@ -336,13 +344,44 @@ static void raiseWindow( QWidget *window )
     while ( parent->parentWidget() )
         parent = parent->parentWidget();
 
+#ifdef Q_WS_X11
+    bool fixGeometry = false;
+    if ( parent->isVisible() ) {
+        // By hiding and then showing the window, we bring it to the current virtual desktop
+        // Unfortunatley this causes flicker if the window is already on the current desktop
+        // but I'm not sure how to avoid that.
+        // It looks like I should be able to compare the X11 root window's _NET_CURRENT_DESKTOP
+        // property with the window's _NET_WM_DESKTOP property...
+        QPoint pos = parent->pos();
+        parent->hide();
+        parent->move( pos );
+    } else {
+        // If the window is not visible, it's going to be hit by a bug in Qt/X11
+        // that causes windows to move when you call close();show();
+        // Luckily we save the geometry of the important windows when they close
+        // so we can just restore it to work around the bug.
+        fixGeometry = true;
+    }
+#endif
+
     // unminimize
     if ( parent->isMinimized() )
         parent->showNormal();
     else
-        // just in case...
         parent->show();
 
+#ifdef Q_WS_X11
+    if ( fixGeometry ) {
+        SingleWindow *sw = qobject_cast<SingleWindow*>(parent);
+        if ( sw )
+            sw->loadGeometry();
+        else {
+            MainWindow *mw = qobject_cast<MainWindow*>(parent);
+            if ( mw )
+                mw->loadGeometry();
+        }
+    }
+#endif
 
     // activate and raise it
     parent->activateWindow();
@@ -392,7 +431,7 @@ void QtopiaDesktopApplication::setupPlugins()
     settings.sync();
     qdPluginManager()->setupPlugins( safeMode );
     foreach ( QDPlugin *plugin, qdPluginManager()->plugins() ) {
-        //TRACE(QDA) << "QDPlugin::init" << "for plugin" << plugin->displayName();
+        TRACE(QDA) << "QDPlugin::init" << "for plugin" << plugin->displayName();
         qdPluginManager()->pluginData(plugin)->center = new DesktopWrapper( plugin );
         plugin->init();
         plugin->internal_init();

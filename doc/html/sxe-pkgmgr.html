@@ -13,28 +13,65 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Installer/Package Manager Overview<br /><span class="subtitle"></span>
 </h1>
-<p>Qtopia provides a simplified software installation system in a system binary called <tt>packagemanger</tt>.</p>
-<p><b>Note that earlier versions of Qtopia for PDA's provided a utility to install packages utilizing the ipkg system. There is no such facility currently in Qtopia. The SXE PackageManager is not a general purpose package installation system</b></p>
-<p>Additionally to create safe execution images using the <tt>make install</tt> command during development and when readying a device image for shipping, on a device, the installer tool <tt>sxe_installer</tt> is provided.</p>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>Qtopia provides a simplified software installation system in a system binary called <tt>packagemanager</tt>.</p>
+<p><b>Note that earlier versions of Qtopia for PDAs provided a utility to install packages utilizing the ipkg system. There is no such facility currently in Qtopia. The SXE PackageManager is not a general purpose package installation system</b></p>
 <p>The following features are provided:</p>
 <ul>
-<li>fetch Package list from remote server via HTTP</li>
-<li>display package information, in particular categories</li>
-<li><tt>ungzip</tt>, <tt>untar</tt> and install of <tt>qpk</tt> format packages</li>
-<li>modifications to the two SXE policy rules tables</li>
+<li>connect to remote server via HTTP to retrieve a packages list</li>
+<li>browse through the list and display basic package information</li>
+<li>choose a package install a package by:<ul>
+<li>downloading the <tt>qpk</tt> over HTTP</li>
+<li><tt>ungzip</tt>, <tt>untar</tt> and install of <tt>qpk</tt> format packages into a sandboxed file structure.</li>
+<li>record the package details in the SXE registry files</li>
+<li>applying MAC rules to package files</li>
 <li>installation of run-time keys into binaries</li>
-<li>provide uninstall capability.</li>
 </ul>
-<p>Packages have dependencies on the version of Qtopia and device; packages which are not compatible will not be presented for download or be installable. There is no feature planned to have packages dependent on other packages, all packages will need to be self contained.</p>
-<p>In future, packages that do not match the Qtopia version or device will be displayed (if desired) and be allowed to install. Notification will be given that packages these are unlikely to run correctly.</p>
-<p><b>Note:</b> Packages created by both non-SXE and SXE configured builds of Qtopia can be installed onto an SXE enabled device, provided a number of <a href="sxe-app-checklist.html">requirements</a> are met.</p>
-<p>Packges created by an SXE configured Qtopia however will not run or be available to install onto a non-SXE enabled device.</p>
-<p>Applications which are untrusted run with the <tt>LIDS_SANDBOX</tt> attribute which means that only files specifically allowed may be accessed. Applications are by default installed in <tt>/home/Packages/&lt;md5-sum&gt;</tt> and have by default read-only access to all system libraries, and read-write access to their <tt>/home/Packages/&lt;md5-sum&gt;</tt> directory. Packages do not have access to the /tmp directory nor are they allowed to create <a href="qsettings.html">QSettings</a> objects by supplying an organization or application. To create temporary files or <a href="qsettings.html">QSettings</a> files, an application should use the <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() to obtain the package's directory; in the case of a <a href="qsettings.html">QSettings</a> file something like <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() + &quot;/etc/mysettings.conf&quot; should be supplied as a fileName parameter.</p>
-<p>As a side note, packages cannot be quicklaunched applications, ensure that CONFIG+=<a href="buildsystem/conf-no-quicklaunch-1.html">no_quicklaunch</a> is added into the application project(.pro) file.</p>
+</li>
+<li>provide uninstall functionality.</li>
+<li>re-enable disabled packages</li>
+</ul>
+<a name="packagemanager-conf"></a><a name="configuration"></a>
+<h2>Configuration</h2>
+<p>Package Manager can be configured with a file called PackageManager.conf located in the &lt;qtopia-root-dir&gt;/devices/etc/default/Trolltech directory. The file has the following format:</p>
+<pre>    [server foo]
+    URL=http:<span class="comment">//</span>path/to/foo's/package/feed
+
+    [server bar]
+    URL=http:<span class="comment">//</span>path/to/bar's/package/feed
+
+    [Configuration]
+    MaxPackagesList=50
+    MaxPackagesListSize=50000
+    MaxDescriptorSize=4096
+    DefaultDomain=untrusted
+    SensitiveDomains=none
+    RestrictedOrganizations=Trolltech</pre>
+<p>In the above example &quot;server foo&quot; an &quot;server bar&quot; are the two default servers provided by the packagemanager. Simply add another similar entrys for more defaults.</p>
+<p>The Configuration group is contains settings values.</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Purpose</th></tr></thead>
+<tr valign="top" class="odd"><td>MaxPackagesList</td><td>Maximum number of packages that will be downloaded from a packages.list</td></tr>
+<tr valign="top" class="even"><td>MaxPackagesListSize</td><td>Maximum size in bytes that will be downloaded for a packages.list.</td></tr>
+<tr valign="top" class="odd"><td>MaxDescriptorSize</td><td>Maximum size in bytes that will be downloaded for a qpd descriptor file.</td></tr>
+<tr valign="top" class="even"><td>DefaultDomain</td><td>Default domain that will be applied to packages that do not specify a recognised domain.</td></tr>
+<tr valign="top" class="odd"><td>SensitiveDomain</td><td>Packages requesting access to sensitive/restricted domains will not be allowed to install. If there are no sensitive domains set this value to: none.</td></tr>
+<tr valign="top" class="even"><td>RestrictedOrganization</td><td>Defines organizations for settings files which downloaded applications should not use.</td></tr>
+</table></p>
+<p>The limitations on the packages.list and descriptor are intended to limit the cost to the user if he/she connects to a server whose packages.list is excessively large.</p>
+<p>Settings files for appliations typically specify an organization ( see <a href="./qsettings.html">QSettings</a>). Organizations which are already in use should be specified in the RestrictedOrganizations field. Packages that contain settings files which correspond to this organization won't be able to be installed. This is to moreso prevent 3rd party developers accidentally using an in-use organization rather than for security reasons.</p>
+<p>For developmental purposes downloaded applications can be trusted or untrusted. To prevent installation of trusted applications, the Sensitive domain needs to be set.</p>
+<p>The file <a href="syscust-docstorage.html#package-storage-conf">Storage.conf</a> can be used to specify which directory that all packages are installed to.</p>
+<a name="package-compatability"></a>
+<h2>Package Compatability</h2>
+<p>Package Manager will not present for download or install any packages that are incompatible with the build of Qtopia on the device. There are two measures of compatability, version compatability and device compatability.</p>
+<p>The macro <a href="version-h.html#QTOPIA_COMPATIBLE_VERSIONS">QTOPIA_COMPATIBLE_VERSIONS</a> in <tt>version.h</tt> specifies what versions of Qtopia are considered binary compatible. This is used during package creation so that a package can declare what versions of Qtopia it is known to be compatible with. It is also used during package download so that Package Manager will accept packages it finds that it is compatible with. The macro can be defined as range of versions eg &quot;4.2&#x2e;0-4.2&#x2e;3,4.2&#x2e;5&quot;. As long as there is overlap between the versions specified by the package and the those specified by Qtopia, the package will be allowed to install.</p>
+<p>In a similar manner <a href="custom-h.html#QTOPIA_COMPATIBLE_DEVICES">QTOPIA_COMPATIBLE_DEVICES</a> in <tt>custom.h</tt> specifies a set of devices. Packages built for other devices which should run on this device should be listed in this macro. As long as there is overlap between the set of compatible devices declared by a package and that of Qtopia on the device, the package will be allowed to install.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,45 +25,50 @@
     \brief The QMediaDevice class is an abstraction for Audio devices written for
     Qtopia'a media engine.
 
-    \sa QMediaPipe, QMediaDecoder
+    \sa QMediaDecoder
 */
 
 
 /*!
-    \fn void QMediaDevice::connectInputPipe(QMediaPipe* inputPipe);
+    \enum QMediaDevice::Info::DataType
 
-    The device is being connected to the \a inputPipe, as a source of encoded
-    data for this device.
+    This enum specifies the type of data produced by the QMediaDevice.
+
+    \value Raw This is raw uncooked data.
+    \value PCM This is PCM data.
 */
 
 /*!
-    \fn void QMediaDevice::connectOutputPipe(QMediaPipe* outputPipe);
+    \class QMediaDevice::Info
 
-    The device is being onnectied to the \a outputPipe as a destination for its
-    data.
+    This structure contains information on the type and characteristics of the
+    media stream that this QMediaDevice produces.
+
+    When the stream type is Raw - the dataSize member will indicate the
+    complete size of the data available to the device, or -1 if the size is not
+    available.
+
+    When the stream type is PCM - the PCM data will have a frequency, sample
+    size, and number of channels corresponding to the frequency, bitsPerSample
+    and channels members. The expected volume of the data is set with the
+    volume member.
 */
 
 /*!
-    \fn void QMediaDevice::disconnectInputPipe(QMediaPipe* inputPipe);
+    \fn QMediaDevice::Info QMediaDevice::dataType() const;
 
-    The device is being disconnected from the \a inputPipe source of data.
+    Return information about the Data produced by this QMediaDevice.
 */
 
 /*!
-    \fn void QMediaDevice::disconnectOutputPipe(QMediaPipe* outputPipe);
+    \fn bool QMediaDevice::connectToInput(QMediaDevice* input);
 
-    The device is being disconnected from the \a outputPipe destination for its
-    data.
+    The device is being connected to the \a input to be used as a source of data.
+    Returns true if the connection was successful; false otherwise.
 */
 
 /*!
-    \fn void QMediaDevice::setValue(QString const& name, QVariant const& value);
+    \fn void QMediaDevice::disconnectFromInput(QMediaDevice* input);
 
-    Set \a name to have the \a value. This is device specific.
-*/
-
-/*!
-    \fn QVariant QMediaDevice::value(QString const& name);
-
-    Return the value of \a name, this is device specific.
+    The QMediaDevice is being disconnected from \a input source of data.
 */

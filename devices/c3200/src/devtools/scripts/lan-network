@@ -93,17 +93,13 @@ install()
                
                echo "nameserver $1" > $TMP_FILE
                echo "nameserver $2" >> $TMP_FILE
+               mv $TMP_FILE /etc/resolvconf/$IFACE
+               rm -f $RESOLVCONF
+               ln -s /etc/resolvconf/$IFACE $RESOLVCONF
             else
                echo "Asking DHCP server for dns details";
                ## ADD CODE HERE ##
-               echo > $TMP_FILE
             fi
-
-            mv $TMP_FILE /etc/resolvconf/$IFACE
-
-            rm -f $RESOLVCONF
-            ln -s /etc/resolvconf/$IFACE $RESOLVCONF
-
             ;; 
         dhcp)
             print_debug "Using DHCP to obtain IP, gateway, broadcast and netmask address";
@@ -290,7 +286,8 @@ start()
     
     case $MODE in
         dhcp)
-            /sbin/udhcpc -i $1 &
+            /sbin/ifup $1
+            #/sbin/udhcpc -i $1
             ;;
         static)
             /sbin/ifconfig $1 netmask $NETMASK broadcast $BROADCAST $IPADDR up

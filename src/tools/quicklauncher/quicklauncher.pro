@@ -21,4 +21,4 @@ equals(QTOPIA_SETPROC_METHOD,argv0):DEFINES+=QTOPIA_SETPROC_ARGV0
 SOURCES+=main.cpp
 
 pkg.desc=Quicklauncher stub for quicklaunch enabled applications.
-pkg.domain=quicklauncher,cardreader,prefix,launcher
+pkg.domain=trusted

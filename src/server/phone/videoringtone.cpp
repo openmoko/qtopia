@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -91,7 +91,7 @@ VideoRingtone::~VideoRingtone()
 void VideoRingtone::playVideo(const QString& fileName)
 {
 #ifdef MEDIA_SERVER
-    d->videoContent = new QMediaContent( QContent( fileName ) );
+    d->videoContent = new QMediaContent( QContent( fileName ),"RingTone" );
     connect(d->videoContent, SIGNAL(mediaError(QString)), this, SIGNAL(videoRingtoneFailed()));
 
     QMediaControl* mediaControl = new QMediaControl(d->videoContent);
@@ -109,7 +109,8 @@ void VideoRingtone::playVideo(const QString& fileName)
 void VideoRingtone::stopVideo()
 {
 #ifdef MEDIA_SERVER
-    delete d->videoContent;
+    if ( d->videoContent )
+        delete d->videoContent;
 
     d->videoControl = 0;
 
@@ -150,6 +151,7 @@ VideoRingtone::VideoRingtone()
     d = new VideoRingtonePrivate;
 
 #ifdef MEDIA_SERVER
+    d->videoContent = 0;
     d->videoControl = 0;
 #endif
 }

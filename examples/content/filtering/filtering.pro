@@ -23,7 +23,7 @@ help.hint=help
 INSTALLS+=help
 
 # SXE permissions required
-pkg.domain=window,doc_server
+pkg.domain=trusted
 pkg.name=filtering
 pkg.desc=This is a command line tool used to demonstrate database access and filtering
 pkg.version=1.0.0-1

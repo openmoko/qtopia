@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 
 #include <qtopiaapplication.h>
 #include <qwaitwidget.h>
+#include <qtopialog.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -38,13 +39,6 @@
 #include <QTimer>
 #include <QActionEvent>
 #include <QTableWidgetItem>
-
-
-//#define QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-#   include <QDebug>
-#endif
 
 
 /*!
@@ -272,8 +266,6 @@ QBluetoothRemoteDeviceDialogPrivate::QBluetoothRemoteDeviceDialogPrivate(QBlueto
     connect(m_local, SIGNAL(discoveryCompleted()), SLOT(discoveryCompleted()));
     connect(m_local, SIGNAL(remoteDeviceFound(QBluetoothRemoteDevice)),
             SLOT(discoveredDevice(QBluetoothRemoteDevice)));
-    connect(m_local, SIGNAL(error(QBluetoothLocalDevice::Error,QString)),
-            SLOT(localDeviceError(QBluetoothLocalDevice::Error,QString)));
 
     connect(&m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
             SLOT(serviceSearchCompleted(QBluetoothSdpQueryResult)));
@@ -357,10 +349,6 @@ void QBluetoothRemoteDeviceDialogPrivate::reallyStartDiscovery()
     }
 
     if (!m_local->discoverRemoteDevices()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: error starting discovery:"
-                << m_local->error();
-#endif
         // delay discovery, try again later
         QTimer::singleShot(100, this, SLOT(reallyStartDiscovery()));
         return;
@@ -372,13 +360,8 @@ bool QBluetoothRemoteDeviceDialogPrivate::cancelDiscovery()
     if (!m_local || !m_local->isValid() || !m_discovering || m_cancellingDiscovery)
         return false;
 
-    if (!m_local->cancelDiscovery()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: cancellation of discovery failed"
-                << m_local->error();
-#endif
+    if (!m_local->cancelDiscovery()) 
         return false;
-    }
 
     m_cancellingDiscovery = true;
     m_statusLabel->setText(tr("Canceling..."));
@@ -387,10 +370,6 @@ bool QBluetoothRemoteDeviceDialogPrivate::cancelDiscovery()
 
 void QBluetoothRemoteDeviceDialogPrivate::discoveryCompleted()
 {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-    qDebug() << "QBluetoothRemoteDeviceDialog::discoveryCompleted()";
-#endif
-
     // set ui elements
     int count = m_browser->count();
     if (count == 0) {
@@ -441,10 +420,6 @@ void QBluetoothRemoteDeviceDialogPrivate::deviceActivatedOk()
 {
     if (m_discovering) {
         if (cancelDiscovery()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-            qDebug() << "QBluetoothRemoteDeviceDialog: wait for discovery to finish before accepting dialog";
-#endif
-            // use timeout in case cancel doesn't finish quickly
             QTimer timer;
             timer.start(500);
             while (m_discovering) {
@@ -460,33 +435,20 @@ void QBluetoothRemoteDeviceDialogPrivate::deviceActivatedOk()
 
 void QBluetoothRemoteDeviceDialogPrivate::validateProfiles()
 {
-    if (!m_validationWaitWidget->isVisible()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: profile validation cancelled";
-#endif
+    if (!m_validationWaitWidget->isVisible()) 
         return;
-    }
 
     if (m_cancellingDiscovery) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: waiting for discovery cancellation to finish...";
-#endif
         QTimer::singleShot(100, this, SLOT(validateProfiles()));
         return;
     }
 
     if (m_cancellingServiceSearch) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: waiting for service search to cancel...";
-#endif
         QTimer::singleShot(100, this, SLOT(validateProfiles()));
         return;
     }
 
     if (!m_deviceUnderValidation.isValid()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: device address is invalid";
-#endif
         m_validationWaitWidget->hide();
         return;
     }
@@ -522,32 +484,18 @@ void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCompleted(const QBluetoot
 {
     const QList<QBluetoothSdpRecord> services = result.services();
 
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-    qDebug() << "QBluetoothRemoteDeviceDialog::serviceSearchCompleted()" << services.count();
-#endif
-
     if (!m_deviceUnderValidation.isValid()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: validation was cancelled?";
-#endif
         validationError();
         return;
     }
 
     if (!result.isValid()) {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: service search error:"
-                << result.error();
-#endif
         validationError();
         return;
     }
 
     if (serviceProfilesMatch(services)) {
         // device is now validated, emit the activation signal
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog: Device successfully validated";
-#endif
         deviceActivatedOk();
     } else {
         QMessageBox::warning(this, tr("Service Error"),
@@ -558,10 +506,6 @@ void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCompleted(const QBluetoot
 
 void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCancelled()
 {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-    qDebug() << "QBluetoothRemoteDeviceDialog::serviceSearchCancelled()";
-#endif
-
     if (!m_cancellingServiceSearch) {
         m_cancellingServiceSearch = true;
         m_sdap.cancelSearch();
@@ -572,9 +516,6 @@ void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCancelled()
 
 void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCancelCompleted()
 {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-    qDebug() << "QBluetoothRemoteDeviceDialog::serviceSearchCancelCompleted()";
-#endif
     m_cancellingServiceSearch = false;
 }
 
@@ -590,17 +531,6 @@ bool QBluetoothRemoteDeviceDialogPrivate::serviceProfilesMatch(const QList<QBlue
         iter.toFront();
     }
     return false;
-}
-
-void QBluetoothRemoteDeviceDialogPrivate::localDeviceError(QBluetoothLocalDevice::Error error, const QString &msg)
-{
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-    qDebug() << "QBluetoothRemoteDeviceDialog: local device error"
-            << error << msg;
-#else
-    Q_UNUSED(error);
-    Q_UNUSED(msg);
-#endif
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::addDeviceAction(QAction *action)
@@ -644,10 +574,8 @@ void QBluetoothRemoteDeviceDialogPrivate::addDeviceToDisplay(const QBluetoothRem
             m_browser->selectDevice(device.address());
         }
     } else {
-#ifdef QBLUETOOTHREMOTEDEVICEDIALOG_DEBUG
-        qDebug() << "QBluetoothRemoteDeviceDialog:" << device.address().toString()
-                << "rejected by filter";
-#endif
+        qLog(Bluetooth) << "QBluetoothRemoteDeviceDialog: not displaying"
+            << device.address().toString() << ", device rejected by filter";
     }
 }
 

@@ -1,16 +1,18 @@
 qtopia_project(qtopia lib)
 TARGET=qdsync_common
-CONFIG+=no_tr no_pkg
+CONFIG+=no_tr
+# Packaged by tools/qdsync/app
+CONFIG+=no_pkg
 
 include(common.pri)
 PREFIX=QTOPIADESKTOP
 resolve_include()
 
 HEADERS+=\
-    qcopadaptor_qd.h\
+    qtopia4sync.h\
 
 SOURCES+=\
-    qcopadaptor_qd.cpp\
+    qtopia4sync.cpp\
 
 idep(LIBS+=-l$$TARGET)
 idep(INCLUDEPATH+=$$PWD $$PWD/..,INCLUDEPATH)

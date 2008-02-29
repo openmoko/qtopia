@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/image/qmovie.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/image/qmovie.cpp -->
 <head>
   <title>Qt 4.3: QMovie Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -157,7 +157,7 @@
 <p>This property holds the movie's speed.</p>
 <p>The speed is measured in percentage of the original movie speed. The default speed is 100%. Example:</p>
 <pre> QMovie movie(&quot;racecar.gif&quot;);
- movie.setSpeed(200); <span class="comment">// 2x speed</span></pre>
+ movie.setSpeed(200); <span class="comment">//</span> 2x speed</pre>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>int speed () const</b></li>
@@ -269,36 +269,10 @@
 <p>See also <a href="qimagereader.html#supportedImageFormats">QImageReader::supportedImageFormats</a>().</p>
 <h3 class="fn"><a name="updated"></a>void QMovie::updated ( const <a href="qrect.html">QRect</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the rect <i>rect</i> in the current frame has been updated. You can call <a href="qmovie.html#currentImage">currentImage</a>() or <a href="qmovie.html#currentPixmap">currentPixmap</a>() to get a copy of the updated frame.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="finished-2"></a>bool QMovie::finished () const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qmovie.html#state">state</a>() instead.</p>
-<h3 class="fn"><a name="frameImage"></a><a href="qimage.html">QImage</a> QMovie::frameImage () const</h3>
-<p>Use <a href="qmovie.html#currentImage">currentImage</a>() instead.</p>
-<h3 class="fn"><a name="frameNumber"></a>int QMovie::frameNumber () const</h3>
-<p>Use <a href="qmovie.html#currentFrameNumber">currentFrameNumber</a>() instead.</p>
-<h3 class="fn"><a name="framePixmap"></a><a href="qpixmap.html">QPixmap</a> QMovie::framePixmap () const</h3>
-<p>Use <a href="qmovie.html#currentPixmap">currentPixmap</a>() instead.</p>
-<h3 class="fn"><a name="isNull"></a>bool QMovie::isNull () const</h3>
-<p>Use <a href="qmovie.html#isValid">isValid</a>() instead.</p>
-<h3 class="fn"><a name="pause"></a>void QMovie::pause ()</h3>
-<p>Use setPaused(true) instead.</p>
-<h3 class="fn"><a name="paused"></a>bool QMovie::paused () const</h3>
-<p>Use <a href="qmovie.html#state">state</a>() instead.</p>
-<p>See also <a href="qmovie.html#setPaused">setPaused</a>().</p>
-<h3 class="fn"><a name="restart"></a>void QMovie::restart ()</h3>
-<p>Use <a href="qmovie.html#stop">stop</a>() and <a href="qmovie.html#start">start</a>() instead.</p>
-<h3 class="fn"><a name="running"></a>bool QMovie::running () const</h3>
-<p>Use <a href="qmovie.html#state">state</a>() instead.</p>
-<h3 class="fn"><a name="step"></a>void QMovie::step ()</h3>
-<p>Use <a href="qmovie.html#jumpToNextFrame">jumpToNextFrame</a>() instead.</p>
-<h3 class="fn"><a name="unpause"></a>void QMovie::unpause ()</h3>
-<p>Use setPaused(false) instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

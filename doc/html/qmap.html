@@ -84,8 +84,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qmap.html#operator-lt-lt-11">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QMap&lt;Key, T&gt; &amp; <i>map</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qmap.html#operator-gt-gt-11">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QMap&lt;Key, T&gt; &amp; <i>map</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qmap.html#operator-lt-lt-52">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QMap&lt;Key, T&gt; &amp; <i>map</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qmap.html#operator-gt-gt-37">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QMap&lt;Key, T&gt; &amp; <i>map</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -117,7 +117,7 @@
 <p>There is also a <a href="qmap.html#value">value</a>() overload that uses its second argument as a default value if there is no item with the specified key:</p>
 <pre> int timeout = map.value(&quot;TIMEOUT&quot;, 30);</pre>
 <p>In general, we recommend that you use <a href="qmap.html#contains">contains</a>() and <a href="qmap.html#value">value</a>() rather than operator[]() for looking up a key in a map. The reason is that operator[]() silently inserts an item into the map if no item exists with the same key (unless the map is const). For example, the following code snippet will create 1000 items in memory:</p>
-<pre><span class="comment"> // WRONG</span>
+<pre><span class="comment"> //</span> WRONG
  QMap&lt;int, QWidget *&gt; map;
  ...
  for (int i = 0; i &lt; 1000; ++i) {
@@ -141,7 +141,7 @@
 <p>Normally, a QMap allows only one value per key. If you call <a href="qmap.html#insert">insert</a>() with a key that already exists in the QMap, the previous value will be erased. For example:</p>
 <pre> map.insert(&quot;plenty&quot;, 100);
  map.insert(&quot;plenty&quot;, 2000);
-<span class="comment"> // map.value(&quot;plenty&quot;) == 2000</span></pre>
+<span class="comment"> //</span> map.value(&quot;plenty&quot;) == 2000</pre>
 <p>However, you can store multiple values per key by using <a href="qmap.html#insertMulti">insertMulti</a>() instead of <a href="qmap.html#insert">insert</a>() (or using the convenience subclass <a href="qmultimap.html">QMultiMap</a>). If you want to retrieve all the values for a single key, you can use values(const Key &amp;key), which returns a <a href="qlist.html">QList</a>&lt;T&gt;:</p>
 <pre> QList&lt;int&gt; values = map.values(&quot;plenty&quot;);
  for (int i = 0; i &lt; values.size(); ++i)
@@ -182,7 +182,7 @@
      return e1.dateOfBirth() &lt; e2.dateOfBirth();
  }
 
- #endif <span class="comment">// EMPLOYEE_H</span></pre>
+ #endif <span class="comment">//</span> EMPLOYEE_H</pre>
 <p>In the example, we start by comparing the employees' names. If they're equal, we compare their dates of birth to break the tie.</p>
 <p>See also <a href="qmapiterator.html">QMapIterator</a>, <a href="qmutablemapiterator.html">QMutableMapIterator</a>, <a href="qhash.html">QHash</a>, and <a href="qset.html">QSet</a>.</p>
 <hr />
@@ -305,11 +305,11 @@
  map.insert(5, &quot;five&quot;);
  map.insert(10, &quot;ten&quot;);
 
- map.lowerBound(0);      <span class="comment">// returns iterator to (1, &quot;one&quot;)</span>
- map.lowerBound(1);      <span class="comment">// returns iterator to (1, &quot;one&quot;)</span>
- map.lowerBound(2);      <span class="comment">// returns iterator to (5, &quot;five&quot;)</span>
- map.lowerBound(10);     <span class="comment">// returns iterator to (10, &quot;ten&quot;)</span>
- map.lowerBound(999);    <span class="comment">// returns end()</span></pre>
+ map.lowerBound(0);      <span class="comment">//</span> returns iterator to (1, &quot;one&quot;)
+ map.lowerBound(1);      <span class="comment">//</span> returns iterator to (1, &quot;one&quot;)
+ map.lowerBound(2);      <span class="comment">//</span> returns iterator to (5, &quot;five&quot;)
+ map.lowerBound(10);     <span class="comment">//</span> returns iterator to (10, &quot;ten&quot;)
+ map.lowerBound(999);    <span class="comment">//</span> returns end()</pre>
 <p>If the map contains multiple items with key <i>key</i>, this function returns an iterator that points to the most recently inserted value. The other values are accessible by incrementing the iterator. For example, here's some code that iterates over all the items with the same key:</p>
 <pre> QMap&lt;QString, int&gt; map;
  ...
@@ -351,11 +351,11 @@
  map.insert(5, &quot;five&quot;);
  map.insert(10, &quot;ten&quot;);
 
- map.upperBound(0);      <span class="comment">// returns iterator to (1, &quot;one&quot;)</span>
- map.upperBound(1);      <span class="comment">// returns iterator to (5, &quot;five&quot;)</span>
- map.upperBound(2);      <span class="comment">// returns iterator to (5, &quot;five&quot;)</span>
- map.upperBound(10);     <span class="comment">// returns end()</span>
- map.upperBound(999);    <span class="comment">// returns end()</span></pre>
+ map.upperBound(0);      <span class="comment">//</span> returns iterator to (1, &quot;one&quot;)
+ map.upperBound(1);      <span class="comment">//</span> returns iterator to (5, &quot;five&quot;)
+ map.upperBound(2);      <span class="comment">//</span> returns iterator to (5, &quot;five&quot;)
+ map.upperBound(10);     <span class="comment">//</span> returns end()
+ map.upperBound(999);    <span class="comment">//</span> returns end()</pre>
 <p>See also <a href="qtalgorithms.html#qUpperBound">qUpperBound</a>(), <a href="qmap.html#lowerBound">lowerBound</a>(), and <a href="qmap.html#find">find</a>().</p>
 <h3 class="fn"><a name="upperBound-2"></a><a href="qmap-const-iterator.html">const_iterator</a> QMap::upperBound ( const Key &amp; <i>key</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -394,42 +394,20 @@
 <p>Same as <a href="qmap.html#value">value</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-11"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QMap&lt;Key, T&gt; &amp; <i>map</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-52"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QMap&lt;Key, T&gt; &amp; <i>map</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the map <i>map</i> to stream <i>out</i>.</p>
 <p>This function requires the key and value types to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-11"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QMap&lt;Key, T&gt; &amp; <i>map</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-37"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QMap&lt;Key, T&gt; &amp; <i>map</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a map from stream <i>in</i> into <i>map</i>.</p>
 <p>This function requires the key and value types to implement <tt>operator&gt;&gt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="erase-2"></a>void QMap::erase ( const Key &amp; <i>key</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use remove(<i>key</i>) instead.</p>
-<h3 class="fn"><a name="insert-2"></a><a href="qmap-iterator.html">iterator</a> QMap::insert ( const Key &amp; <i>key</i>, const T &amp; <i>value</i>, bool <i>overwrite</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the two-argument <a href="qmap.html#insert">insert</a>() overload instead. If you don't want to overwrite, call <a href="qmap.html#contains">contains</a>() beforehand.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QMap&lt;QString, int&gt; map;
- ..&#x2e;
- map.insert(&quot;delay&quot;, 30000, false);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QMap&lt;QString, int&gt; map;
- ...
- if (!map.contains(&quot;delay&quot;))
-     map.insert(&quot;delay&quot;, 30000);</pre>
-<h3 class="fn"><a name="remove-2"></a><a href="qmap-iterator.html">iterator</a> QMap::remove ( <a href="qmap-iterator.html">iterator</a> <i>it</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use erase(<i>it</i>) instead.</p>
-<h3 class="fn"><a name="replace"></a><a href="qmap-iterator.html">iterator</a> QMap::replace ( const Key &amp; <i>key</i>, const T &amp; <i>value</i> )</h3>
-<p>Use <a href="qmap.html#remove">remove</a>() then <a href="qmap.html#insert">insert</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

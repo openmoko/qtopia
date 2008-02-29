@@ -28,4 +28,4 @@ serviceb.path	=/services/SettingsManager
 INSTALLS+=serviceb
 
 pkg.desc=Phone profile settings for Qtopia.
-pkg.domain=window,alarm,profiles,cardreader,mediasession,drm,doc_server,doc_write
+pkg.domain=trusted

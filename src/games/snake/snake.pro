@@ -20,4 +20,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Try to keep the snake alive for as long as possible by eating mice and avoiding walls.
-pkg.domain=window,games
+pkg.domain=trusted

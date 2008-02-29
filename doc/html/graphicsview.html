@@ -56,7 +56,7 @@
  QGraphicsRectItem *rect = scene.addRect(QRectF(0, 0, 100, 100));
 
  QGraphicsItem *item = scene.itemAt(50, 50);
-<span class="comment"> // item == rect</span></pre>
+<span class="comment"> //</span> item == rect</pre>
 <p><a href="qgraphicsscene.html">QGraphicsScene</a>'s event propagation architecture schedules scene events for delivery to items, and also manages propagation between items. If the scene receives a mouse press event at a certain position, the scene passes the event on to whichever item is at that position.</p>
 <p><a href="qgraphicsscene.html">QGraphicsScene</a> also manages certain item states, such as item selection and focus. You can select items on the scene by calling <a href="qgraphicsscene.html#setSelectionArea">QGraphicsScene::setSelectionArea</a>(), passing an arbitrary shape. This functionality is also used as a basis for rubberband selection in <a href="qgraphicsview.html">QGraphicsView</a>. To get the list of all currently selected items, call <a href="qgraphicsscene.html#selectedItems">QGraphicsScene::selectedItems</a>(). Another state handled by <a href="qgraphicsscene.html">QGraphicsScene</a> is whether or not an item has keyboard input focus. You can set focus on an item by calling <a href="qgraphicsscene.html#setFocusItem">QGraphicsScene::setFocusItem</a>() or <a href="qgraphicsitem.html#setFocus">QGraphicsItem::setFocus</a>(), or get the current focus item by calling <a href="qgraphicsscene.html#focusItem">QGraphicsScene::focusItem</a>().</p>
 <p>Finally, <a href="qgraphicsscene.html">QGraphicsScene</a> allows you to render parts of the scene into a paint device through the <a href="qgraphicsscene.html#render">QGraphicsScene::render</a>() function. You can read more about this in the Printing section later in this document.</p>
@@ -190,8 +190,8 @@
 <p>In addition, <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> is a special item that combines child event handling with a useful interface for adding and removing items to and from a group. Adding an item to a <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a> will keep the item's original position and transformation, whereas reparenting items in general will cause the child to reposition itself relative to its new parent. For convenience, you can create <a href="qgraphicsitemgroup.html">QGraphicsItemGroup</a>s through the scene by calling <a href="qgraphicsscene.html#createItemGroup">QGraphicsScene::createItemGroup</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -30,72 +30,65 @@
 <h2>Application Styles</h2>
 <p>There are two basic styles of application:</p>
 <ul>
-<li>item-based - applications used to view and possibly edit a specific item type</li>
-<li>task-based - applications allowing a specific task to be performed such as view the time in the case of the <tt>Clock</tt> application.</li>
+<li>item-based - applications used to view and possibly edit a specific item type, such as <tt>Contacts</tt>.</li>
+<li>task-based - applications used to perform a specific task, such as <tt>Clock</tt>.</li>
 </ul>
 <a name="item-based-applications"></a>
 <h3>Item-based Applications</h3>
-<p>The main window of an item-based application will present a list of items, or in some cases a list of sub-lists.</p>
-<p><b>Note:</b> The <i>items</i> may or may not be associated with files. The entries in an <tt>Address Book</tt>, or photos from a camera are equally considered as items.</p>
+<p>The main window of an item-based application presents a list of items, or in rare cases a list of sub-lists.</p>
+<p><b>Note:</b> The <i>items</i> may or may not be associated with files. The <i>entries</i> in <tt>Contacts</tt> or <i>photos</i> in <tt>Pictures</tt> are equally considered as items.</p>
 <p>Item-based applications follow a standard navigational flow:</p>
 <ul>
-<li>List of Lists (if required)</li>
+<li>(List of Lists)</li>
 <li>List of Items</li>
-<li>View of a Single Item</li>
-<li>Edit Single Item</li>
-<li>Deleting a Single Item.</li>
+<li>Single Item View</li>
+<li>Single Item Editing View</li>
 </ul>
 <a name="list-of-lists"></a>
 <h4>List of Lists</h4>
-<p>This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qtopia <tt>Messaging</tt> application. This application shows folders that have specific functions. The <tt>Outbox</tt>, <tt>Trash</tt>, <tt>Inbox</tt> etc, have specific properties that preclude grouping their items into one list.</p>
-<p>The context menu must contain entries that act on all of the lists, and optionally a <i>New</i> entry.</p>
-<p>Highlighting a list and pressing <tt>Select</tt> displays the List of Items. Pressing <tt>Back</tt> or <tt>Done</tt> must close the application.</p>
+<p>This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qtopia <tt>Messaging</tt> application. This application shows folders that have specific functions. The <tt>Outbox</tt>, <tt>Trash</tt>, <tt>Inbox</tt>, etc. folders have specific properties that preclude grouping their items into one list.</p>
+<p>The context menu should contain entries that act on all of the lists, and optionally a <i>New</i> entry.</p>
+<p>Highlighting a list and pressing <tt>Select</tt> displays the list of items. Pressing <tt>Back</tt> or <tt>Done</tt> should close the application.</p>
 <a name="list-of-items"></a>
 <h4>List of Items</h4>
 <p>This is the screen most applications will display when started via the launcher. It lists the items that the application may view and/or edit. It is recommended that the menu contains a <i>View Category..&#x2e;</i> option to display only the items in the selected category.</p>
 <p>The context menu should contain entries that act on all of the items, and optionally a <i>New</i> entry.</p>
-<p>Highlighting an item and pressing <tt>Select</tt> should display a more detailed view of the highlighted item. Pressing <tt>Back</tt> or <tt>Done</tt> must return to the previous list of items or lists (if present), otherwise close the application.</p>
+<p>Highlighting an item and pressing <tt>Select</tt> should display a more detailed view of the highlighted item. Pressing <tt>Back</tt> or <tt>Done</tt> should return to the previous list of lists (if present), or close the application otherwise.</p>
 <p>When an item in the list is used to group or store information; selecting that list item should present the information about that item.</p>
 <a name="viewing-a-single-item"></a>
 <h4>Viewing a Single Item</h4>
-<p>This screen displays a single item, and may allow navigation and activation of data within the view. The context menu must contain entries that act only on the viewed item. If the application can edit the item, it should contain an <tt>Edit</tt> menu entry. If the view contains elements that can be activated, then the <tt>Select</tt> key must activate the highlighted element. Pressing <tt>Back</tt> or <tt>Done</tt> must return to the list of items.</p>
+<p>This screen displays the detailed view of a single item, and may allow navigation and activation of data within the view. The context menu should contain entries that act only on the viewed item. If the application can edit the item, it should contain an <tt>Edit</tt> menu entry. If the view contains elements that can be activated, then the <tt>Select</tt> key should activate the highlighted element. Pressing <tt>Back</tt> or <tt>Done</tt> should return to the list of items.</p>
 <a name="editing-a-single-item"></a>
 <h4>Editing a Single Item</h4>
-<p>This screen allows a single item to be modified. Edit screens must be able to be canceled via the <tt>Cancel</tt> option found in the context menu. When creating or editing an item, the first tab must be displayed with the first input widget focused.</p>
-<p>The context menu must be limited to those entries that act on the item being edited. Phones that do not offer a <tt>No</tt> button may automatically have a <tt>Cancel</tt> entry added to the end of the menu.</p>
-<p>Pressing <tt>Back</tt> or <tt>Done</tt> must accept the changes and return to the view. Pressing <tt>Cancel</tt> must discard the changes and return to the view.</p>
-<p><b>Note:</b> When a user selects the <tt>Done</tt> or <tt>Back</tt> option and nothing has been altered the button acts as the <tt>Cancel</tt> option otherwise the item will be stored.</p>
+<p>This screen allows a single item to be modified. Edit screens should be able to be canceled via the <tt>Cancel</tt> option found in the context menu. When creating or editing an item, the first tab should be displayed with the first input widget focused.</p>
+<p>The context menu should be limited to those entries that act on the item being edited. Phones that do not offer a <tt>No</tt> button may automatically have a <tt>Cancel</tt> entry added to the end of the menu.</p>
+<p>Pressing <tt>Back</tt> or <tt>Done</tt> should accept the changes and return to the view. Pressing <tt>Cancel</tt> should discard the changes and return to the view.</p>
+<p><b>Note:</b> In most cases, when a user selects the <tt>Done</tt> or <tt>Back</tt> option without making any changes, it should act as the <tt>Cancel</tt> option to prevent an empty item from being stored.</p>
 <a name="deleting-a-single-item"></a>
 <h4>Deleting a Single Item</h4>
-<p>An application that can create or edit an item needs to provide the ability to remove an item of the same type. Items are only able to be deleted when viewing details hence can only deleted one at a time.</p>
+<p>An application that can create or edit an item needs to provide the ability to remove an item of the same type. Items are only able to be deleted when viewing or editing details, and hence can only deleted one at a time.</p>
 <a name="navigational-flow"></a>
 <h4>Navigational Flow</h4>
-<p>In order to maintain a consistent navigational flow, the following rules must be adhered to:</p>
+<p>In order to maintain a consistent navigational flow, the following rules should be followed:</p>
 <ul>
-<li>When moving <i>forward</i> (e.g&#x2e; by pressing <tt>Select</tt> or selecting <tt>Edit</tt> from the menu), the displayed screen must be in its <i>initial state</i>. For example, in a list of items the top-most item must be highlighted.</li>
-<li>When moving <i>back</i> (e.g&#x2e; by pressing <tt>Back</tt> or <tt>Done</tt>), the previously viewed screen must be displayed in the same state that it was in when left. For example, if item <i>D</i> was highlighted then viewed, pressing <tt>Back</tt> in the view must return to the list with item <i>D</i> still highlighted.</li>
-<li>The <i>left</i> and <i>right</i> buttons are used for moving between tabs in a tabbed dialog although in some cases they may be used to select widgets that are horizontally aligned.</li>
+<li>When moving <i>forward</i> (e.g&#x2e; by pressing <tt>Select</tt> or selecting <tt>Edit</tt> from the menu), the displayed screen should be in its <i>initial state</i>. For example, in a list of items the top-most item should be highlighted.</li>
+<li>When moving <i>back</i> (e.g&#x2e; by pressing <tt>Back</tt> or <tt>Done</tt>), the previously viewed screen should be displayed in the same state that it was in when left. For example, if item <i>D</i> was highlighted then viewed, pressing <tt>Back</tt> in the view must return to the list with item <i>D</i> still highlighted.</li>
+<li>The <i>left</i> and <i>right</i> buttons are used for moving between tabs in a tabbed dialog.</li>
 <li>The <i>up</i> and <i>down</i> buttons are used for moving between fields in a dialog.</li>
-<li>To edit a field you first have to focus it using the <i>up/down</i> buttons then select it by pressing <tt>Select</tt>.</li>
-<li>The <tt>Select</tt> button is also used to move through tabs when the tab has focus.</li>
+<li>To edit a field you first have to focus it using the <i>up/down</i> buttons then enter edit mode by pressing <tt>Edit</tt>.</li>
 </ul>
-<p><b>Note:</b> In case there is no tabbed dialog it is very tempting to give the <i>left</i> and <i>right</i> buttons the same functionality as <i>up</i> and <i>down</i>. We have explicitly chosen NOT to do so in order to keep the user interface as consistent as possible, i.e&#x2e; maintaining one way of doing things.</p>
 <a name="form-layout"></a>
 <h4>Form Layout</h4>
-<p>An input form provides a simple and familiar way for the user to input data. The basic layout of an input form is a two-columned table:</p>
-<ul>
-<li>column 1: provides a label for the field found in the same row</li>
-<li>column 2: the input field.</li>
-</ul>
-<p>The layout of an input form should remain consistent between all applications an it is recommended that the same input form be used when creating and editing an item.</p>
-<p><b>Note:</b> Ensure that input forms provide sufficient sizing for large and small font sizes.</p>
+<p>An input form provides a simple and familiar way for the user to input data. If your application includes an input form, consider using <a href="qformlayout.html">QFormLayout</a> to arrange your form, as this will help ensure a consistent look and feel with other input forms in Qtopia.</p>
+<p>It is recommended that the same input form be used when creating and editing an item.</p>
 <a name="task-based-applications"></a>
 <h3>Task-based applications</h3>
-<p>These applications allow a specific task to be performed. They do not operate on items, though they may generate items that are then accessed in other applications. Examples of task based applications are <tt>Clock</tt> and <tt>Calculator</tt>.</p>
+<p>Task-based applications allow a specific task to be performed. For example viewing the time in <tt>Clock</tt> or performing calculations in <tt>Calculator</tt>.</p>
+<p><b>Note</b>: While task-based applications do not operate on items, they may generate items that are then accessed in other applications. For example, <tt>Camera</tt> is a task-based application that produces photos which can be used by <tt>Pictures</tt>, an item-based application.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

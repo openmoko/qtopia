@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -66,10 +66,10 @@ QTOPIABASE_EXPORT QDebug operator<<(QDebug debug, const SxeProgramInfo &progInfo
 
 #ifdef SINGLE_EXEC
 #define QSXE_KEY_TEMPLATE
-#define QSXE_APP_KEY;
-#define QSXE_QL_APP_KEY;
-#define QSXE_SET_QL_KEY(APPNAME);
-#define QSXE_SET_APP_KEY(APPNAME);
+#define QSXE_APP_KEY ;
+#define QSXE_QL_APP_KEY ;
+#define QSXE_SET_QL_KEY(APPNAME) ;
+#define QSXE_SET_APP_KEY(APPNAME) ;
 #else
 QTOPIABASE_EXPORT void checkAndSetProcessKey( const char *key, const char *app );
 #define QSXE_KEY_TEMPLATE "XOXOXOauthOXOXOX99"

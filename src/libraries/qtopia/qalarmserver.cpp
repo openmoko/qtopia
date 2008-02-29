@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -168,7 +168,7 @@ static bool triggerAtd( bool writeHWClock = false )
         int len = strlen(data);
         int total_written = trigger.write(data,len);
         if ( total_written != len ) {
-            QMessageBox::critical( 0, 0, qApp->translate( "AlarmServer",  "Out of Space" ),
+            QMessageBox::critical( 0, qApp->translate( "AlarmServer",  "Out of Space" ),
                                    qApp->translate( "AlarmServer", "<qt>Unable to schedule alarm. Free some memory and try again.</qt>" ) );
             trigger.close();
             QFile::remove( trigger.fileName() );

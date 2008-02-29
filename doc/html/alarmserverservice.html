@@ -25,7 +25,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>6 public functions inherited from <a href="qtopiaipcadaptor.html#public-functions">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -35,19 +35,18 @@
 <li><div class="fn"/>void <b><a href="alarmserverservice.html#deleteAlarm">deleteAlarm</a></b> ( QDateTime <i>when</i>, const QString &amp; <i>channel</i>, const QString &amp; <i>msg</i>, int <i>data</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>1 static public member inherited from <a href="qtopiaipcadaptor.html#static-public-members">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>5 protected functions inherited from <a href="qtopiaipcadaptor.html#protected-functions">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -58,25 +57,25 @@
 <p>See also <a href="qtopia.html#addAlarm">Qtopia::addAlarm</a>() and <a href="qtopia.html#deleteAlarm">Qtopia::deleteAlarm</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="AlarmServerService"></a>AlarmServerService::AlarmServerService ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="AlarmServerService"></a>AlarmServerService::AlarmServerService ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create an <a href="alarmserverservice.html">AlarmServerService</a> instance with the passed <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.AlarmServerService"></a>AlarmServerService::~AlarmServerService ()</h3>
 <p>Destroy the <a href="alarmserverservice.html">AlarmServerService</a> instance.</p>
-<h3 class="fn"><a name="addAlarm"></a>void AlarmServerService::addAlarm ( <a href="qdatetime.html">QDateTime</a> <i>when</i>, const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i>, int <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="addAlarm"></a>void AlarmServerService::addAlarm ( <a href="./qdatetime.html">QDateTime</a> <i>when</i>, const <a href="./qstring.html">QString</a> &amp; <i>channel</i>, const <a href="./qstring.html">QString</a> &amp; <i>msg</i>, int <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Schedules an alarm to go off at (or soon after) time <i>when</i>. When the alarm goes off, the <a href="qtopiaipc.html">Qtopia IPC</a> message <i>msg</i> will be sent to <i>channel</i>, with <i>data</i> as a parameter.</p>
 <p>This slot corresponds to the QCop message <tt>addAlarm(QDateTime,QString,QString,int)</tt> on the <tt>QPE/AlarmServer</tt> channel.</p>
 <p>See also <a href="qtopia.html#addAlarm">Qtopia::addAlarm</a>().</p>
 <h3 class="fn"><a name="dailyAlarmEnabled"></a>void AlarmServerService::dailyAlarmEnabled ( bool <i>flag</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Message that indicates when the clock application turns the daily alarm on or off, according to <i>flag</i>.</p>
 <p>This slot corresponds to the QCop message <tt>dailyAlarmEnabled(bool)</tt> on the <tt>QPE/AlarmServer</tt> channel.</p>
-<h3 class="fn"><a name="deleteAlarm"></a>void AlarmServerService::deleteAlarm ( <a href="qdatetime.html">QDateTime</a> <i>when</i>, const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i>, int <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="deleteAlarm"></a>void AlarmServerService::deleteAlarm ( <a href="./qdatetime.html">QDateTime</a> <i>when</i>, const <a href="./qstring.html">QString</a> &amp; <i>channel</i>, const <a href="./qstring.html">QString</a> &amp; <i>msg</i>, int <i>data</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Deletes previously scheduled alarms which match <i>when</i>, <i>channel</i>, <i>msg</i>, and <i>data</i>.</p>
 <p>This slot corresponds to the QCop message <tt>deleteAlarm(QDateTime,QString,QString,int)</tt> on the <tt>QPE/AlarmServer</tt> channel.</p>
 <p>See also <a href="qtopia.html#deleteAlarm">Qtopia::deleteAlarm</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

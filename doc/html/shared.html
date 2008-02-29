@@ -34,14 +34,14 @@
 <p>Code fragment:</p>
 <pre> void QPen::setStyle(Qt::PenStyle style)
  {
-     detach();           <span class="comment">// detach from common data</span>
-     d-&gt;style = style;   <span class="comment">// set the style member</span>
+     detach();           <span class="comment">//</span> detach from common data
+     d-&gt;style = style;   <span class="comment">//</span> set the style member
  }
 
  void QPen::detach()
  {
      if (d-&gt;ref != 1) {
-         ...             <span class="comment">// perform a deep copy</span>
+         ...             <span class="comment">//</span> perform a deep copy
      }
  }</pre>
 <a name="list-of-classes"></a>
@@ -50,10 +50,10 @@
 <p>Example:</p>
 <pre> QPixmap p1, p2;
  p1.load(&quot;image.bmp&quot;);
- p2 = p1;                        <span class="comment">// p1 and p2 share data</span>
+ p2 = p1;                        <span class="comment">//</span> p1 and p2 share data
 
  QPainter paint;
- paint.begin(&amp;p2);               <span class="comment">// cuts p2 loose from p1</span>
+ paint.begin(&amp;p2);               <span class="comment">//</span> cuts p2 loose from p1
  paint.drawText(0,50, &quot;Hi&quot;);
  paint.end();</pre>
 <p>In this example, <tt>p1</tt> and <tt>p2</tt> share data until <a href="qpainter.html#begin">QPainter::begin</a>() is called for <tt>p2</tt>, because painting a pixmap will modify it.</p>
@@ -109,8 +109,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

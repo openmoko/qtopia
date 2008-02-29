@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/tools/qtimeline.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/tools/qtimeline.cpp -->
 <head>
   <title>Qt 4.3: QTimeLine Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -113,12 +113,12 @@
  progressBar = new QProgressBar(this);
  progressBar-&gt;setRange(0, 100);
 
-<span class="comment"> // Construct a 1-second timeline with a frame range of 0 - 100</span>
+<span class="comment"> //</span> Construct a 1-second timeline with a frame range of 0 - 100
  QTimeLine *timeLine = new QTimeLine(1000, this);
  timeLine-&gt;setFrameRange(0, 100);
  connect(timeLine, SIGNAL(frameChanged(int)), progressBar, SLOT(setValue(int)));
 
-<span class="comment"> // Clicking the push button will start the progress bar animation</span>
+<span class="comment"> //</span> Clicking the push button will start the progress bar animation
  pushButton = new QPushButton(tr(&quot;Start animation&quot;), this);
  connect(pushButton, SIGNAL(clicked()), timeLine, SLOT(start()));
  ...</pre>
@@ -276,8 +276,8 @@
 <p>See also <a href="qtimeline.html#CurveShape-enum">CurveShape</a> and <a href="qtimeline.html#frameForTime">frameForTime</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

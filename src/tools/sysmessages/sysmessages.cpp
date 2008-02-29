@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,14 +26,13 @@
 #include <qtopiaapplication.h>
 
 /*!
-  \internal
   \service SysMessagesService SystemMessages
   \brief Provides the Qtopia \i SystemMessages service.
 
   The \i SystemMessages service enables the sending of
-  system related messages as both warning dialogs and as synthetic SMS
-  messages.  Client applications can request the \i SystemMessages service
-  to send an SMS with the following code:
+  system related messages as both warning dialogs and as synthetic messages which will end up in the users inbox.
+  Client applications can request the \i SystemMessages service
+  to send a message with the following code:
   \code
   QtopiaServiceRequest req( "SystemMessages", "QString, QString" );
   req << subject;
@@ -54,7 +53,6 @@
 */
 
 /*!
- \internal
  Constructs the service as a child of \a parent
  */
 SysMessagesService::SysMessagesService( QObject *parent )
@@ -83,7 +81,6 @@ SysMessagesService::~SysMessagesService()
 }
 
 /*!
-  \internal
   Displays a dialog to the user with the specified \a title and \a text
 */
 void SysMessagesService::showDialog( const QString &title, const QString &text )
@@ -100,7 +97,6 @@ void SysMessagesService::showDialog( const QString &title, const QString &text )
 }
 #ifdef MAIL_EXISTS
 /*!
-  \internal
   Attempts to pass on the queued system message corresponding to the specified
   \a messageId to qtmail.
   If qtmail is running, it should receive the message and send back an acknowledgement.
@@ -117,8 +113,7 @@ void SysMessagesService::passOnMessage( int messageId )
 }
 
 /*!
-  \internal
-  Creates synthetic system SMS message with the specified \a subject and \a text
+  Creates synthetic system message with the specified \a subject and \a text
 */
 void SysMessagesService::sendMessage( const QString &subject, const QString &text )
 {

@@ -128,7 +128,7 @@
 <a name="multiple-inheritance-requires-qobject-to-be-first"></a>
 <h3>Multiple Inheritance Requires QObject to Be First</h3>
 <p>If you are using multiple inheritance, <tt>moc</tt> assumes that the first inherited class is a subclass of <a href="qobject.html">QObject</a>. Also, be sure that only the first inherited class is a <a href="qobject.html">QObject</a>.</p>
-<pre><span class="comment"> // correct</span>
+<pre><span class="comment"> //</span> correct
  class SomeClass : public QObject, public OtherClass
  {
      ...
@@ -142,7 +142,7 @@
      Q_OBJECT
 
  public slots:
-     void apply(void (*apply)(List *, void *), char *); <span class="comment">// WRONG</span>
+     void apply(void (*apply)(List *, void *), char *); <span class="comment">//</span> WRONG
  };</pre>
 <p>You can work around this restriction like this:</p>
 <pre> typedef void (*ApplyFunction)(List *, void *);
@@ -198,7 +198,7 @@
      {
          Q_OBJECT
 
-     public slots:   <span class="comment">// WRONG</span>
+     public slots:   <span class="comment">//</span> WRONG
          void b();
      };
  };</pre>
@@ -211,8 +211,8 @@
 <p>See also <a href="metaobjects.html">Meta-Object System</a>, <a href="signalsandslots.html">Signals and Slots</a>, and <a href="properties.html">Qt's Property System</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

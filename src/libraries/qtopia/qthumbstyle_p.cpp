@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,7 +27,12 @@
 #include <QMouseEvent>
 #include <QDesktopWidget>
 #include <QAbstractItemView>
+#include <QBasicTimer>
 #include <QDebug>
+#include <QTextEdit>
+#include <QMessageBox>
+
+static int spinArrowWidth = 16;             // spinbox arrow width
 
 class QThumbStylePrivate : public QObject
 {
@@ -44,21 +49,26 @@ public:
 
     QSize editableStrut;
 
+protected:
+    void timerEvent(QTimerEvent *e);
+
 private:
     QPoint mousePos;
+    Qt::MouseButtons buttons;
     QAbstractScrollArea *scrollArea;
     QWidget *target;
     bool filterPress;
-    bool waitRelease;
+    bool pressed;
     int moveThreshold;
+    QBasicTimer ptimer;
 };
 
 QThumbStylePrivate::QThumbStylePrivate()
 {
     scrollArea = 0;
     target = 0;
-    filterPress = true;
-    waitRelease = false;
+    filterPress = false;
+    pressed = false;
     moveThreshold = QApplication::desktop()->screenGeometry().width()/40;
     qApp->installEventFilter(this);
 }
@@ -70,8 +80,8 @@ QThumbStylePrivate::~QThumbStylePrivate()
 
 bool QThumbStylePrivate::handleMousePress(QAbstractScrollArea *w, QWidget *t, QMouseEvent *e)
 {
-    if (waitRelease)
-        return true;
+    if (!e->spontaneous())
+        return false;
     if (e->button() == Qt::LeftButton && !qobject_cast<QSlider*>(t)) {
         target = t;
         QWidget *cw = t;
@@ -88,30 +98,47 @@ bool QThumbStylePrivate::handleMousePress(QAbstractScrollArea *w, QWidget *t, QM
         }
 
         if (w) {
-            waitRelease = true;
-            if (!filterPress) {
-                filterPress = true;
-                return false;
-            }
             scrollArea = w;
             mousePos = e->globalPos();
+            buttons = e->buttons();
             filterPress = false;
-            e->accept();
+//            e->accept();
+            ptimer.start(250, this);
+            pressed = true;
             return true;
         }
+    } else {
+        target = 0;
+        scrollArea = 0;
+        filterPress = false;
     }
 
     return false;
 }
 
-bool QThumbStylePrivate::handleMouseMove(QAbstractScrollArea *w, QWidget *t, QMouseEvent *e)
+bool QThumbStylePrivate::handleMouseMove(QAbstractScrollArea *w, QWidget* /*t*/, QMouseEvent *e)
 {
+    if (!e->spontaneous())
+        return false;
     if (scrollArea) {
         QPoint diff = mousePos - e->globalPos();
         if (!filterPress
             && (qAbs(diff.y()) > moveThreshold 
             || qAbs(diff.x()) > moveThreshold)) {
             filterPress = true;
+            if (!ptimer.isActive()) {
+                // bogus move to get e.g. QPushButtons unpressed.
+                QPoint bogusPos(-1,-1);
+                QApplication::postEvent(target,
+                        new QMouseEvent(QEvent::MouseMove,
+                                        target->mapFromGlobal(bogusPos),
+                                        bogusPos, Qt::LeftButton, buttons,
+                                        QApplication::keyboardModifiers()));
+            }
+            ptimer.stop();
+            diff = QPoint(0,0); // avoid jump
+            if (QAbstractItemView *iv = qobject_cast<QAbstractItemView *>(w))
+                iv->clearSelection();
         }
         if (filterPress) {
             QScrollBar *sb = scrollArea->verticalScrollBar();
@@ -127,28 +154,29 @@ bool QThumbStylePrivate::handleMouseMove(QAbstractScrollArea *w, QWidget *t, QMo
             }
 
             mousePos = e->globalPos();
+            return true;
         }
-        e->accept();
-        return true;
+        if (ptimer.isActive())
+            return true;
     }
 
     return false;
 }
 
-bool QThumbStylePrivate::handleMouseRelease(QAbstractScrollArea *w, QWidget *t, QMouseEvent *e)
+bool QThumbStylePrivate::handleMouseRelease(QAbstractScrollArea * /*w*/, QWidget *t, QMouseEvent *e)
 {
+    if (!e->spontaneous())
+        return false;
     if (e->button() == Qt::LeftButton) {
-        waitRelease = false;
+        pressed = false;
         if (target) {
-            if (scrollArea) {
-                scrollArea = 0;
-                if (!filterPress) {
-                    // We haven't moved enough, so repeat click but don't filter.
-                    QApplication::postEvent(target, new QMouseEvent(QEvent::MouseButtonPress, t->mapFromGlobal(mousePos), e->button(), e->buttons(), QApplication::keyboardModifiers()));
-                    QApplication::postEvent(target, new QMouseEvent(QEvent::MouseButtonRelease, t->mapFromGlobal(mousePos), e->button(), e->buttons(), QApplication::keyboardModifiers()));
-                }
-                e->accept();
+            scrollArea = 0;
+            if (filterPress) {
+                // Don't send any release
                 target = 0;
+                ptimer.stop();
+                e->accept();
+                filterPress = false;
                 return true;
             } else {
                 QWidget *fw = target;
@@ -162,7 +190,10 @@ bool QThumbStylePrivate::handleMouseRelease(QAbstractScrollArea *w, QWidget *t, 
                     fw = fw->parentWidget();
                 }
             }
-            target = 0;
+            if (ptimer.isActive()) {
+                ptimer.start(0, this);
+                return true;
+            }
         }
     }
 
@@ -207,6 +238,17 @@ bool QThumbStylePrivate::eventFilter(QObject *o, QEvent *e)
     return QObject::eventFilter(o, e);
 }
 
+void QThumbStylePrivate::timerEvent(QTimerEvent *e)
+{
+    if (e->timerId() == ptimer.timerId()) {
+        ptimer.stop();
+        QApplication::postEvent(target, new QMouseEvent(QEvent::MouseButtonPress, target->mapFromGlobal(mousePos), mousePos, Qt::LeftButton, buttons, QApplication::keyboardModifiers()));
+        if (!pressed)
+            QApplication::postEvent(target, new QMouseEvent(QEvent::MouseButtonRelease, target->mapFromGlobal(mousePos), mousePos, Qt::LeftButton, buttons, QApplication::keyboardModifiers()));
+    }
+}
+
+
 //===========================================================================
 
 QThumbStyle::QThumbStyle() : QPhoneStyle()
@@ -215,9 +257,12 @@ QThumbStyle::QThumbStyle() : QPhoneStyle()
 
     int dpi = QApplication::desktop()->screen()->logicalDpiY();
 
-    // 18 pixels on a 100dpi screen
-    int strutSize = qRound(18.0 * dpi / 100.0);
-    d->editableStrut = QSize(strutSize, strutSize);
+    // 30 and 20 pixels on a 100dpi screen
+    int hstrutSize = qRound(30.0 * dpi / 100.0);
+    int vstrutSize = qRound(20.0 * dpi / 100.0);
+    d->editableStrut = QSize(hstrutSize, vstrutSize);
+    
+    spinArrowWidth = qRound(12.0 * dpi / 100.0);
 }
 
 QThumbStyle::~QThumbStyle()
@@ -240,7 +285,65 @@ void QThumbStyle::polish(QWidget *widget)
         widget->setFocusPolicy(Qt::TabFocus);
     }
 
+    QAbstractSpinBox *sb = qobject_cast<QAbstractSpinBox*>(widget);
+    if (sb) {
+        sb->setAlignment(Qt::AlignHCenter);
+    }
+
     QPhoneStyle::polish(widget);
+
+    QTextEdit *te = qobject_cast<QTextEdit*>(widget);
+    if (te && te->document()) {
+        // We'd like links to be about 0.7cm high (~20pt)
+        QString sheet("a { color: palette(link); font-size:20pt; }; a:visited { color: palette(link-visited); font-size:20pt; };");
+        te->document()->setDefaultStyleSheet(sheet);
+    }
+}
+
+/*!
+    \reimp
+*/
+QRect QThumbStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *opt,
+                                SubControl sc, const QWidget *w) const
+{
+    QRect ret;
+
+    switch (cc) {
+    case CC_SpinBox:
+        if (const QStyleOptionSpinBox *spinbox = qstyleoption_cast<const QStyleOptionSpinBox *>(opt)) {
+            QSize bs;
+            int fw = spinbox->frame ? pixelMetric(PM_SpinBoxFrameWidth, spinbox, w) : 0;
+            bs.setHeight(spinbox->rect.height());
+            bs.setWidth(spinArrowWidth);
+            bs = bs.expandedTo(QApplication::globalStrut());
+            //int y = fw;
+            int x, lx, rx;
+            x = spinbox->rect.width() - bs.width();
+            lx = fw;
+            rx = x - bs.width() - fw * 2;
+            switch (sc) {
+            case SC_SpinBoxUp:
+                ret = QRect(x, 0, bs.width(), bs.height());
+                break;
+            case SC_SpinBoxDown:
+                ret = QRect(lx, 0, bs.width(), bs.height());
+                break;
+            case SC_SpinBoxEditField:
+                ret = QRect(bs.width(), fw, rx, spinbox->rect.height() - 2*fw);
+                break;
+            case SC_SpinBoxFrame:
+                ret = spinbox->rect;
+            default:
+                break;
+            }
+            ret = visualRect(spinbox->direction, spinbox->rect, ret);
+        }
+        break;
+    default:
+        ret = QPhoneStyle::subControlRect(cc, opt, sc, w);
+    }
+
+    return ret;
 }
 
 QSize QThumbStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
@@ -265,6 +368,9 @@ QSize QThumbStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
             || mopt->menuItemType == QStyleOptionMenuItem::SubMenu)
             sz = sz.expandedTo(d->editableStrut);
         break; }
+    case CT_SpinBox:
+        sz.setWidth(sz.width() + spinArrowWidth);
+        break;
     default:
         sz = QPhoneStyle::sizeFromContents(type, opt, csz, widget);
         break;
@@ -288,8 +394,8 @@ int QThumbStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     case PM_SmallIconSize: {
             static int size = 0;
             if (!size) {
-                // We would like a 15x15 icon at 100dpi
-                size = (15 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
+                // We would like a 20x20 icon at 100dpi
+                size = (20 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
             }
             ret = size;
         }
@@ -317,7 +423,7 @@ int QThumbStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
         }
         break;
     case PM_MenuScrollerHeight:
-        ret = 16;   //TODO: make dpi-aware
+        ret = d->editableStrut.height();
         break;
     default:
         ret = QPhoneStyle::pixelMetric(metric, option, widget);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -226,9 +224,11 @@ QWidget *QDrag::target() const
     from are specified in \a supportedActions. The default proposed action will be selected
     among the allowed actions in the following order: Move, Copy and Link.
 
-    \bold{Note:} Although the drag and drop operation can take some time, this function
-    does not block the event loop. Other events are still delivered to the application
-    while the operation is performed.
+    \bold{Note:} On Linux and Mac OS X, the drag and drop operation
+    can take some time, but this function does not block the event
+    loop. Other events are still delivered to the application while
+    the operation is performed. On Windows, the Qt event loop is
+    blocked while during the operation.
 */
 
 Qt::DropAction QDrag::exec(Qt::DropActions supportedActions)

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -172,7 +170,7 @@ static bool parseIp6(const QString &address, quint8 *addr, QString *scopeId)
         return false;
 
     int mc = 16;
-    int fillCount = 9 - count;
+    int fillCount = 9 - count;  // number of 0 words to fill in the middle
     for (int i = count - 1; i >= 0; --i) {
         if (mc <= 0)
             return false;

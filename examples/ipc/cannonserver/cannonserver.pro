@@ -8,4 +8,4 @@ pkg.desc=Tutorial Qtopia IPC server
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=GPL
-pkg.domain=
+pkg.domain=trusted

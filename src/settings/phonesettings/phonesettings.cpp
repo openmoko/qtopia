@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -242,9 +242,10 @@ void PhoneSettings::itemActivated( QListWidgetItem *item )
 
     QDialog *dlg = 0;
     int index = item->data( Qt::UserRole ).toInt();
-    if ( index == Barring )
+    if ( index == Barring ) {
         dlg = new CallBarring( this );
-    else if ( index == Waiting )
+        dlg->showMaximized();
+    } else if ( index == Waiting )
         dlg = new CallWaiting( this );
     else if ( index == CallerId )
         dlg = new CallerID( this );
@@ -436,11 +437,18 @@ void CallBarring::itemActivated( QListWidgetItem * item )
 
 void CallBarring::setBarringStatusResult( QTelephony::Result result )
 {
-    if ( result == QTelephony::Error )
+    if ( result == QTelephony::Error ) {
         QMessageBox::warning( this, tr( "Failed" ),
         tr( "<qt>Unable to bar calls(%1).</qt>", "%1 = condition string e.g. All incoming calls" )
         .arg( barOptions->currentItem()->data( Qt::WhatsThisRole ).toString() ), QMessageBox::Ok );
+    } else if ( result == QTelephony::OperationNotAllowed ) {
+        QMessageBox::warning( this, tr( "Failed" ),
+        tr("<qt>The operation is not allowed. Please consult your network operator.</qt>"), QMessageBox::Ok );
+    } else if ( result == QTelephony::IncorrectPassword ) {
+        QMessageBox::warning( this, tr( "Failed" ), tr( "<qt>Password is invalid.</qt>" ), QMessageBox::Ok );
+    }
 }
+
 
 void CallBarring::changeBarringPasswordResult( QTelephony::Result result )
 {
@@ -465,7 +473,7 @@ void CallBarring::unlockAll()
 {
     QString pin2 = QPasswordDialog::getPassword(
             this,
-            "<P>Deactivate all: Enter your Call Barring password (PIN2)",
+            tr( "<P>Deactivate all: Enter your Call Barring password (PIN2)" ),
             QPasswordDialog::Pin );
     if ( pin2.isEmpty() )
         return;
@@ -1026,6 +1034,7 @@ CellBroadcastEditDialog::CellBroadcastEditDialog( QWidget *parent, Qt::WFlags f 
     : QDialog( parent, f ), lstLang( 0 )
 {
     setupUi( this );
+    setObjectName( "broadcast-edit" );
 
     connect( btnLang, SIGNAL(clicked()), this, SLOT(selectLanguages()) );
 }
@@ -1065,6 +1074,7 @@ void CellBroadcastEditDialog::selectLanguages()
     dlg.setModal( true );
     dlg.setWindowTitle( tr( "Select Languages" ) );
     QVBoxLayout layout( &dlg );
+    layout.setMargin(0);
     lstLang = new QListWidget( &dlg );
     connect( lstLang, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemActivated(QListWidgetItem*)) );
     setLanguages();
@@ -1394,8 +1404,6 @@ ServiceNumbers::ServiceNumbers( QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
     init();
-    connect( serviceNumbers, SIGNAL(serviceNumber(QServiceNumbers::NumberId,QString)),
-            this, SLOT(serviceNumber(QServiceNumbers::NumberId,QString)) );
 }
 
 ServiceNumbers::~ServiceNumbers()
@@ -1425,6 +1433,8 @@ void ServiceNumbers::init()
     serviceCenter = new QLineEdit( box1 );
     QtopiaApplication::setInputMethodHint( serviceCenter, QtopiaApplication::PhoneNumber );
     layout1->addWidget( serviceCenter );
+    layout1->setMargin( 4 );
+    layout1->setSpacing( 2 );
     vb->addWidget( box1 );
 
     QGroupBox *box2 = new QGroupBox( tr( "Voice Mail" ), this );
@@ -1432,9 +1442,13 @@ void ServiceNumbers::init()
     voiceMail = new QLineEdit( box2 );
     QtopiaApplication::setInputMethodHint( voiceMail, QtopiaApplication::PhoneNumber );
     layout2->addWidget( voiceMail );
+    layout2->setMargin( 4 );
+    layout2->setSpacing( 2 );
     vb->addWidget( box2 );
 
     serviceNumbers = new QServiceNumbers( QString(), this );
+    connect( serviceNumbers, SIGNAL(serviceNumber(QServiceNumbers::NumberId,QString)),
+            this, SLOT(serviceNumber(QServiceNumbers::NumberId,QString)) );
     serviceNumbers->requestServiceNumber( QServiceNumbers::SmsServiceCenter );
     serviceNumbers->requestServiceNumber( QServiceNumbers::VoiceMail );
 }
@@ -1454,19 +1468,21 @@ void ServiceNumbers::serviceNumber( QServiceNumbers::NumberId id, const QString&
 //----------------------------------------------------------------------------
 
 CallVolume::CallVolume( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ),
+      m_changeSpeakerVolume(true),
+      m_changeMicrophoneVolume(true)
 {
     init();
 
     connect(speakerVolume, SIGNAL(valueChanged(int)),
-            callVolume, SLOT(setSpeakerVolume(int)));
+            this, SLOT(speakerSliderChanged(int)));
     connect(microphoneVolume, SIGNAL(valueChanged(int)),
-            callVolume, SLOT(setMicrophoneVolume(int)));
+            this , SLOT(microphoneSliderChanged(int)));
 
     connect(callVolume, SIGNAL(speakerVolumeChanged(int)),
-            speakerVolume, SLOT(setValue(int)));
+            this, SLOT(speakerVolumeChanged(int)));
     connect(callVolume, SIGNAL(microphoneVolumeChanged(int)),
-            microphoneVolume, SLOT(setValue(int)));
+            this, SLOT(microphoneVolumeChanged(int)));
 }
 
 CallVolume::~CallVolume()
@@ -1496,6 +1512,32 @@ void CallVolume::reject()
     cfg.setValue( "MicrophoneVolume", m_oldMicrophoneVolume );
 
     QDialog::reject();
+}
+
+void CallVolume::speakerSliderChanged(int volume)
+{
+    if (m_changeSpeakerVolume)
+        callVolume->setSpeakerVolume(volume);
+}
+
+void CallVolume::speakerVolumeChanged(int volume)
+{
+    m_changeSpeakerVolume = false;
+    speakerVolume->setValue(volume);
+    m_changeSpeakerVolume = true;
+}
+
+void CallVolume::microphoneSliderChanged(int volume)
+{
+    if (m_changeMicrophoneVolume)
+        callVolume->setMicrophoneVolume(volume);
+}
+
+void CallVolume::microphoneVolumeChanged(int volume)
+{
+    m_changeMicrophoneVolume = false;
+    microphoneVolume->setValue(volume);
+    m_changeMicrophoneVolume = true;
 }
 
 void CallVolume::init()

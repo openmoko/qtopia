@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -331,7 +331,7 @@ QString QtopiaPathHelper::mountPointPath(const QString &mountPoint) const
   The order of the paths returned by \l installPaths() and where the path
   is defined is
   \list
-      \o System update path - \l Storage.conf
+      \o System update path - \l{Document Storage}{Storage.conf}
       \o Default resource location - \l qtopiaDir()
       \o Qtopia Path environment variable
       \o Third-party package location - \l packagePath()
@@ -836,12 +836,12 @@ QString Qtopia::version()
   Returns the device architecture string specified by QPE_ARCHITECTURE. This is a sequence
   of identifiers separated by "/", from most general to most specific (eg. "IBM/PC").
 
-  If a value has not been set for QPE_ARCHITECTURE the string "Uncusomized Device" is returned.
+  If a value has not been set for QPE_ARCHITECTURE the string \c{"Uncusomized Device"} is returned.
 */
 QString Qtopia::architecture()
 {
 #ifndef QPE_ARCHITECTURE
-# define QPE_ARCHITECTURE "Uncustomized Device" // No tr
+#define QPE_ARCHITECTURE "Uncustomized Device"
 #endif
     return QPE_ARCHITECTURE;
 }
@@ -1005,27 +1005,12 @@ QString Qtopia::applicationFileName(const QString& appname, const QString& filen
 QString Qtopia::sandboxDir()
 {
 #ifndef QT_NO_SXE
-    // QCoreApplication::applicationFilePath() doesnt work with symlinks
-    QString appPath = QCoreApplication::arguments().at( 0 );
-    int pIndex = appPath.indexOf( Qtopia::packagePath() );
-    if ( pIndex == - 1 )
-    {
+    QString appPath = QCoreApplication::applicationFilePath();
+    if ( appPath.startsWith( Qtopia::packagePath() ) )
+        return appPath.left( Qtopia::packagePath().length() + 32 )
+                + QLatin1String("/"); //32 is the md5sum length
+    else
         return QString();
-    }
-    QString binPath = QFile::symLinkTarget( appPath );
-    if ( binPath.isEmpty() )
-    {
-        qWarning( "Could not resolve sandbox path %s", qPrintable( appPath ));
-        return QString();
-    }
-    int binIndex = binPath.indexOf( "/bin/" );
-    if ( binIndex == -1 )
-    {
-        qWarning( "Sandbox app path %s did not contain \"/bin/\"",
-                qPrintable( binPath ));
-        return QString();
-    }
-    return binPath.left( binIndex );
 #else
     return QString();
 #endif

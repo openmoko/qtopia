@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,22 +53,30 @@ public:
 
     void setBusy(bool v);
 
-    QContent *currentItem() const;
+    QContent *itemAt(const QPoint&) const;
 
     void setCurrentItem(int);
 
     void updateImages();
 
+public slots:
+    QContent *currentItem() const;
+    QContent *itemAt(int, int) const;
+    int rows() const;
+    int columns() const;
+    void itemDimensions(int*, int*) const;
+
 signals:
 
     void clicked(QContent);
+    void pressed(QContent);
 
     void highlighted(QContent);
 
 protected:
 
     void keyPressEvent(QKeyEvent *event);
-    
+
     void keyReleaseEvent(QKeyEvent *event);
 
     void mousePressEvent(QMouseEvent *event);
@@ -85,6 +93,8 @@ private slots:
 
     void itemSelectedHandler(GridItem *);
 
+    void itemPressedHandler(GridItem *);
+
     void selectionChangedHandler(GridItem *);
 
 private:
@@ -93,13 +103,12 @@ private:
 
     GridItem *createItem(QContent *content,int row,int column) const;
 
-    void itemDimensions(int &itemWidth,int &itemHeight) const;
-
     void rowAndColumn(int idx,int &row,int &column) const;
 
     GridItem *currentGridItem() const;
 
-    GridItem *itemAt(const QPoint &point) const;
+    GridItem *gridItemAt(const QPoint &point) const;
+    GridItem *gridItemAt(int, int) const;
 
     // Potential value of margin - used for selectedItem.
     static const int MARGIN_MOUSE_PREFERRED = 2;
@@ -111,7 +120,7 @@ private:
     // GridItem - used for selectedItem.
     // Override this by building with compiler option -DMOVE_TIME_DURATION=0
 
-    #define MOVE_TIME_DURATION 200
+    #define MOVE_TIME_DURATION 100
 #endif
     static const int DEFAULT_MOVE_TIME_DURATION = MOVE_TIME_DURATION;
 
@@ -121,9 +130,9 @@ private:
     static const QString SELECTED_BACKGROUND_FILE_DEFAULT;
 
     // Number of rows in the grid.
-    int rows;
+    int m_rows;
     // Number of columns in the grid.
-    int columns;
+    int m_columns;
 
     // The scene that is displayed by this view.
     QGraphicsScene *scene;

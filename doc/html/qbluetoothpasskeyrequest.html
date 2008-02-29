@@ -40,7 +40,7 @@
 <p>See also <a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothPasskeyRequest"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteDevice</i> )</h3>
+<h3 class="fn"><a name="QBluetoothPasskeyRequest"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteDevice</i> )</h3>
 <p>Constructs a <a href="qbluetoothpasskeyrequest.html">QBluetoothPasskeyRequest</a>. The <i>localDevice</i> parameter specifies the local bluetooth adapter the request came in on. This string should be in the form hciX, such that it can be passed to <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor. The <i>remoteDevice</i> parameter specifies the remote device being paired to.</p>
 <p>By default, the request is set to be rejected.</p>
 <h3 class="fn"><a name="QBluetoothPasskeyRequest-2"></a>QBluetoothPasskeyRequest::QBluetoothPasskeyRequest ( const QBluetoothPasskeyRequest &amp; <i>other</i> )</h3>
@@ -50,15 +50,15 @@
 <h3 class="fn"><a name="isRejected"></a>bool QBluetoothPasskeyRequest::isRejected () const</h3>
 <p>Returns true if the request has been rejected.</p>
 <p>See also <a href="qbluetoothpasskeyrequest.html#setRejected">setRejected</a>().</p>
-<h3 class="fn"><a name="localDevice"></a>const <a href="qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::localDevice () const</h3>
+<h3 class="fn"><a name="localDevice"></a>const <a href="./qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::localDevice () const</h3>
 <p>Returns the name of the local device adapter. The string returned is of the form hciX. This can be passed in to the <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> constructor.</p>
 <p>See also <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
-<h3 class="fn"><a name="passkey"></a>const <a href="qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::passkey () const</h3>
+<h3 class="fn"><a name="passkey"></a>const <a href="./qstring.html">QString</a> &amp; QBluetoothPasskeyRequest::passkey () const</h3>
 <p>Returns the passkey for the request.</p>
 <p>See also <a href="qbluetoothpasskeyrequest.html#setPasskey">setPasskey</a>().</p>
 <h3 class="fn"><a name="remoteDevice"></a>const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; QBluetoothPasskeyRequest::remoteDevice () const</h3>
 <p>Returns the address of the remote device associated with this request.</p>
-<h3 class="fn"><a name="setPasskey"></a>void QBluetoothPasskeyRequest::setPasskey ( const <a href="qstring.html">QString</a> &amp; <i>passkey</i> )</h3>
+<h3 class="fn"><a name="setPasskey"></a>void QBluetoothPasskeyRequest::setPasskey ( const <a href="./qstring.html">QString</a> &amp; <i>passkey</i> )</h3>
 <p>Accepts the pairing request, and sets the passkey to <i>passkey</i>.</p>
 <p>See also <a href="qbluetoothpasskeyrequest.html#setRejected">setRejected</a>() and <a href="qbluetoothpasskeyrequest.html#passkey">passkey</a>().</p>
 <h3 class="fn"><a name="setRejected"></a>void QBluetoothPasskeyRequest::setRejected ()</h3>
@@ -72,8 +72,8 @@
 <p>Comparison operator. Compares the contents of <i>other</i> to the current passkey request. Returns true if the contents are equal.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

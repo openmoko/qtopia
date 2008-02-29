@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,14 +28,6 @@
 #include <QCalendarWidget>
 
 class QTimer;
-class DayPaintCache
-{
-public:
-    DayPaintCache() : allDay(false), timed(false) {}
-
-    bool allDay;
-    bool timed;
-};
 
 class MonthView : public QCalendarWidget
 {
@@ -56,25 +48,20 @@ public slots:
     void setVisibleSources( QSet<QPimSource> set);
 
 protected:
-    void paintCell(QPainter *p, const QRect &cr, const QDate &cDay) const;
+    void paintEvent(QPaintEvent*);
 
 private slots:
-    void rebuildCacheNow();
-    void rebuildCacheSoon();
-    void rebuildCache() const;
+    void resetFormatsNow();
+    void resetFormatsSoon();
+    void resetFormats() const;
 
 private:
-    void resizeAppointment(QResizeEvent *e);
     QList<QOccurrence> daysAppointments;
 
     QOccurrenceModel *model;
 
     mutable QTimer *dirtyTimer;
     mutable bool dirtyModel;
-
-    //QList<DayPaintCache> paintCache;
-    mutable QMap<QDate, DayPaintCache*> paintCache;
-    mutable int line_height;
 };
 
 #endif

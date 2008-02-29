@@ -45,7 +45,7 @@
 <p>An instance of QMailBase64Codec contains state information about the encoding or decoding operation it performs, so an instance should be used for a single coding operation only:</p>
 <pre>    QString textData = acquireInput();
 
-<span class="comment">    // Encode the string data to a UTF-8 byte sequence, and then encode to Base64</span>
+<span class="comment">    //</span> Encode the string data to a UTF-8 byte sequence, and then encode to Base64
     QMailBase64Codec encoder;
     QByteArray base64Data = encoder.encode(textData, &quot;UTF-8&quot;);</pre>
 <p>See also <a href="qmailcodec.html">QMailCodec</a>.</p>
@@ -66,8 +66,8 @@
 <p>The maximum number of encoded characters per output line can be specified as <i>maximumLineLength</i>. If not specified, or specified to a non-positive value, a default value will be used.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

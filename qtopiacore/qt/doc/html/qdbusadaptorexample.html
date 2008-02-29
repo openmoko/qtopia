@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/qdbusadaptors.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/qdbusadaptors.qdoc -->
 <head>
   <title>Qt 4.3: D-Bus Adaptor Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -41,7 +41,7 @@
      {
          if (app-&gt;hasMainWindow())
              return app-&gt;mainWindow()-&gt;caption();
-         return QString(&quot;&quot;); <span class="comment">// must not return a null QString</span>
+         return QString(&quot;&quot;); <span class="comment">//</span> must not return a null QString
      }
 
      void setCaption(const QString &amp;newCaption)
@@ -116,16 +116,16 @@
 <p>This adaptor could be used in the application's main function as follows</p>
 <pre> int main(int argc, char **argv)
  {
-     <span class="comment">// create the QApplication object</span>
+     <span class="comment">//</span> create the QApplication object
      QApplication app(argc, argv);
 
-     <span class="comment">// create the MainApplication adaptor:</span>
+     <span class="comment">//</span> create the MainApplication adaptor:
      new MainApplicationAdaptor(app);
 
-     <span class="comment">// connect to D-Bus and register as an object:</span>
+     <span class="comment">//</span> connect to D-Bus and register as an object:
      QDBus::sessionBus().registerObject(&quot;/MainApplication&quot;, app);
 
-     <span class="comment">// add main window, etc.</span>
+     <span class="comment">//</span> add main window, etc.
      [...]
 
      app.exec();
@@ -250,8 +250,8 @@
 <p>This private slot (which will not be exported as a method via D-Bus) was connected to the <tt>focusChanged</tt> signal in the adaptor's constructor. It is therefore able to shape the application's signal into what the interface expects it to be.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

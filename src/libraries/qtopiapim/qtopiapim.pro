@@ -6,7 +6,7 @@ VERSION         = 4.0.0
 
 RESOURCES = qtopiapim.qrc
 
-enable_modem:depends(libraries/qtopiaphone)
+enable_cell:depends(libraries/qtopiaphone)
 depends(libraries/qtopiacomm)
 depends(3rdparty/libraries/inputmatch)
 
@@ -83,7 +83,8 @@ QTOPIAPIM_SOURCES+=\
 
 QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h
 QTOPIAPIM_SOURCES+=qgooglecontext.cpp
-DEFINES+=GOOGLE_CALENDAR_CONTEXT
+
+#DEFINES+=GOOGLE_CALENDAR_CONTEXT
 
 enable_cell {
     QTOPIAPIM_PRIVATE_HEADERS+=qsimcontext_p.h
@@ -113,9 +114,24 @@ pkg_qtopiapim_settings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Contacts.
 pkg_qtopiapim_settings.path=/etc/default/Trolltech
 INSTALLS+=pkg_qtopiapim_settings
 
+apics.files=$$QTOPIA_DEPOT_PATH/pics/addressbook/*
+apics.path=/pics/addressbook
+apics.hint=pics
+
+dpics.files=$$QTOPIA_DEPOT_PATH/pics/datebook/*
+dpics.path=/pics/datebook
+dpics.hint=pics
+
+tpics.files=$$QTOPIA_DEPOT_PATH/pics/todolist/*
+tpics.path=/pics/todolist
+tpics.hint=pics
+
+INSTALLS+=apics dpics tpics
+
+
 
 pkg.desc=PIM Data access library
-pkg.domain=libs
+pkg.domain=trusted
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

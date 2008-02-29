@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -329,7 +329,8 @@ QStringList QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::Type type,
 
     //qLog(Network) << "QN: Searching for configs in " << fileName;
     QDir configDir(fileName);
-    configDir.mkdir(fileName);
+    if(!configDir.exists())
+        configDir.mkdir(fileName);
 
     QStringList files = configDir.entryList(QStringList("*.conf"));
     foreach(QString entry, files)

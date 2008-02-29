@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,155 +26,14 @@
 #include <private/qobexauthenticationchallenge_p.h>
 #include <private/qobexauthenticationresponse_p.h>
 
+#include <qtopialog.h>
+
 #include <QTimer>
 #include <QQueue>
 #include <QBuffer>
-#include <QDebug>
 #include <QApplication>
 
 #define OBEX_STREAM_BUF_SIZE 4096
-
-//#define QOBEXCLIENTSESSION_DEBUG
-
-/*!
-    \class QObexClientSession
-    \mainclass
-    \brief The QObexClientSession class provides an implementation of the client side of the OBEX protocol.
-
-    A QObexClientSession can be used over any type of transport that is
-    accessible through a subclass of QIODevice. For example,
-    QBluetoothRfcommSocket, QIrSocket and QTcpSocket are all subclasses of
-    QIODevice, and objects of these subclasses can passed to the
-    QObexClientSession constructor to run an OBEX client over RFCOMM,
-    IrDA or TCP, respectively.
-
-    QObexClientSession performs OBEX requests asynchronously and depends on
-    the presence of a running event loop.
-
-
-    \section1 Executing OBEX client requests
-
-    The QObexClientSession class can be used to execute the standard OBEX requests:
-    \c Connect, \c Disconnect, \c Put, \c Put-Delete, \c Get and \c SetPath.
-    These requests are available through the connect(), disconnect(), put(),
-    putDelete(), get() and setPath() functions, respectively.
-
-    All requests are performed asynchronously. These functions do not block;
-    instead, they schedule requests for later execution, and return
-    immediately. Each function returns a unique identifier for the scheduled
-    request that can be used to track the request's progress by connecting
-    to signals of interest such as requestStarted() and requestFinished().
-    The currentId() function can also be used to determine the request that
-    is currently executed.
-
-    The use of scheduled requests allows the execution of a sequence of
-    commands. For example, this code will connect to an OBEX server
-    running on a particular Bluetooth device, download a file, and then
-    disconnect:
-
-    \code
-    QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
-    rfcommSocket->connect("11:22:33:aa:bb:cc", 10);
-
-    QObexClientSession *client = new QObexClientSession(rfcommSocket);
-    client->connect();
-
-    QObexHeader header;
-    header.setName("SomeFile.txt");
-    client->get(header);
-    client->disconnect();
-    \endcode
-
-    When the last scheduled request has finished, a done() signal is
-    emitted with a \c bool argument that indicates whether the sequence
-    of requests finished with an error.
-
-    As an example, the code example above will produce a sequence of signals
-    similar to this:
-
-    \code
-    requestStarted(1)
-    responseHeaderReceived(responseHeader)
-    requestFinished(1, false)
-
-    requestStarted(2)
-    responseHeaderReceived(responseHeader)
-    dataTransferProgress(962, 2415)
-    readyRead()
-    dataTransferProgress(1980, 2415)
-    readyRead()
-    dataTransferProgress(2415, 2415)
-    readyRead()
-    requestFinished(2, false)
-
-    requestStarted(3)
-    responseHeaderReceived(responseHeader)
-    requestFinished(3, false)
-
-    done(false)
-    \endcode
-
-    The readyRead() signal tells you that there is data ready to be
-    read following a \c Get request. The amount of data can then be queried 
-    with the bytesAvailable() function and it can be read with the read()
-    or readAll() functions.
-
-    If an error occurs during the execution of one of the commands in
-    a sequence of commands, all the pending commands (i.e. scheduled,
-    but not yet executed commands) are cleared and no signals are
-    emitted for them.
-
-    For example, if the \c Get request in the above example code fails
-    because the server responded with a response code other than QObex::Success,
-    the \c Disconnect request would not be executed, and the sequence of
-    signals would look like this instead:
-
-    \code
-    requestStarted(1)
-    responseHeaderReceived(responseHeader)
-    requestFinished(1, false)
-
-    requestStarted(2)
-    requestFinished(2, true)
-
-    done(true)
-    \endcode
-
-    You can then get details about the error with the error() function.
-
-
-    \section1 Multiplexing and Connection Ids
-
-    The \c {Connection Id} header is used when multiplexing OBEX connections
-    over a single transport connection. If an OBEX server includes a
-    \c {Connection Id} header in a response to a \c Connect request, the ID
-    will be retained and the client will automatically include it in the
-    OBEX headers for all future requests. You do not need to track and send
-    the Connection Id yourself. The ID can be retrieved using connectionId().
-
-    Note that the Connection Id will not be automatically added if a request
-    already contains a \c Target header, as a request cannot have both of
-    these headers at the same time. (If it did, the server would be unsure as 
-    to whether the client was establishing a new directed connection or using 
-    an existing connection.)
-
-    \sa QObexServerSession
-    \ingroup qtopiaobex
- */
-
-/*!
-    \enum QObexClientSession::Error
-    \brief The errors that may occur for an OBEX client.
-
-    \value NoError No error has occurred.
-    \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the QIODevice provided in the constructor should not be used for any more OBEX requests.
-    \value RequestFailed The request was refused by the server (i.e. the server responded with a non-success response code).
-    \value InvalidRequest The client request is invalid.
-    \value InvalidResponse The server sent an invalid or unreadable response.
-    \value Aborted The request was aborted by a call to abort().
-    \value AuthenticationFailed The request failed because the client or server could not be authenticated.
-    \value UnknownError An error other than those specified above occurred.
-*/
 
 
 QObexClientSessionPrivate::QObexClientSessionPrivate(QIODevice *device, QObexClientSession *parent)
@@ -184,10 +43,6 @@ QObexClientSessionPrivate::QObexClientSessionPrivate(QIODevice *device, QObexCli
       m_socketDisconnected(false),
       m_busyWithRequest(false)
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-	qDebug() << "QObexClientSession: constructing...";
-#endif
-
     m_lastResponseCode = QObex::Success;
     m_error = QObexClientSession::NoError;
     m_errorString = qApp->translate("QObexClientSession", "Unknown error");
@@ -205,9 +60,6 @@ QObexClientSessionPrivate::QObexClientSessionPrivate(QIODevice *device, QObexCli
 
 QObexClientSessionPrivate::~QObexClientSessionPrivate()
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-	qDebug() << "QObexClientSession: destructing...";
-#endif
     if (m_socket)
         m_socket->setObexClient(0);
 
@@ -262,16 +114,8 @@ int QObexClientSessionPrivate::setPath(const QObexHeader &header, QObex::SetPath
 */
 void QObexClientSessionPrivate::abort()
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession:abort()";
-#endif
-
-    if (m_cmdQueue.empty() || m_aborting) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession ignoring abort request";
-#endif
+    if (m_cmdQueue.empty() || m_aborting)
         return;
-    }
 
     m_aborting = true;
 
@@ -360,36 +204,21 @@ qint64 QObexClientSessionPrivate::bytesAvailable() const
 int QObexClientSessionPrivate::queueCommand(QObexCommand *cmd)
 {
     m_cmdQueue.enqueue(cmd);
-    if (m_cmdQueue.size() == 1) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "Perform newly queued command immediately:" << cmd->m_req;
-#endif
+    if (m_cmdQueue.size() == 1)
         QTimer::singleShot(0, this, SLOT(doPending()));
-    }
 
     return cmd->m_id;
 }
 
 void QObexClientSessionPrivate::doPending()
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession::doPending()";
-#endif
-
     if (m_cmdQueue.empty()) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession::doPending() called, no pending requests left";
-#endif
         finishedAllOps();
         return;
     }
 
-    if (m_busyWithRequest) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession: another request in progress, don't do pending";
-#endif
+    if (m_busyWithRequest)
         return;
-    }
 
     m_busyWithRequest = true;
 
@@ -412,17 +241,11 @@ void QObexClientSessionPrivate::doPending()
 
 void QObexClientSessionPrivate::performCommand(QObexCommand *cmd)
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession::performCommand() id:" << cmd->m_id 
-        << "type:" << cmd->m_req << "headers:" << cmd->m_header;
-#endif
+    qLog(Obex) << "QObexClientSession: preparing to send request, type ="
+        << cmd->m_req;
 
     if (m_aborting) {
         // "abort" the current command by not sending it at all
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession aborting request, not sending request"
-                << cmd->m_req;
-#endif
         finishedAbort(true);
         return;
     }
@@ -463,16 +286,17 @@ void QObexClientSessionPrivate::performCommand(QObexCommand *cmd)
         return;
     }
 
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: sending request...";
-#endif
-
     bool result;
     if (cmd->m_req == QObex::SetPath) {
         const char nonHeaderData[2] = { int(cmd->m_setPathFlags), 0 };
         result = m_socket->sendRequest(cmd->m_req, cmd->m_header, nonHeaderData, 2);
     } else {
         result = m_socket->sendRequest(cmd->m_req, cmd->m_header);
+    }
+
+    if (result) {
+        qLog(Obex) << "QObexClientSession: sending new request, type ="
+            << cmd->m_req << ", number of headers =" << cmd->m_header.size();
     }
 
     if (!result) {
@@ -631,11 +455,6 @@ void QObexClientSessionPrivate::bodyDataAvailable(const char *data, qint64 size)
 
 void QObexClientSessionPrivate::requestDone(QObex::ResponseCode response)
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession::requestDone(), response:"
-            << QObexSocket::responseToString(response);
-#endif
-
     // An error may have been set when processing any authentication headers.
     // The m_lastResponseCode shouldn't be set in this case, since it
     // might be dependent on a successful request.
@@ -663,10 +482,6 @@ void QObexClientSessionPrivate::requestDone(QObex::ResponseCode response)
         }
     }
 
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: continue processing response";
-#endif
-
     // note the response for this, the most recently completed request
     m_lastResponseCode = response;
 
@@ -686,10 +501,6 @@ void QObexClientSessionPrivate::requestDone(QObex::ResponseCode response)
 
 void QObexClientSessionPrivate::requestResponseHeaderReceived(QObexHeader &header)
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: got response header:" << header;
-#endif
-
     if ( (currentRequest() == QObex::Connect) &&
             header.contains(QObexHeader::ConnectionId) ) {
         m_connId = header.connectionId();
@@ -753,10 +564,8 @@ void QObexClientSessionPrivate::requestAborted()
 void QObexClientSessionPrivate::errorOccurred(QObexClientSession::Error error, const QString &msg)
 {
     if (currentRequest() == QObex::NoRequest) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession: ignoring error" << error
+        qLog(Obex) << "QObexClientSession: ignoring error" << error
                 << ", no request in progress";
-#endif
         return;
     }
 
@@ -774,28 +583,18 @@ void QObexClientSessionPrivate::errorOccurred(QObexClientSession::Error error, c
 
 void QObexClientSessionPrivate::performAbort()
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: sending ABORT";
-#endif
-
-    if (m_cmdQueue.isEmpty()) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession: no request in progress, not sending ABORT";
-#endif
+    if (m_cmdQueue.isEmpty())
         return;
-    }
 
     // send Abort request
-    if (!m_socket->abortCurrentRequest()) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession: OBEX_CancelRequest() for ABORT failed!";
-#endif
+    if (!m_socket->abortCurrentRequest())
         finishedAbort(false);
-    }
 }
 
 void QObexClientSessionPrivate::finishedAbort(bool success)
 {
+    qLog(Obex) << "QObexClientSession: finished Abort, successful?" << success;
+
     m_aborting = false;
 
     // The current request should finish with an error, and all
@@ -812,21 +611,16 @@ void QObexClientSessionPrivate::finishedAbort(bool success)
 
 void QObexClientSessionPrivate::finishedCurrentOp(QObexClientSession::Error error, const QString &msg)
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: finishedCurrentOp()" << error << msg;
+    qLog(Obex) << "QObexClientSession: finished request, type =" 
+        << currentRequest() << ", error =" << error << "errormsg =" << msg;
+
     if (m_aborting) {
         // This is not an error - see abort() docs.
-        qDebug() << "QObexClientSession: request not aborted,"
-                << "it finished before we could send Abort";
+        qLog(Obex) << "QObexClientSession: request finished before it could be aborted";
     }
-#endif
 
-    if (m_cmdQueue.empty()) {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession: finishedCurrentOp() called but no request in progress";
-#endif
+    if (m_cmdQueue.empty())
         return;
-    }
 
     // set last error
     m_error = error;
@@ -869,10 +663,6 @@ void QObexClientSessionPrivate::finishedCurrentOp(QObexClientSession::Error erro
 
 void QObexClientSessionPrivate::finishedAllOps()
 {
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: finishedAllOps()";
-#endif
-
     emit m_parent->done(m_error != QObexClientSession::NoError);
 }
 
@@ -889,15 +679,8 @@ bool QObexClientSessionPrivate::readAuthenticationResponse(const QByteArray &res
         return false;
     }
 
-#ifdef QOBEXSERVERSESSION_DEBUG
-    qDebug() << "QObexClientSession: emit authenticationResponse()";
-#endif
     bool accept = false;
     emit m_parent->authenticationResponse(response, &accept);
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: client accepted Authentication Response?"
-            << accept;
-#endif
     if (!accept) {
         m_error = QObexClientSession::AuthenticationFailed;
         m_errorString = qApp->translate("QObexClientSession", "Authentication failed");
@@ -944,9 +727,6 @@ void QObexClientSessionPrivate::resendRequestWithAuthResponse()
 {
     if (m_cmdQueue.size() > 0) {
         QObexCommand *cmd = m_cmdQueue.head();
-#ifdef QOBEXCLIENTSESSION_DEBUG
-        qDebug() << "QObexClientSession:: resending request with Authentication Response";
-#endif
         cmd->m_header.remove(QObexHeader::AuthResponse); // in case added one before
         cmd->m_header.setValue(QObexHeader::AuthResponse, m_nextAuthResponseBytes);
         performCommand(cmd);
@@ -965,9 +745,7 @@ void QObexClientSessionPrivate::socketDisconnected()
     if (m_socketDisconnected)
         return;
 
-#ifdef QOBEXCLIENTSESSION_DEBUG
-    qDebug() << "QObexClientSession: either my QObexSocket or its QIODevice transport has gone away";
-#endif
+    qLog(Obex) << "QObexClientSession: my socket was disconnected!";
 
     // don't react to any more socket disconnections
     if (m_socket) {
@@ -1017,8 +795,180 @@ void QObexClientSessionPrivate::clearAllRequests()
 //=======================================================================
 
 /*!
-    Creates an OBEX client that will communicate over \a device.
-    The \a parent is the parent object.
+    \class QObexClientSession
+    \mainclass
+    \brief The QObexClientSession class provides an implementation of the client side of the OBEX protocol.
+
+    A QObexClientSession can be used over any type of transport that is
+    accessible through a subclass of QIODevice. For example,
+    QBluetoothRfcommSocket, QIrSocket and QTcpSocket are all subclasses of
+    QIODevice, and objects of these subclasses can passed to the
+    QObexClientSession constructor to run an OBEX client over RFCOMM,
+    IrDA or TCP, respectively.
+
+    QObexClientSession performs OBEX requests asynchronously and depends on
+    the presence of a running event loop.
+
+
+    \tableofcontents
+
+    \section1 Executing OBEX client requests
+
+    The QObexClientSession class can be used to execute the standard OBEX requests:
+    \c Connect, \c Disconnect, \c Put, \c Put-Delete, \c Get and \c SetPath.
+    These requests are available through the connect(), disconnect(), put(),
+    putDelete(), get() and setPath() functions, respectively.
+
+    All requests are performed asynchronously. These functions do not block;
+    instead, they schedule requests for later execution, and return
+    immediately. Each function returns a unique identifier for the scheduled
+    request that can be used to track the request's progress by connecting
+    to signals of interest such as requestStarted() and requestFinished().
+    The currentId() function can also be used to determine the request that
+    is currently executed.
+
+    The use of scheduled requests allows the execution of a sequence of
+    commands. For example, this code will connect to an OBEX server
+    running on a particular Bluetooth device, download a file, and then
+    disconnect:
+
+    \code
+    QBluetoothRfcommSocket *rfcommSocket = new QBluetoothRfcommSocket;
+    rfcommSocket->connect("11:22:33:aa:bb:cc", 10);
+
+    QObexClientSession *client = new QObexClientSession(rfcommSocket);
+    client->connect();
+
+    QObexHeader header;
+    header.setName("SomeFile.txt");
+    client->get(header);
+    client->disconnect();
+    \endcode
+
+    When the last scheduled request has finished, a done() signal is
+    emitted with a \c bool argument that indicates whether the sequence
+    of requests finished with an error.
+
+    As an example, the code example above will produce a sequence of signals
+    similar to this:
+
+    \code
+    requestStarted(1)
+    responseHeaderReceived(responseHeader)
+    requestFinished(1, false)
+
+    requestStarted(2)
+    responseHeaderReceived(responseHeader)
+    dataTransferProgress(962, 2415)
+    readyRead()
+    dataTransferProgress(1980, 2415)
+    readyRead()
+    dataTransferProgress(2415, 2415)
+    readyRead()
+    requestFinished(2, false)
+
+    requestStarted(3)
+    responseHeaderReceived(responseHeader)
+    requestFinished(3, false)
+
+    done(false)
+    \endcode
+
+    The readyRead() signal tells you that there is data ready to be
+    read following a \c Get request. The amount of data can then be queried
+    with the bytesAvailable() function and it can be read with the read()
+    or readAll() functions.
+
+    If an error occurs during the execution of one of the commands in
+    a sequence of commands, all the pending commands (i.e. scheduled,
+    but not yet executed commands) are cleared and no signals are
+    emitted for them.
+
+    For example, if the \c Get request in the above example code fails
+    because the server responded with a response code other than QObex::Success,
+    the \c Disconnect request would not be executed, and the sequence of
+    signals would look like this instead:
+
+    \code
+    requestStarted(1)
+    responseHeaderReceived(responseHeader)
+    requestFinished(1, false)
+
+    requestStarted(2)
+    requestFinished(2, true)
+
+    done(true)
+    \endcode
+
+    You can then get details about the error with the error() function.
+
+
+    \section1 Multiplexing and Connection IDs
+
+    The \c {Connection Id} header is used when multiplexing OBEX connections
+    over a single transport connection. If an OBEX server includes a
+    \c {Connection Id} header in a response to a \c Connect request, the ID
+    will be retained and the client will automatically include it in the
+    OBEX headers for all future requests. You do not need to track and send
+    the Connection Id yourself. The ID can be retrieved using connectionId().
+
+    Note that the Connection Id will not be automatically added if a request
+    already contains a \c Target header, as a request cannot have both of
+    these headers at the same time. (If it did, the server would be unsure as
+    to whether the client was establishing a new directed connection or using
+    an existing connection.)
+
+
+    \section1 Handling socket disconnections
+
+    You should ensure that the QIODevice provided in the constructor emits
+    QIODevice::aboutToClose() or QObject::destroyed() when the associated
+    transport connection is disconnected. If one of these signals
+    are emitted while a request is in progress, QObexClientSession will
+    know the transport connection has been lost, and will emit
+    requestFinished() with \c error set to \c true, and error() will return
+    ConnectionError.
+
+    This is particularly an issue for socket classes such as QTcpSocket that
+    do not emit QIODevice::aboutToClose() when a \c disconnected() signal is
+    emitted. In these cases, QObexClientSession will not know that the
+    transport has been disconnected. To avoid this, you can make the socket
+    emit QIODevice::aboutToClose() when it is disconnected:
+
+    \code
+    // make the socket emit aboutToClose() when disconnected() is emitted
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));
+    \endcode
+
+    Or, if the socket can be discarded as soon as it is disconnected:
+
+    \code
+    // delete the socket when the transport is disconnected
+    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    \endcode
+
+    \sa QObexServerSession
+    \ingroup qtopiaobex
+ */
+
+/*!
+    \enum QObexClientSession::Error
+    \brief The errors that may occur for an OBEX client.
+
+    \value NoError No error has occurred.
+    \value ConnectionError The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the QIODevice provided in the constructor should not be used for any more OBEX requests.
+    \value RequestFailed The request was refused by the server (i.e. the server responded with a response code other than QObex::Success).
+    \value InvalidRequest The client request is invalid.
+    \value InvalidResponse The server sent an invalid or unreadable response.
+    \value Aborted The request was aborted by a call to abort().
+    \value AuthenticationFailed The request failed because the client or server could not be authenticated.
+    \value UnknownError An error other than those specified above occurred.
+*/
+
+
+/*!
+    Constructs an OBEX client session that uses \a device for the transport
+    connection. The \a parent is the QObject parent.
 
     The \a device must be opened in order to perform client requests.
     Otherwise, requests will fail with the QObexClientSession::ConnectionError
@@ -1396,6 +1346,17 @@ QString QObexClientSession::errorString() const
     identified by \a id. The \a error value is \c true if an error occurred
     during the processing of the request; otherwise \a error is \c false.
 
+    \bold {Note:} \a error is set to \c true if the server responded with a
+    response code other than QObex::Success. In this case, error() will return
+    QObexClientSession::RequestFailed, and lastResponseCode() will return
+    the response code sent by the server.
+
+    \warning Do not delete a QObexClientSession instance while it is emitting
+    this signal. If you need to delete it, call QObject::deleteLater() instead 
+    of using the \c delete keyword. (If you do this, you may have to store the
+    instance as a QPointer if you need to check the validity of the pointer 
+    later on.)
+    
     \sa requestStarted(), currentId(), currentRequest()
 */
 
@@ -1449,6 +1410,12 @@ QString QObexClientSession::errorString() const
     emitted after the requestFinished() signal for the last request. The
     \a error value is \c true if an error occurred during the processing
     of the request; otherwise \a error is \c false.
+
+    \warning Do not delete a QObexClientSession instance while it is emitting
+    this signal. If you need to delete it, call QObject::deleteLater() instead
+    of using the \c delete keyword. (If you do this, you may have to store the
+    instance as a QPointer if you need to check the validity of the pointer
+    later on.)
  */
 
 /*!

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,25 +23,27 @@
 
 #include <qdplugin.h>
 #include <trace.h>
+QD_LOG_OPTION(QDSyncProtocol)
+#include <desktopsettings.h>
 
 QSyncProtocol::QSyncProtocol(QObject *parent)
     : QObject(parent), pendingServerChanges(false), pendingClientChanges(false)
 { 
-    TRACE(QDSync) << "QSyncProtocol::QSyncProtocol";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::QSyncProtocol";
     state = None;
     merge = new QSyncMerge(this);
 }
 
 QSyncProtocol::~QSyncProtocol()
 {
-    TRACE(QDSync) << "QSyncProtocol::~QSyncProtocol";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::~QSyncProtocol";
     if (state != None && state != Aborted)
         abort(tr("Synchronization released while existing synchronization in progress"));
 }
 
 void QSyncProtocol::abort(const QString &message)
 {
-    TRACE(QDSync) << "QSyncProtocol::abort" << "message" << message;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::abort" << "message" << message;
     if ( state != Aborted ) {
         emit syncError(message);
         abortSync();
@@ -52,7 +54,7 @@ void QSyncProtocol::abort(const QString &message)
 
 void QSyncProtocol::abortSync()
 {
-    TRACE(QDSync) << "QSyncProtocol::abortSync";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::abortSync";
     serverError();
     state = Aborted;
     merge->clearChanges();
@@ -62,69 +64,69 @@ void QSyncProtocol::abortSync()
 
 void QSyncProtocol::serverSyncRequest(const QString &source)
 {
-    TRACE(QDSync) << "QSyncProtocol::serverSyncRequest" << "source" << source;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverSyncRequest" << "source" << source;
     client->serverSyncRequest(source);
 }
 
 void QSyncProtocol::serverIdentity(const QString &server)
 {
-    TRACE(QDSync) << "QSyncProtocol::serverIdentity" << "server" << server;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverIdentity" << "server" << server;
     client->serverIdentity(server);
 }
 
 void QSyncProtocol::serverVersion(int major, int minor, int patch)
 {
-    TRACE(QDSync) << "QSyncProtocol::serverVersion" << major << minor << patch;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverVersion" << major << minor << patch;
     client->serverVersion(major, minor, patch);
 }
 
 void QSyncProtocol::serverSyncAnchors(const QDateTime &serverLastSync, const QDateTime &serverNextSync)
 {
-    TRACE(QDSync) << "QSyncProtocol::serverSyncAnchors" << "serverLastSync" << serverLastSync << "serverNextSync" << serverNextSync;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverSyncAnchors" << "serverLastSync" << serverLastSync << "serverNextSync" << serverNextSync;
     client->serverSyncAnchors(serverLastSync, serverNextSync);
 }
 
 void QSyncProtocol::createServerRecord(const QByteArray &record)
 {
-    TRACE(QDSync) << "QSyncProtocol::createServerRecord";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::createServerRecord";
     LOG() << "record" << record;
     client->createServerRecord(record);
 }
 
 void QSyncProtocol::replaceServerRecord(const QByteArray &record)
 {
-    TRACE(QDSync) << "QSyncProtocol::replaceServerRecord";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::replaceServerRecord";
     LOG() << "record" << record;
     client->replaceServerRecord(record);
 }
 
 void QSyncProtocol::removeServerRecord(const QString &serverId)
 {
-    TRACE(QDSync) << "QSyncProtocol::removeServerRecord" << "serverId" << serverId;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::removeServerRecord" << "serverId" << serverId;
     client->removeServerRecord(serverId);
 }
 
 void QSyncProtocol::requestTwoWaySync()
 {
-    TRACE(QDSync) << "QSyncProtocol::requestTwoWaySync";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::requestTwoWaySync";
     client->requestTwoWaySync();
 }
 
 void QSyncProtocol::requestSlowSync()
 {
-    TRACE(QDSync) << "QSyncProtocol::requestSlowSync";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::requestSlowSync";
     client->requestSlowSync();
 }
 
 void QSyncProtocol::serverError()
 {
-    TRACE(QDSync) << "QSyncProtocol::serverError";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverError";
     client->serverError();
 }
 
 void QSyncProtocol::serverEnd()
 {
-    TRACE(QDSync) << "QSyncProtocol::serverEnd";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::serverEnd";
     client->serverEnd();
 }
 
@@ -134,7 +136,7 @@ void QSyncProtocol::serverEnd()
 */
 void QSyncProtocol::clientSyncRequest(const QString &source)
 {
-    TRACE(QDSync) << "QSyncProtocol::clientSyncRequest" << "source" << source;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientSyncRequest" << "source" << source;
     if (state != None) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -142,14 +144,14 @@ void QSyncProtocol::clientSyncRequest(const QString &source)
     //startSync(source);
 }
 
-void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *server)
+void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *_server)
 {
-    TRACE(QDSync) << "QSyncProtocol::startSync" << "client" << _client << "server" << server;
     client = _client;
-    storage = server;
-    QString source = storage->dataset();
+    server = _server;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::startSync" << "client" << client << "server" << server;
+    QString source = server->dataset();
     merge->setClientReferenceSchema(client->referenceSchema());
-    merge->setServerReferenceSchema(storage->referenceSchema());
+    merge->setServerReferenceSchema(server->referenceSchema());
     // assert state == None
 
     connect( client, SIGNAL(clientSyncRequest(QString)), this, SLOT(clientSyncRequest(QString)) );
@@ -163,18 +165,18 @@ void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *s
     connect( client, SIGNAL(clientError()), this, SLOT(clientError()) );
     connect( client, SIGNAL(clientEnd()), this, SLOT(clientEnd()) );
 
-    connect( storage, SIGNAL(mappedId(QString,QString)), merge, SLOT(mapIdentifier(QString,QString)) );
-    connect( storage, SIGNAL(createServerRecord(QByteArray)), merge, SLOT(createServerRecord(QByteArray)) );
-    connect( storage, SIGNAL(replaceServerRecord(QByteArray)), merge, SLOT(replaceServerRecord(QByteArray)) );
-    connect( storage, SIGNAL(removeServerRecord(QString)), merge, SLOT(removeServerRecord(QString)) );
-    connect( storage, SIGNAL(serverChangesCompleted()), this, SLOT(markServerChangesComplete()) );
+    connect( server, SIGNAL(mappedId(QString,QString)), merge, SLOT(mapIdentifier(QString,QString)) );
+    connect( server, SIGNAL(createServerRecord(QByteArray)), merge, SLOT(createServerRecord(QByteArray)) );
+    connect( server, SIGNAL(replaceServerRecord(QByteArray)), merge, SLOT(replaceServerRecord(QByteArray)) );
+    connect( server, SIGNAL(removeServerRecord(QString)), merge, SLOT(removeServerRecord(QString)) );
+    connect( server, SIGNAL(serverChangesCompleted()), this, SLOT(markServerChangesComplete()) );
 
     merge->clearChanges();
     datasource.clear();
     clientid.clear();
     datasource = source;
     serverSyncRequest(datasource);
-    serverIdentity("trolltech.qtopia.desktop");// possible to configure for multiple later.
+    serverIdentity(DesktopSettings::deviceId());
     serverVersion(4, 3, 0);
     state = Header;
     emit progress();
@@ -182,7 +184,7 @@ void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *s
 
 void QSyncProtocol::clientIdentity(const QString &id)
 {
-    TRACE(QDSync) << "QSyncProtocol::clientIdentity" << "id" << id;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientIdentity" << "id" << id;
     if (state != Header) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -192,7 +194,7 @@ void QSyncProtocol::clientIdentity(const QString &id)
 
 void QSyncProtocol::clientVersion(int major, int minor, int patch)
 {
-    TRACE(QDSync) << "QSyncProtocol::clientVersion" << major << minor << patch;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientVersion" << major << minor << patch;
     if (state != Header) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -211,7 +213,7 @@ void QSyncProtocol::clientVersion(int major, int minor, int patch)
 
 void QSyncProtocol::clientSyncAnchors(const QDateTime &clientLastSync, const QDateTime &clientNextSync)
 {
-    TRACE(QDSync) << "QSyncProtocol::clientSyncAnchors" << "clientLastSync" << clientLastSync << "clientNextSync" << clientNextSync;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientSyncAnchors" << "clientLastSync" << clientLastSync << "clientNextSync" << clientNextSync;
     if (state != Header) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -226,17 +228,17 @@ void QSyncProtocol::clientSyncAnchors(const QDateTime &clientLastSync, const QDa
         // TODO merge should have specific mappings for specific plugins
         merge->clearIdentifierMap();
         requestSlowSync();
-        storage->performSync(QDateTime());
+        server->fetchChangesSince(QDateTime());
     } else {
         requestTwoWaySync();
-        storage->performSync(lastSync.addSecs(1)); // don't re-sync items matching last time-stamp
+        server->fetchChangesSince(lastSync.addSecs(1)); // don't re-sync items matching last time-stamp
     }
     nextSync = clientNextSync; // so last sync when stored will match client
 }
 
 void QSyncProtocol::createClientRecord(const QByteArray &record)
 {
-    TRACE(QDSync) << "QSyncProtocol::createClientRecord";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::createClientRecord";
     LOG() << "record" << record;
     if (state != ClientDiff) {
         abort(tr("Protocol error - unexpected response from client"));
@@ -247,7 +249,7 @@ void QSyncProtocol::createClientRecord(const QByteArray &record)
 
 void QSyncProtocol::replaceClientRecord(const QByteArray &record)
 {
-    TRACE(QDSync) << "QSyncProtocol::replaceClientRecord";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::replaceClientRecord";
     LOG() << "record" << record;
     if (state != ClientDiff) {
         abort(tr("Protocol error - unexpected response from client"));
@@ -258,7 +260,7 @@ void QSyncProtocol::replaceClientRecord(const QByteArray &record)
 
 void QSyncProtocol::removeClientRecord(const QString &clientId)
 {
-    TRACE(QDSync) << "QSyncProtocol::removeClientRecord" << "clientId" << clientId;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::removeClientRecord" << "clientId" << clientId;
     if (state != ClientDiff) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -268,7 +270,7 @@ void QSyncProtocol::removeClientRecord(const QString &clientId)
 
 void QSyncProtocol::mapId(const QString &serverId, const QString &clientId)
 {
-    TRACE(QDSync) << "QSyncProtocol::mapId" << "serverId" << serverId << "clientId" << clientId;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::mapId" << "serverId" << serverId << "clientId" << clientId;
     if (state != IdMapping) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -278,7 +280,7 @@ void QSyncProtocol::mapId(const QString &serverId, const QString &clientId)
 
 void QSyncProtocol::clientError()
 {
-    TRACE(QDSync) << "QSyncProtocol::clientError";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientError";
     emit syncError(tr("Client indicated synchronization failure"));
     state = None;
     merge->clearChanges();
@@ -288,7 +290,7 @@ void QSyncProtocol::clientError()
 
 void QSyncProtocol::markServerChangesComplete()
 {
-    TRACE(QDSync) << "QSyncProtocol::markServerChangesComplete";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::markServerChangesComplete";
     pendingServerChanges = false;
     if (!pendingClientChanges)
         mergeAndApply();
@@ -296,7 +298,7 @@ void QSyncProtocol::markServerChangesComplete()
 
 void QSyncProtocol::clientEnd()
 {
-    TRACE(QDSync) << "QSyncProtocol::clientEnd";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientEnd";
     switch(state) {
         case ClientDiff:
             pendingClientChanges = false;
@@ -316,7 +318,7 @@ void QSyncProtocol::clientEnd()
 
 void QSyncProtocol::mergeAndApply()
 {
-    TRACE(QDSync) << "QSyncProtocol::mergeAndApply";
+    TRACE(QDSyncProtocol) << "QSyncProtocol::mergeAndApply";
     QList<Change> serverChanges, clientChanges;
 
     serverChanges = merge->serverDiff();
@@ -353,13 +355,13 @@ void QSyncProtocol::mergeAndApply()
     foreach(const Change &c, clientChanges) {
         switch(c.type) {
             case Change::Create:
-                storage->createClientRecord(c.record);
+                server->createClientRecord(c.record);
                 break;
             case Change::Replace:
-                storage->replaceClientRecord(c.record);
+                server->replaceClientRecord(c.record);
                 break;
             case Change::Remove:
-                storage->removeClientRecord(c.id);
+                server->removeClientRecord(c.id);
                 break;
         }
     }

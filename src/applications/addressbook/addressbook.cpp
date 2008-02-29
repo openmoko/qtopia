@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -284,6 +284,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
       mHasSim( false ),
 #ifdef QTOPIA_CELL
       mGotSimEntries(false),
+      mShowSimLabel(false),
 #endif
       mContextMenuDirty(true),
       mGroupsListView(0),
@@ -367,7 +368,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     actionAddGroup = new QAction(newIcon, tr("New group"), this);
     actionAddGroup->setWhatsThis(tr("Add new contact group."));
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     actionSetRingTone = new QAction(QIcon(), tr("Set group ringtone...", "Set ringtone to current contact group"), this);
     actionSetRingTone->setWhatsThis(tr("Set a ringtone that is played when an incoming call comes in from this group members."));
 #endif
@@ -443,7 +444,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     /* groups */
     contextMenu->addAction(actionShowGroups);
     contextMenu->addAction(actionAddGroup);
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     contextMenu->addAction(actionSetRingTone);
 #endif
     contextMenu->addAction(actionRemoveGroup);
@@ -1018,6 +1019,8 @@ void AddressbookWindow::updateContextMenuIfDirty()
 
     bool editable = mModel->editable(currentContact().uid());
 
+    bool hasMembers = mModel->count();
+
     bool showingGroups = centralView->currentWidget() == mGroupsListView;
     bool showingContacts = !showingGroups && !details;
     bool showingFiltered = centralView->currentWidget() == mGroupMemberView;
@@ -1052,7 +1055,7 @@ void AddressbookWindow::updateContextMenuIfDirty()
         actionSend->setVisible(details);
 
     if(actionSendCat)
-        actionSendCat->setVisible(!details && mModel->count());
+        actionSendCat->setVisible(!details && hasMembers);
 
     actionPersonal->setVisible(!details && mModel->hasPersonalDetails());
 
@@ -1061,12 +1064,12 @@ void AddressbookWindow::updateContextMenuIfDirty()
     /* group actions */
     actionShowGroups->setVisible( showingContacts );
     actionAddGroup->setVisible( showingGroups );
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     actionSetRingTone->setVisible( showingGroups );
 #endif
     actionRemoveGroup->setVisible( groupSelected && !groupSystem);
     actionRenameGroup->setVisible( groupSelected && !groupSystem);
-    actionRemoveFromGroup->setVisible( showingFiltered );
+    actionRemoveFromGroup->setVisible( showingFiltered && hasMembers);
     actionAddMembers->setVisible( showingFiltered );
     /* end group actions */
 }
@@ -1115,6 +1118,10 @@ void AddressbookWindow::showListView(bool saveState)
         saveViewState();
 
     mModel->setCategoryFilter(QCategoryFilter());
+
+    if (actionSendCat)
+        actionSendCat->setText(tr("Send All..."));
+
 
     if ( centralView->currentWidget() != mListView) {
         centralView->setCurrentWidget(mListView);
@@ -1187,7 +1194,7 @@ void AddressbookWindow::createGroupListView()
         connect(mGroupsListView, SIGNAL(backClicked()), this, SLOT(previousView()));
 
         connect(actionAddGroup, SIGNAL(triggered()), mGroupsListView, SLOT(addGroup()));
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         connect(actionSetRingTone, SIGNAL(triggered()), mGroupsListView, SLOT(setGroupRingTone()));
 #endif
         connect(actionRemoveGroup, SIGNAL(triggered()), mGroupsListView, SLOT(removeCurrentGroup()));
@@ -1210,7 +1217,7 @@ void AddressbookWindow::createGroupMemberView()
         connect(mGroupMemberView, SIGNAL(backClicked()), this, SLOT(previousView()));
 
 #ifdef QTOPIA_CELL
-        mGroupMemberView->showLoadLabel(!mGotSimEntries);
+        mGroupMemberView->showLoadLabel(mShowSimLabel);
 #endif
 
         mGroupMemberView->installEventFilter(this);
@@ -1929,6 +1936,7 @@ void AddressbookWindow::simInserted()
                 }
             }
             if (showLabel) {
+                mShowSimLabel = true;
                 mListView->showLoadLabel(true);
                 if (mGroupMemberView)
                     mGroupMemberView->showLoadLabel(true);
@@ -1940,6 +1948,7 @@ void AddressbookWindow::simInserted()
 void AddressbookWindow::simNotInserted()
 {
     mGotSimEntries = false;
+    mShowSimLabel = false;
     mListView->showLoadLabel(false);
     if (mGroupMemberView)
         mGroupMemberView->showLoadLabel(false);
@@ -1949,6 +1958,7 @@ void AddressbookWindow::phoneBookUpdated(const QString& store)
 {
     if ( store == "SM" ) {        // No tr
         mGotSimEntries = true;
+        mShowSimLabel = false;
         mListView->showLoadLabel(false);
         if (mGroupMemberView)
             mGroupMemberView->showLoadLabel(false);
@@ -2095,14 +2105,18 @@ void AddressbookWindow::updateDependentAppointments(const QContact& src, AbEdito
         if (context != NULL) {
             // Copy the alarm stuff over
             QAppointment generated = am.appointment(aId);
-            generated.setAlarm(editor->anniversaryReminderDelay(), editor->anniversaryReminder());
-            context->updateAppointment(generated);
+            if (generated.alarmDelay() != editor->anniversaryReminderDelay() || generated.alarm() != editor->anniversaryReminder()) {
+                generated.setAlarm(editor->anniversaryReminderDelay(), editor->anniversaryReminder());
+                context->updateAppointment(generated);
+            }
         }
         context = qobject_cast<QAppointmentContext*>(am.context(bId));
         if (context != NULL) {
             QAppointment generated = am.appointment(bId);
-            generated.setAlarm(editor->birthdayReminderDelay(), editor->birthdayReminder());
-            context->updateAppointment(generated);
+            if (generated.alarmDelay() != editor->birthdayReminderDelay() || generated.alarm() != editor->birthdayReminder()) {
+                generated.setAlarm(editor->birthdayReminderDelay(), editor->birthdayReminder());
+                context->updateAppointment(generated);
+            }
         }
     }
 }
@@ -2143,23 +2157,24 @@ void AddressbookWindow::editEntry( const QContact &cnt )
         setFocus();
         QContact editedEntry( abEditor->entry() );
 
-        if( !(entry == editedEntry))
-        {// only do update operations if the data has actually changed
+        if( !(entry == editedEntry)) {
+            // only do update operations if the data has actually changed
             //regular contact, just update
             NameLearner learner(editedEntry);
             mModel->updateContact(editedEntry);
-            updateDependentAppointments(editedEntry, abEditor);
             updateSpeedDialEntries(editedEntry);
-            setCurrentContact(editedEntry);
+        }
 
-            if( mDetailsView && centralView->currentWidget() == mDetailsView)
-            {
-                // don't call slotDetailView because with QDL that would push the same
-                // entry onto the view stack again. just refresh
-                // need to get entry again for contact list model data.
-                editedEntry = mModel->contact(editedEntry.uid());
-                mDetailsView->init( editedEntry );
-            }
+        updateDependentAppointments(editedEntry, abEditor);
+        setCurrentContact(editedEntry);
+
+        if( mDetailsView && centralView->currentWidget() == mDetailsView)
+        {
+            // don't call slotDetailView because with QDL that would push the same
+            // entry onto the view stack again. just refresh
+            // need to get entry again for contact list model data.
+            editedEntry = mModel->contact(editedEntry.uid());
+            mDetailsView->init( editedEntry );
         }
     }
 }
@@ -2740,8 +2755,7 @@ void ContactsService::editPersonalAndClose()
 }
 
 /*!
-    Adds a \a contact. This is not normally used by applications,
-    which should use the AddressBookAccess class.
+    Adds a \a contact.
 
     This slot corresponds to the QCop service message
     \c{Contacts::addContact(QContact)}.
@@ -2754,8 +2768,7 @@ void ContactsService::addContact(const QContact& contact)
 }
 
 /*!
-    Removes a \a contact. This is not normally used by applications,
-    which should use the AddressBookAccess class.
+    Removes a \a contact.
 
     This slot corresponds to the QCop service message
     \c{Contacts::removeContact(QContact)}.
@@ -2769,8 +2782,7 @@ void ContactsService::removeContact(const QContact& contact)
 }
 
 /*!
-    Updates a \a contact. This is not normally used by applications,
-    which should use the AddressBookAccess class.
+    Updates a \a contact.
 
     This slot corresponds to the QCop service message
     \c{Contacts::updateContact(QContact)}.

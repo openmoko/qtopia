@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,60 +22,15 @@
 
 #include <QPainter>
 #include <QResizeEvent>
+#include <QTextFormat>
 #include <QTimeString>
 #include <QTimer>
 
 static QColor normalBgColor(0,0,0);
 static bool foundNColor = false;
 
-// estimate cell height.
-void MonthView::resizeAppointment( QResizeEvent *e )
-{
-    int ch = e->size().height() / 7; // 6 cells, one more for header.
-    if (ch > 0)
-        line_height = qMax(5, ch / 6);
-    else
-        line_height = 5;
-    QCalendarWidget::resizeEvent(e);
-}
-
-void MonthView::paintCell(QPainter *p, const QRect &cr, const QDate &cDay) const
-{
-    if (dirtyModel)
-        rebuildCache();
-    // Grumble.
-    bool selected = (cDay == selectedDate());
-    bool allday = false;
-    bool timed = false;
-    if (paintCache.contains(cDay)) {
-        DayPaintCache *dpc = paintCache[cDay];
-        allday = dpc->allDay;
-        timed = dpc->timed;
-    }
-
-    p->save();
-    if (timed || allday) {
-        QFont f = p->font();
-        f.setWeight(QFont::Bold);
-        p->setFont(f);
-    }
-    if (selected) {
-        p->fillRect(cr, palette().highlight());
-        p->setPen(palette().highlightedText().color());
-    } else {
-        if (allday)
-            p->fillRect(cr, normalBgColor);
-        if (cDay.dayOfWeek() == Qt::Sunday || cDay.dayOfWeek() == Qt::Saturday)
-            p->setPen(Qt::red); //xxx
-    }
-    if (monthShown() != cDay.month())
-        p->setPen(palette().brush(QPalette::Disabled, QPalette::Text).color());
-    p->drawText(cr, Qt::AlignCenter, QString::number(cDay.day()));
-    p->restore();
-}
-
 MonthView::MonthView(QWidget *parent, const QCategoryFilter& c, QSet<QPimSource> set)
-    : QCalendarWidget(parent), line_height(5)
+    : QCalendarWidget(parent)
 {
     setObjectName("monthview");
 
@@ -91,7 +46,7 @@ MonthView::MonthView(QWidget *parent, const QCategoryFilter& c, QSet<QPimSource>
         model->setVisibleSources(set);
     model->setCategoryFilter(c);
 
-    connect(model, SIGNAL(modelReset()), this, SLOT(rebuildCacheSoon()));
+    connect(model, SIGNAL(modelReset()), this, SLOT(resetFormatsSoon()));
     connect(this, SIGNAL(currentPageChanged(int,int)), this, SLOT(updateModelRange(int,int)));
 
     // Since we don't know if we'll get a model reset from the model
@@ -99,9 +54,9 @@ MonthView::MonthView(QWidget *parent, const QCategoryFilter& c, QSet<QPimSource>
     dirtyTimer = new QTimer();
     dirtyTimer->setSingleShot(true);
     dirtyTimer->setInterval(0);
-    connect(dirtyTimer, SIGNAL(timeout()), this, SLOT(rebuildCache()));
+    connect(dirtyTimer, SIGNAL(timeout()), this, SLOT(resetFormats()));
 
-    rebuildCacheSoon();
+    resetFormatsSoon();
 
     // XXX find the QCalendarView class so we can handle Key_Back properly :/
     // [this comes from qtopiaapplication.cpp]
@@ -114,27 +69,30 @@ MonthView::~MonthView()
 {
 }
 
-void MonthView::rebuildCacheNow()
+void MonthView::paintEvent(QPaintEvent* p)
 {
-    dirtyModel = true;
-    rebuildCache();
+    resetFormats();
+    QCalendarWidget::paintEvent(p);
 }
 
-void MonthView::rebuildCacheSoon()
+void MonthView::resetFormatsNow()
+{
+    dirtyModel = true;
+    resetFormats();
+}
+
+void MonthView::resetFormatsSoon()
 {
     dirtyModel = true;
     dirtyTimer->start();
     update();
 }
 
-void MonthView::rebuildCache() const
+void MonthView::resetFormats() const
 {
     if (dirtyModel) {
         dirtyModel = false;
-        // Clear the old cache
-        qDeleteAll(paintCache);
-        paintCache.clear();
-
+        const_cast<MonthView*>(this)->setDateTextFormat(QDate(),QTextCharFormat()); // clear formats
         for (int i = 0; i < model->rowCount(); ++i) {
             // get just the data needed for drawing.
             QDateTime f = model->data(model->index(i, QAppointmentModel::Start), Qt::EditRole).toDateTime();
@@ -146,35 +104,24 @@ void MonthView::rebuildCache() const
                 foundNColor = true;
             }
 
-            bool normalAllDay = false;
-            int startPos = 0;
-            int endPos = 24;
-            if (isAllDay) {
-                normalAllDay = true;
-            } else {
-                startPos =  f.time().hour();
-                endPos = t.time().hour();
-            }
-
             for (QDate i = f.date(); i <= t.date(); i = i.addDays(1)) {
-
                 // get item.
-                DayPaintCache *dpc;
-                if (!paintCache.contains(i)) {
-                    dpc = new DayPaintCache();
-                    paintCache.insert(i, dpc);
-                } else {
-                    dpc = paintCache[i];
-                }
+                QTextCharFormat fmt = dateTextFormat(i);
+                bool set=false;
 
-                if (normalAllDay)
-                    dpc->allDay = true;
-                else {
+                if (isAllDay) {
+                    fmt.setBackground(normalBgColor);
+                    set = true;
+                } else {
                     // Weed out things that end at midnight (e.g should be previous day)
                     if (t != QDateTime(t.date()) || i != t.date()) {
-                        dpc->timed = true;
+                        fmt.setFontWeight(QFont::Bold);
+                        set = true;
                     }
                 }
+
+                if ( set )
+                    const_cast<MonthView*>(this)->setDateTextFormat(i,fmt);
             }
         }
     }

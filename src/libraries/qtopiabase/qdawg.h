@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,7 @@ public:
     bool readFile(const QString&); // may mmap
     bool read(QIODevice* dev);
     bool write(QIODevice* dev) const;
+    bool writeByteSwapped(QIODevice* dev) const;
     bool createFromWords(QIODevice* dev);
     void createFromWords(const QStringList&);
     QStringList allWords() const;
@@ -44,21 +45,28 @@ public:
 
     class QTOPIABASE_EXPORT Node {
         friend class QDawgPrivate;
-        uint let:16;
-        int val:14; //not used
-        uint isword:1;
-        uint islast:1;
-        int offset:32;
+        quint16 let;
+        // lower 14 bits  of val are not used unless 
+        // QTOPIA_INTERNAL_QDAWG_TRIE is defined
+        // Upper two bits of val are (always) used for isWord and isLast
+        quint16 val;
+        const static quint16 isword = 0x8000;
+        const static quint16 islast = 0x4000;
+        const static quint16 valmask = 0x3fff; // Maximum val
+        qint32 offset;
         Node() { val = 0; /*set zero for better compression*/ }
     public:
         QChar letter() const { return QChar((ushort)let); }
-        bool isWord() const { return isword; }
-        bool isLast() const { return islast; }
-        const Node* next() const { return islast ? 0 : this+1; }
+        inline bool isWord() const { return isword & val; }
+        inline bool isLast() const { return islast & val; }
+        inline void setIsWord(bool isWord) { isWord ? val |= isword : val &= ~isword; }
+        inline void setIsLast(bool isLast) { isLast ? val |= islast : val &= ~islast; }
+        const Node* next() const { return (islast & val) ? 0 : this+1; }
         const Node* jump() const { return offset ? this+offset : 0; }
 
 #ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-        int value() const { return val; }
+        inline int value() const { return val & valmask; }
+        inline void setValue(uint i) { val = (val & ~valmask) | (i & valmask); }
 #endif
     };
 

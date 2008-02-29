@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -29,12 +29,10 @@
 #include <QFile>
 #include <QMap>
 #include <QBuffer>
-#include <QDebug>
 #include <QPointer>
 
 #include <QXmlSimpleReader>
 
-//#define QOBEXFTPCLIENT_DEBUG 1
 
 const char *object_profile =
 "<?xml version=\"1.0\"?>\n"
@@ -69,10 +67,6 @@ public:
     bool m_listingFinished;
 
     QObexFtpClient::Error m_error;
-
-#ifdef QOBEXFTPCLIENT_DEBUG
-    QFile m_listingDebug;
-#endif
 
 public slots:
     void requestStarted(int);
@@ -111,9 +105,6 @@ static char target_uuid[] = {
 QObexFtpClientPrivate::QObexFtpClientPrivate(QIODevice *device, QObexFtpClient *parent) :
         QObject(parent),
         m_client(new QObexClientSession(device, this))
-#ifdef QOBEXFTPCLIENT_DEBUG
-        , m_listingDebug("/tmp/listing_debug.list")
-#endif
 {
     m_parent = parent;
 
@@ -137,9 +128,6 @@ QObexFtpClientPrivate::QObexFtpClientPrivate(QIODevice *device, QObexFtpClient *
     m_listingReader.setErrorHandler(&m_listingHandler);
     connect(&m_listingHandler, SIGNAL(info(QObexFolderListingEntryInfo)),
              m_parent, SIGNAL(listInfo(QObexFolderListingEntryInfo)));
-#ifdef QOBEXFTPCLIENT_DEBUG
-    m_listingDebug.open(QIODevice::WriteOnly);
-#endif
 }
 
 QObexFtpClientPrivate::~QObexFtpClientPrivate()
@@ -150,17 +138,8 @@ QObexFtpClientPrivate::~QObexFtpClientPrivate()
 
 void QObexFtpClientPrivate::parseListingChunk()
 {
-#ifdef QOBEXFTPCLIENT_DEBUG
-    qDebug() << "in parseListingChunk" << m_listing.buffer();
-#endif
-
     if (m_listing.buffer().isEmpty())
         return;
-
-#ifdef QOBEXFTPCLIENT_DEBUG
-    m_listingDebug.write(m_listing.buffer());
-    m_listingDebug.flush();
-#endif
 
     // Check for NULL Terminator
     int pos;
@@ -244,13 +223,6 @@ void QObexFtpClientPrivate::processError()
 void QObexFtpClientPrivate::requestFinished(int id, bool error)
 {
     QObexFtpClient::Command type = m_commands[id];
-
-#ifdef QOBEXFTPCLIENT_DEBUG
-    qDebug() << "Operation " << id << " finished.  Error: " << error;
-    if (error) {
-        qDebug() << "Last operation response: " << m_client->lastResponseCode();
-    }
-#endif
 
     if (error) {
         processError();

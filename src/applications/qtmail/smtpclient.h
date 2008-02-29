@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -51,7 +51,7 @@ public:
     ~SmtpClient();
     void newConnection();
     bool addMail(const QMailMessage& mail);
-    void setAccount(MailAccount *_account);
+    void setAccount(QMailAccount *_account);
 
 signals:
     void mailSent(int);
@@ -64,7 +64,7 @@ public slots:
     void errorHandling(int, QString msg);
 
 protected slots:
-    void connected(MailAccount::EncryptType encryptType);
+    void connected(QMailAccount::EncryptType encryptType);
     void incomingData();
     void authenticate();
 
@@ -84,7 +84,7 @@ private:
         Login, Pass, Done, From, Recv, MRcv, Data, Body, Quit
     };
 
-    MailAccount *account;
+    QMailAccount *account;
     TransferStatus status;
     QList<RawEmail> mailList;
     QList<RawEmail>::Iterator mailItr;

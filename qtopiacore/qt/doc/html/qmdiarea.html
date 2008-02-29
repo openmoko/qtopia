@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qmdiarea.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/widgets/qmdiarea.cpp -->
 <head>
   <title>Qt 4.3: QMdiArea Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -161,6 +161,7 @@
 <h3 class="fn"><a name="addSubWindow"></a><a href="qmdisubwindow.html">QMdiSubWindow</a> * QMdiArea::addSubWindow ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>windowFlags</i> = 0 )</h3>
 <p>Adds <i>widget</i> as a new subwindow to the MDI area. If <i>windowFlags</i> are non-zero, they will override the flags set on the widget.</p>
 <p>The <i>widget</i> can be either a <a href="qmdisubwindow.html">QMdiSubWindow</a> or another <a href="qwidget.html">QWidget</a> (in which case the MDI area will create a subwindow and set the <i>widget</i> as the internal widget).</p>
+<p><b>Note:</b> Once the subwindow has been added, its parent will be the <i>viewport widget</i> of the <a href="qmdiarea.html">QMdiArea</a>.</p>
 <pre>     QMdiArea mdiArea;
      QMdiSubWindow *subWindow1 = new QMdiSubWindow;
      subWindow1-&gt;setWidget(internalWidget1);
@@ -212,8 +213,8 @@
 <p>See also <a href="qmdiarea.html#cascadeSubWindows">cascadeSubWindows</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

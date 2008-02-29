@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2071,10 +2069,6 @@ bool QDockAreaLayout::restoreState(QDataStream &stream, const QList<QDockWidget*
 {
     QList<QDockWidget*> dockwidgets = _dockwidgets;
 
-    uchar dmarker;
-    stream >> dmarker;
-    if (dmarker != DockWidgetStateMarker)
-        return false;
     int cnt;
     stream >> cnt;
     for (int i = 0; i < cnt; ++i) {
@@ -2367,7 +2361,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         ver_struct_list.resize(3);
 
         // top --------------------------------------------------
-
+        ver_struct_list[0].init();
         ver_struct_list[0].stretch = 0;
         ver_struct_list[0].sizeHint = top_hint.height();
         ver_struct_list[0].minimumSize = top_min.height();
@@ -2378,7 +2372,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         ver_struct_list[0].size = docks[QInternal::TopDock].rect.height();
 
         // center --------------------------------------------------
-
+        ver_struct_list[1].init();
         ver_struct_list[1].stretch = center_hint.height();
 
         bool tl_significant = corners[Qt::TopLeftCorner] == Qt::TopDockWidgetArea
@@ -2406,7 +2400,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         ver_struct_list[1].size = center_rect.height();
 
         // bottom --------------------------------------------------
-
+        ver_struct_list[2].init();
         ver_struct_list[2].stretch = 0;
         ver_struct_list[2].sizeHint = bottom_hint.height();
         ver_struct_list[2].minimumSize = bottom_min.height();
@@ -2427,7 +2421,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         hor_struct_list.resize(3);
 
         // left --------------------------------------------------
-
+        hor_struct_list[0].init();
         hor_struct_list[0].stretch = 0;
         hor_struct_list[0].sizeHint = left_hint.width();
         hor_struct_list[0].minimumSize = left_min.width();
@@ -2438,7 +2432,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         hor_struct_list[0].size = docks[QInternal::LeftDock].rect.width();
 
         // center --------------------------------------------------
-
+        hor_struct_list[1].init();
         hor_struct_list[1].stretch = center_hint.width();
 
         bool tl_significant = corners[Qt::TopLeftCorner] == Qt::LeftDockWidgetArea
@@ -2465,7 +2459,7 @@ void QDockAreaLayout::getGrid(QVector<QLayoutStruct> *_ver_struct_list,
         hor_struct_list[1].size = center_rect.width();
 
         // right --------------------------------------------------
-
+        hor_struct_list[2].init();
         hor_struct_list[2].stretch = 0;
         hor_struct_list[2].sizeHint = right_hint.width();
         hor_struct_list[2].minimumSize = right_min.width();

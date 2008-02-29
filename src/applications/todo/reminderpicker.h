@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -38,17 +38,12 @@ class ReminderPicker : public QObject {
     Q_OBJECT;
 
     public:
-        ReminderPicker(QObject *parent, QFormLayout *fl);
-
-        QAppointment::AlarmFlags reminderType() const {return reminderFlag;}
-        int reminderMinutes() const;
-
-        void setDefaultAllDayReminderTime(const QTime& defaultAllDayTime);
-        void setAllDay(bool allDay);
-        void setReminderType(QAppointment::AlarmFlags type);
-        void setReminderMinutes(int minutes);
+        ReminderPicker(QObject *parent, QFormLayout *f, QAppointment& appt);
 
         static QString formatReminder(bool allDay, QAppointment::AlarmFlags flag, int minutes);
+
+    public slots:
+        void updateUI(bool enable=true);
 
     private slots:
         void reminderChanged(int index);
@@ -57,8 +52,7 @@ class ReminderPicker : public QObject {
         void updateReminderMinutes();
 
     private:
-        void initCB();
-        void updateUI();
+        void initCB(bool force);
         void splitReminderMinutes(int& dayminutes, int &timeminutes);
         class ReminderEntry{
         public:
@@ -74,17 +68,13 @@ class ReminderPicker : public QObject {
 
         static QList < ReminderEntry > reminderEntries;
         static bool listInited;
-        bool mAllDay;
-        bool mTimeSet;
-        QTime mAllDayDefault;
         QComboBox *comboReminder;
         QComboBox *comboReminderDelay;
         QTimeEdit *timeEdit;
         QLabel *timeLabel;
+        bool mAllDay;
 
-        int dayminutes;
-        int timeminutes;
-        QAppointment::AlarmFlags reminderFlag;
+        QAppointment& mAppointment;
 };
 
 #endif // REMINDERPICKER_H

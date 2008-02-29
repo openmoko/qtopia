@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1229,6 +1227,7 @@ void QX11EmbedContainer::embedClient(WId id)
     XGrabServer(x11Info().display());
     XWindowAttributes attrib;
     if (!XGetWindowAttributes(x11Info().display(), id, &attrib)) {
+        XUngrabServer(x11Info().display());
 	d->emitError(InvalidWindowID);
 	return;
     }

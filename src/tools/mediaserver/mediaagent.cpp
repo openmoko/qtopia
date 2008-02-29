@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -169,14 +169,15 @@ void MediaAgent::initialize()
 
 void MediaAgent::sessionStarting(MediaAgentSession* session)
 {
-    Q_UNUSED(session);
-    // stop others
+    // Stop others not in this engine
+
+    session->wrappedSession()->start();
 }
 
 void MediaAgent::sessionStopped(MediaAgentSession* session)
 {
-    Q_UNUSED(session);
-    // restart others
+    // Resume any stopped by this engine
+    session->wrappedSession()->stop();
 }
 
 // }}}

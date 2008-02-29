@@ -44,17 +44,22 @@
     </rect>
     <layout rect="0,72%,100%x15%" orientation="horizontal">
       <rect rect="0,0,0x0">
-        <image name="dialer" rect="18%,0,63%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
+        <image name="dialer" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
           <image rect="20%,20%,60%x60%" src="phone.svg" scale="yes"/>
         </image>
       </rect>
       <rect rect="0,0,0x0">
-        <image name="mainmenu" rect="18%,0,63%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
+        <image name="mainmenu" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
           <image rect="20%,20%,60%x60%" src="menu.svg" scale="yes"/>
         </image>
       </rect>
       <rect rect="0,0,0x0">
-        <image name="lock" rect="18%,0,63%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
+        <image name="speeddial" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
+          <image rect="20%,20%,60%x60%" src=":icon/favorite.svg" scale="yes"/>
+        </image>
+      </rect>
+      <rect rect="0,0,0x0">
+        <image name="lock" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
           <image rect="20%,20%,60%x60%" src="padlock.svg" scale="yes"/>
         </image>
       </rect>

@@ -25,9 +25,11 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qmailfoldersortkey.html#QMailFolderSortKey">QMailFolderSortKey</a></b> ( const Property &amp; <i>p</i>, const Qt::SortOrder &amp; <i>order</i> = Qt::AscendingOrder )</li>
-<li><div class="fn"/><b><a href="qmailfoldersortkey.html#QMailFolderSortKey-2">QMailFolderSortKey</a></b> ( const QMailFolderSortKey &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="qmailfoldersortkey.html#QMailFolderSortKey">QMailFolderSortKey</a></b> ()</li>
+<li><div class="fn"/><b><a href="qmailfoldersortkey.html#QMailFolderSortKey-2">QMailFolderSortKey</a></b> ( const Property &amp; <i>p</i>, const Qt::SortOrder &amp; <i>order</i> = Qt::AscendingOrder )</li>
+<li><div class="fn"/><b><a href="qmailfoldersortkey.html#QMailFolderSortKey-3">QMailFolderSortKey</a></b> ( const QMailFolderSortKey &amp; <i>other</i> )</li>
 <li><div class="fn"/>virtual <b><a href="qmailfoldersortkey.html#dtor.QMailFolderSortKey">~QMailFolderSortKey</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qmailfoldersortkey.html#isEmpty">isEmpty</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qmailfoldersortkey.html#operator-not-eq">operator!=</a></b> ( const QMailFolderSortKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailFolderSortKey <b><a href="qmailfoldersortkey.html#operator-and">operator&amp;</a></b> ( const QMailFolderSortKey &amp; <i>other</i> ) const</li>
 <li><div class="fn"/>QMailFolderSortKey &amp; <b><a href="qmailfoldersortkey.html#operator-and-eq">operator&amp;=</a></b> ( const QMailFolderSortKey &amp; <i>other</i> )</li>
@@ -55,12 +57,19 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailFolderSortKey"></a>QMailFolderSortKey::QMailFolderSortKey ( const <a href="qmailfoldersortkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> &amp; <i>order</i> = Qt::AscendingOrder )</h3>
-<p>Construct a <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> which sorts a set of results based on the <a href="qmailfoldersortkey.html#Property-enum">QMailFolderSortKey::Property</a> <i>p</i> and the <a href="qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i></p>
-<h3 class="fn"><a name="QMailFolderSortKey-2"></a>QMailFolderSortKey::QMailFolderSortKey ( const QMailFolderSortKey &amp; <i>other</i> )</h3>
+<h3 class="fn"><a name="QMailFolderSortKey"></a>QMailFolderSortKey::QMailFolderSortKey ()</h3>
+<p>Create a <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> with specifying matching parameters.</p>
+<p>A default-constructed key (one for which <a href="qmailfoldersortkey.html#isEmpty">isEmpty</a>() returns true) sorts no folders.</p>
+<p>The result of combining an empty key with a non-empty key is the same as the original non-empty key.</p>
+<p>The result of combining two empty keys is an empty key.</p>
+<h3 class="fn"><a name="QMailFolderSortKey-2"></a>QMailFolderSortKey::QMailFolderSortKey ( const <a href="qmailfoldersortkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> &amp; <i>order</i> = Qt::AscendingOrder )</h3>
+<p>Construct a <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> which sorts a set of results based on the <a href="qmailfoldersortkey.html#Property-enum">QMailFolderSortKey::Property</a> <i>p</i> and the <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i></p>
+<h3 class="fn"><a name="QMailFolderSortKey-3"></a>QMailFolderSortKey::QMailFolderSortKey ( const QMailFolderSortKey &amp; <i>other</i> )</h3>
 <p>Create a copy of the <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QMailFolderSortKey"></a>QMailFolderSortKey::~QMailFolderSortKey ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys this <a href="qmailfoldersortkey.html">QMailFolderSortKey</a>.</p>
+<h3 class="fn"><a name="isEmpty"></a>bool QMailFolderSortKey::isEmpty () const</h3>
+<p>Returns true if the key remains empty after default construction; otherwise returns false.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QMailFolderSortKey::operator!= ( const QMailFolderSortKey &amp; <i>other</i> ) const</h3>
 <p>Returns <tt>true</tt> if the value of this key is not the same as the key <i>other</i>. Returns <tt>false</tt> otherwise.</p>
 <h3 class="fn"><a name="operator-and"></a>QMailFolderSortKey QMailFolderSortKey::operator&amp; ( const QMailFolderSortKey &amp; <i>other</i> ) const</h3>
@@ -73,8 +82,8 @@
 <p>Returns <tt>true</tt> if the value of this key is the same as the key <i>other</i>. Returns <tt>false</tt> otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

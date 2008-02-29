@@ -29,7 +29,7 @@
 <li><a href="#desktop-configuration-file-internationalization">Desktop &amp; Configuration File Internationalization</a></li>
 <li><a href="#image-translation">Image Translation</a></li>
 <li><a href="#documentation-internationalization">Documentation Internationalization</a></li>
-<li><a href="#other-internationalization-files">Other Internationalization Files</a></li>
+<li><a href="#word-lists">Word Lists</a></li>
 <li><a href="#special-localizations">Special Localizations</a></li>
 <ul><li><a href="#contacts">Contacts</a></li>
 </ul>
@@ -37,7 +37,7 @@
 <a name="introduction"></a>
 <h2>Introduction</h2>
 <p>Qtopia can be translated into several languages. By default Qtopia ships only with English. Additional language-specific packages are available for purchase. For further information please contact <a href="mailto:sales@trolltech.com">sales@trolltech.com</a>.</p>
-<p>Internationalizing Qtopia software is much the same as internationalizing any Qt-based software. You should be familiar with the <a href="i18n.html">Qt internationalization documentation</a>, the <a href="qobject.html#tr">QObject::tr()</a> functions, <a href="linguist-manual.html">Qt Linguist</a> and the internationalization process in general before you proceed with this document.</p>
+<p>Internationalizing Qtopia software is much the same as internationalizing any Qt-based software. You should be familiar with the <a href="./i18n.html">Qt internationalization documentation</a>, the <a href="./qobject.html#tr">QObject::tr()</a> functions, <a href="./linguist-manual.html">Qt Linguist</a> and the internationalization process in general before you proceed with this document.</p>
 <p><b>Note:</b> Qtopia ships without any translation files, later steps will show how to generate the translation files.</p>
 <a name="translating-qtopia"></a>
 <h2>Translating Qtopia</h2>
@@ -67,12 +67,9 @@
     vim $QPEDIR/i18n/zh_CN/.directory</pre>
 <a name="createinitialtsfiles"></a><a name="create-initial-version-of-translation-files"></a>
 <h3>Create Initial Version of Translation Files</h3>
-<p>To generate translation files for your chosen language reconfigure Qtopia, e.g&#x2e; run:</p>
-<pre>    $QPEDIR/configure -languages &quot;ja fr zh_CN&quot; &lt;other configure options&gt;</pre>
-<p>This will tell the build system that it has to build translation files for Japanese, French and Simplified Chinese. <tt>configure</tt> will abort if a new language is passed to its <tt>-languages</tt> option without having created the <tt>.directory</tt> file described in the first step of this guide.</p>
-<p>It is now possible to run:</p>
+<p>After creating the .directory file above you need to run configure so that it is aware of the new langage. After that you can create the .ts files for all available languages by running:</p>
 <pre>    make lupdate</pre>
-<p>This will result in the performance of the following steps for each language specified via Qtopia's configure option <tt>-languages</tt></p>
+<p>This will result in the following steps for all available languages.</p>
 <ul>
 <li>generate server specific translation files(e.g&#x2e; <tt>QtopiaApplications.ts</tt> which contain the translated names for Qtopia applications) in the <tt>$QPEDIR/i18n/&lt;your-lang&gt;</tt> directory.</li>
 <li>generate application specific translation files in that applications source directory (e.g <tt>$QPEDIR/src/settings/worldtime/</tt>). The general naming convention for the application specific translation files is <tt>&lt;appname&gt;-&lt;your-lang&gt;.ts</tt> (e.g&#x2e; <tt>sysinfo-zh_CN.ts</tt>).</li>
@@ -181,14 +178,13 @@
 <p>Non-English documentation:</p>
 <p><tt>/opt/Qtopia/help/&lt;lang&gt;/html/&lt;appname&gt;-suffixes.html</tt></p>
 <p>These files are encoded in UTF-8.</p>
-<a name="other-internationalization-files"></a>
-<h2>Other Internationalization Files</h2>
-<p>Other files that are language-specific are:</p>
+<a name="word-lists"></a>
+<h2>Word Lists</h2>
+<p><tt>/opt/Qtopia/etc/dict/&lt;lang&gt;/</tt> contains word lists specific to the language. These files end with <tt>.dawg</tt> and are generated at install time from files <i>without</i> the <tt>.dawg</tt> suffix in the source. See the <a href="qdawg.html">QDawg</a> documentation for details.</p>
+<p>The word lists are:</p>
 <ul>
-<li><tt>/opt/Qtopia/etc/dict/words-&lt;lang&gt;</tt> - list of words in <b>language</b> .</li>
-<li><tt>/opt/Qtopia/etc/dict/words-&lt;lang&gt;.dawg</tt> - above, converted to dawg format.</li>
-<li><tt>/opt/Qtopia/etc/dict/common-&lt;lang&gt;</tt> - list of common words in <b>language</b> that input methods might conflict with less common words.</li>
-<li><tt>/opt/Qtopia/etc/dict/common-&lt;lang&gt;.dawg</tt> - above, converted to dawg format.</li>
+<li><tt>words.dawg</tt> - list of words</li>
+<li><tt>common.dawg</tt> - list of common words that input methods might conflict with less common words</li>
 </ul>
 <a name="special-localizations"></a>
 <h2>Special Localizations</h2>
@@ -197,8 +193,8 @@
 <p>Qtopia defines name ordering conventions used by Contacts in the <tt>formatting</tt> section of <tt>$QPEDIR/etc/default/Trolltech/Contacts.conf</tt>, where a number of options are listed (by default 2 are provided), and the default selection between those options. See <a href="qcontact.html#setLabelFormat">QContact::setLabelFormat</a>() for a description of the format.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -42,9 +42,18 @@
 #include "reporterror.h"
 
 
-
+#ifdef Q_QDOC
+/*!
+    \class qtopia_helix
+    \internal
+*/
+class qtopia_helix
+{
+public:
+#else
 namespace qtopia_helix
 {
+#endif
 
 // typedef
 typedef HX_RESULT (HXEXPORT_PTR FPRMSETDLLACCESSPATH) (const char*);

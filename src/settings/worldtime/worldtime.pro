@@ -19,4 +19,4 @@ desktop.hint=desktop
 INSTALLS+=desktop
 
 pkg.desc=The time-zone manager for Qtopia.
-pkg.domain=window,datetime
+pkg.domain=trusted

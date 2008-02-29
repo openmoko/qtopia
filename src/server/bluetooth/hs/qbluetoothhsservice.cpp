@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,21 +19,22 @@
 **
 ****************************************************************************/
 
-#include <qtopia/comm/qbluetoothaudiogateway.h>
+#include <qbluetoothaudiogateway.h>
 #include "qbluetoothhsservice_p.h"
 #include "qbluetoothhsagserver_p.h"
-#include <qtopia/comm/qbluetoothrfcommserver.h>
-#include <qtopia/comm/qbluetoothrfcommsocket.h>
-#include <qtopia/comm/qbluetoothscosocket.h>
-#include <qtopia/comm/qbluetoothlocaldevice.h>
+#include <qbluetoothrfcommserver.h>
+#include <qbluetoothrfcommsocket.h>
+#include <qbluetoothscosocket.h>
+#include <qbluetoothlocaldevice.h>
 #include <QBluetoothSdpRecord>
 #include <qtopiacomm/private/qsdpxmlparser_p.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
-#include <qtopia/comm/qbluetoothaddress.h>
+#include <qbluetoothaddress.h>
 #include <qcommdevicesession.h>
 
 #include <QFile>
+#include <QTimer>
 
 #include <bluetooth/bluetooth.h>
 #include <sys/socket.h>
@@ -42,6 +43,8 @@
 #include <fcntl.h>
 
 #include "bluetooth/scomisc_p.h"
+
+#define MAX_RINGS 10
 
 class QBluetoothHeadsetServicePrivate
 {
@@ -63,6 +66,7 @@ public:
 
     QBluetoothAddress m_addr;
     int m_channel;
+    int m_numRings;
 };
 
 /*!
@@ -98,6 +102,7 @@ QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service, const
     m_data->m_client = 0;
     m_data->m_connectInProgress = false;
     m_data->m_disconnectInProgress = false;
+    m_data->m_numRings = 0;
 
     m_data->m_speakerVolume = 0;
     m_data->m_microphoneVolume = 0;
@@ -156,20 +161,20 @@ void QBluetoothHeadsetService::start()
         return;
     }
 
+    m_data->m_sdpRecordHandle = 0;
+    QBluetoothSdpRecord sdpRecord;
+
     // register the SDP service
-    m_data->m_sdpRecordHandle = registerRecord(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hsag.xml");
-    if (m_data->m_sdpRecordHandle == 0) {
-        emit started(true,
-                     tr("Error registering with SDP server"));
-        return;
+    QFile sdpRecordFile(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/hsag.xml");
+    if (sdpRecordFile.open(QIODevice::ReadOnly)) {
+        sdpRecord = QBluetoothSdpRecord::fromDevice(&sdpRecordFile);
+        if (!sdpRecord.isNull())
+            m_data->m_sdpRecordHandle = registerRecord(sdpRecord);
     }
 
-    // For now, hard code in the channel, which has to be the same channel as
-    // the one in the XML file passed in the registerRecord() call above
-    int channel = 1;
-
     // start the server
-    if (!m_data->m_server->listen(QBluetoothAddress::any, channel)) {
+    if (!m_data->m_server->listen(QBluetoothAddress::any,
+                QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {
         unregisterRecord(m_data->m_sdpRecordHandle);
         emit started(true, tr("Could not listen on channel."));
         return;
@@ -221,8 +226,10 @@ void QBluetoothHeadsetService::sessionOpen()
                                             m_data->m_addr, m_data->m_channel);
 
         if (!ret) {
+            m_data->m_connectInProgress = false;
             delete m_data->m_client;
             m_data->m_client = 0;
+            m_data->m_session->endSession();
             emit connectResult(false, tr("Connect failed."));
             return;
         }
@@ -283,6 +290,7 @@ void QBluetoothHeadsetService::connect(const QBluetoothAddress &addr,
     }
 
     m_data->m_connectInProgress = true;
+    m_data->m_numRings = 0;
     m_data->m_addr = addr;
     m_data->m_channel = rfcomm_channel;
     qLog(Bluetooth) << "Starting session for headset.";
@@ -310,21 +318,14 @@ void QBluetoothHeadsetService::disconnect()
 {
     releaseAudio();
 
-    if (m_data->m_client &&
-        (m_data->m_client->state() == QBluetoothRfcommSocket::ConnectedState)) {
-        m_data->m_client->disconnect();
-    }
+    if (!m_data->m_client)
+        return;
 
-    else if (m_data->m_client &&
-             m_data->m_client->state() == QBluetoothRfcommSocket::ConnectingState) {
+    if (m_data->m_client->state() == QBluetoothRfcommSocket::ConnectedState ||
+        m_data->m_client->state() == QBluetoothRfcommSocket::ConnectingState) {
         m_data->m_connectInProgress = false;
         m_data->m_disconnectInProgress = true;
         m_data->m_client->disconnect();
-    }
-
-    else if (m_data->m_client &&
-        m_data->m_client->state() == QBluetoothRfcommSocket::ClosingState) {
-        m_data->m_disconnectInProgress = true;
     }
 }
 
@@ -349,6 +350,9 @@ void QBluetoothHeadsetService::setSpeakerVolume(int volume)
     if (m_data->m_client->state() != QBluetoothRfcommSocket::ConnectedState) {
         return;
     }
+
+    if (m_data->m_scofd == -1) // Don't send when audio not connected
+        return;
 
     if (volume == m_data->m_speakerVolume)
         return;
@@ -384,6 +388,9 @@ void QBluetoothHeadsetService::setMicrophoneVolume(int volume)
     if (m_data->m_client->state() != QBluetoothRfcommSocket::ConnectedState) {
         return;
     }
+
+    if (m_data->m_scofd == -1) // Don't send when audio not connected
+        return;
 
     if (volume == m_data->m_microphoneVolume)
         return;
@@ -456,6 +463,8 @@ void QBluetoothHeadsetService::scoStateChanged(QBluetoothAbstractSocket::SocketS
             }
 
             break;
+        default:
+            break;
     };
 }
 
@@ -517,6 +526,21 @@ void QBluetoothHeadsetService::readyRead()
     buf[size] = '\0';
     int volume = 0;
 
+    if (m_data->m_connectInProgress) {
+        if (!strncmp("AT+CKPD=200\r", buf, 512)) {
+            m_data->m_client->write("\r\nOK\r\n");
+            emit connectResult(true, QString());
+            m_data->m_connectInProgress = false;
+            m_data->m_interface->setValue("IsConnected", true);
+            m_data->m_interface->setValue("RemotePeer",
+                                          QVariant::fromValue(m_data->m_client->remoteAddress()));
+        }
+        else {
+            m_data->m_client->write("\r\nERROR\r\n");
+        }
+        return;
+    }
+
     if (!strncmp("AT+CKPD=200\r", buf, 512)) {
         qLog(Bluetooth) << "QBluetoothHeadsetService::readyRead: Got an AT+CKPD=200";
         // Audio not connected
@@ -555,6 +579,24 @@ void QBluetoothHeadsetService::readyRead()
 
         m_data->m_client->write("\r\nOK\r\n");
     }
+}
+
+/*!
+    \internal
+*/
+void QBluetoothHeadsetService::sendRings()
+{
+    if (!m_data->m_connectInProgress || (m_data->m_client->state() != QBluetoothRfcommSocket::ConnectedState))
+        return;
+
+    if (m_data->m_numRings > MAX_RINGS) {
+        disconnect();
+        return;
+    }
+
+    m_data->m_client->write("\r\nRING\r\n");
+    QTimer::singleShot(2000, this, SLOT(sendRings()));
+    m_data->m_numRings++;
 }
 
 /*!
@@ -635,16 +677,13 @@ void QBluetoothHeadsetService::stateChanged(QBluetoothAbstractSocket::SocketStat
 
     switch (socketState) {
         case QBluetoothRfcommSocket::ConnectingState:
+            qLog(Bluetooth) << "Headset socket now in connecting state...";
             break;
         case QBluetoothRfcommSocket::ConnectedState:
-            m_data->m_interface->setValue("IsConnected", true);
-            m_data->m_interface->setValue("RemotePeer",
-                                          QVariant::fromValue(m_data->m_client->remoteAddress()));
-            emit connectResult(true, QString());
-            m_data->m_client->write("\r\nRING\r\n");
-            m_data->m_connectInProgress = false;
+            QTimer::singleShot(0, this, SLOT(sendRings()));
             break;
         case QBluetoothRfcommSocket::ClosingState:
+            qLog(Bluetooth) << "Headset socket now in closing state...";
             break;
         case QBluetoothRfcommSocket::UnconnectedState:
         {

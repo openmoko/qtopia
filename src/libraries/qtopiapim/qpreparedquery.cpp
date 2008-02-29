@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -95,12 +95,12 @@ bool QPreparedSqlQuery::prepare(const QString &text)
 void QPreparedSqlQuery::reset()
 {
     qLog(Sql) << "QPreparedSqlQuery::reset() -" << mText;
-    int res;
-    if (mHandle)
-        res = sqlite3_reset(mHandle);
+    if (mHandle) {
+        int res = sqlite3_reset(mHandle);
+        if (res != SQLITE_OK)
+            qLog(Sql) << "Failed to reset query:" << mText << "-" << sqlite3_errmsg(mDBHandle);
+    }
     skip_step = false;
-    if (res != SQLITE_OK)
-        qLog(Sql) << "Failed to reset query:" << mText << "-" << sqlite3_errmsg(mDBHandle);
 }
 
 void QPreparedSqlQuery::clear()

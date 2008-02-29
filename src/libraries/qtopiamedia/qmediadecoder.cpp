@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -101,3 +101,38 @@ QMediaDecoder::~QMediaDecoder()
 
     Return the mute state of the decoder.
 */
+
+/*!
+    \fn void QMediaDecoder::playerStateChanged(QtopiaMedia::State state);
+
+    Signals the current \a state of the QMediaDecoder
+
+    \sa QtopiaMedia::State
+*/
+
+/*!
+    \fn void QMediaDecoder::positionChanged(quint32 ms);
+
+    Signals a change in the current position \a ms of the media in
+    milliseconds.
+*/
+
+/*!
+    \fn void QMediaDecoder::lengthChanged(quint32 ms);
+
+    Signals the length information of the media has changed to \a ms
+    milliseconds.
+*/
+
+/*!
+    \fn void QMediaDecoder::volumeChanged(int volume);
+
+    Signals the \a volume of the media has changed.
+*/
+
+/*!
+    \fn void QMediaDecoder::volumeMuted(bool muted);
+
+    Signals the mute status of the volume has been set to \a muted.
+*/
+

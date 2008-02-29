@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1131,16 +1129,19 @@ void QTextEdit::keyPressEvent(QKeyEvent *e)
     switch (e->key()) {
         case Qt::Key_Select:
             if (QApplication::keypadNavigationEnabled()) {
-                if (!(d->control->textInteractionFlags() & Qt::LinksAccessibleByKeyboard))
+                // code assumes linksaccessible + editable isn't meaningful
+                if (d->control->textInteractionFlags() & Qt::TextEditable) {
                     setEditFocus(!hasEditFocus());
-                else {
+                } else {
                     if (!hasEditFocus())
                         setEditFocus(true);
                     else {
                         QTextCursor cursor = d->control->textCursor();
                         QTextCharFormat charFmt = cursor.charFormat();
-                        if (!cursor.hasSelection() || charFmt.anchorHref().isEmpty()) {
-                            setEditFocus(false);
+                        if (!(d->control->textInteractionFlags() & Qt::LinksAccessibleByKeyboard)
+                            || !cursor.hasSelection() || charFmt.anchorHref().isEmpty()) {
+                            e->accept();
+                            return;
                         }
                     }
                 }
@@ -1248,7 +1249,7 @@ void QTextEdit::keyPressEvent(QKeyEvent *e)
             case Qt::Key_Back:
                 if (!e->isAutoRepeat()) {
                     if (QApplication::keypadNavigationEnabled()) {
-                        if (document()->isEmpty()) {
+                        if (document()->isEmpty() || !(d->control->textInteractionFlags() & Qt::TextEditable)) {
                             setEditFocus(false);
                             e->accept();
                         } else if (!d->deleteAllTimer.isActive()) {

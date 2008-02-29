@@ -40,8 +40,8 @@ pics.files=$$QTOPIA_DEPOT_PATH/devices/example/src/devtools/*.png\
 pics.path=/pics/devtools
 pics.hint=pics
 
-help.source=$$QTOPIA_DEPOT_PATH/help
-help.files=devtools*
+help.source=$$DEVICE_CONFIG_PATH/help
+help.files=qpe-devtools*
 help.hint=help
 
 INSTALLS+=desktop pics script startup help

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -692,15 +690,80 @@ void qt_event_request_showsheet(QWidget *w)
     PostEventToQueue(GetMainEventQueue(), request_showsheet_pending, kEventPriorityStandard);
 }
 
+static void qt_send_window_change_event(QWidget *widget)
+{
+    qt_widget_private(widget)->needWindowChange = true;
+    QEvent *glWindowChangeEvent = new QEvent(QEvent::MacGLWindowChange);
+    QApplication::postEvent(widget, glWindowChangeEvent);
+}
+
+/*
+    Updates all child and grandchild OpenGL widgets for the give widget.
+*/
+static void qt_mac_update_child_gl_widgets(QWidget *widget)
+{
+    if (widget->isWindow())
+        return;
+
+    // Update all OpenGL child widgets for the given widget.
+    QList<QWidgetPrivate::GlWidgetInfo> &glWidgets = qt_widget_private(widget)->glWidgets;
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator end = glWidgets.end();
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator it = glWidgets.begin();
+
+    for (;it != end; ++it) {
+        qt_send_window_change_event(it->widget);
+    }
+}
+
+/*
+    Updates all OpenGL widgets within the window that the given widget intersects.
+*/
+static void qt_mac_update_intersected_gl_widgets(QWidget *widget)
+{
+    QList<QWidgetPrivate::GlWidgetInfo> &glWidgets = qt_widget_private(widget->window())->glWidgets;
+    if (glWidgets.isEmpty())
+        return;
+
+    // Exit if the window has not been created yet (mapToGlobal/size will force create it)
+    if (widget->testAttribute(Qt::WA_WState_Created) == false || HIViewGetWindow(qt_mac_hiview_for(widget)) == 0)
+        return;
+   
+    const QRect globalWidgetRect = QRect(widget->mapToGlobal(QPoint(0, 0)), widget->size());
+
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator end = glWidgets.end();
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator it = glWidgets.begin();
+
+    for (;it != end; ++it){
+        QWidget *glWidget = it->widget;
+        const QRect globalGlWidgetRect = QRect(glWidget->mapToGlobal(QPoint(0, 0)), glWidget->size());
+        if (globalWidgetRect.intersects(globalGlWidgetRect)) {
+            qt_send_window_change_event(glWidget);
+            it->lastUpdateWidget = widget;
+        } else if (it->lastUpdateWidget == widget) {
+            // Update the gl wigets that the widget intersected the last time around, 
+            // and that we are not intersecting now. This prevents paint errors when the 
+            // intersecting widget leaves a gl widget.
+            qt_send_window_change_event(glWidget);
+            it->lastUpdateWidget = 0;            
+        }
+    }
+}
+
 /* window changing. This is a hack around Apple's missing functionality, pending the toolbox
    team fix. --Sam */
 Q_GUI_EXPORT void qt_event_request_window_change(QWidget *widget)
 {
     if (!widget)
         return;
-    widget->d_func()->needWindowChange = true;
-    QEvent *glWindowChangeEvent = new QEvent(QEvent::MacGLWindowChange);
-    QApplication::postEvent(widget, glWindowChangeEvent);
+
+    // Send update request on gl widgets unconditionally. 
+    if (qt_widget_private(widget)->isGLWidget == true) {
+        qt_send_window_change_event(widget);
+        return;
+    }
+
+    qt_mac_update_child_gl_widgets(widget);
+    qt_mac_update_intersected_gl_widgets(widget);
 }
 
 Q_GUI_EXPORT void qt_event_request_window_change()
@@ -1062,6 +1125,8 @@ void qt_cleanup()
             delete qt_mac_safe_pdev;
             qt_mac_safe_pdev = 0;
         }
+        extern void qt_mac_unregister_widget(); // qapplication_mac.cpp
+        qt_mac_unregister_widget();
     }
 }
 
@@ -1697,10 +1762,12 @@ QApplicationPrivate::globalEventProcessor(EventHandlerCallRef er, EventRef event
             } else if(!(GetCurrentKeyModifiers() & cmdKey)) {
                 QWidget *window = widget->window();
                 window->raise();
+                extern bool qt_isGenuineQWidget(const QWidget *); // qwidget_mac.cpp
+                bool genuineQtWidget = qt_isGenuineQWidget(widget);  // the widget, not the window.
                 if(window->windowType() != Qt::Desktop
                    && window->windowType() != Qt::Popup && !qt_mac_is_macsheet(window)
                    && (window->isModal() || !::qobject_cast<QDockWidget *>(window))
-                   && !window->isActiveWindow()) {
+                   && (!genuineQtWidget || (genuineQtWidget && !window->isActiveWindow()))) {
                    window->activateWindow();
                    if(!qt_mac_can_clickThrough(widget)) {
                        qt_mac_no_click_through_mode = true;

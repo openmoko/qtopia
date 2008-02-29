@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -51,6 +51,7 @@ public:
     QList<QMailAddress> groupMembers() const;
 
     QContact matchContact() const;
+    bool matchesExistingContact() const;
     QContact matchContact(QContactModel& fromModel) const;
 
     bool isPhoneNumber() const;
@@ -63,6 +64,9 @@ public:
     bool operator==(const QMailAddress& other) const;
 
     const QMailAddress& operator=(const QMailAddress& other);
+
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
 
     static QStringList toStringList(const QList<QMailAddress>& list);
     static QList<QMailAddress> fromStringList(const QString& list);
@@ -77,6 +81,13 @@ public:
 private:
     QSharedDataPointer<QMailAddressPrivate> d;
 };
+
+Q_DECLARE_USER_METATYPE(QMailAddress)
+
+typedef QList<QMailAddress> QMailAddressList;
+
+Q_DECLARE_METATYPE(QMailAddressList);
+Q_DECLARE_USER_METATYPE_TYPEDEF(QMailAddressList, QMailAddressList);
 
 #endif // QMAILADDRESS_H 
 

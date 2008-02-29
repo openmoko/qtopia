@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,7 +30,7 @@
 #include <QPowerStatus>
 #include <QtopiaServiceRequest>
 #include <QtopiaTimer>
-#include "media/mediaservicestask.h"
+#include "mediaservicestask.h"
 #include "volumeimpl.h"
 #include <QDebug>
 
@@ -91,7 +91,13 @@ StandardDialogsImpl::StandardDialogsImpl(QObject *parent)
     }
 
     if(volumeDialog && qtopiaTask<MediaServicesTask>()) {
-        QObject::connect(qtopiaTask<MediaServicesTask>(), SIGNAL(volumeChanged(bool)), this, SLOT(volumeChanged(bool)));
+        // QObject::connect(qtopiaTask<MediaServicesTask>(), SIGNAL(volumeChanged(bool)), this, SLOT(volumeChanged(bool)));
+         // NOTE: The Volume Widget is now modified via ValueSpace Item: /Volume/GlobalVolume
+         static VolumeDialogImpl *vd = 0;
+         if ( !vd ) {
+             vd = new VolumeDialogImpl(0, Qt::Tool| Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+         }
+
     }
 
     if(defaultCrashDialog) {
@@ -234,6 +240,7 @@ void StandardDialogsImpl::shutdownRequested()
         sd->showMaximized();
     }
 }
+
 
 void StandardDialogsImpl::volumeChanged(bool up)
 {

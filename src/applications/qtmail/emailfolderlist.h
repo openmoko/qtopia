@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,8 @@
 #ifndef EMAILFOLDERLIST_H
 #define EMAILFOLDERLIST_H
 
+#include "account.h"
+
 #include <qobject.h>
 #include <qstring.h>
 #include <qlist.h>
@@ -37,7 +39,7 @@
 #include <QMailMessageSortKey>
 
 class EmailFolderList;
-class AccountList;
+class QMailAccount;
 
 enum IconType
 {
@@ -45,6 +47,72 @@ enum IconType
     AllMessages = 1,
     UnreadMessages = 2,
     UnsentMessages = 3
+};
+
+class QTOPIAMAIL_EXPORT EmailFolderList : public QObject
+{
+    Q_OBJECT
+
+public:
+    enum MailType { All, Unread, Unsent, Unfinished };
+    enum SortOrder { Submission, AscendingDate, DescendingDate };
+
+    EmailFolderList(QString mailbox, QObject *parent=0);
+    ~EmailFolderList();
+
+    void openMailbox();
+    bool addMail(QMailMessage &mail);
+    bool removeMail(QMailId id);
+    bool moveMail(const QMailId& id, EmailFolderList& dest);
+    bool copyMail(const QMailId& id, EmailFolderList& dest);
+    bool empty(QMailMessage::MessageType type = QMailMessage::AnyType);
+
+    bool moveMailList(const QMailIdList& list, EmailFolderList& dest);
+
+    QString mailbox() const;
+    QMailFolder mailFolder() const;
+
+    bool contains(const QMailId& id) const;
+
+    QMailIdList messages(QMailMessage::MessageType type = QMailMessage::AnyType, 
+                         const SortOrder& order = Submission ) const;
+
+    QMailIdList messages(QMailMessage::Status status, 
+                         bool contains,
+                         QMailMessage::MessageType type = QMailMessage::AnyType,
+                         const SortOrder& order = Submission ) const;
+
+    QMailIdList messagesFromMailbox(const Mailbox& mailbox, 
+                                    QMailMessage::MessageType type = QMailMessage::AnyType,
+                                    const SortOrder& order = Submission ) const;
+
+    QMailIdList messagesFromAccount(const QMailAccount& account, 
+                                    QMailMessage::MessageType type = QMailMessage::AnyType,
+                                    const SortOrder& order = Submission ) const;
+
+    uint messageCount( MailType status, QMailMessage::MessageType type = QMailMessage::AnyType ) const;
+    uint messageCount( MailType status, QMailMessage::MessageType type, const QMailAccount& account ) const;
+    uint messageCount( MailType status, QMailMessage::MessageType type, const Mailbox& mailbox, bool subfolders ) const;
+
+signals:
+    void externalEdit(const QString &);
+    void mailAdded(const QMailId& id, const QString &);
+    void mailUpdated(const QMailId& id, const QString &);
+    void mailRemoved(const QMailId& id, const QString &);
+    void mailMoved(const QMailId& id, const QString&, const QString&);
+    void mailMoved(const QMailIdList& list, const QString&, const QString&);
+    void stringStatus(QString &);
+
+protected slots:
+    void externalChange();
+
+private:
+    QMailIdList messages(QMailMessageKey queryKey, const SortOrder& order) const;
+    uint messageCount(QMailMessageKey queryKey) const;
+
+    QString mMailbox;
+    QMailFolder mFolder;
+    QMailMessageKey mParentFolderKey;
 };
 
 class QTOPIAMAIL_EXPORT MailboxList : public QObject
@@ -61,6 +129,8 @@ public:
     EmailFolderList* mailbox(const QString &name) const;
     EmailFolderList* mailbox(const QMailId& mailFolderId) const;
 
+    EmailFolderList* owner(const QMailId& id) const;
+
     // Identifier strings not visible to user
     static const char* InboxString;
     static const char* OutboxString;
@@ -68,6 +138,7 @@ public:
     static const char* SentString;
     static const char* TrashString;
     static const char* LastSearchString;
+    static const char* EmailString;
 
     // Get the translated name for a mailbox
     static QString mailboxTrName( const QString &s );
@@ -77,6 +148,34 @@ public:
 
     // Get an icon for mailbox.
     static QIcon mailboxIcon( const QString &s );
+
+    static QMailIdList messages(QMailMessage::MessageType type = QMailMessage::AnyType, 
+                                const EmailFolderList::SortOrder& order = EmailFolderList::Submission);
+
+    static QMailIdList messages(QMailMessage::Status status, 
+                                bool contains,
+                                QMailMessage::MessageType type = QMailMessage::AnyType,
+                                const EmailFolderList::SortOrder& order = EmailFolderList::Submission);
+
+    static QMailIdList messagesFromMailbox(const Mailbox& mailbox, 
+                                           QMailMessage::MessageType type = QMailMessage::AnyType,
+                                           const EmailFolderList::SortOrder& order = EmailFolderList::Submission);
+
+    static QMailIdList messagesFromAccount(const QMailAccount& account, 
+                                           QMailMessage::MessageType type = QMailMessage::AnyType,
+                                           const EmailFolderList::SortOrder& order = EmailFolderList::Submission);
+
+    static QMailIdList messages(QMailMessageKey queryKey, const EmailFolderList::SortOrder& order);
+
+    static uint messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type = QMailMessage::AnyType );
+    static uint messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type, const QMailAccount& account );
+    static uint messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type, const Mailbox& mailbox, bool subfolders );
+
+    static uint messageCount( QMailMessageKey queryKey );
+
+    static QMailMessageKey statusFilterKey(EmailFolderList::MailType status);
+    static QMailMessageKey statusFilterKey(QMailMessage::Status status, bool contains);
+    static QMailMessageKey messageFilterKey(QMailMessage::MessageType type, const QString& account = QString(), const QString& mailbox = QString(), bool subfolders = false);
 
 signals:
     void externalEdit(const QString &);
@@ -89,71 +188,6 @@ signals:
 
 private:
     QList<EmailFolderList*> _mailboxes;
-};
-
-class QTOPIAMAIL_EXPORT EmailFolderList : public QObject
-{
-    Q_OBJECT
-
-public:
-    enum MailType { All, New, Unsent, Unfinished };
-    enum SortOrder { Submission, AscendingDate, DescendingDate };
-
-    EmailFolderList(QString mailbox, QObject *parent=0);
-    ~EmailFolderList();
-
-    void openMailbox();
-    bool addMail(QMailMessage &mail);
-    bool removeMail(QMailId id);
-    bool moveMail(const QMailId& id, EmailFolderList& dest);
-    bool copyMail(const QMailId& id, EmailFolderList& dest);
-    bool empty(int type = QMailMessage::AnyType);
-
-    bool moveMailList(const QMailIdList& list, EmailFolderList& dest);
-
-    QString mailbox() const;
-    QMailFolder mailFolder() const;
-
-    QMailIdList messages(unsigned int type = QMailMessage::AnyType, 
-                         const SortOrder& order = Submission ) const;
-
-    QMailIdList messages(const QMailMessage::Status& status, 
-                         bool contains,
-                         unsigned int type = QMailMessage::AnyType,
-                         const SortOrder& order = Submission ) const;
-
-    QMailIdList messagesFromMailbox(const QString& mailbox, 
-                                    unsigned int type = QMailMessage::AnyType,
-                                    const SortOrder& order = Submission ) const;
-
-    QMailIdList messagesFromAccount(const QString& account, 
-                                    unsigned int type = QMailMessage::AnyType,
-                                    const SortOrder& order = Submission ) const;
-
-    bool contains(const QMailId& id) const;
-
-    // If accountList is set and type is New then as a side effect 
-    // the unread count for all accounts is updated by this call.
-    uint mailCount(MailType status, 
-		   int type = QMailMessage::AnyType,
-		   AccountList *accountList = 0);
-
-signals:
-    void externalEdit(const QString &);
-    void mailAdded(const QMailId& id, const QString &);
-    void mailUpdated(const QMailId& id, const QString &);
-    void mailRemoved(const QMailId& id, const QString &);
-    void mailMoved(const QMailId& id, const QString&, const QString&);
-    void mailMoved(const QMailIdList& list, const QString&, const QString&);
-    void stringStatus(QString &);
-
-protected slots:
-    void externalChange();
-
-private:
-    QString mMailbox;
-    QMailFolder mFolder;
-    QMailMessageKey mParentFolderKey;
 };
 
 #endif

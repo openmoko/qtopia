@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/opengl/qgl.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/opengl/qgl.cpp -->
 <head>
   <title>Qt 4.3: QGLFormat Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -115,8 +115,8 @@
  QGLFormat::setDefaultFormat(fmt);</pre>
 <p>Or you can specify the desired format when creating an object of your <a href="qglwidget.html">QGLWidget</a> subclass:</p>
 <pre> QGLFormat fmt;
- fmt.setDoubleBuffer(false);                 <span class="comment">// single buffer</span>
- fmt.setDirectRendering(false);              <span class="comment">// software rendering</span>
+ fmt.setDoubleBuffer(false);                 <span class="comment">//</span> single buffer
+ fmt.setDirectRendering(false);              <span class="comment">//</span> software rendering
  MyGLWidget* myWidget = new MyGLWidget(fmt, ...);</pre>
 <p>After the widget has been created, you can find out which of the requested features the system was able to provide:</p>
 <pre> QGLFormat fmt;
@@ -124,7 +124,7 @@
  fmt.setStereo(true);
  MyGLWidget* myWidget = new MyGLWidget(fmt, ...);
  if (!myWidget-&gt;format().stereo()) {
-     <span class="comment">// ok, goggles off</span>
+     <span class="comment">//</span> ok, goggles off
      if (!myWidget-&gt;format().hasOverlay()) {
          qFatal(&quot;Cool hardware required&quot;);
      }
@@ -176,8 +176,8 @@
 <p>Creates a <a href="qglformat.html">QGLFormat</a> object that is a copy of the current <a href="qglformat.html#defaultFormat">application default format</a>.</p>
 <p>If <i>options</i> is not 0, this copy is modified by these format options. The <i>options</i> parameter should be <tt>FormatOption</tt> values OR'ed together.</p>
 <p>This constructor makes it easy to specify a certain desired format in classes derived from <a href="qglwidget.html">QGLWidget</a>, for example:</p>
-<pre><span class="comment"> // The rendering in MyGLWidget depends on using</span>
-<span class="comment"> // stencil buffer and alpha channel</span>
+<pre><span class="comment"> //</span> The rendering in MyGLWidget depends on using
+<span class="comment"> //</span> stencil buffer and alpha channel
  MyGLWidget::MyGLWidget(QWidget* parent)
      : QGLWidget(QGLFormat(QGL::StencilBuffer | QGL::AlphaChannel), parent)
  {
@@ -314,15 +314,15 @@
  f.setDoubleBuffer(true);
  QGLFormat::setDefaultOverlayFormat(f);</pre>
 <p>As usual, you can find out after widget creation whether the underlying OpenGL system was able to provide the requested specification:</p>
-<pre><span class="comment"> // ...continued from above</span>
+<pre><span class="comment"> //</span> ...continued from above
  MyGLWidget* myWidget = new MyGLWidget(QGLFormat(QGL::HasOverlay), ...);
  if (myWidget-&gt;format().hasOverlay()) {
-     <span class="comment">// Yes, we got an overlay, let's check _its_ format:</span>
+     <span class="comment">//</span> Yes, we got an overlay, let's check _its_ format:
      QGLContext* olContext = myWidget-&gt;overlayContext();
      if (olContext-&gt;format().doubleBuffer())
-         ; <span class="comment">// yes, we got a double buffered overlay</span>
+         ; <span class="comment">//</span> yes, we got a double buffered overlay
      else
-         ; <span class="comment">// no, only single buffered overlays are available</span>
+         ; <span class="comment">//</span> no, only single buffered overlays are available
  }</pre>
 <p>See also <a href="qglformat.html#defaultOverlayFormat">defaultOverlayFormat</a>().</p>
 <h3 class="fn"><a name="setDepth"></a>void QGLFormat::setDepth ( bool <i>enable</i> )</h3>
@@ -413,8 +413,8 @@
 <p>Assigns <i>other</i> to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

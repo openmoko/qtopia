@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -145,8 +145,6 @@ void ThemedHomeScreen::applyHomeScreenImage()
  */
 void ThemedHomeScreen::themeLoaded()
 {
-    applyHomeScreenImage();
-
     ThemeTextItem *textItem = (ThemeTextItem *)themedView->findItem("infobox", ThemedView::Text);
     if (textItem)
         textItem->setTextFormat(Qt::RichText);
@@ -265,6 +263,8 @@ void ThemedHomeScreen::themeItemClicked(ThemeItem *item)
         dialog = new TouchScreenLockDialog(0, Qt::WindowStaysOnTopHint);
     } else if (in == "mainmenu") {
         emit showPhoneBrowser();
+    } else if (in == "speeddial") {
+        emit speedDial(QString());
     } else if( in == "dialer" ) {
         QtopiaServiceRequest e( "Dialer", "showDialer(QString)" );
         e << QString();

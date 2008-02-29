@@ -30,19 +30,18 @@
 </ul>
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterfacegroup.html#public-functions">QAbstractIpcInterfaceGroup</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>2 protected functions inherited from <a href="qabstractipcinterfacegroup.html#protected-functions">QAbstractIpcInterfaceGroup</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -83,7 +82,7 @@
 <p>See also <a href="qabstractipcinterfacegroup.html">QAbstractIpcInterfaceGroup</a>, <a href="qcommservicemanager.html">QCommServiceManager</a>, <a href="qcomminterface.html">QCommInterface</a>, <a href="qnetworkregistration.html">QNetworkRegistration</a>, <a href="qpresence.html">QPresence</a>, and <a href="qphonecallprovider.html">QPhoneCallProvider</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QTelephonyService"></a>QTelephonyService::QTelephonyService ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QTelephonyService"></a>QTelephonyService::QTelephonyService ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a new telephony service called <i>service</i> and attach it to <i>parent</i>.</p>
 <p>A call to the constructor should be followed by a call to <a href="qabstractipcinterfacegroup.html#initialize">initialize</a>() to complete the initialization process.</p>
 <p>See also <a href="qabstractipcinterfacegroup.html#initialize">initialize</a>().</p>
@@ -96,7 +95,7 @@
 <p>Dispatch the SMS datagram <i>msg</i> according to its SMS port number or WAP Push MIME type. This is used by telephony services that accept incoming SMS messages to dispatch them according to the installed services. Returns true if the message was dispatched, or false if no service exists that can handle the message.</p>
 <p>See the documentation for <a href="qsmsmessage.html#destinationPort">QSMSMessage::destinationPort</a>() for more information on how WAP push messages and SMS datagrams are dispatched.</p>
 <p>See also <a href="qsmsmessage.html#destinationPort">QSMSMessage::destinationPort</a>().</p>
-<h3 class="fn"><a name="service"></a><a href="qstring.html">QString</a> QTelephonyService::service () const</h3>
+<h3 class="fn"><a name="service"></a><a href="./qstring.html">QString</a> QTelephonyService::service () const</h3>
 <p>Returns the name of this telephony service, which is the same as its group name.</p>
 <h3 class="fn"><a name="setCallProvider"></a>void QTelephonyService::setCallProvider ( <a href="qphonecallprovider.html">QPhoneCallProvider</a> * <i>provider</i> )</h3>
 <p>Sets the phone call provider for this service to <i>provider</i>. If the service already has a provider, it will be deleted. Ownership of <i>provider</i> will pass to this object, so that it will be automatically deleted when the modem service is deleted.</p>
@@ -110,8 +109,8 @@
 <p>See also <a href="qtelephonyservice.html#callProvider">callProvider</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

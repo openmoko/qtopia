@@ -24,4 +24,4 @@ INSTALLS+=finxibgimage
 
 pkg.name=qpe-theme-finxi
 pkg.desc=finxi theme
-pkg.domain=theme
+pkg.domain=trusted

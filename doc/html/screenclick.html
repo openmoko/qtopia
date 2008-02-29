@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ScreenClick Class Reference</h1>
 <p>The ScreenClick class enables an audible clicking sound whenever the stylus is used. <a href="#details">More...</a></p>
-<pre>    #include &lt;ScreenClick&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qtopiaserverapplication-qwseventfilter.html">QtopiaServerApplication::QWSEventFilter</a>.</p>
+<pre>    #include &lt;ScreenClick&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a> and <a href="qtopiaserverapplication-qwseventfilter.html">QtopiaServerApplication::QWSEventFilter</a>.</p>
 <ul>
 <li><a href="screenclick-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,7 +24,7 @@
 <li><div class="fn"/>virtual <b><a href="screenclick.html#dtor.ScreenClick">~ScreenClick</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="qtopiaserverapplication-qwseventfilter.html#public-functions">QtopiaServerApplication::QWSEventFilter</a></li>
 </ul>
 <a name="protected-functions"></a>
@@ -33,17 +33,16 @@
 <li><div class="fn"/>virtual void <b><a href="screenclick.html#screenClickx">screenClick</a></b> ( bool <i>pressed</i> ) = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -56,7 +55,7 @@
     protected:
         virtual void screenClick(bool pressed)
         {
-            <span class="comment">// Make click noise</span>
+            <span class="comment">//</span> Make click noise
         }
     };
     QTOPIA_TASK(MyScreenClick, MyScreenClick);</pre>
@@ -73,8 +72,8 @@
 <p>Called whenever the user taps or releases the screen. <i>pressed</i> will be true when the user taps the screen, and false when they release.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,6 +34,7 @@
 #include <QMainWindow>
 
 class QStackedWidget;
+class AlarmView;
 class DayView;
 class MonthView;
 class QAppointment;
@@ -122,6 +123,7 @@ protected:
     bool eventFilter(QObject *o, QEvent *e);
 
     void init();
+    void initAlarmView();
     void initDayView();
     void initMonthView();
     void initAppointmentDetails();
@@ -152,6 +154,7 @@ private:
 
     QAppointmentModel *model;
 
+    AlarmView *alarmView;
     DayView *dayView;
     MonthView *monthView;
     AppointmentDetails *appointmentDetails;
@@ -165,7 +168,7 @@ private:
     ExceptionDialog *exceptionDialog;
 
     // Configuration values
-    bool aPreset;    // have everything set to alarm?
+    QAppointment::AlarmFlags aPreset;    // have everything set to alarm?
     int presetTime;  // the standard time for the alarm
     int startTime;
     bool ampm;
@@ -174,7 +177,7 @@ private:
     DateBookSettings::ViewType defaultView;
 
     bool syncing;
-    bool closeAfterView;
+    QWidget *closeAfterView;
 
     QDate lastToday; // last date that was the selected as 'Today'
     QTimer *midnightTimer;

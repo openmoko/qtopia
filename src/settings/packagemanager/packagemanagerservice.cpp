@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -151,15 +151,7 @@ PackageServiceInstaller::PackageServiceInstaller( PackageView *parent, Qt::Windo
     QSettings pkgManagerConf( "Trolltech", "PackageManager" );
 
     pkgManagerConf.beginGroup( QLatin1String( "Configuration" ));
-    if ( pkgManagerConf.contains( QLatin1String( "maxDescriptorSize" )))
-    {
-        m_maxDescriptorSize = pkgManagerConf.value( QLatin1String( "maxDescriptorSize" )).toInt();
-    }
-    else
-    {
-        qWarning( "PackageServiceInstaller constructor:- Configuration/maxDescriptorSize not defined in PackageManager.conf"
-                  "using default value of %d", m_maxDescriptorSize );
-    }
+    m_maxDescriptorSize = pkgManagerConf.value( QLatin1String( "MaxDescriptorSize" )).toInt();
 
     pkgManagerConf.endGroup();
 }
@@ -205,7 +197,7 @@ void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo 
     m_packageDetails->setWindowTitle( m_pendingPackage.name );
 
 #ifndef QT_NO_SXE
-    if( m_packageView->model->hasSensitiveDomains( m_pendingPackage.domain ) )
+    if( DomainInfo::hasSensitiveDomains( m_pendingPackage.domain ) )
     {
         QMessageBox::warning(this, tr("Install Error"), tr("%1 utilizes protected resources")
             .arg( m_pendingPackage.name ) );
@@ -236,7 +228,7 @@ void PackageServiceInstaller::confirmInstall( const InstallControl::PackageInfo 
 
 void PackageServiceInstaller::installPendingPackage()
 {
-    m_packageFile.setFileName( Qtopia::tempDir() + m_pendingPackage.packageFile );
+    m_packageFile.setFileName( InstallControl::downloadedFileLoc() );
 
     m_packageFile.unsetError();
 
@@ -358,7 +350,7 @@ void PackageServiceInstaller::packageDownloadDone( bool error )
     m_progressBar->setValue( m_progressBar->maximum() );
 
     QHttpResponseHeader responseHeader = m_http.lastResponse();
-       
+
     if( responseHeader.statusCode() >= 400 ) 
     {
         QString simpleError = tr( "Package download failed: Error connecting to URL-%1 : %2, status code = %3", 
@@ -379,14 +371,21 @@ void PackageServiceInstaller::packageDownloadDone( bool error )
                                     .arg( currentUrl->toString() )
                                     .arg( m_http.errorString() );
         QString detailedError( "PackageServiceInstaller::packageDownloadDone: URL = %1, http error = %2" );
-        detailedError = detailedError.arg( currentUrl->toString() ).arg( m_http.errorString() ); 
-        reportError( simpleError, detailedError );  
+        detailedError = detailedError.arg( currentUrl->toString() ).arg( m_http.errorString() );
+        reportError( simpleError, detailedError );
     }
-    else if( m_installer.installPackage( m_pendingPackage, m_packageFile.md5Sum(), this ) )
+    else
     {
-        m_progressTextEdit->setText( tr( "%1 installed", "%1 = package name" ).arg( m_pendingPackage.name ) );
-        qobject_cast<InstalledPackageController *>(m_packageView->model->installed )
+        if( m_installer.installPackage( m_pendingPackage, m_packageFile.md5Sum(), this ) )
+        {
+            m_progressTextEdit->setText( tr( "%1 installed", "%1 = package name" ).arg( m_pendingPackage.name ) );
+            qobject_cast<InstalledPackageController *>(m_packageView->model->installed )
                 ->reloadInstalledLocations( QStringList( Qtopia::packagePath() + "controls/" ) );
+        }
+        else
+        {
+            m_installer.uninstallPackage( m_pendingPackage, this );
+        }
     }
 
     m_packageFile.remove();

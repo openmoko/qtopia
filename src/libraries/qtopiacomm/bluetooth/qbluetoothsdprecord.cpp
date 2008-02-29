@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -21,6 +21,7 @@
 
 #include <qbluetoothsdprecord.h>
 #include <qbluetoothsdpuuid.h>
+#include <qtopiacomm/private/qsdpxmlparser_p.h>
 
 #include <QString>
 #include <QUrl>
@@ -169,6 +170,14 @@ QBluetoothSdpRecord::~QBluetoothSdpRecord()
 }
 
 /*!
+    Returns \c true if this SDP service record has no attributes.
+*/
+bool QBluetoothSdpRecord::isNull() const
+{
+    return m_attrs.isEmpty();
+}
+
+/*!
     Construct a SDP service record, copying contents from \a other.
 */
 QBluetoothSdpRecord::QBluetoothSdpRecord(const QBluetoothSdpRecord &other)
@@ -186,6 +195,14 @@ QBluetoothSdpRecord &QBluetoothSdpRecord::operator=(const QBluetoothSdpRecord &o
 
     m_attrs = other.m_attrs;
     return *this;
+}
+
+/*!
+    Returns whether \a other is equal to this SDP service record.
+ */
+bool QBluetoothSdpRecord::operator==(const QBluetoothSdpRecord &other) const
+{
+    return other.m_attrs == m_attrs;
 }
 
 /*!
@@ -561,4 +578,32 @@ int QBluetoothSdpRecord::rfcommChannel(const QBluetoothSdpRecord &service)
     }
 
     return -1;
+}
+
+/*!
+    Returns a SDP service record generated from the contents of \a device.
+
+    Returns a null service record if the contents of \a device cannot be
+    parsed.
+*/
+QBluetoothSdpRecord QBluetoothSdpRecord::fromDevice(QIODevice *device)
+{
+    QSdpXmlParser parser;
+    if (!parser.parseRecord(device))
+        return QBluetoothSdpRecord();
+    return parser.record();
+}
+
+/*!
+    Returns a SDP service record generated from the contents of \a data.
+
+    Returns a null service record if the contents of \a data cannot be
+    parsed.
+*/
+QBluetoothSdpRecord QBluetoothSdpRecord::fromData(const QByteArray &data)
+{
+    QSdpXmlParser parser;
+    if (!parser.parseRecord(data))
+        return QBluetoothSdpRecord();
+    return parser.record();
 }

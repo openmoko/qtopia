@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include "receivewindow.h"
-#include "phone/runningapplicationsviewitem.h"
+#include "taskmanagerentry.h"
 
 #include <qcontent.h>
 #include <qmimetype.h>
@@ -36,12 +36,17 @@
 #include <qtopia/pim/qtask.h>
 
 #include <QHeaderView>
-#include <QTableView>
-#include <QAbstractTableModel>
-#include <QItemDelegate>
+#include <QListView>
+#include <QAbstractListModel>
+#include <QtopiaItemDelegate>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QPainter>
+#include <QTimer>
+#include <QFont>
+#include <QMutableListIterator>
+#include <QMenu>
+#include <QTabWidget>
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -49,200 +54,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-class ReceivedFile
+
+static QString pretty_print_size(qint64 fsize)
 {
-public:
-
-    enum Direction { Sending, Receiving };
-
-    ReceivedFile(int id, Direction dir, const QString &filename, const QString &mimetype, const QString &description);
-
-    void setProgress(qint64 completed, qint64 total);
-    qint64 total() const { return m_total; }
-    qint64 completed() const { return m_completed; }
-
-    const QString filename() const { return m_filename; }
-    const QString mimetype() const { return m_mimetype; }
-    const QString description() const { return m_description; }
-
-    void setCompleted(bool failed) { m_complete = true; m_failed = failed; }
-    bool failed() const { return m_failed; }
-    bool complete() const { return m_complete; }
-
-    Direction direction() const { return m_direction; }
-
-    int id() const { return m_id; }
-
-private:
-    bool m_failed;
-    bool m_complete;
-    QString m_filename;
-    QString m_mimetype;
-    QString m_description;
-    qint64 m_completed;
-    qint64 m_total;
-    Direction m_direction;
-    int m_id;
-};
-
-ReceivedFile::ReceivedFile(int id, Direction dir, const QString &filename, const QString &mimetype, const QString &description)
-{
-    m_id = id;
-    m_filename = filename;
-    m_mimetype = mimetype;
-    m_description = description;
-    m_direction = dir;
-    m_failed = false;
-    m_complete = false;
-    m_completed = 0;
-    m_total = 0;
-}
-
-void ReceivedFile::setProgress(qint64 completed, qint64 total)
-{
-    m_total = total;
-    m_completed = completed;
-}
-
-class ReceivedFilesModel : public QAbstractTableModel
-{
-public:
-    ReceivedFilesModel(QObject *parent = 0);
-
-    virtual int rowCount(const QModelIndex & parent = QModelIndex() ) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex() ) const;
-    virtual QVariant headerData(int section, Qt::Orientation orientation,
-                                int role = Qt::DisplayRole) const;
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    void addFile(const ReceivedFile &file);
-    void removeFile(int index);
-    const ReceivedFile & file(int index) const;
-    ReceivedFile & file(int index);
-    int findFile(int id) const;
-    void updateProgress(int index, qint64 completed, qint64 total);
-    void setCompleted(int index, bool err);
-    int size() const { return m_list.size(); }
-
-private:
-    QList<ReceivedFile> m_list;
-};
-
-ReceivedFilesModel::ReceivedFilesModel(QObject *parent) : QAbstractTableModel(parent)
-{
-
-}
-
-int ReceivedFilesModel::rowCount(const QModelIndex &) const
-{
-    return m_list.size();
-}
-
-int ReceivedFilesModel::columnCount(const QModelIndex &) const
-{
-    return 3;
-}
-
-QVariant ReceivedFilesModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (orientation == Qt::Vertical)
-        return QVariant();
-
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
-    if (section == 0)
-        return QVariant::fromValue(QString(" "));
-
-    if (section == 1)
-        return QVariant::fromValue(QObject::tr("File"));
-
-    if (section == 2)
-        return QVariant::fromValue(QObject::tr("Progress"));
-
-    return QVariant();
-}
-
-QVariant ReceivedFilesModel::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid())
-        return QVariant();
-    else if (role != Qt::DisplayRole)
-        return QVariant();
-
-    if (index.column() == 0) {
-        if (m_list[index.row()].direction() == ReceivedFile::Sending)
-            return QVariant::fromValue(QString("<"));
-        else
-            return QVariant::fromValue(QString(">"));
-    }
-
-    if (index.column() == 1) {
-        QString str = m_list[index.row()].filename();
-        int pos = str.lastIndexOf( QDir::separator() );
-        if ( pos != -1 )
-            str = str.mid( pos + 1 );
-        return QVariant::fromValue(str);
-    }
-
-    if (index.column() == 2) {
-        return QVariant(m_list[index.row()].completed());
-    }
-
-    return QVariant();
-}
-
-void ReceivedFilesModel::addFile(const ReceivedFile &file)
-{
-    beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
-    m_list.push_back(file);
-    endInsertRows();
-}
-
-void ReceivedFilesModel::removeFile(int index)
-{
-    beginRemoveRows(QModelIndex(), index, index);
-    m_list.removeAt(index);
-    endRemoveRows();
-}
-
-const ReceivedFile & ReceivedFilesModel::file(int index) const
-{
-    return m_list[index];
-}
-
-ReceivedFile & ReceivedFilesModel::file(int index)
-{
-    return m_list[index];
-}
-
-int ReceivedFilesModel::findFile(int id) const
-{
-    for (int i = 0; i < m_list.size(); i++) {
-        if (m_list[i].id() == id)
-            return i;
-    }
-
-    return -1;
-}
-
-void ReceivedFilesModel::updateProgress(int idx, qint64 completed, qint64 total)
-{
-    m_list[idx].setProgress(completed, total);
-    emit dataChanged(index(idx, 0), index(idx, 2));
-}
-
-void ReceivedFilesModel::setCompleted(int idx, bool err)
-{
-    m_list[idx].setCompleted(err);
-
-    if (m_list[idx].direction() != ReceivedFile::Sending) {
-        emit dataChanged(index(idx, 0), index(idx, 2));
-    }
-}
-
-static QString pretty_print_size(int fsize)
-{
-    static const char *size_suffix[] = {"B", "K", "M", "G"};
+    static int threshold = 1024*1024; // 1 MB, user's don't care about fractions up to this point
+    static const char *size_suffix[] = {
+        "",
+        QT_TRANSLATE_NOOP("CustomPushService", "KB"),
+        QT_TRANSLATE_NOOP("CustomPushService", "MB"),
+        QT_TRANSLATE_NOOP("CustomPushService", "GB"),
+    };
 
     double max = fsize;
 
@@ -260,225 +81,570 @@ static QString pretty_print_size(int fsize)
     if (i == 4)
         i = 0;
 
-    QString size = QString::number(max, 'f', 1);
-    size += size_suffix[i];
+    QString size;
+    if (fsize >= threshold) {
+        size = QString::number(max, 'f', 2);
+    } else {
+        size = QString::number( static_cast<qint64>(max) );
+    }
+    size += qApp->translate( "CustomPushService", size_suffix[i] );
 
     return size;
 }
 
-class ReceiveWindowItemDelegate : public QItemDelegate
+static void vcalInfo( const QString &fileName, bool *todo, bool *cal )
 {
-    Q_OBJECT
+    *cal = *todo = false;
 
-public:
-    ReceiveWindowItemDelegate(ReceiveWindow *mainWindow, ReceivedFilesModel *model)
-    : QItemDelegate(mainWindow) { m_model = model; }
+    QList<QAppointment> events = QAppointment::readVCalendar( fileName );
 
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option,
-                        const QModelIndex &index ) const
-    {
-        switch (index.column()) {
-        case 0:
-            QItemDelegate::paint(painter, option, index);
-            break;
-        case 1:
-        {
-            const ReceivedFile &receivedFile = m_model->file(index.row());
-            QString s = option.fontMetrics.elidedText(
-                    index.model()->data(index, Qt::DisplayRole).toString(),
-                    Qt::ElideRight,
-                    option.rect.width());
-            painter->drawText(option.rect, Qt::AlignCenter, s);
-            break;
-        }
-        case 2:
-        {
-            const ReceivedFile &receivedFile = m_model->file(index.row());
-
-            // Set up a QStyleOptionProgressBar to precisely mimic the
-            // environment of a progress bar.
-            QStyleOptionProgressBar progressBarOption;
-            progressBarOption.state = QStyle::State_Enabled;
-            progressBarOption.direction = QApplication::layoutDirection();
-            progressBarOption.rect = option.rect;
-            progressBarOption.fontMetrics = option.fontMetrics;
-            progressBarOption.minimum = 0;
-            int max = receivedFile.total();
-            progressBarOption.maximum = max;
-            progressBarOption.textAlignment = Qt::AlignCenter;
-            progressBarOption.textVisible = true;
-
-            // Set the progress and text values of the style option.
-            if (receivedFile.complete() && receivedFile.failed()) {
-                progressBarOption.text = tr("Transfer error.");
-            } else {
-                int progress = receivedFile.completed();
-                if (progress > max || max == 0) {
-                    progressBarOption.progress = 0;
-                    progressBarOption.text = QString("%1/?").arg(pretty_print_size(progress));
-                }
-                else if (progress == max) {
-                    progressBarOption.progress = progress;
-                    progressBarOption.text = tr("Done (%1)", "%1 = transferred file size").
-                            arg(pretty_print_size(progress));
-                }
-                else {
-                    progressBarOption.progress = progress;
-                    progressBarOption.text = QString("%1/%2").
-                            arg(pretty_print_size(progress)).
-                            arg(pretty_print_size(max));
-                }
-            }
-
-            // Draw the progress bar onto the view.
-            QApplication::style()->drawControl(QStyle::CE_ProgressBar,
-                &progressBarOption, painter);
-            break;
-        }
-        }
+    if ( events.count() ) {
+        *cal = true;
     }
 
+    QList<QTask> tasks = QTask::readVCalendar( fileName );
+
+    if ( tasks.count() ) {
+        *todo = true;
+    }
+}
+
+
+class FileTransfer
+{
+public:
+
+    enum Direction { Sending, Receiving };
+
+    FileTransfer(int id, Direction dir, const QString &fileName, const QString &mimeType, const QString &description);
+
+    void setProgress(qint64 completed, qint64 total);
+    qint64 total() const { return m_total; }
+    qint64 completed() const { return m_completed; }
+
+    const QString &fileName() const { return m_fileName; }
+    const QString &mimeType() const { return m_mimeType; }
+    const QString &description() const { return m_description; }
+    const QIcon &icon() const { return m_icon; }
+
+    void setFinished(bool failed) { m_finished = true; m_failed = failed; }
+    bool failed() const { return m_failed; }
+    bool finished() const { return m_finished; }
+
+    Direction direction() const { return m_direction; }
+
+    int id() const { return m_id; }
+
+    void setContentId(const QContentId &contentId) { m_contentId = contentId; }
+    QContentId contentId() const { return m_contentId; }
+
 private:
-    ReceivedFilesModel *m_model;
+    bool m_failed;
+    bool m_finished;
+    QString m_fileName;
+    QString m_mimeType;
+    QString m_description;
+    qint64 m_completed;
+    qint64 m_total;
+    Direction m_direction;
+    int m_id;
+    QIcon m_icon;
+    QContentId m_contentId;
 };
+
+FileTransfer::FileTransfer(int id, Direction dir, const QString &fileName, const QString &mimeType, const QString &description)
+{
+    m_id = id;
+    m_fileName = fileName;
+    m_mimeType = mimeType;
+    m_description = description;
+    m_direction = dir;
+    m_failed = false;
+    m_finished = false;
+    m_completed = 0;
+    m_total = 0;
+    m_icon = QMimeType(mimeType).icon();
+
+    if (dir == Sending)
+        m_contentId = QContent(fileName, false).id();
+    else
+        m_contentId = QContent::InvalidId;
+}
+
+void FileTransfer::setProgress(qint64 completed, qint64 total)
+{
+    m_total = total;
+    m_completed = completed;
+}
+
+class FileTransferListModel : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    FileTransferListModel(QObject *parent = 0);
+
+    virtual int rowCount(const QModelIndex & parent = QModelIndex() ) const;
+    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    void addFile(const FileTransfer &file);
+    void removeFinishedFiles();
+
+    QModelIndex indexFromId(int id) const;
+    const FileTransfer &findFile(const QModelIndex &index) const;   // index must be valid
+    FileTransfer &findFile(const QModelIndex &index);   // index must be valid
+
+    void updateFileProgress(int id, qint64 completed, qint64 total);
+    void setFileCompleted(int id, bool error);
+
+    int size() const { return m_list.size(); }
+
+private:
+    QList<FileTransfer> m_list;
+};
+
+FileTransferListModel::FileTransferListModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+}
+
+int FileTransferListModel::rowCount(const QModelIndex &) const
+{
+    return m_list.size();
+}
+
+QVariant FileTransferListModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    switch (role) {
+        case Qtopia::AdditionalDecorationRole:
+            if (m_list[index.row()].finished() && !m_list[index.row()].failed())
+                return QIcon(":icon/ok");
+        case Qt::TextAlignmentRole:
+            return QVariant(Qt::AlignBottom | Qt::AlignLeft);
+        case Qt::DecorationRole:
+            return m_list[index.row()].icon();
+        case Qt::DisplayRole:
+            const FileTransfer &file = m_list[index.row()];
+            if (!file.description().isEmpty())
+                return file.description();
+            QString str = file.fileName();
+            int pos = str.lastIndexOf( QDir::separator() );
+            if ( pos != -1 )
+                str = str.mid( pos + 1 );
+            return str;
+    }
+    return QVariant();
+}
+
+void FileTransferListModel::addFile(const FileTransfer &file)
+{
+    beginInsertRows(QModelIndex(), 0, 0);
+    m_list.insert(0, file);
+    endInsertRows();
+}
+
+void FileTransferListModel::removeFinishedFiles()
+{
+    QMutableListIterator<FileTransfer> i(m_list);
+    while (i.hasNext()) {
+        if (i.next().finished())
+            i.remove();
+    }
+}
+
+QModelIndex FileTransferListModel::indexFromId(int id) const
+{
+    for (int i=0; i < m_list.size(); i++) {
+        if (m_list[i].id() == id)
+            return index(i);
+    }
+    return QModelIndex();
+}
+
+const FileTransfer &FileTransferListModel::findFile(const QModelIndex &index) const
+{
+    Q_ASSERT(index.isValid());
+    return m_list[index.row()];
+}
+
+FileTransfer &FileTransferListModel::findFile(const QModelIndex &index)
+{
+    Q_ASSERT(index.isValid());
+    return m_list[index.row()];
+}
+
+void FileTransferListModel::updateFileProgress(int id, qint64 completed, qint64 total)
+{
+    for (int i=0; i < m_list.size(); i++) {
+        if (m_list[i].id() == id) {
+            m_list[i].setProgress(completed, total);
+            emit dataChanged(index(i, 0), index(i, 0));
+            break;
+        }
+    }
+}
+
+void FileTransferListModel::setFileCompleted(int id, bool error)
+{
+    for (int i=0; i < m_list.size(); i++) {
+        if (m_list[i].id() == id) {
+            m_list[i].setFinished(error);
+            emit dataChanged(index(i, 0), index(i, 0));
+            break;
+        }
+    }
+}
+
+//==============================================================
+
+class ReceiveWindowItemDelegate : public QtopiaItemDelegate
+{
+    Q_OBJECT
+public:
+    ReceiveWindowItemDelegate(FileTransferListModel *model, QObject *parent);
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option,
+                        const QModelIndex &index ) const;
+
+protected:
+    virtual void drawDisplay(QPainter *painter, const QStyleOptionViewItem &option,
+                        const QRect &rect, const QString &text) const;
+
+private:
+    static int progressHorizontalMargin();
+    static int progressVerticalMargin();
+    static int progressBarHeight(int totalRowHeight);
+    static QFont progressFont(const QModelIndex &index);
+    static void getProgressRect(QRect *rect, const QStyleOptionViewItem &option);
+    static const qreal PROGRESS_HEIGHT_PROPORTION;
+
+    void drawProgressBar(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QRect &rect, qint64 progress, qint64 max) const;
+
+    FileTransferListModel *m_model;
+};
+
+
+// this is the proportion of the height of the progress bar within the total row height
+const qreal ReceiveWindowItemDelegate::PROGRESS_HEIGHT_PROPORTION = (3/7.0);
+
+ReceiveWindowItemDelegate::ReceiveWindowItemDelegate(FileTransferListModel *model, QObject *parent)
+    : QtopiaItemDelegate(parent),
+      m_model(model)
+{
+}
+
+int ReceiveWindowItemDelegate::progressHorizontalMargin()
+{
+    return QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin);
+}
+
+int ReceiveWindowItemDelegate::progressVerticalMargin()
+{
+    return QApplication::style()->pixelMetric(QStyle::PM_FocusFrameVMargin);
+}
+
+int ReceiveWindowItemDelegate::progressBarHeight(int totalRowHeight)
+{
+    return int(totalRowHeight * PROGRESS_HEIGHT_PROPORTION) + progressVerticalMargin();
+}
+
+QFont ReceiveWindowItemDelegate::progressFont(const QModelIndex &index)
+{
+    QFont f = index.data(Qt::FontRole).value<QFont>();
+    f.setPointSize(f.pointSize() - 1);
+    return f;
+}
+
+void ReceiveWindowItemDelegate::getProgressRect(QRect *rect, const QStyleOptionViewItem &option)
+{
+    *rect = option.rect;
+
+    // margin between progress and borders
+    int progressHMargin = progressHorizontalMargin();
+    int progressVMargin = progressVerticalMargin();
+
+    rect->setHeight(progressBarHeight(option.rect.height()) - progressVMargin);
+    rect->moveBottom(option.rect.bottom() - progressVMargin);
+
+    // line up with left edge of filename, taking into account the margins
+    // on both side of the icon, and the margin on the side of the text
+    int hOffsetForIcon = option.decorationSize.width() +
+            (QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin)+1)*3;
+    if (option.direction == Qt::LeftToRight)
+        rect->adjust(hOffsetForIcon, 0, -progressHMargin, 0);
+    else
+        rect->adjust(progressHMargin, 0, -hOffsetForIcon, 0);
+}
+
+void ReceiveWindowItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QString &text) const
+{
+    QRect textRect = rect;
+    textRect.setY(option.rect.y());
+    textRect.setHeight(option.rect.height() -
+            progressBarHeight(option.rect.height()));
+    QtopiaItemDelegate::drawDisplay(painter, option, textRect, text);
+}
+
+QSize ReceiveWindowItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QSize sz = QtopiaItemDelegate::sizeHint(option, index);
+    int minProgressHeight = QFontMetrics(progressFont(index)).height();
+    int height = int(minProgressHeight / PROGRESS_HEIGHT_PROPORTION) +
+            progressVerticalMargin();
+    sz.setHeight(height);
+    return sz;
+}
+
+void ReceiveWindowItemDelegate::drawProgressBar(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, qint64 progress, qint64 max) const
+{
+    // set the progress bar style options
+    QStyleOptionProgressBar progressOption;
+    progressOption.rect = rect;
+    progressOption.fontMetrics = option.fontMetrics;
+    progressOption.direction = QApplication::layoutDirection();
+    progressOption.minimum = 0;
+    progressOption.maximum = max;
+    progressOption.textAlignment = Qt::AlignCenter;
+    progressOption.textVisible = true;
+    progressOption.state = QStyle::State_Enabled;
+
+    if (progress > max || max == 0) {
+        progressOption.progress = 0;
+        progressOption.text = QString("%1/?").arg(pretty_print_size(progress));
+    } else {
+        progressOption.progress = progress;
+        progressOption.text = QString("%1/%2").
+                arg(pretty_print_size(progress)).
+                arg(pretty_print_size(max));
+    }
+
+    // draw the progress bar
+    QApplication::style()->drawControl(QStyle::CE_ProgressBar,
+            &progressOption, painter);
+}
+
+void ReceiveWindowItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index ) const
+{
+    // paint everything except the progress bar / result text
+    QtopiaItemDelegate::paint(painter, option, index);
+
+    QRect progressRect;
+    getProgressRect(&progressRect, option);
+
+    painter->save();
+    painter->setFont(progressFont(index));
+    const FileTransfer &file = m_model->findFile(index);
+    if (file.finished()) {
+        if (file.failed()) {
+            painter->drawText(progressRect, Qt::AlignLeft,
+                    tr("Transfer error."));
+        } else {
+            painter->drawText(progressRect, Qt::AlignLeft,
+                    QString("%1").arg(pretty_print_size(file.completed())));
+        }
+    } else {
+        drawProgressBar(painter, option, progressRect, file.completed(),
+                file.total());
+    }
+    painter->restore();
+}
+
+//===================================================================
+
+/*
+    The FilteredTransferListView class provides a filtered list view of
+    file transfers.
+
+    It will only display file transfers that match the transfer direction
+    given in the constructor.
+*/
+class FilteredTransferListView : public QListView
+{
+    Q_OBJECT
+public:
+    FilteredTransferListView(FileTransfer::Direction direction, QWidget *parent = 0);
+
+protected slots:
+    virtual void rowsInserted(const QModelIndex &parent, int start, int end);
+
+private:
+    FileTransfer::Direction m_direction;
+};
+
+FilteredTransferListView::FilteredTransferListView(FileTransfer::Direction direction, QWidget *parent)
+    : QListView(parent),
+      m_direction(direction)
+{
+}
+
+void FilteredTransferListView::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+    QListView::rowsInserted(parent, start, end);
+
+    FileTransferListModel *m = qobject_cast<FileTransferListModel*>(model());
+    if (m) {
+        for (int i=start; i<=end; i++) {
+            const FileTransfer &transfer = m->findFile(m->index(i));
+            if (transfer.direction() != m_direction)
+                setRowHidden(i, true);
+        }
+    }
+}
+
 
 
 //===================================================================
 
-ReceiveWindow::ReceiveWindow(QWidget *parent) : QMainWindow(parent)
+ReceiveWindow::ReceiveWindow(QWidget *parent)
+    : QMainWindow(parent),
+      m_model(new FileTransferListModel(this))
 {
-    m_files = new QTableView(this);
-    m_model = new ReceivedFilesModel(this);
+    m_incomingView = new FilteredTransferListView(FileTransfer::Receiving);
+    m_outgoingView = new FilteredTransferListView(FileTransfer::Sending);
+    setUpView(m_incomingView);
+    setUpView(m_outgoingView);
 
-    m_files->setModel(m_model);
-    m_files->setItemDelegate(new ReceiveWindowItemDelegate(this, m_model));
-    m_files->setAlternatingRowColors(true);
-    m_files->verticalHeader()->hide();
-    m_files->setSelectionMode(QAbstractItemView::NoSelection);
-    m_files->setFrameStyle(QFrame::NoFrame);
+    m_tabs = new QTabWidget;
+    m_tabs->addTab(m_incomingView, tr("Received"));
+    m_tabs->addTab(m_outgoingView, tr("Sent"));
 
-    QHeaderView *header = m_files->horizontalHeader();
-    QFontMetrics fm = fontMetrics();
-    header->setResizeMode(0, QHeaderView::Custom);
-    header->resizeSection(0, fm.width(">"));                  // no tr
-    header->setResizeMode(1, QHeaderView::Custom);
-    header->resizeSection(1, fm.width("12345678.ext"));       // no tr
-    header->setResizeMode(2, QHeaderView::Stretch);
+    QMenu *menu = QSoftMenuBar::menuFor(m_tabs);
+    m_cancelAction = menu->addAction(QIcon(":icon/cancel"), 
+            tr("Cancel transfer"), this, SLOT(stopCurrentTransfer()));
+    m_cancelAction->setVisible(false);
 
-    // items aren't selectable, so remove 'select' label
-    QSoftMenuBar::setLabel(m_files, Qt::Key_Select, QSoftMenuBar::NoLabel);
-
+    setObjectName(QLatin1String("filetransferwindow"));
     setWindowTitle(QObject::tr("Send/Receive Files"));
-    setCentralWidget(m_files);
+    setCentralWidget(m_tabs);
 
-    m_runningAppsItem = new RunningApplicationsViewItem(windowTitle(), "sync", this);
-    connect(m_runningAppsItem, SIGNAL(activated()), SLOT(showWindow()));
+    m_taskManagerEntry = new TaskManagerEntry(windowTitle(), "sync", this);
+    connect(m_taskManagerEntry, SIGNAL(activated()), SLOT(showWindow()));
 }
 
-ReceiveWindow::~ReceiveWindow()
+void ReceiveWindow::setUpView(QListView *view)
 {
-    delete m_files;
-    delete m_model;
-    m_files = 0;
-    m_model = 0;
+    view->setModel(m_model);
+    view->setItemDelegate(new ReceiveWindowItemDelegate(m_model, this));
+    view->setAlternatingRowColors(true);
+    view->setSelectionMode(QAbstractItemView::SingleSelection);
+    view->setFrameStyle(QFrame::NoFrame);
+    view->setTextElideMode(Qt::ElideMiddle);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setSpacing(3);
+    view->setUniformItemSizes(true);
+
+    connect(view, SIGNAL(activated(QModelIndex)),
+            SLOT(activated(QModelIndex)));
+    connect(view->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            SLOT(currentChanged(QModelIndex,QModelIndex)));
+
+    // no items in list to begin with, so remove 'select' label
+    QSoftMenuBar::setLabel(view, Qt::Key_Select, QSoftMenuBar::NoLabel);
 }
 
 void ReceiveWindow::closeEvent(QCloseEvent *event)
 {
     // remove all completed transfers
-    bool hasUnfinishedTransfer = false;
-    for (int i=0; i<m_model->size(); i++) {
-        if (m_model->file(i).complete()) {
-            m_model->removeFile(i);
-        } else {
-            hasUnfinishedTransfer = true;
-        }
-    }
-    if (!hasUnfinishedTransfer)
-        m_runningAppsItem->hide();
+    m_model->removeFinishedFiles();
+    if (m_model->size() == 0)
+        m_taskManagerEntry->hide();
 
     QMainWindow::closeEvent(event);
 }
 
-void ReceiveWindow::receiveInitiated(int id, const QString &filename, const QString &mime, const QString &description)
+void ReceiveWindow::receiveInitiated(int id, const QString &fileName, const QString &mime, const QString &description)
 {
-    QString mimeType = ( mime.isEmpty() ? QMimeType(filename).id() : mime );
+    QString mimeType = ( mime.isEmpty() ? QMimeType(fileName).id() : mime );
 
-    qLog(Obex) << "recvInitiated: " << filename << "(" << mime << ") ->" << mimeType << description;
+    qLog(Obex) << "recvInitiated: " << fileName << "(" << mime << ") ->"
+            << mimeType << description;
 
-    if ((mimeType.toLower() == "text/x-vcard") || (mimeType.toLower() == "text/x-vcalendar")) {
+    if ((mimeType.toLower() == "text/x-vcard") ||
+            (mimeType.toLower() == "text/x-vcalendar")) {
+        // don't show vCard/vCal transfers
         qLog(Obex) << "Looks like a Vcard or VCal";
-        handleSupportedFormatRecv(id, filename, mimeType, description);
-    }
-    else {
+        handleIncomingVObject(id, fileName, mimeType, description);
+    } else {
         qLog(Obex) << "Looks like a regular file...";
-        m_model->addFile(ReceivedFile(id, ReceivedFile::Receiving, filename, mimeType, description));
-        showWindow();
+        m_model->addFile(FileTransfer(id, FileTransfer::Receiving, fileName,
+                mimeType, description));
 
-        m_runningAppsItem->show();
+        m_incomingView->setCurrentIndex(m_model->indexFromId(id));
+        m_tabs->setCurrentWidget(m_incomingView);
+
+        showWindow();
+        m_taskManagerEntry->show();
     }
 }
 
-void ReceiveWindow::sendInitiated(int id, const QString &filename, const QString &mime)
+void ReceiveWindow::sendInitiated(int id, const QString &fileName, const QString &mime, const QString &description)
 {
     qLog(Obex) << "sendInitiated";
 
-    // Don't do anything here
-    if ((mime.toLower() == "text/x-vcard") || (mime.toLower() == "text/x-vcalendar")) {
+    if ((mime.toLower() == "text/x-vcard") ||
+            (mime.toLower() == "text/x-vcalendar")) {
+        // don't show vCard/vCal transfers
         qLog(Obex) << "Looks like a Vcard or VCal";
-    }
-    else {
+    } else {
         qLog(Obex) << "Looks like a regular file...";
-        m_model->addFile(ReceivedFile(id, ReceivedFile::Sending, filename, mime, QString()));
-        showWindow();
+        m_model->addFile(FileTransfer(id, FileTransfer::Sending, fileName,
+                mime, description));
 
-        m_runningAppsItem->show();
+        m_tabs->setCurrentWidget(m_outgoingView);
+        m_outgoingView->setCurrentIndex(m_model->indexFromId(id));
+
+        showWindow();
+        m_taskManagerEntry->show();
     }
 }
 
 void ReceiveWindow::progress(int id, qint64 bytes, qint64 total)
 {
-    qLog(Obex) << "Got Progress " << id << " " << bytes << "/" << total;
-
-    int index = m_model->findFile(id);
-    if (index != -1) {
-        m_model->updateProgress(index, bytes, total);
-    }
+    qLog(Obex) << "Got Progress " << id << bytes << "/" << total;
+    m_model->updateFileProgress(id, bytes, total);
 }
 
 void ReceiveWindow::completed(int id, bool error)
 {
     qLog(Obex) << "Got completion message " << id << "(" << error << ")";
 
-    if (handleSupportedFormatComplete(id, error))
+    if (handleVObjectReceived(id, error))
         return;
 
-    int index = m_model->findFile(id);
-    if (index != -1) {
-        m_model->setCompleted(index, error);
-        update();
-        if (m_model->size() != 0) {
-            if (!error) {
-                if (m_model->file(index).direction() == ReceivedFile::Receiving)
-                    saveFile(index);
-            }
+    m_model->setFileCompleted(id, error);
+    update();
+
+    QModelIndex index = m_model->indexFromId(id);
+    if (!index.isValid())
+        return;
+
+    FileTransfer &file = m_model->findFile(index);
+    if (!error && file.direction() == FileTransfer::Receiving) {
+        // save the received file
+        QContentId contentId = saveFile(file);
+        if (contentId != QContent::InvalidId)
+            file.setContentId(contentId);
+    }
+
+    QListView *view = qobject_cast<QListView*>(m_tabs->currentWidget());
+    if (view->currentIndex() == index) {
+        // indicate file can now be opened
+        if (file.contentId() != QContent::InvalidId) {
+            QSoftMenuBar::setLabel(view, Qt::Key_Select,
+                    QSoftMenuBar::Select);
         }
+        m_cancelAction->setVisible(false);
     }
 }
 
-void ReceiveWindow::saveFile(int index)
+QContentId ReceiveWindow::saveFile(const FileTransfer &file)
 {
-    if (m_model->size() == 0)
-        return;
+    if (!file.completed() || file.direction() == FileTransfer::Sending)
+        return QContent::InvalidId;
 
-    ReceivedFile file = m_model->file(index);
-    if (!file.completed())
-        return;
-
-    if (file.direction() == ReceivedFile::Sending)
-        return;
-
-    QString saveAs = file.filename();
+    QString saveAs = file.fileName();
     int pos = saveAs.lastIndexOf( QDir::separator() );
     if ( pos != -1 )
         saveAs = saveAs.mid( pos + 1 );
@@ -488,17 +654,17 @@ void ReceiveWindow::saveFile(int index)
     QFile f(tmpFile);
     if ( !f.open(QIODevice::ReadOnly) ) {
         qLog(Obex) << "Couldn't open file to read!!";
-        return;
+        return QContent::InvalidId;
     }
 
     QContent doc;
-    doc.setType(file.mimetype());
-    doc.setName(file.filename());
+    doc.setType(file.mimeType());
+    doc.setName(file.fileName());
 
     QIODevice *device = doc.open(QIODevice::WriteOnly);
 
     qLog(Obex) << "File for QContent is:" << doc.name()
-            << "with filename:" << doc.fileName();
+            << "with fileName:" << doc.fileName();
 
     // If there's a Description value, use that as the QContent name instead
     // of using the Name value, cos it's probably a more user-friendly name
@@ -512,6 +678,8 @@ void ReceiveWindow::saveFile(int index)
         doc.setName(desc);
     }
 
+    QContentId contentId = QContent::InvalidId;
+
     if (device) {
         char buf[4096];
         int size;
@@ -520,36 +688,60 @@ void ReceiveWindow::saveFile(int index)
         }
         device->close();
         delete device;
-        doc.commit();
-    }
-    else {
+
+        if (doc.commit()) {
+            contentId = doc.id();
+        } else {
+            qLog(Obex) << "Error saving QContent file" << doc.fileName();
+        }
+    } else {
         qLog(Obex) << "Failed to save file" << doc.fileName();
     }
 
     f.close();
     ::unlink(tmpFile.toLocal8Bit().data());
+
+    return contentId;
 }
 
-void ReceiveWindow::handleSupportedFormatRecv(int id, const QString &file, const QString &mime, const QString &description)
+void ReceiveWindow::handleIncomingVObject(int id, const QString &fileName, const QString &mime, const QString &/*description*/)
 {
-    m_list.push_back(ReceivedFile(id, ReceivedFile::Receiving, file, mime, description));
+    VObjectTransfer t;
+    t.id = id;
+    t.fileName = fileName;
+    t.mimeType = mime;
+    m_vObjects.append(t);
 }
 
-static void vcalInfo( const QString &filename, bool *todo, bool *cal )
+void ReceiveWindow::activated(const QModelIndex &index)
 {
-    *cal = *todo = false;
-
-    QList<QAppointment> events = QAppointment::readVCalendar( filename );
-
-    if ( events.count() ) {
-        *cal = true;
+    if (!index.isValid())
+        return;
+    const FileTransfer &file = m_model->findFile(index);
+    if (file.contentId() != QContent::InvalidId) {
+        QContent content(file.contentId());
+        qLog(Obex) << "Opening file:" << content.name();
+        content.execute();
     }
+}
 
-    QList<QTask> tasks = QTask::readVCalendar( filename );
+void ReceiveWindow::currentChanged(const QModelIndex &current, const QModelIndex &)
+{
+    if (!current.isValid())
+        return;
 
-    if ( tasks.count() ) {
-        *todo = true;
-    }
+    // don't show 'select' label if file can't be opened (i.e. is incoming
+    // file and haven't fully received it yet)
+    const FileTransfer &file = m_model->findFile(current);
+    QListView *view = (file.direction() == FileTransfer::Receiving ?
+                m_incomingView : m_outgoingView);
+    if (file.contentId() == QContent::InvalidId)
+        QSoftMenuBar::setLabel(view, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    else
+        QSoftMenuBar::setLabel(view, Qt::Key_Select, QSoftMenuBar::Select);
+
+    // only show 'cancel transfer' in context menu if transfer is in progress
+    m_cancelAction->setVisible(!file.finished());
 }
 
 void ReceiveWindow::showWindow()
@@ -559,36 +751,50 @@ void ReceiveWindow::showWindow()
     raise();
 }
 
-// Returns whether the file was handled
-bool ReceiveWindow::handleSupportedFormatComplete(int id, bool err)
+void ReceiveWindow::stopCurrentTransfer()
+{
+    qLog(Obex) << "User wants to abort file transfer";
+
+    QListView *view = qobject_cast<QListView *>(m_tabs->currentWidget());
+    if (!view)
+        return;
+    QModelIndex index = view->currentIndex();
+    if (!index.isValid())
+        return;
+    const FileTransfer &file = m_model->findFile(index);
+    emit abortTransfer(file.id());
+}
+
+bool ReceiveWindow::handleVObjectReceived(int id, bool err)
 {
     int index = -1;
-    for (int i = 0; i < m_list.size(); i++) {
-        if (m_list[i].id() == id) {
+    for (int i = 0; i < m_vObjects.size(); i++) {
+        if (m_vObjects[i].id == id) {
             index = i;
+            break;
         }
     }
 
     if (index == -1)
         return false;
 
-    qLog(Obex) << "Found file...";
+    qLog(Obex) << "Found vCard/vCalendar file...";
 
-    ReceivedFile file = m_list.takeAt(index);
+    VObjectTransfer transfer = m_vObjects.takeAt(index);
 
     if (err) {
-        qLog(Obex) << "Error occurred, deleting incoming file...";
-        QString fn = Qtopia::tempDir() + "obex/in/" + file.filename();
+        qLog(Obex) << "Error occurred, deleting received file...";
+        QString fn = Qtopia::tempDir() + "obex/in/" + transfer.fileName;
         ::unlink(fn.toLocal8Bit().data());
         return true;
     }
 
-    qLog(Obex) << "Figuring out mimetype and app to send to";
+    qLog(Obex) << "Figuring out mimeType and app to send to";
 
-    QString incoming = Qtopia::tempDir() + "obex/in/" + file.filename();
+    QString incoming = Qtopia::tempDir() + "obex/in/" + transfer.fileName;
     qLog(Obex) << "Temp file:" << incoming << "exists?" << QFile::exists(incoming);
 
-    QMimeType mt(file.mimetype());
+    QMimeType mt(transfer.mimeType);
 
     qLog(Obex) << "Mimetype is: " << mt.id();
     QString service = "Receive/"+mt.id();
@@ -601,7 +807,8 @@ bool ReceiveWindow::handleSupportedFormatComplete(int id, bool err)
         // ##### should split file, or some other full fix
         if ( mt.id().toLower() == "text/x-vcalendar" ) {
             bool calendar, todo;
-            vcalInfo(Qtopia::tempDir() + "obex/in/" + file.filename(), &todo, &calendar);
+            vcalInfo(Qtopia::tempDir() + "obex/in/" + transfer.fileName,
+                     &todo, &calendar);
             if ( calendar ) {
                 receiveChannel = QtopiaService::channel(service+"-Events");
             }
@@ -616,7 +823,7 @@ bool ReceiveWindow::handleSupportedFormatComplete(int id, bool err)
         QContent lnk(QtopiaService::app(service));
         qLog(Obex) << "Sending QtopiaIpcEnvelope";
         QtopiaIpcEnvelope e( receiveChannel, "receiveData(QString,QString)");
-        e << Qtopia::tempDir() + "obex/in/" + file.filename() << mt.id();
+        e << Qtopia::tempDir() + "obex/in/" + transfer.fileName << mt.id();
     }
 
     return true;

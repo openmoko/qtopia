@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -100,25 +100,6 @@ PackageModel::PackageModel( QObject* parent )
     networked = AbstractPackageController::factory( AbstractPackageController::network, this );
     installed = AbstractPackageController::factory( AbstractPackageController::installed, this );
 
-#ifndef QT_NO_SXE
-    QFile file( Qtopia::qtopiaDir() + QLatin1String( "/etc/default/Trolltech/PackageManager.conf" ) );
-
-    if( file.open( QIODevice::ReadOnly ) )
-    {
-        QString header = QLatin1String( "[Sensitive]" );
-        QChar bracket = QLatin1Char( '[' );
-
-        QString line;
-
-        while( !file.atEnd() && !(line = file.readLine()).startsWith( header ) );
-
-        while( !file.atEnd() && !(line = file.readLine()).startsWith( bracket ) )
-            sensitiveDomains.append( line.trimmed() );
-
-        file.close();
-    }
-#endif
-
     // can only have a max of 15 top level items
     rootItems << installed << networked;
 
@@ -215,7 +196,6 @@ void PackageModel::setServer( const QString& server )
     activeServer = server;
     QString serverUrl = servers[ server ];
     if ( serverUrl != QString() ) {
-        if ( network->networkServer() != serverUrl )
             network->setNetworkServer( serverUrl );
     }
 }
@@ -421,19 +401,6 @@ int PackageModel::columnCount( const QModelIndex &parent ) const
         return 1;
     return  2; // columnHeads.count();
 }
-
-#ifndef QT_NO_SXE
-bool PackageModel::hasSensitiveDomains( const QString &domain )
-{
-    QStringList packageDomains = domain.split( QLatin1Char( ',' ), QString::SkipEmptyParts );
-
-    foreach( QString d, packageDomains )
-        if( sensitiveDomains.contains( d ) )
-            return true;
-
-    return false;
-}
-#endif
 
 void PackageModel::serverStatusUpdated(const QString &status)
 {

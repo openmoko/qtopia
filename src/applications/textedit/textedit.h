@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,7 +33,7 @@ class QToolButton;
 class QAction;
 class QStackedWidget;
 class QDocumentSelector;
-class StupidToolTip;
+class SimpleToolTip;
 class QVBoxLayout;
 class QLabel;
 
@@ -103,7 +103,7 @@ private:
     QAction *pasteAction;
     QAction *findAction;
     QContent *doc;
-    StupidToolTip *mToolTip;
+    SimpleToolTip *mToolTip;
     QWidget *mFindTextWidget;
     QLineEdit *mFindTextEntry;
     QLabel *mFindIcon;

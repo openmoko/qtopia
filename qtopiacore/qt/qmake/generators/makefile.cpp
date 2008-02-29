@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the qmake application of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1135,7 +1133,7 @@ MakefileGenerator::writeObj(QTextStream &t, const QString &src)
         if((*sit).isEmpty())
             continue;
 
-        t << escapeFilePath((*oit)) << ": " << escapeFilePath((*sit)) << " " << escapeFilePaths(findDependencies((*sit))).join(" \\\n\t\t");
+        t << escapeDependencyPath((*oit)) << ": " << escapeDependencyPath((*sit)) << " " << escapeDependencyPaths(findDependencies((*sit))).join(" \\\n\t\t");
 
         QString comp, cimp;
         for(QStringList::Iterator cppit = Option::cpp_ext.begin(); cppit != Option::cpp_ext.end(); ++cppit) {
@@ -1325,7 +1323,7 @@ MakefileGenerator::writeInstalls(QTextStream &t, const QString &installs, bool n
                     QString targ = var((*dep_it) + ".target");
                     if(targ.isEmpty())
                         targ = (*dep_it);
-                    t << " " << targ;
+                    t << " " << escapeDependencyPath(targ);
                 }
             }
             if(project->isEmpty("QMAKE_NOFORCE"))
@@ -1680,14 +1678,14 @@ MakefileGenerator::writeExtraTargets(QTextStream &t)
             QString dep = var((*dep_it) + ".target");
             if(dep.isEmpty())
                 dep = (*dep_it);
-            deps += " " + escapeFilePath(dep);
+            deps += " " + escapeDependencyPath(dep);
         }
         if(project->values((*it) + ".CONFIG").indexOf("fix_target") != -1)
             targ = fileFixify(targ);
         if(project->isEmpty("QMAKE_NOFORCE") &&
            project->values((*it) + ".CONFIG").indexOf("phony") != -1)
             deps += QString(" ") + "FORCE";
-        t << escapeFilePath(targ) << ":" << deps;
+        t << escapeDependencyPath(targ) << ":" << deps;
         if(!cmd.isEmpty())
             t << "\n\t" << cmd;
         t << endl << endl;
@@ -1752,11 +1750,11 @@ MakefileGenerator::writeExtraCompilerTargets(QTextStream &t)
         if(project->values((*it) + ".CONFIG").indexOf("combine") != -1) {
             // compilers with a combined input only have one output
             QString input = project->values((*it) + ".output").first();
-            t << " " << escapeFilePath(replaceExtraCompilerVariables(tmp_out, input, QString()));
+            t << " " << escapeDependencyPath(replaceExtraCompilerVariables(tmp_out, input, QString()));
         } else {
             for(QStringList::ConstIterator input = tmp_inputs.begin(); input != tmp_inputs.end(); ++input) {
                 QString in = Option::fixPathToTargetOS((*input), false);
-                t << " " << escapeFilePath(replaceExtraCompilerVariables(tmp_out, (*input), QString()));
+                t << " " << escapeDependencyPath(replaceExtraCompilerVariables(tmp_out, (*input), QString()));
             }
         }
         t << endl;
@@ -1882,12 +1880,12 @@ MakefileGenerator::writeExtraCompilerTargets(QTextStream &t)
                 continue;
 
             QString cmd = replaceExtraCompilerVariables(tmp_cmd, escapeFilePaths(inputs), QStringList(tmp_out));
-            t << escapeFilePath(tmp_out) << ":";
+            t << escapeDependencyPath(tmp_out) << ":";
             // compiler.CONFIG+=explicit_dependencies means that ONLY compiler.depends gets to cause Makefile dependencies
             if(project->values((*it) + ".CONFIG").indexOf("explicit_dependencies") != -1) {
-                t << " " << valList(escapeFilePaths(fileFixify(tmp_dep, Option::output_dir, Option::output_dir)));
+                t << " " << valList(escapeDependencyPaths(fileFixify(tmp_dep, Option::output_dir, Option::output_dir)));
             } else {
-                t << " " << valList(escapeFilePaths(inputs)) << " " << valList(escapeFilePaths(deps));
+                t << " " << valList(escapeDependencyPaths(inputs)) << " " << valList(escapeDependencyPaths(deps));
             }
             t << "\n\t" << cmd << endl << endl;
             continue;
@@ -1895,7 +1893,7 @@ MakefileGenerator::writeExtraCompilerTargets(QTextStream &t)
         for(QStringList::ConstIterator input = tmp_inputs.begin(); input != tmp_inputs.end(); ++input) {
             QString in = Option::fixPathToTargetOS((*input), false);
             QStringList deps = findDependencies((*input));
-            deps += escapeFilePath(in);
+            deps += escapeDependencyPath(in);
             QString out = replaceExtraCompilerVariables(tmp_out, (*input), QString());
             if(!tmp_dep.isEmpty()) {
                 QStringList pre_deps = fileFixify(tmp_dep, Option::output_dir, Option::output_dir);
@@ -1990,7 +1988,7 @@ MakefileGenerator::writeExtraCompilerTargets(QTextStream &t)
                 else
                     ++i;
             }
-            t << escapeFilePath(out) << ": " << valList(escapeFilePaths(deps)) << "\n\t"
+            t << escapeDependencyPath(out) << ": " << valList(escapeDependencyPaths(deps)) << "\n\t"
               << cmd << endl << endl;
         }
     }
@@ -2589,17 +2587,17 @@ MakefileGenerator::writeMakeQmake(QTextStream &t)
     if(pfile != "(stdin)") {
         QString qmake = build_args();
         if(!ofile.isEmpty() && !project->isActiveConfig("no_autoqmake")) {
-            t << escapeFilePath(ofile) << ": " << fileFixify(pfile) << " ";
+            t << escapeFilePath(ofile) << ": " << escapeDependencyPath(fileFixify(pfile)) << " ";
             if(Option::mkfile::do_cache)
-                t <<  fileFixify(Option::mkfile::cachefile) << " ";
+                t <<  escapeDependencyPath(fileFixify(Option::mkfile::cachefile)) << " ";
             if(!specdir().isEmpty()) {
                 if(exists(Option::fixPathToLocalOS(specdir()+QDir::separator()+"qmake.conf")))
-                    t << escapeFilePath(specdir() + Option::dir_sep + "qmake.conf") << " ";
+                    t << escapeDependencyPath(specdir() + Option::dir_sep + "qmake.conf") << " ";
                 else if(exists(Option::fixPathToLocalOS(specdir()+QDir::separator()+"tmake.conf")))
-                    t << escapeFilePath(specdir() + Option::dir_sep + "tmake.conf") << " ";
+                    t << escapeDependencyPath(specdir() + Option::dir_sep + "tmake.conf") << " ";
             }
             const QStringList &included = project->values("QMAKE_INTERNAL_INCLUDED_FILES");
-            t << escapeFilePaths(included).join(" \\\n\t\t") << "\n\t"
+            t << escapeDependencyPaths(included).join(" \\\n\t\t") << "\n\t"
               << qmake << endl;
             for(int include = 0; include < included.size(); ++include) {
 		const QString i(included.at(include));
@@ -2656,6 +2654,15 @@ MakefileGenerator::escapeFilePaths(const QStringList &paths) const
     QStringList ret;
     for(int i = 0; i < paths.size(); ++i)
         ret.append(escapeFilePath(paths.at(i)));
+    return ret;
+}
+
+QStringList
+MakefileGenerator::escapeDependencyPaths(const QStringList &paths) const
+{
+    QStringList ret;
+    for(int i = 0; i < paths.size(); ++i)
+        ret.append(escapeDependencyPath(paths.at(i)));
     return ret;
 }
 

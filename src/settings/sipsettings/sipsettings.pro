@@ -29,4 +29,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=SIP settings dialog for Qtopia.
-pkg.domain=window,phonecomm
+pkg.domain=trusted

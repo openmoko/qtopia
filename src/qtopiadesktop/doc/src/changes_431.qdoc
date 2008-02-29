@@ -1,0 +1,22 @@
+/*!
+
+\changelog 4.3.1
+
+\section1 Overview
+
+This page describes changes to Qtopia Sync Agent 4.3.1.
+
+\list
+\o Fixed some data corruption bugs and implemented test cases for the Qtopia side
+   of the connection.
+\o Documentation has been significantly updated.
+\o Corrected issues that impacted building Qtopia Sync Agent from source code.
+\endlist
+
+\section1 Known issues
+
+\list
+\o Appointments starting and ending at midnight are mis-reported as all day events.
+\endlist
+
+*/

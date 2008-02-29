@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 
 #include <QListWidget>
 #include <QPushButton>
+#include <QMailMessage>
 #include <QMenu>
 #include <QString>
 #include <QList>
@@ -35,19 +36,17 @@ class QMailMessage;
 class AttachmentItem : public QListWidgetItem
 {
 public:
-    AttachmentItem(QListWidget *parent, const QContent&);
-    AttachmentItem(QListWidget *parent, const QString &filename );
+    AttachmentItem(QListWidget *parent, const QContent&, QMailMessage::AttachmentsAction);
     ~AttachmentItem();
 
-    bool isDocument() const;
     const QContent& document() const;
-    QString fileName() const;
     int sizeKB() const;
+    QMailMessage::AttachmentsAction action() const;
 
 private:
     QContent mAttachment;
-    QString mFileName;
     int mSizeKB;
+    QMailMessage::AttachmentsAction mAction;
 };
 
 class AddAttBase
@@ -59,8 +58,7 @@ public:
     void setHighlighted();
     virtual void getFiles() = 0;
     void setMailMessageParts(QMailMessage *mail);
-    bool addAttachment(const QString &filename);
-    bool addAttachment(const QContent&);
+    bool addAttachment(const QContent&, QMailMessage::AttachmentsAction action);
     int totalSizeKB();
 
 protected:

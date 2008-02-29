@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -76,6 +76,8 @@ E1CallHistorySelector::E1CallHistorySelector( QWidget* parent )
 void E1CallHistorySelector::itemSelected( QListWidgetItem* i )
 {
     int cr = currentRow();
+    Q_UNUSED(cr);    // Unused in non-debug builds
+    Q_UNUSED(i);     // Unused in non-debug builds
     Q_ASSERT(item(cr) == i);
     Q_ASSERT(cr == E1CallHistory::Dialed || cr == E1CallHistory::Answered || cr == E1CallHistory::Missed);
     emit selected( (E1CallHistory::Type)currentRow() );

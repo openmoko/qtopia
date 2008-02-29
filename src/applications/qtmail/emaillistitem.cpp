@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -41,6 +41,7 @@ static QPixmap* pm_toget = 0;
 static QPixmap* pm_tosend = 0;
 static QPixmap* pm_unread = 0;
 static QPixmap* pm_unfinished = 0;
+static QPixmap* pm_removed = 0;
 
 static QPixmap* pm_mms = 0;
 static QPixmap* pm_ems = 0;
@@ -58,6 +59,7 @@ static void ensurePixmaps()
         pm_toget = new QPixmap(":image/flag_toget");
         pm_tosend = new QPixmap(":image/flag_tosend");
         pm_unfinished = new QPixmap(":image/flag_unfinished");
+        pm_removed = new QPixmap(":image/flag_removed");
 
         int extent = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
         pm_mms = new QPixmap(QIcon(":icon/multimedia").pixmap(extent));
@@ -76,6 +78,7 @@ void EmailListItem::deletePixmaps()
     delete pm_toget;
     delete pm_tosend;
     delete pm_unfinished;
+    delete pm_removed;
     delete pm_mms;
     delete pm_ems;
     delete pm_sms;
@@ -87,6 +90,8 @@ EmailListItem::EmailListItem(MailListView *parent, const QMailId& id, int col)
 {
     ensurePixmaps();
     setFlags( flags() & ~Qt::ItemIsEditable );
+
+    Q_UNUSED(parent)
 }
 
 EmailListItem::~EmailListItem()
@@ -133,7 +138,9 @@ void EmailListItem::setColumns()
 
     QMailMessage::Status mailStatus(mail.status());
     if ( mailStatus & QMailMessage::Incoming ) {
-        if ( mailStatus & QMailMessage::Downloaded ) {
+        if ( mailStatus & QMailMessage::Removed ) {
+            setIcon(*pm_removed);
+        } else if ( mailStatus & QMailMessage::Downloaded ) {
             if ( mailStatus & QMailMessage::Read ) {
                 setIcon(*pm_normal);
             } else {
@@ -144,8 +151,8 @@ void EmailListItem::setColumns()
         }
     } else {
         if ( mailStatus & QMailMessage::Sent ) {
-                setIcon(*pm_normal);
-        } else if ( mail.hasRecipients() ) {
+            setIcon(*pm_normal);
+        } else if ( !mail.hasRecipients() ) {
             setIcon(*pm_unfinished);
         } else {
             setIcon(*pm_tosend);
@@ -262,17 +269,17 @@ void EmailListItemDelegate::paint(QPainter *painter,
         if ( mail.status() & QMailMessage::Incoming ) {
             QMailAddress fromAddress(mail.from());
             if(item->cachedName().isNull())
-                item->setCachedName(nameString(fromAddress));
+                item->setCachedName(fromAddress.displayName());
         } else {
             if ( mail.to().count() > 0) {
                 QMailAddress firstRecipient(mail.to().first());
                 if(item->cachedName().isNull())
                 {
-                    item->setCachedName(nameString(firstRecipient));
+                    item->setCachedName(firstRecipient.displayName());
 
                     int recipientCount = mail.recipients().count();
                     if (recipientCount > 1)
-                        item->setCachedName(item->cachedName() + "...");
+                        item->setCachedName(item->cachedName() + ", ...");
                 }
             }
         }
@@ -381,15 +388,3 @@ void EmailListItemDelegate::paint(QPainter *painter,
     }
 }
 
-QString EmailListItemDelegate::nameString(const QMailAddress& address) const
-{
-    if(address.isEmailAddress())
-    {
-        if(!address.name().isEmpty())
-            return address.name();
-        else
-            return address.address();
-    }
-    else
-        return address.displayName();
-}

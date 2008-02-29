@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,13 +33,17 @@ Slider::Slider( int min, int max, int step, int value, QWidget* parent )
     setPageStep( step );
     setValue( value );
     // Disable context menu
-    QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), QSoftMenuBar::NoLabel );
+    QSoftMenuBar::menuFor( this );
 }
 
 void Slider::keyPressEvent( QKeyEvent* e )
 {
-    if( ( e->key() == Qt::Key_Select || e->key() == Qt::Key_Back ) && hasEditFocus() )
-        emit selected();
-    else
-        QSlider::keyPressEvent( e );
+    QSlider::keyPressEvent( e );
+
+    if( ( e->key() == Qt::Key_Select || e->key() == Qt::Key_Back ) )
+    {
+         emit selected();
+
+         e->accept();
+    }
 }

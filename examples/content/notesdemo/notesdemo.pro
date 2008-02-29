@@ -26,4 +26,4 @@ pkg.desc=NotesDemo Application
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=Commercial
-pkg.domain=window,doc_server,doc_write
+pkg.domain=trusted

@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -39,7 +39,7 @@
     #include &lt;QtopiaServiceRequest&gt;
     #include &lt;QVBoxLayout&gt;
 
-<span class="comment">    // A stackable widget allowing the selection of a Contact</span>
+<span class="comment">    //</span> A stackable widget allowing the selection of a Contact
     class ContactSelector : public QWidget
     {
         Q_OBJECT
@@ -60,12 +60,12 @@
             QVBoxLayout* layout = new QVBoxLayout(this);
             layout-&gt;addWidget(label);
             layout-&gt;addWidget(listView);
-            <span class="comment">// Adjust ContactSelector layout for attractive layout - not relevant to example discussion</span>
+            <span class="comment">//</span> Adjust ContactSelector layout for attractive layout - not relevant to example discussion
             int horizontal = style()-&gt;pixelMetric(QStyle::PM_LayoutLeftMargin);
             int vertical = style()-&gt;pixelMetric(QStyle::PM_LayoutTopMargin);
             label-&gt;setContentsMargins(horizontal, vertical, horizontal, 0);
             layout-&gt;setContentsMargins(0, 0, 0, 0);
-            <span class="comment">// end-Adjust</span>
+            <span class="comment">//</span> end-Adjust
         }
 
     signals:
@@ -79,7 +79,7 @@
         QContactListView* listView;
     };
 
-<span class="comment">    // A stackable widget allowing the selection of a message</span>
+<span class="comment">    //</span> A stackable widget allowing the selection of a message
     class MessageSelector : public QWidget
     {
         Q_OBJECT
@@ -103,12 +103,12 @@
             QVBoxLayout* layout = new QVBoxLayout(this);
             layout-&gt;addWidget(label);
             layout-&gt;addWidget(listView);
-            <span class="comment">// Adjust MessageSelector layout for attractive layout - not relevant to example discussion</span>
+            <span class="comment">//</span> Adjust MessageSelector layout for attractive layout - not relevant to example discussion
             int horizontal = style()-&gt;pixelMetric(QStyle::PM_LayoutLeftMargin);
             int vertical = style()-&gt;pixelMetric(QStyle::PM_LayoutTopMargin);
             label-&gt;setContentsMargins(horizontal, vertical, horizontal, 0);
             layout-&gt;setContentsMargins(0, 0, 0, 0);
-            <span class="comment">// end-Adjust</span>
+            <span class="comment">//</span> end-Adjust
         }
 
     signals:
@@ -149,11 +149,11 @@
 
         emit listPrepared();
     }
-<span class="comment">    // end-listMessages</span>
+<span class="comment">    //</span> end-listMessages
 
     bool MessageSelector::eventFilter(QObject* obj, QEvent* event)
     {
-        <span class="comment">// We need to capture the back key, so it doesn't close our window</span>
+        <span class="comment">//</span> We need to capture the back key, so it doesn't close our window
         if ((obj == listView) &amp;&amp; (event-&gt;type() == QEvent::KeyPress))
         {
             if (QKeyEvent* keyEvent = static_cast&lt;QKeyEvent*&gt;(event))
@@ -176,10 +176,10 @@
     {
         setupUi(this);
 
-        <span class="comment">// Necessary to create the menu (which contains our help entry):</span>
+        <span class="comment">//</span> Necessary to create the menu (which contains our help entry):
         (void)QSoftMenuBar::menuFor(this);
 
-        <span class="comment">// Connect our components</span>
+        <span class="comment">//</span> Connect our components
         connect(contactSelector, SIGNAL(contactSelected(QContact)), messageSelector, SLOT(listMessages(QContact)));
         connect(messageSelector, SIGNAL(listPrepared()), this, SLOT(showMessageList()));
         connect(messageSelector, SIGNAL(messageSelected(QMailId)), this, SLOT(viewMessage(QMailId)));
@@ -206,7 +206,7 @@
 
     void MessageViewer::viewMessage(const QMailId&amp; id)
     {
-        <span class="comment">// Request that some application display the selected message</span>
+        <span class="comment">//</span> Request that some application display the selected message
         QtopiaServiceRequest req( &quot;Messages&quot;, &quot;viewMessage(QMailId)&quot; );
         req &lt;&lt; id;
         req.send();
@@ -220,8 +220,8 @@
     #include &quot;messageviewer.moc&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

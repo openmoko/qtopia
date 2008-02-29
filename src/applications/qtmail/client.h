@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,7 +26,7 @@
 
 #include <qtopiaglobal.h>
 
-class MailAccount;
+class QMailAccount;
 class MailList;
 
 class Client : public QObject
@@ -36,7 +36,7 @@ class Client : public QObject
 public:
     Client();
     virtual ~Client();
-    virtual void setAccount(MailAccount *_account);
+    virtual void setAccount(QMailAccount *_account);
     virtual void headersOnly(bool headers, int limit);
     virtual void newConnection();
     virtual void setSelectedMails(MailList *list, bool connected);
@@ -53,7 +53,6 @@ signals:
     void mailTransferred(int);
     void unresolvedUidlList(QStringList &);
     void serverFolders();
-    void downloadedSize(int);
     void mailboxSize(int);
     void transferredSize(int);
     void failedList(QStringList &);

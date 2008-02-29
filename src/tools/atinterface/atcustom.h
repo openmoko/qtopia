@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,7 @@
 #define ATCUSTOM_H
 
 #include <custom.h>
+#include <version.h>
 
 // Values that can be used to customise manufacturer information.
 #ifndef QTOPIA_AT_MANUFACTURER
@@ -32,7 +33,7 @@
 #define QTOPIA_AT_MODEL             "QTOPIA PHONE"
 #endif
 #ifndef QTOPIA_AT_REVISION
-#define QTOPIA_AT_REVISION          QPE_VERSION
+#define QTOPIA_AT_REVISION          QTOPIA_VERSION_STR
 #endif
 #ifndef QTOPIA_AT_SERIAL_NUMBER
 #define QTOPIA_AT_SERIAL_NUMBER     "1234567890"

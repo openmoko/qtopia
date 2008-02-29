@@ -27,14 +27,20 @@
 <tr valign="top" class="odd"><td><tt>AT+CGDATA=[&lt;L2P&gt;[,&lt;cid&gt;[,&lt;cid&gt;[,...]]]]</tt></td><td><tt>CONNECT</tt>, <tt>ERROR</tt></td></tr>
 <tr valign="top" class="even"><td><tt>AT+CGDATA=?</tt></td><td><tt>+CGDCONT:</tt></td></tr>
 </table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><b>AT+CGDCONT Define PDP context</b></p>
 <p>The <tt>AT+CGDCONT</tt> command is used to select the Packet Data Protocols and Packet Domain.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CGDCONT=[&lt;cid&gt;[,&lt;PDP_type&gt;[,&lt;APN&gt;]]]</tt></td><td><tt>OK</tt> <tt>ERROR</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CGDCONT=[&lt;cid&gt;[,&lt;PDP_type&gt;[,&lt;APN&gt;]]]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
 <tr valign="top" class="even"><td><tt>AT+CGDCONT?</tt></td><td><tt>+CGDCONT: &lt;cid&gt;,&lt;PDP_type&gt;,&lt;APN&gt;</tt></td></tr>
 <tr valign="top" class="odd"><td><tt>AT+CGDCONT=?</tt></td><td><tt>+CGDCONT: (1),&quot;IP&quot;,</tt></td></tr>
 </table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -43,8 +49,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

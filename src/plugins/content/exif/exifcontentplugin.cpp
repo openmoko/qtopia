@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -75,21 +75,36 @@ bool ExifContentPlugin::updateContent( QContent *content )
 
 bool ExifContentPlugin::readFile( QFile *file, QContent *content )
 {
-    if( file->peek( 4 ) == "\xFF\xD8\xFF\xE1" )
-    {
-        file->seek( 6 );
+    if( file->peek( 2 ) != "\xFF\xD8" )
+        return false;
 
-        if( file->read( 4 ) != "Exif" )
+    file->read( 2 );
+
+    QDataStream stream( file );
+    stream.setByteOrder( QDataStream::BigEndian );
+
+    while( file->read( 2 ) != "\xFF\xE1" )
+    {
+        if( file->atEnd() )
             return false;
 
-        file->seek( 12 );
+        quint16 length;
+
+        stream >> length;
+
+        file->seek( file->pos() + length - 2 );
     }
+
+    file->read( 2 );
+
+    if( file->read( 4 ) != "Exif" )
+        return false;
+
+    file->read( 2 );
 
     qint64 baseOffset = file->pos();
 
     QByteArray byteOrder = file->read( 2 );
-
-    QDataStream stream( file );
 
     if( byteOrder == "II" )
         stream.setByteOrder( QDataStream::LittleEndian );

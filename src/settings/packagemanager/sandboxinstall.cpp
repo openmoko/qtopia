@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
-/Q** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2.
@@ -21,6 +21,7 @@
 
 #include "sandboxinstall.h"
 #include "packageview.h"
+#include "utils.h"
 
 #include <qtopianamespace.h>
 #include <qcontent.h>
@@ -45,6 +46,17 @@
 #include <qcontent.h>
 #include <qtopiachannel.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+//directories found in the packages root path
+#define BIN "bin"
+#define PICS "pics"
+#define SOUNDS "sounds"
+#define HELP "help"
+#define CONTROLS "controls"
+#define I18N "i18n"
+
 /*!
   Construct a new sandbox install job object, ensuring the sandbox
   root exists, and creating the destination directory for the
@@ -88,20 +100,19 @@ SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, co
         abort = true;
         return;
     }
-    if ( sandboxRoot.exists( pkg->md5Sum ))
-    {
-        if( reporter )
-        {
-            QString simpleError = QObject::tr( "Package already installed" );
-            QString detailedError( QString("SandboxInstallJob::SandboxInstallJob:- "
-                                       "Package directory matching %1 already exists")
-                                        .arg( pkg->md5Sum ));
-            reporter->reportError( simpleError, detailedError );
-        }
 
-        abort = true;
-        return;
+    if (sandboxRoot.exists( pkg->md5Sum ))
+    {
+        qWarning( QString("SandboxInstallJob::SandboxInstallJob:- "
+                          "Package directory matching %1 already exists, clearing out "
+                          "residual package elements" ).arg(pkg->md5Sum).toLatin1() );
+
+        SandboxUninstallJob job( pkg, m, reporter );
+        job.terminateApps();
+        job.unregisterPackageFiles();
+        job.dismantleSandbox();
     }
+
     if ( media.isEmpty() )
     {
         if ( !sandboxRoot.mkdir( pkg->md5Sum ))
@@ -110,7 +121,8 @@ SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, co
             {
                 QString simpleError = QObject::tr( "Error occurred during installation" );
                 QString detailedError = QString( "SandboxInstallJob::SandboxInstallJob:- "
-                                               "Could not create directory %1").arg( pkg->md5Sum);
+                                               "Could not create directory %1")
+                                       .arg( pkg->md5Sum );
                 reporter->reportError( simpleError, detailedError );
             }
 
@@ -121,6 +133,14 @@ SandboxInstallJob::SandboxInstallJob( const InstallControl::PackageInfo *pkg, co
     else
     {
         mediaSandboxRoot();
+    }
+
+    QStringList dirs;
+    dirs << BIN << PICS << SOUNDS << HELP << CONTROLS << I18N;
+    foreach ( QString dir, dirs )
+    {
+        if ( !QDir::root().exists( Qtopia::packagePath() + dir) )
+            QDir::root().mkpath( Qtopia::packagePath() + dir );
     }
 }
 
@@ -211,19 +231,18 @@ void SandboxInstallJob::removeDestination() const
             f.remove();
         }
     }
-    clearMiscFiles();
+    SandboxUninstallJob::clearMiscFiles(package);
 }
 
 /*!
-  Register all the files in the directory tree at \a path with the Qtopia
-  system, including SXE and Document systems.
-  */
-bool SandboxInstallJob::registerPackageFiles( const QString &path )
-{
-#ifndef QT_NO_SXE
-    SxeProgramInfo pi;
-#endif
+  Recurse through a given directory to find any desktop files
+  and add them to the desktopPaths variable for later use.
 
+  Also make any executables found writable (the need for doing
+  this is deprecated and should eventaully be removed)
+  */
+bool SandboxInstallJob::preprocessPackageFiles( const QString &path )
+{
     QDir directory( path.isEmpty() ? destination : path );
 
     qLog(Package) << "registering package files in" << directory.path();
@@ -237,7 +256,7 @@ bool SandboxInstallJob::registerPackageFiles( const QString &path )
 
         // recurse to other directories
         if (fileInfo.isDir()) {
-            registerPackageFiles( fileInfo.filePath() );
+            preprocessPackageFiles( fileInfo.filePath() );
         }
         else if ( fileInfo.isFile() )
         {
@@ -247,7 +266,7 @@ bool SandboxInstallJob::registerPackageFiles( const QString &path )
                 desktopPaths << fileInfo.filePath();
             }
             else if ( fileInfo.isExecutable() )
-            {
+            {//Note: the need for making executables writable is deprecated
                 if ( !fileInfo.isWritable() )
                 {
                     QFile::Permissions perms = QFile::permissions( fileInfo.filePath() );
@@ -264,21 +283,6 @@ bool SandboxInstallJob::registerPackageFiles( const QString &path )
                         return false;
                     }
                 }
-#ifndef QT_NO_SXE
-                QString registerPath = directory.path();
-                registerPath.remove( Qtopia::packagePath() );
-                pi.fileName = fileInfo.fileName();
-                pi.relPath = registerPath;
-                pi.runRoot = Qtopia::packagePath();
-                pi.domain = package->domain;
-                emit newBinary( pi );
-                QString binPath = directory.path() + "/" + fileInfo.fileName();
-                runSandbox( binPath, destination );
-                QStringList domainList = package->domain.split(",");
-                foreach ( QString dom, domainList )
-                    applyDomainRules( binPath, dom );
-                reloadRules();
-#endif
             }
         }
     }
@@ -357,6 +361,9 @@ void SandboxInstallJob::runSandbox( const QString &binPath, const QString &sandb
 {
     static QString sandboxCmd;
     static bool commandUnavailable = false;
+    
+    if ( !LidsUtils::isLidsEnabled() )
+        return;
 
     if ( commandUnavailable )
         return;
@@ -385,6 +392,7 @@ void SandboxInstallJob::runSandbox( const QString &binPath, const QString &sandb
 }
 
 /*!
+  \deprecated
   Execute the domain specific MAC kernel rules for the \a domain, by invoking the
   shell scripts in the qtopia \c {etc/sxe_domains} directory.
 
@@ -404,8 +412,13 @@ void SandboxInstallJob::applyDomainRules( const QString &binPath, const QString 
 {
     static QMap<QString,QString> domainScripts;
     static bool scriptsNotFound = false;
+ 
+    if ( !LidsUtils::isLidsEnabled() )
+                return;
+
     if ( scriptsNotFound == true )
         return;
+
     if ( domainScripts.count() == 0 )
     {
         QString scriptPath;
@@ -444,7 +457,18 @@ void SandboxInstallJob::applyDomainRules( const QString &binPath, const QString 
     }
     if ( !domainScripts.contains( domain ))
         return;
+    //set binary path for domain script
     ::setenv( "BIN", qPrintable(binPath), 1 );
+
+    //set qcop message file for domain script
+    ::setenv( "QCOP_FILE", qPrintable( Qtopia::tempDir()
+                + QLatin1String("qcop-msg-")
+                + package->md5Sum + QLatin1Char('_')
+                + binPath.mid( binPath.lastIndexOf('/') + 1 )),1);
+    //set the package path for domain script
+    //so permissions can be given to acces help etc
+    ::setenv( "PACKAGES_DIR", qPrintable(Qtopia::packagePath()),1 );
+
     QString domainCommand = domainScripts[domain];
     qLog(Package) << "Running domain script: " << ( domainCommand );
     QProcess::execute( domainCommand );
@@ -458,6 +482,9 @@ void SandboxInstallJob::reloadRules()
 {
     static QString reloadCmd;
     static bool commandUnavailable = false;
+
+    if ( !LidsUtils::isLidsEnabled() )
+                return;
 
     if ( commandUnavailable )
         return;
@@ -563,8 +590,7 @@ void SandboxInstallJob::reloadRules()
 */
 bool SandboxInstallJob::setupSandbox()
 {
-    // create links for the icon, binary
-    QHash<QString,QSettings*> desktopConf;
+    QList<QSettings*> desktops;
     qLog(Package) << "Desktop files are" << desktopPaths;
 
     if ( desktopPaths.count() == 0 )
@@ -579,10 +605,12 @@ bool SandboxInstallJob::setupSandbox()
         return false;
     }
 
+    //ensure desktop files are writable and
+    //populate the desktops variable
     for ( int x = 0; x < desktopPaths.count(); ++x )
     {
         QFile::Permissions perms = QFile::permissions( desktopPaths[x] );
-        if ( !QFile::setPermissions( desktopPaths[x], perms | QFile::WriteOwner ))
+        if ( !QFile::setPermissions(desktopPaths[x], perms | QFile::WriteOwner) )
         {
 
             if ( reporter )
@@ -598,32 +626,17 @@ bool SandboxInstallJob::setupSandbox()
 
         QSettings *dc = new QSettings( desktopPaths[x], QSettings::IniFormat );
         dc->beginGroup( QLatin1String( "Desktop Entry" ));
-        QString exec = dc->value( QLatin1String( "Exec" )).toString();
+        QString exec = dc->value( QLatin1String("Exec"), QLatin1String("") ).toString();
         qLog(Package) << "found Exec field" << exec << "in" << desktopPaths[x];
         if ( exec.isEmpty() )
-        {
             delete dc;
-        }
         else
-        {
-            if ( desktopConf.contains( exec ) )
-            {
-
-                if ( reporter )
-                {
-                    QString detailedError( "%1 referenced by multiple desktop files, %2 and %2");
-                    detailedError = detailedError.arg( exec ).arg( desktopPaths[x] ).arg( desktopConf[exec]->fileName() );
-                    reporter->reportError( tr("Invalid package, contact package supplier"),
-                                            detailedError );
-                }
-                return false;
-            }
-
-            desktopConf[exec] = dc;
-        }
+            desktops.append( dc );
     }
-    QString installSystemBinPath = Qtopia::packagePath() + QLatin1String( "/bin" );
-    QDir packageBin( destination + "/" + QLatin1String( "bin" ));
+
+    QString installSystemBinPath = Qtopia::packagePath() + '/' + BIN;
+    QString sandboxBinPath = destination + '/' + BIN;
+    QDir packageBin( sandboxBinPath );
 
     if ( !packageBin.exists() )
     {
@@ -636,87 +649,130 @@ bool SandboxInstallJob::setupSandbox()
         return false;
     }
 
-    QStringList newBins;
-    QFileInfoList bins = packageBin.entryInfoList();
-    for ( int b = 0; b < bins.count(); ++b )
+
+    // the package bin directory MUST actually be a directory
+    // as opposed to a symlink otherwise it is possible
+    // to spoof binaries
+    QFileInfo packageBinInfo( sandboxBinPath );
+    if ( !packageBinInfo.isDir() || packageBinInfo.isSymLink() )
     {
-        if ( !bins[b].isExecutable() )
-            continue;
-        if ( bins[b].fileName().startsWith(".") ) // dont do invisible files or dirs
-            continue;
-        QString origBin = bins[b].fileName();
-        QString newBin = package->md5Sum + "_" + origBin;
-        newBins << newBin;
-        QString linkDst = Qtopia::packagePath() + QLatin1String( "/bin/" ) + newBin;
-        if ( createLink( bins[b].filePath(), linkDst ))
+        if ( reporter )
         {
-            if ( desktopConf.contains( origBin ))
-            {
-                desktopConf[origBin]->setValue( "Exec", newBin );
-                qLog(Package) << "Re-writing desktop file Exec from" << origBin << "to" << newBin;
-
-                QString icon = desktopConf[origBin]->value( "Icon" ).toString();
-                QDir packagePic( destination + "/pics/" + origBin );
-                if ( packagePic.exists() ) // there is a pics directory
-                {
-                    linkDst = Qtopia::packagePath() + QLatin1String( "/pics/" ) + newBin;
-                    createLink( packagePic.path(), linkDst );
-
-                    if ( icon.startsWith( origBin + '/' ) )
-                    {
-                        QString newIcon = newBin + icon.mid( origBin.length() );
-                        desktopConf[origBin]->setValue( "Icon", newIcon );
-                        qLog(Package) << "Re-writing desktop file Icon from" << origBin << "to" << newBin;
-                    }
-                }
-                desktopConf[origBin]->sync();
-            }
-            else
-            {
-                qLog(Package) << "No rewrite for non-Exec binary" << origBin;
-            }
+            reporter->reportError( tr("Invalid package, contact package supplier"),
+                                QString("SandboxInstallJob::setupSandbox:- ")
+                                + sandboxBinPath + " is not a directory" );
         }
+        return false;
     }
-    QHash<QString,QSettings*>::iterator it = desktopConf.begin();
-    while ( it != desktopConf.end() )
+
+    //create binary, icon and sound links
+    //these are done on a per binary basis
+    QStringList binaries = packageBin.entryList(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+#ifndef QT_NO_SXE
+    SxeProgramInfo pi;
+#endif
+    QString origBin;
+    foreach( QSettings *dc, desktops )
     {
-        QSettings *dc = it.value();
-        if ( !newBins.contains(dc->value(QLatin1String("Exec")).toString()) )
+        origBin = dc->value(QLatin1String("Exec")).toString();
+        if ( binaries.contains( origBin ) )
+        {
+#ifndef QT_NO_SXE
+            QString registerPath = destination + "/" + BIN;
+            registerPath.remove( Qtopia::packagePath() );
+            QString binPath = sandboxBinPath + "/" + origBin;
+            pi.fileName = origBin;
+            pi.relPath = registerPath;
+            pi.runRoot = Qtopia::packagePath();
+            pi.domain = package->domain;
+            emit newBinary( pi );
+            runSandbox( binPath, destination );
+            QStringList domainList = package->domain.split(",");
+            foreach ( QString dom, domainList )
+                applyDomainRules( binPath, dom );
+            reloadRules();
+#endif
+        }
+        else
         {
             if ( reporter )
             {
                 QString detailedMessage( "SandboxInstallJob::setupSandbox:- desktop file %1 "
-                                    "does not reference a existing binary executable" );
-                detailedMessage = detailedMessage.arg( dc->fileName() );
+                                    "references binary %2 that does not exist in the package "
+                                    "bin directory: %3");
+                detailedMessage = detailedMessage.arg( dc->fileName() )
+                                    .arg( dc->value(QLatin1String("Exec")).toString() )
+                                    .arg( sandboxBinPath );
                 reporter->reportError( tr("Invalid package, contact package supplier" ),
                                     detailedMessage );
             }
             return false;
         }
+
+        QString newBin = package->md5Sum + "_" + origBin;
+        QString link = Qtopia::packagePath() + '/' + BIN + '/' + newBin;
+        if ( !createLink( sandboxBinPath + '/' + origBin, link) )
+        {
+            if ( reporter )
+            {
+                QString detailedMessage( "SandboxInstallJob::setupSandbox:- could not "
+                        "create link, " + link + " to " + sandboxBinPath + '/' + origBin );
+            }
+            return false;
+        }
+
+        dc->setValue( "Exec", newBin);
+        qLog(Package) << "Re-writing desktop file Exec from" << origBin << "to" << newBin;
+
+        QDir packagePic( destination + '/' + PICS + '/' + origBin );
+        if ( packagePic.exists() ) // there is a pics directory
+        {
+            link = Qtopia::packagePath() + '/' +  PICS + '/' + newBin;
+            createLink( packagePic.path(), link );
+
+            QString icon = dc->value( "Icon" ).toString();
+            if ( icon.startsWith( origBin + '/' ) )
+            {
+                QString newIcon = newBin + icon.mid( origBin.length() );
+                dc->setValue( "Icon", newIcon );
+                qLog(Package) << "Re-writing desktop file Icon from" << origBin << "to" << newBin;
+            }
+        }
+
+        QDir packageSounds ( destination + '/' + SOUNDS + '/' + origBin );
+        if ( packageSounds.exists () )
+        {
+            link = Qtopia::packagePath() + '/' + SOUNDS + '/' + newBin;
+            createLink( packageSounds.path(), link );
+        }
+
         dc->endGroup();
         dc->beginGroup( QLatin1String( "Package Data" ));
         dc->setValue( QLatin1String( "Path" ), destination );
-        qLog(Package) << "deleting desktop settings object for" << it.key();
+        dc->sync();
+
+        qLog(Package) << "deleting desktop settings object for" << origBin;
         // delete QSettings object, causes .desktop file to be persisted
-        delete it.value();
-        ++it;
+        delete dc;
     }
 
-    //copy control into controls directory and add md5sum entry
-    QDir packages( destination + "/../" );
-    if ( !packages.exists("controls") && !packages.mkdir( "controls" ) )
-    {
+    //create help links
+    QString packageHelpDir( destination + '/' + HELP + '/' );
+    if ( QDir::root().exists(packageHelpDir) )
+        registerHelpFiles(packageHelpDir );
 
-        if ( reporter )
-        {
-            reporter->reportError( tr("Error occurred during installation" ),
-                QLatin1String("SandboxInstallJob::setupSandbox:-Could not create controls directory") );
-        }
+    //create i18n links
+    QString packageI18NDir( destination + '/' + I18N );
+    if ( QDir::root().exists(packageI18NDir) )
+        registerI18NFiles( packageI18NDir);
+
+    //create settings links
+    if ( !setupSettingsFiles() )
         return false;
-    }
 
     QString origControl( destination +  QLatin1String( "/control") );
-    QString newControl = destination + "/../" + QLatin1String( "controls/" )
+    QString newControl = Qtopia::packagePath() + CONTROLS + '/'
                             + package->md5Sum + QLatin1String( ".control" );
     QFile::rename( origControl, newControl );
     QFile newControlFile( newControl );
@@ -823,38 +879,220 @@ bool SandboxInstallJob::createLink( const QString &target, const QString &link )
     return true;
 }
 
-/*!
-  \internal
-  Removes links related to  \c package from the Qtopia::packagePath's
-  bin, pics and control directories
+/*
+    \internal
+    Register help files in the \a helpDir so they can be found by the help system.
+    This function will recurse and register files in any subdirectories.
+
+    Implementation Note:
+    Registration occurs by adding symlinks in Qtopia::packagePath()/help to
+    the application's help files.
+
+    The help files are found according to the application name,
+    For a downloaded application executable <app>,
+    the QtopiaApplication::applicationName is <md5sum>_<app>, therefore the help
+    symlinks must be prepended with <md5sum>_.(Typically help files are
+    of the form <app>[-<suffix>].html)
+    Because of this prepended md5sum, html links in the help files must be modified.
 */
-void SandboxInstallJob::clearMiscFiles() const
+void SandboxInstallJob::registerHelpFiles( const QString &helpDir  )
 {
-    QList<QDir> dirs;
-    dirs << Qtopia::packagePath() + "bin";
-    dirs << Qtopia::packagePath() + "pics";
-    dirs << Qtopia::packagePath() + "controls";
+    QDir dir( helpDir  );
+    if ( !dir.exists() )
+        qWarning() << "SandboxInstallJob::registerHelpFiles called with param, "
+                      "helpDir that is not a directory:" << helpDir;
+    QFileInfoList files = dir.entryInfoList( QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot );
 
-    foreach( QDir dir, dirs )
+    QRegExp rx;
+    rx.setMinimal( true );
+    rx.setPattern("(<\\s*[a|A].*[h|H][r|R][e|E][f|F]\\s*=\\s*\")(.*)(\".*>)");
+
+    QString contents;
+    foreach( QFileInfo file, files )
     {
-        if ( !dir.exists() )
+        //recurse if subdirectory is found
+        if ( file.isDir() )
+            registerHelpFiles( file.filePath() );
+        else
         {
-            qLog( Package ) << "SandboxInstallJob::clearMiscFiles:- dir does not exist: "
-                            << dir.absolutePath();
-            return;
-        }
-
-        QFileInfoList fileList= dir.entryInfoList( QDir::System | QDir::NoDotAndDotDot | QDir::Files );
-        QFile f;
-        foreach( QFileInfo fi, fileList )
-        {
-            if ( fi.completeBaseName().startsWith( package->md5Sum ) )
+            //get the contents of a file
+            QFile origFile ( file.absoluteFilePath() );
+            if ( !origFile.open( QFile::ReadOnly ) )
             {
-                f.setFileName( fi.absoluteFilePath() );
-                f.remove();
+                qWarning() << "SandboxInstallJob::registerHelpFile:- Could not open file"
+                           << "for registration" << file.absoluteFilePath();
+                break;
             }
+
+            //make a copy of the file contents and adjust links so that the md5sum is prepended
+            QTextStream tsOrig( &origFile );
+            contents = tsOrig.readAll();
+            contents.replace( rx, QString("\\1") + package->md5Sum + "_" + QLatin1String("\\2\\3") );
+
+            //create a new file and fill it with the modified contents
+            QString newFilePath = file.absolutePath() + "/" + package->md5Sum + "_" + file.fileName();
+            QFile newFile( newFilePath );
+            if ( !newFile.open( QFile::WriteOnly ) )
+            {
+                qWarning() << "SandboxInstallJob::registerHelpFile:- Could not create file"
+                           << newFile.fileName();
+            }
+
+            QTextStream tsNewFile( &newFile );
+            tsNewFile << contents;
+            origFile.close();
+            newFile.close();
+
+            //remove the original file and rename the new file
+            origFile.remove();
+            newFile.rename( file.absoluteFilePath());
+
+            //make a link in the appropriate location within Qtopia::packagePath()/help
+            //the links in this directory have the md5sum prepended to the file names
+            QString linkName = newFilePath;
+            linkName.remove( 0, destination.length() );
+            linkName.prepend( Qtopia::packagePath() );
+            createLink( file.absoluteFilePath(), linkName );
         }
     }
+}
+
+/*
+   \internal
+   Register i18n files in the \a i18nDir.
+   This function will recurse and register files in any subdirectories.
+
+   Implementation Note:
+   Registration occurs by adding symlinks in Qtopia::packagePath()/i18n to
+   the application's i18n files.
+
+   The i18n files are found according to application name.
+   For a downloaded application executable <app>, the QtopiaApplication::applicationName
+   is <md5sum>_<app>, therefore the i18n symlinks
+   must be prepended with <md5sum>_. (Typically the i18n files are of the form
+   <app>.qm)
+*/
+void SandboxInstallJob::registerI18NFiles( const QString &i18nDir )
+{
+    QDir dir( i18nDir  );
+    if ( !dir.exists() )
+        qWarning() << "SandboxInstallJob::registerI18NFiles called with param, "
+                      "i18nDir that is not a directory:" << i18nDir;
+    QFileInfoList files = dir.entryInfoList( QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot );
+    foreach( QFileInfo file, files )
+    {
+        //recurse if subdirectory is found
+        if ( file.isDir() )
+        {
+            registerI18NFiles( file.filePath() );
+        }
+        else
+        {
+           QString linkName = file.absolutePath() + QLatin1Char('/')
+                            + package->md5Sum + "_" + file.fileName();
+           linkName.remove( 0, destination.length() );
+           linkName.prepend( Qtopia::packagePath() );
+           createLink( file.absoluteFilePath(), linkName );
+        }
+    }
+}
+
+/*
+  \internal
+  Sets up the settings directory of the package.
+
+  Implementation Note:
+  The qtopia settings files are symlinked from the package's settings directory
+  so that they can be found by the package.  These symlinks are made according
+  to the organization(s) specified in the RestrictedOrganizations field in
+  PackageManager.conf.
+
+  Typically the Trolltech organization is restricted, indicating that
+  3rd party applications cannot write to QSettings files using that organization.
+  (reading those settings files is still allowed)
+  Symlinks are then made to the Trolltech directory and Trolltech.conf from
+  the package settings directory.
+
+  A System integrator could add the restricted organization Acme to
+  PackageManager.conf resulting in the Acme and Acme.conf symlinks being created.
+  If Acme.conf (or the even the Acme directory) does not exist, a broken symlink
+  is made.  This is not a cause of concern however, if Acme.conf is created during
+  runtime then the link will be valid, if not there's no negative consequences.
+  A resricted organization should only be added if its settings files need
+  to be read by almost every application.
+  */
+bool SandboxInstallJob::setupSettingsFiles()
+{
+    QString settingsPath = destination + "/Settings";
+    if ( !QDir::root().mkpath( settingsPath ) )
+    {
+        if ( reporter )
+        {
+            QString detailedError( "Unable to make directory: %s" );
+            detailedError = detailedError.arg( settingsPath );
+            reporter->reportError( QObject::tr("Error occurred during installation"),
+                detailedError );
+        }
+        return false;
+    }
+
+    QSettings pkgManagerConf( "Trolltech", "PackageManager" );
+    pkgManagerConf.beginGroup( "Configuration" );
+    QStringList orgs =  pkgManagerConf.value( "RestrictedOrganizations" ).toStringList();
+    foreach( QString org, orgs )
+    {
+        if ( QFile::exists( settingsPath + QLatin1Char('/') + org )
+             || QFile::exists( settingsPath + QLatin1Char('/') + org + QLatin1String(".conf" )) )
+        {
+            if ( reporter )
+            {
+                QString detailedError( "Settings file/directory for (restricted) organisation, %1 "
+                                       "aleady exists in %2" );
+                detailedError = detailedError.arg(org).arg( settingsPath );
+                reporter->reportError( QObject::tr( "Invalid package, contact package supplier" ),
+                        detailedError );
+            }
+            return false;
+        }
+
+        //this code is derived from qsettings.cpp
+        //so that we can obtain the location of qtopia's
+        //settings files at user scope
+        char *env = getenv("XDG_CONFIG_HOME");
+        QString qtopiaSettingsPath;
+        if (env == 0)
+        {
+            qtopiaSettingsPath = QDir::homePath();
+            qtopiaSettingsPath += QLatin1Char('/');
+            qtopiaSettingsPath += QLatin1String("Settings");
+        } else if (*env == '/')
+        {
+            qtopiaSettingsPath = QLatin1String(env);
+        }
+        else
+        {
+            qtopiaSettingsPath = QDir::homePath();
+            qtopiaSettingsPath += QLatin1Char('/');
+            qtopiaSettingsPath += QLatin1String(env);
+        }
+
+        bool ok;
+        //create link for organisation directory
+        ok = createLink( qtopiaSettingsPath + QLatin1Char('/') + org,
+                          settingsPath + QLatin1Char('/') + org );
+        if ( !ok ) //note: error reporting already handled in createLink
+            return false;
+
+        //create link for organisation settings file
+        ok = createLink( qtopiaSettingsPath + QLatin1Char('/')
+                        + org + QLatin1String(".conf"),
+                    settingsPath + QLatin1Char('/')
+                        + org + QLatin1String(".conf") );
+        if ( !ok )
+            return false;
+    }
+
+    return true;
 }
 
 /*
@@ -888,19 +1126,13 @@ void SandboxInstallJob::clearMiscFiles() const
   \internal
   SandboxUninstallJob constructor
 */
-SandboxUninstallJob::SandboxUninstallJob( const InstallControl::PackageInfo *pkg, const QString &media, ErrorReporter *reporter)
-    : package( pkg )
+SandboxUninstallJob::SandboxUninstallJob( const InstallControl::PackageInfo *pkg,
+                                const QString &media, ErrorReporter *errorReporter)
+    : package( pkg ),
+      reporter ( errorReporter )
 {
     packagePath = media.isEmpty() ? Qtopia::packagePath() : media + "/" + PACKAGE_DIRECTORY + "/";
     packagePath += package->md5Sum;
-
-    if ( !QDir( packagePath).exists() )
-    {
-            if( reporter )
-            {
-                reporter->reportError( QObject::tr( "Package does not exist" ) );
-            }
-    }
 }
 
 /*!
@@ -950,8 +1182,8 @@ void SandboxUninstallJob::terminateApps() const
                         default: //on subsequent passes just kill the application
                                  //we do this for multiple passes to kill all instances
                                  //of the application, which may continually fork
-                            kill( pid, 9 );
-                            break;
+                        kill( pid, 9 );
+                        break;
                     }
                 }
             }
@@ -999,34 +1231,7 @@ void SandboxUninstallJob::dismantleSandbox() const
 #ifndef QT_NO_SXE
     QStringList binaryPaths = getPackageBinaryPaths();
 #endif
-
-    //Deletes the package's control file in the controls directory.
-    QFile control( packagePath + "/../controls/" + package->md5Sum + ".control" );
-    if ( !control.remove() )
-        qWarning( "SandboxUninstallJob could not remove .control file from controls directory: %s",
-                 qPrintable(control.fileName()) );
-
-
-    //Deletes the packages symlinks in the bin and pics directory.
-    QList<QDir> dirList;
-    dirList << QDir ( Qtopia::packagePath() + QLatin1String( "bin" ) );
-    dirList << QDir ( Qtopia::packagePath() + QLatin1String( "pics" ) );
-
-    QDir dir;
-    QFileInfoList fList;
-    foreach ( dir, dirList )
-    {
-        fList = dir.entryInfoList( QDir::AllEntries | QDir::System );
-        for ( int i = 0; i < fList.count(); ++i )
-        {
-            if ( fList.at(i).fileName().startsWith( package->md5Sum ) )
-            {
-                if ( !QFile::remove( fList.at(i).absoluteFilePath() ) )
-                    qWarning("SandboxInstallJob: cannot uninstall link: %s",
-                            qPrintable(fList.at(i).absoluteFilePath()) );
-            }
-        }
-    }
+    clearMiscFiles( package );
 
     //Delete the package directory
     removePackage();
@@ -1048,6 +1253,9 @@ void SandboxUninstallJob::rollBackSandboxRule( const QString &binPath ) const
     static QString unsandboxCmd;
     static bool commandUnavailable = false;
 
+    if ( !LidsUtils::isLidsEnabled() )
+                return;
+
     if ( commandUnavailable )
         return;
 
@@ -1058,7 +1266,7 @@ void SandboxUninstallJob::rollBackSandboxRule( const QString &binPath ) const
         {
             if ( QFile::exists( dirs[d] + "etc/sxe_qtopia/sxe_unsandbox" ))
             {
-                unsandboxCmd = dirs[d] + "etc/sxe_qtopia/sxe_unsandbox %1";
+                unsandboxCmd = dirs[d] + "etc/sxe_qtopia/sxe_unsandbox %1 %2";
                 break;
             }
         }
@@ -1069,8 +1277,19 @@ void SandboxUninstallJob::rollBackSandboxRule( const QString &binPath ) const
             return;
         }
     }
-    qLog(Package) << "Running unsandboxing script: "<< ( unsandboxCmd.arg( binPath ));
-    QProcess::execute( unsandboxCmd.arg( binPath ));
+    QString sandboxDir;
+    if ( binPath.startsWith( Qtopia::packagePath()) )
+        sandboxDir = binPath.left( Qtopia::packagePath().length() + 32 );
+    else
+    {
+        qWarning( "Packagemanager:- SandboxUninstallJob::rollBackSandboxrule trying to roll back "
+                  "sandbox rule for non-downloaded application; binPath parameter "
+                  "does not start with Qtopia::packagePath()" );
+        return;
+    }
+
+    qLog(Package) << "Running unsandboxing script: "<< unsandboxCmd.arg( binPath ).arg(sandboxDir);
+    QProcess::execute( unsandboxCmd.arg( binPath ).arg(sandboxDir) );
 }
 
 /*!
@@ -1108,13 +1327,70 @@ void SandboxUninstallJob::removePackage() const
 {
     QDir destDir( packagePath );
     if ( !destDir.exists() )
-    {
-        qWarning( "Request to remove non-existent directory %s", qPrintable( packagePath ));
         return;
-    }
+
     QString cmd( "rm -Rf " );
     cmd += packagePath;
     Q_ASSERT( !packagePath.isEmpty() && packagePath != "/" );
     qLog(Package) << "Removing destination by executing:" << cmd;
     QProcess::execute( cmd );
+}
+
+/*!
+  \internal
+  Removes files related to a \a package from the Qtopia::packagePath's
+  bin, pics, control,help etc directories and from the tmp directory
+*/
+void SandboxUninstallJob::clearMiscFiles( const InstallControl::PackageInfo *pkg )
+{
+    QList<QDir> dirs;
+    dirs << Qtopia::packagePath() + BIN;
+    dirs << Qtopia::packagePath() + PICS;
+    dirs << Qtopia::packagePath() + SOUNDS;
+    dirs << Qtopia::packagePath() + HELP;
+    dirs << Qtopia::packagePath() + CONTROLS;
+    dirs << Qtopia::packagePath() + I18N;
+
+    foreach( QDir dir, dirs )
+        clearMiscFilesHelper( dir, pkg );
+
+    //remove any left over package qcop-msg files in tmp
+    QDir tempDir( Qtopia::tempDir() );
+    QFileInfoList fileList = tempDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot );
+    foreach( QFileInfo fi, fileList )
+    {
+        if( fi.fileName().startsWith(QString("qcop-msg-") + pkg->md5Sum ) )
+            QFile::remove( fi.absoluteFilePath() );
+    }
+}
+
+/*!
+  \internal
+  Removes all the files related to the package \a pkg from \a dir.
+*/
+void SandboxUninstallJob::clearMiscFilesHelper( const QDir &dir, const InstallControl::PackageInfo *pkg )
+{
+    if ( !dir.exists() )
+    {
+        qLog( Package ) << "SandboxUninstallJob::clearMiscFilesHelper():- dir does not exist: "
+                        << dir.absolutePath();
+        return;
+    }
+
+    QFileInfoList fileList= dir.entryInfoList( QDir::System | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs );
+    QFile f;
+    foreach( QFileInfo fi, fileList )
+    {
+        if ( fi.isDir() )
+        {
+            clearMiscFilesHelper( QDir(fi.absoluteFilePath()), pkg );
+        }
+
+        if ( fi.completeBaseName().startsWith( pkg->md5Sum ) )
+        {
+            qLog(Package) << "SandboxUninstallJob::clearMiscFilesHelper removing file: " << fi.absoluteFilePath();
+            f.setFileName( fi.absoluteFilePath() );
+            f.remove();
+        }
+    }
 }

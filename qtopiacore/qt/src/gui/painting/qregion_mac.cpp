@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -38,6 +36,7 @@
 
 #include <private/qt_mac_p.h>
 #include "qcoreapplication.h"
+#include <qlibrary.h>
 
 QRegion::QRegionData QRegion::shared_empty = { Q_ATOMIC_INIT(1), 0, 0 };
 
@@ -121,10 +120,18 @@ Q_GUI_EXPORT QRegion qt_mac_convert_mac_region(RgnHandle rgn)
     return ret;
 }
 
+typedef OSStatus (*PtrHIShapeGetAsQDRgn)(HIShapeRef, RgnHandle);
+static PtrHIShapeGetAsQDRgn ptrHIShapeGetAsQDRgn = 0;
+
 QRegion qt_mac_convert_mac_region(HIShapeRef shape)
 {
+    if (ptrHIShapeGetAsQDRgn == 0) {
+        QLibrary library(QLatin1String("/System/Library/Frameworks/Carbon.framework/Carbon"));
+        ptrHIShapeGetAsQDRgn = reinterpret_cast<PtrHIShapeGetAsQDRgn>(library.resolve("HIShapeGetAsQDRgn"));
+    }
+    
     RgnHandle rgn = qt_mac_get_rgn();
-    HIShapeGetAsQDRgn(shape, rgn);
+    ptrHIShapeGetAsQDRgn(shape, rgn);
     QRegion ret = qt_mac_convert_mac_region(rgn);
     qt_mac_dispose_rgn(rgn);
     return ret;

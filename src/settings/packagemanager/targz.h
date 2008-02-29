@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,9 +22,12 @@
 #define TARGZ_H
 
 #include <QString>
+#include <libtar.h>
 
 bool targz_extract_all( const QString &tarfile, const QString &destpath = QString(), bool verbose = true );
 bool targz_archive_all( const QString &tarfile, const QString &srcpath, bool gzip = true, bool verbose = true );
-qlonglong targz_archive_size( const QString &tarfile );
-#endif
 
+TAR * get_tar_ptr( const QString &tarfile );
+qlonglong targz_archive_size( const QString &tarfile );
+bool check_tar_valid( const QString &tarfile );
+#endif

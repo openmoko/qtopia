@@ -17,4 +17,4 @@ INSTALLS+=crisppics
 
 pkg.name=qpe-theme-crisp
 pkg.desc=Crisp theme
-pkg.domain=theme
+pkg.domain=trusted

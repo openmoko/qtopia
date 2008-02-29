@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -200,7 +200,7 @@ bool QAudioStateConfiguration::isInitialized() const
     Returns a set of domains supported by the audio device.  All
     devices should provide \c{RingTone}, \c{Media} and \c{Phone} domains.
 
-    \sa states(), profiles(), availabilityChanged()
+    \sa states(), availabilityChanged()
 */
 QSet<QByteArray> QAudioStateConfiguration::domains() const
 {
@@ -219,7 +219,7 @@ QSet<QByteArray> QAudioStateConfiguration::domains() const
 /*!
     Returns a set of states supported by the audio device.
 
-    \sa domains(), profiles(), availabilityChanged()
+    \sa domains(), availabilityChanged()
 */
 QSet<QAudioStateInfo> QAudioStateConfiguration::states() const
 {
@@ -239,7 +239,7 @@ QSet<QAudioStateInfo> QAudioStateConfiguration::states() const
     Returns a set of states supported by the audio device for a particular
     \a domain.
 
-    \sa domains(), profiles(), availabilityChanged()
+    \sa domains(), availabilityChanged()
 */
 QSet<QAudioStateInfo> QAudioStateConfiguration::states(const QByteArray &domain) const
 {

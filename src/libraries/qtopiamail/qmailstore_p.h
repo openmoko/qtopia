@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,21 +33,39 @@
 // We mean it.
 //
 
-#include <QSharedData>
 #include <QSqlDatabase>
 #include <QString>
 #include <QCache>
+#include <QtopiaIpcEnvelope>
 #include "mailbodystore_p.h"
 #include "qmailfolder.h"
 #include "qmailmessage.h"
+#include "qmailmessagekey.h"
 
 class QMailId;
 class QMailFolderKey;
 class QMailFolderSortKey;
-class QMailMessageKey;
 class QMailMessageSortKey;
 class QSqlRecord;
 class QSqlQuery;
+
+typedef QMap<QMailMessageKey::Property,QString> MessagePropertyMap;
+typedef QPair<int,int> Segment; //start,end - end non inclusive
+typedef QList<Segment> SegmentList;
+
+static  QMailMessageKey::Properties updatableProperties = QMailMessageKey::ParentFolderId |
+                                                          QMailMessageKey::Type |
+                                                          QMailMessageKey::Sender |
+                                                          QMailMessageKey::Recipients |
+                                                          QMailMessageKey::Subject | 
+                                                          QMailMessageKey::TimeStamp | 
+                                                          QMailMessageKey::Status |
+                                                          QMailMessageKey::FromAccount |
+                                                          QMailMessageKey::FromMailbox |
+                                                          QMailMessageKey::ServerUid |
+                                                          QMailMessageKey::Size;
+//all exposed message properties
+static QMailMessageKey::Properties allProperties = QMailMessageKey::Id | updatableProperties;                                                          
 
 class MailMessageCache 
 {
@@ -66,18 +84,35 @@ private:
 };
 
 
-class QMailStorePrivate : public QSharedData
+class QMailStorePrivate : public QObject 
 {
-public:
-    QMailStorePrivate();
-    QMailStorePrivate(const QMailStorePrivate& other);
+    Q_OBJECT
 
-    bool deleteFolder(const QMailId& f);
-    bool deleteMailsFromFolder(const QMailId& f);
+public:
+    static const int lookAhead = 5;
+    static const int maxComparitorsCutoff = 50;
+    static const int maxNotifySegmentSize = 50;
+
+    enum ChangeType 
+    {
+        Added,
+        Removed,
+        Updated
+    };
+
+public:
+    QMailStorePrivate(QObject* parent = 0);
+    ~QMailStorePrivate();
+    bool deleteFolder(const QMailId& f, 
+                      QMailIdList& deletedSubfolders, 
+                      QMailIdList& deletedMessages);
+    bool deleteMailsFromFolder(const QMailId& f, 
+                               QMailIdList& deletedMessages);
 	QSqlQuery prepare(const QString& sql) const;
 	bool execute(QSqlQuery& q) const;
 	bool folderExists(const quint64& id);
-	QMailMessage buildQMailMessage(const QSqlRecord& r) const;
+	QMailMessage buildQMailMessage(const QSqlRecord& r, 
+                                   const QMailMessageKey::Properties& properties = allProperties) const;
 	QMailFolder buildQMailFolder(const QSqlRecord& r) const;
 	QString buildOrderClause(const QMailFolderSortKey& key) const;
 	QString buildOrderClause(const QMailMessageSortKey& key) const;
@@ -85,11 +120,36 @@ public:
 	void bindWhereData(const QMailMessageKey& key, QSqlQuery& query) const;
 	QString buildWhereClause(const QMailFolderKey& k) const;
 	void bindWhereData(const QMailFolderKey& key, QSqlQuery& query) const;
+    void bindUpdateData(const QMailMessageKey::Properties& properties, 
+                        const QMailMessage& data,
+                        QSqlQuery& query) const;
+    void bindUpdateData(const QMailMessageKey::Properties& properties,
+                        const QMailMessage& fromMessage,
+                        QMailMessage& toMessage) const;
     static bool initStore();
     static bool setupTables(QStringList tableList, QSqlDatabase& db);
     static QString parseSql(QTextStream& ts);
-    static int lookAhead() { return 5; };
-
+    QString expandValueList(const QVariantList& valueList) const;
+    const MessagePropertyMap& messagePropertyMap() const;
+    QString expandProperties(const QMailMessageKey::Properties& p, bool update = false) const;
+    int numComparitors(const QMailMessageKey& key) const;
+    int numComparitors(const QMailFolderKey& key) const;
+    void checkComparitors(const QMailMessageKey& key) const;
+    void checkComparitors(const QMailFolderKey& key) const;
+    void notifyMessagesChange(const ChangeType& changeType,
+                              const QMailIdList& ids);
+    void notifyFoldersChange(const ChangeType& changeType,
+                             const QMailIdList& ids);
+    SegmentList createSegments(int numItems, int segmentSize);
+public slots:
+    void ipcMessage(const QString& message, const QByteArray& data);
+signals:
+    void messagesAdded(const QMailIdList& ids);
+    void messagesUpdated(const QMailIdList& ids);
+    void messagesRemoved(const QMailIdList& ids);
+    void foldersAdded(const QMailIdList& ids);
+    void foldersUpdated(const QMailIdList& ids);
+    void foldersRemoved(const QMailIdList& ids);
 public:
     mutable MailMessageCache headerCache;
     mutable QSqlDatabase database;

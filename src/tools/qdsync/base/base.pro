@@ -1,6 +1,8 @@
 qtopia_project(qtopia plugin)
 TARGET=base
-CONFIG+=no_tr no_pkg
+CONFIG+=no_tr
+# Packaged by tools/qdsync/app
+CONFIG+=no_pkg
 plugin_type=qdsync
 
 VPATH+=..

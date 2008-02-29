@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -98,11 +98,15 @@ void SearchView::init()
 
 void SearchView::setQueryBox(QString box)
 {
-    box = MailboxList::mailboxTrName(box);
-    for (int i = 0; i < mailbox->count(); i++) {
-        if (mailbox->itemText(i).toLower() == box.toLower() ) {
-            mailbox->setCurrentIndex(i);
-            break;
+    if (box.isEmpty()) {
+        mailbox->setCurrentIndex(0);
+    } else {
+        box = MailboxList::mailboxTrName(box).toLower();
+        for (int i = 1; i < mailbox->count(); i++) {
+            if (mailbox->itemText(i).toLower() == box ) {
+                mailbox->setCurrentIndex(i);
+                break;
+            }
         }
     }
 
@@ -113,16 +117,18 @@ void SearchView::setQueryBox(QString box)
 void SearchView::setSearch(Search *in)
 {
     QString str = in->mailbox();
-    if ( str == MailboxList::InboxString )
+    if ( str.isEmpty() )
         mailbox->setCurrentIndex(0);
-    else if ( str == MailboxList::OutboxString )
+    else if ( str == MailboxList::InboxString )
         mailbox->setCurrentIndex(1);
-    else if ( str == MailboxList::DraftsString )
+    else if ( str == MailboxList::OutboxString )
         mailbox->setCurrentIndex(2);
-    else if ( str == MailboxList::SentString )
+    else if ( str == MailboxList::DraftsString )
         mailbox->setCurrentIndex(3);
-    else if ( str == MailboxList::TrashString )
+    else if ( str == MailboxList::SentString )
         mailbox->setCurrentIndex(4);
+    else if ( str == MailboxList::TrashString )
+        mailbox->setCurrentIndex(5);
 
     switch( in->status() ) {
         case Search::Read: {
@@ -174,11 +180,12 @@ Search* SearchView::getSearch()
 
     int i = mailbox->currentIndex();
     switch(i) {
-        case 0: search->setMailbox(MailboxList::InboxString); break;
-        case 1: search->setMailbox(MailboxList::OutboxString); break;
-        case 2: search->setMailbox(MailboxList::DraftsString); break;
-        case 3: search->setMailbox(MailboxList::SentString); break;
-        case 4: search->setMailbox(MailboxList::TrashString); break;
+        case 0: search->setMailbox(QString()); break;
+        case 1: search->setMailbox(MailboxList::InboxString); break;
+        case 2: search->setMailbox(MailboxList::OutboxString); break;
+        case 3: search->setMailbox(MailboxList::DraftsString); break;
+        case 4: search->setMailbox(MailboxList::SentString); break;
+        case 5: search->setMailbox(MailboxList::TrashString); break;
     }
 
     search->setMailFrom( fromLine->text() );

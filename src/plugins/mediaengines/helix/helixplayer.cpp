@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -143,6 +143,7 @@ public:
     PlayerStateAdvise(HelixPlayer* helixPlayer):
         m_refCount(0),
         m_state(QtopiaMedia::Stopped),
+        m_preBufferState(QtopiaMedia::Stopped),
         m_helixPlayer(helixPlayer)
     {
     }
@@ -181,6 +182,7 @@ public:
 private:
     INT32               m_refCount;
     QtopiaMedia::State  m_state;
+    QtopiaMedia::State  m_preBufferState;
     HelixPlayer*        m_helixPlayer;
 };
 
@@ -193,9 +195,18 @@ STDMETHODIMP PlayerStateAdvise::OnBegin( ULONG32 )
     return HXR_OK;
 }
 
-STDMETHODIMP PlayerStateAdvise::OnBuffering(ULONG32, UINT16)
+STDMETHODIMP PlayerStateAdvise::OnBuffering(ULONG32, UINT16 percent)
 {
-    m_state = QtopiaMedia::Buffering;
+    if( m_state != QtopiaMedia::Buffering && percent != 100 )
+    {
+        m_preBufferState = m_state;
+
+        m_state = QtopiaMedia::Buffering;
+    }
+    else if( m_state == QtopiaMedia::Buffering && percent == 100 )
+    {
+        m_state = m_preBufferState;
+    }
 
     notify();
 
@@ -591,7 +602,7 @@ bool HelixPlayer::isMuted() const
 
 void HelixPlayer::setVolume( int volume )
 {
-    if (volume >= 1 && volume <= 100)
+    if (volume >= 0 && volume <= 100)
         m_volume->SetVolume( volume );
 }
 

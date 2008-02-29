@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,7 +34,7 @@
 class QAction;
 class QTimer;
 class QValueSpaceItem;
-
+class QWaitWidget;
 
 class CameraMainWindow : public QMainWindow
 {
@@ -64,6 +64,7 @@ private slots:
     void contextMenuAboutToShow();
     void contextMenuAboutToHide();
     void loadThumbs( bool resized = false );
+    void delayedInit();
 
 private:
     bool event(QEvent* e);
@@ -126,6 +127,10 @@ private:
     QContentSetModel *m_photoModel;
     QString camcat;
     bool    m_contextMenuActive;
+    QWaitWidget *m_wait;
+    bool m_iswaiting;
+    void showWaitScreen(const QString& s = "");
+    void hideWaitScreen();
 };
 
 class CameraService : public QtopiaAbstractService

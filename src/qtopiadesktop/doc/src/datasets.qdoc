@@ -1,26 +1,27 @@
 /*!
 
-\overview Datasets Overview
+\group datasets
+\title Datasets
+\ingroup overviews
 \brief Information about datasets supported by Qtopia Sync Agent.
+\sa Overviews
 
 In order for two or more plugins to pass data between them, they must agree on a structure for the data.
 Qtopia Sync Agent uses XML to pass data between plugins. The structure of the XML data is determined by the
 dataset that it belongs to.
 
-Qtopia Sync Agent supports a number of datasets. They are documented in \l{Datasets}.
+Qtopia Sync Agent supports a number of datasets. They are documented below.
 
 Extra datasets can be added. As long as two or more plugins handle a dataset, it will be synchronized.
 
-*/
-
-/*!
-
-\group datasets
-\title Datasets
+Note that server plugins can ignore part of a dataset. The value returned from
+QDSyncPlugin::referenceSchema() is used by the Sync Manager to avoid problems. For this reason
+a missing XML tag in a replaced record should be taken to mean the value should not change. To delete
+a value send an empty tag.
 
 \generatelist related
 
-\sa {Datasets Overview}
+\sa {Add a new dataset}
 
 */
 

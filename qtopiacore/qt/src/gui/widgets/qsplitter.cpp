@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1551,6 +1549,8 @@ QSize QSplitter::minimumSizeHint() const
     Giving the values to another splitter's setSizes() function will
     produce a splitter with the same layout as this one.
 
+    Note that invisible widgets have a size of 0.
+
     The easiest way to iterate over the list is to use the Java-style iterators.
 
     \quotefromfile snippets/splitter/splitter.cpp
@@ -1584,7 +1584,8 @@ QList<int> QSplitter::sizes() const
     the program will still be well-behaved.
 
     The values in \a list should be the height or width (depending on
-    orientation()) that the widgets should be resized to.
+    orientation()) that the widgets should be resized to. If you specify
+    a size of 0, the widget will be invisible.
 
     \sa sizes()
 */

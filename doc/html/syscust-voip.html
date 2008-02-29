@@ -65,13 +65,13 @@
             ( const QString&amp; service, QObject *parent )
         : QTelephonyService( service, parent )
     {
-        <span class="comment">// Initialize the iaxclient library</span>
+        <span class="comment">//</span> Initialize the iaxclient library
         ...
     }
 
     IaxTelephonyService::~IaxTelephonyService()
     {
-        <span class="comment">// Shut down the iaxclient library</span>
+        <span class="comment">//</span> Shut down the iaxclient library
         ...
     }</pre>
 <p>All telephony services must override the initialize() method to create the telephony interfaces that it requires. For Asterisk, we need the <a href="qnetworkregistration.html">QNetworkRegistration</a>, <a href="qtelephonyconfiguration.html">QTelephonyConfiguration</a>, <a href="qservicechecker.html">QServiceChecker</a>, and <a href="qphonecallprovider.html">QPhoneCallProvider</a> interfaces:</p>
@@ -121,11 +121,11 @@
     void IaxTelephonyServiceQCop::start()
     {
         if ( !service ) {
-            <span class="comment">// Register a task to keep us alive while the service is running.</span>
+            <span class="comment">//</span> Register a task to keep us alive while the service is running.
             QtopiaApplication::instance()-&gt;registerRunningTask
                 ( &quot;IaxTelephonyService&quot;, this );
 
-            <span class="comment">// Create the service handler, registered under the name &quot;asterisk&quot;.</span>
+            <span class="comment">//</span> Create the service handler, registered under the name &quot;asterisk&quot;.
             qLog(VoIP) &lt;&lt; &quot;Starting iaxclient service handler&quot;;
             service = new IaxTelephonyService( &quot;asterisk&quot;, this );
             service-&gt;initialize();
@@ -135,12 +135,12 @@
     void IaxTelephonyServiceQCop::stop()
     {
         if ( service ) {
-            <span class="comment">// Delete the service handler.</span>
+            <span class="comment">//</span> Delete the service handler.
             qLog(VoIP) &lt;&lt; &quot;Stopping iaxclient service handler&quot;;
             delete service;
             service = 0;
 
-            <span class="comment">// Deregister the task which allows this daemon to shut down.</span>
+            <span class="comment">//</span> Deregister the task which allows this daemon to shut down.
             QtopiaApplication::instance()-&gt;unregisterRunningTask
                 ( &quot;IaxTelephonyService&quot; );
         }
@@ -325,10 +325,10 @@
     {
         IaxPhoneCall *call = fromCallNo( e-&gt;callNo );
         if ( call ) {
-            <span class="comment">// State change on a known call.</span>
+            <span class="comment">//</span> State change on a known call.
             call-&gt;stateEvent( e );
         } else if ( ( e-&gt;state &amp; IAXC_CALL_STATE_RINGING ) != 0 ) {
-            <span class="comment">// Newly arrived incoming call.</span>
+            <span class="comment">//</span> Newly arrived incoming call.
             beginStateTransaction();
             QString identifier = QUuid::createUuid().toString();
             IaxPhoneCall *call = new IaxPhoneCall
@@ -388,7 +388,7 @@
 
     void IaxConfiguration::update( const QString&amp; name, const QString&amp; )
     {
-        <span class="comment">// Process messages from the &quot;iaxsettings&quot; program for config updates.</span>
+        <span class="comment">//</span> Process messages from the &quot;iaxsettings&quot; program for config updates.
         if ( name == &quot;registration&quot; )
             service-&gt;updateRegistrationConfig();
         else if ( name == &quot;callerid&quot; )
@@ -397,7 +397,7 @@
 
     void IaxConfiguration::request( const QString&amp; name )
     {
-        <span class="comment">// Not supported - just return an empty value.</span>
+        <span class="comment">//</span> Not supported - just return an empty value.
         emit notification( name, QString() );
     }</pre>
 <p>There are two other forms of configuration that can be handled in a special manner: network registration changes and presence changes. The settings program can use <a href="qnetworkregistration.html#setCurrentOperator">QNetworkRegistration::setCurrentOperator</a>() to register to and deregister from the network, and it can use <a href="qpresence.html#localPresence-prop">QPresence::setLocalPresence</a>() to update the user's presence state.</p>
@@ -430,15 +430,15 @@
 <pre>    QAbstractCallPolicyManager::CallHandling AsteriskManager::handling
             (const QString&amp; number)
     {
-        <span class="comment">// Cannot handle URI's that contain '@' or ':'.</span>
+        <span class="comment">//</span> Cannot handle URI's that contain '@' or ':'.
         if (number.contains(QChar('@')) || number.contains(QChar(':')))
             return CannotHandle;
 
-        <span class="comment">// If no network registration, then cannot handle at this time.</span>
+        <span class="comment">//</span> If no network registration, then cannot handle at this time.
         if (registrationState() != QTelephony::RegistrationHome)
             return CannotHandle;
 
-        <span class="comment">// Assume that this is a number that we can dial.</span>
+        <span class="comment">//</span> Assume that this is a number that we can dial.
         return CanHandle;
     }</pre>
 <p>We first filter out URI's for SIP and other call types that do not use phone numbers. Then we check to see if the Asterisk service is currently registered to the user's home network. If it is, then we indicate that Asterisk can handle the call.</p>
@@ -478,8 +478,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

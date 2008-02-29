@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/dnd.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/dnd.qdoc -->
 <head>
   <title>Qt 4.3: Porting to Qt 4 (Drag and Drop)</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -26,7 +26,7 @@
  {
      QDragObject *d = new QTextDrag( myHighlightedText(), this );
      d-&gt;dragCopy();
-     <span class="comment">// do NOT delete d.</span>
+     <span class="comment">//</span> do NOT delete d.
  }</pre>
 <p>Similarly, in Qt 4, drag operations are also initiated when a <a href="qdrag.html">QDrag</a> object is constructed and its <a href="qdrag.html#exec">exec()</a> function is called. In contrast, these objects are typically constructed on the stack rather than the heap since each drag and drop operation is performed synchronously as far as the drag source is concerned. One key benefit of this is that the drag source can receive information about how the operation ended from the value returned by <a href="qdrag.html#exec">exec()</a>.</p>
 <pre> void MyWidget::mousePressEvent(QMouseEvent *event)
@@ -95,8 +95,8 @@
 <p>In Qt 4, only the <a href="qmimedata.html">QMimeData</a> class is used to represent data, providing a container for data stored in multiple formats, each associated with a relevant MIME type. Since arbitrary MIME types can be specified, there is no need for an extensive class hierarchy to represent different kinds of information. Additionally, <a href="qmimedata.html">QMimeData</a> it provides some convenience functions to allow the most common data formats to be stored and retrieved with less effort than for arbitrary MIME types.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

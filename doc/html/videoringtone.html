@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">VideoRingtone Class Reference</h1>
 <p>The VideoRingtone class provides an interface to the Qtopia media system to play the video tones for incoming calls. <a href="#details">More...</a></p>
-<pre>    #include &lt;VideoRingtone&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;VideoRingtone&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="videoringtone-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <li><div class="fn"/>QWidget * <b><a href="videoringtone.html#videoWidget">videoWidget</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -36,7 +36,7 @@
 <li><div class="fn"/>void <b><a href="videoringtone.html#videoWidgetReady">videoWidgetReady</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -44,16 +44,15 @@
 <li><div class="fn"/>VideoRingtone * <b><a href="videoringtone.html#instance">instance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,7 +72,7 @@
     CallScreen::showVideo() {
         QWidget *widget = videoTone-&gt;videoWidget();
 
-        <span class="comment">// set the new parent to manage resource</span>
+        <span class="comment">//</span> set the new parent to manage resource
         widget-&gt;setParent( this );
 
         layout()-&gt;addWidget( widget );
@@ -85,7 +84,7 @@
 <p>Destroys the <a href="videoringtone.html">VideoRingtone</a> object.</p>
 <h3 class="fn"><a name="instance"></a>VideoRingtone * VideoRingtone::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the <a href="videoringtone.html">VideoRingtone</a> instance.</p>
-<h3 class="fn"><a name="playVideo"></a>void VideoRingtone::playVideo ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )</h3>
+<h3 class="fn"><a name="playVideo"></a>void VideoRingtone::playVideo ( const <a href="./qstring.html">QString</a> &amp; <i>fileName</i> )</h3>
 <p>Attempts to play the video <i>fileName</i>.</p>
 <h3 class="fn"><a name="stopVideo"></a>void VideoRingtone::stopVideo ()</h3>
 <p>Stops the media content.</p>
@@ -93,14 +92,14 @@
 <p>This signal is emitted when the media system fails to play the video tone.</p>
 <h3 class="fn"><a name="videoRingtoneStopped"></a>void VideoRingtone::videoRingtoneStopped ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the video tone is stopped.</p>
-<h3 class="fn"><a name="videoWidget"></a><a href="qwidget.html">QWidget</a> * VideoRingtone::videoWidget ()</h3>
+<h3 class="fn"><a name="videoWidget"></a><a href="./qwidget.html">QWidget</a> * VideoRingtone::videoWidget ()</h3>
 <p>Returns the video widget instance.</p>
 <h3 class="fn"><a name="videoWidgetReady"></a>void VideoRingtone::videoWidgetReady ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the video widget is created and ready to be used.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

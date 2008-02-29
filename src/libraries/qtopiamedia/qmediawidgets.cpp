@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,8 +20,10 @@
 ****************************************************************************/
 
 #include "qmediawidgets.h"
+#include <QtopiaApplication>
 
 #include <private/mediastyle_p.h>
+#include <private/activitymonitor_p.h>
 
 static QImage load_scaled_image( const QString& filename, const QSize& size, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio )
 {
@@ -145,7 +147,7 @@ QtopiaMedia::State QMediaStateLabel::state() const
 /*!
     \reimp
 */
-QSize QMediaStateLabel::sizeHint() const { return QSize( fontMetrics().height(), fontMetrics().height() ); }
+QSize QMediaStateLabel::sizeHint() const { return QSize( QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize), QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) ); }
 
 /*!
     \fn void QMediaStateLabel::setState( QtopiaMedia::State state )
@@ -358,7 +360,6 @@ QMediaProgressLabel::QMediaProgressLabel( Type type, QWidget* parent )
     m_d->time = new SimpleLabel;
     layout->addWidget( m_d->time );
 
-    // ### HACK Suitable only for media player
     switch( m_type )
     {
     case ElapsedTime:
@@ -640,6 +641,7 @@ QMediaProgressWidget::QMediaProgressWidget( QWidget* parent )
     // Construct progress bar
     m_d->progress = new SlimlineProgress;
     m_d->progress->setTextVisible( false );
+    m_d->progress->setMaximum( 0 );
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin( 0 );
@@ -803,7 +805,7 @@ void QMediaVolumeLabel::setVolumeType( Type type )
 */
 QSize QMediaVolumeLabel::sizeHint() const
 {
-    return QSize( fontMetrics().height(), fontMetrics().height() );
+    return QSize( QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize), QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) );
 }
 
 /*!
@@ -1048,6 +1050,7 @@ void QMediaVolumeWidget::suspend()
 
 void QMediaVolumeWidget::resume()
 {
+    if(!m_control) return;
     connect( m_control, SIGNAL(volumeChanged(int)),
         this, SLOT(setVolume(int)) );
 
@@ -1438,6 +1441,7 @@ QMediaSeekWidget::QMediaSeekWidget( QWidget* parent )
     m_context->addObject( m_d->monitor );
 
     m_d->progress->setTextVisible( false );
+    m_d->progress->setMaximum( 0 );
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin( 0 );

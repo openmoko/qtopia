@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -84,7 +84,7 @@ void HttpFetcher::run()
     }
     else                  // getting a file
     {
-        md5File = new Md5File( file.prepend( Qtopia::tempDir() ) );
+        md5File = new Md5File( InstallControl::downloadedFileLoc() );
         if ( md5File->exists() )
             md5File->remove();
         packageData = md5File;
@@ -222,10 +222,10 @@ HttpInfoReceiver::HttpInfoReceiver( QObject *p )
     if ( pkgManagerConfList.contains( QLatin1String( "Configuration" )))
     {
         pkgManagerConf.beginGroup( QLatin1String( "Configuration" ));
-        if ( pkgManagerConf.contains( QLatin1String( "maxPackagesList" )))
-            maxPackagesList = pkgManagerConf.value( QLatin1String( "maxPackagesList" )).toInt();
+        if ( pkgManagerConf.contains( QLatin1String( "MaxPackagesList" )))
+            maxPackagesList = pkgManagerConf.value( QLatin1String( "MaxPackagesList" )).toInt();
 
-        maxPackagesListSize = pkgManagerConf.value( QLatin1String( "maxPackagesListSize" ),
+        maxPackagesListSize = pkgManagerConf.value( QLatin1String( "MaxPackagesListSize" ),
                                         QVariant(MAX_PACKAGES_LIST_BYTES) ).toInt();
 
         pkgManagerConf.endGroup();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 #include <qtopianamespace.h>
 #include <qthumbnail.h>
 #include <qtopia/private/drmcontent_p.h>
+#include <QThreadStorage>
 /*
     Generic QAbstractFileEngine implementation providing access to content using
     QDrmContentPlugin::createDecoder().
@@ -251,10 +252,57 @@ QDrmContentLicense::~QDrmContentLicense()
     \sa renderStateChanged()
 */
 
+class QDrmContentPluginLicenseStore : public QObject
+{
+    Q_OBJECT
+public:
+    QDrmContentPluginLicenseStore( QObject *parent = 0 );
+
+    void insertLicense( QDrmContentLicense *license );
+    QDrmContentLicense *license( const QString &fileName );
+
+private slots:
+    void licenseDestroyed( QObject *object );
+
+private:
+    QHash< QString, QDrmContentLicense * > m_licenses;
+};
+
+QDrmContentPluginLicenseStore::QDrmContentPluginLicenseStore( QObject *parent )
+    : QObject( parent )
+{
+}
+
+void QDrmContentPluginLicenseStore::insertLicense( QDrmContentLicense *license )
+{
+    m_licenses.insert( license->content().fileName(), license );
+
+    connect( license, SIGNAL(destroyed(QObject*)), this, SLOT(licenseDestroyed(QObject*)) );
+}
+
+QDrmContentLicense *QDrmContentPluginLicenseStore::license( const QString &fileName )
+{
+    return m_licenses.value( fileName );
+}
+
+void QDrmContentPluginLicenseStore::licenseDestroyed( QObject *object )
+{
+    QHash< QString, QDrmContentLicense * >::iterator it;
+    for( it = m_licenses.begin(); it != m_licenses.end(); it++ )
+    {
+        if( it.value() == object )
+        {
+            m_licenses.erase( it );
+
+            return;
+        }
+    }
+}
+
 class QDrmContentPluginPrivate
 {
 public:
-    QSet< QDrmContentLicense * > licenses;
+    QThreadStorage< QDrmContentPluginLicenseStore * > licenses;
 };
 
 /*!
@@ -541,11 +589,7 @@ QAbstractFileEngine *QDrmContentPlugin::create( const QString &file ) const
 */
 QDrmContentLicense *QDrmContentPlugin::license( const QString &fileName ) const
 {
-    foreach( QDrmContentLicense *license, d->licenses )
-        if( license->content().fileName() == fileName )
-            return license;
-
-    return 0;
+    return d->licenses.hasLocalData() ? d->licenses.localData()->license( fileName ) : 0;
 }
 
 /*!
@@ -555,11 +599,10 @@ QDrmContentLicense *QDrmContentPlugin::license( const QString &fileName ) const
 */
 void QDrmContentPlugin::registerLicense( QDrmContentLicense *license )
 {
-    d->licenses.insert( license );
+    if( !d->licenses.hasLocalData() )
+        d->licenses.setLocalData( new QDrmContentPluginLicenseStore );
 
-    license->setParent( this );
-
-    connect( license,SIGNAL(destroyed(QObject*)), this, SLOT(unregisterLicense(QObject*)) );
+    d->licenses.localData()->insertLicense( license );
 }
 
 /*!
@@ -567,7 +610,7 @@ void QDrmContentPlugin::registerLicense( QDrmContentLicense *license )
 */
 void QDrmContentPlugin::unregisterLicense( QObject *license )
 {
-    d->licenses.remove( static_cast< QDrmContentLicense * >( license ) );
+    Q_UNUSED(license);
 }
 
 /*!
@@ -622,3 +665,4 @@ QDrmAgentPlugin::~QDrmAgentPlugin()
     Each widget is displayed in a seperate tab page.
 */
 
+#include "qdrmcontentplugin.moc"

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2172,9 +2170,10 @@ void qt_message_output(QtMsgType msgType, const char *buf)
 
     Calls the message handler with the debug message \a msg. If no
     message handler has been installed, the message is printed to
-    stderr. Under Windows, the message is sent to the debugger. This
-    function does nothing if \c QT_NO_DEBUG_OUTPUT was defined during
-    compilation.
+    stderr. Under Windows, the message is sent to the console, if it is a
+    console application; otherwise, it is sent to the debugger. This
+    function does nothing if \c QT_NO_DEBUG_OUTPUT was defined
+    during compilation.
 
     If you pass the function a format string and a list of arguments,
     it works in similar way to the C printf() function.

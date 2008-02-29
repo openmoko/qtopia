@@ -8,7 +8,7 @@ fi
 die()
 {
     echo -n "updatedevice failed while doing: "
-    echo $@
+    echo -e $@
     exit 1
 }
 
@@ -68,6 +68,9 @@ install_image()
         sleep 60
     fi
     ssh root@$PHONEIP "reboot" || die install_image reboot
+    if [ $RESULT -ne 0 ]; then
+        die install_image "\nThe image may be too big, corrupt, already installed, or incompatible with the root filesystem."
+    fi
 }
 
 # Find default update image

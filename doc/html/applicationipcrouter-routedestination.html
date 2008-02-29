@@ -28,16 +28,16 @@
 <h2>Detailed Description</h2>
 <p>The RouteDestination class represents an IPC route destination.</p>
 <p>A route destination allows an <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> to add a manual transport route to the <a href="applicationipcrouter.html">ApplicationIpcRouter</a> instance. Manual transport routes are usefull to adapt the system's primary IPC transport to other transport models.</p>
+<p><b>Note:</b> This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <p>An overview of the application launcher mechanism and the role the RouteDestination plays in it is given in the documentation of the <a href="applicationlauncher.html">ApplicationLauncher</a> class.</p>
-<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="routeMessage"></a>void RouteDestination::routeMessage ( const <a href="qstring.html">QString</a> &amp; <i>appName</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="routeMessage"></a>void RouteDestination::routeMessage ( const <a href="./qstring.html">QString</a> &amp; <i>appName</i>, const <a href="./qstring.html">QString</a> &amp; <i>message</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Invoked by the system's IpcRouter to deliver an IPC message. <i>appName</i> is set to the name of the application the message should be delivered to (the &quot;destination&quot;). <i>message</i> and <i>data</i> represent the message itself.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

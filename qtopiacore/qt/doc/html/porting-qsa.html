@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/porting-qsa.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/porting-qsa.qdoc -->
 <head>
   <title>Qt 4.3: Moving from QSA to Qt Script</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -51,7 +51,7 @@
 <pre> point.manhattanLength = function() {
      return this.x + this.y;
  }
- print(point.manhattanLength()); <span class="comment">// prints 47</span></pre>
+ print(point.manhattanLength()); <span class="comment">//</span> prints 47</pre>
 <p>In the code above, we see the first subtle difference between QSA and Qt Script. In QSA one would write the point class like this:</p>
 <pre> class Point() {
      var x;
@@ -63,7 +63,7 @@
 <pre> point.manhattanLength = function() {
      return this.x + this.y;
  }
- print(point.manhattanLength()); <span class="comment">// prints 47</span></pre>
+ print(point.manhattanLength()); <span class="comment">//</span> prints 47</pre>
 <p>This is because, in QSA, the value of <tt>this</tt> is decided based on the location of the declaration of the function it is used in. In the code above, the function is assigned to an object, but it is declared in the global scope, hence there will be no valid <tt>this</tt> value. In Qt Script, the value of <tt>this</tt> is decided at run-time, hence you could have assigned the <tt>manhattanLength()</tt> function to any object that had <tt>x</tt> and <tt>y</tt> values.</p>
 <a name="constructors"></a>
 <h3>Constructors</h3>
@@ -245,8 +245,8 @@
 <p>QSA supported a hardcoded set of type mappings which covered most of the <a href="qvariant.html">QVariant</a> types, QObjects and primitives. For more complex type signatures, such as the template-based tool classes, it had rather limited support. Qt Script is significantly better at type mapping and will convert lists of template types into arrays of the appropriate types, given that all the types are declared to the meta-type system.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

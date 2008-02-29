@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -59,7 +59,7 @@ MailTransport::MailTransport(const char* name)
         QSslSocket::addDefaultCaCertificates(sslCertsPath());
     }
 
-    encryption = MailAccount::Encrypt_NONE;
+    encryption = QMailAccount::Encrypt_NONE;
 #endif
     mSocket = 0;
     mStream = 0;
@@ -67,7 +67,7 @@ MailTransport::MailTransport(const char* name)
     connect( connectToHostTimeOut, SIGNAL(timeout()),
 	     this, SLOT(hostConnectionTimeOut()) );
 #ifdef QT_NO_OPENSSL
-    createSocket(MailAccount::Encrypt_NONE);
+    createSocket(QMailAccount::Encrypt_NONE);
 #endif
 }
 
@@ -78,14 +78,14 @@ MailTransport::~MailTransport()
     delete mSocket;
 }
 
-void MailTransport::createSocket(MailAccount::EncryptType encryptType)
+void MailTransport::createSocket(QMailAccount::EncryptType encryptType)
 {
 #ifndef QT_NO_OPENSSL
     if (mSocket)
     {
         // Note: socket recycling doesn't seem to work in SSL mode...
         if (mSocket->mode() == QSslSocket::UnencryptedMode &&
-            (encryptType == MailAccount::Encrypt_NONE || encryptType == MailAccount::Encrypt_TLS))
+            (encryptType == QMailAccount::Encrypt_NONE || encryptType == QMailAccount::Encrypt_TLS))
         {
             // The socket already exists in the correct mode
             return;
@@ -124,12 +124,12 @@ void MailTransport::createSocket(MailAccount::EncryptType encryptType)
     mStream = new QTextStream(mSocket);
 }
 
-void MailTransport::open(const MailAccount& account)
+void MailTransport::open(const QMailAccount& account)
 {
     open(account.mailServer(), account.mailPort(), account.mailEncryption());
 }
 
-void MailTransport::open(const QString& url, int port, MailAccount::EncryptType encryptionType)
+void MailTransport::open(const QString& url, int port, QMailAccount::EncryptType encryptionType)
 {
     if (mSocket && mSocket->isOpen())
     {
@@ -143,8 +143,8 @@ void MailTransport::open(const QString& url, int port, MailAccount::EncryptType 
     emit updateStatus(tr("DNS lookup"));
 
 #ifndef QT_NO_OPENSSL
-    qLog(Messaging) << "Opening connection - " << url << ':' << port << (encryptionType == MailAccount::Encrypt_SSL ? " SSL" : (encryptionType == MailAccount::Encrypt_TLS ? " TLS" : ""));
-    if (mailEncryption() == MailAccount::Encrypt_SSL)
+    qLog(Messaging) << "Opening connection - " << url << ':' << port << (encryptionType == QMailAccount::Encrypt_SSL ? " SSL" : (encryptionType == QMailAccount::Encrypt_TLS ? " TLS" : ""));
+    if (mailEncryption() == QMailAccount::Encrypt_SSL)
         mSocket->connectToHostEncrypted(url, port);
     else
 #endif
@@ -183,11 +183,11 @@ QByteArray MailTransport::readLine(qint64 maxSize)
 void MailTransport::connectionEstablished()
 {
     connectToHostTimeOut->stop();
-    if (mailEncryption() == MailAccount::Encrypt_NONE)
+    if (mailEncryption() == QMailAccount::Encrypt_NONE)
         emit updateStatus(tr("Connected"));
 
     qLog(Messaging) << mName << ": connection established";
-    emit connected(MailAccount::Encrypt_NONE);
+    emit connected(QMailAccount::Encrypt_NONE);
 }
 
 void MailTransport::hostConnectionTimeOut()
@@ -199,7 +199,7 @@ void MailTransport::hostConnectionTimeOut()
 #ifndef QT_NO_OPENSSL
 void MailTransport::encryptionEstablished()
 {
-    if (mailEncryption() != MailAccount::Encrypt_NONE)
+    if (mailEncryption() != QMailAccount::Encrypt_NONE)
         emit updateStatus(tr("Connected"));
 
     qLog(Messaging) << mName << ": Secure connection established";
@@ -224,7 +224,7 @@ void MailTransport::connectionFailed(const QList<QSslError>& errors)
 void MailTransport::errorHandling(int status, QString msg)
 {
     connectToHostTimeOut->stop();
-    mSocket->close();
+    mSocket->abort();
     emit updateStatus(tr("Error occurred"));
     emit errorOccurred(status, msg);
 }
@@ -234,12 +234,12 @@ void MailTransport::socketError(QAbstractSocket::SocketError status)
     errorHandling(static_cast<int>(status), tr("Socket error"));
 }
 
-MailAccount::EncryptType MailTransport::mailEncryption() const
+QMailAccount::EncryptType MailTransport::mailEncryption() const
 {
 #ifndef QT_NO_OPENSSL
     return encryption;
 #else
-    return MailAccount::Encrypt_NONE;
+    return QMailAccount::Encrypt_NONE;
 #endif
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,7 +26,6 @@
 #include <QVariant>
 #include <qtopiaglobal.h>
 #include <QSharedData>
-#include "qmailstore.h"
 #include "qmailfolder.h"
 
 class QMailFolderKeyPrivate;
@@ -53,7 +52,9 @@ public:
     };
 
 public:
+    QMailFolderKey();
     QMailFolderKey(const Property& p, const QVariant& value, const Operand& = Equal);
+    explicit QMailFolderKey(const QMailIdList& ids);
     QMailFolderKey(const QMailFolderKey& other);
     virtual ~QMailFolderKey();
 
@@ -68,9 +69,7 @@ public:
 
     QMailFolderKey& operator=(const QMailFolderKey& other);
 
-private:
-    QMailFolderKey();
-    void init(const Property& p, const Operand& op, const QVariant& value);
+    bool isEmpty() const;
 
 private:
 	friend class QMailStore;

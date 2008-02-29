@@ -21,7 +21,8 @@
 <a name="public-types"></a>
 <h3>Public Types</h3>
 <ul>
-<li><div class="fn"/>enum <b><a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a></b> { HeaderOnlyFormat, StorageFormat, TransmissionFormat, IdentityFormat }</li>
+<li><div class="fn"/>enum <b><a href="qmailmessage.html#AttachmentsAction-enum">AttachmentsAction</a></b> { LinkToAttachments, CopyAttachments, CopyAndDeleteAttachments }</li>
+<li><div class="fn"/>enum <b><a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a></b> { HeaderOnlyFormat, StorageFormat, TransmissionFormat, IdentityFormat, SerializationFormat }</li>
 <li><div class="fn"/>enum <b><a href="qmailmessage.html#MailDataSelection-enum">MailDataSelection</a></b> { Header, HeaderAndBody }</li>
 <li><div class="fn"/>enum <b><a href="qmailmessage.html#MessageStatusFlag-enum">MessageStatusFlag</a></b> { Incoming, Outgoing, Sent, Replied, ..., ReadElsewhere }</li>
 <li><div class="fn"/>enum <b><a href="qmailmessage.html#MessageType-enum">MessageType</a></b> { Mms, Sms, Email, System, None, AnyType }</li>
@@ -31,8 +32,8 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qmailmessage.html#QMailMessage">QMailMessage</a></b> ()</li>
-<li><div class="fn"/><b><a href="qmailmessage.html#QMailMessage-3">QMailMessage</a></b> ( const QMailId &amp; <i>id</i>, const MailDataSelection &amp; <i>selection</i> = HeaderAndBody )</li>
-<li><div class="fn"/>virtual <b><a href="qmailmessage.html#dtor.QMailMessage">~QMailMessage</a></b> ()</li>
+<li><div class="fn"/><b><a href="qmailmessage.html#QMailMessage-2">QMailMessage</a></b> ( const QMailId &amp; <i>id</i>, MailDataSelection <i>selection</i> = HeaderAndBody )</li>
+<li><div class="fn"/><b><a href="qmailmessage.html#QMailMessage-3">QMailMessage</a></b> ( const QString &amp; <i>uid</i>, const QString &amp; <i>account</i>, MailDataSelection <i>selection</i> = HeaderAndBody )</li>
 <li><div class="fn"/>QList&lt;QMailAddress&gt; <b><a href="qmailmessage.html#bcc">bcc</a></b> () const</li>
 <li><div class="fn"/>QList&lt;QMailAddress&gt; <b><a href="qmailmessage.html#cc">cc</a></b> () const</li>
 <li><div class="fn"/>QMailTimeStamp <b><a href="qmailmessage.html#date">date</a></b> () const</li>
@@ -89,11 +90,19 @@
 <p>QMailMessage supports a number of types. These include telephony types such as SMS and MMS, and internet email messages as defined in <a href="http://www.ietf.org/rfc/rfc2822.txt">RFC 2822</a> (Internet Message Format), and <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a> (Format of Internet Message Bodies) through <a href="http://www.ietf.org/rfc/rfc2049.txt">RFC 2049</a> (Conformance Criteria and Examples).</p>
 <p>The most common way to use QMailMessage is to initialize it from raw data using <a href="qmailmessage.html#fromRfc2822">QMailMessage::fromRfc2822</a>().</p>
 <p>A QMailMessage can also be constructed piece by piece using functions such as <a href="qmailmessage.html#setMessageType">setMessageType</a>(), <a href="qmailmessage.html#setFrom">setFrom</a>(), <a href="qmailmessage.html#setTo">setTo</a>(), <a href="qmailmessage.html#setSubject">setSubject</a>(), and <a href="qmailmessagepartcontainer.html#setBody">setBody</a>() or <a href="qmailmessagepartcontainer.html#appendPart">appendPart</a>(). Convenience functions such as <a href="qmailmessage.html#from">from</a>()/<a href="qmailmessage.html#setFrom">setFrom</a>() and <a href="qmailmessage.html#date">date</a>()/<a href="qmailmessage.html#setDate">setDate</a>() accept and return wrapper types, to simplify the exchange of correctly-formatted data. In some cases, however, it may be simpler for clients to get and set the content of header fields directly, using the <a href="qmailmessagepartcontainer.html#headerField">headerField</a>() and <a href="qmailmessagepartcontainer.html#setHeaderField">setHeaderField</a>() functions inherited from <a href="qmailmessagepartcontainer.html">QMailMessagePartContainer</a>.</p>
-<p>A message may be serialized to a <a href="qdatastream.html">QDataStream</a>, or returned as a <a href="qbytearray.html">QByteArray</a> using <a href="qmailmessage.html#toRfc2822">toRfc2822</a>().</p>
+<p>A message may be serialized to a <a href="./qdatastream.html">QDataStream</a>, or returned as a <a href="./qbytearray.html">QByteArray</a> using <a href="qmailmessage.html#toRfc2822">toRfc2822</a>().</p>
 <p>Messages can be added to the <a href="qmailstore.html">QMailStore</a>, or retrieved from the store via their <a href="qmailid.html">QMailId</a> identifier.</p>
 <p>See also <a href="qmailmessagepart.html">QMailMessagePart</a>, <a href="qmailmessagebody.html">QMailMessageBody</a>, <a href="qmailstore.html">QMailStore</a>, and <a href="qmailid.html">QMailId</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="AttachmentsAction-enum"></a>enum QMailMessage::AttachmentsAction</h3>
+<p>This enum type is used to describe the action that should be performed on each message attachment.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QMailMessage::LinkToAttachments</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">Add a part to the message containing a link to the supplied attachment. If the document is removed, the message will no longer have access to the data.</td></tr>
+<tr><td valign="top"><tt>QMailMessage::CopyAttachments</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Add a part to the message containing a copy of the data in the supplied attachment. If the document is removed, the message will still contain the data.</td></tr>
+<tr><td valign="top"><tt>QMailMessage::CopyAndDeleteAttachments</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Add a part to the message containing a copy of the data in the supplied attachment, then delete the document from which the data was copied.</td></tr>
+</table></p>
 <h3 class="fn"><a name="EncodingFormat-enum"></a>enum QMailMessage::EncodingFormat</h3>
 <p>This enum type is used to describe the format in which a message should be serialized.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
@@ -102,6 +111,7 @@
 <tr><td valign="top"><tt>QMailMessage::StorageFormat</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The message is serialized to RFC 2822 form, without attachments.</td></tr>
 <tr><td valign="top"><tt>QMailMessage::TransmissionFormat</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The entire message is serialized to RFC 2822 form, with additional header fields added if necessary, and 'bcc' header field omitted.</td></tr>
 <tr><td valign="top"><tt>QMailMessage::IdentityFormat</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The entire message is serialized to RFC 2822 form, with only Content-Type and Content-Transfer-Encoding headers added where required.</td></tr>
+<tr><td valign="top"><tt>QMailMessage::SerializationFormat</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The entire message is serialized to RFC 2822 form for internal use only.</td></tr>
 </table></p>
 <h3 class="fn"><a name="MailDataSelection-enum"></a>enum QMailMessage::MailDataSelection</h3>
 <p>This enum type is used to describe the data to be loaded from the message store when constructing a <a href="qmailmessage.html">QMailMessage</a>.</p>
@@ -141,14 +151,14 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailMessage"></a>QMailMessage::QMailMessage ()</h3>
 <p>Constructs an empty message object.</p>
-<h3 class="fn"><a name="QMailMessage-3"></a>QMailMessage::QMailMessage ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i>, const <a href="qmailmessage.html#MailDataSelection-enum">MailDataSelection</a> &amp; <i>selection</i> = HeaderAndBody )</h3>
+<h3 class="fn"><a name="QMailMessage-2"></a>QMailMessage::QMailMessage ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i>, <a href="qmailmessage.html#MailDataSelection-enum">MailDataSelection</a> <i>selection</i> = HeaderAndBody )</h3>
 <p>Constructs a message object from data stored in the message store with <a href="qmailid.html">QMailId</a> <i>id</i>, and mail data selection defined by <i>selection</i>.</p>
-<h3 class="fn"><a name="dtor.QMailMessage"></a>QMailMessage::~QMailMessage ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destroys the mail message object.</p>
-<h3 class="fn"><a name="bcc"></a><a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::bcc () const</h3>
+<h3 class="fn"><a name="QMailMessage-3"></a>QMailMessage::QMailMessage ( const <a href="./qstring.html">QString</a> &amp; <i>uid</i>, const <a href="./qstring.html">QString</a> &amp; <i>account</i>, <a href="qmailmessage.html#MailDataSelection-enum">MailDataSelection</a> <i>selection</i> = HeaderAndBody )</h3>
+<p>Constructs a message object from data stored in the message store with the unique identifier <i>uid</i> from the account <i>account</i>, and mail data selection defined by <i>selection</i>.</p>
+<h3 class="fn"><a name="bcc"></a><a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::bcc () const</h3>
 <p>Returns a list of all the bcc (blind carbon copy) recipients specified for the message.</p>
 <p>See also <a href="qmailmessage.html#setBcc">setBcc</a>(), <a href="qmailmessage.html#to">to</a>(), <a href="qmailmessage.html#cc">cc</a>(), and <a href="qmailaddress.html">QMailAddress</a>.</p>
-<h3 class="fn"><a name="cc"></a><a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::cc () const</h3>
+<h3 class="fn"><a name="cc"></a><a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::cc () const</h3>
 <p>Returns a list of all the cc (carbon copy) recipients specified for the message.</p>
 <p>See also <a href="qmailmessage.html#setCc">setCc</a>(), <a href="qmailmessage.html#to">to</a>(), <a href="qmailmessage.html#bcc">bcc</a>(), and <a href="qmailaddress.html">QMailAddress</a>.</p>
 <h3 class="fn"><a name="date"></a><a href="qmailtimestamp.html">QMailTimeStamp</a> QMailMessage::date () const</h3>
@@ -157,45 +167,45 @@
 <h3 class="fn"><a name="from"></a><a href="qmailaddress.html">QMailAddress</a> QMailMessage::from () const</h3>
 <p>Returns the originating address of the message.</p>
 <p>See also <a href="qmailmessage.html#setFrom">setFrom</a>().</p>
-<h3 class="fn"><a name="fromAccount"></a><a href="qstring.html">QString</a> QMailMessage::fromAccount () const</h3>
+<h3 class="fn"><a name="fromAccount"></a><a href="./qstring.html">QString</a> QMailMessage::fromAccount () const</h3>
 <p>Returns the name of the originating account for the message.</p>
 <p>See also <a href="qmailmessage.html#setFromAccount">setFromAccount</a>().</p>
-<h3 class="fn"><a name="fromMailbox"></a><a href="qstring.html">QString</a> QMailMessage::fromMailbox () const</h3>
+<h3 class="fn"><a name="fromMailbox"></a><a href="./qstring.html">QString</a> QMailMessage::fromMailbox () const</h3>
 <p>Returns the name of the originating mailbox for the message.</p>
 <p>See also <a href="qmailmessage.html#setFromMailbox">setFromMailbox</a>().</p>
-<h3 class="fn"><a name="fromRfc2822"></a>QMailMessage QMailMessage::fromRfc2822 ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>byteArray</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromRfc2822"></a>QMailMessage QMailMessage::fromRfc2822 ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>byteArray</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a mail message from the RFC 2822 data contained in <i>byteArray</i>.</p>
-<h3 class="fn"><a name="fromRfc2822File"></a>QMailMessage QMailMessage::fromRfc2822File ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromRfc2822File"></a>QMailMessage QMailMessage::fromRfc2822File ( const <a href="./qstring.html">QString</a> &amp; <i>fileName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a mail message from the RFC 2822 data contained in the file <i>fileName</i>.</p>
 <h3 class="fn"><a name="hasRecipients"></a>bool QMailMessage::hasRecipients () const</h3>
 <p>Returns true if there are any recipients (either To, CC or BCC addresses) defined for this message; otherwise returns false.</p>
 <h3 class="fn"><a name="id"></a><a href="qmailid.html">QMailId</a> QMailMessage::id () const</h3>
 <p>Returns the Qtopia unique <a href="qmailid.html">QMailId</a> of the message.</p>
 <p>See also <a href="qmailmessage.html#setId">setId</a>().</p>
-<h3 class="fn"><a name="inReplyTo"></a><a href="qstring.html">QString</a> QMailMessage::inReplyTo () const</h3>
+<h3 class="fn"><a name="inReplyTo"></a><a href="./qstring.html">QString</a> QMailMessage::inReplyTo () const</h3>
 <p>Returns the message ID specified by the RFC 2822 'In-Reply-To' field for the message, if present.</p>
 <p>See also <a href="qmailmessage.html#setInReplyTo">setInReplyTo</a>().</p>
-<h3 class="fn"><a name="indicativeSize"></a>uint QMailMessage::indicativeSize () const</h3>
-<p>Returns an indication of the size of the message. This measure should be used only in comparing the relative size of outgoing messages.</p>
+<h3 class="fn"><a name="indicativeSize"></a><a href="./qtglobal.html#uint-typedef">uint</a> QMailMessage::indicativeSize () const</h3>
+<p>Returns an indication of the size of the message. This measure should be used only in comparing the relative size of messages with respect to transmission.</p>
 <h3 class="fn"><a name="messageType"></a><a href="qmailmessage.html#MessageType-enum">MessageType</a> QMailMessage::messageType () const</h3>
 <p>Returns the <a href="qmailmessage.html#MessageType-enum">MessageType</a> of the message.</p>
 <p>See also <a href="qmailmessage.html#setMessageType">setMessageType</a>().</p>
 <h3 class="fn"><a name="parentFolderId"></a><a href="qmailid.html">QMailId</a> QMailMessage::parentFolderId () const</h3>
 <p>Return the <a href="qmailid.html">QMailId</a> of the parent of the folder that contains the message.</p>
 <p>See also <a href="qmailmessage.html#setParentFolderId">setParentFolderId</a>().</p>
-<h3 class="fn"><a name="recipients"></a><a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::recipients () const</h3>
+<h3 class="fn"><a name="recipients"></a><a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::recipients () const</h3>
 <p>Returns a list of all the recipients specified for the message, either as To, CC, or BCC addresses.</p>
 <p>See also <a href="qmailmessage.html#to">to</a>(), <a href="qmailmessage.html#cc">cc</a>(), <a href="qmailmessage.html#bcc">bcc</a>(), and <a href="qmailmessage.html#hasRecipients">hasRecipients</a>().</p>
 <h3 class="fn"><a name="replyTo"></a><a href="qmailaddress.html">QMailAddress</a> QMailMessage::replyTo () const</h3>
 <p>Returns the address specified by the RFC 2822 'Reply-To' field for the message, if present.</p>
 <p>See also <a href="qmailmessage.html#setReplyTo">setReplyTo</a>().</p>
-<h3 class="fn"><a name="serverUid"></a><a href="qstring.html">QString</a> QMailMessage::serverUid () const</h3>
+<h3 class="fn"><a name="serverUid"></a><a href="./qstring.html">QString</a> QMailMessage::serverUid () const</h3>
 <p>Returns the identifier for the message on the originating server.</p>
 <p>See also <a href="qmailmessage.html#setServerUid">setServerUid</a>().</p>
-<h3 class="fn"><a name="setBcc"></a>void QMailMessage::setBcc ( const <a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>bccList</i> )</h3>
+<h3 class="fn"><a name="setBcc"></a>void QMailMessage::setBcc ( const <a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>bccList</i> )</h3>
 <p>Set the list of bcc (blind carbon copy) recipients for the message to <i>bccList</i>.</p>
 <p>See also <a href="qmailmessage.html#bcc">bcc</a>(), <a href="qmailmessage.html#setTo">setTo</a>(), and <a href="qmailmessage.html#setCc">setCc</a>().</p>
-<h3 class="fn"><a name="setCc"></a>void QMailMessage::setCc ( const <a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>ccList</i> )</h3>
+<h3 class="fn"><a name="setCc"></a>void QMailMessage::setCc ( const <a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>ccList</i> )</h3>
 <p>Set the list of cc (carbon copy) recipients for the message to <i>ccList</i>.</p>
 <p>See also <a href="qmailmessage.html#setTo">setTo</a>() and <a href="qmailmessage.html#setBcc">setBcc</a>().</p>
 <h3 class="fn"><a name="setDate"></a>void QMailMessage::setDate ( const <a href="qmailtimestamp.html">QMailTimeStamp</a> &amp; <i>timeStamp</i> )</h3>
@@ -204,16 +214,16 @@
 <h3 class="fn"><a name="setFrom"></a>void QMailMessage::setFrom ( const <a href="qmailaddress.html">QMailAddress</a> &amp; <i>from</i> )</h3>
 <p>Sets the from address, that is the originating address of the message to <i>from</i>.</p>
 <p>See also <a href="qmailmessage.html#from">from</a>().</p>
-<h3 class="fn"><a name="setFromAccount"></a>void QMailMessage::setFromAccount ( const <a href="qstring.html">QString</a> &amp; <i>account</i> )</h3>
+<h3 class="fn"><a name="setFromAccount"></a>void QMailMessage::setFromAccount ( const <a href="./qstring.html">QString</a> &amp; <i>account</i> )</h3>
 <p>Sets the name of the originating account for the message to <i>account</i>.</p>
 <p>See also <a href="qmailmessage.html#fromAccount">fromAccount</a>().</p>
-<h3 class="fn"><a name="setFromMailbox"></a>void QMailMessage::setFromMailbox ( const <a href="qstring.html">QString</a> &amp; <i>mailBox</i> )</h3>
+<h3 class="fn"><a name="setFromMailbox"></a>void QMailMessage::setFromMailbox ( const <a href="./qstring.html">QString</a> &amp; <i>mailBox</i> )</h3>
 <p>Sets the name of the originating mailbox for the message to <i>mailBox</i>.</p>
 <p>See also <a href="qmailmessage.html#fromMailbox">fromMailbox</a>().</p>
 <h3 class="fn"><a name="setId"></a>void QMailMessage::setId ( <a href="qmailid.html">QMailId</a> <i>id</i> )</h3>
 <p>Sets the <a href="qmailid.html">QMailId</a> of the message to <i>id</i>. <i>id</i> should be different for each message known to Qtopia.</p>
 <p>See also <a href="qmailmessage.html#id">id</a>().</p>
-<h3 class="fn"><a name="setInReplyTo"></a>void QMailMessage::setInReplyTo ( const <a href="qstring.html">QString</a> &amp; <i>messageId</i> )</h3>
+<h3 class="fn"><a name="setInReplyTo"></a>void QMailMessage::setInReplyTo ( const <a href="./qstring.html">QString</a> &amp; <i>messageId</i> )</h3>
 <p>Sets the RFC 2822 'In-Reply-To' field for the message to <i>messageId</i>.</p>
 <p>See also <a href="qmailmessage.html#inReplyTo">inReplyTo</a>().</p>
 <h3 class="fn"><a name="setMessageType"></a>void QMailMessage::setMessageType ( <a href="qmailmessage.html#MessageType-enum">MessageType</a> <i>type</i> )</h3>
@@ -225,10 +235,10 @@
 <h3 class="fn"><a name="setReplyTo"></a>void QMailMessage::setReplyTo ( const <a href="qmailaddress.html">QMailAddress</a> &amp; <i>address</i> )</h3>
 <p>Sets the RFC 2822 'Reply-To' address of the message to <i>address</i>.</p>
 <p>See also <a href="qmailmessage.html#replyTo">replyTo</a>().</p>
-<h3 class="fn"><a name="setServerUid"></a>void QMailMessage::setServerUid ( const <a href="qstring.html">QString</a> &amp; <i>server</i> )</h3>
+<h3 class="fn"><a name="setServerUid"></a>void QMailMessage::setServerUid ( const <a href="./qstring.html">QString</a> &amp; <i>server</i> )</h3>
 <p>Sets the originating server identifier for the message to <i>server</i>. The identifier specified should be unique.</p>
 <p>See also <a href="qmailmessage.html#serverUid">serverUid</a>().</p>
-<h3 class="fn"><a name="setSize"></a>void QMailMessage::setSize ( uint <i>size</i> )</h3>
+<h3 class="fn"><a name="setSize"></a>void QMailMessage::setSize ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>size</i> )</h3>
 <p>Sets the complete size of the message as found on the server to <i>size</i>.</p>
 <p>See also <a href="qmailmessage.html#size">size</a>().</p>
 <h3 class="fn"><a name="setStatus"></a>void QMailMessage::setStatus ( <a href="qmailmessage.html#MessageStatusFlag-enum">Status</a> <i>flags</i> )</h3>
@@ -237,37 +247,37 @@
 <h3 class="fn"><a name="setStatus-2"></a>void QMailMessage::setStatus ( <a href="qmailmessage.html#MessageStatusFlag-enum">MessageStatusFlag</a> <i>flag</i>, bool <i>set</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>If <i>set</i> is true, sets the individual status <i>flag</i>; otherwise the flag is cleared.</p>
-<h3 class="fn"><a name="setSubject"></a>void QMailMessage::setSubject ( const <a href="qstring.html">QString</a> &amp; <i>subject</i> )</h3>
+<h3 class="fn"><a name="setSubject"></a>void QMailMessage::setSubject ( const <a href="./qstring.html">QString</a> &amp; <i>subject</i> )</h3>
 <p>Sets the subject of the message to <i>subject</i>.</p>
 <p>See also <a href="qmailmessage.html#subject">subject</a>().</p>
-<h3 class="fn"><a name="setTo"></a>void QMailMessage::setTo ( const <a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>toList</i> )</h3>
+<h3 class="fn"><a name="setTo"></a>void QMailMessage::setTo ( const <a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; &amp; <i>toList</i> )</h3>
 <p>Sets the list of primary recipients for the message to <i>toList</i>.</p>
 <p>See also <a href="qmailmessage.html#to">to</a>(), <a href="qmailmessage.html#setCc">setCc</a>(), and <a href="qmailmessage.html#setBcc">setBcc</a>().</p>
 <h3 class="fn"><a name="setTo-2"></a>void QMailMessage::setTo ( const <a href="qmailaddress.html">QMailAddress</a> &amp; <i>address</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the list of primary recipients for the message to contain <i>address</i>.</p>
 <p>See also <a href="qmailmessage.html#setCc">setCc</a>() and <a href="qmailmessage.html#setBcc">setBcc</a>().</p>
-<h3 class="fn"><a name="size"></a>uint QMailMessage::size () const</h3>
+<h3 class="fn"><a name="size"></a><a href="./qtglobal.html#uint-typedef">uint</a> QMailMessage::size () const</h3>
 <p>Returns the complete size of the message as indicated on the originating server.</p>
 <p>See also <a href="qmailmessage.html#setSize">setSize</a>().</p>
 <h3 class="fn"><a name="status"></a><a href="qmailmessage.html#MessageStatusFlag-enum">Status</a> QMailMessage::status () const</h3>
 <p>Returns the status flags for the message.</p>
 <p>See also <a href="qmailmessage.html#setStatus">setStatus</a>().</p>
-<h3 class="fn"><a name="subject"></a><a href="qstring.html">QString</a> QMailMessage::subject () const</h3>
+<h3 class="fn"><a name="subject"></a><a href="./qstring.html">QString</a> QMailMessage::subject () const</h3>
 <p>Returns the subject of the message, if present; otherwise returns an empty string.</p>
 <p>See also <a href="qmailmessage.html#setSubject">setSubject</a>().</p>
-<h3 class="fn"><a name="to"></a><a href="qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::to () const</h3>
+<h3 class="fn"><a name="to"></a><a href="./qlist.html">QList</a>&lt;<a href="qmailaddress.html">QMailAddress</a>&gt; QMailMessage::to () const</h3>
 <p>Returns the list of primary recipients for the message.</p>
 <p>See also <a href="qmailmessage.html#setTo">setTo</a>(), <a href="qmailmessage.html#cc">cc</a>(), <a href="qmailmessage.html#bcc">bcc</a>(), and <a href="qmailaddress.html">QMailAddress</a>.</p>
-<h3 class="fn"><a name="toRfc2822"></a><a href="qbytearray.html">QByteArray</a> QMailMessage::toRfc2822 ( <a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a> <i>format</i> = TransmissionFormat ) const</h3>
+<h3 class="fn"><a name="toRfc2822"></a><a href="./qbytearray.html">QByteArray</a> QMailMessage::toRfc2822 ( <a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a> <i>format</i> = TransmissionFormat ) const</h3>
 <p>Returns the message in RFC 2822 format. The encoded content will vary depending on the value of <i>format</i>.</p>
-<h3 class="fn"><a name="toRfc2822-2"></a>void QMailMessage::toRfc2822 ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, <a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a> <i>format</i> = TransmissionFormat ) const</h3>
+<h3 class="fn"><a name="toRfc2822-2"></a>void QMailMessage::toRfc2822 ( <a href="./qdatastream.html">QDataStream</a> &amp; <i>out</i>, <a href="qmailmessage.html#EncodingFormat-enum">EncodingFormat</a> <i>format</i> = TransmissionFormat ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the message to the output stream <i>out</i>, in RFC 2822 format. The encoded content will vary depending on the value of <i>format</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

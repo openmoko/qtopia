@@ -27,7 +27,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>5 public functions inherited from <a href="qabstractipcinterfacegroupmanager.html#public-functions">QAbstractIpcInterfaceGroupManager</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -37,7 +37,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>3 signals inherited from <a href="qabstractipcinterfacegroupmanager.html#signals">QAbstractIpcInterfaceGroupManager</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -45,16 +45,15 @@
 <li><div class="fn"/>QStringList <b><a href="qhardwaremanager.html#providers-2">providers</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -70,37 +69,37 @@
 <p>See also <a href="qhardwareinterface.html">QHardwareInterface</a>, <a href="qpowersource.html">QPowerSource</a>, <a href="qsignalsource.html">QSignalSource</a>, and <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QHardwareManager"></a>QHardwareManager::QHardwareManager ( const <a href="qstring.html">QString</a> &amp; <i>interface</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QHardwareManager"></a>QHardwareManager::QHardwareManager ( const <a href="./qstring.html">QString</a> &amp; <i>interface</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a <a href="qhardwaremanager.html">QHardwareManager</a> object and attaches it to <i>parent</i>. <i>interface</i> is the name of the accessory interface that this object is monitoring.</p>
 <p>The following code assumes that Qtopia is running on a device that has a modem as power source (for more details see <a href="qpowerstatus.html">QPowerStatus</a> and <a href="qpowersource.html">QPowerSource</a>).</p>
 <pre>    QHardwareManager manager( &quot;QPowerSource&quot; );
     QStringList providers = manager.providers();
 
-<span class="comment">    //Qtopia always has a virtual power source with id DefaultBattery</span>
-    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//always true</span>
-    providers.contains( &quot;modem&quot; ); <span class="comment">//true</span></pre>
+<span class="comment">    //</span>Qtopia always has a virtual power source with id DefaultBattery
+    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//</span>always true
+    providers.contains( &quot;modem&quot; ); <span class="comment">//</span>true</pre>
 <p>Another way to achieve the same as the above example would be:</p>
 <pre>    QStringList providers = QHardwareManager::providers&lt;QPowerSource&gt;();
-    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//always true</span>
-    providers.contains( &quot;modem&quot; ); <span class="comment">//true</span></pre>
+    providers.contains( &quot;DefaultBattery&quot; ); <span class="comment">//</span>always true
+    providers.contains( &quot;modem&quot; ); <span class="comment">//</span>true</pre>
 <h3 class="fn"><a name="dtor.QHardwareManager"></a>QHardwareManager::~QHardwareManager ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qhardwaremanager.html">QHardwareManager</a> object.</p>
-<h3 class="fn"><a name="interface"></a><a href="qstring.html">QString</a> QHardwareManager::interface () const</h3>
+<h3 class="fn"><a name="interface"></a><a href="./qstring.html">QString</a> QHardwareManager::interface () const</h3>
 <p>Returns the interface that this object is monitoring.</p>
-<h3 class="fn"><a name="providerAdded"></a>void QHardwareManager::providerAdded ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="providerAdded"></a>void QHardwareManager::providerAdded ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when provider <i>id</i> is added.</p>
-<h3 class="fn"><a name="providerRemoved"></a>void QHardwareManager::providerRemoved ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="providerRemoved"></a>void QHardwareManager::providerRemoved ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when provider <i>id</i> is removed.</p>
-<h3 class="fn"><a name="providers"></a><a href="qstringlist.html">QStringList</a> QHardwareManager::providers () const</h3>
+<h3 class="fn"><a name="providers"></a><a href="./qstringlist.html">QStringList</a> QHardwareManager::providers () const</h3>
 <p>Returns a list of providers that support the interface that this object was initialized with.</p>
-<h3 class="fn"><a name="providers-2"></a><a href="qstringlist.html">QStringList</a> QHardwareManager::providers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="providers-2"></a><a href="./qstringlist.html">QStringList</a> QHardwareManager::providers ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a list of providers which support the given interface of type <tt>T</tt>. The following example demonstrates how to get the list of providers that supports the <a href="qpowersource.html">QPowerSource</a> interface.</p>
 <pre>    QStringList providers = QHardwareManager::providers&lt;QPowerSource&gt;();</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,11 +1,9 @@
 <html>
-<head><title>Internet Help</title></head>
+<head><title>Internet</title></head>
 <body>
 <!--#include file="device-name.html"-->
 <!--#if expr="$USERGUIDE"-->
    <h2>Internet</h2>
-<!--#else -->
-   <h3>Internet Help</h3>
 <!--#endif -->
 <p><img src=":image/netsetup/PPPConnect"></p>
 <p>Used to manually define the network settings for your <!--#echo var="device-name" -->, or to show settings that have been sent to it by your network operator.</p>
@@ -19,7 +17,9 @@
 <ul>
 <li><a href="netsetup-dialup-menu.html">Dial-up Help</a></li>
 <li><a href="netsetup-lan-menu.html">LAN Help</a></li>
+<!--#if expr="$BLUETOOTH"-->
 <li><a href="netsetup-bluetooth-menu.html">Bluetooth Help</a></li>
+<!--#endif -->
 </ul>
 
 <p>See Also: <a href="netsetup-add-service.html">New Service</a>

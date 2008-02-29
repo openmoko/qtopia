@@ -2,7 +2,7 @@
 #
 # Configures to build the Qt library
 #
-# Copyright (C) 1999-2007 Trolltech ASA. All rights reserved.
+# Copyright (C) 1999-2008 Trolltech ASA. All rights reserved.
 #
 # This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2286,7 +2286,7 @@ else
 fi
 
 TEST_COMPILER="$CC"
-[ -z "$TEST_COMPILE" ] && TEST_COMPILER=`getQMakeConf "$XQMAKESPEC" | grep "^QMAKE_CXX[^_A-Z0-9]" | sed "s,.* *= *\(.*\)$,\1,"`
+[ -z "$TEST_COMPILER" ] && TEST_COMPILER=`getQMakeConf "$XQMAKESPEC" | grep "^QMAKE_CXX[^_A-Z0-9]" | sed "s,.* *= *\(.*\)$,\1,"`
 
 # auto-detect precompiled header support
 if [ "$CFG_PRECOMPILE" = "auto" ]; then
@@ -4974,15 +4974,15 @@ case "$COMPILER" in
 g++*)
     # GNU C++
     QMAKE_CONF_COMPILER=`getQMakeConf | grep "^QMAKE_CXX[^_A-Z0-9]" | sed "s,.* *= *\(.*\)$,\1,"`
-    COMPILER_VERSION=`${QMAKE_CONF_COMPILER} --version 2>/dev/null`
+    COMPILER_VERSION=`${QMAKE_CONF_COMPILER} --version 2>/dev/null | sed 's,^[^0-9]*,,g'`
     case "$COMPILER_VERSION" in
-    *2.95.*)
+    2.95.*)
         COMPILER_VERSION="2.95.*"
         ;;
-    *3.*)
+    3.*)
         COMPILER_VERSION="3.*"
         ;;
-    *4.*)
+    4.*)
         COMPILER_VERSION="4"
         ;;
     *)

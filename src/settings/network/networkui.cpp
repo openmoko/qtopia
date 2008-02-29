@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -368,8 +368,8 @@ void NetworkUI::init()
 
 #ifdef QTOPIA_VPN
     vpnPage = new VpnUI();
-    tabWidget->addTab( vpnPage, tr("VPN") );
-    tabWidget->setTabIcon( 2, QIcon(":icon/server") );
+    int tabIndex = tabWidget->addTab( vpnPage, tr("VPN") );
+    tabWidget->setTabIcon( tabIndex, QIcon(":icon/server") );
 #endif //QTOPIA_VPN
 
     layout->addWidget( tabWidget );

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -357,6 +355,38 @@ static void solidFill_template(QScreen *screen, const QColor &color,
         qt_rectfill(dest, c, r.x(), r.y(), r.width(), r.height(), stride);
     }
 }
+
+#ifdef QT_QWS_DEPTH_GENERIC
+static void solidFill_rgb_32bpp(QScreen *screen, const QColor &color,
+                                const QRegion &region)
+{
+    quint32 *dest = reinterpret_cast<quint32*>(screen->base());
+    const quint32 c = qt_convertToRgb<quint32>(color.rgba());
+
+    const int stride = screen->linestep();
+    const QVector<QRect> rects = region.rects();
+
+    for (int i = 0; i < rects.size(); ++i) {
+        const QRect r = rects.at(i);
+        qt_rectfill(dest, c, r.x(), r.y(), r.width(), r.height(), stride);
+    }
+}
+
+static void solidFill_rgb_16bpp(QScreen *screen, const QColor &color,
+                                const QRegion &region)
+{
+    quint16 *dest = reinterpret_cast<quint16*>(screen->base());
+    const quint16 c = qt_convertToRgb<quint32>(color.rgba());
+
+    const int stride = screen->linestep();
+    const QVector<QRect> rects = region.rects();
+
+    for (int i = 0; i < rects.size(); ++i) {
+        const QRect r = rects.at(i);
+        qt_rectfill(dest, c, r.x(), r.y(), r.width(), r.height(), stride);
+    }
+}
+#endif // QT_QWS_DEPTH_GENERIC
 
 #ifdef QT_QWS_DEPTH_4
 static inline void qt_rectfill_gray4(quint8 *dest, quint8 value,
@@ -837,105 +867,6 @@ static void blit_1(QScreen *screen, const QImage &image,
 
 #ifdef QT_QWS_DEPTH_GENERIC
 
-class qrgb
-{
-public:
-    quint32 dummy;
-
-    static int bpp;
-    static int len_red;
-    static int len_green;
-    static int len_blue;
-    static int len_alpha;
-    static int off_red;
-    static int off_green;
-    static int off_blue;
-    static int off_alpha;
-} Q_PACKED;
-
-int qrgb::bpp = 0;
-int qrgb::len_red = 0;
-int qrgb::len_green = 0;
-int qrgb::len_blue = 0;
-int qrgb::len_alpha = 0;
-int qrgb::off_red = 0;
-int qrgb::off_green = 0;
-int qrgb::off_blue = 0;
-int qrgb::off_alpha = 0;
-
-template <typename SRC>
-static inline quint32 qt_convertToRgb(SRC color);
-
-template <>
-static inline quint32 qt_convertToRgb(quint32 color)
-{
-    const int r = qRed(color) >> (8 - qrgb::len_red);
-    const int g = qGreen(color) >> (8 - qrgb::len_green);
-    const int b = qBlue(color) >> (8 - qrgb::len_blue);
-    const int a = qAlpha(color) >> (8 - qrgb::len_alpha);
-    const quint32 v = (r << qrgb::off_red)
-                      | (g << qrgb::off_green)
-                      | (b << qrgb::off_blue)
-                      | (a << qrgb::off_alpha);
-
-    return v;
-}
-
-template <>
-static inline quint32 qt_convertToRgb(quint16 color)
-{
-    return qt_convertToRgb(qt_colorConvert<quint32, quint16>(color, 0));
-}
-
-template <typename SRC>
-static inline void qt_rectconvert_rgb(qrgb *dest, const SRC *src,
-                                      int x, int y, int width, int height,
-                                      int dstStride, int srcStride)
-{
-    quint8 *dest8 = reinterpret_cast<quint8*>(dest)
-                    + y * dstStride + x * qrgb::bpp;
-
-    srcStride = srcStride / sizeof(SRC) - width;
-    dstStride -= (width * qrgb::bpp);
-
-    for (int j = 0;  j < height; ++j) {
-        for (int i = 0; i < width; ++i) {
-            SRC s = *src;
-            const quint32 v = qt_convertToRgb<SRC>(*src++);
-#if Q_BYTE_ORDER == Q_BIG_ENDIAN
-            for (int j = qrgb::bpp - 1; j >= 0; --j)
-                *dest8++ = (v >> (8 * j)) & 0xff;
-#else
-            for (int j = 0; j < qrgb::bpp; ++j)
-                *dest8++ = (v >> (8 * j)) & 0xff;
-#endif
-        }
-
-        dest8 += dstStride;
-        src += srcStride;
-    }
-}
-
-template <>
-void qt_rectconvert(qrgb *dest, const quint32 *src,
-                    int x, int y, int width, int height,
-                    int dstStride, int srcStride)
-{
-    qt_rectconvert_rgb<quint32>(dest, src, x, y, width, height,
-                                dstStride, srcStride);
-}
-
-template <>
-void qt_rectconvert(qrgb *dest, const quint16 *src,
-                    int x, int y, int width, int height,
-                    int dstStride, int srcStride)
-{
-    qt_rectconvert_rgb<quint16>(dest, src, x, y, width, height,
-                                dstStride, srcStride);
-}
-
-
-
 static void blit_rgb(QScreen *screen, const QImage &image,
                      const QPoint &topLeft, const QRegion &region)
 {
@@ -965,6 +896,10 @@ void qt_set_generic_blit(QScreen *screen, int bpp,
     qrgb::off_blue = off_blue;
     qrgb::off_alpha = off_alpha;
     screen->d_ptr->blit = blit_rgb;
+    if (bpp == 16)
+        screen->d_ptr->solidFill = solidFill_rgb_16bpp;
+    else if (bpp == 32)
+        screen->d_ptr->solidFill = solidFill_rgb_32bpp;
 }
 
 #endif // QT_QWS_DEPTH_GENERIC
@@ -1084,7 +1019,7 @@ QImage::Format QScreenPrivate::preferredImageFormat() const
     application will call the initDevice() function prior to the
     connect() function, to initialize the framebuffer. The
     initDevice() function can be reimplemented to set up the graphics
-    card (note that the default implementation does nothing).
+    card.
 
     Likewise, just before a \l {Qtopia Core} application exits, it
     calls the screen driver's disconnect() function. The server
@@ -1096,10 +1031,10 @@ QImage::Format QScreenPrivate::preferredImageFormat() const
     it possible to save and restore the state of the graphics
     card. Note that the default implementations do nothing. Hardware
     screen drivers should reimplement these functions to save (and
-    restore) its registers, enabling swintching between virtual
+    restore) its registers, enabling switching between virtual
     consoles.
 
-    In additon, you can use the base() function to retrieve a pointer
+    In addition, you can use the base() function to retrieve a pointer
     to the beginning of the framebuffer, and the region() function to
     retrieve the framebuffer's region. Use the onCard() function to
     determine whether the framebuffer is within the graphics card's
@@ -2208,6 +2143,8 @@ void QScreen::compose(int level, const QRegion &exposed, QRegion &blend,
         QSpanData spanData;
         spanData.init(&rb);
         if (!win) {
+            if (blendbuffer.format() == QImage::Format_ARGB32_Premultiplied)
+                spanData.rasterBuffer->compositionMode = QPainter::CompositionMode_Source;
             spanData.setup(qwsServer->backgroundBrush(), 256);
             spanData.dx = off.x();
             spanData.dy = off.y();
@@ -2585,6 +2522,11 @@ QPoint QScreen::offset() const
 void QScreen::setFrameBufferLittleEndian(bool littleEndian)
 {
     d_ptr->fb_is_littleEndian = littleEndian;
+}
+
+bool QScreen::frameBufferLittleEndian() const
+{
+    return d_ptr->fb_is_littleEndian;
 }
 #endif
 

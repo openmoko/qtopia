@@ -28,7 +28,7 @@
 <ul>
 	<li><b>Client Application</b> - application which wishes to share data from, or modify data in, another application.</li>
 	<li><b>Source Application</b> - application which provides one or more QDS services.</li>
-	<li><b>QDS Database</b> - The central repository for shared data. For the <b>core phase</b> the database will stores the data alongside a MIME type using a QUid as the key. In the <b>extended phase</b> a reference count will be included for each entry.</li>
+	<li><b>QDS Database</b> - The central repository for shared data. For the <b>core phase</b> the database stores the data alongside a MIME type using a QUid as the key. In the <b>extended phase</b> a reference count is included for each entry.</li>
 </ul>
 
 
@@ -37,16 +37,16 @@
 <p>It is impossible for QDS to impose certain behavior as it is application specific, this includes:</p>
 
 <ul>
-	<li><b>How the client selects the source application</b> - At times it will be obvious which source application to choose at a given time, E.g. users wishes to add a photo to a contact, but on other scenarios it is less obvious. It is up to the client application to decide how this is done.</li>
+	<li><b>How the client selects the source application</b> - In some cases, the source application to choose is obvious, e.g. users wishes to add a photo to a contact, but in other scenarios it is less obvious. It is up to the client application to decide how this is done.</li>
 	<li><b>How the source application allows the user to select the data source</b> - Typically the source application will decide how to present the available data to the user based off the <tt>mimetype</tt> in the <tt>requestData</tt> message.</li>
-	<li><b>How the source application stores the QUids of shared data</b> - Ideally a source application should associate the <span class="nobr"><a href="qlocaluniqueid.html">QLocalUniqueId<sup></sup></a></span> with the data source, then if another request is made for the same data there will be only one entry in the QDS database for the data item.</li>
+	<li><b>How the source application stores the QUids of shared data</b> - Ideally a source application associates the <span class="nobr"><a href="qlocaluniqueid.html">QLocalUniqueId<sup></sup></a></span> with the data source, then if another request is made for the same data, only one entry is needed in the QDS database for the data item.</li>
 	<li><b>How the client application stores the QUids of shared data</b> - There are no requirements on how the client stores the <span class="nobr"><a href="qlocaluniqueid.html">QLocalUniqueId<sup></sup></a></span>.</li>
 	<li><b>How the client application renders the data</b></li>
 </ul>
 
-<td width=10></table><hr /><div align="center">
+<hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div>

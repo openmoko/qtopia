@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -86,28 +86,6 @@ public:
         return r;
     }
 
-    static time_t toTime_t( const QDateTime &utc )
-    {
-        QTime t = utc.time();
-        QDate d = utc.date();
-        tm brokenDown;
-        brokenDown.tm_sec = t.second();
-        brokenDown.tm_min = t.minute();
-        brokenDown.tm_hour = t.hour();
-        brokenDown.tm_mday = d.day();
-        brokenDown.tm_mon = d.month() - 1;
-        brokenDown.tm_year = d.year() - 1900;
-        brokenDown.tm_isdst = -1;
-
-        QString origTz = getenv( "TZ" );
-        setenv( "TZ", "GMT", true );
-        tzset();
-        time_t secsSince1Jan1970UTC = mktime( &brokenDown );
-        if ( !origTz.isEmpty() )
-            setenv( "TZ", origTz.toAscii(), true );
-
-        return secsSince1Jan1970UTC;
-    }
 private:
     static QString sZonePath;
     static QString sZoneFile;
@@ -163,7 +141,6 @@ public:
     bool isDaylightSavings( const QDateTime & ) const;
     QDateTime toUtc( const QDateTime & ) const;
     QDateTime fromUtc( const QDateTime & ) const;
-    QDateTime convert( const QDateTime &, const TimeZoneData & ) const;
     QString id() const { return mId; }
     QString standardAbbreviation() const;
     QString dstAbbreviation() const;
@@ -321,15 +298,6 @@ QDateTime TimeZoneData::fromUtc( const QDateTime &utc ) const
     QDateTime rv = dt.addSecs( timeTypes[ timeIndex ].utcOffset );
     rv.setTimeSpec(Qt::LocalTime);
     return rv;
-}
-
-QDateTime TimeZoneData::convert( const QDateTime &,
-                                 const TimeZoneData & ) const
-{
-    if ( !isValid() ) { qWarning("TimeZoneData::convert invalid"); return QDateTime(); }
-
-    qWarning("TimeZoneData::convert not implemented yet");
-    return QDateTime();
 }
 
 TimeZoneData::TimeZoneData( const QString & loc ) : mId( loc ), mDstRule( false )
@@ -937,8 +905,7 @@ QDateTime QTimeZone::fromTime_t( time_t secs ) const
 */
 uint QTimeZone::toTime_t( const QDateTime &dt ) const
 {
-    QDateTime utc = toUtc( dt );
-    return TimeZonePrivate::toTime_t( utc );
+    return toUtc( dt ).toTime_t();
 }
 
 /*!

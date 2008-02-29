@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -564,45 +562,63 @@ static QList<T> findChildren(const QObject *o)
 bool QMainWindowLayoutState::restoreState(QDataStream &stream,
                                         const QMainWindowLayoutState &oldState)
 {
-#ifndef QT_NO_DOCKWIDGET
-    QList<QDockWidget *> dockWidgets = ::findChildren<QDockWidget*>(mainWindow);
-    if (!dockAreaLayout.restoreState(stream, dockWidgets))
-        return false;
-
-    for (int i = 0; i < dockWidgets.size(); ++i) {
-        QDockWidget *w = dockWidgets.at(i);
-        QList<int> path = dockAreaLayout.indexOf(w);
-        if (path.isEmpty()) {
-            QList<int> oldPath = oldState.dockAreaLayout.indexOf(w);
-            if (oldPath.isEmpty()) {
-                continue;
-            }
-            QDockAreaLayoutInfo *info = dockAreaLayout.info(oldPath);
-            if (info == 0) {
-                continue;
-            }
-            info->item_list.append(QDockAreaLayoutItem(new QDockWidgetItem(w)));
-        }
-    }
-#endif
-
+    while (!stream.atEnd()) {
+        uchar marker;
+        stream >> marker;
+        switch(marker)
+        {
 #ifndef QT_NO_TOOLBAR
-    QList<QToolBar *> toolBars = ::findChildren<QToolBar*>(mainWindow);
-    if (!toolBarAreaLayout.restoreState(stream, toolBars))
-        return false;
+            case QToolBarAreaLayout::ToolBarStateMarker:
+            case QToolBarAreaLayout::ToolBarStateMarkerEx:
+                {
+                    QList<QToolBar *> toolBars = ::findChildren<QToolBar*>(mainWindow);
+                    if (!toolBarAreaLayout.restoreState(stream, toolBars, marker))
+                        return false;
 
-    for (int i = 0; i < toolBars.size(); ++i) {
-        QToolBar *w = toolBars.at(i);
-        QList<int> path = toolBarAreaLayout.indexOf(w);
-        if (path.isEmpty()) {
-            QList<int> oldPath = oldState.toolBarAreaLayout.indexOf(w);
-            if (oldPath.isEmpty()) {
-                continue;
-            }
-            toolBarAreaLayout.docks[oldPath.at(0)].insertToolBar(0, w);
-        }
-    }
+                    for (int i = 0; i < toolBars.size(); ++i) {
+                        QToolBar *w = toolBars.at(i);
+                        QList<int> path = toolBarAreaLayout.indexOf(w);
+                        if (path.isEmpty()) {
+                            QList<int> oldPath = oldState.toolBarAreaLayout.indexOf(w);
+                            if (oldPath.isEmpty()) {
+                                continue;
+                            }
+                            toolBarAreaLayout.docks[oldPath.at(0)].insertToolBar(0, w);
+                        }
+                    }
+                }
+                break;
 #endif // QT_NO_TOOLBAR
+
+#ifndef QT_NO_DOCKWIDGET
+            case QDockAreaLayout::DockWidgetStateMarker:
+                {
+                    QList<QDockWidget *> dockWidgets = ::findChildren<QDockWidget*>(mainWindow);
+                    if (!dockAreaLayout.restoreState(stream, dockWidgets))
+                        return false;
+
+                    for (int i = 0; i < dockWidgets.size(); ++i) {
+                        QDockWidget *w = dockWidgets.at(i);
+                        QList<int> path = dockAreaLayout.indexOf(w);
+                        if (path.isEmpty()) {
+                            QList<int> oldPath = oldState.dockAreaLayout.indexOf(w);
+                            if (oldPath.isEmpty()) {
+                                continue;
+                            }
+                            QDockAreaLayoutInfo *info = dockAreaLayout.info(oldPath);
+                            if (info == 0) {
+                                continue;
+                            }
+                            info->item_list.append(QDockAreaLayoutItem(new QDockWidgetItem(w)));
+                        }
+                    }
+                }
+                break;
+#endif
+            default:
+                return false;
+        }// switch
+    } //while
 
     return true;
 }
@@ -990,7 +1006,10 @@ void QMainWindowLayout::insertIntoMacHIToolbar(QToolBar *before, QToolBar *toolb
         qtoolbarsInHIToolbarList.removeAt(toolbarIndex);
         HIToolbarRemoveItemAtIndex(macToolbar, toolbarIndex);
     }
-    toolbar->createWinId();
+
+    // Make the toolbar a child of the mainwindow to avoid creating a window.
+    toolbar->setParent(layoutState.mainWindow);
+    toolbar->createWinId();  // Now create the HIViewRef.
     qtoolbarsInHIToolbarList.insert(beforeIndex, toolbar);
     QCFType<HIToolbarItemRef> outItem;
     const QObject *stupidArray[] = { toolbar, this };

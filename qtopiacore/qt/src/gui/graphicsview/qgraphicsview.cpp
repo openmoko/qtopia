@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -337,7 +335,7 @@ public:
     QGraphicsView::ViewportUpdateMode viewportUpdateMode;
     QGraphicsView::OptimizationFlags optimizationFlags;
 
-    QGraphicsScene *scene;
+    QPointer<QGraphicsScene> scene;
 #ifndef QT_NO_RUBBERBAND
     QRect rubberBandRect;
     QRegion rubberBandRegion(const QWidget *widget, const QRect &rect) const;
@@ -1130,7 +1128,7 @@ void QGraphicsView::resetCachedContent()
     enabled background caching.
 
     Note that QGraphicsView currently supports background caching only (see
-    CachedBackground). This function is equivalent to calling update() if any
+    QGraphicsView::CacheBackground). This function is equivalent to calling update() if any
     layer but QGraphicsScene::BackgroundLayer is passed.
 
     \sa QGraphicsScene::invalidate(), update()
@@ -2158,8 +2156,8 @@ void QGraphicsView::setBackgroundBrush(const QBrush &brush)
 
     This property sets the foreground brush for the scene in this view. It is
     used to override the scene's own foreground, and defines the behavior of
-    drawForeground(). To provide custom background drawing for this view, you
-    can reimplement drawBackground() instead.
+    drawForeground(). To provide custom foreground drawing for this view, you
+    can reimplement drawForeground() instead.
 
     \sa QGraphicsScene::foregroundBrush, backgroundBrush
 */
@@ -3280,7 +3278,7 @@ void QGraphicsView::inputMethodEvent(QInputMethodEvent *event)
     If no such brush is defined (the default), the scene's drawBackground()
     function is called instead.
 
-    \sa drawForeground(), QGraphicsScene::drawForeground()
+    \sa drawForeground(), QGraphicsScene::drawBackground()
 */
 void QGraphicsView::drawBackground(QPainter *painter, const QRectF &rect)
 {
@@ -3308,7 +3306,7 @@ void QGraphicsView::drawBackground(QPainter *painter, const QRectF &rect)
     If no such brush is defined (the default), the scene's drawForeground()
     function is called instead.
 
-    \sa drawBackground(), QGraphicsScene::drawBackground()
+    \sa drawBackground(), QGraphicsScene::drawForeground()
 */
 void QGraphicsView::drawForeground(QPainter *painter, const QRectF &rect)
 {

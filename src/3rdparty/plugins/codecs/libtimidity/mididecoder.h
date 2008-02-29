@@ -3,7 +3,7 @@
 
 
 #include <qtopiamedia/media.h>
-#include <qtopiamedia/qmediadecoder.h>
+#include <QMediaDecoder>
 
 
 class QMediaDevice;
@@ -19,20 +19,16 @@ public:
     MidiDecoder();
     ~MidiDecoder();
 
-    void connectInputPipe(QMediaPipe* inputPipe);
-    void connectOutputPipe(QMediaPipe* outputPipe);
+    QMediaDevice::Info const& dataType() const;
 
-    void disconnectInputPipe(QMediaPipe* inputPipe);
-    void disconnectOutputPipe(QMediaPipe* outputPipe);
-
-    void setValue(QString const& name, QVariant const& value);
-    QVariant value(QString const& name);
+    bool connectToInput(QMediaDevice* input);
+    void disconnectFromInput(QMediaDevice* input);
 
     void start();
     void stop();
     void pause();
 
-    quint32 length();
+    quint64 length();
     bool seek(qint64 ms);
 
     void setVolume(int volume);
@@ -40,13 +36,6 @@ public:
 
     void setMuted(bool mute);
     bool isMuted();
-
-signals:
-    void playerStateChanged(QtopiaMedia::State);
-    void positionChanged(quint32);
-    void lengthChanged(quint32);
-    void volumeChanged(int);
-    void volumeMuted(bool);
 
 private:
     qint64 readData(char *data, qint64 maxlen);

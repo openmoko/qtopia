@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,7 @@
 #include <QDBusMessage>
 #include <QDBusMetaType>
 #include <QDBusArgument>
+#include <QDebug>
 
 #include <QList>
 #include <QString>
@@ -43,7 +44,6 @@
 #include <QStack>
 #include <QUrl>
 #include <QMetaType>
-#include <QDebug>
 
 Q_DECLARE_METATYPE(QList<uint>)
 
@@ -235,9 +235,6 @@ void QBluetoothSdpQuery_Private::asyncGetRecordError(const QDBusError &error, co
     }
 
     m_result.setError(error.message());
-#ifdef QBLUETOOTH_DEBUG
-    qDebug() << "Received an error reply from hcid:" << error;
-#endif
     emit m_parent->searchComplete(m_result);
     m_finished = true;
 }

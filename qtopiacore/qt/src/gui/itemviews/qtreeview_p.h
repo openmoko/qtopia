@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -77,7 +75,7 @@ public:
           itemsExpandable(true), sortingEnabled(false),
           allColumnsShowFocus(false),
           animationsEnabled(false), columnResizeTimerID(0),
-          autoExpandDelay(-1), hoverBranch(-1) {}
+          autoExpandDelay(-1), hoverBranch(-1), geometryRecursionBlock(false) {}
 
     ~QTreeViewPrivate() {}
     void initialize();
@@ -190,6 +188,8 @@ public:
     // used for drawing hilighted expand/collapse indicators
     int hoverBranch;
 
+    // used for blocking recursion when calling setViewportMargins from updateGeometries
+    bool geometryRecursionBlock;
 };
 
 #endif // QT_NO_TREEVIEW

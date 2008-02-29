@@ -42,7 +42,7 @@
     </exclusive>
   </rect>
   <exclusive>
-    <text rect="10%,44%,-10%,-3%" name="caption" size="6" outline="#000000" bold="yes" color="#FFFFFF" align="hcenter,vcenter" transient="yes" elided="right">
+    <text rect="10%,44%,-10%,-3%" name="caption" outline="#000000" bold="yes" color="#FFFFFF" align="hcenter,vcenter" transient="yes" elided="right">
     expr:@/UI/ActiveWindow/Caption
     </text>
     <text rect="10%,44%,-10%,-3%" name="operator" align="hcenter,vcenter" bold="yes" transient="yes" color="#ffffff" outline="#000000" active="expr:!@/UI/ActiveWindow/Caption">

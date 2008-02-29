@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -669,7 +669,7 @@ bool QLineEditSoftKeyLabelHelper::eventFilter(QObject* watched, QEvent *event)
             // backspace.
             // If the preedit is empty, then the existing logic is sufficient.
             // either way, store the preedit so that future updates are correct
-            m_preeditTextFlag = imevent->preeditString().isEmpty();
+            m_preeditTextFlag = !imevent->preeditString().isEmpty();
             updateAllLabels();
 
         } else {
@@ -680,6 +680,94 @@ bool QLineEditSoftKeyLabelHelper::eventFilter(QObject* watched, QEvent *event)
     // never consume event
     return false;
 };
+
+//////////////////////////////////////////////////////
+class SoftKeyLabelHelperQSpinBoxLineEditAccessor : public QAbstractSpinBox
+{
+    Q_OBJECT
+public:
+    QLineEdit *getLineEdit() { return lineEdit(); }
+};
+
+/*!
+    \class QDateTimeEditSoftKeyLabelHelper
+    \internal
+    \brief The QDateTimeEditSoftKeyLabelHelper class is a handler for the softkeys for the \l QDateTimeEdit class.
+*/
+
+QDateTimeEditSoftKeyLabelHelper::QDateTimeEditSoftKeyLabelHelper(QString className) : QAbstractSoftKeyLabelHelper(className), m_dte(0)
+{
+    
+}
+
+QDateTimeEditSoftKeyLabelHelper::QDateTimeEditSoftKeyLabelHelper(QDateTimeEdit* dte) : QAbstractSoftKeyLabelHelper(dte)
+{
+    m_dte = dte;
+}
+
+QDateTimeEditSoftKeyLabelHelper::~QDateTimeEditSoftKeyLabelHelper()
+{
+    
+}
+
+bool QDateTimeEditSoftKeyLabelHelper::focusIn(QWidget *widget)
+{
+    updateAllLabels(widget);
+    widget->installEventFilter(this);
+    return true;
+}
+
+bool QDateTimeEditSoftKeyLabelHelper::focusOut(QWidget *widget)
+{
+    widget->removeEventFilter(this);
+    return true;
+}
+
+bool QDateTimeEditSoftKeyLabelHelper::enterEditFocus(QWidget *widget)
+{
+    updateAllLabels(widget);
+    return true;
+}
+
+bool QDateTimeEditSoftKeyLabelHelper::leaveEditFocus(QWidget *widget)
+{
+    updateAllLabels(widget);
+    return true;
+}
+
+void QDateTimeEditSoftKeyLabelHelper::updateAllLabels(QWidget *widget)
+{
+    if (QDateTimeEdit *dte = qobject_cast<QDateTimeEdit*>(widget)) {
+        ContextKeyManager* keyManager = ContextKeyManager::instance();
+        
+        if(dte->hasFocus() && !dte->hasEditFocus()){
+            keyManager->setStandard(dte, Qt::Key_Select, QSoftMenuBar::Edit);
+            keyManager->setStandard(dte, Qt::Key_Back, QSoftMenuBar::Back);
+        }
+        
+        if (dte->hasEditFocus()) {
+            if (dte->currentSection() == QDateTimeEdit::NoSection) {
+                keyManager->setStandard(dte, Qt::Key_Select, QSoftMenuBar::Select);
+                keyManager->setStandard(dte, Qt::Key_Back, QSoftMenuBar::NoLabel);
+            } else {
+                keyManager->setStandard(dte, Qt::Key_Select, QSoftMenuBar::EndEdit);
+                keyManager->setStandard(dte, Qt::Key_Back, QSoftMenuBar::BackSpace);
+            }
+        }
+    }
+}
+
+bool QDateTimeEditSoftKeyLabelHelper::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyRelease) {
+        if (QDateTimeEdit *dte = qobject_cast<QDateTimeEdit*>(watched)) {
+            updateAllLabels(dte);
+            return true;
+        }
+    }
+    return false;
+}
+//////////////////////////////////////////////////////
 
 /*!
     The function responds to changes in the text of the current target \l QLineEdit by calling \l updateAllLabels().

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -124,6 +124,7 @@ private slots:
     void mtrshEFList( const QString& msg );
     void mtsms( const QString& msg );
     void mtss( const QString& msg );
+    void mtussd( const QString& msg );
     void mtdtmf( const QString& msg );
     void mtcall( const QString& msg );
     void mtitxt( const QString& msg );

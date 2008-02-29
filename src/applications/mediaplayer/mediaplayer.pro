@@ -10,6 +10,12 @@ HEADERS = mediaplayer.h \
             mediabrowser.h \
             visualization.h \
             playlist.h \
+            browser.h \
+            keyhold.h \
+            menumodel.h \
+            menuview.h \
+            requesthandler.h \
+            servicerequest.h \
             keyfilter.h
 
 SOURCES = main.cpp \
@@ -21,6 +27,11 @@ SOURCES = main.cpp \
             mediabrowser.cpp \
             visualization.cpp \
             playlist.cpp \
+            browser.cpp \
+            keyhold.cpp \
+            menumodel.cpp \
+            menuview.cpp \
+            requesthandler.cpp \
             keyfilter.cpp
 
 !contains(QTOPIAMEDIA_ENGINES,helix) {
@@ -44,6 +55,6 @@ INSTALLS+=help
 
 
 pkg.desc=Qtopia media player.
-pkg.domain=mediasession,window,drm,cardreader,doc_server,doc_write,nice,directvideo,directaudio
+pkg.domain=trusted
 
 depends(libraries/qtopiamedia)

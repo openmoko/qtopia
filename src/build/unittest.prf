@@ -8,7 +8,7 @@ DEFINES+=QTOPIA_TEST
     CONFIG*=console no_sxe_test
     INCLUDEPATH*=$$QT_DEPOT_PATH/tests \
                  $$QTOPIA_DEPOT_PATH/tests
-    DEFINES*=QTOPIATEST_SRCDIR=$$LITERAL_ESCAPED_QUOTE$$SRCDIR$$LITERAL_ESCAPED_QUOTE
+    DEFINES*=TEST_SRCDIR=$$LITERAL_ESCAPED_QUOTE$$SRCDIR$$LITERAL_ESCAPED_QUOTE
     #CONFIG+=no_quicklaunch no_tr
 
     win32-msvc:QMAKE_LFLAGS_DEBUG 	+= /NODEFAULTLIB:libc
@@ -43,6 +43,10 @@ DEFINES+=QTOPIA_TEST
         $$fixpath($(INSTALL_ROOT)/$$TARGET)
     test.depends+=install
     QMAKE_EXTRA_TARGETS+=test
+
+    install_tests.commands=
+    install_tests.depends+=install
+    QMAKE_EXTRA_TARGETS+=install_tests
 
     CONFIG+=no_batch
 }

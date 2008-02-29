@@ -37,7 +37,7 @@ for(prefix,PREFIXES) {
     cleanimage.commands+=$$RMRF $$prefix
 }
 build_qtopia:cleanimage.commands+=$$LINE_SEP_VERBOSE\
-    $$QPEDIR/bin/content_installer -clearlocks $(IMAGE)/qtopia_db.sqlite
+    $$QPEDIR/bin/content_installer -clearlocks $(INSTALL_ROOT)/qtopia_db.sqlite
 QMAKE_EXTRA_TARGETS+=cleanimage
 qtopia_install.depends+=cleanimage
 
@@ -51,6 +51,7 @@ QMAKE_EXTRA_TARGETS+=append_install
     sdk_inst.commands=$(MAKE) sdk
     QMAKE_EXTRA_TARGETS+=sdk_inst
     qtopia_install.depends+=sdk_inst
+    cleanimage.depends+=sdk_inst
 
     # make sdk implies make cleansdk
     cleansdk.commands=$$COMMAND_HEADER

@@ -26,23 +26,32 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>bool <b><a href="qmodempreferrednetworkoperators.html#deleteBeforeUpdate">deleteBeforeUpdate</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmodempreferrednetworkoperators.html#quoteOperatorNumber">quoteOperatorNumber</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qmodempreferrednetworkoperators.html#setDeleteBeforeUpdate">setDeleteBeforeUpdate</a></b> ( bool <i>value</i> )</li>
+<li><div class="fn"/>void <b><a href="qmodempreferrednetworkoperators.html#setQuoteOperatorNumber">setQuoteOperatorNumber</a></b> ( bool <i>value</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
 <li><div class="fn"/>3 public slots inherited from <a href="qpreferrednetworkoperators.html#public-slots">QPreferredNetworkOperators</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>3 signals inherited from <a href="qpreferrednetworkoperators.html#signals">QPreferredNetworkOperators</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>1 static public member inherited from <a href="qpreferrednetworkoperators.html#static-public-members">QPreferredNetworkOperators</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -57,10 +66,26 @@
 <p>Create a new preferred network operator handler for <i>service</i>.</p>
 <h3 class="fn"><a name="dtor.QModemPreferredNetworkOperators"></a>QModemPreferredNetworkOperators::~QModemPreferredNetworkOperators ()</h3>
 <p>Destroy this preferred network operator handler.</p>
+<h3 class="fn"><a name="deleteBeforeUpdate"></a>bool QModemPreferredNetworkOperators::deleteBeforeUpdate () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns a flag indicating if a preferred network operator entry should be deleted before it is updated. This may be necessary for modems that do not support direct modification of an entry by index using <tt>AT+CPOL</tt>. The default value is false.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<p>See also <a href="qmodempreferrednetworkoperators.html#setDeleteBeforeUpdate">setDeleteBeforeUpdate</a>().</p>
+<h3 class="fn"><a name="quoteOperatorNumber"></a>bool QModemPreferredNetworkOperators::quoteOperatorNumber () const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Returns a flag indicating if operator numbers should be quoted when modifying preferred operator entries with <tt>AT+CPOL</tt>. The default value is false.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<p>See also <a href="qmodempreferrednetworkoperators.html#setQuoteOperatorNumber">setQuoteOperatorNumber</a>().</p>
+<h3 class="fn"><a name="setDeleteBeforeUpdate"></a>void QModemPreferredNetworkOperators::setDeleteBeforeUpdate ( bool <i>value</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Sets a flag indicating if a preferred network operator entry should be deleted before it is updated to <i>value</i>. This may be necessary for modems that do not support direct modification of an entry by index using <tt>AT+CPOL</tt>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<p>See also <a href="qmodempreferrednetworkoperators.html#deleteBeforeUpdate">deleteBeforeUpdate</a>().</p>
+<h3 class="fn"><a name="setQuoteOperatorNumber"></a>void QModemPreferredNetworkOperators::setQuoteOperatorNumber ( bool <i>value</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Sets a flag indicating if operator numbers should be quoted when modifying preferred operator entries with <tt>AT+CPOL</tt> to <i>value</i>.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
+<p>See also <a href="qmodempreferrednetworkoperators.html#quoteOperatorNumber">quoteOperatorNumber</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

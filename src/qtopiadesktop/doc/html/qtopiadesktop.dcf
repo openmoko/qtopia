@@ -15,6 +15,7 @@
         <keyword ref="desktopsettings.html#currentPlugin">currentPlugin</keyword>
         <keyword ref="desktopsettings.html#debugMode">debugMode</keyword>
         <keyword ref="desktopsettings.html#defaultPlugin">defaultPlugin</keyword>
+        <keyword ref="desktopsettings.html#deviceId">deviceId</keyword>
         <keyword ref="desktopsettings.html#homePath">homePath</keyword>
         <keyword ref="desktopsettings.html#installedDir">installedDir</keyword>
         <keyword ref="desktopsettings.html#languages">languages</keyword>
@@ -36,11 +37,10 @@
         <keyword ref="qdclientsyncplugin.html#clientError">clientError</keyword>
         <keyword ref="qdclientsyncplugin.html#clientIdentity">clientIdentity</keyword>
         <keyword ref="qdclientsyncplugin.html#clientSyncAnchors">clientSyncAnchors</keyword>
-        <keyword ref="qdclientsyncplugin.html#clientSyncRequest">clientSyncRequest</keyword>
         <keyword ref="qdclientsyncplugin.html#clientVersion">clientVersion</keyword>
         <keyword ref="qdclientsyncplugin.html#createClientRecord">createClientRecord</keyword>
         <keyword ref="qdclientsyncplugin.html#createServerRecord">createServerRecord</keyword>
-        <keyword ref="qdclientsyncplugin.html#mapId">mapId</keyword>
+        <keyword ref="qdclientsyncplugin.html#mappedId">mappedId</keyword>
         <keyword ref="qdclientsyncplugin.html#removeClientRecord">removeClientRecord</keyword>
         <keyword ref="qdclientsyncplugin.html#removeServerRecord">removeServerRecord</keyword>
         <keyword ref="qdclientsyncplugin.html#replaceClientRecord">replaceClientRecord</keyword>
@@ -54,6 +54,12 @@
         <keyword ref="qdclientsyncplugin.html#serverSyncRequest">serverSyncRequest</keyword>
         <keyword ref="qdclientsyncplugin.html#serverVersion">serverVersion</keyword>
         <section ref="qdclientsyncplugin-members.html" title="List of all members"/>
+    </section>
+    <section ref="qdclientsyncpluginfactory.html" title="QDClientSyncPluginFactory Class Reference">
+        <keyword ref="qdclientsyncpluginfactory.html">QDClientSyncPluginFactory</keyword>
+        <keyword ref="qdclientsyncpluginfactory.html#datasets">datasets</keyword>
+        <keyword ref="qdclientsyncpluginfactory.html#pluginForDataset">pluginForDataset</keyword>
+        <section ref="qdclientsyncpluginfactory-members.html" title="List of all members"/>
     </section>
     <section ref="qdconplugin.html" title="QDConPlugin Class Reference">
         <keyword ref="qdconplugin.html">QDConPlugin</keyword>
@@ -74,6 +80,7 @@
     </section>
     <section ref="qddevplugin.html" title="QDDevPlugin Class Reference">
         <keyword ref="qddevplugin.html">QDDevPlugin</keyword>
+        <keyword ref="qddevplugin.html#connection">connection</keyword>
         <keyword ref="qddevplugin.html#disassociate">disassociate</keyword>
         <keyword ref="qddevplugin.html#icon">icon</keyword>
         <keyword ref="qddevplugin.html#model">model</keyword>
@@ -117,15 +124,19 @@
     </section>
     <section ref="qdserversyncplugin.html" title="QDServerSyncPlugin Class Reference">
         <keyword ref="qdserversyncplugin.html">QDServerSyncPlugin</keyword>
+        <keyword ref="qdserversyncplugin.html#abortTransaction">abortTransaction</keyword>
+        <keyword ref="qdserversyncplugin.html#beginTransaction">beginTransaction</keyword>
+        <keyword ref="qdserversyncplugin.html#commitTransaction">commitTransaction</keyword>
         <keyword ref="qdserversyncplugin.html#createClientRecord">createClientRecord</keyword>
         <keyword ref="qdserversyncplugin.html#createServerRecord">createServerRecord</keyword>
+        <keyword ref="qdserversyncplugin.html#fetchChangesSince">fetchChangesSince</keyword>
         <keyword ref="qdserversyncplugin.html#mappedId">mappedId</keyword>
-        <keyword ref="qdserversyncplugin.html#performSync">performSync</keyword>
         <keyword ref="qdserversyncplugin.html#removeClientRecord">removeClientRecord</keyword>
         <keyword ref="qdserversyncplugin.html#removeServerRecord">removeServerRecord</keyword>
         <keyword ref="qdserversyncplugin.html#replaceClientRecord">replaceClientRecord</keyword>
         <keyword ref="qdserversyncplugin.html#replaceServerRecord">replaceServerRecord</keyword>
         <keyword ref="qdserversyncplugin.html#serverChangesCompleted">serverChangesCompleted</keyword>
+        <keyword ref="qdserversyncplugin.html#serverError">serverError</keyword>
         <section ref="qdserversyncplugin-members.html" title="List of all members"/>
     </section>
     <section ref="qdsyncplugin.html" title="QDSyncPlugin Class Reference">
@@ -146,6 +157,30 @@
         <keyword ref="qdthread.html#t_quit">t_quit</keyword>
         <keyword ref="qdthread.html#t_run">t_run</keyword>
         <section ref="qdthread-members.html" title="List of all members"/>
+    </section>
+    <section ref="qtopia4syncplugin.html" title="Qtopia4SyncPlugin Class Reference">
+        <keyword ref="qtopia4syncplugin.html">Qtopia4SyncPlugin</keyword>
+        <keyword ref="qtopia4syncplugin.html#abortTransaction">abortTransaction</keyword>
+        <keyword ref="qtopia4syncplugin.html#beginTransaction">beginTransaction</keyword>
+        <keyword ref="qtopia4syncplugin.html#clientChangesCompleted">clientChangesCompleted</keyword>
+        <keyword ref="qtopia4syncplugin.html#clientError">clientError</keyword>
+        <keyword ref="qtopia4syncplugin.html#commitTransaction">commitTransaction</keyword>
+        <keyword ref="qtopia4syncplugin.html#createClientRecord">createClientRecord</keyword>
+        <keyword ref="qtopia4syncplugin.html#createServerRecord">createServerRecord</keyword>
+        <keyword ref="qtopia4syncplugin.html#dataset">dataset</keyword>
+        <keyword ref="qtopia4syncplugin.html#fetchChangesSince">fetchChangesSince</keyword>
+        <keyword ref="qtopia4syncplugin.html#mappedId">mappedId</keyword>
+        <keyword ref="qtopia4syncplugin.html#removeClientRecord">removeClientRecord</keyword>
+        <keyword ref="qtopia4syncplugin.html#removeServerRecord">removeServerRecord</keyword>
+        <keyword ref="qtopia4syncplugin.html#replaceClientRecord">replaceClientRecord</keyword>
+        <keyword ref="qtopia4syncplugin.html#replaceServerRecord">replaceServerRecord</keyword>
+        <section ref="qtopia4syncplugin-members.html" title="List of all members"/>
+    </section>
+    <section ref="qtopia4syncpluginfactory.html" title="Qtopia4SyncPluginFactory Class Reference">
+        <keyword ref="qtopia4syncpluginfactory.html">Qtopia4SyncPluginFactory</keyword>
+        <keyword ref="qtopia4syncpluginfactory.html#keys">keys</keyword>
+        <keyword ref="qtopia4syncpluginfactory.html#plugin">plugin</keyword>
+        <section ref="qtopia4syncpluginfactory-members.html" title="List of all members"/>
     </section>
     <section ref="qtsingleapplication.html" title="QtSingleApplication Class Reference">
         <keyword ref="qtsingleapplication.html">QtSingleApplication</keyword>
@@ -227,6 +262,15 @@
         <keyword ref="trace-h.html#TRACE">TRACE</keyword>
         <keyword ref="trace-h.html#WARNING">WARNING</keyword>
     </section>
+    <section ref="task-add-a-new-dataset-1.html" title="Add a new dataset">
+        <keyword ref="task-add-a-new-dataset-1.html">Add a new dataset</keyword>
+    </section>
+    <section ref="task-add-a-new-desktop-plugin-1.html" title="Add a new desktop plugin">
+        <keyword ref="task-add-a-new-desktop-plugin-1.html">Add a new desktop plugin</keyword>
+    </section>
+    <section ref="task-add-a-new-device-plugin-1.html" title="Add a new device plugin">
+        <keyword ref="task-add-a-new-device-plugin-1.html">Add a new device plugin</keyword>
+    </section>
     <section ref="over-building-qtopia-sync-agent-1.html" title="Building Qtopia Sync Agent">
         <keyword ref="over-building-qtopia-sync-agent-1.html">Building Qtopia Sync Agent</keyword>
     </section>
@@ -239,9 +283,6 @@
     <section ref="qdsync-callb-1.html" title="CALLB">
         <keyword ref="qdsync-callb-1.html">CALLB</keyword>
     </section>
-    <section ref="chlog-4-3-0-1.html" title="Changes for 4.3&#x2e;0">
-        <keyword ref="chlog-4-3-0-1.html">Changes for 4.3&#x2e;0</keyword>
-    </section>
     <section ref="classes.html" title="Classes">
         <keyword ref="classes.html">Classes</keyword>
     </section>
@@ -251,8 +292,8 @@
     <section ref="datasets.html" title="Datasets">
         <keyword ref="datasets.html">Datasets</keyword>
     </section>
-    <section ref="over-datasets-overview-1.html" title="Datasets Overview">
-        <keyword ref="over-datasets-overview-1.html">Datasets Overview</keyword>
+    <section ref="over-desktop-synchronization-1.html" title="Desktop Synchronization">
+        <keyword ref="over-desktop-synchronization-1.html">Desktop Synchronization</keyword>
     </section>
     <section ref="examples.html" title="Examples">
         <keyword ref="examples.html">Examples</keyword>
@@ -272,6 +313,9 @@
     <section ref="qdsync-helper-quit-1.html" title="HELPER_QUIT">
         <keyword ref="qdsync-helper-quit-1.html">HELPER_QUIT</keyword>
     </section>
+    <section ref="tasks.html" title="Integration Tasks">
+        <keyword ref="tasks.html">Integration Tasks</keyword>
+    </section>
     <section ref="overviews.html" title="Overviews">
         <keyword ref="overviews.html">Overviews</keyword>
     </section>
@@ -281,17 +325,17 @@
     <section ref="qdautoplugin-cpp.html" title="qdautoplugin.cpp">
         <keyword ref="qdautoplugin-cpp.html">qdautoplugin.cpp</keyword>
     </section>
-    <section ref="over-qdsync-protocol-1.html" title="qdsync Protocol">
-        <keyword ref="over-qdsync-protocol-1.html">qdsync Protocol</keyword>
+    <section ref="qdsync-commands.html" title="qdsync Protocol">
+        <keyword ref="qdsync-commands.html">qdsync Protocol</keyword>
     </section>
-    <section ref="qdsync-commands.html" title="qdsync Protocol Commands">
-        <keyword ref="qdsync-commands.html">qdsync Protocol Commands</keyword>
+    <section ref="chlog-4-3-0-1.html" title="Qtopia Sync Agent changes for 4.3&#x2e;0">
+        <keyword ref="chlog-4-3-0-1.html">Qtopia Sync Agent changes for 4.3&#x2e;0</keyword>
+    </section>
+    <section ref="chlog-4-3-1-1.html" title="Qtopia Sync Agent changes for 4.3&#x2e;1">
+        <keyword ref="chlog-4-3-1-1.html">Qtopia Sync Agent changes for 4.3&#x2e;1</keyword>
     </section>
     <section ref="index.html" title="Qtopia Sync Agent Documentation">
         <keyword ref="index.html">Qtopia Sync Agent Documentation</keyword>
-    </section>
-    <section ref="over-qtopia-sync-agent-plugins-1.html" title="Qtopia Sync Agent Plugins">
-        <keyword ref="over-qtopia-sync-agent-plugins-1.html">Qtopia Sync Agent Plugins</keyword>
     </section>
     <section ref="qdsync-quit-1.html" title="QUIT">
         <keyword ref="qdsync-quit-1.html">QUIT</keyword>
@@ -316,6 +360,12 @@
     </section>
     <section ref="dataset-tasks-1.html" title="tasks Dataset">
         <keyword ref="dataset-tasks-1.html">tasks Dataset</keyword>
+    </section>
+    <section ref="task-use-a-serial-connection-1.html" title="Use a Serial Connection">
+        <keyword ref="task-use-a-serial-connection-1.html">Use a Serial Connection</keyword>
+    </section>
+    <section ref="task-use-a-tcp-ip-connection-1.html" title="Use a TCP/IP Connection">
+        <keyword ref="task-use-a-tcp-ip-connection-1.html">Use a TCP/IP Connection</keyword>
     </section>
     <section ref="qdsync-user-1.html" title="USER">
         <keyword ref="qdsync-user-1.html">USER</keyword>

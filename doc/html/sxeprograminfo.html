@@ -41,7 +41,7 @@
 <h3>Related Non-Members</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="sxeprograminfo.html#checkAndSetProcessKey">checkAndSetProcessKey</a></b> ( const char * <i>key</i>, const char * <i>app</i> )</li>
-<li><div class="fn"/>QDebug <b><a href="sxeprograminfo.html#operator-lt-lt-64">operator&lt;&lt;</a></b> ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</li>
+<li><div class="fn"/>QDebug <b><a href="sxeprograminfo.html#operator-lt-lt-62">operator&lt;&lt;</a></b> ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</li>
 </ul>
 <a name="macros"></a>
 <h3>Macros</h3>
@@ -73,8 +73,8 @@
 <p>Construct a new <a href="sxeprograminfo.html">SxeProgramInfo</a></p>
 <h3 class="fn"><a name="dtor.SxeProgramInfo"></a>SxeProgramInfo::~SxeProgramInfo ()</h3>
 <p>Destroy this <a href="sxeprograminfo.html">SxeProgramInfo</a> object</p>
-<h3 class="fn"><a name="absolutePath"></a><a href="qstring.html">QString</a> SxeProgramInfo::absolutePath () const</h3>
-<p>Return the <a href="qstring.html">QString</a> of the absolute path to the binary for this <a href="sxeprograminfo.html">SxeProgramInfo</a> object.</p>
+<h3 class="fn"><a name="absolutePath"></a><a href="./qstring.html">QString</a> SxeProgramInfo::absolutePath () const</h3>
+<p>Return the <a href="./qstring.html">QString</a> of the absolute path to the binary for this <a href="sxeprograminfo.html">SxeProgramInfo</a> object.</p>
 <p>This is simply the concatenation of <a href="sxeprograminfo.html#installRoot-var">installRoot</a>, <a href="sxeprograminfo.html#relPath-var">relPath</a> and <a href="sxeprograminfo.html#fileName-var">fileName</a>. If the <a href="sxeprograminfo.html#installRoot-var">installRoot</a> is null, the <a href="sxeprograminfo.html#runRoot-var">runRoot</a> is used instead.</p>
 <p><a href="sxeprograminfo.html#isValid">isValid</a>() can be called to check that the returned path will point to a valid binary.</p>
 <h3 class="fn"><a name="isValid"></a>bool SxeProgramInfo::isValid () const</h3>
@@ -107,19 +107,19 @@
 <p>This method only succeeds on a suitably patched SXE linux kernel.</p>
 <hr />
 <h2>Member Variable Documentation</h2>
-<h3 class="fn"><a name="domain-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::domain</h3>
+<h3 class="fn"><a name="domain-var"></a><a href="./qstring.html">QString</a> SxeProgramInfo::domain</h3>
 <p>security domains, a list of comma seperated values</p>
-<h3 class="fn"><a name="fileName-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::fileName</h3>
+<h3 class="fn"><a name="fileName-var"></a><a href="./qstring.html">QString</a> SxeProgramInfo::fileName</h3>
 <p>the binaries file name, eg calculator, bomber</p>
 <h3 class="fn"><a name="id-var"></a>unsigned char SxeProgramInfo::id</h3>
 <p>SXE program identity</p>
-<h3 class="fn"><a name="installRoot-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::installRoot</h3>
+<h3 class="fn"><a name="installRoot-var"></a><a href="./qstring.html">QString</a> SxeProgramInfo::installRoot</h3>
 <p>for example <tt>$HOME/build/qtopia/42-phone/image</tt> this should only ever be set when running under sxe_installer</p>
 <h3 class="fn"><a name="key-var"></a>char SxeProgramInfo::key[QSXE_KEY_LEN]</h3>
 <p>SXE shared secret key</p>
-<h3 class="fn"><a name="relPath-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::relPath</h3>
+<h3 class="fn"><a name="relPath-var"></a><a href="./qstring.html">QString</a> SxeProgramInfo::relPath</h3>
 <p>for example <tt>bin</tt>, <tt>packages/bin</tt>, <tt>plugings/application</tt></p>
-<h3 class="fn"><a name="runRoot-var"></a><a href="qstring.html">QString</a> SxeProgramInfo::runRoot</h3>
+<h3 class="fn"><a name="runRoot-var"></a><a href="./qstring.html">QString</a> SxeProgramInfo::runRoot</h3>
 <p>for example <tt>/opt/Qtopia.rom</tt>, <tt>/opt/Qtopia.user</tt></p>
 <hr />
 <h2>Related Non-Members</h2>
@@ -128,7 +128,7 @@
 <p>After this call all QWS calls by <i>app</i> will be authorized with this <i>key</i>.</p>
 <p>A check is made that the binary has been keyed, and if not then the method will qFatal, with the message &quot;SXE key has not been set&quot;.</p>
 <p>(This function is stubbed out with an empty implementation if Qtopia is configured without SXE.)</p>
-<h3 class="fn"><a name="operator-lt-lt-64"></a>QDebug operator&lt;&lt; ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-62"></a>QDebug operator&lt;&lt; ( QDebug <i>debug</i>, const SxeProgramInfo &amp; <i>progInfo</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sends the <a href="sxeprograminfo.html">SxeProgramInfo</a> <i>progInfo</i> to the <i>debug</i> stream.</p>
 <hr />
@@ -159,8 +159,8 @@
 <p>See also <a href="buildsystem/over-applications-1.html">Applications</a> and <a href="qtopiaapplication.html#QTOPIA_SET_KEY">QTOPIA_SET_KEY</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

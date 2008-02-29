@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,21 +34,6 @@
 namespace gstreamer
 {
 
-static inline bool isQVFb()
-{
-    static bool result, test = true;
-
-    if (test)
-    {
-        test = false;
-
-        QByteArray display_spec(getenv("QWS_DISPLAY"));
-
-        result = display_spec.startsWith("QVFb");
-    }
-
-    return result;
-}
 
 /*!
     \class gstreamer::DirectPainterWidget
@@ -121,11 +106,7 @@ void DirectPainterWidget::paint(QImage const& frame)
 #endif
         endPainting();
 
-        if (isQVFb())
-        {
-            // Inform QVFb of change in framebuffer
-            QScreen::instance()->setDirty(m_destRect);
-        }
+        qt_screen->setDirty(m_destRect);
     }
 
     m_painting = false;

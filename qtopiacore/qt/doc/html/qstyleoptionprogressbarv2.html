@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/styles/qstyleoption.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/styles/qstyleoption.cpp -->
 <head>
   <title>Qt 4.3: QStyleOptionProgressBarV2 Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -52,14 +52,14 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QStyleOptionProgressBarV2 class is used to describe the parameters necessary for drawing a progress bar in Qt 4.1 or above.</p>
-<p>An instance of this class has <a href="qstyleoption.html#type-varx">type</a> <a href="qstyleoption.html#OptionType-enum">SO_ProgressBar</a> and <a href="qstyleoption.html#version-var">version</a> 2.</p>
+<p>An instance of this class has <a href="qstyleoption.html#type-var">type</a> <a href="qstyleoption.html#OptionType-enum">SO_ProgressBar</a> and <a href="qstyleoption.html#version-var">version</a> 2.</p>
 <p>The type is used internally by <a href="qstyleoption.html">QStyleOption</a>, its subclasses, and <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>() to determine the type of style option. In general you do not need to worry about this unless you want to create your own <a href="qstyleoption.html">QStyleOption</a> subclass and your own styles. The version is used by <a href="qstyleoption.html">QStyleOption</a> subclasses to implement extensions without breaking compatibility. If you use <a href="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</a>(), you normally don't need to check it.</p>
 <p>If you create your own <a href="qstyle.html">QStyle</a> subclass, you should handle both <a href="qstyleoptionprogressbar.html">QStyleOptionProgressBar</a> and QStyleOptionProgressBarV2. One way to achieve this is to use the QStyleOptionProgressBarV2 copy constructor. For example:</p>
 <pre>     if (const QStyleOptionProgressBar *progressBarOption =
             qstyleoption_cast&lt;const QStyleOptionProgressBar *&gt;(option)) {
          QStyleOptionProgressBarV2 progressBarV2(*progressBarOption);
 
-         <span class="comment">// draw the progress bar using progressBarV2</span>
+         <span class="comment">//</span> draw the progress bar using progressBarV2
      }</pre>
 <p>In the example above: If the <tt>progressBarOption</tt>'s version is 1, the extra members (<a href="qstyleoptionprogressbarv2.html#orientation-var">orientation</a>, <a href="qstyleoptionprogressbarv2.html#invertedAppearance-var">invertedAppearance</a>, and <a href="qstyleoptionprogressbarv2.html#bottomToTop-var">bottomToTop</a>) are set to default values for <tt>progressBarV2</tt>. If the <tt>progressBarOption</tt>'s version is 2, the constructor will simply copy the extra members to progressBarV2.</p>
 <p>For an example demonstrating how style options can be used, see the <a href="widgets-styles.html">Styles</a> example.</p>
@@ -110,8 +110,8 @@
 <p>See also <a href="qprogressbar.html#orientation-prop">QProgressBar::orientation</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

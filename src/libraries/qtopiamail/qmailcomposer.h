@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -60,7 +60,8 @@ public slots:
     virtual void setMessage( const QMailMessage& mail ) = 0;
     virtual void clear() = 0;
     virtual void setText( const QString &text, const QString &type );
-    virtual void attach( const QContent &lnk );
+    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
+    virtual void setSignature( const QString &sig );
 
 signals:
     void contentChanged();

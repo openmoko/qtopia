@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -168,8 +168,13 @@ ThemedSecondaryDisplay::ThemedSecondaryDisplay(QWidget *parent, Qt::WFlags f)
     title->show();
 
     QVBoxLayout *vbox = new QVBoxLayout;
+
+    // ensure home screen image stretches to edges of screen
+    vbox->setContentsMargins(0, 0, 0, 0);
+
     setLayout(vbox);
     home = new SecondaryHomeScreen;
+
     vbox->addWidget(home);
 }
 

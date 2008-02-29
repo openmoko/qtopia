@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -640,9 +640,19 @@ QVariant QContactModel::data(const QModelIndex &index, int role) const
                                     return Qt::escape(company);
                             }
                         case StatusIconRole:
-                            if (isPersonalDetails(id(row)))
-                                return QPixmap(":image/addressbook/business");
-                            return QPixmap();
+                            if (isPersonalDetails(id(row))) {
+                                QPixmap pm;
+                                static const QLatin1String key("pimcontact-personaldetails-thumb");
+                                if (!QGlobalPixmapCache::find(key, pm)) {
+                                    QIcon i(":icon/addressbook/personaldetails");
+                                    pm = i.pixmap(QContact::thumbnailSize());
+                                    if (!pm.isNull()) {
+                                        QGlobalPixmapCache::insert(key, pm);
+                                    }
+                                }
+                                return qvariant_cast<QPixmap>(pm);
+                            } else
+                                return QPixmap();
                     }
                 }
                 break;
@@ -1326,6 +1336,8 @@ bool QContactModel::removeContact(const QUniqueId& identifier)
   successfully added.  Otherwise returns a null identifier.
 
   Note the current identifier of the specified appointment is ignored.
+
+  \sa phoneSource(), simSource(), mirrorToSource()
 */
 QUniqueId QContactModel::addContact(const QContact& contact, const QPimSource &source)
 {

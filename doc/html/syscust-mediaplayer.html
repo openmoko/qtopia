@@ -15,11 +15,12 @@
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <ul><li><a href="#building-qtopia-with-the-helix-source-package">Building Qtopia with the Helix Source Package</a></li>
+<li><a href="#streaming-media">Streaming Media</a></li>
 </ul>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia supports the integration of the Helix DNA Client v1.5 (Cayenne). To discuss access to Helix sources within a Commercial context contact <a href="mailto:sales@trolltech.com">sales@trolltech.com</a>.</p>
+<p>Qtopia supports the integration of the Helix DNA Client v3.1 (Atlas). To discuss access to Helix sources within a Commercial context contact <a href="mailto:sales@trolltech.com">sales@trolltech.com</a>.</p>
 <a name="building-qtopia-with-the-helix-source-package"></a>
 <h3>Building Qtopia with the Helix Source Package</h3>
 <p>To build Qtopia with Helix support enabled, follow these steps:</p>
@@ -27,18 +28,24 @@
 <pre>    cd &lt;qtopia-root-dir&gt;
     tar -xzvf qtopia-helix-commercial-src-&lt;version&gt;.tar.gz</pre>
 <p><i>configure</i> Qtopia via running :</p>
-<pre>    configure -helix-system-id &lt;SYSTEM_ID&gt; &lt;other configure options&gt;</pre>
+<pre>    configure -qtopiamedia -mediaengines helix -helix-system-id &lt;SYSTEM_ID&gt; &lt;other configure options&gt;</pre>
 <p>To see the possible values of &lt;SYSTEM_ID&gt; to suit Linux systems run the following commands :</p>
 <pre>    cd &lt;qtopia-root-dir&gt;
     find src/3rdparty/libraries/helix/src/build/umakecf -name &quot;linux*.cf&quot; -printf &quot;%f\n&quot; | sed &quot;s/\(.*\).cf/\1/&quot;</pre>
 <p><i>after</i> starting configuring Qtopia check that you see the following <tt>configure</tt> output :</p>
 <pre>    Testing for helix: PRESENT</pre>
 <p><i>make</i> and make install Qtopia</p>
+<a name="streaming-media"></a>
+<h3>Streaming Media</h3>
+<p>Qtopia supports streaming media through the Helix Integration. To stream media, send a setDocument() message to the MediaPlayer application, with the URL of the media to be streamed.</p>
+<pre>    QtopiaServiceRequest r(&quot;mediaplayer&quot;, &quot;setDocument(QString)&quot;);
+    r &lt;&lt; QString(&quot;rtsp:<span class="comment">//</span>host/path&quot;);
+    r.send();</pre>
 <p><b>Note:</b> The Helix engine is published under a number of licenses, ranging from Research and Development to commercial. For further information please refer to: <a href="https://helixcommunity.org">Helix Community</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

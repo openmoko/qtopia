@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,17 +23,18 @@
 #define __QMAILSTORE_H
 
 #include <QMailId>
-#include <QSharedData>
 #include <qtopiaglobal.h>
+#include "qmailfolderkey.h"
+#include "qmailfoldersortkey.h"
+#include "qmailmessagekey.h"
+#include "qmailmessagesortkey.h"
 
 class QMailFolder;
-class QMailFolderKey;
-class QMailFolderSortKey;
 class QMailMessage;
-class QMailMessageKey;
-class QMailMessageSortKey;
 class QMailStorePrivate;
 class QMailStore;
+
+
 
 typedef QList<QMailFolder> QMailFolderList;
 typedef QList<QMailMessage> QMailMessageList;
@@ -43,8 +44,17 @@ typedef QList<QMailId> QMailIdList;
 static QMailStore* QMailStoreInstance();
 #endif
 
-class QTOPIAMAIL_EXPORT QMailStore
+class QTOPIAMAIL_EXPORT QMailStore : public QObject
 {
+    Q_OBJECT 
+
+public:
+    enum ReturnOption
+    {
+        ReturnAll,
+        ReturnDistinct
+    };
+
 public:
     virtual ~QMailStore();
 
@@ -55,55 +65,56 @@ public:
     bool removeMessage(const QMailId& id);
 
     bool updateFolder(QMailFolder* f);
-    bool updateMessage(QMailMessage* m); 
+    bool updateMessage(QMailMessage* m);
+    bool updateMessages(const QMailMessageKey& key,
+                        const QMailMessageKey::Properties& properties,
+                        const QMailMessage& data);
+    bool updateMessages(const QMailMessageKey& key,
+                        const QMailMessage::Status status,
+                        bool set);
 
-    int countFolders(const QMailFolderKey& k) const;
-	int countFolders() const;
-    int countMessages(const QMailMessageKey& k) const;
-	int countMessages() const;
+    int countFolders(const QMailFolderKey& key = QMailFolderKey()) const;
+    int countMessages(const QMailMessageKey& key = QMailMessageKey()) const;
 
-	QMailIdList queryFolders() const;
-	QMailIdList queryFolders(const QMailFolderSortKey& sortKey) const;
-    QMailIdList queryFolders(const QMailFolderKey& k) const;
-	QMailIdList queryFolders(const QMailFolderKey& key, 
-			          const QMailFolderSortKey& sortKey) const;
-	QMailIdList queryMessages() const;
-	QMailIdList queryMessages(const QMailMessageSortKey& sortKey) const;
-    QMailIdList queryMessages(const QMailMessageKey& k) const;
-	QMailIdList queryMessages(const QMailMessageKey& key, 
-			          const QMailMessageSortKey& sortKey) const;
+    int sizeOfMessages(const QMailMessageKey& key = QMailMessageKey()) const;
 
-	QMailFolder folder(const QMailId& id) const;
-	QMailMessage message(const QMailId& id) const;
-	QMailMessage messageHeader(const QMailId& id) const;
+    QMailIdList queryFolders(const QMailFolderKey& key = QMailFolderKey(),
+                             const QMailFolderSortKey& sortKey = QMailFolderSortKey()) const;
+    QMailIdList queryMessages(const QMailMessageKey& key = QMailMessageKey(),
+                              const QMailMessageSortKey& sortKey = QMailMessageSortKey()) const;
+
+    QMailFolder folder(const QMailId& id) const;
+
+    QMailMessage message(const QMailId& id) const;
+    QMailMessage message(const QString& uid, const QString& account) const;
+
+    QMailMessage messageHeader(const QMailId& id) const;
+    QMailMessage messageHeader(const QString& uid, const QString& account) const;
+    QMailMessageList messageHeaders(const QMailMessageKey& key, 
+                                    const QMailMessageKey::Properties& properties,
+                                    const ReturnOption& option = ReturnAll) const;
 
     static QMailStore* instance();
 #ifdef QMAILSTOREINSTANCE_DEFINED_HERE	
     friend QMailStore* QMailStoreInstance();    
 #endif
 
+signals:
+    void messagesAdded(const QMailIdList& ids);
+    void messagesRemoved(const QMailIdList& ids);
+    void messagesUpdated(const QMailIdList& ids);
+    void foldersAdded(const QMailIdList& ids);
+    void foldersRemoved(const QMailIdList& ids);
+    void foldersUpdated(const QMailIdList& ids);
+
 private:
     QMailStore();
 				
-    // Here follow some nasty functions, required to speed up specific qtmail tasks:
-
     friend class EmailFolderList;
     friend class EmailClient;
 
-    QMailIdList parentFolderIds(const QMailIdList& list) const;
-    bool updateParentFolderIds(const QMailIdList& list, const QMailId& id);
-
-    struct DeletionProperties {
-        QMailId id;
-        QString serverUid;
-        QString fromAccount;
-        QString fromMailbox;
-    };
-
-    QList<DeletionProperties> deletionProperties(const QMailIdList& list) const;
-
 private:
-    QSharedDataPointer<QMailStorePrivate> d;
+    QMailStorePrivate* d;
 
 };
 

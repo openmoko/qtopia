@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the qmake application of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -60,6 +58,20 @@ bool MingwMakefileGenerator::isWindowsShell() const
 #endif
 }
 
+QString MingwMakefileGenerator::escapeDependencyPath(const QString &path) const
+{
+    QString ret = path;
+    ret.remove('\"');
+    ret.replace('\\', "/");
+    ret.replace(' ', "\\ ");
+    return ret;
+}
+
+QString MingwMakefileGenerator::getLibTarget()
+{
+    return QString("lib" + project->first("TARGET") + project->first("TARGET_VERSION_EXT") + ".a");
+}
+
 bool MingwMakefileGenerator::findLibraries()
 {
     QStringList &l = project->values("QMAKE_LIBS");
@@ -81,7 +93,7 @@ bool MingwMakefileGenerator::findLibraries()
                 suffix = project->first("QMAKE_" + steam.toUpper() + "_SUFFIX");
             QString extension;
             for (QList<QMakeLocalFileName>::Iterator dir_it = dirs.begin(); dir_it != dirs.end(); ++dir_it) {
-                int ver = findHighestVersion((*dir_it).local(), steam);
+                int ver = findHighestVersion((*dir_it).local(), steam, "dll.a|a");
                 if (ver != -1) {
                     extension += QString::number(ver);
                     break;
@@ -179,14 +191,14 @@ void MingwMakefileGenerator::writeMingwParts(QTextStream &t)
     if (!preCompHeaderOut.isEmpty()) {
 	QString header = project->first("PRECOMPILED_HEADER");
 	QString cHeader = preCompHeaderOut + Option::dir_sep + "c";
-	t << cHeader << ": " << header << " "
-          << findDependencies(header).join(" \\\n\t\t")
+	t << escapeDependencyPath(cHeader) << ": " << escapeDependencyPath(header) << " "
+          << escapeDependencyPaths(findDependencies(header)).join(" \\\n\t\t")
 	  << "\n\t" << mkdir_p_asstring(preCompHeaderOut)
 	  << "\n\t" << "$(CC) -x c-header -c $(CFLAGS) $(INCPATH) -o " << cHeader << " " << header
           << endl << endl;
 	QString cppHeader = preCompHeaderOut + Option::dir_sep + "c++";
-	t << cppHeader << ": " << header << " "
-          << findDependencies(header).join(" \\\n\t\t")
+	t << escapeDependencyPath(cppHeader) << ": " << escapeDependencyPath(header) << " "
+          << escapeDependencyPaths(findDependencies(header)).join(" \\\n\t\t")
 	  << "\n\t" << mkdir_p_asstring(preCompHeaderOut)
 	  << "\n\t" << "$(CXX) -x c++-header -c $(CXXFLAGS) $(INCPATH) -o " << cppHeader << " " << header
           << endl << endl;
@@ -362,12 +374,12 @@ void MingwMakefileGenerator::writeBuildRulesPart(QTextStream &t)
         t << "\n\t" <<var("QMAKE_PRE_LINK");
     if(project->isActiveConfig("staticlib") && project->first("TEMPLATE") == "lib") {
 	if (project->values("OBJECTS").count() < var("QMAKE_LINK_OBJECT_MAX").toInt()) {
-            t << "\n\t" << "$(LIB) \"$(DESTDIR_TARGET)\" " << objectsLinkLine << " " ;
+            t << "\n\t" << "$(LIB) $(DESTDIR_TARGET) " << objectsLinkLine << " " ;
         } else {
             t << "\n\t" << objectsLinkLine << " " ;
         }
     } else {
-        t << "\n\t" << "$(LINK) $(LFLAGS) -o \"$(DESTDIR_TARGET)\" " << objectsLinkLine << " " << " $(LIBS)";
+        t << "\n\t" << "$(LINK) $(LFLAGS) -o $(DESTDIR_TARGET) " << objectsLinkLine << " " << " $(LIBS)";
     }
     if(!project->isEmpty("QMAKE_POST_LINK"))
         t << "\n\t" <<var("QMAKE_POST_LINK");
@@ -402,7 +414,7 @@ void MingwMakefileGenerator::processPrlVariable(const QString &var, const QStrin
 
 QStringList &MingwMakefileGenerator::findDependencies(const QString &file)
 {
-	QStringList &aList = MakefileGenerator::findDependencies(file);
+    QStringList &aList = MakefileGenerator::findDependencies(file);
     // Note: The QMAKE_IMAGE_COLLECTION file have all images
     // as dependency, so don't add precompiled header then
     if (file == project->first("QMAKE_IMAGE_COLLECTION")

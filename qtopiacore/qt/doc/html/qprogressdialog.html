@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/dialogs/qprogressdialog.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/dialogs/qprogressdialog.cpp -->
 <head>
   <title>Qt 4.3: QProgressDialog Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -129,12 +129,12 @@
 
          if (progress.wasCanceled())
              break;
-         <span class="comment">//... copy one file</span>
+         <span class="comment">//</span>... copy one file
      }
      progress.setValue(numFiles);</pre>
 <p>A modeless progress dialog is suitable for operations that take place in the background, where the user is able to interact with the application. Such operations are typically based on <a href="qtimer.html">QTimer</a> (or <a href="qobject.html#timerEvent">QObject::timerEvent</a>()), <a href="qsocketnotifier.html">QSocketNotifier</a>, or <a href="porting4.html#qurloperator">QUrlOperator</a>; or performed in a separate thread. A <a href="qprogressbar.html">QProgressBar</a> in the status bar of your main window is often an alternative to a modeless progress dialog.</p>
 <p>You need to have an event loop to be running, connect the <a href="qprogressdialog.html#canceled">canceled</a>() signal to a slot that stops the operation, and call <a href="qprogressdialog.html#value-prop">setValue</a>() at intervals. For example:</p>
-<pre><span class="comment"> // Operation constructor</span>
+<pre><span class="comment"> //</span> Operation constructor
  Operation::Operation(QObject *parent)
      : QObject(parent), steps(0)
  {
@@ -148,7 +148,7 @@
  void Operation::perform()
  {
      pd-&gt;setValue(steps);
-     <span class="comment">//... perform one percent of the operation</span>
+     <span class="comment">//</span>... perform one percent of the operation
      steps++;
      if (steps &gt; pd-&gt;maximum())
          t-&gt;stop();
@@ -157,7 +157,7 @@
  void Operation::cancel()
  {
      t-&gt;stop();
-     <span class="comment">//... cleanup</span>
+     <span class="comment">//</span>... cleanup
  }</pre>
 <p>In both modes the progress dialog may be customized by replacing the child widgets with custom widgets by using <a href="qprogressdialog.html#setLabel">setLabel</a>(), <a href="qprogressdialog.html#setBar">setBar</a>(), and <a href="qprogressdialog.html#setCancelButton">setCancelButton</a>(). The functions <a href="qprogressdialog.html#labelText-prop">setLabelText</a>() and <a href="qprogressdialog.html#setCancelButtonText">setCancelButtonText</a>() set the texts shown.</p>
 <p>The <a href="dialogs-standarddialogs.html">Standard Dialogs</a> example shows how to use QProgressDialog as well as other built-in Qt dialogs.</p>
@@ -287,8 +287,8 @@
 <p>Reimplemented from <a href="qwidget.html#sizeHint-prop">QWidget</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

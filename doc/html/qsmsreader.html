@@ -32,7 +32,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -44,7 +44,7 @@
 <li><div class="fn"/>virtual void <b><a href="qsmsreader.html#setUnreadCount">setUnreadCount</a></b> ( int <i>value</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -56,7 +56,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -65,15 +65,14 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -88,7 +87,7 @@
 <p>See also <a href="qsmsmessage.html">QSMSMessage</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSMSReader"></a>QSMSReader::QSMSReader ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QSMSReader"></a>QSMSReader::QSMSReader ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new SMS request object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports SMS requests. If there is more than one service that supports network registration, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qsmsreader.html">QSMSReader</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
@@ -97,9 +96,9 @@
 <h3 class="fn"><a name="check"></a>void QSMSReader::check ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Fetch the total number of messages in the incoming SMS buffer. The number is returned via the <a href="qsmsreader.html#messageCount">messageCount</a>() signal.</p>
 <p>See also <a href="qsmsreader.html#messageCount">messageCount</a>() and <a href="qsmsreader.html#firstMessage">firstMessage</a>().</p>
-<h3 class="fn"><a name="deleteMessage"></a>void QSMSReader::deleteMessage ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="deleteMessage"></a>void QSMSReader::deleteMessage ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Delete the message with the identifier <i>id</i> from the incoming SMS buffer.</p>
-<h3 class="fn"><a name="fetched"></a>void QSMSReader::fetched ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>m</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="fetched"></a>void QSMSReader::fetched ( const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>m</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a message in the incoming SMS buffer of is fetched. <i>id</i> will be zero-length if there are no remaining messages in the buffer to be fetched. Otherwise, the message content is in <i>m</i>.</p>
 <p>See also <a href="qsmsreader.html#firstMessage">firstMessage</a>() and <a href="qsmsreader.html#nextMessage">nextMessage</a>().</p>
 <h3 class="fn"><a name="firstMessage"></a>void QSMSReader::firstMessage ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
@@ -132,7 +131,7 @@
 <h3 class="fn"><a name="unreadCountChanged"></a>void QSMSReader::unreadCountChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when <a href="qsmsreader.html#unreadCount">unreadCount</a>() changes.</p>
 <p>See also <a href="qsmsreader.html#unreadCount">unreadCount</a>(), <a href="qsmsreader.html#unreadList">unreadList</a>(), and <a href="qsmsreader.html#setUnreadCount">setUnreadCount</a>().</p>
-<h3 class="fn"><a name="unreadList"></a><a href="qstringlist.html">QStringList</a> QSMSReader::unreadList () const</h3>
+<h3 class="fn"><a name="unreadList"></a><a href="./qstringlist.html">QStringList</a> QSMSReader::unreadList () const</h3>
 <p>Returns a list of message identifiers for messages that are new and unread since the last time <a href="qsmsreader.html#firstMessage">firstMessage</a>() was called. This list will reset to empty when <a href="qsmsreader.html#firstMessage">firstMessage</a>() is called. The list will be ordered roughly in the order in which the messages arrived.</p>
 <p>See also <a href="qsmsreader.html#unreadCount">unreadCount</a>(), <a href="qsmsreader.html#setUnreadCount">setUnreadCount</a>(), and <a href="qsmsreader.html#unreadCountChanged">unreadCountChanged</a>().</p>
 <h3 class="fn"><a name="usedMessages"></a>int QSMSReader::usedMessages () const</h3>
@@ -140,8 +139,8 @@
 <p>See also <a href="qsmsreader.html#totalMessages">totalMessages</a>() and <a href="qsmsreader.html#messageCount">messageCount</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

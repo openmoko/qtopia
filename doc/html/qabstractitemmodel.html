@@ -229,7 +229,7 @@
 <h3 class="fn"><a name="columnCount"></a>int QAbstractItemModel::columnCount ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the number of columns for the children of the given <i>parent</i>. When the parent is valid it means that rowCount is returning the number of children of parent.</p>
 <p>In most subclasses, the number of columns is independent of the <i>parent</i>. For example:</p>
-<pre> int DomModel::columnCount(const QModelIndex &amp;/*parent*/</span>) const
+<pre> int DomModel::columnCount(const QModelIndex &amp;<span class="comment">/*parent*/</span>) const
  {
      return 3;
  }</pre>
@@ -461,8 +461,8 @@
 <p>See also <a href="qabstractitemmodel.html#dropMimeData">dropMimeData</a>(), <a href="qt.html#DropAction-enum">Qt::DropActions</a>, and <a href="model-view-dnd.html">Using Drag and Drop with Item Views</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

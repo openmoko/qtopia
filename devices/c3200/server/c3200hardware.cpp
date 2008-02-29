@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,12 @@
 #include <qtopiaipcadaptor.h>
 #include <qbootsourceaccessory.h>
 #include <qtopiaipcenvelope.h>
+#include <qpowersource.h>
+
+#include <QAudioStateConfiguration>
+#include <QAudioStateInfo>
+#include <qaudionamespace.h>
+#include <QtopiaIpcEnvelope>
 
 #include <qtopiaserverapplication.h>
 #include <standarddevicefeatures.h>
@@ -70,6 +76,21 @@ C3200Hardware::C3200Hardware()
     } else {
         qWarning("Cannot open log for detect (%s)", strerror(errno));
     }
+    batterySource = new QPowerSourceProvider(QPowerSource::Battery, "C3200Battery", this);
+    batterySource->setAvailability(QPowerSource::Available);
+    connect(batterySource, SIGNAL(chargingChanged(bool)),
+            this, SLOT(chargingChanged(bool)));
+    connect(batterySource, SIGNAL(chargeChanged(int)),
+            this, SLOT(chargeChanged(int)));
+    wallSource = new QPowerSourceProvider(QPowerSource::Wall, "C3200Charger", this);
+
+    // Handle Audio State Changes
+    mgr = new QtopiaIpcAdaptor("QPE/AudioStateManager", this);
+    audioConf = new QAudioStateConfiguration(this);
+    connect(audioConf, SIGNAL(currentStateChanged(QAudioStateInfo,QAudio::AudioCapability)),
+            this, SLOT(currentStateChanged(QAudioStateInfo,QAudio::AudioCapability)));
+    connect(audioConf, SIGNAL(availabilityChanged()),
+            this, SLOT(availabilityChanged()));
 }
 
 C3200Hardware::~C3200Hardware()
@@ -88,40 +109,97 @@ void C3200Hardware::readDetectData()
     if(n !=16)
       return;
 
-    if((detectData.type==0) && (detectData.code==0) && (detectData.value==0)) 
+    if((detectData.type==0) && (detectData.code==0) && (detectData.value==0))
         return;
     if(detectData.type==1) return;
-    qWarning("event: type=%03d code=%03d value=%03d",detectData.type, 
-              detectData.code,detectData.value);
-  
+
+    //-------------
+    int ac = 0xff; // AC status
+    int bs = 0xff; // Battery status
+    int bf = 0xff; // Battery flag
+    int pc = -1; // Remaining battery (percentage)
+    int min = -1; // Remaining battery (minutes)
+
+    FILE *f = fopen("/proc/apm", "r");
+    if ( f  ) {
+        //I 1.13 1.2 0x02 0x00 0xff 0xff 49% 147 sec
+        char u;
+        fscanf(f, "%*[^ ] %*d.%*d 0x%*x 0x%x 0x%x 0x%x %d%% %i %c",
+                &ac, &bs, &bf, &pc, &min, &u);
+        fclose(f);
+
+        int  percent = pc;
+
+        if(ac) {
+            wallSource->setAvailability(QPowerSource::Available);
+            batterySource->setCharging(true);
+            qLog(Hardware) << "Charger cable plugged in";
+        } else {
+            wallSource->setAvailability(QPowerSource::NotAvailable);
+            batterySource->setCharging(false);
+            batterySource->setCharge(percent);
+            qLog(Hardware) << "Charger cable unplugged";
+        }
+    } else {
+        wallSource->setAvailability(QPowerSource::NotAvailable);
+        batterySource->setCharging(false);
+        qLog(Hardware) << "/proc/apm failed!";
+    }
+
+    //-------------
+
+    qLog(Hardware) << "event: type = " << detectData.type << ", code = " <<
+        detectData.code << ", value = " << detectData.value;
+
     if((detectData.type==5) && (detectData.code==2) && (detectData.value==1)) {
         qLog(Hardware) << "Headset plugged in";
 	vsoPortableHandsfree.setAttribute("Present", true);
-        system("amixer set \'Speaker Function\' Off");
-        system("amixer set \'Jack Function\' \'Headset\'");
-        return;  
-    } 
+        QByteArray mode("PhoneSpeaker");
+        mgr->send("setProfile(QByteArray)", mode);
+        return;
+    }
     if((detectData.type==5) && (detectData.code==2) && (detectData.value==0)) {
         qLog(Hardware) << "Headset unplugged";
 	vsoPortableHandsfree.setAttribute("Present", false);
-        system("amixer set \'Speaker Function\' On");
-        system("amixer set \'Jack Function\' \'Headphone\'");
-        return;  
-    } 
+        QByteArray mode("MediaSpeaker");
+        mgr->send("setProfile(QByteArray)", mode);
+        return;
+    }
     if((detectData.type==5) && (detectData.code==1) && (detectData.value==1)) {
         qLog(Hardware) << "Screen closed";
         system("echo 1>/sys/class/backlight/corgi-bl/brightness");
-        return;  
+        return;
     }
     if((detectData.type==5) && (detectData.code==1) && (detectData.value==0)) {
         qLog(Hardware) << "Screen opened";
         system("echo 10>/sys/class/backlight/corgi-bl/brightness");
         QWSServer::instance()->refresh();
-        return;  
+        return;
     }
 }
 void C3200Hardware::shutdownRequested()
 {
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
 }
+
+void C3200Hardware::chargingChanged(bool charging)
+{
+    qLog(Hardware) << "could set leds here! charging " << charging;
+}
+
+void C3200Hardware::chargeChanged(int charge)
+{
+    qLog(Hardware) << "charge " << charge;
+}
+
+void C3200Hardware::availabilityChanged()
+{
+    qLog(Hardware) << "void C3200Hardware::availabilityChanged()";
+}
+
+void C3200Hardware::currentStateChanged(const QAudioStateInfo &state, QAudio::AudioCapability)
+{
+    qLog(Hardware) << "void C3200Hardware::currentStateChanged()";
+}
+
 #endif // QT_QWS_C3200

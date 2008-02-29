@@ -51,7 +51,7 @@
 <li><a href="#keyboard-input-plug-ins">Keyboard/Input plug-ins</a></li>
 <li><a href="#pointer-plugins">Pointer plugins</a></li>
 <li><a href="#accelerated-graphics-driver">Accelerated Graphics Driver</a></li>
-<li><a href="#setting-environment-variables">Setting Environment Variables</a></li>
+<li><a href="#environment-variables">Environment Variables</a></li>
 </ul>
 <li><a href="#qtopia-platform">Qtopia Platform</a></li>
 <ul><li><a href="#multiple-screen-support">Multiple screen support</a></li>
@@ -62,6 +62,7 @@
 </ul>
 <li><a href="#document-content-system">Document/Content system</a></li>
 <ul><li><a href="#document-storage">Document Storage</a></li>
+<li><a href="#drm-integration">DRM integration</a></li>
 </ul>
 <li><a href="#memory-management">Memory management</a></li>
 <ul><li><a href="#general-information">General information</a></li>
@@ -79,13 +80,18 @@
 <li><a href="#device-indicators">Device indicators</a></li>
 <li><a href="#networking">Networking</a></li>
 <li><a href="#input-methods">Input methods</a></li>
+<li><a href="#sxe-integration">SXE integration</a></li>
 <li><a href="#internationalization">Internationalization</a></li>
 <li><a href="#application-services">Application services</a></li>
-<li><a href="#environment-variables">Environment variables</a></li>
+<li><a href="#qtopia-environment-variables">Qtopia Environment variables</a></li>
 <li><a href="#miscellaneous-steps">Miscellaneous steps</a></li>
-<ul><li><a href="#voip-integration">VoIP integration</a></li>
 </ul>
-<li><a href="#phone-keypad-lp">Phone keypad (LP)</a></li>
+<li><a href="#qtopia-phone-edition">Qtopia Phone Edition</a></li>
+<ul><li><a href="#telephony">Telephony</a></li>
+<ul><li><a href="#modem-integration">Modem Integration</a></li>
+<li><a href="#voip-integration">VoIP integration</a></li>
+</ul>
+<li><a href="#phone-keypad">Phone keypad</a></li>
 <li><a href="#messaging">Messaging</a></li>
 <ul><li><a href="#multimedia-messaging">Multimedia Messaging</a></li>
 <ul><li><a href="#multimedia-messaging-viewer-smil">Multimedia Messaging Viewer (SMIL)</a></li>
@@ -135,7 +141,7 @@
 <li>CONFIG_SYSVIPC</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Unix-domain Sockets</td><td>Qtopia uses Unix-domain Sockets for Inter-process Communication (IPC) between client applications and the server. For details on the IPC mechanism used in Qtopia See <a href="qtopiacore-architecture.html#client-server-communication">Client/Server Communication</a> and <a href="qtopiaipc.html">Qtopia IPC Layer</a>.<p>The Linux kernel must be configured with the following options to enable Unix-domain Sockets</p>
+<tr valign="top" class="even"><td>Unix-domain Sockets</td><td>Qtopia uses Unix-domain Sockets for Inter-process Communication (IPC) between client applications and the server. For details on the IPC mechanism used in Qtopia See <a href="./qtopiacore-architecture.html">Client/Server Communication</a> and <a href="qtopiaipc.html">Qtopia IPC Layer</a>.<p>The Linux kernel must be configured with the following options to enable Unix-domain Sockets</p>
 <ul>
 <li>CONFIG_UNIX</li>
 </ul>
@@ -147,7 +153,7 @@
 <li>Device specific Framebuffer driver</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>proc</tt> Filesystem</td><td>The <tt>proc</tt> virtual filesystem provides an interface for querying the status of and controlling certain aspect of the running system. Qtopia uses this filesystem for managing processes, monitoring memory use, querying mounted filesystems, managing network interfaces, power management and querying general system information.<p>The <tt>proc</tt> filesystem must be mounted on <tt>/proc</tt> during start-up.</p>
+<tr valign="top" class="even"><td><tt>proc</tt> Filesystem</td><td>The <tt>proc</tt> virtual filesystem provides an interface for querying the status of and controlling certain aspect of the running system. Qtopia uses this filesystem for managing processes, authenticating IPC communication when SXE is enabled, monitoring memory use, querying mounted filesystems, managing network interfaces, power management and querying general system information.<p>The <tt>proc</tt> filesystem must be mounted on <tt>/proc</tt> during start-up.</p>
 <p>The Linux kernel must be configured with the following option to enable access to the <tt>proc</tt> filesystem.</p>
 <ul>
 <li>CONFIG_PROC_FS</li>
@@ -159,7 +165,14 @@
 <p>Qtopia includes many optional features and components that may not be needed for all devices. The following table lists these optional features and components together with the Linux kernel configuration options that they depend on.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Optional Qtopia Component</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><a name="bluetooth-kernel-configuration"></a><td>Bluetooth</td><td>Qtopia supports Bluetooth communication devices via the BlueZ API. For full details on Bluetooth integration see <a href="qtopiabluetooth.html">Bluetooth</a>.<p>The Linux kernel must be configured with the following options to enable Bluetooth support</p>
+<tr valign="top" class="odd"><a name="at-modem"></a><td>AT Modem</td><td>Qtopia's <a href="qtopia-telephony.html">telephony stack</a> includes support for AT modems. These devices are typically connected via a serial interface. If the modem is connected via a different interface, you will need to enable support for that interface. For full details on modem integration see <a href="#modem-integration">Modem Integration</a>.<p>The Linux kernel must be configured with the following options to enable access to an AT modem connected via a serial interface</p>
+<ul>
+<li>CONFIG_SERIAL</li>
+<li>Device specific serial driver</li>
+<li>Device specific modem driver</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><a name="bluetooth-kernel-configuration"></a><td>Bluetooth</td><td>Qtopia supports Bluetooth communication devices via the BlueZ API. For full details on Bluetooth integration see <a href="qtopiabluetooth.html">Bluetooth</a>.<p>The Linux kernel must be configured with the following options to enable Bluetooth support</p>
 <ul>
 <li>CONFIG_BLUEZ</li>
 <li>CONFIG_BLUEZ_L2CAP</li>
@@ -175,7 +188,7 @@
 <li>Device specific serial driver</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Internet, VoIP</td><td>Qtopia can use a variety of network interfaces to provide Internet connectivity. For full details on integrating Internet connectivity see <a href="#networking">Networking</a>. As Qtopia's VoIP feature routes calls over the Internet, it has the same kernel configuration requirements as Internet connectivity.<p>The Linux kernel must be configured with the following options to enable support for Internet connectivity</p>
+<tr valign="top" class="odd"><td>Internet, VoIP</td><td>Qtopia can use a variety of network interfaces to provide Internet connectivity. For full details on integrating Internet connectivity see <a href="#networking">Networking</a>. As Qtopia's VoIP feature routes calls over the Internet, it has the same kernel configuration requirements as Internet connectivity.<p>The Linux kernel must be configured with the following options to enable support for Internet connectivity</p>
 <ul>
 <li>CONFIG_INET</li>
 <li>CONFIG_NETDEVICES</li>
@@ -198,6 +211,12 @@
 <p>Qtopia can share it's Internet connection with other devices. This feature requires the following kernel configuration option (FIXME: is this Qtopia 4.3+?)</p>
 <ul>
 <li>CONFIG_BRIDGE</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>SXE</td><td>Qtopia provides a Safe Execution Environment (SXE) for running third party applications. The SXE environment currently uses the LIDS patch set to provide kernel level Mandatory Access Controls (MACs). For full details on SXE integration see <a href="#sxe-integration">SXE integration</a>.<p>The Linux kernel must be patched and configured with the following options to fully enable SXE functionality</p>
+<ul>
+<li>CONFIG_LIDS</li>
+<li>CONFIG_LIDS_*</li>
 </ul>
 </td></tr>
 <tr valign="top" class="odd"><td>Camera</td><td>Qtopia's camera application uses the video4linux API to access the device's camera.<p>The Linux kernel must be configured with the following options to enable camera support</p>
@@ -376,24 +395,29 @@
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>Messages</td><td><ul>
-<li><a href="3rdparty.html#sqlite">SQlite</a></li>
+<li><a href="./3rdparty.html">SQlite</a></li>
 <li>WAP</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>PIM</td><td><ul>
-<li><a href="3rdparty.html#sqlite">SQlite</a></li>
+<tr valign="top" class="odd"><td>SXE</td><td><ul>
+<li>LIDS</li>
+<li>App Armor</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>PIM</td><td><ul>
+<li><a href="./3rdparty.html">SQlite</a></li>
 <li>zoneinfo</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Touchscreen</td><td><ul>
+<tr valign="top" class="odd"><td>Touchscreen</td><td><ul>
 <li>tslib</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>Camera</td><td><ul>
+<tr valign="top" class="even"><td>Camera</td><td><ul>
 <li>v4l (Video 4 Linux)</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Image Viewer</td><td><ul>
+<tr valign="top" class="odd"><td>Image Viewer</td><td><ul>
 <li>ungif</li>
 <li>libpng</li>
 <li>libjpeg</li>
@@ -419,15 +443,16 @@
 <tr valign="top" class="even"><td>dropbear</td><td></td><td>ssh service and client</td><td></td><td></td></tr>
 <tr valign="top" class="odd"><td>expat</td><td></td><td><a href="http://expat.sourceforge.net/">XML Parser</a></td><td><a href="bluetooth.html">bluetooth</a></td><td></td></tr>
 <tr valign="top" class="even"><td>e2fsprogs</td><td></td><td>Utilities for ext2 file systems</td><td></td><td></td></tr>
-<tr valign="top" class="odd"><td>libungif</td><td></td><td>GIF library</td><td></td><td></td></tr>
-<tr valign="top" class="even"><td>pcmcia</td><td></td><td>PCMCIA utilities</td><td></td><td></td></tr>
-<tr valign="top" class="odd"><td>sqlite</td><td></td><td><a href="http://www.sqlite.org/">SQLite database</a></td><td>PIM, Messaging</td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
-<tr valign="top" class="even"><td>sysvinit</td><td></td><td><a href="http://freshmeat.net/projects/sysvinit/">sysvinit project</a> System initialization</td><td>busybox also provides a simple init without runlevels</td><td></td></tr>
-<tr valign="top" class="odd"><td>udev</td><td></td><td>Kernel device manager</td><td></td><td><a href="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html">Udev web site</a></td></tr>
-<tr valign="top" class="even"><td>v4l</td><td></td><td><a href="http://www.exploits.org/v4l/">Video For Linux</a></td><td>camera</td><td></td></tr>
-<tr valign="top" class="odd"><td>wireless_tools</td><td>0.28</td><td>wireless utilities</td><td>wireless networking <a href="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html">Wireless Tools</a></td><td></td></tr>
-<tr valign="top" class="even"><td>wpa_supplicant</td><td>0.4&#x2e;9</td><td><a href="http://hostap.epitest.fi/wpa_supplicant/">WPA\WPA2 Authentication</a></td><td>wireless networking</td><td></td></tr>
-<tr valign="top" class="odd"><td>zoneinfo</td><td></td><td>Time Zone Data</td><td>WorldTime, Date/Time</td><td><a href="syscust-time.html">Time on an Embedded Device</a></td></tr>
+<tr valign="top" class="odd"><td>LIDS</td><td>1.2&#x2e;2</td><td>Linux Intrusion Detection System</td><td><a href="sxe.html">Safe Execution Environment - SXE</a></td><td></td></tr>
+<tr valign="top" class="even"><td>libungif</td><td></td><td>GIF library</td><td></td><td></td></tr>
+<tr valign="top" class="odd"><td>pcmcia</td><td></td><td>PCMCIA utilities</td><td></td><td></td></tr>
+<tr valign="top" class="even"><td>sqlite</td><td></td><td><a href="http://www.sqlite.org/">SQLite database</a></td><td>PIM, Messaging</td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="odd"><td>sysvinit</td><td></td><td><a href="http://freshmeat.net/projects/sysvinit/">sysvinit project</a> System initialization</td><td>busybox also provides a simple init without runlevels</td><td></td></tr>
+<tr valign="top" class="even"><td>udev</td><td></td><td>Kernel device manager</td><td></td><td><a href="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html">Udev web site</a></td></tr>
+<tr valign="top" class="odd"><td>v4l</td><td></td><td><a href="http://www.exploits.org/v4l/">Video For Linux</a></td><td>camera</td><td></td></tr>
+<tr valign="top" class="even"><td>wireless_tools</td><td>0.28</td><td>wireless utilities</td><td>wireless networking <a href="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html">Wireless Tools</a></td><td></td></tr>
+<tr valign="top" class="odd"><td>wpa_supplicant</td><td>0.4&#x2e;9</td><td><a href="http://hostap.epitest.fi/wpa_supplicant/">WPA\WPA2 Authentication</a></td><td>wireless networking</td><td></td></tr>
+<tr valign="top" class="even"><td>zoneinfo</td><td></td><td>Time Zone Data</td><td>WorldTime, Date/Time</td><td><a href="syscust-time.html">Time on an Embedded Device</a></td></tr>
 </table></p>
 <a name="other-tools"></a>
 <h4>Other tools</h4>
@@ -437,16 +462,16 @@
 <tr valign="top" class="odd"><td>libelf</td><td>Linux file system tools</td><td></td><td></td></tr>
 <tr valign="top" class="even"><td>dosfstools</td><td>DOS file system tools</td><td></td><td></td></tr>
 <tr valign="top" class="odd"><td>libungif</td><td>gif library</td><td></td><td></td></tr>
-<tr valign="top" class="even"><td>zlib</td><td>File Compression Utility</td><td>Package Manager</td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
-<tr valign="top" class="odd"><td>libjpeg</td><td>JPEG image library</td><td></td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="even"><td>zlib</td><td>File Compression Utility</td><td>Package Manager</td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="odd"><td>libjpeg</td><td>JPEG image library</td><td></td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
 <tr valign="top" class="even"><td>OpenSSH</td><td><a href="http://www.openssh.com/">OpenSSH</a></td><td></td><td>developer tool</td></tr>
 <tr valign="top" class="odd"><td>telnet</td><td>Telnet Terminal Services</td><td></td><td>developer tool</td></tr>
 <tr valign="top" class="even"><td>ftp</td><td>File Transfer Protocol</td><td></td><td>developer tool</td></tr>
 <tr valign="top" class="odd"><td>tar</td><td>Archive Utility</td><td></td><td>developer tool</td></tr>
-<tr valign="top" class="even"><td>freetype</td><td>Font Library</td><td></td><td>Provided by <a href="qtopiacore-fonts.html">Qtopia Core Fonts</a></td></tr>
-<tr valign="top" class="odd"><td>libmng</td><td>PNG animation library</td><td></td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
-<tr valign="top" class="even"><td>libpng</td><td></td><td></td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
-<tr valign="top" class="odd"><td>md5</td><td></td><td></td><td>Provided by <a href="qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="even"><td>freetype</td><td>Font Library</td><td></td><td>Provided by <a href="./qtopiacore-fonts.html">Qtopia Core Fonts</a></td></tr>
+<tr valign="top" class="odd"><td>libmng</td><td>PNG animation library</td><td></td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="even"><td>libpng</td><td></td><td></td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
+<tr valign="top" class="odd"><td>md5</td><td></td><td></td><td>Provided by <a href="./qtopiacore.html">Qtopia Core</a></td></tr>
 <tr valign="top" class="even"><td>gdb server</td><td>Remote debugging utility</td><td></td><td><a href="debug-qtopia.html#remote-debugging">Remote Debugging</a></td></tr>
 <tr valign="top" class="odd"><td>prelink</td><td>Binary optimization</td><td></td><td><a href="tut-prelink.html">Prelink Tutorial</a></td></tr>
 </table></p>
@@ -483,7 +508,31 @@
 <p>Note that the various options provided in the above table can be combined. A detailed overview of the possible options are provided by Qtopia's <a href="buildsystem/over-configure-options-1.html">configure script</a>.</p>
 <a name="configure-options"></a>
 <h4>Configure options</h4>
-<p>The configure options allow the enabling/disabling of Qtopia features. Some features are not required for every conceivable target device and may be disabled to reduce Qtopia's filesystem and memory use. Qtopia maintains two sets of configure options. The first set is related to Qtopia's configure script and the second set is related to Qt's configure script.</p>
+<p>The configure options allow the enabling/disabling of Qtopia features. Some features are not required for every conceivable target device and may be disabled to reduce Qtopia's filesystem and memory use. An example is the &quot;Minimum VoIP&quot; <a href="buildsystem/over-device-profiles-1.html">device profile</a> which is part of the Qtopia source package (see <tt>$QPEDIR/devices/min_voip</tt>). The profile shows how to reduce the size of the Qtopia build as far as possible, while still providing VoIP telephony. A large part of this optimization is simply achieved by passing the right options to Qtopia's configure script:</p>
+<pre>    -xplatform min_voip -arch arm -no-qvfb
+    -displaysize 320x240
+    -edition phone
+    -no-modem
+    -voip
+    -no-helix
+    -no-drm
+    -no-sxe
+    -prefix /opt/Qtopia
+    -no-bluetooth
+    -no-infrared
+    -iconsize 22
+    -font &quot;dejavu_sans_condensed:16:50&quot;
+    -languages &quot;en_US&quot;
+    -extra-qtopiacore-config &quot;-no-freetype&quot;
+    -extra-qtopiacore-config &quot;-qt-libjpeg&quot;
+    -extra-qtopiacore-config &quot;-qt-libmng&quot;
+    -extra-qtopiacore-config &quot;-qt-libpng&quot;
+    -extra-qtopiacore-config &quot;-qt-zlib&quot;
+    -extra-qtopiacore-config &quot;-no-accessibility&quot;
+    -release
+    -silent
+    -no-samples</pre>
+<p>Qtopia maintains two sets of configure options. The first set is related to Qtopia's configure script and the second set is related to Qt's configure script.</p>
 <ul>
 <li><a href="buildsystem/over-configure-options-1.html">Qtopia configure options</a></li>
 <li><a href="buildsystem/over-configure-options-qtopia-core-1.html">Qtopia Core configure options</a></li>
@@ -492,10 +541,24 @@
 <a name="removing-applications"></a>
 <h4>Removing applications</h4>
 <p>In addition to the removal of Qtopia features, applications can be removed and added to a Qtopia build. Qtopia's <a href="buildsystem/task-deciding-what-to-build-1.html">project files</a> list each individual application that is part of the build and hence enables the developer to choose among provided applications. This level of customization is also available via <a href="#device-specific-configuration">device profiles</a>.</p>
-<p>For example, the greenphone profile adds applications to the standard build process:</p>
+<p>The minimal VoIP profile example excludes various applications to reduce the Qtopia footprint:</p>
+<pre>        ...
+    PROJECTS-=settings/appearance
+    PROJECTS-=settings/beaming
+    PROJECTS-=settings/calibrate
+    PROJECTS-=settings/handwriting
+    PROJECTS-=settings/phonenetworks
+    PROJECTS-=settings/phonesettings
+    PROJECTS-=settings/callforwarding
+    PROJECTS-=settings/words
+    PROJECTS-=settings/packagemanager
+    PROJECTS-=settings/security
+    PROJECTS-=settings/serverwidgets
+    PROJECTS-=settings/worldtime
+        ...</pre>
+<p>whereas the greenphone profile actually adds applications to the build process:</p>
 <pre>    PROJECTS-=\
-        settings/beaming\
-        libraries/qtopiatest
+        settings/beaming
     PROJECTS*=\
         3rdparty/tools/atd\
         3rdparty/applications/target_sqlite\
@@ -519,84 +582,84 @@
 <h2>Qtopia Core</h2>
 <a name="qt-feature-system"></a>
 <h3>Qt Feature system</h3>
-<p>Qtopia Core allows the fine-tuning of library content via the qconfig tool. <a href="qtopiacore-features.html">QConfig</a> provides a visual user interface that enables a convenient way of customizing library content. It presents a short dscription of particular features, can enable/disable them and resolves dependencies among these features. This allows the adjustment of Qtopia Core library sizes as needed. Qtopia uses a default configuration provided by <tt>QPEDIR/qtopiacore/qconfig-qpe.h</tt> which may be used as a starting point for further customization. Please note that the qconfig system can only be used to customize Qtopia Core libraries and not Qtopia libraries.</p>
+<p>Qtopia Core allows the fine-tuning of library content via the qconfig tool. <a href="./qtopiacore-features.html">QConfig</a> provides a visual user interface that enables a convenient way of customizing library content. It presents a short dscription of particular features, can enable/disable them and resolves dependencies among these features. This allows the adjustment of Qtopia Core library sizes as needed. Qtopia uses a default configuration provided by <tt>QPEDIR/qtopiacore/qconfig-qpe.h</tt> which may be used as a starting point for further customization. Please note that the qconfig system can only be used to customize Qtopia Core libraries and not Qtopia libraries.</p>
 <p><tt>qconfig-qpe.h</tt> excludes the following Qt components from a standard Qtopia build:</p>
 <p><table width="90%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th><tt>#define</tt></th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>QT_NO_STL</td><td>standard template library compatibility</td></tr>
-<tr valign="top" class="even"><td>QT_NO_COLORDIALOG</td><td>removes <a href="qcolordialog.html">QColorDialog</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_ERRORMESSAGE</td><td>removes <a href="qerrormessage.html">QErrorMessage</a></td></tr>
-<tr valign="top" class="even"><td>QT_NO_FILEDIALOG</td><td>removes <a href="qfiledialog.html">QFileDialog</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_INPUTDIALOG</td><td>removes <a href="qinputdialog.html">QInputDialog</a></td></tr>
+<tr valign="top" class="even"><td>QT_NO_COLORDIALOG</td><td>removes <a href="./qcolordialog.html">QColorDialog</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_ERRORMESSAGE</td><td>removes <a href="./qerrormessage.html">QErrorMessage</a></td></tr>
+<tr valign="top" class="even"><td>QT_NO_FILEDIALOG</td><td>removes <a href="./qfiledialog.html">QFileDialog</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_INPUTDIALOG</td><td>removes <a href="./qinputdialog.html">QInputDialog</a></td></tr>
 <tr valign="top" class="even"><td>QT_NO_PROGRESSDIALOG</td><td>removes QProgressDialog</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_TABDIALOG</td><td>removes Q3TabDialog</td></tr>
 <tr valign="top" class="even"><td>QT_NO_IMAGEFORMAT_PPM</td><td>removes support for PPM images</td></tr>
-<tr valign="top" class="odd"><td>QT_NO_IMAGE_HEURISTIC_MASK</td><td>removes support for 1-bpp heuristic mask (see <a href="qimage.html#createHeuristicMask">QImage::createHeuristicMask</a>() )</td></tr>
+<tr valign="top" class="odd"><td>QT_NO_IMAGE_HEURISTIC_MASK</td><td>removes support for 1-bpp heuristic mask (see <a href="./qimage.html#createHeuristicMask">QImage::createHeuristicMask</a>() )</td></tr>
 <tr valign="top" class="even"><td>QT_NO_IMAGE_TEXT</td><td>removes support for image file text strings</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_BIG_CODECS</td><td>no support for big codecs e.g&#x2e;, CJK (should be added via plug-ins when necessary)</td></tr>
 <tr valign="top" class="even"><td>QT_NO_CODECS</td><td>no support for non-unicode text conversions</td></tr>
-<tr valign="top" class="odd"><td>QT_NO_DIRMODEL</td><td>no data model support for the local filesystem (see <a href="qdirmodel.html">QDirModel</a>)</td></tr>
-<tr valign="top" class="even"><td>QT_NO_CURSOR</td><td>no mouse cursor support (see <a href="qcursor.html">QCursor</a>)</td></tr>
+<tr valign="top" class="odd"><td>QT_NO_DIRMODEL</td><td>no data model support for the local filesystem (see <a href="./qdirmodel.html">QDirModel</a>)</td></tr>
+<tr valign="top" class="even"><td>QT_NO_CURSOR</td><td>no mouse cursor support (see <a href="./qcursor.html">QCursor</a>)</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_DRAGANDDROP</td><td>removes drag and drop mechanisms</td></tr>
 <tr valign="top" class="even"><td>QT_NO_EFFECTS</td><td>removes special widget effects (e.g&#x2e;, fading and scrolling)</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_SESSIONMANAGER</td><td>removes support for session management</td></tr>
-<tr valign="top" class="even"><td>QT_NO_NETWORKPROXY</td><td>removes network layer proxy support (see <a href="qnetworkproxy.html">QNetworkProxy</a>)</td></tr>
+<tr valign="top" class="even"><td>QT_NO_NETWORKPROXY</td><td>removes network layer proxy support (see <a href="./qnetworkproxy.html">QNetworkProxy</a>)</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_SOCKS5</td><td>removes SOCKS v5 network proxy support (depends on QT_NO_NETWORKPROXY)</td></tr>
-<tr valign="top" class="even"><td>QT_NO_COLORNAMES</td><td>removes colar names such as &quot;red&quot;, which are used by <a href="qcolor.html">QColor</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_PICTURE</td><td>removes support for recording and replaying <a href="qpainter.html">QPainter</a> commands</td></tr>
+<tr valign="top" class="even"><td>QT_NO_COLORNAMES</td><td>removes colar names such as &quot;red&quot;, which are used by <a href="./qcolor.html">QColor</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_PICTURE</td><td>removes support for recording and replaying <a href="./qpainter.html">QPainter</a> commands</td></tr>
 <tr valign="top" class="even"><td>QT_NO_QWS_ALPHA_CURSOR</td><td>removes support for alpha-blended cursors</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_QWS_CURSOR</td><td>removes support for visible cursors (depends on QT_NO_CURSOR)</td></tr>
 <tr valign="top" class="even"><td>QT_NO_QWS_DECORATION_WINDOWS</td><td>no support for &quot;Windows&quot; style decorations of top level windows</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_QWS_MOUSE</td><td>removes mouse driver support</td></tr>
 <tr valign="top" class="even"><td>QT_NO_QWS_MOUSE_AUTO</td><td>removes support for auto-detected mouse drivers</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_QWS_MOUSE_MANUAL</td><td>removes support for non-autodetected mouse drivers</td></tr>
-<tr valign="top" class="even"><td>QT_NO_STYLE_MOTIF</td><td>removes support for Motif look and feel (see <a href="qmotifstyle.html">QMotifStyle</a>)</td></tr>
+<tr valign="top" class="even"><td>QT_NO_STYLE_MOTIF</td><td>removes support for Motif look and feel (see <a href="./qmotifstyle.html">QMotifStyle</a>)</td></tr>
 <tr valign="top" class="odd"><td>QT_NO_STYLE_CDE</td><td>removes support for CDE look and feel (depends in QT_NO_STYLE_MOTIF)</td></tr>
-<tr valign="top" class="even"><td>QT_NO_STYLE_PLASTIQUE</td><td>removes support for widget style similar to the Plastik style available in KDE (see <a href="qplastiquestyle.html">QPlastiqueStyle</a>)</td></tr>
-<tr valign="top" class="odd"><td>QT_NO_STYLE_WINDOWSXP</td><td>removes support for Microsoft WindowsXP look and feel (see <a href="qwindowsxpstyle.html">QWindowsXPStyle</a>)</td></tr>
+<tr valign="top" class="even"><td>QT_NO_STYLE_PLASTIQUE</td><td>removes support for widget style similar to the Plastik style available in KDE (see <a href="./qplastiquestyle.html">QPlastiqueStyle</a>)</td></tr>
+<tr valign="top" class="odd"><td>QT_NO_STYLE_WINDOWSXP</td><td>removes support for Microsoft WindowsXP look and feel (see <a href="./qwindowsxpstyle.html">QWindowsXPStyle</a>)</td></tr>
 <tr valign="top" class="even"><td>QT_NO_CONTEXTMENU</td><td>removes support for pop-up menus on right mouse click</td></tr>
-<tr valign="top" class="odd"><td>QT_NO_DOCKWIDGET</td><td>removes support for docking widgets inside a <a href="qmainwindow.html">QMainWindow</a> or floated as a top-level window (see <a href="qdockwidget.html">QDockWidget</a>)</td></tr>
-<tr valign="top" class="even"><td>QT_NO_WORKSPACE</td><td>removes <a href="porting4.html#qworkspace">QWorkSpace</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_SPLITTER</td><td>removes <a href="qsplitter.html">QSplitter</a></td></tr>
-<tr valign="top" class="even"><td>QT_NO_SIZEGRIP</td><td>removes <a href="qsizegrip.html">QSizeGrip</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_DIAL</td><td>removes <a href="qdial.html">QDial</a></td></tr>
-<tr valign="top" class="even"><td>QT_NO_SYNTAXHIGHLIGHTER</td><td>removes <a href="qsyntaxhighlighter.html">QSyntaxHighlighter</a></td></tr>
-<tr valign="top" class="odd"><td>QT_NO_STATUSBAR</td><td>removes <a href="qstatusbar.html">QStatusBar</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_DOCKWIDGET</td><td>removes support for docking widgets inside a <a href="./qmainwindow.html">QMainWindow</a> or floated as a top-level window (see <a href="./qdockwidget.html">QDockWidget</a>)</td></tr>
+<tr valign="top" class="even"><td>QT_NO_WORKSPACE</td><td>removes <a href="./porting4.html">QWorkSpace</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_SPLITTER</td><td>removes <a href="./qsplitter.html">QSplitter</a></td></tr>
+<tr valign="top" class="even"><td>QT_NO_SIZEGRIP</td><td>removes <a href="./qsizegrip.html">QSizeGrip</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_DIAL</td><td>removes <a href="./qdial.html">QDial</a></td></tr>
+<tr valign="top" class="even"><td>QT_NO_SYNTAXHIGHLIGHTER</td><td>removes <a href="./qsyntaxhighlighter.html">QSyntaxHighlighter</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_STATUSBAR</td><td>removes <a href="./qstatusbar.html">QStatusBar</a></td></tr>
 <tr valign="top" class="even"><td>QT_NO_STATUSTIP</td><td>removes support for status tip functionality and events</td></tr>
-<tr valign="top" class="odd"><td>QT_NO_TOOLBOX</td><td>removes <a href="qtoolbox.html">QToolBox</a></td></tr>
-<tr valign="top" class="even"><td>QT_NO_TOOLTIP</td><td>removes <a href="qtooltip.html">QToolTip</a></td></tr>
+<tr valign="top" class="odd"><td>QT_NO_TOOLBOX</td><td>removes <a href="./qtoolbox.html">QToolBox</a></td></tr>
+<tr valign="top" class="even"><td>QT_NO_TOOLTIP</td><td>removes <a href="./qtooltip.html">QToolTip</a></td></tr>
 </table></p>
 <a name="porting"></a>
 <h3>Porting</h3>
 <p>The term porting is used to describe two similar processes. The first use of the term is in the context of modifying Qtopia Core to support a new hardware platform or operating system. In this case the statements &quot;Porting Qtopia Core to a new Architecture&quot; and &quot;Porting Qtopia Core to another Operating System&quot; refer to the process of adding the necessary platform dependent code to Qtopia Core to support the target hardware platform and operating system. The second use refers to the process of changing application code, for an existing application, to work with a newer version of the Qtopia API.</p>
 <a name="qtopia-core-to-a-new-architecture"></a>
 <h4>Qtopia Core to a New Architecture</h4>
-<p>Porting Qtopia Core to a new Architecture involves implementing device drivers for keypad input pointer input, and screen output. You must also ensure that platform dependent atomic operations are provided. These topics are covered in the <a href="qtopiacore-porting-device.html">Porting Qtopia Core to a New Architecture</a> document.</p>
+<p>Porting Qtopia Core to a new Architecture involves implementing device drivers for keypad input pointer input, and screen output. You must also ensure that platform dependent atomic operations are provided. These topics are covered in the <a href="./qtopiacore-porting-device.html">Porting Qtopia Core to a New Architecture</a> document.</p>
 <a name="to-another-operating-system"></a>
 <h4>To another Operating System</h4>
-<p>Porting Qtopia Core to another Operating System involves replacing all Linux specific system calls used in Qtopia Core with equivalents available on the new Operating System. <a href="qtopiacore-porting-operatingsystem.html">Porting Qtopia Core to Another Operating System</a> documents the Linux specific system calls that are currently used and what they are used for.</p>
+<p>Porting Qtopia Core to another Operating System involves replacing all Linux specific system calls used in Qtopia Core with equivalents available on the new Operating System. <a href="./qtopiacore-porting-operatingsystem.html">Porting Qtopia Core to Another Operating System</a> documents the Linux specific system calls that are currently used and what they are used for.</p>
 <a name="qt-application-to-qtopia-core"></a>
 <h4>Qt Application to Qtopia Core</h4>
-<p>Existing Qt 4 applications should require no porting provided there is no platform dependent code. If platform dependent code is used, <a href="qtopiacore-differences.html">Porting Qt Applications to Qtopia Core</a> provides information on how to manage platform dependent code within your application.</p>
+<p>Existing Qt 4 applications should require no porting provided there is no platform dependent code. If platform dependent code is used, <a href="./qtopiacore-differences.html">Porting Qt Applications to Qtopia Core</a> provides information on how to manage platform dependent code within your application.</p>
 <a name="qtopia-2-x-to-4-x"></a>
 <h4>Qtopia 2.x to 4.x</h4>
 <p>Porting applications from Qtopia 2.x to Qtopia 4.x primarily involves making changes related to changes in the Qt API. Qtopia does not support the Qt 3 Support module, so the task of porting from Qtopia 2 to Qtopia 4 takes more work than porting from Qt 2 to Qt 4. An overview on the planned incompatibilities between Qtopia versions and instructions on how to update your code to the new API is described in the <a href="porting.html">Porting Between Qtopia Versions</a> document.</p>
 <p>For Qtopia 4 applications it is no longer recommended that the <tt>main()</tt> function be written explicitly by the programmer. Instead macros are used to declare the application entry point. These macros are designed so that your application can be built for different configurations (such as <a href="single-exec.html">singleexec</a>, <a href="quicklaunch.html">quicklaunch</a> and standard builds) without requiring any code changes. For details on declaring the entry point for your application see <a href="buildsystem/over-applications-1.html">Applications</a>.</p>
 <a name="linux-framebuffer-and-display-management"></a>
 <h3>Linux Framebuffer and Display Management</h3>
-<p>Qtopia Core provides screen drivers for the Linux Framebuffer, virtual framebuffer, transformed screens, VNC servers and multiple screens. Qtopia Core's default behavior is for each client application to render its contents into an off-screen buffer. The Qtopia server process copies the memory contents onto the screen. For an overview of this process see <a href="qtopiacore-architecture.html#graphics-rendering">Graphics Rendering</a> and <a href="qtopiacore-architecture.html#drawing-on-screen">Drawing on Screen</a>.</p>
-<p>The virtual framebuffer and VNC server drivers are used predominantly during development. When Qtopia is deployed on a device the Linux framebuffer, transformed screens or multi-screen drivers are typically used. The screen driver that Qtopia uses is specified in the <a href="qtopiacore-envvars.html#qws-display">QWS_DISPLAY</a> environment variable. Refer to <a href="qtopiacore-displaymanagement.html">Qtopia Core Display Management</a> for documentation on building screen drivers and how to specify which screen driver Qtopia should use.</p>
-<p>Most devices will use the Linux Framebuffer driver. The Qtopia Core document <a href="qtopiacore-testingframebuffer.html">Testing the Linux Framebuffer</a> includes a small test program that can be used to verify that the Linux Framebuffer is configured and works correctly.</p>
+<p>Qtopia Core provides screen drivers for the Linux Framebuffer, virtual framebuffer, transformed screens, VNC servers and multiple screens. Qtopia Core's default behavior is for each client application to render its contents into an off-screen buffer. The Qtopia server process copies the memory contents onto the screen. For an overview of this process see <a href="./qtopiacore-architecture.html">Graphics Rendering</a> and <a href="./qtopiacore-architecture.html">Drawing on Screen</a>.</p>
+<p>The virtual framebuffer and VNC server drivers are used predominantly during development. When Qtopia is deployed on a device the Linux framebuffer, transformed screens or multi-screen drivers are typically used. The screen driver that Qtopia uses is specified in the <a href="./qtopiacore-envvars.html">QWS_DISPLAY</a> environment variable. Refer to <a href="./qtopiacore-displaymanagement.html">Qtopia Core Display Management</a> for documentation on building screen drivers and how to specify which screen driver Qtopia should use.</p>
+<p>Most devices will use the Linux Framebuffer driver. The Qtopia Core document <a href="./qtopiacore-testingframebuffer.html">Testing the Linux Framebuffer</a> includes a small test program that can be used to verify that the Linux Framebuffer is configured and works correctly.</p>
 <p>Qtopia includes support for multiple screens and accelerated graphics drivers. For documentation on integrating these features refer to <a href="#multiple-screen-support">Multiple Screen Support</a> and <a href="#accelerated-graphics-driver">Accelerated Graphics Driver</a>.</p>
 <a name="fonts"></a>
 <h3>Fonts</h3>
-<p>Qtopia Core uses the <a href="qtopiacore-fonts.html#freetype-formats">FreeType 2</a> font engine to render fonts. In addition Qtopia Core also supports native prerendered fonts (<a href="qtopiacore-fonts.html#qt-prerendered-font-qpf2">QPF2</a>) and legacy prerendered fonts (<a href="qtopiacore-fonts.html#legacy-qt-prerendered-font-qpf">QPF</a>). For full details on the font formats supported by Qtopia Core see <a href="qtopiacore-fonts.html">Qtopia Core Fonts</a>.</p>
-<p>Qtopia Core ships with several fonts. The licensing terms for these fonts are described in <a href="licenses-fonts.html">Licenses for Fonts Used in Qtopia Core</a>.</p>
+<p>Qtopia Core uses the <a href="./qtopiacore-fonts.html">FreeType 2</a> font engine to render fonts. In addition Qtopia Core also supports native prerendered fonts (<a href="./qtopiacore-fonts.html">QPF2</a>) and legacy prerendered fonts (<a href="./qtopiacore-fonts.html">QPF</a>). For full details on the font formats supported by Qtopia Core see <a href="./qtopiacore-fonts.html">Qtopia Core Fonts</a>.</p>
+<p>Qtopia Core ships with several fonts. The licensing terms for these fonts are described in <a href="./licenses-fonts.html">Licenses for Fonts Used in Qtopia Core</a>.</p>
 <p>Qtopia selects the font size based on the size and resolution of the target display. Please refer to <a href="syscust-dpi.html">Setting the Display Size</a> which demonstrates how the actual font size is calculated.</p>
 <a name="keyboard-input-plug-ins"></a>
 <h3>Keyboard/Input plug-ins</h3>
-<p>Qtopia's keyboard handling is controlled by <a href="qtopiacore.html">Qtopia Core</a>. There are a few default keyboard drivers available: tty usb sl5000 yopy vr41xx qvfb</p>
-<p>A custom keyboard driver may be implemented through Qtopia's <a href="buildsystem/over-device-profiles-1.html">Device Configuration Profiles</a>, and documentation can be found for the class <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a>.</p>
+<p>Qtopia's keyboard handling is controlled by <a href="./qtopiacore.html">Qtopia Core</a>. There are a few default keyboard drivers available: tty usb sl5000 yopy vr41xx qvfb</p>
+<p>A custom keyboard driver may be implemented through Qtopia's <a href="buildsystem/over-device-profiles-1.html">Device Configuration Profiles</a>, and documentation can be found for the class <a href="./qwskeyboardhandler.html">QWSKeyboardHandler</a>.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Keyboard driver</th><th>Source</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>tty</td><td><tt>$QPEDIR/qtopiacore/qt/src/gui/embedded/qkbdtty_qws.cpp</tt></td><td>Standard tty keyboard</td></tr>
@@ -609,7 +672,7 @@
 <p>More information about Keyboard Plugins:</p>
 <ul>
 <li><a href="syscust-keypadarch.html">Keypad Architecture</a></li>
-<li><a href="qtopiacore-charinput.html">Qtopia Core Character Input</a></li>
+<li><a href="./qtopiacore-charinput.html">Qtopia Core Character Input</a></li>
 <li><a href="syscust-keypadbutt.html">Keypad Button Behavior</a></li>
 </ul>
 <a name="pointer-plugins"></a>
@@ -628,7 +691,7 @@
 <p>More information about Mouse Pointer plug-ins:</p>
 <ul>
 <li><a href="syscust-pointer.html">Mouse Pointer Handling</a></li>
-<li><a href="qtopiacore-pointer.html">Qtopia Core Pointer Handling</a></li>
+<li><a href="./qtopiacore-pointer.html">Qtopia Core Pointer Handling</a></li>
 <li><a href="tut-mouse-ptr.html">Mouse Pointer Calibration</a></li>
 </ul>
 <a name="accelerated-graphics-driver"></a>
@@ -636,12 +699,12 @@
 <p>Qtopia's display performance can be enhanced by the use of a hardware graphics accelerator.</p>
 <p>More information about Accelerated Graphics Drivers in Qtopia Core:</p>
 <ul>
-<li><a href="qtopiacore-displaymanagement.html">Qtopia Core Display Management</a></li>
-<li><a href="qtopiacore-svgalib.html">Accelerated Graphics Driver Example</a></li>
-<li><a href="qtopiacore-ahigl.html">OpenGL for Embedded Systems Example</a></li>
+<li><a href="./qtopiacore-displaymanagement.html">Qtopia Core Display Management</a></li>
+<li><a href="./qtopiacore-svgalib.html">Accelerated Graphics Driver Example</a></li>
+<li><a href="./qtopiacore-ahigl.html">OpenGL for Embedded Systems Example</a></li>
 </ul>
-<a name="setting-environment-variables"></a>
-<h3>Setting Environment Variables</h3>
+<a name="environment-variables"></a>
+<h3>Environment Variables</h3>
 <p>Qtopia makes use of a few environment variables. These are usually set by the Qtopia startup script.</p>
 <pre>    #!/bin/sh
     export QWS_DISPLAY=LinuxFb:mmWidth34:mmHeight44:0
@@ -652,7 +715,7 @@
 <p>Note that variables set in defaultbuttons.conf do not override variables set in the environment before running Qtopia.</p>
 <p>More Information on most Qtopia Core Environmental Variables:</p>
 <ul>
-<li><a href="qtopiacore-envvars.html">Qtopia Core Environment Variables</a></li>
+<li><a href="./qtopiacore-envvars.html">Qtopia Core Environment Variables</a></li>
 </ul>
 <p>In addition to the Qtopia Core specific environment variables mentioned above the following standard variables may be required:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -670,12 +733,12 @@
 <a name="qws-connection-timeout"></a>
 <h3>QWS connection timeout</h3>
 <p>The Qtopia server needs to launch processes during startup but it also needs to do it's own initializing which can cause the processes to die. This happens because of a 5 second timeout, QWS clients wait only 5 seconds for the server to respond after connecting to it's socket.</p>
-<p>To avoid this problem the server sets the <tt>QWS_CONNECTION_TIMEOUT</tt> variable to 30, extending the timeout to 30 seconds. This value was chosen after testing on the Greenphone. It can be overriden by setting the variable (see <a href="#setting-environment-variables">Setting Environment Variables</a> for how to do this).</p>
+<p>To avoid this problem the server sets the <tt>QWS_CONNECTION_TIMEOUT</tt> variable to 30, extending the timeout to 30 seconds. This value was chosen after testing on the Greenphone. It can be overriden by setting the variable (see <a href="#qtopia-environment-variables">Qtopia Environment Variables</a> for how to do this).</p>
 <a name="server-tasks"></a>
 <h3>Server Tasks</h3>
 <p>The Qtopia server application is structured as a collection of <a href="qtopiaserverapplication.html#qtopia-server-tasks">server tasks</a>. Ideally each task would perform a small, well-defined portion of work or functionality. Server tasks allow ODMs to easily customize Qtopia by extending, replacing and removing tasks from the Qtopia server application with little or no changes required to the Qtopia server source code. This is achieved by using <a href="#device-specific-configuration">device profiles</a> and the <tt>$QPEDIR/etc/Tasks.cfg</tt> configuration file. For information about particular server tasks refer to the <a href="groups.html#qtopia-server-classes">server task class documentation</a>.</p>
-<p>In most cases Qtopia server tasks are implemented as <a href="qobject.html">QObject</a> derived classes. An exception to this are functional tasks, which are implemented as static functions. The developer uses <a href="qtopiaserverapplication.html#QTOPIA_TASK">QTOPIA_TASK</a>() and <a href="qtopiaserverapplication.html#QTOPIA_STATIC_TASK">QTOPIA_STATIC_TASK</a>() macros to declare server tasks. For full details see the <a href="qtopiaserverapplication.html">QtopiaServerApplication</a> documentation. The following example demonstrates how to implement a server task. First the class is declared in the header file</p>
-<pre>        <span class="comment">// exampleservertask.h</span>
+<p>In most cases Qtopia server tasks are implemented as <a href="./qobject.html">QObject</a> derived classes. An exception to this are functional tasks, which are implemented as static functions. The developer uses <a href="qtopiaserverapplication.html#QTOPIA_TASK">QTOPIA_TASK</a>() and <a href="qtopiaserverapplication.html#QTOPIA_STATIC_TASK">QTOPIA_STATIC_TASK</a>() macros to declare server tasks. For full details see the <a href="qtopiaserverapplication.html">QtopiaServerApplication</a> documentation. The following example demonstrates how to implement a server task. First the class is declared in the header file</p>
+<pre>        <span class="comment">//</span> exampleservertask.h
         #include &lt;QObject&gt;
 
         class ExampleServerTask : public QObject
@@ -799,6 +862,9 @@
 </ul>
 </td></tr>
 </table></p>
+<a name="drm-integration"></a>
+<h4>DRM integration</h4>
+<p>Qtopia is able to handle Digital Rights Management. See <a href="docsys-drmintegr.html">Document System: DRM</a> for general details on how the document system handles DRM protected files and refer to <a href="syscust-drm.html">DRM Agent Integration</a> if more information on integrating a particular drm agent is required.</p>
 <a name="memory-management"></a>
 <h3>Memory management</h3>
 <a name="general-information"></a>
@@ -807,7 +873,7 @@
 <p>If it is necessary to debug various memory related problems, profiling tools like <tt>valgrind</tt> and <tt>gprof</tt> should be used to determine potential bottlenecks. The Qtopia documentation provides a quick <a href="syscust-perform.html">introduction</a> (using <tt>valgrind</tt> as an example) to how memory related performance issues might be detected.</p>
 <a name="out-of-memory-management"></a>
 <h4>Out of memory management</h4>
-<p>Qtopia 4.3 introduces the concept of an <a href="syscust-guide.html">Out-Of-Memory (OOM) management</a>. The Qtopia management system consists of four parts:</p>
+<p>Qtopia 4.3 introduces the concept of an <a href="syscust-oom.html">Out-Of-Memory (OOM) management</a>. The Qtopia management system consists of four parts:</p>
 <ol type="1">
 <li>OOM Data Manager</li>
 <li>Application Launcher integration</li>
@@ -876,6 +942,16 @@
 <tr valign="top" class="even"><td>Docked Keyboard</td><td><tt>$QPEDIR/src/plugins/inputmethods/dockedkeyboard</tt></td><td>The Docked Keyboard provides widget based input methods not unlike the Keyboard. However the difference is the presentation of the input widget. Using the same popup widget as the normal keyboard, this input method docks itself along side other widgets on the display (instead of on top of them), reducing the available display space for normal widgets.</td></tr>
 </table></p>
 <p>As stated earlier, Qtopia's input methods are reference implementations. Their purpose is to demonstrate and test certain capabilities of Qtopia's back-end implementation as well as providing sample code for new plug-in development. The <a href="tut-createim-compose.html">input method tutorial</a> describes the steps required for plug-in development.</p>
+<a name="sxe-integration"></a>
+<h3>SXE integration</h3>
+<p>Qtopia sandbox based security mechanism called the <a href="sxe.html">Safe Execution Environment (SXE)</a> Safe Execution Environment, which supports the download and secure execution of 3rd party native applications.</p>
+<p>The SXE consists of several major components working together in tandem.</p>
+<ul>
+<li><a href="sxe-pkgmgr.html">Package Manager</a></li>
+<li><a href="sxe-pkgmgr-profiles.html">Application level policy</a></li>
+<li><a href="syscust-sxe.html">OS level policy using LIDS</a></li>
+<li><a href="sxe-sxemonitor.html">Security Monitor</a>(aka SxeMonitor)</li>
+</ul>
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
 <p>Qtopia can be translated into several languages. By default, Qtopia only provides an English user interface. However user interfaces have been designed and tested with a variety of European and Asian languages to ensure that Qtopia can handle the various layout and space issues caused by most languages.</p>
@@ -886,18 +962,29 @@
 <li><a href="qtopiadesktop/overviews.html">Other build system related internationalization tasks</a></li>
 </ul>
 <p>It is possible to purchase translations for selected languages from Trolltech. For more details please contact <a href="mailto:sales@trolltech.com">sales@trolltech.com</a>.</p>
-<p>The number of supported languages is limited by Qt. Please consult the <a href="i18n.html">Internationalization with Qt</a> guide to obtain an overview.</p>
+<p>The number of supported languages is limited by Qt. Please consult the <a href="./i18n.html">Internationalization with Qt</a> guide to obtain an overview.</p>
 <a name="application-services"></a>
 <h3>Application services</h3>
 <p>Services are a standardized way of accessing functionality supplied by other applications. Any application can utilize these services via the <a href="ipc.html">QtopiaService*</a> classes. Messages between applications are delivered via <a href="qtopiaipc.html">Qtopia IPC</a>.</p>
 <p>Qtopia services are documented in the <a href="services.html">service documentation</a>. It explains what services are provided by Qtopia, how they can be accessed and the steps required to add new services. The various meta-information describing a service can be found in <tt>$QPEDIR/services</tt> and each service is documented like any other Qtopia class (see the <a href="clockservice.html">ClockService</a> as an example).</p>
-<a name="environment-variables"></a>
-<h3>Environment variables</h3>
+<a name="qtopia-environment-variables"></a>
+<h3>Qtopia Environment variables</h3>
 <p>Qtopia uses various environmental variables to facilitate various settings, which are documented in:</p>
 <ul>
-<li><a href="qtopiacore-envvars.html">Qtopia Core Environment Variables</a></li>
+<li><a href="./qtopiacore-envvars.html">Qtopia Core Environment Variables</a></li>
 <li><a href="running-qtopia.html#environment-settings-to-run-qtopia">Environment Settings to Run Qtopia</a></li>
 </ul>
+<p>In addition to Qtopia Core's environment variables Qtopia uses the following variables to further specify its behavior:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Variable</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><b><a href="custom-h.html#QTOPIA_PHONE_DEVICE">QTOPIA_PHONE_DEVICE</a></b></td><td>Specifies the phone device and speed. Qtopia will use a default device if this variable is not set. The default value is set in <tt>custom.h</tt>.<p>See also <a href="#modem-integration">Modem Integration</a> and <a href="running-qtopia.html#connecting-qtopia-phone-to-the-phone-device">Using a phone device</a></p>
+</td></tr>
+<tr valign="top" class="even"><td><b>QTOPIA_PHONE_DUMMY</b></td><td>If this Variable is set to <tt>1</tt> Qtopia uses a telephony dummy implementation which does not require a real serial device. However its capabilities are limited as well.</td></tr>
+<tr valign="top" class="odd"><td><b><a href="custom-h.html#QTOPIA_PHONE_MUX">QTOPIA_PHONE_MUX</a></b></td><td>If this variable is set to <tt>no</tt> disables multiplexing in Qtopia.<p>See also <a href="syscust-gsm.html">GSM Modem Integration</a></p>
+</td></tr>
+<tr valign="top" class="even"><td><b><a href="custom-h.html#QTOPIA_PHONE_VENDOR">QTOPIA_PHONE_VENDOR</a></b></td><td>Specifies the multiplexer plug-in that Qtopia uses.<p>See also <a href="tut-multiplexing.html#introduction">Multiplexer plug-in tutorial</a></p>
+</td></tr>
+</table></p>
 <a name="miscellaneous-steps"></a>
 <h3>Miscellaneous steps</h3>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -906,13 +993,84 @@
 <tr valign="top" class="even"><td><a href="syscust-time.html">Setting time on a device</a></td><td>Qtopia requires <tt>/sbin/hwclock</tt> to update the system time and zone information for time conversion purposes.</td></tr>
 <tr valign="top" class="odd"><td><a href="syscust-hardware.html#removable-media-and-devices">Removable Media and Devices</a></td><td>Qtopia must be notified when a removable media or a PCMCIA card is connected to the device. Note that the <a href="stabmonitor.html">StabMonitor</a> server task can provide such notifications for PCMCIA cards (for details refer to the class documentation).</td></tr>
 </table></p>
+<a name="qtopia-phone-edition"></a>
+<h2>Qtopia Phone Edition</h2>
+<a name="telephony"></a>
+<h3>Telephony</h3>
+<p>Qtopia Phone Edition provides Telephony support that enables Qtopia devices to use GSM and Voice over IP (VoIP) functionality. The <a href="qtopia-telephony.html">Telephony Documentation</a> provides the main entry page into the telephony parts of Qtopia.</p>
+<a name="modem-integration"></a>
+<h4>Modem Integration</h4>
+<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony-modem.html">Qtopia Phone Modem Library</a>. The process of implementing a vendor-specific phone-vendor plug-in and multiplexer plug-in is covered in <a href="syscust-gsm.html">GSM Modem Integration</a> and <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a> respectively. Before starting it may be necessary to configure the Linux kernel to support the modem device. See <a href="#at-modem">AT Modem</a> for details on what is required for modems connected via a serial interface.</p>
+<p>The <tt>QTOPIA_PHONE_DEVICE</tt> macro in <tt>custom.h</tt> is used to specify the modem device. <tt>QTOPIA_PHONE_DEVICE</tt> can also be set as an environment variable. The format of <tt>QTOPIA_PHONE_DEVICE</tt> is</p>
+<pre>        &lt;device&gt;:&lt;baud rate&gt;</pre>
+<p>For example to specify <tt>/dev/ttyS0</tt> as the modem device with a baud rate of 115200, add the following preprocessor define to <tt>custom.h</tt></p>
+<pre>        #define QTOPIA_PHONE_DEVICE &quot;/dev/ttyS0:115200&quot;</pre>
+<p>or alternatively the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable could be set. For Bourne compatible shells</p>
+<pre>        export QTOPIA_PHONE_DEVICE=&quot;/dev/ttyS0:115200&quot;</pre>
 <a name="voip-integration"></a>
 <h4>VoIP integration</h4>
 <p>Qtopia's main telephony components are based on GSM/UMTS networks. However many other communication bearers require similar if not even identicial infrastructure support. Therefore new bearers can easily be integrated into Qtopia's telephony API. In fact Qtopia's higher API layers are almost agnostic in regards to the actual communication protocol.</p>
 <p>One additional communication bearer that is directly supported by Qtopia is Voice over IP (VoIP). The <a href="voip-overview.html">VoIP Overview</a> describes the main VoIP components used by Qtopia's reference implementation and demonstrates how they interact with Qtopia's phone user interface. The reference implementation uses the open source library <tt>libdissipate2</tt> which provides simple SIP functionality.</p>
 <p>If the hardware platform already features its own SIP implementation Qtopia's VoIP implementation can easily be replaced as described by Qtopia's general <a href="syscust-voip.html">VoIP Integration</a> guide. It describes the necessary steps to integrate new SIP clients as well as new telephony services in general.</p>
-<a name="phone-keypad-lp"></a>
-<h3>Phone keypad (LP)</h3>
+<a name="phone-keypad"></a>
+<h3>Phone keypad</h3>
+<p>Qtopia's defaultbuttons.conf file provides integrators a way to map the devices keypad to certain actions, map out characters to be generated and specify details for Qtopia's ui. The relevant sections:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Section</th><th>Details</th><th>Possible settings.</th></tr></thead>
+<tr valign="top" class="odd"><td>[Translation]</td><td></td><td><ul>
+<li>File=</li>
+<li>Context=</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>[Menu]</td><td>Specifies details for Qtopia's main 'grid'</td><td><ul>
+<li>Rows=&lt;number&gt;</li>
+<li>Columns=&lt;number&gt;</li>
+<li>Map=&lt;characters(123456789*0#)&gt; - Maps grid to keypad shortcuts.</li>
+<li>Default=&lt;number&gt; - Which in map should Qtopia default to.</li>
+<li>&lt;number (from Map)&gt;=&lt;apps.desktop&gt; - Specifies an application desktop file to handle.</li>
+<li>Animator=Bounce</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>[SoftKeys]</td><td>Provides assignments for Qtopia softkeys at the botton of the screen</td><td><ul>
+<li>Count=&lt;number&gt; - number of buttons to display</li>
+<li>KeyX=&lt;Qt Key&gt; - assign Qt Keycode to this button. Where X is a number starting with 0. Possible codes: Context1, Select, Back.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>[SystemButtons]</td><td>Provides Qt keycode assignments for physical buttons.</td><td><ul>
+<li>Count=&lt;number&gt; - number of physical buttons</li>
+<li>KeyX=&lt;Qt keycode&gt; - assign Qt Keycode to this button. Where X is a number starting with 0. Possible codes: Context1, Select, Back, Call, Hangup</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>[TextButtons]</td><td>Maps physical buttons to hold and tab actions.</td><td><ul>
+<li>Buttons=&lt;characters(123456789*0#)&gt; - which buttons to map</li>
+<li>HoldX=&lt;'Y&gt; - Specifies hold actions, where X is button specifier and Y is a character to send, ie. 0-9,*,# or mode|shift|symbol</li>
+<li>TapX=&lt;&quot;string&quot;&gt; - Specifies tap actions, where X is button specifier, and string is characters, i.e &quot;wxyz9&quot;</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>[LocaleTextButtons]</td><td></td><td><ul>
+<li>TapX[]=&lt;'string&gt; - Specifies tap action, where X is button specifier and string is characters</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>[PhoneTextButtons]</td><td></td><td><ul>
+<li>Buttons=&lt;button specifier&gt;</li>
+<li>TapX=&lt;characters&gt; - Specifies tap action, where X is button specifier</li>
+<li>HoldX=&lt;characters&gt; - Specifies hold actions, where X is buttons specifier</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>[Device]</td><td>Provides device information.</td><td>PrimaryInput=(Keypad|Touchscreen) - Tells Qtopia to use keypad or touchscreen.</td></tr>
+<tr valign="top" class="odd"><td>[Button]</td><td>Tells Qtopia number of physical buttons to provide mapping for.</td><td>Count=&lt;number&gt;</td></tr>
+<tr valign="top" class="even"><td>[ButtonX]</td><td>Specifies a physical button and mapping its actions. X being a number starting at 0 to the number specified in [Button]/Count.</td><td><ul>
+<li>Name=&lt;string&gt;</li>
+<li>Key=&lt;Qt Key&gt;, i.e&#x2e; F7</li>
+<li>HeldActionService=&lt;Service&gt;</li>
+<li>HeldActionMessage=&lt;QCop message&gt;</li>
+<li>PressedActionService=&lt;Service&gt;</li>
+<li>PressedActionMessage=&lt;QCop message&gt;</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>[Environment]</td><td>Specifies environmental configuration.</td><td><a href="./qtopiacore-envvars.html">QWS_DISPLAY</a>=&lt;gfx driver&gt;&lt;:driver specific options&gt;&lt;:display number&gt;</td></tr>
+<tr valign="top" class="even"><td>[<a href="inputmethods.html">InputMethods</a>]</td><td>Specifies default InputMethod to be used</td><td>DefaultIM=&lt;string:Identifier&gt;</td></tr>
+</table></p>
 <a name="messaging"></a>
 <h3>Messaging</h3>
 <p>Qtopia Phone Edition provides Messaging functionality that enables Qtopia devices to support SMS, MMS and electronic mail messaging. The <a href="qtopia-messaging.html">Messaging Documention</a> provides the main entry page into the messaging parts of Qtopia.</p>
@@ -951,7 +1109,8 @@
 <a name="running-qtopia"></a>
 <h2>Running Qtopia</h2>
 <p>The <a href="running-qtopia.html">Running Qtopia</a> reference documentation describes how to run Qtopia on desktop machines as well as running Qtopia on a target device (directly flashed onto the device or via NFS).</p>
-<p>The Qtopia Core documentation also contains a <a href="qtopiacore-running.html#command-line-options">Running Qtopia Core Applications</a> help which shows the qws command line supported by Qtopia Core.</p>
+<p>In order to test Qtopia Phone functionality Qtopia provides a <a href="running-qtopia.html#connecting-qtopia-phone-to-the-phone-device">Phone simulator</a> (see <tt>$QTOPIA_DEPOT_PATH/src/tools/phonesim</tt>) which simulates a significant subset of the GSM 27.007 AT command set. This may be used if a real modem is not available for testing purposes.</p>
+<p>The Qtopia Core documentation also contains a <a href="./qtopiacore-running.html">Running Qtopia Core Applications</a> help which shows the qws command line supported by Qtopia Core.</p>
 <a name="building-and-running-outside-of-qtopia-build-tree"></a>
 <h3>Building and running outside of Qtopia build tree</h3>
 <p>In addition to standard Qtopia applications and libraries which are already incorporated into the build system it may be necessary to add more (including 3rdparty) applications to a Qtopia build. For this purpose the Qtopia build system provides qtopiamake which allows development from outside of the main build tree. Please refer to the following documents for further information:</p>
@@ -969,9 +1128,9 @@
 <h3>UI customization</h3>
 <a name="styles"></a>
 <h4>Styles</h4>
-<p>Qtopia uses the <a href="qstyle.html">Qt Style framework</a> to define the look and feel of the common widgets used by Qtopia applications. Qtopia provides a default style, Qtopia, which is implemented in <a href="qphonestyle.html">QPhoneStyle</a> and <a href="qtopiastyle.html">QtopiaStyle</a>. The look and feel of Qtopia applications can be changed by implementing new styles. New styles are created by deriving new classes from <a href="qstyle.html">QStyle</a>. Refer to <a href="qstyle.html#creating-a-custom-style">Creating a custom style</a> and <a href="widgets-styles.html">Styles Example</a> documentation on creating custom styles. Custom styles are loaded using the <a href="plugins-howto.html">plug-in system</a>. For details on creating a style plug-in and registering the custom style with the <a href="qstylefactory.html">QStyleFactory</a> refer to <a href="plugins-howto.html#the-higher-level-api-writing-qt-extensions">Writing Qt Extensions</a>.</p>
-<p>If your device will be used with both left-to-right and right-to-left layouts you should consider the <a href="qstyle.html#right-to-left-desktops">implications</a> this has when designing custom styles.</p>
-<p>When creating custom widgets it is important to make them <a href="qstyle.html#developing-style-aware-custom-widgets">style-aware</a>, doing so will allow you to maintain a consistent look and feel.</p>
+<p>Qtopia uses the <a href="./qstyle.html">Qt Style framework</a> to define the look and feel of the common widgets used by Qtopia applications. Qtopia provides a default style, Qtopia, which is implemented in <a href="qphonestyle.html">QPhoneStyle</a> and <a href="qtopiastyle.html">QtopiaStyle</a>. The look and feel of Qtopia applications can be changed by implementing new styles. New styles are created by deriving new classes from <a href="./qstyle.html">QStyle</a>. Refer to <a href="./qstyle.html">Creating a custom style</a> and <a href="./widgets-styles.html">Styles Example</a> documentation on creating custom styles. Custom styles are loaded using the <a href="./plugins-howto.html">plug-in system</a>. For details on creating a style plug-in and registering the custom style with the <a href="./qstylefactory.html">QStyleFactory</a> refer to <a href="./plugins-howto.html">Writing Qt Extensions</a>.</p>
+<p>If your device will be used with both left-to-right and right-to-left layouts you should consider the <a href="./qstyle.html">implications</a> this has when designing custom styles.</p>
+<p>When creating custom widgets it is important to make them <a href="./qstyle.html">style-aware</a>, doing so will allow you to maintain a consistent look and feel.</p>
 <p>In Qtopia, styles are linked to themes, which the user can select in the Appearance Settings application. The following segment of <tt>$QPEDIR/etc/themes/qtopia.conf</tt> demonstrates how a widget style is associated with a given theme. In this example the Qtopia style is used when the user selects the Qtopia theme.</p>
 <pre>        [Theme]
         Name[] = Qtopia
@@ -1011,8 +1170,8 @@
 <p>See also <a href="qdeviceindicators.html">QDeviceIndicators</a> and <a href="qvaluespaceitem.html">QValueSpaceItem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

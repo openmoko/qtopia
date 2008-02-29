@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,7 +31,7 @@ class QAbstractDialerScreen : public QWidget
 Q_OBJECT
 public:
     QAbstractDialerScreen(QWidget *parent = 0, Qt::WFlags f = 0)
-    : QWidget(parent, f) {}
+    : QWidget(parent, f) { setObjectName( "dialer" ); }
 
     virtual QString digits() const = 0;
 

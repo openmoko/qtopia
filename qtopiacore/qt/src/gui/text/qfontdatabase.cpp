@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -70,6 +68,8 @@
 #  define for if(0){}else for
 #endif
 
+
+extern int qt_defaultDpiY(); // in qfont.cpp
 
 Q_GUI_EXPORT bool qt_enable_test_font = false;
 
@@ -1669,7 +1669,7 @@ QList<int> QFontDatabase::pointSizes(const QString &family,
 #ifdef Q_WS_X11
     int dpi = QX11Info::appDpiY();
 #else
-    const int dpi = 72; // embedded
+    const int dpi = qt_defaultDpiY(); // embedded
 #endif
 
     for (int j = 0; j < fam->count; j++) {
@@ -1686,7 +1686,7 @@ QList<int> QFontDatabase::pointSizes(const QString &family,
                 const QtFontSize *size = style->pixelSizes + l;
 
                 if (size->pixelSize != 0 && size->pixelSize != USHRT_MAX) {
-                    const uint pointSize = qRound(size->pixelSize * dpi / 72.);
+                    const uint pointSize = qRound(size->pixelSize * 72.0 / dpi);
                     if (! sizes.contains(pointSize))
                         sizes.append(pointSize);
                 }
@@ -1772,8 +1772,9 @@ QList<int> QFontDatabase::smoothSizes(const QString &family,
 #ifdef Q_WS_X11
     int dpi = QX11Info::appDpiY();
 #else
-    const int dpi = 72; // embedded
+    const int dpi = qt_defaultDpiY(); // embedded
 #endif
+
     for (int j = 0; j < fam->count; j++) {
         QtFontFoundry *foundry = fam->foundries[j];
         if (foundryName.isEmpty() || foundry->name.compare(foundryName, Qt::CaseInsensitive) == 0) {
@@ -1788,7 +1789,7 @@ QList<int> QFontDatabase::smoothSizes(const QString &family,
                 const QtFontSize *size = style->pixelSizes + l;
 
                 if (size->pixelSize != 0 && size->pixelSize != USHRT_MAX) {
-                    const uint pointSize = qRound(size->pixelSize * dpi / 72.);
+                    const uint pointSize = qRound(size->pixelSize * 72.0 / dpi);
                     if (! sizes.contains(pointSize))
                         sizes.append(pointSize);
                 }

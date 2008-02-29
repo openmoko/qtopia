@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -115,6 +115,7 @@ void QProgressDialog::reset()
 
 const QString AbstractPackageController::INFORMATION_FILE = "control";
 const QString AbstractPackageController::PACKAGE_SUMMARY_FILE = "packages.list";
+const QString AbstractPackageController::INSTALLED_INFO_FILES_LOC = Qtopia::packagePath() + "/controls";
 
 /**
   \internal
@@ -158,25 +159,7 @@ AbstractPackageController::~AbstractPackageController()
 
 void AbstractPackageController::setPackageFilter( const QList<InstallControl::PackageInfo> &filter )
 {
-    foreach ( InstallControl::PackageInfo pkg, filteredOutPkgList )
-    {
-        if ( !filter.contains( pkg ))
-        {
-            filteredOutPkgList.removeAll( pkg );
-            pkgList.append( pkg );
-            qSort( pkgList );
-            qLog(Package) << pkg.name << "is no longer filtered out";
-        }
-    }
-    foreach ( InstallControl::PackageInfo pkg, pkgList )
-    {
-        if ( filter.contains( pkg ))
-        {
-            filteredOutPkgList.append( pkg );
-            pkgList.removeAll( pkg );
-            qLog(Package) << pkg.name << "is now filtered out";
-        }
-    }
+    filteredOutPkgList = filter;
 }
 
 QString AbstractPackageController::packageDetails( int pkgId ) const
@@ -192,17 +175,24 @@ QString AbstractPackageController::packageDetails( int pkgId ) const
                                QT_TRANSLATE_NOOP("PackageView", "Trusted:" )
                              };
     Q_UNUSED( dummyStr );
-
-    return  tr( "Name:" ) + QLatin1String(" ") + pkg.name + "<br>" +
-            tr( "Description:" ) + QLatin1String(" ")+ pkg.description + "<br>" +
-            tr( "Installation Size:" )  + QLatin1String(" ")+ pkg.installedSize + "<br>" +
-            tr( "MD5Sum:" ) + QLatin1String(" ")+ pkg.md5Sum + "<br>"
+    QString str = tr( "Name:" ) + QLatin1String(" ") + pkg.name + "<br>" +
+                  tr( "Description:" ) + QLatin1String(" ")+ pkg.description + "<br>" +
+                  tr( "Installation Size:" )  + QLatin1String(" ")+ pkg.installedSize + "<br>" +
+                  tr( "MD5Sum:" ) + QLatin1String(" ")+ pkg.md5Sum + "<br>";
 #ifndef QT_NO_SXE
-            + tr( "Capabilities:" ) + QLatin1String(" ") + DomainInfo::explain( pkg.domain, pkg.name );
-#else
-            ;
+    if ( DomainInfo::hasSensitiveDomains(pkg.domain) )
+    {
+        str += "<font color=\"#0000FF\">"; 
+        str += QCoreApplication::translate( "PackageView","The package <font color=\"#0000FF\">%1</font> <b>cannot be installed</b> "
+                                            "as it utilizes protected resources" ).arg( pkg.name );
+        str += "</font>";
+    }
+    else 
+    {
+        str += tr( "Capabilities:" ) + QLatin1String(" ") + DomainInfo::explain( pkg.domain, pkg.name );
+    }
 #endif
-
+    return str;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -319,7 +309,6 @@ NetworkPackageController::~NetworkPackageController()
 
 void NetworkPackageController::setNetworkServer( const QString &s )
 {
-    if ( currentNetworkServer == s ) return;
     currentNetworkServer = s;
     int rows = pkgList.count();
     PackageModel *pm = qobject_cast<PackageModel *>( parent() );
@@ -432,6 +421,16 @@ void NetworkPackageController::install( int packageI )
         return;
     }
 
+    if ( InstalledPackageScanner::isPackageInstalled(pkgList[packageI]) )
+    {
+        QString simpleError = QObject::tr( "Package already installed" );
+        QString detailedError = QString("NetworkPackageController::install:- "
+                    "Package already installed name: %1, md5Sum %2")
+                    .arg(pkgList[packageI].name).arg( pkgList[packageI].md5Sum );
+        reporter.reportError( simpleError, detailedError );
+        return;
+    }
+
     qLog(Package) << "installing network package" << packageI;
     qLog(Package) << "\t:" << pkgList[packageI].packageFile << "bytes";
 
@@ -485,8 +484,11 @@ void NetworkPackageController::packageFetchComplete()
                 pi = pkgList[i];
                 emit updated();
                 emit packageInstalled( pi );
+            } else
+            {
+                SimpleErrorReporter errorReporter( SimpleErrorReporter::Uninstall, pkgList[i].name);
+                installControl->uninstallPackage( pkgList[i], &errorReporter );
             }
-
         }
         delete hf;
         hf = 0;
@@ -496,6 +498,7 @@ void NetworkPackageController::packageFetchComplete()
         qWarning( "HttpFetcher was deleted early!" );
 
     }
+    QFile::remove( InstallControl::downloadedFileLoc() );
     progressDisplay->reset();
 }
 
@@ -519,7 +522,7 @@ InstalledPackageController::~InstalledPackageController()
 
 void InstalledPackageController::initialize()
 {
-    reloadInstalledLocations( QStringList( Qtopia::packagePath() + "controls/" ));
+    reloadInstalledLocations( QStringList( INSTALLED_INFO_FILES_LOC ));
 }
 
 /*!

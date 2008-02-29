@@ -8,4 +8,4 @@ pkg.desc=This is a command line tool useful to enumerate the Document paths know
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=GPL
-pkg.domain=
+pkg.domain=trusted

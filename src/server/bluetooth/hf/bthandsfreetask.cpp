@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,7 +22,7 @@
 #include "bthandsfreetask.h"
 #include "qtopiaserverapplication.h"
 #include "qbluetoothhfservice_p.h"
-#include "bluetooth/btaudiovolumemanager_p.h"
+#include "btaudiovolumemanager.h"
 #include <qtopialog.h>
 
 /*!

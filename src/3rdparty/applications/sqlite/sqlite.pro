@@ -1,4 +1,5 @@
 qtopia_project(desktop external app)
+license(FREEWARE)
 include(../../libraries/sqlite/sqlite.pro)
 CONFIG-=syncqtopia
 INSTALLS-=sdk_headers
@@ -7,5 +8,6 @@ VPATH+=../../libraries/sqlite
 
 SOURCES+=\
     shell.c
-LIBS+=-lpthread
+
+depends(3rdparty/libraries/pthread)
 

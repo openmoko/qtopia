@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
     **
     ** This file is part of the Opensource Edition of the Qtopia Toolkit.
     **
@@ -72,13 +72,13 @@
         static const int iconSize(qApp-&gt;style()-&gt;pixelMetric(QStyle::PM_ListViewIconSize));
         static const int smallIconSize(qApp-&gt;style()-&gt;pixelMetric(QStyle::PM_SmallIconSize));
 
-        <span class="comment">// Find the paintable elements of the item</span>
+        <span class="comment">//</span> Find the paintable elements of the item
         QIcon icon(qvariant_cast&lt;QIcon&gt;(index.model()-&gt;data(index, Qt::DecorationRole)));
         QIcon typeIcon(qvariant_cast&lt;QIcon&gt;(index.model()-&gt;data(index, SecondaryDecorationRole)));
         QString headerText(qvariant_cast&lt;QString&gt;(index.model()-&gt;data(index, Qt::DisplayRole)));
         QString subText(qvariant_cast&lt;QString&gt;(index.model()-&gt;data(index, SubLabelRole)));
 
-        <span class="comment">// Find the painting properties we need</span>
+        <span class="comment">//</span> Find the painting properties we need
         const bool sel((option.state &amp; QStyle::State_Selected) == QStyle::State_Selected);
         QBrush baseBrush(sel ? option.palette.highlight() : option.palette.base());
         QBrush textBrush(sel ? option.palette.highlightedText() : option.palette.text());
@@ -92,7 +92,7 @@
         painter-&gt;save();
         painter-&gt;setClipRect(option.rect);
 
-        <span class="comment">// Draw the background gradient if selected</span>
+        <span class="comment">//</span> Draw the background gradient if selected
         if (sel)
         {
             QPalette::ColorGroup cg((option.state &amp; QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled);
@@ -124,7 +124,7 @@
             painter-&gt;drawPixmap(option.rect.topLeft(), pm);
         }
 
-        <span class="comment">// Find the icon rectangles for this item</span>
+        <span class="comment">//</span> Find the icon rectangles for this item
         QRect textRect(option.rect);
         QRect iconRect(option.rect);
         QRect secondaryRect(option.rect);
@@ -146,7 +146,7 @@
             textRect.setRight(secondaryRect.left());
         }
 
-        <span class="comment">// Find the text rectangles</span>
+        <span class="comment">//</span> Find the text rectangles
         QFontMetrics fm(main);
         QRect headerRect(textRect);
         headerRect.setTop(headerRect.top() + 1);
@@ -157,14 +157,14 @@
         subRect.setTop(subRect.bottom() - sfm.lineSpacing() + 1);
         subRect.setHeight(sfm.lineSpacing());
 
-        <span class="comment">// Paint the icons</span>
+        <span class="comment">//</span> Paint the icons
         QPoint drawOffset(iconRect.left() + ((iconRect.width() - iconSize)/2), iconRect.top() + ((iconRect.height() - iconSize) / 2));
         painter-&gt;drawPixmap(drawOffset, icon.pixmap(QSize(iconSize, iconSize)));
 
         drawOffset = QPoint(secondaryRect.left() + ((secondaryRect.width() - smallIconSize)/2), secondaryRect.top() + ((secondaryRect.height() - smallIconSize) / 2));
         painter-&gt;drawPixmap(drawOffset, typeIcon.pixmap(QSize(smallIconSize, smallIconSize)));
 
-        <span class="comment">// Paint the text elements</span>
+        <span class="comment">//</span> Paint the text elements
         painter-&gt;setBrush(baseBrush);
         painter-&gt;setPen(textBrush.color());
 
@@ -178,8 +178,8 @@
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

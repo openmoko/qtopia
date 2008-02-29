@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qrubberband.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/widgets/qrubberband.cpp -->
 <head>
   <title>Qt 4.3: QRubberBand Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -87,8 +87,8 @@
  void Widget::mouseReleaseEvent(QMouseEvent *event)
  {
      rubberBand-&gt;hide();
-     <span class="comment">// determine selection, for example using QRect::intersects()</span>
-     <span class="comment">// and QRect::contains().</span>
+     <span class="comment">//</span> determine selection, for example using QRect::intersects()
+     <span class="comment">//</span> and QRect::contains().
  }</pre>
 <p>If you pass a parent to QRubberBand's constructor, the rubber band will display only inside its parent, but stays on top of other child widgets. If no parent is passed, QRubberBand will act as a top-level widget.</p>
 <p>Call <a href="qwidget.html#show">show</a>() to make the rubber band visible; also when the rubber band is not a top-level. Hiding or destroying the widget will make the rubber band disappear. The rubber band can be a <a href="qrubberband.html#Shape-enum">Rectangle</a> or a <a href="qrubberband.html#Shape-enum">Line</a> (vertical or horizontal), depending on the <a href="qrubberband.html#shape">shape</a>() it was given when constructed.</p>
@@ -135,8 +135,8 @@
 <p>Returns the shape of this rubber band. The shape can only be set upon construction.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

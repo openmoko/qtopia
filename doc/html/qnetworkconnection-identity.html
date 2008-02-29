@@ -44,7 +44,7 @@
 <p>Each network connection has a user visible <a href="qnetworkconnection-identity.html#name">name</a>(), is associated to a <a href="qnetworkconnection-identity.html#deviceHandle">deviceHandle</a>() which identifies the network device and a <a href="qnetworkconnection-identity.html#type">type</a>(). The following example deomstrates the most common way how network identities are obtain:</p>
 <pre>    QNetworkConnectionManager manager;
     QNetworkConnection::Identities idents = manager.connections();
-    QNetworkDevice dev( idents.at(0) ); <span class="comment">//pick first</span>
+    QNetworkDevice dev( idents.at(0) ); <span class="comment">//</span>pick first
     QtopiaNetworkInterface::Status state = dev.state();</pre>
 <p>For more information about Qtopia's network API see <a href="qnetworkdevice.html">QNetworkDevice</a>.</p>
 <p>See also <a href="qnetworkconnection.html">QNetworkConnection</a>.</p>
@@ -56,14 +56,14 @@
 <p>Constructs a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.Identity"></a>Identity::~Identity ()</h3>
 <p>Destroys this <a href="qnetworkconnection-identity.html">QNetworkConnection::Identity</a> instance.</p>
-<h3 class="fn"><a name="deviceHandle"></a><a href="qstring.html">QString</a> Identity::deviceHandle () const</h3>
+<h3 class="fn"><a name="deviceHandle"></a><a href="./qstring.html">QString</a> Identity::deviceHandle () const</h3>
 <p>Returns the handle for this network connection. The handle allows the identification of the network device associated to this identity.</p>
 <p>Note: Several identities can have the same handle such as wireless LAN or Bluetooth PAN connections which can be managed by the same network device. This means that no two network connections with the same identity handle can be online/connected at the same time.</p>
 <h3 class="fn"><a name="isValid"></a>bool Identity::isValid () const</h3>
 <p>Returns true if this Identity object can be mapped to a valid network configuration.</p>
 <p>A network connection identity becomes invalid when the associated network configuration is deleted.</p>
 <p>Note: note The network connection identity remains the same if the configuration has been edited only. This means that the actual target network and/or the name (as returned by <a href="qnetworkconnection-identity.html#name">QNetworkConnection::Identity::name</a>() ) may change during the life time of this object.</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> Identity::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> Identity::name () const</h3>
 <p>Returns the user visibile name of the network connection. The returned name is empty if this identity is invalid.</p>
 <p>See also <a href="qnetworkconnection-identity.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="type"></a><a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> Identity::type () const</h3>
@@ -76,8 +76,8 @@
 <p>Returns true if this identityis equal to <i>other</i>. Equality means all the fields are equivalent.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -34,7 +34,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="qhash.html#QHash">QHash</a></b> ()</li>
+<li><div class="fn"/><b><a href="qhash.html#QHashx">QHash</a></b> ()</li>
 <li><div class="fn"/><b><a href="qhash.html#QHash-2">QHash</a></b> ( const QHash&lt;Key, T&gt; &amp; <i>other</i> )</li>
 <li><div class="fn"/><b><a href="qhash.html#dtor.QHash">~QHash</a></b> ()</li>
 <li><div class="fn"/>iterator <b><a href="qhash.html#begin">begin</a></b> ()</li>
@@ -80,8 +80,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>uint <b><a href="qhash.html#qHashx">qHash</a></b> ( char <i>key</i> )</li>
-<li><div class="fn"/>uint <b><a href="qhash.html#qHash-4">qHash</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>key</i> )</li>
+<li><div class="fn"/>uint <b><a href="qhash.html#qHash">qHash</a></b> ( char <i>key</i> )</li>
+<li><div class="fn"/>uint <b><a href="qhash.html#qHash-9">qHash</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>key</i> )</li>
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-10">qHash</a></b> ( uchar <i>key</i> )</li>
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-11">qHash</a></b> ( signed char <i>key</i> )</li>
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-12">qHash</a></b> ( ushort <i>key</i> )</li>
@@ -97,8 +97,8 @@
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-22">qHash</a></b> ( const QBitArray &amp; <i>key</i> )</li>
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-23">qHash</a></b> ( const QString &amp; <i>key</i> )</li>
 <li><div class="fn"/>uint <b><a href="qhash.html#qHash-24">qHash</a></b> ( const T * <i>key</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qhash.html#operator-lt-lt-10">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QHash&lt;Key, T&gt; &amp; <i>hash</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qhash.html#operator-gt-gt-10">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QHash&lt;Key, T&gt; &amp; <i>hash</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qhash.html#operator-lt-lt-51">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QHash&lt;Key, T&gt; &amp; <i>hash</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qhash.html#operator-gt-gt-36">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QHash&lt;Key, T&gt; &amp; <i>hash</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -109,7 +109,7 @@
 <ul>
 <li>QHash provides faster lookups than <a href="qmap.html">QMap</a>. (See <a href="containers.html#algorithmic-complexity">Algorithmic Complexity</a> for details.)</li>
 <li>When iterating over a <a href="qmap.html">QMap</a>, the items are always sorted by key. With QHash, the items are arbitrarily ordered.</li>
-<li>The key type of a <a href="qmap.html">QMap</a> must provide operator&lt;(). The key type of a QHash must provide operator==() and a global <a href="qhash.html#qHashx">qHash</a>(Key) function.</li>
+<li>The key type of a <a href="qmap.html">QMap</a> must provide operator&lt;(). The key type of a QHash must provide operator==() and a global <a href="qhash.html#qHash">qHash</a>(Key) function.</li>
 </ul>
 <p>Here's an example QHash with <a href="qstring.html">QString</a> keys and <tt>int</tt> values:</p>
 <pre> QHash&lt;QString, int&gt; hash;</pre>
@@ -130,7 +130,7 @@
 <p>There is also a <a href="qhash.html#value">value</a>() overload that uses its second argument as a default value if there is no item with the specified key:</p>
 <pre> int timeout = hash.value(&quot;TIMEOUT&quot;, 30);</pre>
 <p>In general, we recommend that you use <a href="qhash.html#contains">contains</a>() and <a href="qhash.html#value">value</a>() rather than operator[]() for looking up a key in a hash. The reason is that operator[]() silently inserts an item into the hash if no item exists with the same key (unless the hash is const). For example, the following code snippet will create 1000 items in memory:</p>
-<pre><span class="comment"> // WRONG</span>
+<pre><span class="comment"> //</span> WRONG
  QHash&lt;int, QWidget *&gt; hash;
  ...
  for (int i = 0; i &lt; 1000; ++i) {
@@ -154,7 +154,7 @@
 <p>Normally, a QHash allows only one value per key. If you call <a href="qhash.html#insert">insert</a>() with a key that already exists in the QHash, the previous value is erased. For example:</p>
 <pre> hash.insert(&quot;plenty&quot;, 100);
  hash.insert(&quot;plenty&quot;, 2000);
-<span class="comment"> // hash.value(&quot;plenty&quot;) == 2000</span></pre>
+<span class="comment"> //</span> hash.value(&quot;plenty&quot;) == 2000</pre>
 <p>However, you can store multiple values per key by using <a href="qhash.html#insertMulti">insertMulti</a>() instead of <a href="qhash.html#insert">insert</a>() (or using the convenience subclass <a href="qmultihash.html">QMultiHash</a>). If you want to retrieve all the values for a single key, you can use values(const Key &amp;key), which returns a <a href="qlist.html">QList</a>&lt;T&gt;:</p>
 <pre> QList&lt;int&gt; values = hash.values(&quot;plenty&quot;);
  for (int i = 0; i &lt; values.size(); ++i)
@@ -171,8 +171,8 @@
  foreach (int value, hash)
      cout &lt;&lt; value &lt;&lt; endl;</pre>
 <p>Items can be removed from the hash in several ways. One way is to call <a href="qhash.html#remove">remove</a>(); this will remove any item with the given key. Another way is to use <a href="qmutablehashiterator.html#remove">QMutableHashIterator::remove</a>(). In addition, you can clear the entire hash using <a href="qhash.html#clear">clear</a>().</p>
-<p>QHash's key and value data types must be <a href="containers.html#assignable-data-types">assignable data types</a>. You cannot, for example, store a <a href="qwidget.html">QWidget</a> as a value; instead, store a <a href="qwidget.html">QWidget</a> *. In addition, QHash's key type must provide operator==(), and there must also be a global <a href="qhash.html#qHashx">qHash</a>() function that returns a hash value for an argument of the key's type.</p>
-<p>Here's a list of the C++ and Qt types that can serve as keys in a QHash: any integer type (char, unsigned long, etc.), any pointer type, <a href="qchar.html">QChar</a>, <a href="qstring.html">QString</a>, and <a href="qbytearray.html">QByteArray</a>. For all of these, the <tt>&lt;QHash&gt;</tt> header defines a <a href="qhash.html#qHashx">qHash</a>() function that computes an adequate hash value. If you want to use other types as the key, make sure that you provide operator==() and a <a href="qhash.html#qHashx">qHash</a>() implementation.</p>
+<p>QHash's key and value data types must be <a href="containers.html#assignable-data-types">assignable data types</a>. You cannot, for example, store a <a href="qwidget.html">QWidget</a> as a value; instead, store a <a href="qwidget.html">QWidget</a> *. In addition, QHash's key type must provide operator==(), and there must also be a global <a href="qhash.html#qHash">qHash</a>() function that returns a hash value for an argument of the key's type.</p>
+<p>Here's a list of the C++ and Qt types that can serve as keys in a QHash: any integer type (char, unsigned long, etc.), any pointer type, <a href="qchar.html">QChar</a>, <a href="qstring.html">QString</a>, and <a href="qbytearray.html">QByteArray</a>. For all of these, the <tt>&lt;QHash&gt;</tt> header defines a <a href="qhash.html#qHash">qHash</a>() function that computes an adequate hash value. If you want to use other types as the key, make sure that you provide operator==() and a <a href="qhash.html#qHash">qHash</a>() implementation.</p>
 <p>Example:</p>
 <pre> #ifndef EMPLOYEE_H
  #define EMPLOYEE_H
@@ -200,8 +200,8 @@
      return qHash(key.name()) ^ key.dateOfBirth().day();
  }
 
- #endif <span class="comment">// EMPLOYEE_H</span></pre>
-<p>The <a href="qhash.html#qHashx">qHash</a>() function computes a numeric value based on a key. It can use any algorithm imaginable, as long as it always returns the same value if given the same argument. In other words, if <tt>e1 == e2</tt>, then <tt>qHash(e1) == qHash(e2)</tt> must hold as well. However, to obtain good performance, the <a href="qhash.html#qHashx">qHash</a>() function should attempt to return different hash values for different keys to the largest extent possible.</p>
+ #endif <span class="comment">//</span> EMPLOYEE_H</pre>
+<p>The <a href="qhash.html#qHash">qHash</a>() function computes a numeric value based on a key. It can use any algorithm imaginable, as long as it always returns the same value if given the same argument. In other words, if <tt>e1 == e2</tt>, then <tt>qHash(e1) == qHash(e2)</tt> must hold as well. However, to obtain good performance, the <a href="qhash.html#qHash">qHash</a>() function should attempt to return different hash values for different keys to the largest extent possible.</p>
 <p>In the example above, we've relied on Qt's global qHash(const <a href="qstring.html">QString</a> &amp;) to give us a hash value for the employee's name, and XOR'ed this with the day they were born to help produce unique hashes for people with the same name.</p>
 <p>Internally, QHash uses a hash table to perform lookups. Unlike Qt 3's <tt>QDict</tt> class, which needed to be initialized with a prime number, QHash's hash table automatically grows and shrinks to provide fast lookups without wasting too much memory. You can still control the size of the hash table by calling <a href="qhash.html#reserve">reserve</a>() if you already know approximately how many items the QHash will contain, but this isn't necessary to obtain good performance. You can also call <a href="qhash.html#capacity">capacity</a>() to retrieve the hash table's size.</p>
 <p>See also <a href="qhashiterator.html">QHashIterator</a>, <a href="qmutablehashiterator.html">QMutableHashIterator</a>, <a href="qmap.html">QMap</a>, and <a href="qset.html">QSet</a>.</p>
@@ -221,7 +221,7 @@
 <p>Typedef for int. Provided for STL compatibility.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QHash"></a>QHash::QHash ()</h3>
+<h3 class="fn"><a name="QHashx"></a>QHash::QHash ()</h3>
 <p>Constructs an empty hash.</p>
 <p>See also <a href="qhash.html#clear">clear</a>().</p>
 <h3 class="fn"><a name="QHash-2"></a>QHash::QHash ( const QHash&lt;Key, T&gt; &amp; <i>other</i> )</h3>
@@ -396,12 +396,12 @@
 <p>Same as <a href="qhash.html#value">value</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="qHashx"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( char <i>key</i> )</h3>
+<h3 class="fn"><a name="qHash"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( char <i>key</i> )</h3>
 <p>Returns the hash value for <i>key</i>.</p>
-<h3 class="fn"><a name="qHash-4"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( const <a href="qpair.html">QPair</a>&lt;T1, T2&gt; &amp; <i>key</i> )</h3>
+<h3 class="fn"><a name="qHash-9"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( const <a href="qpair.html">QPair</a>&lt;T1, T2&gt; &amp; <i>key</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the hash value for <i>key</i>.</p>
-<p>Types <tt>T1</tt> and <tt>T2</tt> must be supported by <a href="qhash.html#qHashx">qHash</a>().</p>
+<p>Types <tt>T1</tt> and <tt>T2</tt> must be supported by <a href="qhash.html#qHash">qHash</a>().</p>
 <p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="qHash-10"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>key</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -448,20 +448,20 @@
 <h3 class="fn"><a name="qHash-24"></a><a href="qtglobal.html#uint-typedef">uint</a> qHash ( const T * <i>key</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the hash value for <i>key</i>.</p>
-<h3 class="fn"><a name="operator-lt-lt-10"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QHash&lt;Key, T&gt; &amp; <i>hash</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-51"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QHash&lt;Key, T&gt; &amp; <i>hash</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the hash <i>hash</i> to stream <i>out</i>.</p>
 <p>This function requires the key and value types to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-10"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QHash&lt;Key, T&gt; &amp; <i>hash</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-36"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QHash&lt;Key, T&gt; &amp; <i>hash</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a hash from stream <i>in</i> into <i>hash</i>.</p>
 <p>This function requires the key and value types to implement <tt>operator&gt;&gt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

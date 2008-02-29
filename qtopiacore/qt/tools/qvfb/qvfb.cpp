@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -346,10 +344,10 @@ QMenu* QVFb::createFileMenu()
     QMenu *file = new QMenu( "&File", this );
     file->addAction( "Configure...", this, SLOT(configure()), 0 );
     file->addSeparator();
-    file->addAction( "Save image...", this, SLOT(saveImage()), 0 );
-    file->addAction( "Animation...", this, SLOT(toggleAnimation()), 0 );
+    file->addAction( "&Save image...", this, SLOT(saveImage()), 0 );
+    file->addAction( "&Animation...", this, SLOT(toggleAnimation()), 0 );
     file->addSeparator();
-    file->addAction( "Quit", qApp, SLOT(quit()) );
+    file->addAction( "&Quit", qApp, SLOT(quit()) );
     return file;
 }
 

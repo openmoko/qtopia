@@ -40,4 +40,4 @@ settings.path=/etc/default/Trolltech
 INSTALLS+=settings
 
 pkg.desc=Bluetooth Settings
-pkg.domain=window,bluetooth,cardreader,pim,phonecomm
+pkg.domain=trusted

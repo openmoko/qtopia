@@ -164,13 +164,13 @@
  msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
  switch (msgBox.exec()) {
  case QMessageBox::Yes:
-     <span class="comment">// yes was clicked</span>
+     <span class="comment">//</span> yes was clicked
      break;
  case QMessageBox::No:
-     <span class="comment">// no was clicked</span>
+     <span class="comment">//</span> no was clicked
      break;
  default:
-     <span class="comment">// should never be reached</span>
+     <span class="comment">//</span> should never be reached
      break;
  }</pre>
 <p>When using an instance of QMessageBox with custom buttons, you can test the value of <a href="qmessagebox.html#clickedButton">clickedButton</a>() after calling <a href="qmessagebox.html#exec">exec</a>(). For example,</p>
@@ -181,9 +181,9 @@
  msgBox.exec();
 
  if (msgBox.clickedButton() == connectButton) {
-     <span class="comment">// connect</span>
+     <span class="comment">//</span> connect
  } else if (msgBox.clickedButton() == abortButton) {
-     <span class="comment">// abort</span>
+     <span class="comment">//</span> abort
  }</pre>
 <p>In the example above, the <b>Connect</b> button is created using the <a href="qmessagebox.html#addButton">addButton</a>() overload that takes a text and a <a href="qmessagebox.html#ButtonRole-enum">ButtonRole</a>. The <a href="qmessagebox.html#ButtonRole-enum">ButtonRole</a> is used by QMessageBox to determine the ordering of the buttons on screen (which varies according to the platform).</p>
 <p>The <a href="qmessagebox.html#text-prop">text</a>(), <a href="qmessagebox.html#icon-prop">icon</a>() and <a href="qmessagebox.html#iconPixmap-prop">iconPixmap</a>() functions provide access to the current text and pixmap of the message box. The <a href="qmessagebox.html#text-prop">setText</a>(), <a href="qmessagebox.html#icon-prop">setIcon</a>() and <a href="qmessagebox.html#iconPixmap-prop">setIconPixmap</a>() let you change it. The difference between <a href="qmessagebox.html#icon-prop">setIcon</a>() and <a href="qmessagebox.html#iconPixmap-prop">setIconPixmap</a>() is that the former accepts a <a href="qmessagebox.html#Icon-enum">QMessageBox::Icon</a> and can be used to set standard icons, whereas the latter accepts a <a href="qpixmap.html">QPixmap</a> and can be used to set custom icons.</p>
@@ -496,33 +496,10 @@
      ...
      return app.exec();
  }</pre>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMessageBox-4"></a>QMessageBox::QMessageBox ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qmessagebox.html#Icon-enum">Icon</a> <i>icon</i>, int <i>button0</i>, int <i>button1</i>, int <i>button2</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, bool <i>modal</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint )</h3>
-<p>Constructs a message box with the given <i>parent</i>, <i>name</i>, and window flags, <i>f</i>. The window title is specified by <i>title</i>, and the message box displays message text and an icon specified by <i>text</i> and <i>icon</i>.</p>
-<p>The buttons that the user can access to respond to the message are defined by <i>button0</i>, <i>button1</i>, and <i>button2</i>.</p>
-<h3 class="fn"><a name="QMessageBox-5"></a>QMessageBox::QMessageBox ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a message box with the given <i>parent</i> and <i>name</i>.</p>
-<h3 class="fn"><a name="message"></a>int QMessageBox::message ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qstring.html">QString</a> &amp; <i>buttonText</i> = QString(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Opens a modal message box with the given <i>title</i> and showing the given <i>text</i>. The message box has a single button which has the given <i>buttonText</i> (or tr(&quot;OK&quot;)). The message box is centred over its <i>parent</i> and is called <i>name</i>.</p>
-<p>Use <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#warning">warning</a>(), <a href="qmessagebox.html#question">question</a>(), or <a href="qmessagebox.html#critical">critical</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QMessageBox::message(tr(&quot;My App&quot;), tr(&quot;All occurrences replaced.&quot;),
-                      tr(&quot;Close&quot;), this);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QMessageBox::information(this, tr(&quot;My App&quot;),
-                          tr(&quot;All occurrences replaced.&quot;),
-                          QMessageBox::Close);</pre>
-<h3 class="fn"><a name="query"></a>bool QMessageBox::query ( const <a href="qstring.html">QString</a> &amp; <i>caption</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qstring.html">QString</a> &amp; <i>yesButtonText</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>noButtonText</i> = QString(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Queries the user using a modal message box with up to two buttons. The message box has the given <i>caption</i> (although some window managers don't show it), and shows the given <i>text</i>. The left button has the <i>yesButtonText</i> (or tr(&quot;OK&quot;)), and the right button has the <i>noButtonText</i> (or isn't shown). The message box is centred over its <i>parent</i> and is called <i>name</i>.</p>
-<p>Use <a href="qmessagebox.html#information">information</a>(), <a href="qmessagebox.html#question">question</a>(), <a href="qmessagebox.html#warning">warning</a>(), or <a href="qmessagebox.html#critical">critical</a>() instead.</p>
-<h3 class="fn"><a name="standardIcon"></a><a href="qpixmap.html">QPixmap</a> QMessageBox::standardIcon ( <a href="qmessagebox.html#Icon-enum">Icon</a> <i>icon</i>, <a href="qt-qt3.html#GUIStyle-enum">Qt::GUIStyle</a> <i>style</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the pixmap used for a standard icon. This allows the pixmaps to be used in more complex message boxes. <i>icon</i> specifies the required icon, e.g&#x2e; <a href="qmessagebox.html#Icon-enum">QMessageBox::Information</a>, <a href="qmessagebox.html#Icon-enum">QMessageBox::Warning</a> or <a href="qmessagebox.html#Icon-enum">QMessageBox::Critical</a>.</p>
-<p><i>style</i> is unused.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

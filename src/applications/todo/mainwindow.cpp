@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -144,7 +144,14 @@ QString TodoView::createTaskText(const QTask &task)
     QString text;
     QDate today = QDate::currentDate();
 
+    bool rtl = qApp->layoutDirection() == Qt::RightToLeft;
+    QLatin1String floatLead(rtl ? "float: right;" : "float: left;");
+    QLatin1String floatTrail(rtl ? "float: left;" : "float: right;");
+
     QUniqueId apptId = task.dependentChildrenOfType("duedate").value(0);
+
+    QString leadIcons;
+    QString trailIcons;
 
     if (!apptId.isNull()) {
         QAppointmentModel am;
@@ -153,20 +160,25 @@ QString TodoView::createTaskText(const QTask &task)
 
     // Some nice icons first
     if (task.isCompleted())
-        text += QLatin1String("<img style=\"float: left;\" src=\"completedicon\">");
+        leadIcons += QLatin1String("<img src=\"completedicon\">");
     else if (task.priority() <= 2)
-        text += QLatin1String("<img style=\"float: left;\" src=\"priorityicon\">");
+        leadIcons += QLatin1String("<img src=\"priorityicon\">");
 
 
     if ( ev.hasRepeat() )
-        text += QLatin1String("<img style=\"float: right;\" src=\"repeaticon\">");
+        trailIcons += QLatin1String("<img src=\"repeaticon\">");
 
     if ( ev.hasAlarm() ) {
         if (ev.alarm() == QAppointment::Audible)
-            text += QLatin1String("<img style=\"float: right;\" src=\"audibleicon\">");
+            trailIcons += QLatin1String("<img src=\"audibleicon\">");
         else
-            text += QLatin1String("<img style=\"float: right;\" src=\"silenticon\">");
+            trailIcons += QLatin1String("<img src=\"silenticon\">");
     }
+
+    if (!leadIcons.isEmpty())
+        text += "<table style='" + floatLead + "'><tr><td>" + leadIcons + "</td></tr></table>";
+    if (!trailIcons.isEmpty())
+        text += "<table style='" + floatTrail + "'><tr><td>" + trailIcons + "</td></tr></table>";
 
     text += "<b>";
 
@@ -256,8 +268,6 @@ QString TodoView::createTaskText(const QTask &task)
                 word = tr("every year");
 
         text += "<br><b>" + tr("Repeat:") + " </b>";
-        if ( ev.frequency() > 1 )
-            word = word.arg( ev.frequency() );
 
         QString endword;
         if ( ev.repeatForever() )

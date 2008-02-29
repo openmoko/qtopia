@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContentFilterModel Class Reference</h1>
 <p>The QContentFilterModel class defines a model for displaying and selecting possible content filters. <a href="#details">More...</a></p>
-<pre>    #include &lt;QContentFilterModel&gt;</pre><p>Inherits <a href="qabstractitemmodel.html">QAbstractItemModel</a>.</p>
+<pre>    #include &lt;QContentFilterModel&gt;</pre><p>Inherits <a href="./qabstractitemmodel.html">QAbstractItemModel</a>.</p>
 <ul>
 <li><a href="qcontentfiltermodel-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -39,22 +39,21 @@
 <li><div class="fn"/>void <b><a href="qcontentfiltermodel.html#setModelTemplate">setModelTemplate</a></b> ( const Template &amp; <i>modelTemplate</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>34 public functions inherited from <a href="qabstractitemmodel.html#public-functions">QAbstractItemModel</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>34 public functions inherited from <a href="./qabstractitemmodel.htmlqabstractitemmodel.html#public-functions">QAbstractItemModel</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>2 public slots inherited from <a href="qabstractitemmodel.html#public-slots">QAbstractItemModel</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>14 signals inherited from <a href="qabstractitemmodel.html#signals">QAbstractItemModel</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>15 protected functions inherited from <a href="qabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>2 public slots inherited from <a href="./qabstractitemmodel.htmlqabstractitemmodel.html#public-slots">QAbstractItemModel</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>14 signals inherited from <a href="./qabstractitemmodel.htmlqabstractitemmodel.html#signals">QAbstractItemModel</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>14 protected functions inherited from <a href="./qabstractitemmodel.htmlqabstractitemmodel.html#protected-functions">QAbstractItemModel</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -131,12 +130,12 @@
 <p>The TemplateOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;TemplateOption&gt;. It stores an OR combination of TemplateOption values.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QContentFilterModel"></a>QContentFilterModel::QContentFilterModel ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentFilterModel"></a>QContentFilterModel::QContentFilterModel ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new <a href="qcontentfiltermodel.html">QContentFilterModel</a> with the given <i>parent</i>.</p>
-<h3 class="fn"><a name="QContentFilterModel-2"></a>QContentFilterModel::QContentFilterModel ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentFilterModel-2"></a>QContentFilterModel::QContentFilterModel ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = SelectAll, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new content filter model parented to <i>parent</i> which lists filters for the property <i>property</i> according to the given template <i>options</i>.</p>
 <p>The properties listed in the <i>checked</i> list will be checked by default.</p>
-<h3 class="fn"><a name="QContentFilterModel-3"></a>QContentFilterModel::QContentFilterModel ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = SelectAll, const <a href="qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentFilterModel-3"></a>QContentFilterModel::QContentFilterModel ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> = QString(), <a href="qcontentfiltermodel.html#TemplateOption-enum">TemplateOptions</a> <i>options</i> = SelectAll, const <a href="./qstringlist.html">QStringList</a> &amp; <i>checked</i> = QStringList(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new content filter model parented to <i>parent</i> which lists filters of type <i>type</i> within the given <i>scope</i> according to the template <i>options</i>.</p>
 <p>Any filters with an argument that matches one in the <i>checked</i> list will be checked by default.</p>
 <h3 class="fn"><a name="dtor.QContentFilterModel"></a>QContentFilterModel::~QContentFilterModel ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -144,9 +143,9 @@
 <h3 class="fn"><a name="baseFilter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterModel::baseFilter () const</h3>
 <p>Returns the base filter of the model. Only filters which return content passed by the base filter will be listed in the view.</p>
 <p>See also <a href="qcontentfiltermodel.html#setBaseFilter">setBaseFilter</a>().</p>
-<h3 class="fn"><a name="checkedFilter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterModel::checkedFilter ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const</h3>
+<h3 class="fn"><a name="checkedFilter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterModel::checkedFilter ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>parent</i> = QModelIndex() ) const</h3>
 <p>Returns a filter built from the the checked items that are children of <i>parent</i>.</p>
-<h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterModel::filter ( const <a href="qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
+<h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentFilterModel::filter ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>Returns the <a href="qcontentfilter.html">QContentFilter</a> at <i>index</i>. The returned filter will be and'ed combination of the filter at the index and it's parents, not including the models base filter.</p>
 <h3 class="fn"><a name="modelTemplate"></a><a href="qcontentfiltermodel-template.html">Template</a> QContentFilterModel::modelTemplate () const</h3>
 <p>Returns the template which the model is constructed from.</p>
@@ -159,8 +158,8 @@
 <p>See also <a href="qcontentfiltermodel.html#modelTemplate">modelTemplate</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

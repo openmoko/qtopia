@@ -2,7 +2,7 @@ qtopia_project(qtopia plugin)
 TARGET=qdockedkeyboard
 CONFIG+=no_singleexec
 #FIXME extract to a library or something
-INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/server
+INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/server/core_server
 
 HEADERS		= dockedkeyboard.h \
 		    dockedkeyboardimpl.h
@@ -28,4 +28,4 @@ pics.hint=pics
 #INSTALLS += pics //already installed by keyboard
  
 pkg.name=qpe-dockedkeyboard
-pkg.domain=libs
+pkg.domain=trusted

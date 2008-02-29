@@ -1,12 +1,8 @@
-
 #include <QTimer>
 #include <QFileInfo>
+#include <QMediaDevice>
 
-#include <qtopianamespace.h>
 #include <qtopialog.h>
-
-#include <qtopiamedia/qmediadevice.h>
-#include <qtopiamedia/qmediapipe.h>
 
 #include <timidity.h>
 
@@ -25,12 +21,12 @@ public:
     int                 volume;
     quint32             length;
     quint32             position;
-    QMediaPipe*         inputPipe;
-    QMediaPipe*         outputPipe;
+    QMediaDevice*       inputDevice;
     MidSong*            song;
     MidIStream*         midiStream;
     MidSongOptions      options;
     QtopiaMedia::State  state;
+    QMediaDevice::Info  outputInfo;
 };
 // }}}
 
@@ -46,69 +42,43 @@ MidiDecoder::MidiDecoder():
     d->length = 0;
     d->position = 0;
     d->state = QtopiaMedia::Stopped;
+    d->song = 0;
 
-    // Load .cfg
-    foreach (QString configPath, Qtopia::installPaths())
-    {
-        configPath += QLatin1String("etc/timidity/timidity.cfg");
-
-        qLog(Media) << "MidiDecoder::MidiDecoder(); searching for config -" << configPath;
-
-        if (QFileInfo(configPath).exists())
-        {
-            qLog(Media) << "MidiDecoder::MidiDecoder(); found timidity.cfg";
-
-            if (mid_init(configPath.toLocal8Bit().data()) == -1)
-                qLog(Media) << "MidiDecoder::MidiDecoder(); Invalid config file";
-
-            break;
-        }
-    }
+    d->outputInfo.type = QMediaDevice::Info::PCM;
+    d->outputInfo.frequency = 44100;
+    d->outputInfo.bitsPerSample = 16;
+    d->outputInfo.channels = 2;
+    d->outputInfo.volume = 100;
 }
 
 MidiDecoder::~MidiDecoder()
 {
-    mid_song_free(d->song);
-    mid_exit();
+    if (d->song != 0)
+        mid_song_free(d->song);
 
     delete d;
 }
 
-void MidiDecoder::connectInputPipe(QMediaPipe* inputPipe)
+QMediaDevice::Info const& MidiDecoder::dataType() const
 {
-    d->inputPipe = inputPipe;
+    return d->outputInfo;
 }
 
-void MidiDecoder::connectOutputPipe(QMediaPipe* outputPipe)
+bool MidiDecoder::connectToInput(QMediaDevice* input)
 {
-    d->outputPipe = outputPipe;
+    if (input->dataType().type != QMediaDevice::Info::Raw)
+        return false;
+
+    d->inputDevice = input;
+
+    return true;
 }
 
-void MidiDecoder::disconnectInputPipe(QMediaPipe* inputPipe)
+void MidiDecoder::disconnectFromInput(QMediaDevice* input)
 {
-    Q_UNUSED(inputPipe);
+    Q_UNUSED(input);
 
-    d->inputPipe = 0;
-}
-
-void MidiDecoder::disconnectOutputPipe(QMediaPipe* outputPipe)
-{
-    Q_UNUSED(outputPipe);
-
-    d->outputPipe = 0;
-}
-
-void MidiDecoder::setValue(QString const& name, QVariant const& value)
-{
-    Q_UNUSED(name);
-    Q_UNUSED(value);
-}
-
-QVariant MidiDecoder::value(QString const& name)
-{
-    Q_UNUSED(name);
-
-    return QVariant();
+    d->inputDevice = 0;
 }
 
 void MidiDecoder::start()
@@ -117,9 +87,9 @@ void MidiDecoder::start()
     {
         QIODevice::open(QIODevice::ReadWrite | QIODevice::Unbuffered);
 
-        d->options.rate        = 44100;
-        d->options.format      = MID_AUDIO_S16LSB;
-        d->options.channels    = 2;
+        d->options.rate        = d->outputInfo.frequency;
+        d->options.format      = MID_AUDIO_S16LSB;  // 16
+        d->options.channels    = d->outputInfo.channels;
         d->options.buffer_size = MIDI_BUFFER_SIZE / (16 * 2 / 8);
 
         d->midiStream = mid_istream_open_callbacks(midiReadCallback,
@@ -140,16 +110,16 @@ void MidiDecoder::start()
             mid_song_start(d->song);
 
             d->initialized = true;
-
         }
-        else
+        else {
             qLog(Media) << "MidiDecoder::start(); Failed to load MIDI file";
+            d->state = QtopiaMedia::Error;
+        }
     }
     else
         d->state = QtopiaMedia::Playing;
 
-    if (d->initialized)
-    {
+    if (d->initialized) {
         emit readyRead();
         emit playerStateChanged(d->state);
     }
@@ -157,16 +127,16 @@ void MidiDecoder::start()
 
 void MidiDecoder::stop()
 {
-    d->state = QtopiaMedia::Stopped;
+    emit playerStateChanged(d->state = QtopiaMedia::Stopped);
     seek(0);
 }
 
 void MidiDecoder::pause()
 {
-    d->state = QtopiaMedia::Paused;
+    emit playerStateChanged(d->state = QtopiaMedia::Paused);
 }
 
-quint32 MidiDecoder::length()
+quint64 MidiDecoder::length()
 {
     return d->length;
 }
@@ -211,28 +181,20 @@ bool MidiDecoder::isMuted()
 //private:
 qint64 MidiDecoder::readData(char *data, qint64 maxlen)
 {
-    qint64      rc = maxlen;
+    if (d->state != QtopiaMedia::Playing)
+        return 0;
 
-    if (maxlen > 0)
-    {
-        if (d->state == QtopiaMedia::Playing)
-        {
-            quint32 position = (mid_song_get_time(d->song) / 1000) * 1000;
-            if (d->position != position)
-            {
-                d->position = position;
-                emit positionChanged(d->position);
-            }
+    qint64      rc = 0;
 
-            qint64 rc = (qint64) mid_song_read_wave(d->song, data, maxlen);
-
-            if (rc == 0)
-                d->state = QtopiaMedia::Stopped;
+    if (maxlen > 0) {
+        quint32 position = (mid_song_get_time(d->song) / 1000) * 1000;
+        if (d->position != position) {
+            d->position = position;
+            emit positionChanged(d->position);
         }
-        else
-        {
-            rc = 0;
-        }
+
+        if ((rc = (qint64) mid_song_read_wave(d->song, data, maxlen)) == 0)
+            emit playerStateChanged(d->state = QtopiaMedia::Stopped);
     }
 
     return rc;
@@ -248,12 +210,7 @@ qint64 MidiDecoder::writeData(const char *data, qint64 len)
 
 size_t MidiDecoder::readCallback(void* dst, size_t itemSize, size_t numItems)
 {
-    size_t rc = d->inputPipe->read(reinterpret_cast<char*>(dst), itemSize * numItems);
-
-    if (rc > 0)
-        rc /= itemSize;
-
-    return rc;
+    return d->inputDevice->read(reinterpret_cast<char*>(dst), itemSize * numItems) / itemSize;
 }
 
 int MidiDecoder::closeCallback()

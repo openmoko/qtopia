@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,15 +23,14 @@
 #define MALPKG_H
 
 #include <qdialog.h>
-
-class QWizard;
+#include <QWizard>
 class QWizardPage;
 class QTextEdit;
 class QLineEdit;
 class QPushButton;
 class QCheckBox;
 
-class MalPkg : public QDialog
+class MalPkg : public QWizard
 {
     Q_OBJECT
 

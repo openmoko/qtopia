@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -280,9 +278,9 @@ QPixmap convertHIconToPixmap( const HICON icon)
 
         for (int y = 0 ; y< iconpixmap.height() ; y++){
             QRgb *scanlineImage = reinterpret_cast<QRgb *>(img.scanLine(y));
-            QRgb *scanlineMask = reinterpret_cast<QRgb *>(mask.scanLine(y));
+            QRgb *scanlineMask = mask.isNull() ? 0 : reinterpret_cast<QRgb *>(mask.scanLine(y));
             for (int x = 0; x < img.width() ; x++){
-                if (qRed(scanlineMask[x]) != 0)
+                if (scanlineMask && qRed(scanlineMask[x]) != 0)
                     scanlineImage[x] = 0; //mask out this pixel
                 else
                     scanlineImage[x] |= 0xff000000; // set the alpha channel to 255

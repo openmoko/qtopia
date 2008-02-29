@@ -8,7 +8,8 @@ DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJ
 depends(libraries/qt/xml)
 depends(3rdparty/libraries/dbus)
 
-INCLUDEPATH += $$DBUS_PREFIX/lib/dbus-1.0/include $$DBUS_PREFIX/include/dbus-1.0 $$QTE_DEPOT_PATH/tools/qdbus/src
+INCLUDEPATH += $$QTE_DEPOT_PATH/tools/qdbus/src
+QMAKE_CXXFLAGS+=$$DBUS_CFLAGS
 
 VPATH += $$QTE_DEPOT_PATH/tools/qdbus/src
 

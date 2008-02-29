@@ -16,6 +16,7 @@
 <p>Files:</p>
 <ul>
 <li><a href="activeqt-wrapper-main-cpp.html">activeqt/wrapper/main.cpp</a></li>
+<li><a href="activeqt-wrapper-wrapper-pro.html">activeqt/wrapper/wrapper.pro</a></li>
 </ul>
 <p>The Wrapper example demonstrates how to export existing <a href="qwidget.html">QWidget</a> classes as ActiveX controls, and the use of <a href="qaxfactory.html">QAxFactory</a> together with the <tt>QAXFACTORY_EXPORT()</tt> macro. ActiveX controls in this example are the standard button classes <a href="qpushbutton.html">QPushButton</a>, <a href="qcheckbox.html">QCheckBox</a> and <a href="qradiobutton.html">QRadioButton</a> as provided by Qt.</p>
 <pre> class ActiveQtFactory : public QAxFactory
@@ -43,7 +44,7 @@
              return new QPushButton(0 );
          if ( key == &quot;QToolButton&quot; ) {
              QToolButton *tb = new QToolButton(0);
-<span class="comment"> //          tb-&gt;setIcon( QPixmap(fileopen) );</span>
+<span class="comment"> //</span>          tb-&gt;setIcon( QPixmap(fileopen) );
              return tb;
          }
 
@@ -156,8 +157,8 @@
  &lt;/object&gt;&lt;br /&gt;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

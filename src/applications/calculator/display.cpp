@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -90,7 +90,12 @@ void MyLcdDisplay::readStack() {
     int horizontalOffset = 10; // right margin
     if (!stateOk) {
         lcdPainter->setFont(smallFont);
-        lcdPainter->drawText(5,5,visibleWidth - horizontalOffset,20,Qt::AlignRight,systemEngine->errorString);
+        QRect r = QFontMetrics(smallFont).boundingRect( 5, 5, 
+                visibleWidth-horizontalOffset, 80, 
+                layoutDirection() == Qt::LeftToRight ? Qt::AlignRight : Qt::AlignLeft, 
+                systemEngine->errorString);
+        //the alignment below doesn't really matter. r already defines what is necessary
+        lcdPainter->drawText( r, Qt::AlignRight, systemEngine->errorString );
         verticalOffset=25;
     } else {
         lcdPainter->setFont(bigFont);

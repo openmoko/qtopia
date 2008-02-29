@@ -31,7 +31,7 @@
 <p>The Qtopia IPC API is based on the notion of channels and messages. Messages can be used by by an application to notify another application to take some action. Messages can have arguments associated with them. In essence, a message can be thought of as a remote method call. A message consists of a function identifier followed by a list of types in parantheses. There is no whitespace in the message name.</p>
 <p>Channels are unique string based identifiers which are used to logically group a set of messages together. Effectively, a set of messages on a particular channel defines an interface. By convention all channels within Qtopia start with &quot;QPE/&quot;.</p>
 <p>The Qtopia IPC system uses the event-processing loop. If you create a message it will not be sent until the next the event loop is entered.</p>
-<p>Qtopia IPC system consists of three major classes. The <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> is the preferred way to interface with the system. In addition, <a href="qtopiachannel.html">QtopiaChannel</a> and <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> classes are provided to ease the transition between the Qtopia <a href="qcopchannel.html">QCopChannel</a> based systems and the new API.</p>
+<p>Qtopia IPC system consists of three major classes. The <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> is the preferred way to interface with the system. In addition, <a href="qtopiachannel.html">QtopiaChannel</a> and <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> classes are provided to ease the transition between the Qtopia <a href="./qcopchannel.html">QCopChannel</a> based systems and the new API.</p>
 <a name="qtopiaipcadaptor"></a>
 <h2>QtopiaIpcAdaptor</h2>
 <a name="overview"></a>
@@ -40,11 +40,11 @@
 <p>To use <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> directly, we first construct a new object by providing a channel as so:</p>
 <pre>    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;);</pre>
 <p>The newly created <i>adaptor</i> object can now be used to send messages to remote applications, or to receive messages. To send messages use the <tt>send</tt> method calls:</p>
-<pre><span class="comment">    // First we aim the cannon</span>
+<pre><span class="comment">    //</span> First we aim the cannon
     QtopiaIpcSendEnvelope envelope = adaptor-&gt;send(MESSAGE(aimCannon(int,int)));
     envelope &lt;&lt; direction &lt;&lt; elevation;
 
-<span class="comment">    // Alternatively if there are less than 3 arguments we can use send directly</span>
+<span class="comment">    //</span> Alternatively if there are less than 3 arguments we can use send directly
     adaptor-&gt;send(MESSAGE(shootCannon(int)), cannonPower);</pre>
 <p>Another application is responsible for actually aiming and shooting the cannon. Let us suppose that the cannon application can reply with two types of messages, a hit or a miss. E.g&#x2e; the remote application will send a <i>missed()</i> or <i>hit()</i> message. We can listen for such messages in the following manner:</p>
 <pre>    class CannonListener : public QObject
@@ -81,11 +81,11 @@
     CannonController *control = new CannonController;
     QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;);
 
-<span class="comment">    // Hookup remote messages to our object</span>
+<span class="comment">    //</span> Hookup remote messages to our object
     QtopiaIpcAdaptor::connect(adaptor, SIGNAL(missed()), control, SLOT(missed()));
     QtopiaIpcAdaptor::connect(adaptor, SIGNAL(hit()), control, SLOT(hit()));
 
-<span class="comment">    // Send our signals to the remote object</span>
+<span class="comment">    //</span> Send our signals to the remote object
     QtopiaIpcAdaptor::connect(control, SIGNAL(aimCannon(int,int)), adaptor, SLOT(aimCannon(int,int)));
     QtopiaIpcAdaptor::connect(control, SIGNAL(shootCannon(int)), adaptor, SLOT(shootCannon(int)));</pre>
 <p>We should now recognize that for non-trivial interactions the last example is a quite common use case. It is thus desirable to avoid using QtopiaIpcAdaptor::connect for each connection, which can be quite error prone. <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> provides an alternate interaction technique based on inheritance. Instead of creating another class and using QtopiaIpcAdaptor::connect, we inherit directly from <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> and use the publish or publishAll methods to automatically publish all signals and slots on the channel. E.g&#x2e;:</p>
@@ -137,7 +137,7 @@
 <a name="enumerations"></a>
 <h4>Enumerations</h4>
 <p>To make the example complete, we show how to extend our example with custom data types. First let us suppose that we'd like to use a custom ammunition type. We define a new enumeration named appropriately <i>AmmunitionType</i>. In order to exchange these enumerations, we must first register it with the meta-type system. This is accomplished by using the <i>Q_DECLARE_USER_METATYPE_ENUM</i> macro. This macro must be used in the header file where the enumeration is defined. Additionally we must use the <i>Q_IMPLEMENT_USER_METATYPE_ENUM</i> macro to implement the necessary serialization and deserialization functions.</p>
-<pre>        <span class="comment">// Header</span>
+<pre>        <span class="comment">//</span> Header
         class CannonController : public QtopiaIpcAdaptor
         {
             Q_OBJECT
@@ -162,7 +162,7 @@
 
     ...
 
-        <span class="comment">// Implementation:</span>
+        <span class="comment">//</span> Implementation:
 
         Q_IMPLEMENT_USER_METATYPE_ENUM(CannonController::AmmunitionType)</pre>
 <a name="custom-classes"></a>
@@ -245,7 +245,7 @@
 <p>Each application listens on a channel called <b>QPE/Application/<i>appname</i></b> , where <b><i>appname</i></b> is the executable name (the application identifier). Standard messages on this channel are:</p>
 <p><b>QPE/Application/<i>appname</i></b></p>
 <ul>
-<li>setDocument(<a href="qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
+<li>setDocument(<a href="./qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="./qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
 <li>nextView() -- Applications connected to hardware buttons will receive this message if they are already visible.</li>
 <li>raise() -- Internal. Causes the the main document widget and the current modal widget to be raised.</li>
 <li><a href="qtopiadesktop/qdsync-quit-1.html">quit</a>() -- Internal. Terminates the application.</li>
@@ -254,41 +254,11 @@
 <p>The <b>QPE/Application/<i>appname</i></b> channel has a special property: when messages are sent to these channels via <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>, the message is delivered even if the application is not yet running (the application is run and the message is then sent).</p>
 <a name="command-line-access-to-qtopia-ipc-system"></a>
 <h2>Command-line access to Qtopia IPC System</h2>
-<p>The <tt>qcop</tt> command-line tool can be used to access the Qtopia IPC system from shell scripts and for debugging purposes. Running <tt>qcop</tt> without any arguments will print a help message. The other commands are as follows:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>qcop send</tt> <i>channel</i> <i>message</i> [<i>parameters</i>]</td><td>Send <i>message</i> on <i>channel</i> with the specified <i>parameters</i>.</td></tr>
-<tr valign="top" class="even"><td><tt>qcop service send</tt> <i>name</i> <i>message</i> [<i>parameters</i>]</td><td>Send <i>message</i> to the application that implements the service <i>name</i> with the specified <i>parameters</i>.</td></tr>
-<tr valign="top" class="odd"><td><tt>qcop watch</tt> <i>channel</i> [<i>channel</i> ..&#x2e;]</td><td>Watch all messages on <i>channel</i> and print them to standard output. If <i>channel</i> has the form <tt>QPE/Application/foo</tt>, this will watch all messages to the application <tt>foo</tt>.</td></tr>
-<tr valign="top" class="even"><td><tt>qcop service watch</tt> <i>name</i> [<i>name</i> ..&#x2e;]</td><td>Same as above, but watches the application associated with the service <i>name</i> instead.</td></tr>
-<tr valign="top" class="odd"><td><tt>qcop wait</tt> <i>channel</i> <i>message</i></td><td>Waits for <i>message</i> to appear on <i>channel</i> and then prints the message arguments to standard output.</td></tr>
-<tr valign="top" class="even"><td><tt>qcop service wait</tt> <i>name</i> <i>message</i></td><td>Same as above, but waits on the application channel for the application associated with the service. This can be used to wait for someone to send a message to the service.</td></tr>
-<tr valign="top" class="odd"><td><tt>qcop query</tt> <i>channel</i></td><td>Query all messages that the application on <i>channel</i> can respond to. The application needs to handle the special message <tt>__query_qcop_messages(QString)</tt> for this to work correctly. The easiest method is to use the <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> or <a href="qtopiaabstractservice.html">QtopiaAbstractService</a> classes to implement your service. These classes will automatically respond to the query message. The argument to the message is the name of the channel to respond on. The <tt>qcop query</tt> command has a default timeout of 1 second unless overridden by the <tt>timeout</tt> flag.</td></tr>
-<tr valign="top" class="even"><td><tt>qcop service query</tt> <i>name</i></td><td>Same as above, but for the service called <i>name</i>.</td></tr>
-<tr valign="top" class="odd"><td><tt>qcop list</tt></td><td>List all services and the Qtopia IPC channels that they map to.</td></tr>
-</table></p>
-<p>The following flags can be specified before a command to modify its behavior:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Flag</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>hex</tt></td><td>Print the contents of <a href="qbytearray.html">QByteArray</a> parameters in hexadecimal (default).</td></tr>
-<tr valign="top" class="even"><td><tt>nohex</tt></td><td>Print the contents of <a href="qbytearray.html">QByteArray</a> parameters as Latin-1 strings.</td></tr>
-<tr valign="top" class="odd"><td><tt>timeout</tt> <i>msecs</i></td><td>Set the timeout for the command to <i>msecs</i> milliseconds.</td></tr>
-<tr valign="top" class="even"><td><tt>notimeout</tt></td><td>Disable the timeout for the command. This is the default for most commands, except <tt>qcop query</tt> which has a default timeout of 1 second.</td></tr>
-<tr valign="top" class="odd"><td><tt>enum</tt> <i>name</i></td><td>Recognise <i>name</i> as an enumerated type in message names.</td></tr>
-</table></p>
-<p>The following example will watch for all Qtopia IPC messages on the <tt>QPE/System</tt> channel:</p>
-<pre>    qcop watch QPE/System</pre>
-<p>The channel name for <tt>qcop watch</tt> can include wildcards. For example, the following will watch all network-related channels:</p>
-<pre>    qcop watch 'QPE/Network*'</pre>
-<p>It is usually necessary to quote channel names when they include wildcards, especially when using <tt>qcop watch '*'</tt>.</p>
-<p>The following example sends a <tt>Time::editTime()</tt> message to the <tt>Time</tt> service:</p>
-<pre>    qcop service send Time 'editTime()'</pre>
-<p>Multiple commands can be separated by <tt>--</tt> on the command line. The following example sends the <tt>dial()</tt> message to the <tt>QPE/pppd</tt> channel and then waits for up to 30 seconds for a <tt>dialResult(bool)</tt> message on the same channel.</p>
-<pre>    qcop send QPE/pppd 'dial()' -- timeout 30000 wait QPE/pppd 'dialResult(bool)'</pre>
+<p>The <a href="qcop-tool.html">qcop</a> command-line tool can be used to access the Qtopia IPC system from shell scripts and for debugging purposes.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

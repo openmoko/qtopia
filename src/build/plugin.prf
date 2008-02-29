@@ -11,6 +11,9 @@ contains(PROJECT_TYPE,embedded) {
     target.path=/qt_plugins/$$plugin_type
 }
 
+# Qtopia projects have link_test on by default (external projects must opt-in)
+depotProject:CONFIG+=link_test
+
 # Opt-out of the link test (eg. because you know it will fail but you
 # also know your plugin will work at runtime).
 no_link_test:CONFIG-=link_test

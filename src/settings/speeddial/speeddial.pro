@@ -24,4 +24,4 @@ sounds.path=/sounds/speeddial
 INSTALLS+=sounds
 
 pkg.desc=Speed-dial settings dialog for Qtopia.
-pkg.domain=window
+pkg.domain=trusted

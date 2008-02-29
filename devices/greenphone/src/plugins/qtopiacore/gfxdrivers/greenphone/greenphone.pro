@@ -1,5 +1,4 @@
 qtopia_project(embedded qtopia core plugin)
-depends(libraries/qtopiacore)
 TARGET = greenphonescreen
 
 CONFIG += no_tr

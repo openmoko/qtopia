@@ -32,7 +32,7 @@
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Meta-data</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><a href="qcontent.html#name">Name</a></td><td>The user visible name of the content. This is typically derived from the file name but may be explicitly set or extracted from content headers (e.g&#x2e; the song title of an MP3). For some content such as applications this will be a translated string.</td></tr>
-<tr valign="top" class="even"><td><a href="qcontent.html#fileNamex">File name</a></td><td>The absolute file name of the content, or for applications the binary name with no path.</td></tr>
+<tr valign="top" class="even"><td><a href="qcontent.html#fileName">File name</a></td><td>The absolute file name of the content, or for applications the binary name with no path.</td></tr>
 <tr valign="top" class="odd"><td><a href="qcontent.html#type">MIME type</a></td><td>The RFC2045 MIME type of the content.</td></tr>
 <tr valign="top" class="even"><td><a href="qcontent.html#role">Role</a></td><td>The intended usage of the document, indicates whether it is an application, a user document, a system document, or an application folder.</td></tr>
 <tr valign="top" class="odd"><td><a href="qcontent.html#drmState">DRM protection</a></td><td>Indicates whether or not the content is protected by any form of DRM.</td></tr>
@@ -59,15 +59,15 @@
 <a name="application-meta-data"></a>
 <h2>Application Meta-data</h2>
 <p>In addition to the regular meta-data shared by all content, applications also need to identify the types of documents they are able to open from the launcher. For each supported type the document system stores the type itself, an icon, and the DRM permission a document must have in order to be opened by the application. Only the first must be specified, if no icon is given then the application's icon will be used, and in the absence of a DRM permission the application is assumed to not support protected content.</p>
-<p>The MIME type information and other application meta-data is usually defined in a <a href="files.html#desktop-file-standard"><tt>.desktop</tt></a> file and is imported into the document system when the application is installed.</p>
+<p>The MIME type information and other application meta-data is usually defined in a <a href="desktopfiles.html"><tt>.desktop</tt></a> file and is imported into the document system when the application is installed.</p>
 <a name="content-plug-ins"></a>
 <h2>Content Plug-ins</h2>
 <p>The document system employs <a href="qcontentplugin.html">content plug-ins</a> to extract meta-data embedded in content. The information provided by a content plug-in may be an extensive list of searchable information such as that found in the ID3 headers of MP3 files, or simply the correct type of a file with an ambiguous file extension.</p>
 <p>A content plug-in identifies a list of file extensions for MIME types it support reading and when installing or updating content meta-data the document system uses these extensions to identify a content plug-in capable of extracting embedded meta-data. If no content plug-in can be found for the content or some necessary information (name or MIME type) has not been provided the document will attempt to derive the missing information from the file name.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

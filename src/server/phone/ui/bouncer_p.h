@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,7 @@
 #include "animator_p.h"
 
 #include <QString>
+#include <QPixmap>
 
 class Painter;
 class SelectedItem;
@@ -49,6 +50,8 @@ public:
                      int frameMax = 50);
 
     void animate(QPainter *,SelectedItem *,qreal percent);
+
+    void initFromGridItem(GridItem *item);
 
     static const QString &description() { return mDescription; }
 
@@ -70,6 +73,8 @@ private:
     qreal minVariation;
     qreal maxVariation;
     int frameMax;
+    
+    QPixmap bigpixmap;
 };
 
 #endif

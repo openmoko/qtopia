@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,7 +53,7 @@ void Search::setMailbox(QString mailbox)
     _mailbox = mailbox.toLower();
 }
 
-QString Search::mailbox()
+QString Search::mailbox() const
 {
     return _mailbox;
 }
@@ -63,7 +63,7 @@ void Search::setName(QString in)
     _name = in;
 }
 
-QString Search::name()
+QString Search::name() const
 {
     if ( !_name.isEmpty() ) {
         return _name;
@@ -73,33 +73,31 @@ QString Search::name()
 }
 
 // organized after lest expensive search
-bool Search::matches(const QMailMessage& in)
+bool Search::matches(const QMailMessage& in) const
 {
-    mail = in;
-
-    if ( !matchesStatus() )
+    if ( !matchesStatus(in) )
         return false;
 
-    if ( !matchesAccount() )
+    if ( !matchesAccount(in) )
         return false;
-    if ( !matchesFolder() )
-        return false;
-
-    if ( !match(fromMail, mail.from().toString() ) )
+    if ( !matchesFolder(in) )
         return false;
 
-    if ( !matchesTo() )
+    if ( !match(fromMail, in.from().toString() ) )
         return false;
 
-    if ( !match(subject, mail.subject() ) )
+    if ( !matchesTo(in) )
         return false;
 
-    if ( !matchesBeforeDate() )
-        return false;
-    if ( !matchesAfterDate() )
+    if ( !match(subject, in.subject() ) )
         return false;
 
-    if ( !matchesBody() )
+    if ( !matchesBeforeDate(in) )
+        return false;
+    if ( !matchesAfterDate(in) )
+        return false;
+
+    if ( !matchesBody(in) )
         return false;
 
     return true;
@@ -130,7 +128,7 @@ void Search::setStatus(MailStatus s)
     _status = s;
 }
 
-uint Search::status()
+uint Search::status() const
 {
     return _status;
 }
@@ -159,7 +157,7 @@ void Search::setFromAccount(QString _fromAccount)
     lists.  Only to.first() are currently cached.  Reading all the mails
     from disk are currently to slow a process though
 */
-bool Search::matchesTo()
+bool Search::matchesTo(const QMailMessage& mail) const
 {
     if ( recipient.isEmpty() )
         return true;
@@ -190,7 +188,7 @@ bool Search::match(const QString &source, const QString &target)
 }
 
 /*  Reading entire mailbox is very slow on a large mailbox  */
-bool Search::matchesBody()
+bool Search::matchesBody(const QMailMessage& mail) const
 {
     if ( body.isEmpty() )
         return true;
@@ -198,7 +196,7 @@ bool Search::matchesBody()
     return match(body, mail.body().data());
 }
 
-bool Search::matchesStatus()
+bool Search::matchesStatus(const QMailMessage& mail) const
 {
     switch( _status ) {
         case Any:       return true;
@@ -212,7 +210,7 @@ bool Search::matchesStatus()
 }
 
 // match against date, if the mails date is not parsed, always return true
-bool Search::matchesBeforeDate()
+bool Search::matchesBeforeDate(const QMailMessage& mail) const
 {
     if ( beforeDate.isNull() )
         return true;
@@ -228,7 +226,7 @@ bool Search::matchesBeforeDate()
 }
 
 // match against date, if the mails date is not parsed, always return true
-bool Search::matchesAfterDate()
+bool Search::matchesAfterDate(const QMailMessage& mail) const
 {
     if ( afterDate.isNull() )
         return true;
@@ -243,7 +241,7 @@ bool Search::matchesAfterDate()
     return false;
 }
 
-bool Search::matchesFolder()
+bool Search::matchesFolder(const QMailMessage& mail) const
 {
     if ( folder.isEmpty() )
         return true;
@@ -251,7 +249,7 @@ bool Search::matchesFolder()
     return ( folder == mail.fromMailbox() );
 }
 
-bool Search::matchesAccount()
+bool Search::matchesAccount(const QMailMessage& mail) const
 {
     if ( fromAccount.isEmpty() )
         return true;
@@ -261,32 +259,32 @@ bool Search::matchesAccount()
     return false;
 }
 
-QString Search::getFrom()
+QString Search::getFrom() const
 {
     return fromMail;
 }
 
-QString Search::getTo()
+QString Search::getTo() const
 {
     return recipient;
 }
 
-QString Search::getSubject()
+QString Search::getSubject() const
 {
     return subject;
 }
 
-QString Search::getBody()
+QString Search::getBody() const
 {
     return body;
 }
 
-QDate Search::getBeforeDate()
+QDate Search::getBeforeDate() const
 {
     return beforeDate;
 }
 
-QDate Search::getAfterDate()
+QDate Search::getAfterDate() const
 {
     return afterDate;
 }

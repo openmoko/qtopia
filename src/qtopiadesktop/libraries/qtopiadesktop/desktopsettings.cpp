@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,7 @@
 #include <QDesktopWidget>
 #include <QTranslator>
 #include <QApplication>
+#include <QUuid>
 
 static QString checkLanguage( const QString &language )
 {
@@ -274,5 +275,22 @@ void DesktopSettings::loadTranslations( const QString &file, QObject *parent )
             delete trans;
         }
     }
+}
+
+/*!
+  Returns a unique string for this device.
+*/
+QString DesktopSettings::deviceId()
+{
+    static QString id;
+    if ( id.isEmpty() ) {
+        DesktopSettings settings("settings");
+        id = settings.value("deviceId").toString();
+        if ( id.isEmpty() ) {
+            id = QUuid::createUuid();
+            settings.setValue("deviceId", id);
+        }
+    }
+    return id;
 }
 

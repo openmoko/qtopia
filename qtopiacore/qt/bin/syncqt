@@ -3,7 +3,7 @@
 #
 # Synchronizes Qt header files - internal Trolltech tool.
 #
-# Copyright (C) 1997-2007 Trolltech ASA. All rights reserved.
+# Copyright (C) 1997-2008 Trolltech ASA. All rights reserved.
 #
 ######################################################################
 
@@ -160,6 +160,8 @@ sub classNames {
         push @ret, "QtEvents";
     } elsif(basename($iheader) eq "qnamespace.h") {
         push @ret, "Qt"
+    } elsif(basename($iheader) eq "qssl.h") {
+	push @ret, "QSsl";
     } elsif(basename($iheader) eq "qtest.h") {
         push @ret, "QTest"
     }

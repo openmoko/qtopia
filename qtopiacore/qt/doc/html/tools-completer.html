@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/examples/completer.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/examples/completer.qdoc -->
 <head>
   <title>Qt 4.3: Completer Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -21,6 +21,7 @@
 <li><a href="tools-completer-mainwindow-cpp.html">tools/completer/mainwindow.cpp</a></li>
 <li><a href="tools-completer-mainwindow-h.html">tools/completer/mainwindow.h</a></li>
 <li><a href="tools-completer-main-cpp.html">tools/completer/main.cpp</a></li>
+<li><a href="tools-completer-completer-pro.html">tools/completer/completer.pro</a></li>
 <li><a href="tools-completer-completer-qrc.html">tools/completer/completer.qrc</a></li>
 </ul>
 <p>The Completer example shows how to provide string-completion facilities for an input widget based on data provided by a model.</p>
@@ -239,7 +240,7 @@
      switch (modelCombo-&gt;currentIndex()) {
      default:
      case 0:
-         { <span class="comment">// Unsorted QDirModel</span>
+         { <span class="comment">//</span> Unsorted QDirModel
              QDirModel *dirModel = new QDirModel(completer);
              completer-&gt;setModel(dirModel);
              contentsLabel-&gt;setText(tr(&quot;Enter file path&quot;));
@@ -248,7 +249,7 @@
 <p>Note that we create the model with <tt>completer</tt> as the parent as this allows us to replace the model with a new model. The <tt>completer</tt> will ensure that the old one is deleted the moment a new model is assigned to it.</p>
 <p>If <tt>case</tt> is 1, we use the <tt>DirModel</tt> we defined earlier, resulting in full paths for the files.</p>
 <pre>     case 1:
-         { <span class="comment">// DirModel that shows full paths</span>
+         { <span class="comment">//</span> DirModel that shows full paths
              DirModel *dirModel = new DirModel(completer);
              completer-&gt;setModel(dirModel);
              contentsLabel-&gt;setText(tr(&quot;Enter file path&quot;));
@@ -256,7 +257,7 @@
          break;</pre>
 <p>When <tt>case</tt> is 2, we attempt to complete names of countries. This requires a <a href="qtreeview.html">QTreeView</a> object, <tt>treeView</tt>. The country names are extracted from <i>countries.txt</i> and set the popup used to display completions to <tt>treeView</tt>.</p>
 <pre>     case 2:
-         { <span class="comment">// Country List</span>
+         { <span class="comment">//</span> Country List
              completer-&gt;setModel(modelFromFile(&quot;:/resources/countries.txt&quot;));
              QTreeView *treeView = new QTreeView;
              completer-&gt;setPopup(treeView);
@@ -273,7 +274,7 @@
 <p>The screenshot below shows the Completer with the word list model.</p>
 <p align="center"><img src="images/completer-example-word.png" /></p><p>Once the model type is selected, we call the <tt>changeMode()</tt> function and the <tt>changeCase()</tt> function and set the wrap option accordingly. The <tt>wrapCheckBox</tt>'s <a href="qabstractbutton.html#clicked">clicked()</a> signal is connected to the <tt>completer</tt>'s <a href="qcompleter.html#wrapAround-prop">setWrapAround()</a> slot.</p>
 <pre>     case 3:
-         { <span class="comment">// Word list</span>
+         { <span class="comment">//</span> Word list
              completer-&gt;setModel(modelFromFile(&quot;:/resources/wordlist.txt&quot;));
              completer-&gt;setModelSorting(QCompleter::CaseInsensitivelySortedModel);
              contentsLabel-&gt;setText(tr(&quot;Enter a word&quot;));
@@ -305,8 +306,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

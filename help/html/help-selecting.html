@@ -1,7 +1,10 @@
 <html>
 <head><title>Selecting Text</title></head>
 <body>
+<!--#if expr="$CLIPBOARD"-->
+<!--#if expr="$USERGUIDE"-->
 <h3>Selecting Text</h3>
+<!--#endif-->
 In navigation mode all text in the field is automatically selected.
 Use <img src=":icon/copy"> </img> to copy the text to the clipboard.
 <p>
@@ -14,5 +17,8 @@ Use <img src=":icon/paste"> </img> to insert the previously cut or copied
 text into the document at the current location of the cursor.</li>
 </ul>
 <p>The select, copy and paste icons only appear in menus when they can be utilized.</p>
+<!--#else-->
+This device does not have clipboard functionality.
+<!--#endif-->
 </body>
 </html>

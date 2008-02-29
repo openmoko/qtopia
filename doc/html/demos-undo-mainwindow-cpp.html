@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2005-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the demonstration applications of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -414,7 +412,7 @@
      if (doc == 0)
          return;
 
-     <span class="comment">// Create a macro command using beginMacro() and endMacro()</span>
+     <span class="comment">//</span> Create a macro command using beginMacro() and endMacro()
 
      doc-&gt;undoStack()-&gt;beginMacro(tr(&quot;Add snowman&quot;));
      doc-&gt;undoStack()-&gt;push(new AddShapeCommand(doc,
@@ -432,7 +430,7 @@
      if (doc == 0)
          return;
 
-     <span class="comment">// Compose a macro command by explicitly adding children to a parent command</span>
+     <span class="comment">//</span> Compose a macro command by explicitly adding children to a parent command
 
      QUndoCommand *parent = new QUndoCommand(tr(&quot;Add robot&quot;));
 
@@ -458,8 +456,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

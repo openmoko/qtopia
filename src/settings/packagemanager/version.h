@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,10 +24,9 @@
 
 #include <qstring.h>
 
-#include <custom-qtopia.h>
+#include <custom.h>
+// The documentation references these lines (see doc/src/syscust/custom.qdoc)
 #ifndef QTOPIA_COMPATIBLE_DEVICES
-#warning  QTOPIA_COMPATIBLE_DEVICES not defined in device specific custom.h \
-           setting value to "Unknown" 
 #define QTOPIA_COMPATIBLE_DEVICES "Unknown"
 #endif
 

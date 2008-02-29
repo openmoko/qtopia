@@ -2,23 +2,56 @@
 <html>
 <head><title>MMS Settings</title></head>
 <body>
+<!--#if expr="$USERGUIDE"-->
 <h3>MMS Settings</h3>
+<!--#endif-->
 <p>Before you can use MMS you must set up your account.</p>
 <ul>
 <li>Press <img src=":icon/options"><b>Options</b>, then select <b>Account Settings...</b> from the menu.</li>
 <li>Select <b>MMS</b> from the list.</li>
-<li>Enter your account details.</li>
-<li>Press <img src=":icon/i18n/back"> </img> to save and exit.</li>
+<li>Select <b>Configure Network...</b> from the list to set up an internet
+connection.</li>
 </ul>
-<p>There are 3 tabs and you must complete all the fields before you can use MMS. </p>
-<p><b>Server:</b></p>
+<p>A data connection and WAP account must be created:</p>
+<ul>To create a data connection:
+<li>Press <img src=":icon/left"></img> to select the <b>Data</b> tab.</li>
+<li>Press <img src=":icon/options"><b>Options</b> and select <b>New</b> from
+the menu.</li>
+<li>Use <img src=":icon/up"> </img> / <img src=":icon/down"> </img> to
+select the appropriate service, e.g. GPRS.</li>
+<li>Enter the appropriate account settings information, e.g. APN, username and
+password for GPRS as provided by your service provider.</li>
+<li>Press back twice to return to the internet connection screen.</li> 
+</ul>
+<ul>To create a WAP account:
+<li>Press <img src=":icon/right"></img> to select the <b>WAP</b> tab.</li>
+<li>Press <img src=":icon/options"><b>Options</b> and select <b>New</b> from
+the menu.</li>
+<li>Select the <b>Account</b> item, and use <img src=":icon/down"></img> and
+Select to choose a data account, e.g. GPRS, then press back.</li>
+<li>Select the <b>WAP Gateway</b> item. Enter the appropriate WAP Gateway
+details as provided by your service provider, then press back.</li>
+<li>Select the <b>MMS Server</b> item. Enter the appropriate MMS server
+details as provided by your service provider, then press back to return to the
+internet connection screen.</li>
+<p>The MMS Server details than can be specified are:</p>
 <p>Server: the URL of your mail server.</p>
-<p>Gateway: the address of your WAP gateway.</p>
-<p><b>Send:</b></p>
+<p>Port: the TCP/IP port of your mail server.</p>
 <p>Expiry: how long the message should remain on the server before it is removed.</p>
 <p>Visibility: if your address or phone number should be visible to the recipient.</p>
-<p><b>Receive:</b></p>
-<p>Allow delivery reports: if ticked, a receipt will sent indicating that you have viewed the message when the sender requests one. The cost of sending the receipt will be borne by you.</p>
+<p>Delivery reports: if ticked, a receipt will be sent indicating that you have viewed the message when the sender requests one. The cost of sending the receipt will be borne by you.</p>
+
+<li>Select the newly created WAP account so that it appears as the Standard
+account, then press back to return to the Network Profile.</li>
+<li>Press back again to return to the Internet Connection screen, then press
+back again to return to the network profile screen. In the network profile
+screen the following option can be specified:</li>
+<p>Retrieve automatically: if ticked then when Qtopia receives a notification
+message that a new MMS message has arrived the complete MMS message will be
+fetched.</p>
+<li>Press back again to return to the Account Settings screen, and back once
+more to return to the main Messages screen.</li>
+</ul>
 </body>
 </html>
 <!--#endif-->

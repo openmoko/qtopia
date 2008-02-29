@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -154,7 +152,7 @@ private:
 
     Q_PRIVATE_SLOT(d_func(), void _q_directoryChanged(const QString &directory, const QStringList &list))
     Q_PRIVATE_SLOT(d_func(), void _q_performDelayedSort())
-    Q_PRIVATE_SLOT(d_func(), void _q_fileSystemChanged(const QString &path, const QList<QPair<QString, QExtendedInformation> > &))
+    Q_PRIVATE_SLOT(d_func(), void _q_fileSystemChanged(const QString &path, const QList<QPair<QString, QFileInfo> > &))
     Q_PRIVATE_SLOT(d_func(), void _q_resolvedName(const QString &fileName, const QString &resolvedName))
 };
 
@@ -185,9 +183,9 @@ public:
         inline QString type() const { if (info) return info->displayType; return QLatin1String(""); }
         inline QDateTime lastModified() const { if (info) return info->lastModified; return QDateTime(); }
         inline QFile::Permissions permissions() const { if (info) return info->permissions; return 0; }
-        inline bool isReadable() const { return (permissions() & QFile::ReadUser); }
-        inline bool isWritable() const { return (permissions() & QFile::WriteUser); }
-        inline bool isExecutable() const { return (permissions() & QFile::ExeUser); }
+        inline bool isReadable() const { return ((permissions() & QFile::ReadUser) != 0); }
+        inline bool isWritable() const { return ((permissions() & QFile::WriteUser) != 0); }
+        inline bool isExecutable() const { return ((permissions() & QFile::ExeUser) != 0); }
         inline bool isDir() const {
             if (info)
                 return info->isDir();
@@ -340,6 +338,7 @@ public:
 
     QIcon icon(const QModelIndex &index) const;
     QString name(const QModelIndex &index) const;
+    QString filePath(const QModelIndex &index) const;
     QString size(const QModelIndex &index) const;
     static QString size(qint64 bytes);
     QString type(const QModelIndex &index) const;
@@ -347,7 +346,7 @@ public:
 
     void _q_directoryChanged(const QString &directory, const QStringList &list);
     void _q_performDelayedSort();
-    void _q_fileSystemChanged(const QString &path, const QList<QPair<QString, QExtendedInformation> > &);
+    void _q_fileSystemChanged(const QString &path, const QList<QPair<QString, QFileInfo> > &);
     void _q_resolvedName(const QString &fileName, const QString &resolvedName);
 
     static int naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs);

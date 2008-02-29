@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2005-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2005-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the demonstration applications of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -115,7 +113,7 @@
          painter-&gt;setPen(QPen(Qt::black, 0));
      }
 
-     <span class="comment">// Draw text</span>
+     <span class="comment">//</span> Draw text
      if (option-&gt;levelOfDetail &gt;= 2) {
          QFont font(&quot;Times&quot;, 10);
          font.setStyleStrategy(QFont::ForceOutline);
@@ -128,7 +126,7 @@
          painter-&gt;restore();
      }
 
-     <span class="comment">// Draw lines</span>
+     <span class="comment">//</span> Draw lines
      QVarLengthArray&lt;QLineF, 36&gt; lines;
      if (option-&gt;levelOfDetail &gt;= 0.5) {
          for (int i = 0; i &lt;= 10; i += (option-&gt;levelOfDetail &gt; 0.5 ? 1 : 2)) {
@@ -153,7 +151,7 @@
      }
      painter-&gt;drawLines(lines.data(), lines.size());
 
-     <span class="comment">// Draw red ink</span>
+     <span class="comment">//</span> Draw red ink
      if (stuff.size() &gt; 1) {
          painter-&gt;setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
          painter-&gt;setBrush(Qt::NoBrush);
@@ -188,8 +186,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

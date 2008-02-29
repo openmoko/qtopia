@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -290,6 +288,7 @@ static int unpackControlTypes(QSizePolicy::ControlTypes controls, QSizePolicy::C
     Constructs a style object.
 */
 QStyle::QStyle()
+    : QObject(*new QStylePrivate)
 {
 }
 
@@ -824,6 +823,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o \l State_DownArrow \o Indicates that a scroll down arrow should be drawn.
     \row \o \l State_UpArrow \o Indicates that a scroll up arrow should be drawn
     \row \o \l State_HasFocus \o Set if the menu bar has input focus.
+
     \row \o{1,5} \l CE_PushButton, \l CE_PushButtonBevel, \l CE_PushButtonLabel
          \o{1,5} \l QStyleOptionButton
          \o \l State_Enabled \o Set if the button is enabled.
@@ -845,12 +845,21 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o \l State_Sunken
          \o Set if the button is down (i.e., the mouse button or
          the space bar is pressed on the button).
-    \row \o{1,2} \l CE_ProgressBarContents, \l CE_ProgressBarLabel,
+
+   \row \o{1,2} \l CE_ProgressBarContents, \l CE_ProgressBarLabel,
                  \l CE_ProgressBarGroove
          \o{1,2} \l QStyleOptionProgressBar
          \o \l State_Enabled \o Set if the progress bar is enabled.
     \row \o \l State_HasFocus \o Set if the progress bar has input focus.
+
     \row \o \l CE_Header, \l CE_HeaderSection, \l CE_HeaderLabel \o \l QStyleOptionHeader \o \o
+
+    \row \o{1,3} \l CE_TabBarTab, CE_TabBarTabShape, CE_TabBarTabLabel
+        \o{1,3} \l QStyleOptionTab
+        \o \l State_Enabled \o Set if the tab bar is enabled.
+    \row \o \l State_Selected \o The tab bar is the currently selected tab bar.
+    \row \o \l State_HasFocus \o Set if the tab bar tab has input focus.
+
     \row \o{1,7} \l CE_ToolButtonLabel
          \o{1,7} \l QStyleOptionToolButton
          \o \l State_Enabled \o Set if the tool button is enabled.
@@ -862,6 +871,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
     \row \o \l State_AutoRaise \o Set if the tool button has auto-raise enabled.
     \row \o \l State_MouseOver \o Set if the mouse pointer is over the tool button.
     \row \o \l State_Raised \o Set if the button is not down and is not on.
+
     \row \o \l CE_ToolBoxTab \o \l QStyleOptionToolBox
          \o \l State_Selected \o The tab is the currently selected tab.
     \row \o{1,3} \l CE_HeaderSection \o{1,3} \l QStyleOptionHeader
@@ -1735,6 +1745,7 @@ void QStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment,
 
     Used to fill any area not covered by the items.
     \omitvalue SH_UnderlineAccelerator
+    \omitvalue SH_Menu_Mask
 
     \sa styleHint()
 */

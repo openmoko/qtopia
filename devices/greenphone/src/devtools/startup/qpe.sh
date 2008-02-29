@@ -60,8 +60,8 @@ if [ "$PERFTEST_FLAG" = 1 ] && [ "$QTOPIA_PERFTEST" != 1 ]; then
     export QTOPIA_PERFTEST=1
     echo "Enabling performance testing" | logger -p local5.notice -t 'Qtopia'
     if [ "$PERFTESTSLEEP_FLAG" = 1 ]; then
-        echo "Performance: sleeping for 3 minutes" | logger -p local5.notice -t 'Qtopia'
-        sleep 180
+        echo "Performance: sleeping for 2 minutes" | logger -p local5.notice -t 'Qtopia'
+        sleep 120
         echo "Performance: finished sleeping" | logger -p local5.notice -t 'Qtopia'
     fi
 

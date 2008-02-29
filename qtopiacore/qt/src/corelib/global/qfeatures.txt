@@ -130,6 +130,13 @@ Requires:
 Name: QTextStream
 SeeAlso: ???
 
+Feature: TEMPORARYFILE
+Description: Provides an I/O device that operates on temporary files.
+Section: File I/O
+Requires:
+Name: QTemporaryFile
+SeeAlso: ???
+
 Feature: LIBRARY
 Description: Supports a shared library wrapper.
 Section: File I/O

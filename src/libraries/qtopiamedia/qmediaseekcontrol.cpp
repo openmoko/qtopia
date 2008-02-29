@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -96,7 +96,7 @@ QMediaSeekControl::QMediaSeekControl(QMediaContent* mediaContent):
     QObject(mediaContent),
     d(new QMediaSeekControlPrivate(mediaContent, QMediaSeekControl::name()))
 {
-    connect(d, SIGNAL(positionChanged(quint32)), this, SIGNAL(positionCHanged(quint32)));
+    connect(d, SIGNAL(positionChanged(quint32)), this, SIGNAL(positionChanged(quint32)));
 
     connect(d, SIGNAL(valid()), this, SIGNAL(valid()));
     connect(d, SIGNAL(invalid()), this, SIGNAL(invalid()));

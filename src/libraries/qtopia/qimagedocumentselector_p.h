@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -51,12 +51,14 @@
 class QContentFilterDialog;
 class SingleView;
 class QAbstractListModel;
+class ThumbnailLoader;
 
 class QImageDocumentSelectorPrivate : public QWidget
 {
     Q_OBJECT
 public:
     explicit QImageDocumentSelectorPrivate( QWidget* parent = 0 );
+    ~QImageDocumentSelectorPrivate();
 
     // Images may be displayed as a collection of thumbnails
     // or singularly, default thumbnail mode
@@ -119,15 +121,6 @@ private slots:
     // Launch view category dialog
     void launchCategoryDialog();
 
-    // Maintain valid selection
-    void rowRemovedSelection(const QModelIndex &idx, int rstart, int rend);
-    void rowAddedSelection();
-
-    // Initialize selection
-    void resetSelection();
-
-    void delayResetSelection();
-
     void updateFinished();
 
 protected:
@@ -149,6 +142,7 @@ private:
 
     // Only Qtopia Phone
     QContentFilterDialog *category_dialog;
+    QLabel *category_label;
 
     QStringList default_categories;
     QStringList filtered_default_categories;
@@ -159,6 +153,8 @@ private:
     SingleView *single_view;
     ThumbnailView *thumbnail_view;
     QLabel *message_view;
+
+    ThumbnailLoader *loader;
 
     void filterDefaultCategories();
 };

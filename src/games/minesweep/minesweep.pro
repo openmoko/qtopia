@@ -22,4 +22,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.description=A minesweeper game for Qtopia
-pkg.domain=window,games
+pkg.domain=trusted

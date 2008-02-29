@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,6 +23,12 @@
 #include <qtopiadesktoplog.h>
 #include <qcopchannel_qd.h>
 #include <qcopenvelope_qd.h>
+#include <QApplication>
+#include <trace.h>
+QD_LOG_OPTION(Qtopia4Sync)
+
+#define SEND_CHANNEL "QPE/Qtopia4Sync"
+#define RECEIVE_CHANNEL "QD/Qtopia4Sync"
 
 class Qtopia4Sync : public QDClientSyncPlugin
 {
@@ -61,7 +67,7 @@ private:
 
 void Qtopia4Sync::init()
 {
-    QCopChannel *channel = new QCopChannel("QD/PimSync", this);
+    QCopChannel *channel = new QCopChannel(RECEIVE_CHANNEL, this);
     connect(channel, SIGNAL(received(QString,QByteArray)),
             this, SLOT(handleMessage(QString,QByteArray)));
 }
@@ -92,19 +98,19 @@ void Qtopia4Sync::finishSync()
 
 void Qtopia4Sync::serverSyncRequest(const QString &source)
 {
-    QCopEnvelope e("QPE/PimSync", "serverSyncRequest(QString)");
+    QCopEnvelope e(SEND_CHANNEL, "serverSyncRequest(QString)");
     e << source;
 }
 
 void Qtopia4Sync::serverIdentity(const QString &server)
 {
-    QCopEnvelope e("QPE/PimSync", "serverIdentity(QString)");
+    QCopEnvelope e(SEND_CHANNEL, "serverIdentity(QString)");
     e << server;
 }
 
 void Qtopia4Sync::serverVersion(int major, int minor, int patch)
 {
-    QCopEnvelope e("QPE/PimSync", "serverVersion(int,int,int)");
+    QCopEnvelope e(SEND_CHANNEL, "serverVersion(int,int,int)");
     e << major;
     e << minor;
     e << patch;
@@ -112,47 +118,47 @@ void Qtopia4Sync::serverVersion(int major, int minor, int patch)
 
 void Qtopia4Sync::serverSyncAnchors(const QDateTime &serverLastSync, const QDateTime &serverNextSync)
 {
-    QCopEnvelope e("QPE/PimSync", "serverSyncAnchors(QDateTime,QDateTime)");
+    QCopEnvelope e(SEND_CHANNEL, "serverSyncAnchors(QDateTime,QDateTime)");
     e << serverLastSync;
     e << serverNextSync;
 }
 
 void Qtopia4Sync::createServerRecord(const QByteArray &record)
 {
-    QCopEnvelope e("QPE/PimSync", "createServerRecord(QByteArray)");
+    QCopEnvelope e(SEND_CHANNEL, "createServerRecord(QByteArray)");
     e << record;
 }
 
 void Qtopia4Sync::replaceServerRecord(const QByteArray &record)
 {
-    QCopEnvelope e("QPE/PimSync", "replaceServerRecord(QByteArray)");
+    QCopEnvelope e(SEND_CHANNEL, "replaceServerRecord(QByteArray)");
     e << record;
 }
 
 void Qtopia4Sync::removeServerRecord(const QString &serverId)
 {
-    QCopEnvelope e("QPE/PimSync", "removeServerRecord(QString)");
+    QCopEnvelope e(SEND_CHANNEL, "removeServerRecord(QString)");
     e << serverId;
 }
 
 void Qtopia4Sync::requestTwoWaySync()
 {
-    QCopEnvelope e("QPE/PimSync", "requestTwoWaySync()");
+    QCopEnvelope e(SEND_CHANNEL, "requestTwoWaySync()");
 }
 
 void Qtopia4Sync::requestSlowSync()
 {
-    QCopEnvelope e("QPE/PimSync", "requestSlowSync()");
+    QCopEnvelope e(SEND_CHANNEL, "requestSlowSync()");
 }
 
 void Qtopia4Sync::serverError()
 {
-    QCopEnvelope e("QPE/PimSync", "serverError()");
+    QCopEnvelope e(SEND_CHANNEL, "serverError()");
 }
 
 void Qtopia4Sync::serverEnd()
 {
-    QCopEnvelope e("QPE/PimSync", "serverEnd()");
+    QCopEnvelope e(SEND_CHANNEL, "serverEnd()");
 }
 
 void Qtopia4Sync::handleMessage(const QString &message, const QByteArray &data)
@@ -162,10 +168,7 @@ void Qtopia4Sync::handleMessage(const QString &message, const QByteArray &data)
     int i1, i2, i3;
     QDateTime ts1, ts2;
     QByteArray r;
-    if (message == "clientSyncRequest(QString)") {
-        stream >> s1;
-        emit clientSyncRequest(s1);
-    } else if (message == "clientIdentity(QString)") {
+    if (message == "clientIdentity(QString)") {
         stream >> s1;
         emit clientIdentity(s1);
         finishState.needEnd = true;
@@ -184,9 +187,9 @@ void Qtopia4Sync::handleMessage(const QString &message, const QByteArray &data)
     } else if (message == "removeClientRecord(QString)") {
         stream >> s1;
         emit removeClientRecord(s1);
-    } else if (message == "mapId(QString,QString)") {
+    } else if (message == "mappedId(QString,QString)") {
         stream >> s1 >> s2;
-        emit mapId(s1, s2);
+        emit mappedId(s1, s2);
     } else if (message == "clientError()") {
         emit clientError();
     } else if (message == "clientEnd()") {
@@ -197,49 +200,82 @@ void Qtopia4Sync::handleMessage(const QString &message, const QByteArray &data)
     }
 }
 
-class Qtopia4DatebookSync : public Qtopia4Sync
+// =====================================================================
+
+class Qtopia4SyncImpl : public Qtopia4Sync
 {
     Q_OBJECT
-    QD_CONSTRUCT_PLUGIN(Qtopia4DatebookSync,Qtopia4Sync)
 public:
+    Qtopia4SyncImpl( const QString &dataset, QObject *parent = 0 )
+        : Qtopia4Sync( parent ), mDataset( dataset )
+    {
+    }
+    ~Qtopia4SyncImpl()
+    {
+    }
+
     // QDPlugin
-    QString id() { return "com.trolltech.sync.qtopia4.datebook"; }
-    QString displayName() { return tr("Qtopia Appointments"); }
+    QString id() { return QString("com.trolltech.sync.qtopia4.%1").arg(mDataset); }
+    QString displayName() { return QString("Qtopia Sync (%1)").arg(mDataset); } // FIXME tr()
 
     // QDClientSyncPlugin
-    QString dataset() { return "calendar"; }
+    QString dataset() { return mDataset; }
+
+private:
+    QString mDataset;
 };
 
-QD_REGISTER_PLUGIN(Qtopia4DatebookSync)
+// =====================================================================
 
-class Qtopia4AddressbookSync : public Qtopia4Sync
+class Qtopia4MultiSync : public QDClientSyncPluginFactory
 {
     Q_OBJECT
-    QD_CONSTRUCT_PLUGIN(Qtopia4AddressbookSync,Qtopia4Sync)
+    QD_CONSTRUCT_PLUGIN(Qtopia4MultiSync,QDClientSyncPluginFactory)
 public:
     // QDPlugin
-    QString id() { return "com.trolltech.sync.qtopia4.addressbook"; }
-    QString displayName() { return tr("Qtopia Contacts"); }
+    QString id() { return "com.trolltech.multisync.qtopia4"; }
+    QString displayName() { return QString("Qtopia Sync"); } // FIXME tr()
+    void init();
 
-    // QDClientSyncPlugin
-    QString dataset() { return "contacts"; }
+    // QDClientSyncPluginFactory
+    QStringList datasets();
+    QDClientSyncPlugin *pluginForDataset( const QString &dataset );
+
+private slots:
+    void checkForDatasets();
+
+private:
+    QStringList mDatasets;
 };
 
-QD_REGISTER_PLUGIN(Qtopia4AddressbookSync)
+QD_REGISTER_PLUGIN(Qtopia4MultiSync)
 
-class Qtopia4TodoSync : public Qtopia4Sync
+// =====================================================================
+
+void Qtopia4MultiSync::init()
 {
-    Q_OBJECT
-    QD_CONSTRUCT_PLUGIN(Qtopia4TodoSync,Qtopia4Sync)
-public:
-    // QDPlugin
-    QString id() { return "com.trolltech.sync.qtopia4.todo"; }
-    QString displayName() { return tr("Qtopia Tasks"); }
+    connect( qApp, SIGNAL(setConnectionState(int)), this, SLOT(checkForDatasets()) );
+}
 
-    // QDClientSyncPlugin
-    QString dataset() { return "tasks"; }
-};
+void Qtopia4MultiSync::checkForDatasets()
+{
+    TRACE(Qtopia4Sync) << "Qtopia4MultiSync::checkForDatasets";
+    mDatasets = QStringList();
+    QDDevPlugin *dev = centerInterface()->currentDevice();
+    if ( !dev || dev != centerInterface()->getPlugin("com.trolltech.plugin.dev.qtopia4") ) return;
+    QDConPlugin *con = dev->connection();
+    if ( !con ) return;
+    mDatasets = con->conProperty("datasets").split(" ");
+}
 
-QD_REGISTER_PLUGIN(Qtopia4TodoSync)
+QStringList Qtopia4MultiSync::datasets()
+{
+    return mDatasets;
+}
+
+QDClientSyncPlugin *Qtopia4MultiSync::pluginForDataset( const QString &dataset )
+{
+    return new Qtopia4SyncImpl(dataset, centerInterface()->syncObject());
+}
 
 #include "qtopia4sync.moc"

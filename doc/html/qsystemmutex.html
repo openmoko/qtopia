@@ -31,7 +31,7 @@
 <h2>Detailed Description</h2>
 <p>The QSystemMutex class provides mutual exclusion between processes.</p>
 <p>A mutex is a synchronization tool for protecting critical sections of the code. The purpose of a QSystemMutex is to protect an object, data structure or section of code so that only one thread, or process, can access it at a time.</p>
-<p>QSystemMutex behaves much like the <a href="qmutex.html">QMutex</a> class, but it also works across multiple processes (although it also works perfectly well, albeit slightly less efficiently, in a single process). In order to clean up the system resources used to coordinate cross process synchronization, one QSystemMutex instance is designated the lock &quot;owner&quot;. This instance creates the required resources, and removes them when it is destroyed. The lock owner should always be instantiated before any others.</p>
+<p>QSystemMutex behaves much like the <a href="./qmutex.html">QMutex</a> class, but it also works across multiple processes (although it also works perfectly well, albeit slightly less efficiently, in a single process). In order to clean up the system resources used to coordinate cross process synchronization, one QSystemMutex instance is designated the lock &quot;owner&quot;. This instance creates the required resources, and removes them when it is destroyed. The lock owner should always be instantiated before any others.</p>
 <p>System locks are identified by a 32-bit integer, which allows other processes to share the same lock. While the selection of this identifier is left upto the caller, under Linux it is common to use the ftok(3) function call which uses the identity of a specified file to generate such an identifier.</p>
 <pre>    int id = (int)::ftok(&quot;/tmp/my_lock_identifier&quot;, 0);
 
@@ -65,8 +65,8 @@
 <p>Release the mutex.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

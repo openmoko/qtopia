@@ -24,7 +24,7 @@
     {
         if ( !current.isNull() ) {
             if ( !current.save( data ) ) {
-                <span class="comment">// error</span>
+                <span class="comment">//</span> error
                 return;
             }
         }
@@ -32,7 +32,7 @@
         current = QContent( filename );
 
         if ( !current.load( data ) ) {
-            <span class="comment">// error</span>
+            <span class="comment">//</span> error
         }
     }</pre>
 <a name="registering-mime-types"></a>
@@ -53,6 +53,7 @@
         MimeTypeIcons=&quot;mediaviewer/AudioPlayer;mediaviewer/VideoPlayer;mediaviewer/ImageViewer&quot;
         [DRM]
         MimeTypePermissions=&quot;Play;Play;Display;Display&quot;</pre>
+<p>A complete listing of .desktop file entries can be found in the <a href="desktopfiles.html">Desktop File Standard</a></p>
 <a name="run-time-registration"></a>
 <h3>Run-time registration</h3>
 <p>An application may also associate itself with a MIME type at run-time using <a href="qmimetype.html#addAssociation">QMimeType::addAssociation</a>(), and remove an association with <a href="qmimetype.html#removeAssociation">QMimeType::removeAssociation</a>(). <a href="qmimetype.html">QMimeType</a> may also be used to query existing associations between applications and MIME types.</p>
@@ -67,8 +68,8 @@
 <p>The <a href="qdocumentselector.html">QDocumentSelector</a>(<a href="qdocumentselectordialog.html">Dialog</a>) and <a href="qimagedocumentselector.html">QImageDocumentSelector</a>(<a href="qimagedocumentselectordialog.html">Dialog</a>) widgets can be used to browse and select documents from within an application. For an example of using the <a href="qdocumentselector.html">QDocumentSelector</a> widget see the <a href="content-notesdemo.html">Notes Application</a> tutorial.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

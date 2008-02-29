@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,16 +28,19 @@
 
 class MailboxList;
 class ActionListItem;
+class ActionListItemDelegate;
 
 class ActionListView : public QListWidget
 {
     Q_OBJECT
+
 public:
     ActionListView(QWidget *parent);
     virtual ~ActionListView();
-    ActionListItem *newItem( const char *name, const char* context, bool useTr);
-    ActionListItem *actionItemFromIndex( QModelIndex index ) const;
+
     void updateFolderStatus( const QString &, const QString &, IconType );
+
+    QString currentFolder() const;
     void setCurrentFolder(const QString &);
 
 signals:
@@ -51,7 +54,13 @@ protected slots:
     void currentFolderChanged(int); 
 
 private:
-    ActionListItem *folder(const QString &);
+    friend class ActionListItemDelegate;
+
+    ActionListItem *newItem( const char *name, const char* context = 0 );
+    ActionListItem *newItem( const char *name, const char* context, const QString& mailbox );
+    ActionListItem *actionItemFromIndex( QModelIndex index ) const;
+    ActionListItem *actionItemFromRow( int row ) const;
+    ActionListItem *folder(const QString &) const;
 
     QListWidgetItem *mComposeItem;
     QListWidgetItem *mInboxItem;

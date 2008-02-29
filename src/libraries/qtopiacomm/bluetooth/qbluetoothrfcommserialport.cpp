@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,11 +33,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <QDebug>
 #include <QTime>
 #include <QTimer>
 #include <QString>
 #include <QApplication>
+#include <QDebug>
 
 static bool release_dev_with_socket(int id, int socket)
 {
@@ -250,9 +250,6 @@ bool QBluetoothRfcommSerialPortPrivate::initiateConnect(const QBluetoothAddress 
 
 void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
 {
-#ifdef QBLUETOOTH_DEBUG
-    qDebug() << "m_cancelled: " << m_cancelled << "m_retries:" << m_retries;
-#endif
     if (m_cancelled || (m_retries == MAX_RETRIES)) {
         m_timer->stop();
         QBluetoothRfcommSerialPort::releaseDevice(m_id);
@@ -272,15 +269,10 @@ void QBluetoothRfcommSerialPortPrivate::setupTtyRetry()
     char devname[MAXPATHLEN];
     snprintf(devname, MAXPATHLEN - 1, "/dev/rfcomm%d", m_id);
     if ((m_fd = open(devname, O_RDONLY | O_NOCTTY)) < 0) {
-#ifdef QBLUETOOTH_DEBUG
-        qDebug() << "Opening" << devname << strerror(errno);
-#endif
         snprintf(devname, MAXPATHLEN-1, "/dev/bluetooth/rfcomm/%d", m_id);
         m_fd = open(devname, O_RDONLY | O_NOCTTY);
-#ifdef QBLUETOOTH_DEBUG
         if ( m_fd < 0 )
-            qDebug() << "Opening" << devname << strerror(errno);
-#endif
+            qWarning("Error opening RFCOMM serial port"); 
     }
 
     m_retries++;
@@ -308,9 +300,6 @@ void QBluetoothRfcommSerialPortPrivate::setupTty()
     m_socket = 0;
 
     if ( m_id < 0 ) {
-#ifdef QBLUETOOTH_DEBUG
-        qDebug() << "RfcommSerialPortPrivate::setupTty(): " << strerror(errno);
-#endif
         m_parent->setError(QBluetoothRfcommSerialPort::CreationError);
 
         emit m_parent->error(m_error);
@@ -321,9 +310,6 @@ void QBluetoothRfcommSerialPortPrivate::setupTty()
     setupTtyRetry();
 
     if (m_fd == -1) {
-#ifdef QBLUETOOTH_DEBUG
-        qDebug() << "Going into delayed open";
-#endif
         m_openInProgress = true;
         m_timer->start(OPEN_TIME);
     }
@@ -337,9 +323,6 @@ void QBluetoothRfcommSerialPortPrivate::error(QBluetoothAbstractSocket::SocketEr
 
 void QBluetoothRfcommSerialPortPrivate::stateChanged(QBluetoothAbstractSocket::SocketState socketState)
 {
-#ifdef QBLUETOOTH_DEBUG
-    qDebug() << "stateChanged" << socketState;
-#endif
     switch (socketState) {
         case QBluetoothRfcommSocket::ConnectingState:
             break;
@@ -392,12 +375,12 @@ bool QBluetoothRfcommSerialPortPrivate::disconnect()
 {
     bool ret = true;
 
+    ::close(m_fd);
+    m_fd = -1;
+
     if (!(m_flags & QBluetoothRfcommSerialPort::KeepAlive)) {
         ret = QBluetoothRfcommSerialPort::releaseDevice(m_id);
     }
-
-    ::close(m_fd);
-    m_fd = -1;
 
     m_flags = 0;
     m_id = -1;

@@ -98,6 +98,11 @@
         </property>
         <item>
          <property name="text" >
+          <string>Any</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
           <string>Inbox</string>
          </property>
         </item>

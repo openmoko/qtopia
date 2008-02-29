@@ -4,17 +4,20 @@
 <body>
 <!--#if expr="$USERGUIDE"-->
    <h2>Call History</h2>
-<!--#else -->
-   <h3>Call History</h3>
 <!--#endif -->
-<p>Call history is invoked by pressing <img src=":image/callbutton"> </img> from the
-home screen and displays the last 50 calls. 
+<p>Call history
+<!--#if expr="$KEYPAD"--> is invoked by pressing <img src=":image/callbutton"> </img> from the
+home screen and
+<!--#endif--> displays the last 50 calls. 
 <p>If a number is in <b>Contacts</b> then the icon shows its type (home, mobile, etc).</p>
 <!--#if expr="$KEYPAD"-->
 <p>Use <img src=":icon/left">/<img src=":icon/right"> </img> to display:</p>
 <!--#endif-->
 <!--#if expr="$TOUCH"-->
 <p>Touch the tabs to dispay:</p>
+<!--#endif-->
+<!--#if expr="$FINGER"-->
+<p>Touch the tabs to display:</p>
 <!--#endif-->
 <ul>
 <li><img src=":icon/callhistory/CallHistory"> </img> all calls.</li>

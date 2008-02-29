@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,7 +22,7 @@
 #define SYSTEM_TIME_H
 
 #include <qdatetime.h>
-#include <QMainWindow>
+#include <QDialog>
 #include <QBasicTimer>
 #include <qtopiaabstractservice.h>
 
@@ -34,7 +34,7 @@ class QDateEdit;
 class QTimeEdit;
 class QValueSpaceItem;
 
-class SetDateTime : public QMainWindow
+class SetDateTime : public QDialog
 {
     Q_OBJECT
 public:
@@ -46,7 +46,6 @@ protected slots:
     void tzChange( const QString &tz );
     void dateChange(const QDate &);
     void timeChange(const QTime &);
-    void setDateFormat();
     void updateDateFormat();
     void updateTimeFormat(int);
 
@@ -57,8 +56,9 @@ public slots:
     void sysTimeZoneChanged();
 
 protected:
-    virtual void closeEvent( QCloseEvent* e );
     virtual void timerEvent( QTimerEvent* );
+    virtual void accept();
+    virtual void reject();
 
 private:
     QTimeEdit *time;
@@ -79,6 +79,7 @@ private:
 
     QBasicTimer clocktimer;
 
+    QString selectedDateFormat() const;
     void storeSettings();
 };
 

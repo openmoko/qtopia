@@ -70,7 +70,7 @@
 <p>Images can be provided for the buttons by placing them in <tt>pics/Button/</tt>. The name of the image should be the number of the button as described in <tt>defaultbuttons.conf</tt>. For this example, the image for the calendar button would be <tt>Button/0.png</tt>.</p>
 <pre>    Key=F9</pre>
 <p>This describes the Qt keycode the button maps to. These are the codes listed in <tt>qnamespace.h</tt> found in the Qt include directory.</p>
-<p>If your driver does not already map to the right keycode a custom driver may be required. Driver's can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a> and <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plugin mechanism. See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
+<p>If your driver does not already map to the right keycode a custom driver may be required. Driver's can be added by deriving from the <a href="./qwsmousehandler.html">QWSMouseHandler</a> and <a href="./qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="./qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="./qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plugin mechanism. See the <a href="./plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="./tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
 <pre>    PressedActionService=Calendar
     PressedActionMessage=raiseToday()
     HeldActionService=Calendar
@@ -102,9 +102,10 @@
     4=
     5=Applications/addressbook.desktop
     6=Settings
-    7=
+    7=Applications/simapp.desktop{@/Telephony/Status/SimToolkitAvailable},Applications/calculator.desktop
     8=Applications
     9=Documents</pre>
+<p>Note the example for button 7 is a <i>list</i> of alternatives separated by commas. The first alternative (simapp.desktop) is only used if the bracketed <a href="qexpressionevaluator.html">Qtopia Expression</a> evaluates to true. By using an expression that references the <a href="qvaluespaceitem.html">Qtopia Value Space</a>, this mechanism allows the function associated with a button to be determined dynamically.</p>
 <a name="phone-buttons"></a>
 <h3>Phone Buttons</h3>
 <p>The dialing and other buttons of a phone are configured by the <i>SystemButtons</i>, <i>TextButtons</i>, <i>PhoneTextButtons</i>, and <i>LocaleTextButtons</i> sections of the <tt>defaultbuttons.conf</tt> file.</p>
@@ -158,6 +159,11 @@
 <pre>    [InputMethods]
     DefaultIM=Phone Keys</pre>
 <p>If the named input method is available, it will be activated by default on startup. If this entry is not present, the default input method depends on the <tt>PrimaryInput</tt> entry of the <tt>Device</tt> section.</p>
+<p>Additionally, configuration options for the symbol picker are available. For backwards compatibility, these are in a different section as follows:</p>
+<pre>    [IMethod]
+    picker_width=13
+    picker_font_point_size=6</pre>
+<p><tt>picker_width</tt> determines the number of characters per row on the symbol picker, and <tt>picker_font_point_size</tt> determines the size of the font used on the symbol picker. If this results in too many characters per row to fit onscreen, the rightmost characters will not be visible.</p>
 <a name="phone-softkey-definition"></a>
 <h3>Phone SoftKey Definition</h3>
 <p>The format of the soft-key definition section of the file is as follows:</p>
@@ -212,8 +218,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

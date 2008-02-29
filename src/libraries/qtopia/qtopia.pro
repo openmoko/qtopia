@@ -143,7 +143,8 @@ QTOPIA_PRIVATE_HEADERS+=\
     qperformancelog_p.h \
     motionpath_p.h \
     qthumbstyle_p.h \
-    testslaveinterface_p.h
+    testslaveinterface_p.h \
+    qtagmap_p.h
 
 QTOPIA_SOURCES+=\
     qmimetype.cpp\
@@ -405,7 +406,7 @@ INSTALLS+=mainapps_category app_categories settings_category
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/server
 
 pkg.desc =Base Qtopia library.
-pkg.domain=base
+pkg.domain=trusted
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

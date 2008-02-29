@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -61,9 +61,6 @@ public:
     QString getOperation( const QModelIndex & );
     InstallControl *installControl();
 
-#ifndef QT_NO_SXE
-    bool hasSensitiveDomains( const QString &domain );
-#endif
 signals:
     void targetsUpdated( const QStringList & );
     void serversUpdated( const QStringList & );
@@ -96,10 +93,6 @@ private:
     QHash<QString,QString> servers;
     QHash<QString,QString> mediaNames;
     QString activeServer;
-
-#ifndef QT_NO_SXE
-    QStringList sensitiveDomains;
-#endif
 };
 
 ////////////////////////////////////////////////////////////////////////

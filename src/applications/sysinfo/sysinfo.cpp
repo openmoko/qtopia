@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,8 @@
 #include <qtabwidget.h>
 #include <qlayout.h>
 #include <QScrollArea>
+#include <QTimer>
+#include <QCoreApplication>
 
 SystemInfo::SystemInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -51,17 +53,8 @@ SystemInfo::SystemInfo( QWidget *parent, Qt::WFlags f )
     lay->addWidget( tab );
 
     tab->addTab( wrapWithScrollArea(new VersionInfo( tab )), tr("Version") );
-    tab->addTab( new StorageInfoView(tab), tr("Storage"));
-#ifdef SYSINFO_GEEK_MODE
-    tab->addTab( wrapWithScrollArea(new LoadInfo(tab)), tr("CPU") );
-#endif
-    tab->addTab( wrapWithScrollArea(new MemoryInfo(tab)), tr("Memory") );
-    tab->addTab( wrapWithScrollArea(new DataView(tab)), tr("Data") );
-    tab->addTab( new SecurityInfo(tab), tr("Security") );
-#ifdef QTOPIA_CELL
-    tab->addTab( new ModemInfo(tab), tr("Modem") );
-    tab->addTab( wrapWithScrollArea(new SimInfo(tab)), tr("SIM") );
-#endif
+    // we have the first tab created, so, delay creation of the other tabs until we've got time to start processing them.
+    QTimer::singleShot(1, this, SLOT(delayedInit()));
 
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
@@ -85,6 +78,28 @@ QScrollArea *SystemInfo::wrapWithScrollArea(QWidget *widget)
     sv->setWidget( widget );
     sv->setFocusPolicy( Qt::TabFocus );
     return sv;
+}
+
+void SystemInfo::delayedInit()
+{
+    tab->addTab( new StorageInfoView(tab), tr("Storage"));
+    QCoreApplication::processEvents();
+#ifdef SYSINFO_GEEK_MODE
+    tab->addTab( wrapWithScrollArea(new LoadInfo(tab)), tr("CPU") );
+    QCoreApplication::processEvents();
+#endif
+    tab->addTab( wrapWithScrollArea(new MemoryInfo(tab)), tr("Memory") );
+    QCoreApplication::processEvents();
+    tab->addTab( wrapWithScrollArea(new DataView(tab)), tr("Data") );
+    QCoreApplication::processEvents();
+    tab->addTab( new SecurityInfo(tab), tr("Security") );
+    QCoreApplication::processEvents();
+#ifdef QTOPIA_CELL
+    tab->addTab( new ModemInfo(tab), tr("Modem") );
+    QCoreApplication::processEvents();
+    tab->addTab( wrapWithScrollArea(new SimInfo(tab)), tr("SIM") );
+    QCoreApplication::processEvents();
+#endif
 }
 
 /*TODO: Once the cleanup wizard has been ported it must be published using \service tag
@@ -115,3 +130,4 @@ void CleanupWizardService::showCleanupWizard()
 {
     parent->startCleanupWizard();
 }
+

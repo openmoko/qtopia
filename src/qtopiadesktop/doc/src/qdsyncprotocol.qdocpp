@@ -1,14 +1,13 @@
 /*!
 
-\page over_qdsync Protocol_1.html
+\group qdsync_commands
 \title qdsync Protocol
 \ingroup overviews
-\sa {Overviews}
 \brief A description of the protocol used between Qtopia Sync Agent and the Synchronization application.
 
 \section1 Overview
 
-This page describes how the qdsync protocol works. Individual commands are documented in \l{qdsync Protocol Commands}.
+This page describes how the qdsync protocol works. Individual commands are documented below.
 
 The qdsync protocol is a line-oriented protocol that can be implemented on top of a socket.
 It consists of a number of required commands and some optional commands.
@@ -16,6 +15,9 @@ It consists of a number of required commands and some optional commands.
 \section1 State Machine
 
 While there is no formal state machine there is an expected order of message arrival.
+The basic process looks like this.
+
+\image qdsyncprotocol.png qdsync protocol diagram
 
 \list
 \o When a connection is initiated the device will send a \l 220 message.
@@ -24,7 +26,7 @@ While there is no formal state machine there is an expected order of message arr
 \o The desktop sends a \l PASS message.
 \o The device responds with a \l 230 message.
 \o The desktop and device can now send \l CALL or \l CALLB messages.
-\o The device responds to these with \l 200 messages.
+\o The device responds to these with \l 200 messages (unless disabled with \l HELPER_INIT).
 \o The connection is ended when the desktop sends a \l QUIT message.
 \endlist
 
@@ -33,16 +35,11 @@ of some kind within the specified duration period. The \l HELPER_PING and \l HEL
 this purpose. The \l HELPER_QUIT command is used by the device to indicate failure to send a command in the
 specified time.
 
-*/
-
-/*!
-
-\group qdsync_commands
-\title qdsync Protocol Commands
+\section1 Commands
 
 \generatelist related
 
-\sa {qdsync Protocol}
+\sa Overviews
 
 */
 
@@ -51,7 +48,7 @@ specified time.
 \page qdsync_220_1.html
 \title 220
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 220 Qtopia 4.3.0;key=value;key=value
 
 \section1 Usage
@@ -78,6 +75,12 @@ Qtopia Sync Agent expects the following key/value pairs to be sent:
 \o hexversion \list foo This is the version number as a hexadecimal number. It should be comparable to the QTOPIA_VERSION macro. \endlist
 \endlist
 
+Additionally, the \c qtopia4 plugin expects to see:
+
+\list
+\o datasets \list foo A list of datasets the device supports (proxy QDClientSyncPlugin instances will be created for them). \endlist
+\endlist
+
 After this command is sent the device expects to receive a \l USER command.
 
 \sa USER
@@ -89,7 +92,7 @@ After this command is sent the device expects to receive a \l USER command.
 \page qdsync_USER_1.html
 \title USER
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief USER username
 
 \section1 Usage
@@ -112,7 +115,7 @@ The device will respond with a \l 331 or a \l 530 command.
 \page qdsync_530_1.html
 \title 530
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 530 Please login with USER and PASS
 
 \section1 Usage
@@ -133,7 +136,7 @@ or if the username/password is incorrect.
 \page qdsync_331_1.html
 \title 331
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 331 User name ok, need password
 
 \section1 Usage
@@ -155,7 +158,7 @@ After this command is sent the device will expect to receive a \l PASS command.
 \page qdsync_PASS_1.html
 \title PASS
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief PASS password
 
 \section1 Usage
@@ -176,7 +179,7 @@ The device will respond with a \l 230 or a \l 530 command.
 \page qdsync_230_1.html
 \title 230
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 230 User logged in, proceed
 
 \section1 Usage
@@ -195,7 +198,7 @@ indicates that the handshaking is done.
 \page qdsync_CALL_1.html
 \title CALL
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief CALL QPE/System execute(QString) addressbook
 
 \section1 Usage
@@ -223,7 +226,7 @@ This command exists for legacy reasons and should be avoided. Please see the
 \page qdsync_CALLB_1.html
 \title CALLB
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief CALLB QPE/System execute(QString) BASE64DATA
 
 \section1 Usage
@@ -262,7 +265,7 @@ being terminated. To allow a particular message to be sent you should mofify the
 \page qdsync_500_1.html
 \title 500
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 500 Syntax error, command unrecognized
 
 \section1 Usage
@@ -283,7 +286,7 @@ or to a \l CALL or \l CALLB command with less than 2 arguments.
 \page qdsync_599_1.html
 \title 599
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 599 ChannelNotRegistered QPE/Channel
 
 \section1 Usage
@@ -307,7 +310,7 @@ be running when the command is sent.
 \page qdsync_502_1.html
 \title 502
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 502 Command not implemented
 
 \section1 Usage
@@ -327,7 +330,7 @@ Sent from the device to the desktop. This is sent in response to a command that 
 \page qdsync_200_1.html
 \title 200
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 200 Command okay
 
 \section1 Usage
@@ -351,7 +354,7 @@ Note that the desktop does not send these commands to the device.
 \page qdsync_QUIT_1.html
 \title QUIT
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief QUIT
 
 \section1 Usage
@@ -370,7 +373,7 @@ The device responds with a \l 211 command.
 \page qdsync_211_1.html
 \title 211
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief 211 Have a nice day!
 
 \section1 Usage
@@ -391,7 +394,7 @@ the connection is closed.
 \page qdsync_HELPER_INIT_1.html
 \title HELPER_INIT
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief HELPER_INIT 5000 1 1
 
 \section1 Usage
@@ -421,7 +424,7 @@ Note: This command is removed from the command stream by the connection helper.
 \page qdsync_HELPER_PING_1.html
 \title HELPER_PING
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief HELPER_PING
 
 \section1 Usage
@@ -442,7 +445,7 @@ Note: This command is removed from the command stream by the connection helper.
 \page qdsync_HELPER_ACK_1.html
 \title HELPER_ACK
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief HELPER_ACK
 
 \section1 Usage
@@ -463,7 +466,7 @@ Note: This command is removed from the command stream by the connection helper.
 \page qdsync_HELPER_QUIT_1.html
 \title HELPER_QUIT
 \ingroup qdsync_commands
-\sa {qdsync Protocol Commands}
+\sa {qdsync Protocol}
 \brief HELPER_QUIT
 
 \section1 Usage

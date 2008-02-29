@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -158,6 +156,10 @@ typedef BOOL (WINAPI * PFNWGLSETPBUFFERATTRIBARBPROC) (HPBUFFERARB hPbuffer, con
 #define WGL_AUX9_ARB                       0x2090
 #endif
 
+#ifndef WGL_FLOAT_COMPONENTS_NV
+#define WGL_FLOAT_COMPONENTS_NV        0x20B0
+#endif
+
 QGLFormat pfiToQGLFormat(HDC hdc, int pfi);
 
 bool QGLPixelBufferPrivate::init(const QSize &size, const QGLFormat &f, QGLWidget *shareWidget)
@@ -232,6 +234,13 @@ bool QGLPixelBufferPrivate::init(const QSize &size, const QGLFormat &f, QGLWidge
     if (f.stencil()) {
         attribs[i++] = WGL_STENCIL_BITS_ARB;
         attribs[i++] = f.stencilBufferSize() == -1 ? 8 : f.stencilBufferSize();
+    }
+    if ((f.redBufferSize() > 8 || f.greenBufferSize() > 8
+         || f.blueBufferSize() > 8 || f.alphaBufferSize() > 8)
+        && (QGLExtensions::glExtensions & QGLExtensions::NVFloatBuffer))
+    {
+        attribs[i++] = WGL_FLOAT_COMPONENTS_NV;
+        attribs[i++] = TRUE;
     }
     // sample buffers doesn't work in conjunction with the render_texture extension
     // so igonre that for now

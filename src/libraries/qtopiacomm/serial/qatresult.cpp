@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -378,7 +378,8 @@ static QAtCodeInfo const basic_codes[] = {
     {QAtResult::Busy,                       "BUSY"},        // no tr
     {QAtResult::Busy,                       "7"},       // no tr
     {QAtResult::NoAnswer,                   "NO ANSWER"},       // no tr
-    {QAtResult::NoAnswer,                   "8"}        // no tr
+    {QAtResult::NoAnswer,                   "8"},        // no tr
+    {QAtResult::OK,                         "VCON"}        // no tr
 };
 static QAtCodeInfo const ext_codes[] = {
     {QAtResult::PhoneFailure,               "phone failure"},       // no tr

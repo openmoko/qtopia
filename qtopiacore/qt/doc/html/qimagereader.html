@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/image/qimagereader.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/image/qimagereader.cpp -->
 <head>
   <title>Qt 4.3: QImageReader Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -138,7 +138,7 @@
 <p>Returns the format <a href="qimagereader.html">QImageReader</a> uses for reading images.</p>
 <p>You can call this function after assigning a device to the reader to determine the format of the device. For example:</p>
 <pre> QImageReader reader(&quot;image.png&quot;);
-<span class="comment"> // reader.format() == &quot;png&quot;</span></pre>
+<span class="comment"> //</span> reader.format() == &quot;png&quot;</pre>
 <p>If the reader cannot read any image from the device (e.g&#x2e;, there is no image there, or the image has already been read), or if the format is unsupported, this function returns an empty QByteArray().</p>
 <p>See also <a href="qimagereader.html#setFormat">setFormat</a>() and <a href="qimagereader.html#supportedImageFormats">supportedImageFormats</a>().</p>
 <h3 class="fn"><a name="imageCount"></a>int QImageReader::imageCount () const</h3>
@@ -179,7 +179,7 @@
 <pre> QImage icon(64, 64, QImage::Format_RGB32);
  QImageReader reader(&quot;icon_64x64.bmp&quot;);
  if (reader.read(&amp;icon)) {
-     <span class="comment">// Display icon</span>
+     <span class="comment">//</span> Display icon
  }</pre>
 <p>For image formats that support animation, calling <a href="qimagereader.html#read">read</a>() repeatedly will return the next frame. When all frames have been read, a null image will be returned.</p>
 <p>See also <a href="qimagereader.html#canRead">canRead</a>(), <a href="qimagereader.html#supportedImageFormats">supportedImageFormats</a>(), <a href="qimagereader.html#supportsAnimation">supportsAnimation</a>(), and <a href="qmovie.html">QMovie</a>.</p>
@@ -207,7 +207,7 @@
 <h3 class="fn"><a name="setFormat"></a>void QImageReader::setFormat ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>format</i> )</h3>
 <p>Sets the format <a href="qimagereader.html">QImageReader</a> will use when reading images, to <i>format</i>. <i>format</i> is a case insensitive text string. Example:</p>
 <pre> QImageReader reader;
- reader.setFormat(&quot;png&quot;); <span class="comment">// same as reader.setFormat(&quot;PNG&quot;);</span></pre>
+ reader.setFormat(&quot;png&quot;); <span class="comment">//</span> same as reader.setFormat(&quot;PNG&quot;);</pre>
 <p>You can call <a href="qimagereader.html#supportedImageFormats">supportedImageFormats</a>() for the full list of formats <a href="qimagereader.html">QImageReader</a> supports.</p>
 <p>See also <a href="qimagereader.html#format">format</a>().</p>
 <h3 class="fn"><a name="setQuality"></a>void QImageReader::setQuality ( int <i>quality</i> )</h3>
@@ -269,8 +269,8 @@
 <p>See also <a href="qimagereader.html#text">text</a>(), <a href="qimagewriter.html#setText">QImageWriter::setText</a>(), and <a href="qimage.html#textKeys">QImage::textKeys</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -202,6 +202,9 @@ QCallListItem::~QCallListItem()
 /*!
   Returns true if this item is the same as \a other or false if they
   are different.
+
+  The time properties such as start() and end()
+  are converted to string using Qt::ISODate format for comparison.
 */
 bool QCallListItem::operator== ( const QCallListItem& other ) const
 {
@@ -210,10 +213,10 @@ bool QCallListItem::operator== ( const QCallListItem& other ) const
     }
     return ( d->type == other.d->type &&
              d->number == other.d->number &&
-             d->start == other.d->start  &&
-             d->end == other.d->end &&
-             d->originalTimeZoneStart == other.d->originalTimeZoneStart  &&
-             d->originalTimeZoneEnd == other.d->originalTimeZoneEnd &&
+             d->start.toString( Qt::ISODate ) == other.d->start.toString( Qt::ISODate ) &&
+             d->end.toString( Qt::ISODate ) == other.d->end.toString( Qt::ISODate ) &&
+             d->originalTimeZoneStart.toString( Qt::ISODate ) == other.d->originalTimeZoneStart.toString( Qt::ISODate ) &&
+             d->originalTimeZoneEnd.toString( Qt::ISODate ) == other.d->originalTimeZoneEnd.toString( Qt::ISODate ) &&
              d->contact == other.d->contact &&
              d->serviceType == other.d->serviceType &&
              d->timeZoneId == other.d->timeZoneId
@@ -682,10 +685,15 @@ void QCallListPrivate::load()
     int simrecordCol = rec.indexOf( "simrecord" );
 
     while ( query.next() ) {
+        QDateTime time, endTime;
+        QVariant timeV(query.value(timeCol));
+        QVariant endTimeV(query.value(endtimeCol));
+        if (!timeV.isNull())    time    = timeV.toDateTime();
+        if (!endTimeV.isNull()) endTime = endTimeV.toDateTime();
         QCallListItem newItem( static_cast<QCallListItem::CallType>(query.value(calltypeCol).toInt()),
                 query.value(phonenumberCol).toString(),
-                query.value(timeCol).toDateTime(),
-                query.value(endtimeCol).toDateTime(),
+                time,
+                endTime,
                 QUniqueId::fromUInt( query.value(contactidCol).toUInt() ),
                 query.value(servicetypeCol).toString(),
                 query.value(timezoneidCol).toString(),
@@ -1148,10 +1156,15 @@ QList<QCallListItem> QCallListPrivate::searchCalls( QCallList::SearchOptions& op
     int simrecordCol = rec.indexOf( "simrecord" );
 
     while ( query.next() ) {
+        QDateTime time, endTime;
+        QVariant timeV(query.value(timeCol));
+        QVariant endTimeV(query.value(endtimeCol));
+        if (!timeV.isNull())    time    = timeV.toDateTime();
+        if (!endTimeV.isNull()) endTime = endTimeV.toDateTime();
         QCallListItem newItem( static_cast<QCallListItem::CallType>(query.value(calltypeCol).toInt()),
                 query.value(phonenumberCol).toString(),
-                query.value(timeCol).toDateTime(),
-                query.value(endtimeCol).toDateTime(),
+                time,
+                endTime,
                 QUniqueId::fromUInt( query.value(contactidCol).toUInt() ),
                 query.value(servicetypeCol).toString(),
                 query.value(timezoneidCol).toString(),

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMailComposerInterface Class Reference</h1>
 <p>The QMailComposerInterface class defines the interface to objects that can compose a mail message. <a href="#details">More...</a></p>
-<pre>    #include &lt;QMailComposerInterface&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QMailComposerInterface&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qmailcomposerinterface-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -33,18 +33,19 @@
 <li><div class="fn"/>virtual QWidget * <b><a href="qmailcomposerinterface.html#widget">widget</a></b> () const = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#attach">attach</a></b> ( const QContent &amp; <i>item</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#attach">attach</a></b> ( const QContent &amp; <i>item</i>, QMailMessage::AttachmentsAction <i>action</i> = QMailMessage::LinkToAttachments )</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#clear">clear</a></b> () = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#setMessage">setMessage</a></b> ( const QMailMessage &amp; <i>mail</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#setSignature">setSignature</a></b> ( const QString &amp; <i>signature</i> )</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#setText">setText</a></b> ( const QString &amp; <i>text</i>, const QString &amp; <i>type</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -53,16 +54,15 @@
 <li><div class="fn"/>void <b><a href="qmailcomposerinterface.html#finished">finished</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -79,46 +79,48 @@
 <p>See also <a href="qmailcomposerfactory.html">QMailComposerFactory</a> and <a href="qmailcomposerplugin.html">QMailComposerPlugin</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailComposerInterface"></a>QMailComposerInterface::QMailComposerInterface ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QMailComposerInterface"></a>QMailComposerInterface::QMailComposerInterface ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs the <a href="qmailcomposerinterface.html">QMailComposerInterface</a> object with the parent widget <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QMailComposerInterface"></a>QMailComposerInterface::~QMailComposerInterface ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructs the <a href="qmailcomposerinterface.html">QMailComposerInterface</a> object.</p>
-<h3 class="fn"><a name="addActions"></a>void QMailComposerInterface::addActions ( <a href="qmenu.html">QMenu</a> * <i>menu</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="addActions"></a>void QMailComposerInterface::addActions ( <a href="./qmenu.html">QMenu</a> * <i>menu</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Allows the composer object to add any relevant actions to the application <i>menu</i> supplied.</p>
-<h3 class="fn"><a name="attach"></a>void QMailComposerInterface::attach ( const <a href="qcontent.html">QContent</a> &amp; <i>item</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Adds <i>item</i> as an attachment to the message in the composer.</p>
+<h3 class="fn"><a name="attach"></a>void QMailComposerInterface::attach ( const <a href="qcontent.html">QContent</a> &amp; <i>item</i>, <a href="qmailmessage.html#AttachmentsAction-enum">QMailMessage::AttachmentsAction</a> <i>action</i> = QMailMessage::LinkToAttachments )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<p>Adds <i>item</i> as an attachment to the message in the composer. The <i>action</i> parameter specifies what the composer should do with <i>item</i>.</p>
 <h3 class="fn"><a name="clear"></a>void QMailComposerInterface::clear ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Clears any message content contained in the composer.</p>
 <h3 class="fn"><a name="contentChanged"></a>void QMailComposerInterface::contentChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the composer's content is changed.</p>
-<h3 class="fn"><a name="displayIcon"></a><a href="qicon.html">QIcon</a> QMailComposerInterface::displayIcon () const</h3>
+<h3 class="fn"><a name="displayIcon"></a><a href="./qicon.html">QIcon</a> QMailComposerInterface::displayIcon () const</h3>
 <p>Returns the icon representing the message type created by the composer.</p>
-<h3 class="fn"><a name="displayName"></a><a href="qstring.html">QString</a> QMailComposerInterface::displayName () const</h3>
+<h3 class="fn"><a name="displayName"></a><a href="./qstring.html">QString</a> QMailComposerInterface::displayName () const</h3>
 <p>Returns the translated name of the message type created by the composer, in a form suitable for display on a button or menu.</p>
 <h3 class="fn"><a name="finished"></a>void QMailComposerInterface::finished ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the user has completed editing.</p>
 <h3 class="fn"><a name="isEmpty"></a>bool QMailComposerInterface::isEmpty () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns true if the composer contains no message content; otherwise returns false.</p>
-<h3 class="fn"><a name="key"></a><a href="qstring.html">QString</a> QMailComposerInterface::key () const</h3>
+<h3 class="fn"><a name="key"></a><a href="./qstring.html">QString</a> QMailComposerInterface::key () const</h3>
 <p>Returns a string identifying the composer.</p>
 <h3 class="fn"><a name="message"></a><a href="qmailmessage.html">QMailMessage</a> QMailComposerInterface::message () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the current content of the composer.</p>
 <p>See also <a href="qmailcomposerinterface.html#setMessage">setMessage</a>().</p>
 <h3 class="fn"><a name="messageType"></a><a href="qmailmessage.html#MessageType-enum">QMailMessage::MessageType</a> QMailComposerInterface::messageType () const</h3>
 <p>Returns the type of message created by the composer.</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMailComposerInterface::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QMailComposerInterface::name () const</h3>
 <p>Returns the translated name of the message type created by the composer.</p>
 <h3 class="fn"><a name="setMessage"></a>void QMailComposerInterface::setMessage ( const <a href="qmailmessage.html">QMailMessage</a> &amp; <i>mail</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Sets the content of the composer to <i>mail</i>.</p>
 <p>See also <a href="qmailcomposerinterface.html#message">message</a>().</p>
-<h3 class="fn"><a name="setText"></a>void QMailComposerInterface::setText ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, const <a href="qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setSignature"></a>void QMailComposerInterface::setSignature ( const <a href="./qstring.html">QString</a> &amp; <i>signature</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<p>Sets the composer to append <i>signature</i> to the body of the message, when creating a message.</p>
+<h3 class="fn"><a name="setText"></a>void QMailComposerInterface::setText ( const <a href="./qstring.html">QString</a> &amp; <i>text</i>, const <a href="./qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the message to contain <i>text</i>, if that is meaningful to the message type created by the composer. The text has the mime-type <i>type</i>.</p>
-<h3 class="fn"><a name="widget"></a><a href="qwidget.html">QWidget</a> * QMailComposerInterface::widget () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="widget"></a><a href="./qwidget.html">QWidget</a> * QMailComposerInterface::widget () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the widget implementing the composer interface.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

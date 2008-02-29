@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -96,7 +94,7 @@ void QDBusConnectionManager::removeConnection(const QString &name)
     QDBusConnectionPrivate *d = 0;
     d = connectionHash.take(name);
     if (d && !d->ref.deref())
-        delete d;
+        d->deleteYourself();
 
     // Static objects may be keeping the connection open.
     // However, it is harmless to have outstanding references to a connection that is
@@ -111,7 +109,7 @@ QDBusConnectionManager::~QDBusConnectionManager()
          it != connectionHash.constEnd(); ++it) {
         QDBusConnectionPrivate *d = it.value();
         if (!d->ref.deref())
-            delete d;
+            d->deleteYourself();
         else
             d->closeConnection();
     }
@@ -279,7 +277,7 @@ QDBusConnection::QDBusConnection(QDBusConnectionPrivate *dd)
 QDBusConnection::~QDBusConnection()
 {
     if (d && !d->ref.deref())
-        delete d;
+        d->deleteYourself();
 }
 
 /*!
@@ -296,7 +294,7 @@ QDBusConnection &QDBusConnection::operator=(const QDBusConnection &other)
     QDBusConnectionPrivate *old = static_cast<QDBusConnectionPrivate *>(
             q_atomic_set_ptr(&d, other.d));
     if (old && !old->ref.deref())
-        delete old;
+        old->deleteYourself();
 
     return *this;
 }

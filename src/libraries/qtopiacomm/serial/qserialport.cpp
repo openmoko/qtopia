@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -147,7 +147,8 @@ int QSerialPort::fd() const
 }
 
 /*!
-    Open the serial device with the specified \a mode.
+    Opens the serial device with the specified \a mode.
+    Returns true if the device could be opened; false otherwise.
 */
 bool QSerialPort::open( OpenMode mode )
 {
@@ -343,7 +344,7 @@ bool QSerialPort::open( OpenMode mode )
 }
 
 /*!
-    Close the serial device.
+    Closes the serial device.
 */
 void QSerialPort::close()
 {

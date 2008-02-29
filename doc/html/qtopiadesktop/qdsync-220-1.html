@@ -10,7 +10,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">220<br /><span class="subtitle"></span>
 </h1>
 <a name="usage"></a>
@@ -34,11 +34,16 @@
 </li>
 <li>model<p>This is a string describing the device that may be displayed to the user.</p>
 </li>
-<li>hexversion<p>This is the version number as a hexadecimal number. It should be comparable to the QTOPIA_VERSION macro.</p>
+<li>hexversion<p>This is the version number as a hexadecimal number. It should be comparable to the <a href="../version-h.html#QTOPIA_VERSION">QTOPIA_VERSION</a> macro.</p>
+</li>
+</ul>
+<p>Additionally, the <tt>qtopia4</tt> plugin expects to see:</p>
+<ul>
+<li>datasets<p>A list of datasets the device supports (proxy <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> instances will be created for them).</p>
 </li>
 </ul>
 <p>After this command is sent the device expects to receive a <a href="qdsync-user-1.html">USER</a> command.</p>
-<p>See also <a href="qdsync-commands.html">qdsync Protocol Commands</a> and <a href="qdsync-user-1.html">USER</a>.</p>
+<p>See also <a href="qdsync-commands.html">qdsync Protocol</a> and <a href="qdsync-user-1.html">USER</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

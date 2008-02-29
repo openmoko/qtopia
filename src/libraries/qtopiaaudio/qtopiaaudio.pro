@@ -10,28 +10,37 @@ QTOPIAAUDIO_HEADERS = \
     qaudiostate.h \
     qaudiostateinfo.h \
     qaudiostatemanager.h \
-    qaudionamespace.h
+    qaudionamespace.h 
 
 QTOPIAAUDIO_SOURCES = \
-    qaudioinput.cpp \
-    qaudiooutput.cpp \
     qaudiostateconfiguration.cpp \
     qaudiostateplugin.cpp \
     qaudiostate.cpp \
     qaudiostateinfo.cpp \
     qaudiostatemanager.cpp \
     qaudionamespace.cpp \
-    qaudiostatemanagerservice.cpp
+    qaudiostatemanagerservice.cpp 
 
 QTOPIAAUDIO_PRIVATE_HEADERS = \
     qaudiostatemanagerservice_p.h
 
 equals(QTOPIA_SOUND_SYSTEM,alsa) {
     depends(3rdparty/libraries/alsa)
-    DEFINES+=HAVE_ALSA
+    QTOPIAAUDIO_SOURCES+=qaudioinput_alsa.cpp qaudiooutput_alsa.cpp
+    DEFINES+=QTOPIA_HAVE_ALSA
 }
+
 equals(QTOPIA_SOUND_SYSTEM,oss) {
-    DEFINES+=HAVE_OSS
+    QTOPIAAUDIO_SOURCES+=qaudioinput_oss.cpp
+
+    enable_qtopiamedia {
+        QTOPIAAUDIO_SOURCES+=qaudiooutput_oss.cpp
+        DEFINES+=QTOPIA_HAVE_OSS
+    }
+    else {
+        QTOPIAAUDIO_SOURCES+=qaudiooutput_qss.cpp
+        DEFINES+=QTOPIA_HAVE_QSS
+    }
 }
 
 PREFIX=QTOPIAAUDIO

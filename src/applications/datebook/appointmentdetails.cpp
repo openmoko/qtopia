@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,6 +54,7 @@ void AppointmentDetails::init( const QOccurrence &occurrence )
         QIcon silent(":icon/silent");
         QIcon exception(":icon/repeatException");
         QIcon timezone(":icon/globe");
+        QIcon readonly(":icon/readonly");
         int iconMetric = style()->pixelMetric(QStyle::PM_SmallIconSize);
 
         QTextDocument* doc = document();
@@ -62,6 +63,7 @@ void AppointmentDetails::init( const QOccurrence &occurrence )
         doc->addResource(QTextDocument::ImageResource, QUrl("silenticon"), silent.pixmap(iconMetric));
         doc->addResource(QTextDocument::ImageResource, QUrl("exceptionicon"), exception.pixmap(iconMetric));
         doc->addResource(QTextDocument::ImageResource, QUrl("timezoneicon"), timezone.pixmap(iconMetric));
+        doc->addResource(QTextDocument::ImageResource, QUrl("readonlyicon"), readonly.pixmap(iconMetric));
         mIconsLoaded = true;
     }
     setHtml( createPreviewText( mOccurrence ) );
@@ -178,31 +180,39 @@ QString AppointmentDetails::createPreviewText( const QOccurrence &o )
 {
     QAppointment ev = o.appointment();
     QString text;
+    QString iconText;
     QDate today = QDate::currentDate();
     loadLinks( ev.customField( QDL::CLIENT_DATA_KEY ) );
+
+    bool rtl = qApp->layoutDirection() == Qt::RightToLeft;
 
     QAppointmentModel am;
     QPimContext *ctx = am.context(ev.uid());
     if (ctx) {
-        text += QLatin1String("<img style=\"float: right;\" src=\"contexticon\">");
+        if (!ctx->editable(ev.uid()))
+            iconText += QLatin1String("<img src=\"readonlyicon\">");
+        iconText += QLatin1String("<img src=\"contexticon\">");
         int iconMetric = style()->pixelMetric(QStyle::PM_SmallIconSize);
         document()->addResource(QTextDocument::ImageResource, QUrl("contexticon"), ctx->icon().pixmap(iconMetric));
     }
 
     if ( ev.hasRepeat() )
-        text += QLatin1String("<img style=\"float: right;\" src=\"repeaticon\">");
+        iconText += QLatin1String("<img src=\"repeaticon\">");
     else if ( ev.isException() )
-        text += QLatin1String("<img style=\"float: right;\" src=\"exceptionicon\">");
+        iconText += QLatin1String("<img src=\"exceptionicon\">");
 
     if ( ev.hasAlarm() ) {
         if (ev.alarm() == QAppointment::Audible)
-            text += QLatin1String("<img style=\"float: right;\" src=\"audibleicon\">");
+            iconText += QLatin1String("<img src=\"audibleicon\">");
         else
-            text += QLatin1String("<img style=\"float: right;\" src=\"silenticon\">");
+            iconText += QLatin1String("<img src=\"silenticon\">");
     }
 
     if ( ev.timeZone().isValid() )
-        text += QLatin1String("<img style=\"float: right;\" src=\"timezoneicon\">");
+        iconText += QLatin1String("<img src=\"timezoneicon\">");
+
+    if (!iconText.isEmpty())
+        text += "<table style='float:"+ QLatin1String(rtl ? "left":"right") +"'><tr><td>" + iconText + "</td></tr></table>";
 
     text += "<b>";
 

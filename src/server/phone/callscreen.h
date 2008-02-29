@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -46,6 +46,7 @@ class QPhoneCall;
 
 class QSimToolkit;
 class QAbstractMessageBox;
+class MouseControlDialog;
 
 class CallScreen : public PhoneThemedView
 {
@@ -65,8 +66,6 @@ public:
 
 signals:
     void acceptIncoming();
-    void increaseCallVolume();
-    void decreaseCallVolume();
     void muteRing();
     void listEmpty();
     void testKeys(const QString&, bool&);
@@ -90,7 +89,7 @@ protected:
     void closeEvent(QCloseEvent *);
     bool eventFilter(QObject *, QEvent *);
     void hideEvent( QHideEvent * );
-    void mouseReleaseEvent(QMouseEvent *);
+    void mousePressEvent(QMouseEvent *);
 
 private slots:
     void updateAll();
@@ -117,6 +116,7 @@ private slots:
     void hideProgressDlg();
     void interactionDelayTimeout();
     void rejectModalDialog();
+    void initializeMouseControlDialog();
 
 private:
     void clearDtmfDigits(bool clearOneChar = false);
@@ -163,6 +163,7 @@ private:
     QAbstractMessageBox *simMsgBox;
     bool showWaitDlg;
     QTimer *symbolTimer;
+    MouseControlDialog *m_mouseCtrlDlg;
 };
 
 #endif

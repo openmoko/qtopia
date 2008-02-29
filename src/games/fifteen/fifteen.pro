@@ -19,4 +19,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Try to get the fifteen pieces in order by sliding them around.
-pkg.domain=window,games,cardreader,doc_server,doc_write
+pkg.domain=trusted

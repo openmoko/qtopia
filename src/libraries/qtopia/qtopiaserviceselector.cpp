@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -264,20 +264,20 @@ QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 }
 
 /*!
-    Add all installed applications to the list of services displayed in this selector.
+    Add all installed applications (and games and settings) to the list of services displayed in this selector.
     By default, only service actions are shown.
 */
 void QtopiaServiceSelector::addApplications()
 {
     // Copy all of the AppLnks to our own list
-    QContentSet lnkSet(QContentFilter::Category, QLatin1String("Applications"));
+    QContentSet lnkSet = QContentSet(QContentFilter(QContent::Application));
     QContentList apps = lnkSet.items();
     foreach(const QContent &it, apps )
     {
         if ( it.type() != "Separator" && it.property("Builtin") != "1") // No tr
         {
             QListWidgetItem *item = new QListWidgetItem(it.name(), actionlist);
-            item->setData(SRV_ROLE, it.executableName());
+            item->setData(SRV_ROLE, "Application:" + it.executableName());
             item->setData(ICON_ROLE, it.iconName());
             item->setData(ACTION_ROLE, "raise()");
             item->setIcon(QIcon(":icon/"+it.iconName()));

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/xml/qdom.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/xml/qdom.cpp -->
 <head>
   <title>Qt 4.3: QDomImplementation Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -102,16 +102,16 @@
 <pre> QDomDocument doc;
  QDomImplementation impl;
 
-<span class="comment"> // This will create the element, but the resulting XML document will</span>
-<span class="comment"> // be invalid, because '~' is not a valid character in a tag name.</span>
+<span class="comment"> //</span> This will create the element, but the resulting XML document will
+<span class="comment"> //</span> be invalid, because '~' is not a valid character in a tag name.
  impl.setInvalidDataPolicy(QDomImplementation::AcceptInvalidData);
  QDomElement elt1 = doc.createElement(&quot;foo~bar&quot;);
 
-<span class="comment"> // This will create an element with the tag name &quot;foobar&quot;.</span>
+<span class="comment"> //</span> This will create an element with the tag name &quot;foobar&quot;.
  impl.setInvalidDataPolicy(QDomImplementation::DropInvalidData);
  QDomElement elt2 = doc.createElement(&quot;foo~bar&quot;);
 
-<span class="comment"> // This will create a null element.</span>
+<span class="comment"> //</span> This will create a null element.
  impl.setInvalidDataPolicy(QDomImplementation::ReturnNullNode);
  QDomElement elt3 = doc.createElement(&quot;foo~bar&quot;);</pre>
 <p>This function was introduced in Qt 4.1.</p>
@@ -124,8 +124,8 @@
 <p>Returns true if <i>x</i> and this DOM implementation object were created from the same <a href="qdomdocument.html">QDomDocument</a>; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

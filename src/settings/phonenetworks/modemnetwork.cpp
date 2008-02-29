@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,33 +33,343 @@
 #include <QTimer>
 #include <QTranslatableSettings>
 #include <QtopiaItemDelegate>
+#include <QKeyEvent>
 #include <QScrollArea>
+#include <QDesktopWidget>
 
-
-class PhoneNetworksListWidget : public QListWidget
+//------------------------------------------------
+// Code similar to that in phonesettings.h
+// Modified to work across 2 lines (\n separated)
+// reasonably optimised for fast execution,
+// although sacrifices space to do so.
+#define FLOATING_LISTWIDGETS
+class TwoLineFloatingTextList : public QListWidget
 {
     Q_OBJECT
+
 public:
-    PhoneNetworksListWidget(QWidget *parent = 0);
-    QSize minimumSizeHint() const;
+    TwoLineFloatingTextList( QWidget *parent, int w );
+
+protected:
+    void keyPressEvent( QKeyEvent *e );
+
+protected slots:
+    void newCurrentRow( int row );
+    void floatText();
+
+private:
+    QTimer *timer;
+    QFontMetrics *fm;
+
+    int oldRow;                // the previously selected item.
+    int firstLineLastChar;     // last char of first line displayed
+    int secondLineLastChar;    // last char of second line displayed
+    int firstLineMaxIndex;     // last char index of first line
+    int secondLineMaxIndex;    // last char index of second line
+    bool needToFloatFirst;     // whether we need to float the first line
+    bool needToFloatSecond;    // whether we need to float the second line
+    QString firstLine;         // complete text of first line
+    QString secondLine;        // complete text of second line
+    QString displayFirst;      // current shown text of first line
+    QString displaySecond;     // current shownt ext of second line
+    int firstLineWidth;        // current width of first line
+    int secondLineWidth;       // current width of second line
+    int availableWidth;        // width available to display in
+
+    bool finishedFloating;     // whether we have finished or not.
 };
 
-PhoneNetworksListWidget::PhoneNetworksListWidget( QWidget *parent )
-    : QListWidget( parent )
+TwoLineFloatingTextList::TwoLineFloatingTextList( QWidget *parent, int w )
+: QListWidget( parent ), availableWidth( w )
 {
+    timer = new QTimer( this );
+
+    oldRow = 0;
+    firstLineLastChar = 0;
+    secondLineLastChar = 0;
+    firstLineMaxIndex = 0;
+    secondLineMaxIndex = 0;
+    needToFloatFirst = false;
+    needToFloatSecond = false;
+    firstLine = "";
+    secondLine = "";
+    displayFirst = "";
+    displaySecond = "";
+    firstLineWidth = 0;
+    secondLineWidth = 0;
+    finishedFloating = true;
+
+    fm = new QFontMetrics(font());
+
+    connect( this, SIGNAL(currentRowChanged(int)), this, SLOT(newCurrentRow(int)) );
+    connect( timer, SIGNAL(timeout()), this, SLOT(floatText()) );
+
+    setItemDelegate(new QtopiaItemDelegate);
+    setFrameStyle(NoFrame);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
-QSize PhoneNetworksListWidget::minimumSizeHint() const
+void TwoLineFloatingTextList::newCurrentRow( int row )
 {
-    QSize sz = QListWidget::minimumSizeHint();
-    if ( count() > 0 ) {
-        int h = sizeHintForRow( 0 );
-        return QSize( sz.width(), h * 5 );
+    if ( timer->isActive() )
+        timer->stop();
+
+    if ( row < 0 )
+        return;
+
+    // first, regenerate the text of the old row if required.
+    if ( oldRow != row && ( needToFloatFirst || needToFloatSecond ) ) {
+        QListWidgetItem *old = item( oldRow );
+        firstLine = old->data( Qt::UserRole ).toString().section( '\n', 0, 0 );
+        secondLine = old->data( Qt::UserRole ).toString().section( '\n', 1, 1 );
+        old->setText( firstLine + "\n" + secondLine );
     }
-    return sz;
+
+    // extract each line from this item.
+    oldRow = row;
+    QListWidgetItem *current = item( row );
+    firstLine = current->data( Qt::UserRole ).toString().section( '\n', 0, 0 );
+    secondLine = current->data( Qt::UserRole ).toString().section( '\n', 1, 1 );
+
+    // Determine whether we need to float the lines.
+    if ( fm->width( firstLine ) >= availableWidth ) {
+        needToFloatFirst = true;
+    } else {
+        needToFloatFirst = false;
+    }
+
+    if ( fm->width( secondLine ) >= availableWidth ) {
+        needToFloatSecond = true;
+    } else {
+        needToFloatSecond = false;
+    }
+
+    // either display the line, or float it
+    if ( needToFloatFirst || needToFloatSecond ) {
+        firstLineLastChar = 0;
+        secondLineLastChar = 0;
+        displayFirst = "";
+        displaySecond = "";
+        firstLineWidth = 0;
+        secondLineWidth = 0;
+        firstLineMaxIndex = firstLine.length() - 1;
+        secondLineMaxIndex = secondLine.length() - 1;
+        timer->start( 1200 ); //, this, SLOT(floatText()) );
+    } else {
+        current->setText( firstLine + "\n" + secondLine );
+    }
 }
 
+void TwoLineFloatingTextList::floatText()
+{
+    QListWidgetItem *current = currentItem();
+    if ( !current ) {
+        return;
+    }
 
+    // modify the timer interval if started.
+    if ( timer->interval() == 1200 ) {
+        timer->stop();
+        timer->start( 500 );
+    }
+
+    // this ensures we display the last char for 500 msec
+    finishedFloating = true;
+
+    if ( needToFloatFirst ) {
+        // build the initial string if required.
+        if ( firstLineLastChar == 0 ) {
+            while ( firstLineWidth < availableWidth && firstLineLastChar <= (firstLineMaxIndex+1) ) {
+                QChar curr = firstLine.at( firstLineLastChar++ );
+                displayFirst += curr;
+                firstLineWidth += fm->width( curr );
+            }
+            firstLineLastChar--;
+            finishedFloating = false;
+        } else {
+            // alternatively, float along one character
+            if ( firstLineLastChar < firstLineMaxIndex ) {
+                // more characters to display
+                finishedFloating = false;
+                firstLineLastChar += 1;
+                QChar curr = firstLine.at( firstLineLastChar );
+                firstLineWidth += fm->width( curr );
+                displayFirst += curr;
+                while ( firstLineWidth >= availableWidth ) {
+                    firstLineWidth -= fm->width( displayFirst.at( 0 ) );
+                    displayFirst.remove( 0, 1 );
+                }
+            }
+        }
+    } else {
+        displayFirst = firstLine;
+    }
+
+    if ( needToFloatSecond ) {
+        // build the initial string if required.
+        if ( secondLineLastChar == 0 ) {
+            while ( secondLineWidth < availableWidth && secondLineLastChar < (secondLineMaxIndex+1) ) {
+                QChar curr = secondLine.at( secondLineLastChar++ );
+                displaySecond += curr;
+                secondLineWidth += fm->width( curr );
+            }
+            secondLineLastChar--;
+            finishedFloating = false;
+        } else {
+            // alternatively, float along one character
+            if ( secondLineLastChar < secondLineMaxIndex ) {
+                // more characters to display
+                finishedFloating = false;
+                secondLineLastChar += 1;
+                QChar curr = secondLine.at( secondLineLastChar );
+                secondLineWidth += fm->width( curr );
+                displaySecond += curr;
+                while ( secondLineWidth >= availableWidth ) {
+                    secondLineWidth -= fm->width( displaySecond.at( 0 ) );
+                    displaySecond.remove( 0, 1 );
+                }
+            }
+        }
+    } else {
+        displaySecond = secondLine;
+    }
+
+    // If we have waited at the end for 500 msec, then return
+    if ( finishedFloating ) {
+        newCurrentRow( currentRow() ); // refloat the line.
+        return;
+    }
+
+    // display the lines for this QListWidgetItem
+    current->setText( displayFirst + "\n" + displaySecond );
+
+    // Display the current lines for 500 msec.
+    if ( !timer->isActive() )
+        timer->start( 500 );
+}
+
+void TwoLineFloatingTextList::keyPressEvent( QKeyEvent *e )
+{
+    if ( !hasEditFocus() ) {
+        QListWidget::keyPressEvent( e );
+        return;
+    }
+
+    int curRow = currentRow();
+    if ( e->key() == Qt::Key_Up ) {
+        if ( curRow == 0 )
+            setCurrentRow( count() - 1 );
+        else
+            setCurrentRow( curRow - 1 );
+    } else if ( e->key() == Qt::Key_Down ) {
+        if ( curRow == count() - 1 )
+            setCurrentRow( 0 );
+        else
+           setCurrentRow( curRow + 1 );
+    } else if ( e->key() == Qt::Key_Back ) {
+        setEditFocus( false );
+    } else {
+        QListWidget::keyPressEvent( e );
+    }
+}
+//----------------------------------------------------------------------------
+
+//------------------------------------------------
+// Code similar to code from phonesettings.cpp -
+// modified to work for a group of radiobuttons.
+class FloatingTextRadioButton : public QRadioButton
+{
+    Q_OBJECT
+
+public:
+    FloatingTextRadioButton( QWidget *parent, int w, QString t );
+    QString getCompleteText();
+
+public slots:
+    void focusInEvent( QFocusEvent *event );
+
+protected slots:
+    void floatText();
+    void showItemText();
+
+private:
+    QTimer *timer;
+    QString completeText;
+    int availableWidth;
+    int maxChars;
+    static int lastCharIndex; // index of the last character shown
+};
+
+int FloatingTextRadioButton::lastCharIndex = 0;
+
+FloatingTextRadioButton::FloatingTextRadioButton( QWidget *parent, int w, QString t )
+: QRadioButton( parent )
+{
+    timer = new QTimer( this );
+    availableWidth = w;
+    completeText = t;
+
+    // first, calculate the maximum number of characters allowed.
+    int totalWidth = 0;
+    QFontMetrics fm(font());
+    maxChars = 0;
+    while ( maxChars < completeText.length() && totalWidth < availableWidth )
+    {
+        totalWidth += fm.width(completeText.at(maxChars));
+        maxChars += 1;
+    }
+
+    if ( totalWidth >= availableWidth || maxChars < completeText.length() )
+        maxChars -= 2; // to ensure that we don't go over our max width.
+
+    showItemText();
+    connect( timer, SIGNAL(timeout()), this, SLOT(floatText()) );
+}
+
+QString FloatingTextRadioButton::getCompleteText()
+{
+    return completeText;
+}
+
+void FloatingTextRadioButton::showItemText()
+{
+    QString shownText = completeText.mid( 0, maxChars );
+    setText( shownText );
+}
+
+void FloatingTextRadioButton::focusInEvent( QFocusEvent* event )
+{
+    if ( timer->isActive() )
+        timer->stop();
+
+    if ( completeText.length() > maxChars )
+        timer->singleShot( 800, this, SLOT(floatText()) );
+
+    Q_UNUSED( event );
+}
+
+void FloatingTextRadioButton::floatText()
+{
+    if ( !timer->isActive() ) {
+        lastCharIndex = maxChars - 1;
+        timer->start( 500 );
+    }
+
+    QFontMetrics fm(font());
+    QString shownText = completeText.mid( lastCharIndex - maxChars + 1, maxChars );
+    //check if the new string would fit the screen
+    while ( availableWidth < fm.width( shownText ) ) // if it doesn't fit
+        shownText = shownText.mid( 1 );     // remove the first character
+
+    setText( shownText );
+    lastCharIndex++;
+    if ( lastCharIndex == completeText.length() ) {
+        // reset our index, and stop floating the text.
+        lastCharIndex = maxChars - 1;
+        timer->stop();
+    }
+}
+//------------------------------------------------
 
 ModemNetworkRegister::ModemNetworkRegister( QWidget *parent )
     : QListWidget( parent )
@@ -97,7 +407,6 @@ void ModemNetworkRegister::init()
     m_client = new QNetworkRegistration( "modem", this );
     m_bandSel = new QBandSelection( "modem", this );
 
-    setWindowTitle( tr( "Call Networks" ) );
     setObjectName( "modem" );
 
     (void) new QListWidgetItem( tr( "Current status" ), this );
@@ -142,13 +451,18 @@ void ModemNetworkRegister::operationSelected( QListWidgetItem * )
     }
 }
 
+static QMap<QString,QString> countries;
 static QString countryForOperatorId( const QString& id )
 {
     if ( !id.startsWith( QChar('2') ) )
         return QString();
-    QTranslatableSettings settings( "Trolltech", "GsmOperatorCountry" );
-    settings.beginGroup( "Countries" );
-    return settings.value( id.mid(1,3) ).toString();
+    if ( countries.isEmpty() ) {
+        QTranslatableSettings settings( "Trolltech", "GsmOperatorCountry" );
+        settings.beginGroup( "Countries" );
+        foreach ( QString key, settings.allKeys() )
+            countries.insert( key, settings.value( key ).toString() );
+    }
+    return countries.value( id.mid(1,3) );
 }
 
 void ModemNetworkRegister::showCurrentOperator()
@@ -251,27 +565,41 @@ void ModemNetworkRegister::selectBand( const QStringList& bandList )
 
     QDialog *dlg = new QDialog( this );
     dlg->setWindowTitle( tr( "Select band" ) );
-    QVBoxLayout *layout = new QVBoxLayout( dlg );
-    QButtonGroup *group = new QButtonGroup( dlg );
+    QVBoxLayout *dlayout = new QVBoxLayout( dlg );
+    QWidget *container = new QWidget;
+    QVBoxLayout *clayout = new QVBoxLayout( container );
+    QButtonGroup *group = new QButtonGroup( container );
     int id = 0;
 
+    // calculate the available width for the FloatingTextRadioButtons
+    int leftMargin = 0;
+    int rightMargin = 0;
+    int is = style()->pixelMetric(QStyle::PM_ExclusiveIndicatorWidth) + 
+            style()->pixelMetric(QStyle::PM_RadioButtonLabelSpacing) +
+            style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+    dlayout->getContentsMargins( &leftMargin, 0, &rightMargin, 0 );
+    is += leftMargin + rightMargin;
+    clayout->getContentsMargins( &leftMargin, 0, &rightMargin, 0 );
+    is += leftMargin + rightMargin;
+    QDesktopWidget *desktop = QApplication::desktop();
+    int availWidth = desktop->availableGeometry(desktop->screenNumber(container)).width() - is;
+
     // automatic
-    QRadioButton *autoBand = new QRadioButton( tr( "Automatic" ), dlg );
+    FloatingTextRadioButton *autoBand = new FloatingTextRadioButton( container, availWidth, tr( "Automatic" ) );
     if ( m_curBandMode == QBandSelection::Automatic )
         autoBand->setChecked( true );
     group->addButton( autoBand, id++ );
-    layout->addWidget( autoBand );
+    clayout->addWidget( autoBand );
 
     // available bands
-    QRadioButton *btn;
+    FloatingTextRadioButton *btn;
     foreach ( QString band, bandList ) {
-        btn = new QRadioButton( band, dlg );
+        btn = new FloatingTextRadioButton( container, availWidth, band );
         if ( m_curBandMode == QBandSelection::Manual && band == m_curBand )
             btn->setChecked( true );
         group->addButton( btn, id++ );
-        layout->addWidget( btn );
+        clayout->addWidget( btn );
     }
-    layout->addStretch();
 
     id = group->checkedId();
     if ( id < 0 ) { // if nothing is checked, check and activate Auto option
@@ -280,6 +608,14 @@ void ModemNetworkRegister::selectBand( const QStringList& bandList )
         m_bandSel->setBand( QBandSelection::Automatic, QString() );
     }
 
+    QScrollArea *scrollArea = new QScrollArea( dlg );
+    scrollArea->setFocusPolicy(Qt::NoFocus);
+    scrollArea->setFrameStyle(QFrame::NoFrame);
+    scrollArea->setWidget(container);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dlayout->addWidget( scrollArea );
+
     if ( QtopiaApplication::execDialog( dlg ) ) {
         if ( id == group->checkedId() ) // no change
             return;
@@ -287,7 +623,8 @@ void ModemNetworkRegister::selectBand( const QStringList& bandList )
         if ( autoBand->isChecked() )
             m_bandSel->setBand( QBandSelection::Automatic, QString() );
         else
-            m_bandSel->setBand( QBandSelection::Manual, group->checkedButton()->text() );
+            m_bandSel->setBand( QBandSelection::Manual, 
+                    ((FloatingTextRadioButton*)(group->checkedButton()))->getCompleteText() );
     }
 }
 
@@ -295,6 +632,10 @@ void ModemNetworkRegister::setBandResult( QTelephony::Result result )
 {
     if ( result == QTelephony::OK )
         m_bandSel->requestBand();
+    else {
+        QMessageBox::warning( this, tr( "Error" ),
+                "<qt>" + tr( "Error Occurred" ) + "</qt>" );
+    }
 }
 
 void ModemNetworkRegister::selectSearchMode()
@@ -309,6 +650,7 @@ void ModemNetworkRegister::selectSearchMode()
     QRadioButton *manual = new QRadioButton( tr( "Manual" ), dlg );
     group->addButton( manual, (int)QTelephony::OperatorModeManual );
     layout->addWidget( manual );
+    layout->addStretch();
 
     QTelephony::OperatorMode originalMode = m_client->currentOperatorMode();
     if ( originalMode == QTelephony::OperatorModeAutomatic )
@@ -349,10 +691,18 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
     m_opDlg = new QDialog( this );
     m_opDlg->setWindowTitle( tr( "Available operators" ) );
     QVBoxLayout *layout = new QVBoxLayout( m_opDlg );
-    m_opList = new PhoneNetworksListWidget( m_opDlg );
-    m_opList->setItemDelegate( new QtopiaItemDelegate );
-    m_opList->setFrameStyle( QFrame::NoFrame );
+
+    // calculate the available width for the TwoLineFloatingTextLists
     int iconMetric = QApplication::style()->pixelMetric( QStyle::PM_SmallIconSize );
+    int leftMargin = 0;
+    int rightMargin = 0;
+    layout->getContentsMargins( &leftMargin, 0, &rightMargin, 0 );
+    int is = style()->pixelMetric(QStyle::PM_ScrollBarExtent) +
+            leftMargin + rightMargin + iconMetric + 24; // magic number
+    QDesktopWidget *desktop = QApplication::desktop();
+    int availWidth = desktop->availableGeometry(desktop->screenNumber(m_opDlg)).width() - is;
+
+    m_opList = new TwoLineFloatingTextList( m_opDlg, availWidth );
     m_opList->setIconSize( QSize( iconMetric, iconMetric ) );
     m_opList->setUniformItemSizes( true );
     m_opList->setAlternatingRowColors( true );
@@ -370,8 +720,11 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
             name = name + " (" + utran  +")" ;
         QString country = countryForOperatorId( op.id );
         if ( !country.isEmpty() )
-            name = name + "\n  " + country;
+            name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
         item = new QListWidgetItem( name, m_opList );
+        item->setData( Qt::UserRole, name );
         switch ( op.availability ) {
         case QTelephony::OperatorUnavailable:
             item->setIcon( QIcon( ":icon/close" ) );
@@ -394,6 +747,7 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
 
     connect( m_opList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(acceptOpDlg()) );
 
+    m_opDlg->showMaximized();
     QtopiaApplication::execDialog( m_opDlg );
 }
 
@@ -445,12 +799,13 @@ void ModemNetworkRegister::setCurrentOperatorResult( QTelephony::Result result )
 void ModemNetworkRegister::preferredOperators()
 {
     PreferredOperatorsDialog dlg( this );
+    dlg.showMaximized();
     QtopiaApplication::execDialog( &dlg );
 }
 
 //-----------------------------------------------------
 PreferredOperatorsDialog::PreferredOperatorsDialog( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ), m_addNetworkDlg(0)
 {
     init();
 
@@ -487,7 +842,17 @@ void PreferredOperatorsDialog::init()
 {
     setWindowTitle( tr( "Preferred Networks" ) );
     QVBoxLayout *layout = new QVBoxLayout( this );
-    m_list = new QListWidget( this );
+
+    // calculate the available width for the TwoLineFloatingTextLists
+    int leftMargin = 0;
+    int rightMargin = 0;
+    layout->getContentsMargins( &leftMargin, 0, &rightMargin, 0 );
+    int is = style()->pixelMetric(QStyle::PM_ScrollBarExtent) +
+            leftMargin + rightMargin + 18; // magic number
+    QDesktopWidget *desktop = QApplication::desktop();
+    int availWidth = desktop->availableGeometry(desktop->screenNumber(this)).width() - is;
+
+    m_list = new TwoLineFloatingTextList( this, availWidth );
     layout->addWidget( m_list );
 
     QMenu *contextMenu = QSoftMenuBar::menuFor( this );
@@ -532,21 +897,37 @@ void PreferredOperatorsDialog::populateList()
         QString country = countryForOperatorId
             ( "2" + QString::number( resolved.at( i ).id ) );
         if ( !country.isEmpty() )
-            name = name + "\n  " + country;
-        (void) new QListWidgetItem( name, m_list );
+            name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
+        QListWidgetItem *item = new QListWidgetItem( name, m_list );
+        item->setData( Qt::UserRole, name );
     }
     if ( resolved.count() > 0 )
         m_list->setCurrentRow( 0 );
+
+    if ( !m_addNetworkDlg )
+        initAddNetworkDlg();
 }
 
-void PreferredOperatorsDialog::addNetwork()
+void PreferredOperatorsDialog::initAddNetworkDlg()
 {
-    QDialog dlg( this );
-    dlg.setModal( true );
-    dlg.setWindowTitle( tr( "Select Network" ) );
-    QVBoxLayout layout( &dlg );
-    QListWidget list( &dlg );
-    layout.addWidget( &list );
+    m_addNetworkDlg = new QDialog( this );
+    m_addNetworkDlg->setModal( true );
+    m_addNetworkDlg->setWindowTitle( tr( "Select Network" ) );
+    QVBoxLayout *layout = new QVBoxLayout( m_addNetworkDlg );
+
+    // calculate the available width for the TwoLineFloatingTextLists
+    int leftMargin = 0;
+    int rightMargin = 0;
+    layout->getContentsMargins( &leftMargin, 0, &rightMargin, 0 );
+    int is = style()->pixelMetric(QStyle::PM_ScrollBarExtent) +
+            leftMargin + rightMargin + 18; // magic number
+    QDesktopWidget *desktop = QApplication::desktop();
+    int availWidth = desktop->availableGeometry(desktop->screenNumber(m_addNetworkDlg)).width() - is;
+
+    m_addNetworkList = new TwoLineFloatingTextList( m_addNetworkDlg, availWidth );
+    layout->addWidget( m_addNetworkList );
 
     for ( int i = 0; i < m_operatorNames.count(); i++ ) {
         // filter out network that are alrealy in the preferred list
@@ -561,22 +942,28 @@ void PreferredOperatorsDialog::addNetwork()
         QString country = countryForOperatorId
             ( "2" + QString::number( m_operatorNames.at( i ).id ) );
         if ( !country.isEmpty() )
-            name = name + "\n  " + country;
-        (void) new QListWidgetItem( name, &list, m_operatorNames.at( i ).id );
+            name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
+        QListWidgetItem *item = new QListWidgetItem( name, m_addNetworkList, m_operatorNames.at( i ).id );
+        item->setData( Qt::UserRole, name );
     }
 
-    connect( &list, SIGNAL(itemActivated(QListWidgetItem*)),
+    connect( m_addNetworkList, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(networkSelected(QListWidgetItem*)) );
 
-    connect( &list, SIGNAL(itemActivated(QListWidgetItem*)),
-            &dlg, SLOT(accept()) );
+    QtopiaApplication::setMenuLike( m_addNetworkDlg, true );
+}
 
-    if ( m_operatorNames.count() > 0 )
-        list.setCurrentRow( 0 );
+void PreferredOperatorsDialog::addNetwork()
+{
+    if ( !m_addNetworkDlg )
+        initAddNetworkDlg();
+    if ( m_addNetworkList->count() )
+        m_addNetworkList->setCurrentRow( 0 );
 
-    QtopiaApplication::setMenuLike( &dlg, true );
-
-    QtopiaApplication::execDialog( &dlg );
+    m_addNetworkDlg->showMaximized();
+    QtopiaApplication::execDialog( m_addNetworkDlg );
 }
 
 bool PreferredOperatorsDialog::isPreferred( unsigned int id )
@@ -584,6 +971,32 @@ bool PreferredOperatorsDialog::isPreferred( unsigned int id )
     for ( int i = 0; i < m_currentOpers.count(); i++ ) {
         if ( m_currentOpers.at( i ).id == id )
             return true;
+    }
+    return false;
+}
+
+// necessary to make the Select Position dialog sane.
+bool PreferredOperatorsDialog::eventFilter(QObject *obj, QEvent *event)
+{
+    QSpinBox *spinBox = (QSpinBox*)obj;
+    if (event->type() == QEvent::KeyPress) {
+        bool ok = false;
+        int dbgVal = spinBox->cleanText().toInt( &ok );
+        if ( ((QKeyEvent*)event)->key() == Qt::Key_Select ) {
+            if ( ok && dbgVal > 0 ) {
+                savedPrefNetOpLoc = spinBox->value();
+                QSoftMenuBar::setLabel( spinBox->parentWidget(), Qt::Key_Back, QSoftMenuBar::Ok );
+            } else {
+                savedPrefNetOpLoc = -1;
+                QSoftMenuBar::setLabel( spinBox->parentWidget(), Qt::Key_Back, QSoftMenuBar::Cancel );
+            }
+        } else if ( ((QKeyEvent*)event)->key() == Qt::Key_Back ) {
+            if ( ok && dbgVal > 0 ) {
+                savedPrefNetOpLoc = spinBox->value();
+            } else {
+                savedPrefNetOpLoc = -1;
+            }
+        }
     }
     return false;
 }
@@ -596,7 +1009,7 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
     QVBoxLayout layout( &dlg );
     layout.setSpacing( 2 );
     layout.setMargin( 2 );
-    QString networkName = item->text();
+    QString networkName = item->data( Qt::UserRole ).toString();
     networkName.replace("\n", "");
     QLabel label( &dlg );
     label.setTextFormat(Qt::RichText);
@@ -616,15 +1029,18 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
     if ( m_currentOpers.count() == 0 ) {
         oper.index = 1;
     } else {
-        if ( QtopiaApplication::execDialog( &dlg ) )
-            oper.index = spinBox.value();
-        else
+        savedPrefNetOpLoc = -1;
+        spinBox.installEventFilter( this );
+        if ( QtopiaApplication::execDialog( &dlg ) && savedPrefNetOpLoc > 0 ) {
+            oper.index = savedPrefNetOpLoc;
+            m_addNetworkDlg->accept();
+        } else
             return;
     }
 
     oper.format = 2;
     oper.id = item->type();
-    oper.name = item->text();
+    oper.name = item->data( Qt::UserRole ).toString();
 
     // add new item to current list
     m_currentOpers.insert( oper.index - 1, oper );
@@ -634,6 +1050,7 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
         updateIndex( i, true );
 
     QListWidgetItem *newItem = new QListWidgetItem( oper.name );
+    newItem->setData( Qt::UserRole, oper.name );
     m_list->insertItem( oper.index - 1, newItem );
     m_list->setCurrentRow( oper.index - 1 );
 }

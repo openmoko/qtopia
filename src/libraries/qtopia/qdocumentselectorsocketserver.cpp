@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,13 +22,14 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QStorageDeviceSelector>
-#include <QGridLayout>
+#include <QFormLayout>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFileSystem>
 #include <QtopiaApplication>
 #include <QDocumentSelector>
 #include <QContentSortCriteria>
+#include <QCategorySelector>
 
 Q_IMPLEMENT_USER_METATYPE_ENUM(QIODevice::OpenMode);
 
@@ -45,10 +46,14 @@ public:
 
     QString location() const;
 
+    void setCategories( const QStringList &categories );
+    QStringList categories() const;
+
 private:
     QLineEdit *m_nameEdit;
     QComboBox *m_typeEdit;
     QStorageDeviceSelector *m_locationEdit;
+    QCategorySelector *m_categoryEdit;
 };
 
 NewDocumentDialog::NewDocumentDialog( QWidget *parent )
@@ -56,16 +61,15 @@ NewDocumentDialog::NewDocumentDialog( QWidget *parent )
 {
     setWindowTitle( QDocumentSelectorServer::tr( "Save As..." ) );
 
-    QGridLayout *layout = new QGridLayout( this );
+    QFormLayout *layout = new QFormLayout;
 
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Name" ), this ), 0, 0 );
-    layout->addWidget( m_nameEdit = new QLineEdit( this ), 0, 1 );
+    layout->addRow( QDocumentSelectorServer::tr( "Name" ), m_nameEdit = new QLineEdit( this ) );
+    layout->addRow( QDocumentSelectorServer::tr( "Location" ), m_locationEdit = new QStorageDeviceSelector( this ) );
+    layout->addRow( QDocumentSelectorServer::tr( "Category" ),
+                    m_categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor | QCategorySelector::DialogView) );
+    layout->addRow( QDocumentSelectorServer::tr( "Type" ), m_typeEdit = new QComboBox( this ) );
 
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Location" ), this ), 1, 0 );
-    layout->addWidget( m_locationEdit = new QStorageDeviceSelector( this ), 1, 1 );
-
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Type" ), this ), 2, 0 );
-    layout->addWidget( m_typeEdit = new QComboBox( this ), 2, 1 );
+    setLayout( layout );
 }
 
 void NewDocumentDialog::setName( const QString &name )
@@ -95,6 +99,16 @@ QString NewDocumentDialog::location() const
     return m_locationEdit->installationPath();
 }
 
+void NewDocumentDialog::setCategories( const QStringList &categories )
+{
+    m_categoryEdit->selectCategories( categories );
+}
+
+QStringList NewDocumentDialog::categories() const
+{
+    return m_categoryEdit->selectedCategories();
+}
+
 class SaveDocumentDialog : public QDialog
 {
 public:
@@ -102,34 +116,43 @@ public:
 
     void setContent( const QContent &content );
 
+    QStringList categories() const;
+
 private:
     QLabel *m_nameLabel;
     QLabel *m_typeLabel;
     QLabel *m_locationLabel;
+    QCategorySelector *m_categoryEdit;
 };
 
 SaveDocumentDialog::SaveDocumentDialog( QWidget *parent )
     : QDialog( parent )
 {
-    QGridLayout *layout = new QGridLayout( this );
-
     setWindowTitle( QDocumentSelectorServer::tr( "Save..." ) );
 
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Name" ), this ), 0, 0 );
-    layout->addWidget( m_nameLabel = new QLabel( this ), 0, 1 );
+    QFormLayout *layout = new QFormLayout;
 
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Location" ), this ), 1, 0 );
-    layout->addWidget( m_locationLabel = new QLabel( this ), 1, 1 );
+    layout->addRow( QDocumentSelectorServer::tr( "Name" ), m_nameLabel = new QLabel( this ) );
+    layout->addRow( QDocumentSelectorServer::tr( "Location" ), m_locationLabel = new QLabel( this ) );
+    layout->addRow( QDocumentSelectorServer::tr( "Category" ),
+                    m_categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor | QCategorySelector::DialogView) );
+    layout->addRow( QDocumentSelectorServer::tr( "Type" ), m_typeLabel = new QLabel( this ) );
 
-    layout->addWidget( new QLabel( QDocumentSelectorServer::tr( "Type" ), this ), 2, 0 );
-    layout->addWidget( m_typeLabel = new QLabel( this ), 2, 1 );
+    setLayout( layout );
 }
 
 void SaveDocumentDialog::setContent( const QContent &content )
 {
     m_nameLabel->setText( content.name() );
     m_typeLabel->setText( content.type() );
+    m_categoryEdit->selectCategories( content.categories() );
+
     m_locationLabel->setText( QFileSystem::fromFileName( content.fileName() ).name() );
+}
+
+QStringList SaveDocumentDialog::categories() const
+{
+    return m_categoryEdit->selectedCategories();
 }
 
 QDocumentSelectorServer::QDocumentSelectorServer( QObject *parent )
@@ -178,6 +201,8 @@ void QDocumentSelectorServer::invokeSlot( const QDocumentServerMessage &message 
 
             QVBoxLayout *layout = new QVBoxLayout( m_selectorDialog );
 
+            layout->setMargin( 0 );
+            layout->setSpacing( 0 );
             layout->addWidget( m_selector = new QDocumentSelector( m_selectorDialog ) );
 
             connect( m_selector, SIGNAL(documentSelected(QContent)), this, SLOT(documentSelected(QContent)) );
@@ -213,6 +238,7 @@ void QDocumentSelectorServer::invokeSlot( const QDocumentServerMessage &message 
 
         m_newDocumentDialog->setName( qvariant_cast< QString >( arguments.at( 0 ) ) );
         m_newDocumentDialog->setTypes( qvariant_cast< QStringList >( arguments.at( 1 ) ) );
+        m_newDocumentDialog->setCategories( QStringList() );
 
         QtopiaApplication::showDialog( m_newDocumentDialog );
     }
@@ -306,6 +332,9 @@ void QDocumentSelectorServer::newDocumentAccepted()
 
 void QDocumentSelectorServer::saveDocumentAccepted()
 {
+    m_selectedDocument.setCategories( m_saveDocumentDialog->categories() );
+    m_selectedDocument.commit();
+
     documentSelected( m_selectedDocument );
 }
 

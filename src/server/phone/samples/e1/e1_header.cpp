@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,7 +24,7 @@
 #include "e1_callhistory.h"
 #include "phone/messagecontrol.h"
 #include "phone/themecontrol.h"
-#include "phone/dialercontrol.h"
+#include "dialercontrol.h"
 #include "windowmanagement.h"
 #include <QSize>
 #include <QPushButton>

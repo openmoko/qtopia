@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -408,6 +408,12 @@ QSqlError QtopiaSql::exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction
   */
 QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
 {
+    if( id == quint32(-1) )
+    {
+        qWarning() << "Database requested for invalid handle";
+        return d()->nullDatabase;
+    }
+
     QMutexLocker guard(&d()->guardMutex);
     if (!d()->dbs.contains(QThread::currentThreadId())) {
         QtopiaSql::openDatabase();
@@ -420,14 +426,14 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
         // remove the connection, it's stale.
         qWarning() << "Stale database handle, returning the system database instead";
         dbs.remove(id);
-        return database(0);
+        return d()->nullDatabase;
     }
     else if(!isValidDatabaseId(id))
     {
-        qWarning() << "Database handle doesnt exist in the master list, returning the system database";
+        qWarning() << "Database handle doesnt exist in the master list, returning an invalid database";
         if(id == 0)
             qFatal("Should not be requesting the system database from this location in the code");
-        return database(0);
+        return d()->nullDatabase;
     }
     else if (!dbs.contains(id))
     {
@@ -441,15 +447,26 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
         db.setHostName(from.hostName());
         db.setPort(from.port());
         db.setConnectOptions(from.connectOptions());
-        db.open();
-        d()->installSorting(db);
-        QSqlQuery xsql( db );
+        if (db.open() )
+        {
+            d()->installSorting(db);
+            QSqlQuery xsql( db );
 #if defined(Q_USE_SQLITE)
-        xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
-        xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
+            xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
+            xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
 #endif
-        dbs.insert(id, db);
-        d()->connectionNames[QThread::currentThreadId()].insert(id, connName);
+            dbs.insert(id, db);
+            d()->connectionNames[QThread::currentThreadId()].insert(id, connName);
+
+            qLog(Sql) << "Connected database" << db.databaseName() << "for database id" << id << "with connection name" << connName;
+        }
+        else
+        {
+            qWarning() << "Failed to open database" << db.databaseName() << "for database id" << id << "with connection name" << connName;
+            qWarning() << db.lastError().text();
+
+            return d()->nullDatabase;
+        }
     }
 
     return dbs[id];
@@ -482,7 +499,7 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
     if(path.isEmpty() || dbPath.isEmpty() || d()->defaultConn == NULL || dbPath == d()->defaultConn->databaseName())
         return;
     QtopiaDatabaseId dbid = databaseIdForDatabasePath(dbPath);
-    if(!isValidDatabaseId(dbid))
+    if(dbid != quint32(-1) && !isValidDatabaseId(dbid))
     {
 #ifndef QTOPIA_CONTENT_INSTALLER
 
@@ -582,28 +599,28 @@ void QtopiaSql::detachDB(const QString& path)
 {
     qLog(Sql) << "Detaching database at" << path;
     QMutexLocker guard(&d()->guardMutex);
-    QtopiaDatabaseId dbid = databaseIdForPath(path);
-    if(d()->dbPaths.contains(dbid) && dbid != 0)
+    QtopiaDatabaseId dbid = d()->dbPaths.key( path, 0 );
+    if(dbid != 0)
     {
         QString dbPath=d()->masterAttachedConns[dbid].databaseName();
         d()->masterAttachedConns.remove(dbid);
         d()->dbPaths.remove(dbid);
 
-        QHash<QtopiaDatabaseId, QSqlDatabase> hash;
-        foreach(hash, d()->dbs)
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QSqlDatabase> >::iterator hash;
+        for( hash = d()->dbs.begin(); hash != d()->dbs.end(); hash++ )
         {
-            if(hash.keys().contains(dbid))
+            if(hash->keys().contains(dbid))
             {
-                hash.take(dbid).close();
+                hash->take(dbid).close();
             }
         }
-        
-        QHash<QtopiaDatabaseId, QString> hash2;
-        foreach(hash2, d()->connectionNames)
+
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QString> >::iterator hash2;
+        for( hash2 = d()->connectionNames.begin(); hash2 != d()->connectionNames.end(); hash2++ )
         {
-            if(hash2.keys().contains(dbid))
+            if(hash2->keys().contains(dbid))
             {
-                QSqlDatabase::removeDatabase(hash2.take(dbid));
+                QSqlDatabase::removeDatabase(hash2->take(dbid));
             }
         }
         // todo: if database itself is located in the temp directory, then delete it.
@@ -646,14 +663,36 @@ QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
 {
     openDatabase();
 
-    for(QHash<QtopiaDatabaseId, QString>::iterator i=d()->dbPaths.begin(); i != d()->dbPaths.end(); i++)
-    {
-        if(i.value() != QLatin1String("/"))
-            if (i.key() != 0 && path.startsWith(i.value()))
-                return i.key();
+#ifndef QTOPIA_CONTENT_INSTALLER
+    QFileSystem *bestMatch = 0;
+    int bestLen = 0;
+
+    foreach ( QFileSystem *fs, QStorageMetaInfo::instance()->fileSystems( NULL, false) ) {
+        if ( fs->contentDatabase() ) {
+            QString fsPath = !fs->path().isEmpty() ? fs->path() : fs->prevPath();
+            if ( fsPath.length() > bestLen && path.startsWith( fsPath ) ) {
+                int currLen = fsPath.length();
+                if ( currLen == 1 )
+                    currLen = 0; // Fix checking '/' root mount which is a special case
+                if ( path.length() == currLen ||
+                    path[currLen] == '/' ||
+                    path[currLen] == '\\') {
+                    bestMatch = fs;
+                    bestLen = fsPath.length();
+                }
+            }
+        }
     }
-    // fall through. if it's not under a registered path, then use the system database id(0)
+
+    if ( bestMatch ) {
+        return d()->dbPaths.key( bestMatch->isConnected() ? bestMatch->path() : bestMatch->prevPath(), -1 );
+    } else {
+        return 0;
+    }
+#else
+    Q_UNUSED(path)
     return 0;
+#endif
 }
 
 /*!
@@ -725,7 +764,7 @@ QString QtopiaSql::databasePathForId(const QtopiaDatabaseId& id)
     openDatabase();
 
     QString result;
-    if(id != 0 && d()->dbPaths.contains(id))
+    if(id != 0 && id != quint32(-1) && d()->dbPaths.contains(id))
         result = d()->dbPaths.value(id);
     return result;
 }

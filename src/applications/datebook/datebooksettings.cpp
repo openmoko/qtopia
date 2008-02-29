@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,19 +20,22 @@
 ****************************************************************************/
 
 #include "datebooksettings.h"
+#include <QFormLayout>
+#include <QSpinBox>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QApplication>
+
+#include "../todo/reminderpicker.h"
 
 DateBookSettings::DateBookSettings( bool whichClock, QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl ),
       ampm( whichClock ), oldtime(0)
 {
-    setupUi( this );
-    widCompress->hide();
     init();
     setObjectName("settings");
     QObject::connect( qApp, SIGNAL(clockChanged(bool)),
                       this, SLOT(slotChangeClock(bool)) );
-
-    connect(chkAlarmPreset, SIGNAL(stateChanged(int)), this, SLOT(enablePresetDetails(int)));
 }
 
 DateBookSettings::~DateBookSettings()
@@ -70,31 +73,20 @@ int DateBookSettings::startTime() const
 }
 
 
-void DateBookSettings::setAlarmPreset( bool bAlarm, int presetTime )
+void DateBookSettings::setPresetAlarm( QAppointment::AlarmFlags alarmType, int presetTime )
 {
-    chkAlarmPreset->setChecked( bAlarm );
-    if ( presetTime >=0 )
-        spinPreset->setValue( presetTime );
+    mAppt.setAlarm(presetTime, alarmType);
+    picker->updateUI();
 }
 
-bool DateBookSettings::alarmPreset() const
+QAppointment::AlarmFlags DateBookSettings::alarmType() const
 {
-    return chkAlarmPreset->isChecked();
+    return mAppt.alarm();
 }
 
-int DateBookSettings::presetTime() const
+int DateBookSettings::alarmDelay() const
 {
-    return spinPreset->value();
-}
-
-void DateBookSettings::setCompressDay( bool compress )
-{
-    chkCompressDayView->setChecked( compress );
-}
-
-bool DateBookSettings::compressDay() const
-{
-    return chkCompressDayView->isChecked();
+    return mAppt.alarmDelay();
 }
 
 void DateBookSettings::slot12Hour( int i )
@@ -113,6 +105,44 @@ void DateBookSettings::slot12Hour( int i )
 
 void DateBookSettings::init()
 {
+    setObjectName(QString::fromUtf8("DateBookSettingsBase"));
+
+    QFormLayout *fl = new QFormLayout();
+    QFormLayout *gbfl = new QFormLayout();
+    fraView = new QGroupBox();
+    cmbDefaultView = new QComboBox(fraView);
+
+    spinStart = new QSpinBox(fraView);
+    spinStart->setWrapping(true);
+    spinStart->setMaximum(23);
+    QObject::connect(spinStart,SIGNAL(valueChanged(int)), this,SLOT(slot12Hour(int)));
+
+    fraAlarm = new QGroupBox();
+
+    setWindowTitle(QApplication::translate("DateBookSettingsBase", "Settings", 0, QApplication::UnicodeUTF8));
+    fraView->setTitle(QApplication::translate("DateBookSettingsBase", "View", 0, QApplication::UnicodeUTF8));
+    gbfl->addRow(QApplication::translate("DateBookSettingsBase", "Default view", 0, QApplication::UnicodeUTF8), cmbDefaultView);
+
+    cmbDefaultView->clear();
+    cmbDefaultView->insertItems(0, QStringList()
+         << QApplication::translate("DateBookSettingsBase", "Day", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("DateBookSettingsBase", "Month", 0, QApplication::UnicodeUTF8));
+
+    gbfl->addRow(QApplication::translate("DateBookSettingsBase", "Day starts at", 0, QApplication::UnicodeUTF8), spinStart);
+    spinStart->setSuffix(QApplication::translate("DateBookSettingsBase", ":00", 0, QApplication::UnicodeUTF8));
+    fraAlarm->setTitle(QApplication::translate("DateBookSettingsBase", "Preset", 0, QApplication::UnicodeUTF8));
+
+    fraView->setLayout(gbfl);
+
+    gbfl = new QFormLayout();
+    picker = new ReminderPicker(this, gbfl, mAppt);
+    fraAlarm->setLayout(gbfl);
+
+    fl->addRow(fraView);
+    fl->addRow(fraAlarm);
+
+    setLayout(fl);
+
     if ( ampm ) {
         spinStart->setMinimum( 1 );
         spinStart->setMaximum( 12 );
@@ -140,11 +170,6 @@ void DateBookSettings::slotChangeClock( bool whichClock )
     ampm = whichClock;
     init();
     setStartTime( saveMe );
-}
-
-void DateBookSettings::enablePresetDetails(int state)
-{
-    spinPreset->setEnabled(state != Qt::Unchecked);
 }
 
 DateBookSettings::ViewType DateBookSettings::defaultView() const

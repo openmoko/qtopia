@@ -45,11 +45,9 @@ help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=todo*
 help.hint=help
 INSTALLS+=help
-pics.files=$$QTOPIA_DEPOT_PATH/pics/todolist/*
-pics.path=/pics/todolist
-pics.hint=pics
-INSTALLS+=pics
+
+# pics are installed by libqtopiapim since they're shared
 
 pkg.name=qpe-todo
 pkg.desc=Todo helps you manage your list of tasks.
-pkg.domain=window,beaming,qdl,qds,pim,bluetooth,alarm
+pkg.domain=trusted

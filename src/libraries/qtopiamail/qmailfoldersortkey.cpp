@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,6 +54,22 @@
     \value Name The name of the folder.
     \value ParentId the ID of the parent folder for a given folder.
 */
+
+/*!
+    Create a QMailFolderSortKey with specifying matching parameters.
+
+    A default-constructed key (one for which isEmpty() returns true) sorts no folders. 
+
+    The result of combining an empty key with a non-empty key is the same as the original 
+    non-empty key.
+
+    The result of combining two empty keys is an empty key.
+*/
+
+QMailFolderSortKey::QMailFolderSortKey()
+{
+	d = new QMailFolderSortKeyPrivate();
+}
 
 /*!
     Construct a QMailFolderSortKey which sorts a set of results based on the  
@@ -137,12 +153,12 @@ QMailFolderSortKey& QMailFolderSortKey::operator=(const QMailFolderSortKey& othe
     return *this;
 }
 
+/*!
+    Returns true if the key remains empty after default construction; otherwise returns false.
+*/
 
-/*! \internal */
-
-QMailFolderSortKey::QMailFolderSortKey()
+bool QMailFolderSortKey::isEmpty() const
 {
-	d = new QMailFolderSortKeyPrivate();
+    return d->arguments.isEmpty();
 }
-
 

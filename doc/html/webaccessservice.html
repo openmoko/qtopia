@@ -20,24 +20,22 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="webaccessservice.html#getURL">getURL</a></b> ( const QString &amp; <i>url</i>, const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="webaccessservice.html#clearSession">clearSession</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="webaccessservice.html#openURL">openURL</a></b> ( const QString &amp; <i>url</i> )</li>
-<li><div class="fn"/>void <b><a href="webaccessservice.html#retrieveURL">retrieveURL</a></b> ( const QString &amp; <i>url</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -46,20 +44,20 @@
 <p>The <i>WebAccess</i> service enables applications to access the web browser installed on the device.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="getURL"></a>void WebAccessService::getURL ( const <a href="qstring.html">QString</a> &amp; <i>url</i>, const <a href="qstring.html">QString</a> &amp; <i>path</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Retrieve the resource specified by <i>url</i>, and create a document containing the resource using the given <i>path</i> as the destination for the document. The service is responsible for notifying the content system of the new document. It does this by creating an instance of <a href="qcontent.html">QContent</a> and calling at least <a href="qcontent.html#setName">QContent::setName</a>() and <a href="qcontent.html#setFile">QContent::setFile</a>() on it. It then updates the content system by calling QContent::writeLink().</p>
-<p>This slot corresponds to the QCop service message <tt>WebAccess::getURL(QString,QString)</tt>.</p>
-<p>See also <a href="qcontent.html">QContent</a>.</p>
-<h3 class="fn"><a name="openURL"></a>void WebAccessService::openURL ( const <a href="qstring.html">QString</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="clearSession"></a>void WebAccessService::clearSession ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Clear the current session's navigation history and remove the currently displayed Web page.</p>
+<p>This is used by SIM toolkit applications to implement the &quot;Close the existing browser session and launch new browser session&quot; functionality required by 3GPP TS 11.14. This service call will be immediately followed by a call to <a href="webaccessservice.html#openURL">openURL</a>() to specify the new URL to display.</p>
+<p>This slot corresponds to the QCop service message <tt>WebAccess::clearSession()</tt>.</p>
+<p>See also <a href="qsimtoolkit.html">QSimToolkit</a> and <a href="webaccessservice.html#openURL">openURL</a>().</p>
+<h3 class="fn"><a name="openURL"></a>void WebAccessService::openURL ( const <a href="./qstring.html">QString</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Retrieve the resource specified by <i>url</i> and either display it to the user, invoke further services to display the resource, or notify the user that no facility exists for displaying the resource. If the resource cannot be retrieved, the service notifies the user.</p>
+<p>If <i>url</i> is an empty string, the user's default home page should be shown.</p>
 <p>This slot corresponds to the QCop service message <tt>WebAccess::openURL(QString)</tt>.</p>
-<h3 class="fn"><a name="retrieveURL"></a>void WebAccessService::retrieveURL ( const <a href="qstring.html">QString</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Retrieve the resource specified by <i>url</i>, and create a document containing the resource. If services exist to display the document, the WebAccess service gives the user the option to display the document. If the resource cannot be retrieved, the service notifies the user.</p>
-<p>This slot corresponds to the QCop service message <tt>WebAccess::retrieveURL(QString)</tt>.</p>
+<p>See also <a href="webaccessservice.html#clearSession">clearSession</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,7 +1,10 @@
 qtopia_project(qtopia plugin)
 TARGET=genericviewer
 
-!enable_modem:DEFINES+=QTOPIA_NO_SMS
+!enable_cell {
+    DEFINES+=QTOPIA_NO_SMS
+    !enable_voip:DEFINES+=QTOPIA_NO_DIAL_FUNCTION
+}
 
 HEADERS+=\
     attachmentoptions.h\

@@ -1,6 +1,6 @@
 /****************************************************************************
   **
-  ** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+  ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
   **
   ** This file is part of the Opensource Edition of the Qtopia Toolkit.
   **
@@ -27,6 +27,7 @@
 #include "qsoftkeylabelhelper_p.h"
 #include <QByteArray>
 #include <QLineEdit>
+#include <QDateTimeEdit>
 #include <QSoftMenuBar>
 #include "contextkeymanager_p.h"
 
@@ -110,5 +111,25 @@ protected:
     QLineEdit* m_l;
 private:
     bool m_preeditTextFlag;
+};
+
+class QTOPIA_EXPORT QDateTimeEditSoftKeyLabelHelper : public QAbstractSoftKeyLabelHelper
+{
+    Q_OBJECT
+public:
+    QDateTimeEditSoftKeyLabelHelper(QString className="QDateTimeEdit");
+    QDateTimeEditSoftKeyLabelHelper(QDateTimeEdit* de);
+    ~QDateTimeEditSoftKeyLabelHelper();
+    
+    virtual bool focusIn(QWidget*);
+    virtual bool focusOut(QWidget*);
+    virtual bool enterEditFocus(QWidget*);
+    virtual bool leaveEditFocus(QWidget*);
+
+public slots:
+    virtual void updateAllLabels(QWidget* widget=0);
+protected:
+    virtual bool eventFilter(QObject* watched, QEvent *event);
+    QDateTimeEdit* m_dte;
 };
 #endif // QSOFTKEYLABELHELPER_H

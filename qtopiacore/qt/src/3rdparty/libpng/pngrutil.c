@@ -1037,7 +1037,7 @@ png_handle_iCCP(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
 
    /* there should be at least one zero (the compression type byte)
       following the separator, and we should be on it  */
-   if ( profile >= chunkdata + slength)
+   if ( profile >= chunkdata + slength - 1)
    {
       png_free(png_ptr, chunkdata);
       png_warning(png_ptr, "Malformed iCCP chunk");
@@ -1141,7 +1141,7 @@ png_handle_sPLT(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
    ++entry_start;
 
    /* a sample depth should follow the separator, and we should be on it  */
-   if (entry_start > chunkdata + slength)
+   if (entry_start > chunkdata + slength - 2)
    {
       png_free(png_ptr, chunkdata);
       png_warning(png_ptr, "malformed sPLT chunk");
@@ -1660,7 +1660,7 @@ png_handle_pCAL(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
       buf++; /* Skip the null string terminator from previous parameter. */
 
       png_debug1(3, "Reading pCAL parameter %d\n", i);
-      for (params[i] = buf; *buf != 0x00 && buf <= endptr; buf++)
+      for (params[i] = buf; buf <= endptr && *buf != 0x00; buf++)
          /* Empty loop to move past each parameter string */ ;
 
       /* Make sure we haven't run out of data yet */
@@ -1757,6 +1757,17 @@ png_handle_sCAL(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
    for (ep = buffer; *ep; ep++)
       /* empty loop */ ;
    ep++;
+
+   if (buffer + slength < ep)
+   {
+       png_warning(png_ptr, "Truncated sCAL chunk");
+#if defined(PNG_FIXED_POINT_SUPPORTED) && \
+    !defined(PNG_FLOATING_POINT_SUPPORTED)
+       png_free(png_ptr, swidth);
+#endif
+      png_free(png_ptr, buffer);
+       return;
+   }
 
 #ifdef PNG_FLOATING_POINT_SUPPORTED
    height = png_strtod(png_ptr, ep, &vp);
@@ -1981,7 +1992,7 @@ png_handle_zTXt(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
       /* empty loop */ ;
 
    /* zTXt must have some text after the chunkdataword */
-   if (text == chunkdata + slength)
+   if (text >= chunkdata + slength - 2)
    {
       comp_type = PNG_TEXT_COMPRESSION_NONE;
       png_warning(png_ptr, "Zero length zTXt chunk");
@@ -2084,7 +2095,7 @@ png_handle_iTXt(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
       translated keyword (possibly empty), and possibly some text after the
       keyword */
 
-   if (lang >= chunkdata + slength)
+   if (lang >= chunkdata + slength - 3)
    {
       comp_flag = PNG_TEXT_COMPRESSION_NONE;
       png_warning(png_ptr, "Zero length iTXt chunk");
@@ -2099,9 +2110,22 @@ png_handle_iTXt(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
       /* empty loop */ ;
    lang_key++;        /* skip NUL separator */
 
+   if (lang_key >= chunkdata + slength)
+   {
+      png_warning(png_ptr, "Truncated iTXt chunk");
+      png_free(png_ptr, chunkdata);
+      return;
+   }
+
    for (text = lang_key; *text; text++)
       /* empty loop */ ;
    text++;        /* skip NUL separator */
+   if (text >= chunkdata + slength)
+   {
+      png_warning(png_ptr, "Malformed iTXt chunk");
+      png_free(png_ptr, chunkdata);
+      return;
+   }
 
    prefix_len = text - chunkdata;
 

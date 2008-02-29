@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 1992-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qt Toolkit.
 **
@@ -508,6 +508,18 @@ void QtopiaItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewIt
 }
 
 /*!
+    Renders the \a pixmap within the rectangle specified by
+    \a rect using the given \a painter and style \a option.
+*/
+void QtopiaItemDelegate::drawDecoration(QPainter *painter, const QStyleOptionViewItem &option,
+                            const QRect &rect, const QPixmap &pixmap) const
+{
+    QPoint p = QStyle::alignedRect(option.direction, option.decorationAlignment,
+            pixmap.size(), rect).topLeft();
+    painter->drawPixmap(p, pixmap);
+}
+
+/*!
     Renders the \a decoration within the rectangle specified by
     \a rect using the given \a painter and style \a option.
 */
@@ -527,9 +539,7 @@ void QtopiaItemDelegate::drawDecoration(QPainter *painter, const QStyleOptionVie
         break; }
     case QVariant::Pixmap: {
         QPixmap pixmap = qvariant_cast<QPixmap>(decoration);
-        QPoint p = QStyle::alignedRect(option.direction, option.decorationAlignment,
-                                    pixmap.size(), rect).topLeft();
-        painter->drawPixmap(p, pixmap);
+        drawDecoration(painter, option, rect, pixmap);
         break; }
     case QVariant::Color: {
         painter->fillRect(rect, qvariant_cast<QColor>(decoration));
@@ -580,6 +590,10 @@ void QtopiaItemDelegate::drawFocus(QPainter *painter,
                               const QStyleOptionViewItem &option,
                               const QRect &rect) const
 {
+    Q_UNUSED(painter);
+    Q_UNUSED(option);
+    Q_UNUSED(rect);
+    /* Focus should not be necessary in Qtopia.
     if ((option.state & QStyle::State_HasFocus) == 0 || !rect.isValid())
         return;
     QStyleOptionFocusRect o;
@@ -592,7 +606,8 @@ void QtopiaItemDelegate::drawFocus(QPainter *painter,
                                              ? QPalette::Highlight : QPalette::Window);
     const QWidget *widget = d->widget(option);
     QStyle *style = widget ? widget->style() : QApplication::style();
-//    style->drawPrimitive(QStyle::PE_FrameFocusRect, &o, painter, widget);
+    style->drawPrimitive(QStyle::PE_FrameFocusRect, &o, painter, widget);
+    */
 }
 
 /*!

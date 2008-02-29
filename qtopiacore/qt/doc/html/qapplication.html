@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qapplication.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qapplication.cpp -->
 <head>
   <title>Qt 4.3: QApplication Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -416,10 +416,10 @@
      QApplication app(argc, argv, useGUI);
 
      if (useGUI) {
-        <span class="comment">// start GUI version</span>
+        <span class="comment">//</span> start GUI version
         ...
      } else {
-        <span class="comment">// start non-GUI version</span>
+        <span class="comment">//</span> start non-GUI version
         ...
      }
      return app.exec();
@@ -721,7 +721,7 @@
 <p>Application cursors are stored on an internal stack. setOverrideCursor() pushes the cursor onto the stack, and <a href="qapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>() pops the active cursor off the stack. <a href="qapplication.html#changeOverrideCursor">changeOverrideCursor</a>() changes the curently active application override cursor. Every setOverrideCursor() must eventually be followed by a corresponding <a href="qapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>(), otherwise the stack will never be emptied.</p>
 <p>Example:</p>
 <pre> QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
- calculateHugeMandelbrot();              <span class="comment">// lunch time...</span>
+ calculateHugeMandelbrot();              <span class="comment">//</span> lunch time...
  QApplication::restoreOverrideCursor();</pre>
 <p>See also <a href="qapplication.html#overrideCursor">overrideCursor</a>(), <a href="qapplication.html#restoreOverrideCursor">restoreOverrideCursor</a>(), <a href="qapplication.html#changeOverrideCursor">changeOverrideCursor</a>(), and <a href="qwidget.html#cursor-prop">QWidget::setCursor</a>().</p>
 <h3 class="fn"><a name="setPalette"></a>void QApplication::setPalette ( const <a href="qpalette.html">QPalette</a> &amp; <i>palette</i>, const char * <i>className</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -790,89 +790,10 @@
 <p>A global pointer referring to the unique application object. It is equivalent to the pointer returned by the <a href="qcoreapplication.html#instance">QCoreApplication::instance</a>() function except that, in GUI applications, it is a pointer to a <a href="qapplication.html">QApplication</a> instance.</p>
 <p>Only one application object can be created.</p>
 <p>See also <a href="qcoreapplication.html#instance">QCoreApplication::instance</a>().</p>
-<hr />
-<h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="ColorMode-typedef"></a>typedef QApplication::ColorMode</h3>
-<p>Use <a href="qapplication.html#ColorSpec-enum">ColorSpec</a> instead.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="colorMode"></a><a href="qapplication-qt3.html#ColorMode-typedef">ColorMode</a> QApplication::colorMode ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qapplication.html#colorSpec">colorSpec</a>() instead, and use <a href="qapplication.html#ColorSpec-enum">ColorSpec</a> as the enum type.</p>
-<p>See also <a href="qapplication-qt3.html#setColorMode">setColorMode</a>().</p>
-<h3 class="fn"><a name="flushX"></a>void QApplication::flushX ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qcoreapplication.html#flush">flush</a>() instead.</p>
-<h3 class="fn"><a name="hasGlobalMouseTracking"></a>bool QApplication::hasGlobalMouseTracking ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This feature does not exist anymore. This function always returns true in Qt 4.</p>
-<h3 class="fn"><a name="horizontalAlignment"></a><a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a> QApplication::horizontalAlignment ( <a href="qt.html#AlignmentFlag-enum">Qt::Alignment</a> <i>align</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Strips out vertical alignment flags and transforms an alignment <i>align</i> of <a href="qt.html#AlignmentFlag-enum">Qt::AlignLeft</a> into <a href="qt.html#AlignmentFlag-enum">Qt::AlignLeft</a> or <a href="qt.html#AlignmentFlag-enum">Qt::AlignRight</a> according to the language used.</p>
-<h3 class="fn"><a name="macVersion"></a><a href="qt-qt3.html#MacintoshVersion-enum">Qt::MacintoshVersion</a> QApplication::macVersion ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qsysinfo.html#MacintoshVersion-var">QSysInfo::MacintoshVersion</a> instead.</p>
-<h3 class="fn"><a name="mainWidget"></a><a href="qwidget.html">QWidget</a> * QApplication::mainWidget ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the main application widget, or 0 if there is no main widget.</p>
-<p>See also <a href="qapplication-qt3.html#setMainWidget">setMainWidget</a>().</p>
-<h3 class="fn"><a name="reverseLayout"></a>bool QApplication::reverseLayout ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qapplication.html#layoutDirection-prop">layoutDirection</a>() instead.</p>
-<p>See also <a href="qapplication-qt3.html#setReverseLayout">setReverseLayout</a>().</p>
-<h3 class="fn"><a name="setColorMode"></a>void QApplication::setColorMode ( <a href="qapplication-qt3.html#ColorMode-typedef">ColorMode</a> <i>mode</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qapplication.html#setColorSpec">setColorSpec</a>() instead, and pass a <a href="qapplication.html#ColorSpec-enum">ColorSpec</a> value instead.</p>
-<p>See also <a href="qapplication-qt3.html#colorMode">colorMode</a>().</p>
-<h3 class="fn"><a name="setFont-2"></a>void QApplication::setFont ( const <a href="qfont.html">QFont</a> &amp; <i>font</i>, bool <i>b</i>, const char * <i>className</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the two-argument overload instead.</p>
-<h3 class="fn"><a name="setGlobalMouseTracking"></a>void QApplication::setGlobalMouseTracking ( bool <i>dummy</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This function does nothing in Qt 4. The <i>dummy</i> parameter is ignored.</p>
-<p>See also <a href="qapplication-qt3.html#hasGlobalMouseTracking">hasGlobalMouseTracking</a>().</p>
-<h3 class="fn"><a name="setMainWidget"></a>void QApplication::setMainWidget ( <a href="qwidget.html">QWidget</a> * <i>mainWidget</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Sets the application's main widget to <i>mainWidget</i>.</p>
-<p>In most respects the main widget is like any other widget, except that if it is closed, the application exits. Note that <a href="qapplication.html">QApplication</a> does <i>not</i> take ownership of the <i>mainWidget</i>, so if you create your main widget on the heap you must delete it yourself.</p>
-<p>You need not have a main widget; connecting <a href="qapplication.html#lastWindowClosed">lastWindowClosed</a>() to <a href="qcoreapplication.html#quit">quit</a>() is an alternative.</p>
-<p>For X11, this function also resizes and moves the main widget according to the <i>-geometry</i> command-line option, so you should set the default geometry (using <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>()) before calling setMainWidget().</p>
-<p>See also <a href="qapplication-qt3.html#mainWidget">mainWidget</a>(), <a href="qapplication.html#exec">exec</a>(), and <a href="qcoreapplication.html#quit">quit</a>().</p>
-<h3 class="fn"><a name="setOverrideCursor-2"></a>void QApplication::setOverrideCursor ( const <a href="qcursor.html">QCursor</a> &amp; <i>cursor</i>, bool <i>replace</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use changeOverrideCursor(<i>cursor</i>) (if <i>replace</i> is true) or setOverrideCursor(<i>cursor</i>) (if <i>replace</i> is false).</p>
-<h3 class="fn"><a name="setPalette-2"></a>void QApplication::setPalette ( const <a href="qpalette.html">QPalette</a> &amp; <i>pal</i>, bool <i>b</i>, const char * <i>className</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the two-argument overload instead.</p>
-<h3 class="fn"><a name="setReverseLayout"></a>void QApplication::setReverseLayout ( bool <i>reverse</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qapplication.html#layoutDirection-prop">setLayoutDirection</a>() instead.</p>
-<p>See also <a href="qapplication-qt3.html#reverseLayout">reverseLayout</a>().</p>
-<h3 class="fn"><a name="setWinStyleHighlightColor"></a>void QApplication::setWinStyleHighlightColor ( const <a href="qcolor.html">QColor</a> &amp; <i>c</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use the palette instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> app.setWinStyleHighlightColor(color);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QPalette palette(qApp-&gt;palette());
- palette.setColor(QPalette::Highlight, color);
- qApp-&gt;setPalette(palette);</pre>
-<p>See also <a href="qapplication-qt3.html#winStyleHighlightColor">winStyleHighlightColor</a>().</p>
-<h3 class="fn"><a name="widgetAt-2"></a><a href="qwidget.html">QWidget</a> * QApplication::widgetAt ( int <i>x</i>, int <i>y</i>, bool <i>child</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the two-argument <a href="qapplication.html#widgetAt">widgetAt</a>() overload to get the child widget. To get the top-level widget do this:</p>
-<pre> QWidget *widget = qApp-&gt;widgetAt(x, y);
- if (widget)
-     widget = widget-&gt;window();</pre>
-<h3 class="fn"><a name="widgetAt-3"></a><a href="qwidget.html">QWidget</a> * QApplication::widgetAt ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i>, bool <i>child</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the single-argument <a href="qapplication.html#widgetAt">widgetAt</a>() overload to get the child widget. To get the top-level widget do this:</p>
-<pre> QWidget *widget = qApp-&gt;widgetAt(point);
- if (widget)
-     widget = widget-&gt;window();</pre>
-<h3 class="fn"><a name="winStyleHighlightColor"></a>const <a href="qcolor.html">QColor</a> &amp; QApplication::winStyleHighlightColor ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qapplication.html#qApp">qApp</a>-&gt;<a href="qapplication.html#palette">palette</a>().color(<a href="qpalette.html#ColorGroup-enum">QPalette::Active</a>, <a href="qpalette.html#ColorRole-enum">QPalette::Highlight</a>) instead.</p>
-<p>See also <a href="qapplication-qt3.html#setWinStyleHighlightColor">setWinStyleHighlightColor</a>().</p>
-<h3 class="fn"><a name="winVersion"></a><a href="qt-qt3.html#WindowsVersion-enum">Qt::WindowsVersion</a> QApplication::winVersion ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Use <a href="qsysinfo.html#WindowsVersion-var">QSysInfo::WindowsVersion</a> instead.</p>
-<hr />
-<h2>Member Variable Documentation</h2>
-<h3 class="fn"><a name="CustomColors-var"></a>const int QApplication::CustomColors</h3>
-<p>Use <a href="qapplication.html#ColorSpec-enum">CustomColor</a> instead.</p>
-<h3 class="fn"><a name="NormalColors-var"></a>const int QApplication::NormalColors</h3>
-<p>Use <a href="qapplication.html#ColorSpec-enum">NormalColor</a> instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

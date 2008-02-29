@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,11 +23,11 @@
 #define MEDIABROWSER_H
 
 #include "playercontrol.h"
+#include "requesthandler.h"
+#include "menumodel.h"
+#include "menuview.h"
 
 #include <qmediacontent.h>
-#include <private/requesthandler_p.h>
-#include <private/menumodel_p.h>
-#include <private/menuview_p.h>
 #include <private/activitymonitor_p.h>
 
 class TitleBar;
@@ -47,7 +47,7 @@ public:
     MediaBrowser( PlayerControl* control, RequestHandler* handler = 0, QWidget* parent = 0 );
     ~MediaBrowser();
 
-    void setCurrentPlaylist( Playlist* playlist );
+    void setCurrentPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
 
     bool hasBack() const;
     void goBack();
@@ -71,7 +71,6 @@ private slots:
     void generateMyShuffle();
     void resetMyShuffle();
 
-    // ### HACK
     void enableNowPlaying();
 
     void directCurrentChange();
@@ -79,8 +78,12 @@ private slots:
 
     void executeShowPlayerRequest();
 
+    void delayMenuCreation();
+    void execSettings();
+
 private:
     RequestHandler *m_requesthandler;
+    RequestHandler *m_requesthandlerparent;
 
     CustomView *m_view;
     MenuStack *m_stack;
@@ -94,6 +97,7 @@ private:
 
     SimpleMenuModel *m_mainmenu;
     PlaylistMenuModel *m_currentplaylistmenu;
+    PlaylistMenuModel *m_myshufflemenu;
 
     ActionGroup *m_removegroup;
     ActionGroup *m_savegroup;
@@ -101,7 +105,7 @@ private:
 
     TitleBar *m_titlebar;
 
-    Playlist *m_playlist;
+    QExplicitlySharedDataPointer< Playlist > m_playlist;
     bool m_hasnowplaying;
 
     ActivityMonitor *m_browsermonitor;

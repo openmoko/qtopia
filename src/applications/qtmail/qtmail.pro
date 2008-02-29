@@ -2,13 +2,16 @@ qtopia_project(qtopia app)
 TARGET=qtmail
 CONFIG+=qtopia_main
 
-enable_modem:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
+enable_cell:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
 else:DEFINES+=QTOPIA_NO_SMS QTOPIA_NO_MMS
 
 FORMS_MMS = mmseditaccountbase.ui
 FORMS = editaccountbasephone.ui searchviewbasephone.ui
 
-enable_mms:FORMS += $$FORMS_MMS
+enable_mms {
+    FORMS += $$FORMS_MMS
+    qtopia_depot:DEFINES+=ENABLE_UNCONDITIONAL_MMS_SEND
+}
 
 HEADERS+=\
     account.h\
@@ -40,6 +43,7 @@ HEADERS+=\
     smsclient.h\
     smsdecoder.h\
     smtpclient.h\
+    statusdisplay.h\
     viewatt.h\
     writemail.h
 
@@ -74,6 +78,7 @@ SOURCES+=\
     smsclient.cpp\
     smsdecoder.cpp\
     smtpclient.cpp\
+    statusdisplay.cpp\
     viewatt.cpp\
     writemail.cpp
 
@@ -135,14 +140,14 @@ INSTALLS+=help
 
 smsservice.files=$$QTOPIA_DEPOT_PATH/services/SMS/qtmail
 smsservice.path=/services/SMS
-INSTALLS+=smsservice
+enable_cell:INSTALLS+=smsservice
 messageservice.files=$$QTOPIA_DEPOT_PATH/services/Messages/qtmail
 messageservice.path=/services/Messages
 INSTALLS+=messageservice
 qdssmsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/SMS
 qdssmsservice.path=/etc/qds
-INSTALLS+=qdssmsservice
+enable_cell:INSTALLS+=qdssmsservice
 
 pkg.name=qpe-mail
 pkg.desc=Messaging application for Qtopia.
-pkg.domain=window,qds,msg,phonecomm,cardreader,camera,pictures,alarm,mediarecorder,pim,net,drm,print,doc_server,doc_write,mediasession,phonecomm,launcher
+pkg.domain=trusted

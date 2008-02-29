@@ -57,44 +57,44 @@
 <p>If a string is a prefix of an <a href="qvalidator.html#State-enum">Acceptable</a> string, it is considered <a href="qvalidator.html#State-enum">Intermediate</a>. For example, &quot;&quot; and &quot;A&quot; are <a href="qvalidator.html#State-enum">Intermediate</a> for the regexp <b>[A-Z][0-9]</b> (whereas &quot;_&quot; would be <a href="qvalidator.html#State-enum">Invalid</a>).</p>
 <p>For a brief introduction to Qt's regexp engine, see <a href="qregexp.html">QRegExp</a>.</p>
 <p>Example of use:</p>
-<pre><span class="comment"> // regexp: optional '-' followed by between 1 and 3 digits</span>
+<pre><span class="comment"> //</span> regexp: optional '-' followed by between 1 and 3 digits
  QRegExp rx(&quot;-?\\d{1,3}&quot;);
  QValidator *validator = new QRegExpValidator(rx, this);
 
  QLineEdit *edit = new QLineEdit(this);
  edit-&gt;setValidator(validator);</pre>
 <p>Below we present some examples of validators. In practice they would normally be associated with a widget as in the example above.</p>
-<pre><span class="comment"> // integers 1 to 9999</span>
+<pre><span class="comment"> //</span> integers 1 to 9999
  QRegExp rx(&quot;[1-9]\\d{0,3}&quot;);
-<span class="comment"> // the validator treats the regexp as &quot;^[1-9]\\d{0,3}$&quot;</span>
+<span class="comment"> //</span> the validator treats the regexp as &quot;^[1-9]\\d{0,3}$&quot;
  QRegExpValidator v(rx, 0);
  QString s;
  int pos = 0;
 
- s = &quot;0&quot;;     v.validate(s, pos);    <span class="comment">// returns Invalid</span>
- s = &quot;12345&quot;; v.validate(s, pos);    <span class="comment">// returns Invalid</span>
- s = &quot;1&quot;;     v.validate(s, pos);    <span class="comment">// returns Acceptable</span>
+ s = &quot;0&quot;;     v.validate(s, pos);    <span class="comment">//</span> returns Invalid
+ s = &quot;12345&quot;; v.validate(s, pos);    <span class="comment">//</span> returns Invalid
+ s = &quot;1&quot;;     v.validate(s, pos);    <span class="comment">//</span> returns Acceptable
 
- rx.setPattern(&quot;\\S+&quot;);            <span class="comment">// one or more non-whitespace characters</span>
+ rx.setPattern(&quot;\\S+&quot;);            <span class="comment">//</span> one or more non-whitespace characters
  v.setRegExp(rx);
- s = &quot;myfile.txt&quot;;  v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
- s = &quot;my file.txt&quot;; v.validate(s, pos); <span class="comment">// Returns Invalid</span>
+ s = &quot;myfile.txt&quot;;  v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
+ s = &quot;my file.txt&quot;; v.validate(s, pos); <span class="comment">//</span> Returns Invalid
 
-<span class="comment"> // A, B or C followed by exactly five digits followed by W, X, Y or Z</span>
+<span class="comment"> //</span> A, B or C followed by exactly five digits followed by W, X, Y or Z
  rx.setPattern(&quot;[A-C]\\d{5}[W-Z]&quot;);
  v.setRegExp(rx);
- s = &quot;a12345Z&quot;; v.validate(s, pos);        <span class="comment">// Returns Invalid</span>
- s = &quot;A12345Z&quot;; v.validate(s, pos);        <span class="comment">// Returns Acceptable</span>
- s = &quot;B12&quot;;     v.validate(s, pos);        <span class="comment">// Returns Intermediate</span>
+ s = &quot;a12345Z&quot;; v.validate(s, pos);        <span class="comment">//</span> Returns Invalid
+ s = &quot;A12345Z&quot;; v.validate(s, pos);        <span class="comment">//</span> Returns Acceptable
+ s = &quot;B12&quot;;     v.validate(s, pos);        <span class="comment">//</span> Returns Intermediate
 
-<span class="comment"> // match most 'readme' files</span>
+<span class="comment"> //</span> match most 'readme' files
  rx.setPattern(&quot;read\\S?me(\.(txt|asc|1st))?&quot;);
  rx.setCaseSensitive(false);
  v.setRegExp(rx);
- s = &quot;readme&quot;;      v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
- s = &quot;README.1ST&quot;;  v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
- s = &quot;read me.txt&quot;; v.validate(s, pos); <span class="comment">// Returns Invalid</span>
- s = &quot;readm&quot;;       v.validate(s, pos); <span class="comment">// Returns Intermediate</span></pre>
+ s = &quot;readme&quot;;      v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
+ s = &quot;README.1ST&quot;;  v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
+ s = &quot;read me.txt&quot;; v.validate(s, pos); <span class="comment">//</span> Returns Invalid
+ s = &quot;readm&quot;;       v.validate(s, pos); <span class="comment">//</span> Returns Intermediate</pre>
 <p>See also <a href="qregexp.html">QRegExp</a>, <a href="qintvalidator.html">QIntValidator</a>, <a href="qdoublevalidator.html">QDoubleValidator</a>, and <a href="tools-settingseditor.html">Settings Editor Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
@@ -120,17 +120,10 @@
 <p>For example, if the regular expression is <b>\w\d\d</b> (word-character, digit, digit) then &quot;A57&quot; is <a href="qvalidator.html#State-enum">Acceptable</a>, &quot;E5&quot; is <a href="qvalidator.html#State-enum">Intermediate</a>, and &quot;+9&quot; is <a href="qvalidator.html#State-enum">Invalid</a>.</p>
 <p>Reimplemented from <a href="qvalidator.html#validate">QValidator</a>.</p>
 <p>See also <a href="qregexp.html#exactMatch">QRegExp::exactMatch</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QRegExpValidator-3"></a>QRegExpValidator::QRegExpValidator ( <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a validator with a <i>parent</i> object and <i>name</i> that accepts any string (including an empty one) as valid.</p>
-<h3 class="fn"><a name="QRegExpValidator-4"></a>QRegExpValidator::QRegExpValidator ( const <a href="qregexp.html">QRegExp</a> &amp; <i>rx</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a validator with a <i>parent</i> object and a <i>name</i> that accepts all strings that match the regular expression <i>rx</i>.</p>
-<p>The match is made against the entire string; e.g&#x2e; if the regexp is <b>[A-Fa-f0-9]+</b> it will be treated as <b>^[A-Fa-f0-9]+$</b>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

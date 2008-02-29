@@ -33,6 +33,9 @@
 <ul>
 <li>a suitable <a href="#supported-compilers">compiler</a> must be installed</li>
 <li>Linux kernel that provides shared memory, mmap, and sockets.</li>
+<li>If Qtopia is being built with <a href="sxe.html">Safe Execution Environment - (SXE)</a> support, then the kernel must be patched to have LIDS support.</li>
+<li>If Qtopia is being built with <a href="docsys-drmintegr.html">Digital Rights Management</a>(DRM) support, then version 2.4 of <tt>drmagent</tt> from BeepScience must be installed.<p><b>Note:</b> A commercial license from <a href="http://www.beepscience.com">BeepScience</a> is required to use the BeepScience <tt>drmagent</tt>.</p>
+</li>
 <li>If Qtopia is being built with Helix please refer to <a href="syscust-mediaplayer.html">Helix</a> for further information about using Helix with Qtopia.</li>
 <li>Linux with Framebuffer support.</li>
 <li>For dependencies related to playing sounds see <a href="#sounds-and-qtopia">Sounds and Qtopia</a></li>
@@ -40,10 +43,10 @@
 </ul>
 <a name="supported-compilers"></a>
 <h2>Supported Compilers</h2>
-<p>In general terms any version of GCC greater than or equal to 3.3 may be used to compile/cross-compile Qtopia. The following table provides additional information about the status of a given versions of GCC.</p>
+<p>In general terms any version of GCC greater than or equal to 3.4 may be used to compile/cross-compile Qtopia. The following table provides additional information about the status of a given versions of GCC.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Property</th><th>Version(s)</th></tr></thead>
-<tr valign="top" class="odd"><td>Minimum</td><td>GCC 3.3</td></tr>
+<tr valign="top" class="odd"><td>Minimum</td><td>GCC 3.4</td></tr>
 <tr valign="top" class="even"><td>Recommended</td><td>GCC 3.4&#x2e;3, GCC 3.4&#x2e;5, GCC 4.1&#x2e;1 (uses symbol visibility)</td></tr>
 <tr valign="top" class="odd"><td>Not recommended</td><td>GCC 4.0&#x2e;2, GCC 4.1&#x2e;0</td></tr>
 </table></p>
@@ -93,8 +96,8 @@
 <p>To see the outline of steps required to customize Qtopia for a new device see: <a href="syscust-index.html">System Customization Guide </a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

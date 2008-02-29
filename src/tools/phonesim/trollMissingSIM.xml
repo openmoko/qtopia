@@ -871,6 +871,13 @@
 </chat>
 
 <chat>
+  <!-- Remove preferred operator 1 -->
+  <command>AT+CPOL=1</command>
+  <response>OK</response>
+  <set name="PO1" value=""/>
+</chat>
+
+<chat>
   <!-- Set preferred operator 2 -->
   <command>AT+CPOL=2,2,*</command>
   <response>OK</response>
@@ -879,9 +886,9 @@
 
 <chat>
   <!-- Remove preferred operator 2 -->
-  <command>AT+CPOL=2,0,0,0</command>
+  <command>AT+CPOL=2</command>
   <response>OK</response>
-  <set name="PO2" value="2,0,0,0"/>
+  <set name="PO2" value=""/>
 </chat>
 
 <chat>
@@ -893,9 +900,9 @@
 
 <chat>
   <!-- Remove preferred operator 3 -->
-  <command>AT+CPOL=3,0,0,0</command>
+  <command>AT+CPOL=3</command>
   <response>OK</response>
-  <set name="PO3" value="3,0,0,0"/>
+  <set name="PO3" value=""/>
 </chat>
 
 <chat>
@@ -907,9 +914,9 @@
 
 <chat>
   <!-- Remove preferred operator 4 -->
-  <command>AT+CPOL=4,0,0,0</command>
+  <command>AT+CPOL=4</command>
   <response>OK</response>
-  <set name="PO4" value="4,0,0,0"/>
+  <set name="PO4" value=""/>
 </chat>
 
 <chat>
@@ -921,9 +928,9 @@
 
 <chat>
   <!-- Remove preferred operator 5 -->
-  <command>AT+CPOL=5,0,0,0</command>
+  <command>AT+CPOL=5</command>
   <response>OK</response>
-  <set name="PO5" value="5,0,0,0"/>
+  <set name="PO5" value=""/>
 </chat>
 
 <chat>
@@ -935,9 +942,9 @@
 
 <chat>
   <!-- Remove preferred operator 6 -->
-  <command>AT+CPOL=6,0,0,0</command>
+  <command>AT+CPOL=6</command>
   <response>OK</response>
-  <set name="PO6" value="6,0,0,0"/>
+  <set name="PO6" value=""/>
 </chat>
 
 <chat>
@@ -949,9 +956,9 @@
 
 <chat>
   <!-- Remove preferred operator 7 -->
-  <command>AT+CPOL=7,0,0,0</command>
+  <command>AT+CPOL=7</command>
   <response>OK</response>
-  <set name="PO7" value="7,0,0,0"/>
+  <set name="PO7" value=""/>
 </chat>
 
 <chat>
@@ -963,9 +970,9 @@
 
 <chat>
   <!-- Remove preferred operator 8 -->
-  <command>AT+CPOL=8,0,0,0</command>
+  <command>AT+CPOL=8</command>
   <response>OK</response>
-  <set name="PO8" value="8,0,0,0"/>
+  <set name="PO8" value=""/>
 </chat>
 
 <!-- ****************** Facility Locks ***************************** -->

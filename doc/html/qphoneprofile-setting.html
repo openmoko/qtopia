@@ -48,17 +48,17 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="Setting"></a>Setting::Setting ()</h3>
 <p>Constructs a null application setting object.</p>
-<h3 class="fn"><a name="Setting-2"></a>Setting::Setting ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )</h3>
+<h3 class="fn"><a name="Setting-2"></a>Setting::Setting ( const <a href="./qstring.html">QString</a> &amp; <i>application</i> )</h3>
 <p>Constructs an empty application setting object for <i>application</i>.</p>
 <h3 class="fn"><a name="Setting-3"></a>Setting::Setting ( const Setting &amp; <i>other</i> )</h3>
 <p>Constructs a copy of <i>other</i>.</p>
-<h3 class="fn"><a name="applicationName"></a><a href="qstring.html">QString</a> Setting::applicationName () const</h3>
+<h3 class="fn"><a name="applicationName"></a><a href="./qstring.html">QString</a> Setting::applicationName () const</h3>
 <p>Returns the application to which this setting object applies, or an empty string if this is a null settings object.</p>
 <p>See also <a href="qphoneprofile-setting.html#setApplicationName">setApplicationName</a>().</p>
-<h3 class="fn"><a name="data"></a><a href="qstring.html">QString</a> Setting::data () const</h3>
+<h3 class="fn"><a name="data"></a><a href="./qstring.html">QString</a> Setting::data () const</h3>
 <p>Returns the data portion of this setting.</p>
 <p>See also <a href="qphoneprofile-setting.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> Setting::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> Setting::description () const</h3>
 <p>Returns an optional visual description for this setting. Generally this is the visual name of the application.</p>
 <p>See also <a href="qphoneprofile-setting.html#setDescription">setDescription</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool Setting::isNull () const</h3>
@@ -79,19 +79,19 @@
     {
         QDataStream stream( data );
         if ( message == &quot;Settings::activateSettings(QString)&quot; ) {
-            ... <span class="comment">// parse and apply application settings data</span>
+            ... <span class="comment">//</span> parse and apply application settings data
         } else if ( message == &quot;Settings::activateDefault()&quot; ) {
-            applyDefault(); <span class="comment">// apply application default settings</span>
+            applyDefault(); <span class="comment">//</span> apply application default settings
         }
     }</pre>
 <p>See also <a href="qphoneprofile-setting.html#setNotifyOnChange">setNotifyOnChange</a>(), <a href="settingsservice.html">SettingsService</a>, and <a href="qtopiaapplication.html#appMessage">QtopiaApplication::appMessage</a>().</p>
-<h3 class="fn"><a name="setApplicationName"></a>void Setting::setApplicationName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="setApplicationName"></a>void Setting::setApplicationName ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Sets the application <i>name</i> for this setting.</p>
 <p>See also <a href="qphoneprofile-setting.html#applicationName">applicationName</a>().</p>
-<h3 class="fn"><a name="setData"></a>void Setting::setData ( const <a href="qstring.html">QString</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="setData"></a>void Setting::setData ( const <a href="./qstring.html">QString</a> &amp; <i>data</i> )</h3>
 <p>Set the setting <i>data</i> for this setting.</p>
 <p>See also <a href="qphoneprofile-setting.html#data">data</a>().</p>
-<h3 class="fn"><a name="setDescription"></a>void Setting::setDescription ( const <a href="qstring.html">QString</a> &amp; <i>description</i> )</h3>
+<h3 class="fn"><a name="setDescription"></a>void Setting::setDescription ( const <a href="./qstring.html">QString</a> &amp; <i>description</i> )</h3>
 <p>Sets the setting <i>description</i> for this setting.</p>
 <p>See also <a href="qphoneprofile-setting.html#description">description</a>().</p>
 <h3 class="fn"><a name="setNotifyOnChange"></a>void Setting::setNotifyOnChange ( bool <i>notifyOnChange</i> )</h3>
@@ -105,8 +105,8 @@
 <p>Returns true if setting <i>other</i> is equal to this setting; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

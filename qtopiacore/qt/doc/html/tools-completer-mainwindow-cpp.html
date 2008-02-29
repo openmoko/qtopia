@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 2006-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2006-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -43,8 +43,6 @@
  ** functionality provided by Qt Designer and its related libraries.
  **
  ** Trolltech reserves all rights not expressly granted herein.
- **
- ** Trolltech ASA (c) 2007
  **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -154,8 +152,8 @@
      if (!fileName.contains(QLatin1String(&quot;countries.txt&quot;)))
          return new QStringListModel(words, completer);
 
-     <span class="comment">// The last two chars of the countries.txt file indicate the country</span>
-     <span class="comment">// symbol. We put that in column 2 of a standard item model</span>
+     <span class="comment">//</span> The last two chars of the countries.txt file indicate the country
+     <span class="comment">//</span> symbol. We put that in column 2 of a standard item model
      QStandardItemModel *m = new QStandardItemModel(words.count(), 2, completer);
      for (int i = 0; i &lt; words.count(); ++i) {
          QModelIndex countryIdx = m-&gt;index(i, 0);
@@ -195,21 +193,21 @@
      switch (modelCombo-&gt;currentIndex()) {
      default:
      case 0:
-         { <span class="comment">// Unsorted QDirModel</span>
+         { <span class="comment">//</span> Unsorted QDirModel
              QDirModel *dirModel = new QDirModel(completer);
              completer-&gt;setModel(dirModel);
              contentsLabel-&gt;setText(tr(&quot;Enter file path&quot;));
          }
          break;
      case 1:
-         { <span class="comment">// DirModel that shows full paths</span>
+         { <span class="comment">//</span> DirModel that shows full paths
              DirModel *dirModel = new DirModel(completer);
              completer-&gt;setModel(dirModel);
              contentsLabel-&gt;setText(tr(&quot;Enter file path&quot;));
          }
          break;
      case 2:
-         { <span class="comment">// Country List</span>
+         { <span class="comment">//</span> Country List
              completer-&gt;setModel(modelFromFile(&quot;:/resources/countries.txt&quot;));
              QTreeView *treeView = new QTreeView;
              completer-&gt;setPopup(treeView);
@@ -222,7 +220,7 @@
          }
          break;
      case 3:
-         { <span class="comment">// Word list</span>
+         { <span class="comment">//</span> Word list
              completer-&gt;setModel(modelFromFile(&quot;:/resources/wordlist.txt&quot;));
              completer-&gt;setModelSorting(QCompleter::CaseInsensitivelySortedModel);
              contentsLabel-&gt;setText(tr(&quot;Enter a word&quot;));
@@ -244,8 +242,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

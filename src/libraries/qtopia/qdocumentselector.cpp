@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,6 +39,7 @@
 #include <QContentSortCriteria>
 #include <QPainter>
 #include <QScrollBar>
+#include <QLabel>
 
 class NewDocumentProxyModel : public QAbstractProxyModel
 {
@@ -47,6 +48,7 @@ public:
     NewDocumentProxyModel( QIcon newIcon, QObject *parent = 0 )
         : QAbstractProxyModel( parent )
         , m_newEnabled( false )
+        , m_hasDocuments( true )
         , m_newIcon( newIcon )
     {
     }
@@ -109,6 +111,8 @@ public:
                         this    , SLOT (_rowsInserted(QModelIndex,int,int)) );
             disconnect( oldModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
                         this    , SLOT (_rowsRemoved(QModelIndex,int,int)) );
+            disconnect( model, SIGNAL(updateFinished()),
+                 this , SLOT  (updateFinished()) );
         }
 
         QAbstractProxyModel::setSourceModel( model );
@@ -137,6 +141,8 @@ public:
                  this , SLOT (_rowsInserted(QModelIndex,int,int)) );
         connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
                  this , SLOT (_rowsRemoved(QModelIndex,int,int)) );
+        connect( model, SIGNAL(updateFinished()),
+                 this , SLOT  (updateFinished()) );
     }
 
     virtual int columnCount( const QModelIndex &parent = QModelIndex() ) const
@@ -153,7 +159,7 @@ public:
             else if( role == Qt::DecorationRole )
                 return m_newIcon;
         }
-        else if( sourceModel()->rowCount() == 0 && index.row() == 0 )
+        else if( !m_hasDocuments && index.row() == 0 )
         {
             if( role == Qt::DisplayRole )
                 return tr( "No documents found" );
@@ -172,7 +178,7 @@ public:
         {
             return QAbstractItemModel::flags( index );
         }
-        else if( sourceModel()->rowCount() == 0 && index.row() == 0 )
+        else if( !m_hasDocuments && index.row() == 0 )
         {
             return Qt::ItemIsEnabled;
         }
@@ -207,8 +213,10 @@ public:
 
             if( m_newEnabled )
                 count++;
+            else if( !m_hasDocuments )
+                count = 1;
 
-            return count > 0 ? count : 1;
+            return count;
         }
 
         return 0;
@@ -218,16 +226,39 @@ public:
     {
         if( enabled && !m_newEnabled )
         {
-            beginInsertRows( QModelIndex(), 0, 0 );
-            m_newEnabled = true;
-            endInsertRows();
+            if( m_hasDocuments )
+            {
+                beginInsertRows( QModelIndex(), 0, 0 );
+                m_newEnabled = true;
+                endInsertRows();
+            }
+            else
+            {
+                m_newEnabled = true;
+                QModelIndex index = createIndex( 0, 0 );
+                emit dataChanged( index, index );
+            }
         }
         else if( !enabled && m_newEnabled )
         {
-            beginRemoveRows( QModelIndex(), 0, 0 );
-            m_newEnabled = false;
-            endRemoveRows();
+            if( m_hasDocuments )
+            {
+                beginRemoveRows( QModelIndex(), 0, 0 );
+                m_newEnabled = false;
+                endRemoveRows();
+            }
+            else
+            {
+                m_newEnabled = false;
+                QModelIndex index = createIndex( 0, 0 );
+                emit dataChanged( index, index );
+            }
         }
+    }
+
+    bool hasDocuments() const
+    {
+        return m_hasDocuments;
     }
 
 private slots:
@@ -285,6 +316,20 @@ private slots:
     {
         if( !parent.isValid() )
         {
+            if( !m_hasDocuments )
+            {
+                if( !m_newEnabled )
+                {
+                    beginRemoveRows( QModelIndex(), 0, 0 );
+
+                    m_hasDocuments = true;
+
+                    endRemoveRows();
+                }
+                else
+                    m_hasDocuments = false;
+            }
+
             if( m_newEnabled )
                 beginInsertRows( QModelIndex(), start + 1, end + 1 );
             else
@@ -321,8 +366,26 @@ private slots:
         endRemoveRows();
     }
 
+    void updateFinished()
+    {
+        if( m_hasDocuments && sourceModel()->rowCount() == 0 )
+        {
+            if( !m_newEnabled )
+            {
+                beginInsertRows( QModelIndex(), 0, 0 );
+
+                m_hasDocuments = false;
+
+                endInsertRows();
+            }
+            else
+                m_hasDocuments = false;
+        }
+    }
+
 private:
     bool m_newEnabled;
+    bool m_hasDocuments;
     QIcon m_newIcon;
 };
 
@@ -365,6 +428,10 @@ signals:
     void currentChanged();
     void newSelected();
     void documentsChanged();
+    void typesSelected( bool selected );
+    void setTypeLabel( const QString &text );
+    void categoriesSelected( bool selected );
+    void setCategoryLabel( const QString &text );
 
 protected slots:
     virtual void currentChanged( const QModelIndex &current, const QModelIndex &previous );
@@ -451,8 +518,8 @@ DocumentView::DocumentView( QWidget *parent )
 
     m_softMenu->addSeparator();
 
-    m_typeAction = m_softMenu->addAction( tr( "Select Type..." ) );
-    m_categoryAction = m_softMenu->addAction( QIcon( ":icon/viewcategory" ), tr( "Select Category..." ) );
+    m_typeAction = m_softMenu->addAction( tr( "View Type..." ) );
+    m_categoryAction = m_softMenu->addAction( QIcon( ":icon/viewcategory" ), tr( "View Category..." ) );
 
     m_newAction->setVisible( false );
     m_deleteAction->setVisible( false );
@@ -660,7 +727,7 @@ void DocumentView::currentChanged( const QModelIndex &current, const QModelIndex
 {
     QListView::currentChanged( current, previous );
 
-    int minRow = m_options & QDocumentSelector::NewDocument ? 1 : 0;
+    int minRow = m_options & QDocumentSelector::NewDocument || !m_proxyModel->hasDocuments() ? 1 : 0;
 
     if( previous.row() < minRow && current.row() >= minRow )
     {
@@ -768,7 +835,7 @@ void DocumentView::selectTypeFilter()
         QString(),
         QContentFilterModel::CheckList | QContentFilterModel::SelectAll );
 
-        m_typeDialog->setWindowTitle( tr("Select Type") );
+        m_typeDialog->setWindowTitle( tr("View Type") );
         m_typeDialog->setFilter( m_baseFilter );
     }
 
@@ -777,6 +844,18 @@ void DocumentView::selectTypeFilter()
     m_typeFilter = m_typeDialog->checkedFilter();
 
     setCombinedFilter();
+
+    QString label = m_typeDialog->checkedLabel();
+
+    if( !m_typeFilter.isValid() || label.isEmpty() )
+    {
+        emit typesSelected( false );
+    }
+    else
+    {
+        emit setTypeLabel( tr("Type: %1").arg( label ) );
+        emit typesSelected( true );
+    }
 }
 
 void DocumentView::selectCategoryFilter()
@@ -801,7 +880,7 @@ void DocumentView::selectCategoryFilter()
 
         m_categoryDialog = new QContentFilterDialog( categoryPage, this );
 
-        m_categoryDialog->setWindowTitle( tr("Select Category") );
+        m_categoryDialog->setWindowTitle( tr("View Category") );
         m_categoryDialog->setFilter( m_baseFilter );
     }
 
@@ -810,6 +889,18 @@ void DocumentView::selectCategoryFilter()
     m_categoryFilter = m_categoryDialog->checkedFilter();
 
     setCombinedFilter();
+
+    QString label = m_categoryDialog->checkedLabel();
+
+    if( !m_categoryFilter.isValid() || label.isEmpty() )
+    {
+        emit categoriesSelected( false );
+    }
+    else
+    {
+        emit setCategoryLabel( tr("Category: %1").arg( label ) );
+        emit categoriesSelected( true );
+    }
 }
 
 void DocumentView::deleteCurrent()
@@ -1076,15 +1167,27 @@ QDocumentSelector::QDocumentSelector( QWidget *parent )
 
     d = new QDocumentSelectorPrivate( this );
 
+    QLabel *typeLabel = new QLabel( this );
+    typeLabel->setVisible( false );
+
+    QLabel *categoryLabel = new QLabel( this );
+    categoryLabel->setVisible( false );
+
     layout->setMargin( 0 );
     layout->setSpacing( 0 );
 
     layout->addWidget( d );
+    layout->addWidget( typeLabel );
+    layout->addWidget( categoryLabel );
 
     connect( d, SIGNAL(documentSelected(QContent)), this, SIGNAL(documentSelected(QContent)) );
     connect( d, SIGNAL(currentChanged()), this, SIGNAL(currentChanged()) );
     connect( d, SIGNAL(newSelected()), this, SIGNAL(newSelected()) );
     connect( d, SIGNAL(documentsChanged()), this, SIGNAL(documentsChanged()) );
+    connect( d, SIGNAL(typesSelected(bool)), typeLabel, SLOT(setVisible(bool)) );
+    connect( d, SIGNAL(setTypeLabel(QString)), typeLabel, SLOT(setText(QString)) );
+    connect( d, SIGNAL(categoriesSelected(bool)), categoryLabel, SLOT(setVisible(bool)) );
+    connect( d, SIGNAL(setCategoryLabel(QString)), categoryLabel, SLOT(setText(QString)) );
 
     setFocusProxy( d );
 }
@@ -1463,13 +1566,25 @@ QDocumentSelectorDialog::QDocumentSelectorDialog( QWidget *parent )
 
     d = new QDocumentSelectorDialogPrivate( this );
 
+    QLabel *typeLabel = new QLabel( this );
+    typeLabel->setVisible( false );
+
+    QLabel *categoryLabel = new QLabel( this );
+    categoryLabel->setVisible( false );
+
     layout->setMargin( 0 );
     layout->setSpacing( 0 );
 
     layout->addWidget( d );
+    layout->addWidget( typeLabel );
+    layout->addWidget( categoryLabel );
 
     connect( d, SIGNAL(documentSelected(QContent)), this, SLOT(accept()) );
     connect( d, SIGNAL(newSelected()), this, SLOT(accept()) );
+    connect( d, SIGNAL(typesSelected(bool)), typeLabel, SLOT(setVisible(bool)) );
+    connect( d, SIGNAL(setTypeLabel(QString)), typeLabel, SLOT(setText(QString)) );
+    connect( d, SIGNAL(categoriesSelected(bool)), categoryLabel, SLOT(setVisible(bool)) );
+    connect( d, SIGNAL(setCategoryLabel(QString)), categoryLabel, SLOT(setText(QString)) );
 }
 
 /*!

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -115,13 +115,13 @@ private:
     bool lastTxtFound;
 };
 
-class StupidToolTip : public QObject
+class SimpleToolTip : public QObject
 {
     Q_OBJECT;
 
 public:
-    StupidToolTip(QWidget *parent);
-    ~StupidToolTip();
+    SimpleToolTip(QWidget *parent);
+    ~SimpleToolTip();
 
 public slots:
     void show(const QString& lbl);
@@ -133,17 +133,17 @@ protected:
     QTimer* mTimer;
 };
 
-StupidToolTip::StupidToolTip(QWidget *parent)
+SimpleToolTip::SimpleToolTip(QWidget *parent)
     : QObject(parent), mParent(parent), mLabel(0), mTimer(0)
 {
 
 }
 
-StupidToolTip::~StupidToolTip()
+SimpleToolTip::~SimpleToolTip()
 {
 }
 
-void StupidToolTip::hide()
+void SimpleToolTip::hide()
 {
     if(mLabel)
         mLabel->hide();
@@ -151,7 +151,7 @@ void StupidToolTip::hide()
         mTimer->stop();
 }
 
-void StupidToolTip::show(const QString& lbl)
+void SimpleToolTip::show(const QString& lbl)
 {
     if (!mLabel) {
         mLabel = new QLabel(mParent);
@@ -216,7 +216,7 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     fileSelector->setFocus();
     editorStack->addWidget(fileSelector);
 
-    mToolTip = new StupidToolTip(editor);
+    mToolTip = new SimpleToolTip(editor);
     mFindTextWidget = 0;
     mFindTextEntry = 0;
     mFindIcon = 0;
@@ -286,7 +286,7 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     contextMenu->addAction( findAction );
     contextMenu->addMenu( settingsMenu );
     contextMenu->addSeparator();
-    contextMenu->addAction( tr( "Print" ), this, SLOT(print()) );
+    contextMenu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(print()) );
     contextMenu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(fileRevert()) );
 
     bool wrap;
@@ -347,10 +347,23 @@ void
 TextEdit::setupFontSizes(void)
 {
     QFontDatabase fd;
-    QList<int> ptSizes = fd.standardSizes();
+    // Pick a spread of sizes (at least 25% bigger from the previous)
+    QFont f = editor->font();
+    QFontInfo qfi(f);
 
-    foreach (int e, ptSizes) {
-        fontSizes << (qreal)e;
+    QString s = fd.styleString(qfi);
+    QList<int> smSizes = fd.smoothSizes(qfi.family(), s);
+
+    qreal last = -1;
+    foreach (int e, smSizes) {
+        QFont g = fd.font(qfi.family(), s, e);
+
+        QFontInfo gfi(g);
+
+        if ((gfi.pixelSize() * 4) > (last * 5) || (e == smSizes.last() && gfi.pixelSize() != last)) {
+            fontSizes << (qreal)gfi.pointSize();
+            last = gfi.pixelSize();
+        }
     }
     if (!fontSizes.contains(defaultFontSize))
         fontSizes << defaultFontSize;
@@ -384,7 +397,6 @@ void TextEdit::setFontSize(qreal size)
     QFont f = editor->font();
     f.setPointSizeF(size);
     editor->setFont(f);
-
     // Zooming only makes sense if we have more than one font size.
     if (fontSizes.count() > 1) {
         zin->setVisible(size != fontSizes.last());
@@ -762,10 +774,10 @@ bool TextEdit::save()
         return true;
     }
 
-    if ( doc->name().isEmpty() )
-        fileName();
-
     QString rt = editor->toPlainText();
+
+    if ( doc->name().isEmpty() )
+        doc->setName(calculateName(rt));
 
     if (!doc->save(rt.toUtf8()))
         return false;
@@ -901,6 +913,8 @@ bool TextEdit::eventFilter(QObject *o, QEvent *e)
         QKeyEvent* ke = static_cast<QKeyEvent*>(e);
         if (ke->key() == Qt::Key_Select) {
             if (editor->hasEditFocus()) {
+                if ( doc->name().isEmpty() )
+                    fileName();
                 close();
                 return true;
             } else if (mFindTextEntry->hasEditFocus()) {
@@ -928,8 +942,8 @@ bool TextEdit::eventFilter(QObject *o, QEvent *e)
 
 void TextEdit::print()
 {
-    QtopiaServiceRequest srv( "Print", "printHtml(QString)" );
-    srv << editor->toHtml();
+    QtopiaServiceRequest srv( "Print", "print(QString)" );
+    srv << doc->fileName();
     srv.send();
 }
 

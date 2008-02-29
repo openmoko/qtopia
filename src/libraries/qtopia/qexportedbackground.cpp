@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -338,15 +338,7 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
     int level = colour.alpha();
     int div = 255;
     int mult = 255-level;
-    QSize dataSize = qt_screen->mapToDevice(QSize(src.width(),src.height()));
-    if(qt_screen->isTransformed()) {
-        int rot = qt_screen->transformOrientation();
-        if(rot == 1 || rot == 3) {
-            rot = dataSize.width();
-            dataSize.setWidth(dataSize.height());
-            dataSize.setHeight(rot);
-        }
-    }
+    QSize dataSize = QSize(src.width(),src.height());
     if (src.depth() == 16 && dest.depth() == 16) {
         sr = (sr << 8) & 0xF800;
         sg = (sg << 3) & 0x07e0;

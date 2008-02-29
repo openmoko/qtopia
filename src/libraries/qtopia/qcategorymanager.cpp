@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -624,7 +624,7 @@ bool QCategoryManager::ensureSystemCategory( const QString &id, const QString &t
 
     if ( !data.isNull() ) {
         // Simple case, the system category already exists as described by the arguments
-        if ( data.isSystem() && trLabel == data.label() && icon == data.label() && forceGlobal == data.isGlobal() ) {
+        if ( data.isSystem() && trLabel == data.label() && icon == data.iconFile() && forceGlobal == data.isGlobal() ) {
             return true;
         } else if ( !QCategoryStore::instance()->removeCategory( id ) ) {
             return false;

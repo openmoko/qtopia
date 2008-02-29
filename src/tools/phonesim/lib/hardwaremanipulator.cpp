@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,12 +20,10 @@
 ****************************************************************************/
 
 #include "hardwaremanipulator.h"
-#include <QtGui/qmessagebox.h>
 #include <Qt>
 #include <qdebug.h>
 #include <qbuffer.h>
 #include <qtimer.h>
-#include <qevent.h>
 #include "../../../libraries/qtopiaphone/qsmsmessage.h"
 #include "../../../libraries/qtopiaphone/qcbsmessage.h"
 #include "../../../libraries/qtopiacomm/serial/qgsmcodec.h"
@@ -40,8 +38,8 @@
 #define ONE_CHAR 1
 #define HEX_BASE 16
 
-HardwareManipulator::HardwareManipulator(QWidget *parent)
-        : QWidget(parent)
+HardwareManipulator::HardwareManipulator(QObject *parent)
+        : QObject(parent)
 {
 }
 
@@ -51,27 +49,16 @@ QSMSMessageList & HardwareManipulator::getSMSList()
     return SMSList;
 }
 
-bool HardwareManipulator::shouldShow() const
+void HardwareManipulator::warning( const QString &title, const QString &message)
 {
-    return false;
+    qWarning() << title << ":" << message;
 }
 
-void HardwareManipulator::closeEvent(QCloseEvent *e)
+void HardwareManipulator::setPhoneNumber( const QString& )
 {
-    e->ignore();
-    this->hide();
 }
 
 QString PS_toHex( const QByteArray& binary );
-
-#define WARNING(A, B) \
-do {\
-    if (shouldShow()) {\
-        QMessageBox::warning(this, A, B);\
-    } else {\
-        qWarning() << (A) << ":" << (B);\
-    }\
-} while(0)
 
 QString HardwareManipulator::constructCBMessage(const QString &messageCode, int geographicalScope, const QString &updateNumber,
     const QString &channel, const QString &/*scheme*/, int language, const QString &numPages, const QString &page, const QString &content)
@@ -80,7 +67,7 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
     bool ok;
     uint mc = convertString(messageCode,1023,3,HEX_BASE, &ok);
     if ( !ok ) {
-        WARNING(tr("Invalid Message Code"),
+        warning(tr("Invalid Message Code"),
                 tr("Message code 3 hex digits long and no larger than 3FF"));
         return "";
     }
@@ -90,7 +77,7 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
 
     uint un = convertString(updateNumber,NIBBLE_MAX,ONE_CHAR,HEX_BASE,&ok);
     if ( !ok ) {
-        WARNING(tr("Invalid Update Number"),
+        warning(tr("Invalid Update Number"),
                 tr("Update number must be 1 hex digit long"
                    "and no larger than F"));
         return "";
@@ -99,7 +86,7 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
 
     uint ch = convertString(channel, TWO_BYTE_MAX,FOUR_CHAR,HEX_BASE,&ok);
     if ( !ok ) {
-        WARNING(tr("Invalid Channel,"),
+        warning(tr("Invalid Channel,"),
                 tr("Channel  must be 4 hex digits long "
                    "and no larger than FFFF"));
         return "";
@@ -114,7 +101,7 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
 
     uint npag = convertString(numPages, NIBBLE_MAX,ONE_CHAR,HEX_BASE,&ok);
     if ( !ok ) {
-        WARNING(tr("Invalid number of pages,"),
+        warning(tr("Invalid number of pages,"),
                 tr("Number of pages  must be 1 hex digit long "
                    "and no larger than F"));
         return "";
@@ -122,7 +109,7 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
 
     uint pag = convertString(page, NIBBLE_MAX,ONE_CHAR,HEX_BASE,&ok);
     if ( !ok ) {
-        WARNING(tr("Invalid page number,"),
+        warning(tr("Invalid page number,"),
                 tr("Page number  must be 1 hex digit long "
                    "and no larger than F"));
         return "";
@@ -145,7 +132,7 @@ void HardwareManipulator::constructSMSMessage( const QString &sender, const QStr
 {
     QSMSMessage m;
     if ( sender.contains(QRegExp("\\D")) ) {
-        WARNING(tr("Invalid Sender"),
+        warning(tr("Invalid Sender"),
                 tr("Sender must not be empty and contain "
                    "only digits"));
         return;
@@ -153,7 +140,7 @@ void HardwareManipulator::constructSMSMessage( const QString &sender, const QStr
     m.setSender(sender);
 
     if ( serviceCenter.contains(QRegExp("\\D")) ) {
-        WARNING(tr("Invalid Service Center"),
+        warning(tr("Invalid Service Center"),
                 tr("Service Center must not be empty and contain "
                    "only digits"));
         return;
@@ -216,10 +203,10 @@ int HardwareManipulator::convertString(const QString &number, int maxValue, int 
     return num;
 }
 
-void HardwareManipulator::handleFromData( const QString& cmd )
+void HardwareManipulator::handleFromData( const QString& /*cmd*/ )
 {
 }
 
-void HardwareManipulator::handleToData( const QString& cmd )
+void HardwareManipulator::handleToData( const QString& /*cmd*/ )
 {
 }

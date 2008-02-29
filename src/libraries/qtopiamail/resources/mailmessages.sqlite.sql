@@ -16,4 +16,5 @@ CREATE TABLE mailmessages (
 
 CREATE INDEX parentfolderid_idx ON mailmessages("parentfolderid");  
 CREATE INDEX fromaccount_idx ON mailmessages("fromaccount");
+CREATE INDEX frommailbox_idx ON mailmessages("frommailbox");
 CREATE INDEX stamp_idx ON mailmessages("stamp");

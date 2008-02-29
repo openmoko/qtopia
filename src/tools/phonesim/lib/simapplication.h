@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -76,6 +76,7 @@ protected slots:
     void startSticksGame();
     void sticksGameShow();
     void sticksGameLoop( const QSimTerminalResponse& resp );
+    void getInputLoop( const QSimTerminalResponse& resp );
     void sticksGamePlayAgain( const QSimTerminalResponse& resp );
     void sendToneMenu();
     void toneMenu( const QSimTerminalResponse& resp );
@@ -83,9 +84,12 @@ protected slots:
     void iconMenu( const QSimTerminalResponse& resp );
     void sendIconSEMenu();
     void iconSEMenu( const QSimTerminalResponse& resp );
+    void sendDisplayText();
+    void displayTextResponse( const QSimTerminalResponse& resp );
 
 private:
     int sticksLeft;
+    bool immediateResponse;
 };
 
 #endif /* SIMAPPLICATION_H */

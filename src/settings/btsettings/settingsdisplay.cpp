@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -33,50 +33,28 @@
 #include <QList>
 #include <QMenu>
 #include <QSoftMenuBar>
+#include <QMessageBox>
+#include <QTimer>
 
-//====================================================
 
-
-SettingsDisplay::SettingsDisplay(QBluetoothLocalDevice *local, QWidget *parent)
+SettingsDisplay::SettingsDisplay(QBluetoothLocalDevice *local, QCommDeviceController *controller, QWidget *parent)
     : QWidget(parent),
       m_local(local),
-      m_deviceController(new QCommDeviceController(
-              m_local->deviceName().toLatin1(), this)),
-      m_localServicesDialog(new LocalServicesDialog(this))
+      m_deviceController(controller),
+      m_localServicesDialog(0)
 {
     m_ui = new Ui::Settings();
     m_ui->setupUi(this);
 
     initDisplayedValues();
-    initActions();
+    powerStateChanged(m_deviceController->powerState());  // set initial state
 
-    // set initial GUI state depending on whether device is on or off
-    powerStateChanged(m_deviceController->powerState());
+    m_detailsAction = new QAction(tr("Other details"), this);
+    addAction(m_detailsAction);
+    m_servicesAction = new QAction(tr("My services..."), this);
+    addAction(m_servicesAction);
 
-    // set tab order
-    QWidget::setTabOrder(m_ui->powerCheckBox, m_ui->visibilityCheckBox);
-    QWidget::setTabOrder(m_ui->visibilityCheckBox, m_ui->timeoutSpinBox);
-    QWidget::setTabOrder(m_ui->timeoutSpinBox, m_ui->nameEdit);
-
-    // for bluetooth on/off
-    connect(m_ui->powerCheckBox, SIGNAL(clicked(bool)),
-            SLOT(toggleLocalPowerState(bool)));
-    connect(m_deviceController, SIGNAL(powerStateChanged(QCommDeviceController::PowerState)),
-            SLOT(powerStateChanged(QCommDeviceController::PowerState)));
-
-    // for device visibility
-    connect(m_ui->visibilityCheckBox, SIGNAL(clicked(bool)),
-            SLOT(toggleLocalVisibility(bool)));
-    connect(m_local, SIGNAL(stateChanged(QBluetoothLocalDevice::State)),
-            SLOT(deviceStateChanged(QBluetoothLocalDevice::State)));
-
-    // for visibility timeout
-    connect(m_ui->timeoutSpinBox, SIGNAL(editingFinished()),
-            SLOT(timeoutEditingFinished()));
-
-    // set the name field
-    connect(m_ui->nameEdit, SIGNAL(editingFinished()),
-            SLOT(nameEditingFinished()));
+    QTimer::singleShot(0, this, SLOT(init()));
 }
 
 SettingsDisplay::~SettingsDisplay()
@@ -87,10 +65,25 @@ void SettingsDisplay::toggleLocalPowerState(bool enable)
 {
     qLog(Bluetooth) << "SettingsDisplay::toggleLocalPowerState()" << enable;
 
-    m_ui->powerCheckBox->setEnabled(false);
     if (enable) {
+        m_ui->powerCheckBox->setEnabled(false);
         m_deviceController->bringUp();
     } else {
+        if (m_deviceController->sessionsActive()) {
+            int result = QMessageBox::question(
+                    this,
+                    QObject::tr("Turn off Bluetooth?"),
+                    QObject::tr("<P>There are applications using the bluetooth device.  Are you sure you want to turn it off?"),
+                    QMessageBox::Yes|QMessageBox::No);
+
+            if (result == QMessageBox::No) {
+                qLog(Bluetooth) << "User doesn't want to shut down the device...";
+                m_ui->powerCheckBox->setChecked(true);
+                return;
+            }
+        }
+
+        m_ui->powerCheckBox->setEnabled(false);
         setInteractive(false);
         m_deviceController->bringDown();
     }
@@ -217,17 +210,58 @@ void SettingsDisplay::initDisplayedValues()
     m_ui->nameEdit->setText(m_local->name());
 }
 
-void SettingsDisplay::initActions()
+void SettingsDisplay::showMyServices()
 {
-    m_detailsAction = new QAction(tr("Other details"), this);
-    addAction(m_detailsAction);
+    if (!m_localServicesDialog)
+        m_localServicesDialog = new LocalServicesDialog(this);
+    m_localServicesDialog->start();
+}
+
+
+void SettingsDisplay::init()
+{
+    // set widgets tab order
+    QWidget::setTabOrder(m_ui->powerCheckBox, m_ui->visibilityCheckBox);
+    QWidget::setTabOrder(m_ui->visibilityCheckBox, m_ui->timeoutSpinBox);
+    QWidget::setTabOrder(m_ui->timeoutSpinBox, m_ui->nameEdit);
+
+    // action signals
     connect(m_detailsAction, SIGNAL(triggered()),
             SLOT(showDetailsDialog()));
-
-    m_servicesAction = new QAction(tr("My services..."), this);
-    addAction(m_servicesAction);
     connect(m_servicesAction, SIGNAL(triggered()),
-            m_localServicesDialog, SLOT(start()));
+            SLOT(showMyServices()));
+
+    // for bluetooth on/off
+    connect(m_ui->powerCheckBox, SIGNAL(clicked(bool)),
+            SLOT(toggleLocalPowerState(bool)));
+    connect(m_deviceController, SIGNAL(powerStateChanged(QCommDeviceController::PowerState)),
+            SLOT(powerStateChanged(QCommDeviceController::PowerState)));
+
+    // for device visibility
+    connect(m_ui->visibilityCheckBox, SIGNAL(clicked(bool)),
+            SLOT(toggleLocalVisibility(bool)));
+    connect(m_local, SIGNAL(stateChanged(QBluetoothLocalDevice::State)),
+            SLOT(deviceStateChanged(QBluetoothLocalDevice::State)));
+
+    // for visibility timeout
+    connect(m_ui->timeoutSpinBox, SIGNAL(editingFinished()),
+            SLOT(timeoutEditingFinished()));
+
+    // set the name field
+    connect(m_ui->nameEdit, SIGNAL(editingFinished()),
+            SLOT(nameEditingFinished()));
+
+    m_ui->timeoutSpinBox->installEventFilter(this);
+}
+
+bool SettingsDisplay::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::LeaveEditFocus) {
+        // in Qt 4.3, editingFinished() isn't emitted when 
+        // leaving edit focus, only on focus out
+        timeoutEditingFinished();
+    }
+    return false;
 }
 
 #include "settingsdisplay.moc"

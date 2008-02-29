@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -78,6 +78,8 @@ protected:
     void keyPressEvent( QKeyEvent *event );
     void paintEvent( QPaintEvent *event );
     void showEvent( QShowEvent *event );
+
+    QPixmap loadImage() const;
 
     QPixmap scale( const QPixmap &src ) const;
 
@@ -188,14 +190,10 @@ signals:
     void rightPressed();
     void durationChanged(int);
 
-protected:
-    void showEvent( QShowEvent *event );
-
 private:
     MMSSlideImage *m_imageContent;
     MMSSlideText *m_textContent;
     MMSSlideAudio *m_audioContent;
-    bool m_firstShow;
     int m_duration;
 };
 
@@ -275,7 +273,7 @@ public:
 public slots:
     void setMessage( const QMailMessage &mail );
     void clear();
-    virtual void attach( const QContent &lnk );
+    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
 
 private:
     MMSComposer *m_composer;

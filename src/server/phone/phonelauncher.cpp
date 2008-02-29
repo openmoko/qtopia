@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,6 +44,8 @@
 #include <QPhoneProfileManager>
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
 #include <QExportedBackground>
+#else
+#include <QGlobalPixmapCache>
 #endif
 //#include <QtopiaServiceHistoryModel>
 #include <qpainter.h>
@@ -68,7 +70,6 @@
 #include "phonelauncher.h"
 #include "phone/ui/phonelauncherview.h"
 #include "windowmanagement.h"
-#include "inputmethods.h"
 #include "contextlabel.h"
 #include "messagebox.h"
 
@@ -100,7 +101,9 @@
 #include "dialercontrol.h"
 #include "dialerservice.h"
 #include "callscreen.h"
+#if defined(QTOPIA_TELEPHONY)
 #include "callhistory.h"
+#endif
 #include "dialercontrol.h"
 #include "messagecontrol.h"
 #endif
@@ -111,32 +114,6 @@
 
 static const int NotificationVisualTimeout = 0;  // e.g. New message arrived, 0 == No timeout
 static const int WarningTimeout = 5000;  // e.g. Cannot call
-
-// declare EarpieceVolume
-class EarpieceVolume : public QWidget
-{
-    Q_OBJECT
-public:
-    EarpieceVolume(QWidget *parent=0, Qt::WFlags f=0);
-
-    void increaseVolume();
-    void decreaseVolume();
-
-protected slots:
-    void levelChanged(int v);
-
-protected:
-    void timerEvent(QTimerEvent *e);
-    bool eventFilter(QObject *o, QEvent *e);
-
-private:
-    int tid;
-    int minLevel;
-    int maxLevel;
-    int level;
-    QLabel *label;
-    QSlider *slider;
-};
 
 class RejectDlg : public QDialog
 {
@@ -236,10 +213,7 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
       newMessages("Communications/Messages/NewMessages"),
 #endif
 #ifdef QTOPIA_PHONEUI
-      serviceMsgBox(0), CBSMessageBox(0),
-#endif
-      volumeScreen(0),
-#ifdef QTOPIA_PHONEUI
+    serviceMsgBox(0), CBSMessageBox(0),
     mCallScreen(0), m_dialer(0),
 #endif
     secondDisplay(0),
@@ -275,6 +249,16 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     QExportedBackground::initExportedBackground(desktopRect.width(),
                                                 desktopRect.height(),
                                                 desktop->primaryScreen());
+#else
+    {
+        //Needed to initialise cache!
+        QPixmap pm;
+        if(!QGlobalPixmapCache::find("qtopia", pm)) {
+            pm.load("qtopia.png");
+            QGlobalPixmapCache::insert("qtopia", pm);
+        }
+    }
+
 #endif
     // Create callscreen
 //    callScreen();
@@ -388,7 +372,7 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     gsmKeyActions = new GsmKeyActions(this);
 #endif
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     // Hook onto registration state changes for all call policy managers.
     // The standard ones are CellModemManager and VoIPManager.
     QList<QAbstractCallPolicyManager *> managers;
@@ -442,8 +426,10 @@ PhoneLauncher::~PhoneLauncher()
     delete m_context;
 #ifdef QTOPIA_PHONEUI
     delete mCallScreen;
+#if defined(QTOPIA_TELEPHONY)
     if(mCallHistory)
         delete mCallHistory;
+#endif
     if( m_dialer )
         delete m_dialer;
 #endif
@@ -458,8 +444,10 @@ PhoneLauncher::~PhoneLauncher()
 void PhoneLauncher::showEvent(QShowEvent *e)
 {
     QTimer::singleShot(0, m_homeScreen, SLOT(show()));
+    QTimer::singleShot(0, m_homeScreen, SLOT(applyHomeScreenImage()));
     QTimer::singleShot(0, this, SLOT(updateBackground()));
-    QTimer::singleShot(0, this, SLOT(updateSecondaryBackground()));
+    if (secondDisplay)
+        QTimer::singleShot(0, this, SLOT(applySecondaryBackgroundImage()));
 #ifdef QTOPIA_PHONEUI
     QTimer::singleShot(0, this, SLOT(initializeCallHistory()));
 #endif
@@ -655,6 +643,7 @@ void PhoneLauncher::showCallScreen()
     }
     callScreen()->showMaximized();
     callScreen()->raise();
+    callScreen()->activateWindow();
 }
 #endif
 
@@ -725,10 +714,7 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         m_homeScreen->applyHomeScreenImage();
         updateBackground();
     } else if ( message == "applySecondaryBackgroundImage()" ) {
-        if ( secondDisplay ) {
-            secondDisplay->applyBackgroundImage();
-            updateSecondaryBackground();
-        }
+        applySecondaryBackgroundImage();
     } else if ( message == "updateHomeScreenInfo()" ) {
         m_homeScreen->updateHomeScreenInfo();
     } else if ( message == "serverKey(int,int)" ) {
@@ -1028,9 +1014,10 @@ void PhoneLauncher::updateBackground()
 /*!
   \internal
   */
-void PhoneLauncher::updateSecondaryBackground()
+void PhoneLauncher::applySecondaryBackgroundImage()
 {
     if ( secondDisplay ) {
+        secondDisplay->applyBackgroundImage();
         secondDisplay->updateBackground();
     }
 }
@@ -1150,6 +1137,7 @@ void PhoneLauncher::showDialer(const QString &digits, bool speedDial)
 */
 void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
 {
+#if defined(QTOPIA_TELEPHONY)
     if ( !callHistory() )
         initializeCallHistory();
 
@@ -1169,6 +1157,7 @@ void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
     {
         callHistory()->showMaximized();
     }
+#endif
 }
 
 /*!
@@ -1178,6 +1167,7 @@ void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
 */
 void PhoneLauncher::initializeCallHistory()
 {
+#if defined(QTOPIA_TELEPHONY)
     if ( !mCallHistory ) {
         mCallHistory = new CallHistory(DialerControl::instance()->callList(), 0);
         connect(callHistory(), SIGNAL(viewedMissedCalls()),
@@ -1189,6 +1179,7 @@ void PhoneLauncher::initializeCallHistory()
                 this,
                 SLOT(requestDial(QString,QUniqueId)));
     }
+#endif
 }
 #endif
 
@@ -1277,36 +1268,6 @@ void PhoneLauncher::cellBroadcast(CellBroadcastControl::Type type,
 
 /*!
   \internal
-  Increases the earpiece volume.
-
-  Note: this affects the user interface only.  Hardware specific code
-  must be added to modify the actual earpiece volume.
-*/
-void PhoneLauncher::increaseEarVolume()
-{
-    if (!volumeScreen)
-        volumeScreen = new EarpieceVolume();
-
-    volumeScreen->increaseVolume();
-}
-
-/*!
-  \internal
-  Decreases the earpiece volume.
-
-  Note: this affects the user interface only.  Hardware specific code
-  must be added to modify the actual earpiece volume.
-*/
-void PhoneLauncher::decreaseEarVolume()
-{
-    if (!volumeScreen)
-        volumeScreen = new EarpieceVolume();
-
-    volumeScreen->decreaseVolume();
-}
-
-/*!
-  \internal
   Shows the Profile settings application.
 */
 void PhoneLauncher::showProfileSelector()
@@ -1325,8 +1286,10 @@ void PhoneLauncher::hideAll()
 #ifdef QTOPIA_PHONEUI
     if (callScreen(false))
         callScreen(false)->close();
+#if defined(QTOPIA_TELEPHONY)
     if (callHistory())
         callHistory()->close();
+#endif
     if (dialer(false))
         dialer(false)->close();
 #endif
@@ -1801,10 +1764,6 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
     if(create && !mCallScreen) {
         mCallScreen = new CallScreen(DialerControl::instance(), 0);
         mCallScreen->move(QApplication::desktop()->screenGeometry().topLeft());
-        QObject::connect(mCallScreen, SIGNAL(increaseCallVolume()),
-                         this, SLOT(increaseEarVolume()));
-        QObject::connect(mCallScreen, SIGNAL(decreaseCallVolume()),
-                         this, SLOT(decreaseEarVolume()));
         RingControl *rc = qtopiaTask<RingControl>();
         if(rc)
             QObject::connect(mCallScreen, SIGNAL(muteRing()),
@@ -1865,16 +1824,26 @@ bool PhoneLauncher::activateSpeedDial( const QString& input )
         connect(speeddialfeedback, SIGNAL(requestSent()), this, SLOT(speedDialActivated()));
 #endif
     }
+
+    QString sel = input;
+    if ( input.isEmpty() ) {
+        speeddialfeedback->setBlindFeedback(false);
+        sel = QSpeedDial::selectWithDialog(this);
+    } else {
+        speeddialfeedback->setBlindFeedback(true);
+    }
+
     QDesktopWidget *desktop = QApplication::desktop();
-    QtopiaServiceDescription* r = QSpeedDial::find(input);
+    QtopiaServiceDescription* r = QSpeedDial::find(sel);
     if(r)
     {
-        speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),input,*r);
+        speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),sel,*r);
         return !r->request().isNull();
     }
     else
     {
-        speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),input,QtopiaServiceDescription());
+        if (!input.isEmpty())
+            speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),sel,QtopiaServiceDescription());
         return false;
     }
 }
@@ -1938,104 +1907,10 @@ void MultiTaskProxy::showRunningTasks()
     emit doShowRunningTasks();
 }
 
-// define EarpieceVolume
-EarpieceVolume::EarpieceVolume(QWidget *parent, Qt::WFlags f)
-    : QWidget(parent, f), tid(0), minLevel(0), maxLevel(5), level(3)
-{
-    //XXX read volume min/max from somewhere.
-
-    setWindowTitle(tr("Volume"));
-    QGridLayout *gl = new QGridLayout(this);//, 5, 2, 8, 8);
-    QLabel *icon = new QLabel(this);
-    icon->setPixmap(QIcon(":icon/volume").pixmap(QSize(14,14)));
-    gl->addWidget(icon, 1, 0);
-    label = new QLabel(this);
-    label->setText(tr("<b>Ear Volume: %1</b>").arg(level));
-    gl->addWidget(label, 1, 1);
-    slider = new QSlider(Qt::Horizontal, this);
-    slider->setRange(minLevel, maxLevel);
-    slider->setValue(level);
-    slider->setTickPosition(QSlider::TicksBelow);
-    slider->installEventFilter(this);
-    QSoftMenuBar::setLabel(slider, Qt::Key_Select, QSoftMenuBar::NoLabel);
-    QSoftMenuBar::setLabel(slider, Qt::Key_Back, QSoftMenuBar::Back);
-    connect(slider, SIGNAL(valueChanged(int)), this, SLOT(levelChanged(int)));
-    gl->addWidget(slider, 2, 0, 1, 2);
-    QLabel *l = new QLabel(QString::number(minLevel), this);
-    gl->addWidget(l, 3, 0);
-    l = new QLabel(QString::number(maxLevel), this);
-    l->setAlignment(Qt::AlignRight);
-    gl->addWidget(l, 3, 1);
-    gl->setRowStretch(0, 1);
-    gl->setRowStretch(4, 1);
-    gl->setColumnStretch(1, 1);
-}
-
-void EarpieceVolume::increaseVolume()
-{
-    if (!isVisible()) {
-        showMaximized();
-        if (tid)
-            killTimer(tid);
-        tid = startTimer(3000);
-    }
-    if (++level > maxLevel)
-        level = maxLevel;
-    else
-        slider->setValue(level);
-}
-
-void EarpieceVolume::decreaseVolume()
-{
-    if (!isVisible()) {
-        showMaximized();
-        if (tid)
-            killTimer(tid);
-        tid = startTimer(3000);
-    }
-    if (--level < minLevel)
-        level = minLevel;
-    else
-        slider->setValue(level);
-}
-
-void EarpieceVolume::levelChanged(int v)
-{
-    level = v;
-    label->setText(tr("<b>Ear Volume: %1</b>").arg(level));
-    //XXX set hardware volume.
-    if (tid)
-        killTimer(tid);
-    tid = startTimer(3000);
-}
-
-void EarpieceVolume::timerEvent(QTimerEvent *)
-{
-    killTimer(tid);
-    tid = 0;
-    close();
-}
-
-bool EarpieceVolume::eventFilter(QObject *, QEvent *e)
-{
-    if (e->type() == QEvent::KeyPress) {
-        QKeyEvent *ke = (QKeyEvent*)e;
-        if (ke->key() == Qt::Key_Select) {
-            return true;
-        } else if (ke->key() == Qt::Key_Back) {
-            // Don't want to cancel setting.
-            close();
-            return true;
-        }
-    }
-
-    return false;
-}
-
 // define QSpeedDialFeedback
 QSpeedDialFeedback::QSpeedDialFeedback() :
     QFrame(0, (Qt::Tool | Qt::FramelessWindowHint)),
-    timerId(0)
+    timerId(0), blind(true)
 {
     setFrameStyle(QFrame::WinPanel|QFrame::Raised);
     QVBoxLayout *vb = new QVBoxLayout(this);
@@ -2049,15 +1924,23 @@ QSpeedDialFeedback::QSpeedDialFeedback() :
     label->setAlignment(Qt::AlignCenter);
 }
 
+// is user "dialing-blind", or picking from screen?
+void QSpeedDialFeedback::setBlindFeedback(bool on)
+{
+    blind = on;
+}
+
 void QSpeedDialFeedback::show(QWidget* center, const QString& input, const QtopiaServiceDescription& r)
 {
     req = r.request();
 #ifdef QTOPIA_PHONEUI
-    RingControl *rc = qtopiaTask<RingControl>();
-    if ( req.isNull() ) {
-        if(rc) rc->playSound(":sound/speeddial/nak");
-    } else {
-        if(rc) rc->playSound(":sound/speeddial/ack");
+    if ( blind ) {
+        RingControl *rc = qtopiaTask<RingControl>();
+        if ( req.isNull() ) {
+            if(rc) rc->playSound(":sound/speeddial/nak");
+        } else {
+            if(rc) rc->playSound(":sound/speeddial/ack");
+        }
     }
 #endif
     if ( req.isNull() ) {
@@ -2090,7 +1973,7 @@ void QSpeedDialFeedback::show(QWidget* center, const QString& input, const Qtopi
     QFrame::show();
     activateWindow();
     setFocus();
-    if( Qtopia::mousePreferred() ) {
+    if( Qtopia::mousePreferred() || !blind ) {
         if ( !req.isNull() ) {
             req.send();
             emit requestSent();

@@ -20,15 +20,69 @@
 <h1 align="center">Modem Emulator - Network<br /><span class="subtitle"></span>
 </h1>
 <p>The AT commands in this section are used for accessing network services on GSM and similar networks.</p>
-<p><b>AT+CIMI Request International Mobile Subscriber Identity</b></p>
-<p>The <tt>AT+CIMI</tt> command retrieves the IMSI value from the SIM.</p>
+<p><b>AT+CAOC Advice of Charge</b></p>
+<p>The <tt>AT+CAOC</tt> command enables the subscriber to get information about the cost of calls.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CIMI</tt></td><td><tt>&lt;IMSI&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CIMI</tt></td><td><tt>+CME ERROR: 10</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CAOC[=&lt;mode&gt;]</tt></td><td><ul>
+<li><tt>[+CAOC: &lt;ccm&gt;]</tt></li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CAOC?</tt></td><td><tt>\c{+CAOC: &lt;mode&gt;}</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CAOC=?</tt></td><td><tt>[+CAOC:</tt>(list of supported <tt>&lt;mode&gt;</tt>s)</td></tr>
 </table></p>
-<p>An error will be returned if there is no SIM present, or the SIM is still being initialized and the IMSI is not available yet.</p>
+<p>The <tt>&lt;mode&gt;</tt> parameter can take the following values:</p>
+<ul>
+<li>0 Query CCM value</li>
+<li>1 Deactivate the unsolicited reporting of CCM value</li>
+<li>2 Activate the unsolicited reporting of CCM value</li>
+</ul>
+<p>The unsolicited result code <tt>+CCCM: &lt;ccm&gt;</tt> is sent when the CCM value changes, but not more than every ten seconds, if enabled.</p>
+<p><tt>&lt;ccm&gt;</tt> is a string type; 3 bytes of the current call meter value in hexadecimal format.</p>
 <p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CPLS Selection of Preferred PLMN List</b></p>
+<p>The <tt>AT+CPLS</tt> command can be used to select one PLMN Selector With Access Technology list from the SIM card or active application in the UICC, which is used by the <tt>AT+CPOL</tt> command.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>+CPLS=&lt;list&gt;</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>+CPLS?</tt></td><td><ul>
+<li><tt>+CPLS: &lt;list&gt;</tt></li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>+CPLS=?</tt></td><td><ul>
+<li><tt>+CPLS:</tt> (list of supported <tt>&lt;list&gt;</tt>s)</li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>The <tt>&lt;list&gt;</tt> parameter can take the following values:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td>0</td><td>User controlled PLMN Selector With Access Technology list</td></tr>
+<tr valign="top" class="even"><td>1</td><td>Operator controlled PLMN Selector With Access Technology list</td></tr>
+<tr valign="top" class="odd"><td>2</td><td>HPLMN Selector With Access Technology list</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p>/sa AT+CPOL</p>
+<p><b>AT+CPOL Preferred PLMN List </b></p>
+<p>The <tt>AT+CPOL</tt> command is used to edit the PLMN Selector With Access Technology lists in the SIM card or active application in the UICC.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>+CPOL=[&lt;index&gt;][,&lt;format&gt;[,&lt;oper&gt;[,&lt;GSM_AcT&gt;, &lt;GSM_Compact_AcT&gt;,&lt;UTRAN_AcT&gt;]]]</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>+CPOL?</tt></td><td><ul>
+<li><tt>+CPOL: &lt;index1&gt;,&lt;format&gt;,&lt;oper1&gt;[,&lt;GSM_AcT1&gt;,&lt;GSM_Compact_AcT1&gt;,&lt;UTRAN_AcT1&gt;]</tt> <tt>[&lt;CR&gt;&lt;LF&gt;+CPOL: &lt;index2&gt;,&lt;format&gt;,&lt;oper2&gt;[,&lt;GSM_AcT2&gt;,&lt;GSM_Compact_AcT2&gt;,&lt;UTRAN_AcT2&gt;]</tt></li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>+CPOL=?</tt></td><td><ul>
+<li><tt>+CPOL:</tt>(list of supported <tt>&lt;index&gt;</tt>s),list of supported <tt>&lt;format&gt;</tt>s)</li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p>/sa AT+CPLS</p>
 <p><b>AT+CNUM Subscriber Number</b></p>
 <p>The <tt>AT+CNUM</tt> command retrieves the MSISDN's related to the subscriber from the SIM.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -36,6 +90,7 @@
 <tr valign="top" class="odd"><td><tt>AT+CNUM</tt></td><td><pre>    +CNUM: [&lt;alpha&gt;],&lt;number&gt;,&lt;type&gt;[,&lt;speed&gt;,&lt;service&gt;[,&lt;itc&gt;]]
     ...</pre>
 </td></tr>
+<tr valign="top" class="even"><td><tt>AT+CNUM=?</tt></td><td></td></tr>
 </table></p>
 <p>Execution command returns the MSISDN's related to the subscriber from the SIM. If the subscriber has different MSISDN's for different services, each MSISDN is returned on a separate line.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -63,7 +118,11 @@
 <p>The <tt>AT+COPS</tt> command is used to select operators, to request the current operator details, and to request a list of the available operators.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+COPS=[&lt;mode&gt;[,&lt;format&gt;[,&lt;oper&gt;[,&lt;AcT&gt;]]]]</tt></td><td><tt>OK</tt>, <tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+COPS=[&lt;mode&gt;[,&lt;format&gt;[,&lt;oper&gt;[,&lt;AcT&gt;]]]]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+</ul>
+</td></tr>
 <tr valign="top" class="even"><td><tt>AT+COPS?</tt></td><td><tt>+COPS: &lt;mode&gt;[,&lt;format&gt;,&lt;oper&gt;[,&lt;AcT&gt;]]</tt></td></tr>
 <tr valign="top" class="odd"><td><tt>AT+COPS=?</tt></td><td><tt>+COPS: [list of supported (&lt;stat&gt;,long &lt;oper&gt;,short &lt;oper&gt;,numeric &lt;oper&gt;[,&lt;AcT&gt;])][,,(list of supported &lt;mode&gt;s),(list of supported &lt;format&gt;s)]</tt></td></tr>
 </table></p>
@@ -105,7 +164,11 @@
 <p>The <tt>AT+CREG</tt> command control the presentation of unsolicited network registration changes.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CREG=[&lt;n&gt;]</tt></td><td><tt>OK</tt>, <tt>+CME ERROR: 3</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CREG=[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>+CME ERROR: 3</tt></li>
+</ul>
+</td></tr>
 <tr valign="top" class="even"><td><tt>AT+CREG?</tt></td><td><tt>+CREG: &lt;n&gt;,&lt;stat&gt;[,&lt;lac&gt;,&lt;ci&gt;]</tt></td></tr>
 <tr valign="top" class="odd"><td><tt>AT+CREG=?</tt></td><td><tt>+CREG: (0-2)</tt></td></tr>
 </table></p>
@@ -131,6 +194,19 @@
 <tr valign="top" class="even"><td><tt>&lt;ci&gt;</tt></td><td>String type, indicating the two byte cell ID in hexadecimal format.</td></tr>
 </table></p>
 <p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CIMI Request International Mobile Subscriber Identity</b></p>
+<p>The <tt>AT+CIMI</tt> command retrieves the IMSI value from the SIM.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CIMI</tt></td><td><ul>
+<li><tt>&lt;IMSI&gt;</tt></li>
+<li><tt>+CME ERROR: 10</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CIMI=?</tt></td><td></td></tr>
+</table></p>
+<p>An error will be returned if there is no SIM present, or the SIM is still being initialized and the IMSI is not available yet.</p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -139,8 +215,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,5 @@
 PROJECTS-=\
-    settings/beaming\
-    libraries/qtopiatest
+    settings/beaming
 PROJECTS*=\
     3rdparty/tools/atd\
     3rdparty/applications/target_sqlite\

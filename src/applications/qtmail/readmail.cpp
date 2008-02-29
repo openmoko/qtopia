@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -57,8 +57,10 @@
 #include <qimagereader.h>
 #include <qalgorithms.h>
 #include <qtmailwindow.h>
+#include <QContactSelector>
 #include <QMailStore>
 #include <QMailComposerFactory>
+#include <QDrmContentPlugin>
 
 
 ReadMail::ReadMail( QWidget* parent,  const QString name, Qt::WFlags fl )
@@ -71,12 +73,15 @@ ReadMail::ReadMail( QWidget* parent,  const QString name, Qt::WFlags fl )
     firstRead = false;
     mailView = 0;
     accountList = 0;
+    contactModel = 0;
+    modelUpdatePending = false;
 
     init();
 }
 
 ReadMail::~ReadMail()
 {
+    delete contactModel;
 }
 
 void ReadMail::init()
@@ -84,6 +89,8 @@ void ReadMail::init()
 #ifndef QTOPIA_NO_MMS
     smilView = 0;
 #endif
+
+    QDrmContentPlugin::initialize();
 
     getThisMailButton = new QAction( QIcon(":icon/getmail"), tr("Get message"), this );
     connect(getThisMailButton, SIGNAL(triggered()), this, SLOT(getThisMail()) );
@@ -124,31 +131,26 @@ void ReadMail::init()
     connect( deleteButton, SIGNAL(triggered()), this, SLOT( deleteItem() ) );
     deleteButton->setWhatsThis( tr("Move this message to the trash folder.  If the message is already in the trash folder it will be deleted. ") );
 
-    QFrame *vbox = new QFrame(this);
-    QVBoxLayout *vboxLayout = new QVBoxLayout(vbox);
-    vboxLayout->setMargin(0);
-
-    views = new QStackedWidget(vbox);
-    vboxLayout->addWidget( views );
+    storeButton = new QAction( QIcon( ":icon/save" ), tr( "Save to Contacts" ), this );
+    connect( storeButton, SIGNAL(triggered()), this, SLOT( storeContact() ) );
+    
+    views = new QStackedWidget(this);
 
     // Create a viewer for static content
     QString key = QMailViewerFactory::defaultKey( QMailViewerFactory::StaticContent );
     emailView = QMailViewerFactory::create( key, views );
-    emailView->setObjectName( "emailView" );
+    emailView->setObjectName( "read-message" );
 
     connect(emailView, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkClicked(QUrl)) );
     connect(emailView, SIGNAL(finished()), this, SLOT(closeView()) );
 
     QWidget* viewer = emailView->widget();
     viewer->setWhatsThis( tr("This view displays the contents of the message.") );
+
     views->addWidget(viewer);
     views->setCurrentWidget(viewer);
 
-    progressLabel = new QLabel(vbox);
-    vboxLayout->addWidget( progressLabel );
-    progressLabel->hide();
-
-    setCentralWidget(vbox);
+    setCentralWidget(views);
 
     context = QSoftMenuBar::menuFor( this );
 }
@@ -336,6 +338,7 @@ void ReadMail::viewSelectedMail(MailListView *view)
 
     deleteButton->setText( hasDelete(mailbox) ? tr("Delete") : tr("Move to Trash") );
     context->addAction( deleteButton );
+    context->addAction( storeButton );
 
     context->addSeparator();
     emailView->addActions( context );
@@ -354,10 +357,9 @@ void ReadMail::mailUpdated(const QMailId& id)
         //reload the mail
         mail = QMailMessage(id,QMailMessage::HeaderAndBody);
         updateView();
-        updateButtons();
-    } else {
-        updateButtons();
     }
+    
+    updateButtons();
 }
 
 void ReadMail::showMail(const QMailId& id)
@@ -471,11 +473,9 @@ void ReadMail::updateButtons()
     }
 
     if ( (mail.status() & QMailMessage::Sent) || sending ) {
-            sendThisMailButton->setVisible(false);
-    } else if ( !mail.hasRecipients() ) {
         sendThisMailButton->setVisible(false);
     } else {
-        sendThisMailButton->setVisible(true);
+        sendThisMailButton->setVisible(mail.hasRecipients());
     }
 
     modifyButton->setVisible( !((mail.status() & QMailMessage::Sent) || sending ) );
@@ -494,7 +494,7 @@ void ReadMail::updateButtons()
         bool otherReplyTarget(!mail.cc().isEmpty() || mail.to().count() > 1);
 
         if (accountList) {
-            if (MailAccount* account = accountList->getAccountById(mail.fromAccount())) {
+            if (QMailAccount* account = accountList->getAccountById(mail.fromAccount())) {
                 QString accountAddress(account->emailAddress());
                 // TODO: if we have no email address, we should try to get our own phone number...
 
@@ -521,13 +521,13 @@ void ReadMail::updateButtons()
     nextButton->setVisible(mailView->row(current) + 1 < mailView->rowCount());
     previousButton->setVisible(mailView->row(current) > 0);
 
+    // Show the 'Store to Contacts' action if we don't have a matching contact
+    QMailAddress fromAddress(mail.from());
+    bool unknownContact = !fromAddress.matchesExistingContact();
+    storeButton->setVisible(unknownContact);
+
     if ( current )
         current->updateState();
-
-    if (sending || receiving)
-        progressLabel->show();
-    else
-        progressLabel->hide();
 }
 
 void ReadMail::viewAttachments()
@@ -571,17 +571,17 @@ void ReadMail::mmsFinished()
 
 void ReadMail::reply()
 {
-    emit resendRequested(mail, 1);
+    emit resendRequested(mail, Reply);
 }
 
 void ReadMail::replyAll()
 {
-    emit resendRequested(mail, 2);
+    emit resendRequested(mail, ReplyToAll);
 }
 
 void ReadMail::forward()
 {
-    emit resendRequested(mail, 3);
+    emit resendRequested(mail, Forward);
 }
 
 void ReadMail::setStatus(int id)
@@ -653,13 +653,6 @@ void ReadMail::isReceiving(bool on)
     receiving = on;
     if ( isVisible() )
         updateButtons();
-}
-
-void ReadMail::setProgressText(const QString &txt)
-{
-    progressLabel->setText(txt);
-    if (txt.isNull())
-        progressLabel->hide();
 }
 
 void ReadMail::initImages(QMailViewerInterface* view)
@@ -744,5 +737,99 @@ void ReadMail::switchView(QWidget* widget, const QString& title)
 {
     QTMailWindow::singleton()->setWindowTitle(title);
     views->setCurrentWidget(widget);
+}
+
+void ReadMail::storeContact()
+{
+    QMailAddress fromAddress = mail.from();
+    if (!fromAddress.isPhoneNumber() && !fromAddress.isEmailAddress()) {
+        qWarning() << "Unable to store unknown address type:" << fromAddress.toString();
+    } else {
+        QString text = "<qt>" + tr("Create a new contact?") + "</qt>";
+        bool newContact = (QMessageBox::warning(0,
+                                                tr("Save to Contacts"), 
+                                                text, 
+                                                QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+
+        if (!contactModel) {
+            // Once we have registered the new contact, we need to update our message display
+            contactModel = new QContactModel();
+            connect(contactModel, SIGNAL(modelReset()), this, SLOT(contactModelReset()) );
+        }
+
+        modelUpdatePending = true;
+
+        if (fromAddress.isPhoneNumber()) {
+            QtopiaServiceRequest req( "Contacts", (newContact ? "createNewContact(QString)"
+                                                              : "addPhoneNumberToContact(QString)") );
+            req << fromAddress.toString();
+            req.send();
+        } else {
+            // The Contacts app doesn't provide email address services at this time
+            if (newContact) {
+                QContact contact;
+                contact.insertEmail(fromAddress.address());
+
+                QtopiaServiceRequest req( "Contacts", "addAndEditContact(QContact)" );
+                req << contact;
+                req.send();
+            } else {
+                // For now, we need to do this ourselves
+                QContactSelector selector;
+                selector.setObjectName("select-contact");
+
+                QContactModel model(&selector);
+
+                QSettings config( "Trolltech", "Contacts" );
+                config.beginGroup( "default" );
+                if (config.contains("SelectedSources/size")) {
+                    int count = config.beginReadArray("SelectedSources");
+                    QSet<QPimSource> set;
+                    for(int i = 0; i < count; ++i) {
+                        config.setArrayIndex(i);
+                        QPimSource s;
+                        s.context = QUuid(config.value("context").toString());
+                        s.identity = config.value("identity").toString();
+                        set.insert(s);
+                    }
+                    config.endArray();
+                    model.setVisibleSources(set);
+                }
+
+                selector.setModel(&model);
+                selector.setAcceptTextEnabled(false);
+
+                selector.showMaximized();
+                if (QtopiaApplication::execDialog(&selector) == QDialog::Accepted) {
+                    QContact contact(selector.selectedContact());
+                    contact.insertEmail(fromAddress.address());
+
+                    if (!model.updateContact(contact)) {
+                        qWarning() << "Unable to update contact:" << contact.label();
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+        }
+
+        if (mailView) {
+            // Force update of from address in GUI
+            mailView->resetNameCaches();
+        }
+    }
+}
+
+void ReadMail::contactModelReset()
+{
+    if (modelUpdatePending) {
+        // TODO: In fact, we can't ignore unrequested reset events, because the first reset after 
+        // our update may not include the change we requested...
+        //modelUpdatePending = false;
+
+        updateView();
+        updateButtons();
+    }
 }
 

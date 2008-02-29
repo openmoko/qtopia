@@ -28,9 +28,9 @@
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
 
- /*
+<span class="comment"> /*
   *  sha1.h
   *
   *      Copyright (C) 1998
@@ -51,30 +51,30 @@
   *
   *      Please read the file sha1.c for more information.
   *
-  */
+  */</span>
 
  #ifndef _SHA1_H_
  #define _SHA1_H_
 
- /*
+<span class="comment"> /*
   *  This structure will hold context information for the hashing
   *  operation
-  */
+  */</span>
  typedef struct SHA1Context
  {
-     unsigned Message_Digest[5]; /* Message Digest (output)          */
+     unsigned Message_Digest[5]; <span class="comment">/* Message Digest (output)          */</span>
 
-     unsigned Length_Low;        /* Message length in bits           */
-     unsigned Length_High;       /* Message length in bits           */
+     unsigned Length_Low;        <span class="comment">/* Message length in bits           */</span>
+     unsigned Length_High;       <span class="comment">/* Message length in bits           */</span>
 
-     unsigned char Message_Block[64]; /* 512-bit message blocks      */
-     int Message_Block_Index;    /* Index into message block array   */
+     unsigned char Message_Block[64]; <span class="comment">/* 512-bit message blocks      */</span>
+     int Message_Block_Index;    <span class="comment">/* Index into message block array   */</span>
 
-     int Computed;               /* Is the digest computed?          */
-     int Corrupted;              /* Is the message digest corruped?  */
+     int Computed;               <span class="comment">/* Is the digest computed?          */</span>
+     int Corrupted;              <span class="comment">/* Is the message digest corruped?  */</span>
  } SHA1Context;
 
- /*
+<span class="comment"> /*
   *  Function Prototypes
   */</span>
  void SHA1Reset(SHA1Context *);
@@ -86,8 +86,8 @@
  #endif</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

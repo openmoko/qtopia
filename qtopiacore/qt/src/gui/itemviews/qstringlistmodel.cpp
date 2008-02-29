@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -43,6 +41,7 @@
 #include "qstringlistmodel.h"
 
 #ifndef QT_NO_STRINGLISTMODEL
+
 /*!
     \class QStringListModel
     \brief The QStringListModel class provides a model that supplies strings to views.
@@ -230,16 +229,45 @@ bool QStringListModel::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
+static bool ascendingLessThan(const QPair<QString, int> &s1, const QPair<QString, int> &s2)
+{
+    return s1.first < s2.first;
+}
+
+static bool decendingLessThan(const QPair<QString, int> &s1, const QPair<QString, int> &s2)
+{
+    return s1.first > s2.first;
+}
+
 /*!
   \reimp
 */
 void QStringListModel::sort(int, Qt::SortOrder order)
 {
     emit layoutAboutToBeChanged();
+
+    QList<QPair<QString, int> > list;
+    for (int i = 0; i < lst.count(); ++i)
+        list.append(QPair<QString, int>(lst.at(i), i));
+
     if (order == Qt::AscendingOrder)
-        qSort(lst.begin(), lst.end(), qLess<QString>());
+        qSort(list.begin(), list.end(), ascendingLessThan);
     else
-        qSort(lst.begin(), lst.end(), qGreater<QString>());
+        qSort(list.begin(), list.end(), decendingLessThan);
+
+    lst.clear();
+    QVector<int> forwarding(list.count());
+    for (int i = 0; i < list.count(); ++i) {
+        lst.append(list.at(i).first);
+        forwarding[list.at(i).second] = i;
+    }
+
+    QModelIndexList oldList = persistentIndexList();
+    QModelIndexList newList;
+    for (int i = 0; i < oldList.count(); ++i)
+        newList.append(index(forwarding.at(oldList.at(i).row()), 0));
+    changePersistentIndexList(oldList, newList);
+
     emit layoutChanged();
 }
 

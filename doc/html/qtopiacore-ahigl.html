@@ -20,6 +20,7 @@
 <li><a href="qtopiacore-ahigl-qscreenahiglplugin-cpp.html">qtopiacore/ahigl/qscreenahiglplugin.cpp</a></li>
 <li><a href="qtopiacore-ahigl-qwindowsurface-ahigl-cpp.html">qtopiacore/ahigl/qwindowsurface_ahigl.cpp</a></li>
 <li><a href="qtopiacore-ahigl-qwindowsurface-ahigl-p-h.html">qtopiacore/ahigl/qwindowsurface_ahigl_p.h</a></li>
+<li><a href="qtopiacore-ahigl-ahigl-pro.html">qtopiacore/ahigl/ahigl.pro</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
@@ -198,7 +199,7 @@
 <p>The <a href="qscreen.html#connect">connect()</a> function is the first one called by the server after the screen driver is constructed. It initializes the <a href="qscreen.html">QScreen</a> data members to hardcoded values that describe the ATI screen. A better implementation would query the hardware for the corresponding values in it's current state and use those. It asks whether the screen driver was started with the <tt>effects</tt> option and sets the <tt>doEffects</tt> flag accordingly.</p>
 <pre> bool QAhiGLScreen::connect(const QString &amp;displaySpec)
  {
-     // Hardcoded values for this device
+     <span class="comment">//</span> Hardcoded values for this device
      w = 480;
      h = 640;
      dw = w;
@@ -348,7 +349,7 @@
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
 
-     // Fill background color
+     <span class="comment">//</span> Fill background color
 
      QColor bgColor = QWSServer::instance()-&gt;backgroundBrush().color();
      glClearColor(bgColor.redF(), bgColor.greenF(),
@@ -378,10 +379,10 @@
 
          glBindTexture(GL_TEXTURE_2D, info-&gt;texture);
          drawWindow(win, progress);
-     } // for i</pre>
+     } <span class="comment">//</span> for i</pre>
 <p>Note the call to glBindTexture() immediately before the call to drawWindow(). This call binds the identifer <tt>GL_TEXTURE_2D</tt> to the texture we have just created. This makes our texture accessible to functions in the OpenGL libraries. If you miss that point, digging into the internals of drawWindow() won't make much sense.</p>
 <p>Finally, the cursor is added to the window composition, and in the last statement, the whole thing is displayed on the screen.</p>
-<pre>     // Draw cursor
+<pre>     <span class="comment">//</span> Draw cursor
 
      const QAhiGLCursor *cursor = d_ptr-&gt;cursor;
      if (cursor-&gt;texture) {
@@ -490,9 +491,9 @@
 
      if (geometry().size() != size) {
 
-         // Driver specific limitations:
-         //   FBO maximimum size of 256x256
-         //   Depth buffer required
+         <span class="comment">//</span> Driver specific limitations:
+         <span class="comment">//</span>   FBO maximimum size of 256x256
+         <span class="comment">//</span>   Depth buffer required
 
          d_ptr-&gt;textureWidth = qMin(256, nextPowerOfTwo(size.width()));
          d_ptr-&gt;textureHeight = qMin(256, nextPowerOfTwo(size.height()));
@@ -551,8 +552,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

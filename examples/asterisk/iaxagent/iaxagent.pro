@@ -20,7 +20,7 @@ SOURCES		= main.cpp \
                   iaxtelephonyservice.cpp
 
 pkg.desc=IAX telephony agent for use with Asterisk servers
-pkg.domain=window,phonecomm
+pkg.domain=trusted
 
 depends(libraries/qtopiaphone)
 depends(libraries/qtopiaaudio)

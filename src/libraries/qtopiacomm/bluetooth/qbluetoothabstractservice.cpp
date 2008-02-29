@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,14 +39,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-
-
-#undef QBLUETOOTHABSTRACTSERVICE_DEBUG
-
-#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
-#   include <QDebug>
-#endif
 
 
 /*
@@ -160,13 +152,8 @@ quint32 QBluetoothAbstractServicePrivate::registerRecord(const QString &record)
         return 0;
 
     QDBusReply<quint32> reply = iface.call("AddServiceRecordFromXML", record);
-    if (!reply.isValid()) {
-#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
-        qDebug() << "QBluetoothAbstractService: registerRecord() error:"
-                << reply.error().type() << reply.error().message();
-#endif
+    if (!reply.isValid()) 
         return 0;
-    }
 
     return reply.value();
 }
@@ -181,13 +168,8 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
 
     QDBusReply<void> reply = iface.call("RemoveServiceRecord",
                                         QVariant::fromValue(handle));
-    if (!reply.isValid()) {
-#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
-        qDebug() << "QBluetoothAbstractService: unregisterRecord() error:"
-                << reply.error().type() << reply.error().message();
-#endif
+    if (!reply.isValid()) 
         return false;
-    }
 
     return true;
 }
@@ -201,112 +183,19 @@ bool QBluetoothAbstractServicePrivate::unregisterRecord(quint32 handle)
     \mainclass
     \brief  The QBluetoothAbstractService class provides a base interface class for Bluetooth services within Qtopia.
 
-    This class makes it easier to implement Qtopia Bluetooth services. If you
-    subclass QBluetoothAbstractService to create a Bluetooth service, the
-    service is automatically registered and accessible as a system Bluetooth 
-    service within Qtopia. The service can then be accessed externally by
-    programmers through the QBluetoothServiceController class. It will also be
-    listed in the system Bluetooth settings application, allowing end users to
-    modify the service's settings.
+    To create a Qtopia Bluetooth service, subclass QBluetoothAbstractService
+    and implement the start(), stop() and setSecurityOptions() methods. Your
+    service will automatically be registered and accessible as a Bluetooth
+    service within Qtopia. This means the service will be accessible to
+    external parties through QBluetoothServiceController. It will also be
+    shown in the list of local services in Qtopia's Bluetooth settings
+    application, allowing end users to modify the service's settings.
 
-    Following is an example of a Qtopia Bluetooth service that is created by
-    subclassing QBluetoothAbstractService. The service will publish the Serial
-    Port Profile, and the service name will be "MySerialPortService".
+    Naturally, it is possible to implement Bluetooth services outside of
+    Qtopia by using the BlueZ libraries and standard Linux tools. However,
+    such services will not be accessible through Qtopia.
 
-    This is the interface for the class:
-
-    \code
-    class MyBluetoothService : public QBluetoothAbstractService
-    {
-        Q_OBJECT
-    public:
-        MyBluetoothService(QObject *parent = 0);
-        virtual void start();
-        virtual void stop();
-        virtual void setSecurityOptions(QBluetooth::SecurityOptions options);
-
-    private:
-        quint32 m_serviceRecordHandle;
-    };
-    \endcode
-
-
-    Now, to the implementation. Firstly, the constructor might look something
-    like this:
-
-    \code
-    MyBluetoothService::MyBluetoothService(QObject *parent)
-        : QBluetoothAbstractService("MySerialPortService", tr("Serial Port Service"), parent)
-    {
-        m_serviceRecordHandle = 0;
-    }
-    \endcode
-
-    This creates a service named "MySerialPortService". The name must be
-    unique among Qtopia Bluetooth services, as it is used internally to
-    uniquely identify the service (for example, for storing service settings).
-
-    The second string argument is an internationalized, human-readable name
-    that can be displayed to the end user. This string will be used, for
-    example, for listing local Bluetooth services in Qtopia's Bluetooth 
-    settings application.
-
-    The \c m_serviceRecordHandle member will store the handle for the 
-    service's associated SDP service record, as you will see below in the
-    start() and stop() implementations.
-
-    Then, to implement the start() method:
-
-    \code
-    void MyBluetoothService::start()
-    {
-        // Register an SDP service for this Bluetooth service
-        quint32 handle = registerRecord("SerialPortService.xml");
-        if (handle == 0) {
-            // registration failed
-            emit started(true, tr("Error registering the SDP service"));
-            return;
-        }
-
-        // Call some method to start the service
-        if (!startMyService()) {
-            // The service failed to start, so unregister the SDP service
-            // that was previously registered
-            unregisterRecord(handle);
-
-            // notify the system that the service was not started
-            emit started(true, tr("Unable to start MySerialPortService"));
-            return;
-        }
-
-        // The service was successfully started
-        m_serviceRecordHandle = handle;
-        emit started(false, QString());
-    }
-    \endcode
-
-    The start() method is called by Qtopia when the service should be started.
-    Note how the example emits the started() signal when the service fails to
-    start, and also when it does start successfully.
-
-    The class also needs to have a stop() method:
-
-    \code
-    void MyBluetoothService::stop()
-    {
-        // call some method to shut down the service
-        stopMyService();
-
-        if (!unregisterRecord(m_serviceRecordHandle))
-            qWarning() << "Error unregistering the SDP service";
-
-        // notify the system that the service has stopped
-        emit stopped();
-    }
-    \endcode
-
-    Finally, the class will need to implement the setSecurityOptions() method
-    to provide the ability to modify the security settings for the service.
+    \sa {Tutorial: Creating a Bluetooth service}
 
     \ingroup qtopiabluetooth
 */
@@ -354,44 +243,8 @@ quint32 QBluetoothAbstractService::registerRecord(const QBluetoothSdpRecord &rec
     record for this Bluetooth service and returns the service record handle of 
     the newly registered service. Returns zero if the registration failed.
 
-    An example of the required XML data structure can be seen by running the 
-    \c {sdptool get --xml} command in a terminal shell. For example, this will
-    add an Object Push service, look up the service to find its service record
-    handle, and then use \c {sdptool get --xml} to show the XML structure:
-    \code
-        $> sdptool add OPUSH
-        $> sdptool browse local
-        Browsing FF:FF:FF:00:00:00 ...
-        Service Name: OBEX Object Push
-        Service RecHandle: 0x10000
-        Service Class ID List:
-        "OBEX Object Push" (0x1105)
-        Protocol Descriptor List:
-        "L2CAP" (0x0100)
-        "RFCOMM" (0x0003)
-            Channel: 9
-        "OBEX" (0x0008)
-        Profile Descriptor List:
-        "OBEX Object Push" (0x1105)
-            Version: 0x0100
-
-        $> sdptool get --xml 0x10000
-    \endcode
-
-    \bold {Note:} If you use \c {sdptool get --xml} to generate the SDP record 
-    XML file, you \bold must remove the service record handle XML element from 
-    the generated output before passing it to this function. This element is 
-    usually near the start of the XML output and will look similar to this:
-
-    \code
-        <attribute id="0x0000">
-                <uint32 value="..." />
-        </attribute>
-    \endcode
-
-    If this element is not removed, the registration will fail, as the 
-    service record handle will be automatically generated by the SDP server
-    and should not be provided by the programmer.
+    See \l {Tutorial: Creating a Bluetooth service#Using a XML-formatted SDP record}{Using a XML-formatted SDP record} for details on how to
+    generate a XML-formatted SDP reord.
 
     \warning The given file must be UTF-8 encoded to be parsed correctly.
 
@@ -422,15 +275,7 @@ quint32 QBluetoothAbstractService::registerRecord(const QString &filename)
 
             // unmap to clean up
             munmap(ptr, st.st_size);
-        } else {
-#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
-            qDebug() << "QBluetoothAbstractService: registerRecord() mmap failed";
-#endif
         }
-    } else {
-#ifdef QBLUETOOTHABSTRACTSERVICE_DEBUG
-        qDebug() << "QBluetoothAbstractService: registerRecord() fstat failed";
-#endif
     }
     ::close(fd);
 

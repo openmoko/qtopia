@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/widgets/qlineedit.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/widgets/qlineedit.cpp -->
 <head>
   <title>Qt 4.3: QLineEdit Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -418,7 +418,7 @@
  {
      QMenu *menu = createStandardContextMenu();
      menu-&gt;addAction(tr(&quot;My Menu Item&quot;));
-     <span class="comment">//...</span>
+     <span class="comment">//</span>...
      menu-&gt;exec(event-&gt;globalPos());
      delete menu;
  }</pre>
@@ -525,69 +525,10 @@
 <h3 class="fn"><a name="validator"></a>const <a href="qvalidator.html">QValidator</a> * QLineEdit::validator () const</h3>
 <p>Returns a pointer to the current input validator, or 0 if no validator has been set.</p>
 <p>See also <a href="qlineedit.html#setValidator">setValidator</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QLineEdit-3"></a>QLineEdit::QLineEdit ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a line edit with no text.</p>
-<p>The maximum text length is set to 32767 characters.</p>
-<p>The <i>parent</i> and <i>name</i> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>See also <a href="qlineedit.html#text-prop">setText</a>() and <a href="qlineedit.html#maxLength-prop">setMaxLength</a>().</p>
-<h3 class="fn"><a name="QLineEdit-4"></a>QLineEdit::QLineEdit ( const <a href="qstring.html">QString</a> &amp; <i>contents</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Constructs a line edit containing the text <i>contents</i>.</p>
-<p>The cursor position is set to the end of the line and the maximum text length to 32767 characters.</p>
-<p>The <i>parent</i> and <i>name</i> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>See also <a href="qlineedit.html#text-prop">text</a>() and <a href="qlineedit.html#maxLength-prop">setMaxLength</a>().</p>
-<h3 class="fn"><a name="QLineEdit-5"></a>QLineEdit::QLineEdit ( const <a href="qstring.html">QString</a> &amp; <i>contents</i>, const <a href="qstring.html">QString</a> &amp; <i>inputMask</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0 )</h3>
-<p>Constructs a line edit with an input <i>inputMask</i> and the text <i>contents</i>.</p>
-<p>The cursor position is set to the end of the line and the maximum text length is set to the length of the mask (the number of mask characters and separators).</p>
-<p>The <i>parent</i> and <i>name</i> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.</p>
-<p>See also <a href="qwidget.html#setMask">setMask</a>() and <a href="qlineedit.html#text-prop">text</a>().</p>
-<h3 class="fn"><a name="characterAt"></a>int QLineEdit::characterAt ( int <i>xpos</i>, <a href="qchar.html">QChar</a> * <i>chr</i> ) const</h3>
-<p>There exists no equivalent functionality in Qt 4.</p>
-<h3 class="fn"><a name="clearModified"></a>void QLineEdit::clearModified ()</h3>
-<p>Use setModified(false) instead.</p>
-<p>See also <a href="qlineedit.html#modified-prop">isModified</a>().</p>
-<h3 class="fn"><a name="clearValidator"></a>void QLineEdit::clearValidator ()</h3>
-<p>Use setValidator(0) instead.</p>
-<h3 class="fn"><a name="cursorLeft"></a>void QLineEdit::cursorLeft ( bool <i>mark</i>, int <i>steps</i> = 1 )</h3>
-<p>Use <a href="qlineedit.html#cursorForward">cursorForward</a>() with a negative number of steps instead. For example, cursorForward(mark, -steps).</p>
-<h3 class="fn"><a name="cursorRight"></a>void QLineEdit::cursorRight ( bool <i>mark</i>, int <i>steps</i> = 1 )</h3>
-<p>Use <a href="qlineedit.html#cursorForward">cursorForward</a>() instead.</p>
-<h3 class="fn"><a name="edited"></a>bool QLineEdit::edited () const</h3>
-<p>Use <a href="qlineedit.html#modified-prop">isModified</a>() instead.</p>
-<p>See also <a href="qlineedit-qt3.html#setEdited">setEdited</a>().</p>
-<h3 class="fn"><a name="frame"></a>bool QLineEdit::frame () const</h3>
-<p>Use <a href="qlineedit.html#frame-prop">hasFrame</a>() instead.</p>
-<p>See also <a href="qlineedit.html#frame-prop">setFrame</a>().</p>
-<h3 class="fn"><a name="getSelection"></a>bool QLineEdit::getSelection ( int * <i>start</i>, int * <i>end</i> )</h3>
-<p>Use <a href="qlineedit.html#selectedText-prop">selectedText</a>() and <a href="qlineedit.html#selectionStart">selectionStart</a>() instead.</p>
-<h3 class="fn"><a name="hasMarkedText"></a>bool QLineEdit::hasMarkedText () const</h3>
-<p>Use <a href="qlineedit.html#hasSelectedText-prop">hasSelectedText</a>() instead.</p>
-<h3 class="fn"><a name="lostFocus"></a>void QLineEdit::lostFocus ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>This signal is emitted when the line edit has lost focus.</p>
-<p>Use <a href="qlineedit.html#editingFinished">editingFinished</a>() instead</p>
-<p>See also <a href="qlineedit.html#editingFinished">editingFinished</a>() and <a href="qlineedit.html#returnPressed">returnPressed</a>().</p>
-<h3 class="fn"><a name="margin"></a>int QLineEdit::margin () const</h3>
-<p>Returns the with of the the margin around the contents of the widget.</p>
-<p>Use <a href="qwidget.html#getContentsMargins">QWidget::getContentsMargins</a>() instead.</p>
-<p>See also <a href="qlineedit-qt3.html#setMargin">setMargin</a>() and <a href="qwidget.html#getContentsMargins">QWidget::getContentsMargins</a>().</p>
-<h3 class="fn"><a name="markedText"></a><a href="qstring.html">QString</a> QLineEdit::markedText () const</h3>
-<p>Use <a href="qlineedit.html#selectedText-prop">selectedText</a>() instead.</p>
-<h3 class="fn"><a name="repaintArea"></a>void QLineEdit::repaintArea ( int <i>a</i>, int <i>b</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Use <a href="qwidget.html#update">update</a>() instead.</p>
-<h3 class="fn"><a name="setEdited"></a>void QLineEdit::setEdited ( bool <i>on</i> )</h3>
-<p>Use <a href="qlineedit.html#modified-prop">setModified</a>() or <a href="qlineedit.html#text-prop">setText</a>().</p>
-<p>See also <a href="qlineedit-qt3.html#edited">edited</a>().</p>
-<h3 class="fn"><a name="setMargin"></a>void QLineEdit::setMargin ( int <i>margin</i> )</h3>
-<p>Sets the width of the margin around the contents of the widget to <i>margin</i>.</p>
-<p>Use <a href="qwidget.html#setContentsMargins">QWidget::setContentsMargins</a>() instead.</p>
-<p>See also <a href="qlineedit-qt3.html#margin">margin</a>() and <a href="qwidget.html#setContentsMargins">QWidget::setContentsMargins</a>().</p>
-<h3 class="fn"><a name="validateAndSet"></a>bool QLineEdit::validateAndSet ( const <a href="qstring.html">QString</a> &amp; <i>newText</i>, int <i>newPos</i>, int <i>newMarkAnchor</i>, int <i>newMarkDrag</i> )</h3>
-<p>Use <a href="qlineedit.html#text-prop">setText</a>(), <a href="qlineedit.html#cursorPosition-prop">setCursorPosition</a>() and <a href="qlineedit.html#setSelection">setSelection</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

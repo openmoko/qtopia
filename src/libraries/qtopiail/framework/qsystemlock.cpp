@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -515,9 +515,6 @@ bool QSystemMutex::lock(int milliSec)
     if(isNull())
         return false;
 
-    struct timespec ts;
-    ts.tv_sec = milliSec / 1000;
-    ts.tv_nsec = (milliSec % 1000) * 1000000;
 
     struct sembuf ops[1];
 
@@ -526,8 +523,12 @@ bool QSystemMutex::lock(int milliSec)
     ops[0].sem_flg = SEM_UNDO;
 
 #ifdef HAVE_SEMTIMEDOP
+    struct timespec ts;
+    ts.tv_sec = milliSec / 1000;
+    ts.tv_nsec = (milliSec % 1000) * 1000000;
     int semoprv = ::semtimedop(m_data->semId, ops, 1, &ts);
 #else
+    Q_UNUSED(milliSec);
     int semoprv = ::semop(m_data->semId, ops, 1);
 #endif
 
@@ -549,7 +550,7 @@ void QSystemMutex::unlock()
 
     op.sem_num = 0;
     op.sem_op = 1;
-    op.sem_flg = 0;
+    op.sem_flg = SEM_UNDO;
     ::semop(m_data->semId, &op, 1);
 }
 

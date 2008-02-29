@@ -20,6 +20,7 @@
 <li><a href="widgets-wiggly-wigglywidget-cpp.html">widgets/wiggly/wigglywidget.cpp</a></li>
 <li><a href="widgets-wiggly-wigglywidget-h.html">widgets/wiggly/wigglywidget.h</a></li>
 <li><a href="widgets-wiggly-main-cpp.html">widgets/wiggly/main.cpp</a></li>
+<li><a href="widgets-wiggly-wiggly-pro.html">widgets/wiggly/wiggly.pro</a></li>
 </ul>
 <p>The Wiggly example shows how to animate a widget using <a href="qbasictimer.html">QBasicTimer</a> and <a href="qobject.html#timerEvent">timerEvent()</a>. In addition, the example demonstrates how to use <a href="qfontmetrics.html">QFontMetrics</a> to determine the size of text on screen.</p>
 <p align="center"><img src="images/wiggly-example.png" alt="Screenshot of the Wiggly example" /></p><p><a href="qbasictimer.html">QBasicTimer</a> is a low-level class for timers. Unlike <a href="qtimer.html">QTimer</a>, <a href="qbasictimer.html">QBasicTimer</a> doesn't inherit from <a href="qobject.html">QObject</a>; instead of emitting a <a href="qtimer.html#timeout">timeout()</a> signal when a certain amount of time has passed, it sends a <a href="qtimerevent.html">QTimerEvent</a> to a <a href="qobject.html">QObject</a> of our choice. This makes <a href="qbasictimer.html">QBasicTimer</a> a more lightweight alternative to <a href="qtimer.html">QTimer</a>. Qt's built-in widgets use it internally, and it is provided in Qt's API for highly-optimized applications (e.g&#x2e;, <a href="qtopiacore.html">Qtopia Core</a> applications).</p>
@@ -138,8 +139,8 @@
 <p>The <a href="qwidget.html#update">QWidget::update</a>() slot does not cause an immediate repaint; instead the slot schedules a paint event for processing when Qt returns to the main event loop. The paint events are then handled by <tt>WigglyWidget</tt>'s <tt>paintEvent()</tt> function.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

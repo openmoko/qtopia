@@ -15,7 +15,7 @@
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
@@ -44,12 +44,10 @@
  **
  ** Trolltech reserves all rights not expressly granted herein.
  **
- ** Trolltech ASA (c) 2007
- **
  ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  **
- ****************************************************************************/
+ ****************************************************************************/</span>
  #include &quot;context2d.h&quot;
 
  #include &quot;qcontext2dcanvas.h&quot;
@@ -57,7 +55,7 @@
  #include &lt;QVariant&gt;
 
  #include &lt;math.h&gt;
- static const double Q_PI   = 3.14159265358979323846;   // pi
+ static const double Q_PI   = 3.14159265358979323846;   <span class="comment">//</span> pi
 
  #define DEGREES(t) ((t) * 180.0 / Q_PI)
 
@@ -87,7 +85,7 @@
          if ((*itr) == ',')
              ++itr;
          points.append(temp.toDouble());
-         //eat spaces
+         <span class="comment">//</span>eat spaces
          while ((*itr).isSpace())
              ++itr;
      }
@@ -105,7 +103,7 @@
          if (compo.size() != 4) {
              return QColor();
          }
-         //alpha seems to be always between 0-1
+         <span class="comment">//</span>alpha seems to be always between 0-1
          compo[3] *= 255;
          return QColor((int)compo[0], (int)compo[1],
                        (int)compo[2], (int)compo[3]);
@@ -119,8 +117,8 @@
                        (int)qClamp(compo[1], qreal(0), qreal(255)),
                        (int)qClamp(compo[2], qreal(0), qreal(255)));
      } else {
-         //QRgb color;
-         //CSSParser::parseColor(name, color);
+         <span class="comment">//</span>QRgb color;
+         <span class="comment">//</span>CSSParser::parseColor(name, color);
          return QColor(name);
      }
  }
@@ -159,7 +157,7 @@
  void CanvasGradientData::setup(QScriptEngine *e)
  {
      QScriptValue proto = e-&gt;newObject();
-     proto.setProperty(&quot;addColorStop&quot;, e-&gt;newFunction(&amp;CanvasGradientData::addColorStop, /*length=*/</span> 2));
+     proto.setProperty(&quot;addColorStop&quot;, e-&gt;newFunction(&amp;CanvasGradientData::addColorStop, <span class="comment">/*length=*/</span> 2));
      e-&gt;setDefaultPrototype(qRegisterMetaType&lt;CanvasGradient&gt;(), proto);
  }
 
@@ -465,7 +463,7 @@
 
  void Context2D::arcTo(qreal x1, qreal y1, qreal x2, qreal y2, qreal radius)
  {
-     <span class="comment">//FIXME: this is surely busted</span>
+     <span class="comment">//</span>FIXME: this is surely busted
      QPointF st  = m_state.matrix.map(QPointF(x1, y1));
      QPointF end = m_state.matrix.map(QPointF(x2, y2));
      m_path.arcTo(st.x(), st.y(),
@@ -484,14 +482,14 @@
                      qreal sar, qreal ear,
                      bool anticlockwise)
  {
-     <span class="comment">//### HACK</span>
-     <span class="comment">// In Qt we don't switch the coordinate system for degrees</span>
-     <span class="comment">// and still use the 0,0 as bottom left for degrees so we need</span>
-     <span class="comment">// to switch</span>
+     <span class="comment">//</span>### HACK
+     <span class="comment">//</span> In Qt we don't switch the coordinate system for degrees
+     <span class="comment">//</span> and still use the 0,0 as bottom left for degrees so we need
+     <span class="comment">//</span> to switch
      sar = -sar;
      ear = -ear;
      anticlockwise = !anticlockwise;
-     <span class="comment">//end hack</span>
+     <span class="comment">//</span>end hack
 
      float sa = DEGREES(sar);
      float ea = DEGREES(ear);
@@ -509,8 +507,8 @@
          span -= 360;
      }
 
-     <span class="comment">//### this is also due to switched coordinate system</span>
-     <span class="comment">// we would end up with a 0 span instead of 360</span>
+     <span class="comment">//</span>### this is also due to switched coordinate system
+     <span class="comment">//</span> we would end up with a 0 span instead of 360
      if (!(qFuzzyCompare(span + (ea - sa), 0.0) &amp;&amp;
            qFuzzyCompare(qAbs(span), 360.0))) {
          span   += ea - sa;
@@ -643,8 +641,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

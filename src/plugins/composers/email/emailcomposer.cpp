@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,6 +30,7 @@
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <qtopiaapplication.h>
 
@@ -37,7 +38,8 @@
 #include "addatt.h"
 
 EmailComposer::EmailComposer( QWidget *parent, const char *name )
-  : QTextEdit( parent)
+  : QTextEdit( parent ),
+    m_index( -1 )
 {
     setObjectName(name);
 
@@ -74,6 +76,39 @@ void EmailComposer::updateLabel()
             else
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Next);
         }
+    }
+}
+
+void EmailComposer::setCursorPosition()
+{
+    if (m_index != -1) {
+        QTextCursor cursor(textCursor());
+        cursor.setPosition(m_index, QTextCursor::MoveAnchor);
+        setTextCursor(cursor);
+
+        m_index = -1;
+    }
+}
+
+void EmailComposer::setPlainText( const QString& text, const QString& signature )
+{
+    if (!signature.isEmpty()) {
+        QString msgText(text);
+        if (msgText.endsWith(signature)) {
+            // Signature already exists
+            m_index = msgText.length() - (signature.length() + 1);
+        } else {
+            // Append the signature
+            msgText.append('\n').append(signature);
+            m_index = text.length();
+        }
+        
+        setPlainText(msgText);
+
+        // Move the cursor before the signature - setting directly fails...
+        QTimer::singleShot(0, this, SLOT(setCursorPosition()));
+    } else {
+        setPlainText(text);
     }
 }
 
@@ -180,33 +215,27 @@ QMailMessage EmailComposerInterface::message() const
 
     QList<AttachmentItem*> attachments = m_composer->addAttDialog()->attachedFiles();
 
+    QString messageText( m_composer->toPlainText() );
+
     QMailMessageContentType type("text/plain; charset=UTF-8");
     if(attachments.isEmpty()) {
-        mail.setBody( QMailMessageBody::fromData( m_composer->toPlainText(), type, QMailMessageBody::Base64 ) );
+        mail.setBody( QMailMessageBody::fromData( messageText, type, QMailMessageBody::Base64 ) );
     } else {
         QMailMessagePart textPart;
-        textPart.setBody(QMailMessageBody::fromData(m_composer->toPlainText().toUtf8(), type, QMailMessageBody::Base64));
+        textPart.setBody(QMailMessageBody::fromData(messageText.toUtf8(), type, QMailMessageBody::Base64));
         mail.setMultipartType(QMailMessagePartContainer::MultipartMixed);
         mail.appendPart(textPart);
 
         foreach (AttachmentItem* current, attachments) {
-            QString partName;
-            QString fileName;
-            QString content;
-
-            if( current->isDocument() ) {
-                partName = current->document().name();
-                fileName = current->document().fileName();
-                content = current->document().type();
-            } else {
-                fileName = current->fileName();
-            }
+            const QContent& doc( current->document() );
+            QString fileName( doc.fileName() );
 
             QFileInfo fi( fileName );
-            if (partName.isEmpty())
-                partName = fi.fileName();
+            QString partName( fi.fileName() );
 
             fileName = fi.absoluteFilePath();
+
+            QString content( doc.type() );
             if (content.isEmpty())
                 content = QMimeType( fileName ).id();
 
@@ -218,7 +247,8 @@ QMailMessage EmailComposerInterface::message() const
 
             QMailMessagePart part;
 
-            if (fileName.startsWith(Qtopia::tempDir())) {
+            if ((current->action() != QMailMessage::LinkToAttachments) ||
+                (fileName.startsWith(Qtopia::tempDir()))) {
                 // This file is temporary - extract the data and create a part from that
                 QFile dataFile(fileName);
                 if (dataFile.open(QIODevice::ReadOnly)) {
@@ -267,11 +297,14 @@ void EmailComposerInterface::setMessage( const QMailMessage &mail )
                 // This is the first text part, we will use as the forwarded text body
                 textPart = i;
             } else {
-                // Detach the part data to a temporary file if necessary
                 QString attPath = part.attachmentPath();
+                QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments;
+
+                // Detach the part data to a temporary file if necessary
                 if (attPath.isEmpty()) {
                     if (part.detachAttachment(Qtopia::tempDir())) {
                         attPath = part.attachmentPath();
+                        action = QMailMessage::CopyAttachments;
 
                         // Create a content object for the file
                         QContent doc(attPath);
@@ -281,7 +314,7 @@ void EmailComposerInterface::setMessage( const QMailMessage &mail )
 
                             if (doc.drmState() == QContent::Unprotected)
                                 doc.setType(type.content());
-}
+                        }
 
                         doc.setName(part.displayName());
                         doc.setRole(QContent::Data);
@@ -294,7 +327,7 @@ void EmailComposerInterface::setMessage( const QMailMessage &mail )
                 }
 
                 if (!attPath.isEmpty())
-                    attach(attPath);
+                    attach(attPath, action);
             }
         }
 
@@ -305,9 +338,11 @@ void EmailComposerInterface::setMessage( const QMailMessage &mail )
     }
 }
 
-void EmailComposerInterface::setText( const QString &txt, const QString & )
+void EmailComposerInterface::setText( const QString &txt, const QString &type )
 {
-    m_composer->setPlainText( txt );
+    m_composer->setPlainText( txt, m_signature );
+
+    Q_UNUSED(type)
 }
 
 QWidget *EmailComposerInterface::widget() const
@@ -323,9 +358,28 @@ void EmailComposerInterface::addActions(QMenu* menu) const
     menu->addAction(attachAction);
 }
 
-void EmailComposerInterface::attach( const QContent &lnk )
+void EmailComposerInterface::attach( const QContent &lnk, QMailMessage::AttachmentsAction action )
 {
-    m_composer->addAttDialog()->attach( lnk );
+    m_composer->addAttDialog()->attach( lnk, action );
+
+    if (action == QMailMessage::CopyAndDeleteAttachments )
+        m_temporaries.append( lnk );
+
+    attachmentsChanged();
+}
+
+void EmailComposerInterface::setSignature( const QString &sig )
+{
+    QString msgText( m_composer->toPlainText() );
+
+    if ( !msgText.isEmpty() && !m_signature.isEmpty() ) {
+        // See if we need to remove the old signature
+        if ( msgText.endsWith( m_signature ) )
+            msgText.chop( m_signature.length() + 1 );
+    }
+
+    m_signature = sig;
+    m_composer->setPlainText( msgText, m_signature );
 }
 
 void EmailComposerInterface::attachmentsChanged()

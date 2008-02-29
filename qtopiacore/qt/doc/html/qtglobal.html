@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/global/qglobal.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/global/qglobal.cpp -->
 <head>
   <title>Qt 4.3: &lt;QtGlobal&gt; - Global Qt Declarations</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -157,7 +157,7 @@
  int maxValue = 6;
 
  int boundedValue = qBound(minValue, myValue, maxValue);
-<span class="comment"> // boundedValue == 6</span></pre>
+<span class="comment"> //</span> boundedValue == 6</pre>
 <p>&lt;QtGlobal&gt; also contains functions that generate messages from the given string argument: <a href="qtglobal.html#qCritical">qCritical</a>(), <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qFatal">qFatal</a>() and <a href="qtglobal.html#qWarning">qWarning</a>(). These functions call the message handler with the given message. For example:</p>
 <pre> if (!driver()-&gt;isOpen() || driver()-&gt;isOpenError()) {
      qWarning(&quot;QSqlQuery::exec: database not open&quot;);
@@ -245,7 +245,7 @@
  int myValue = -4;
 
  absoluteValue = qAbs(myValue);
-<span class="comment"> // absoluteValue == 4</span></pre>
+<span class="comment"> //</span> absoluteValue == 4</pre>
 <h3 class="fn"><a name="qBound"></a>const T &amp; qBound ( const T &amp; <i>min</i>, const T &amp; <i>value</i>, const T &amp; <i>max</i> )</h3>
 <p>Returns <i>value</i> bounded by <i>min</i> and <i>max</i>. This is equivalent to qMax(<i>min</i>, qMin(<i>value</i>, <i>max</i>)). For example:</p>
 <pre> int myValue = 10;
@@ -253,7 +253,7 @@
  int maxValue = 6;
 
  int boundedValue = qBound(minValue, myValue, maxValue);
-<span class="comment"> // boundedValue == 6</span></pre>
+<span class="comment"> //</span> boundedValue == 6</pre>
 <p>See also <a href="qtglobal.html#qMin">qMin</a>() and <a href="qtglobal.html#qMax">qMax</a>().</p>
 <h3 class="fn"><a name="qCritical"></a>void qCritical ( const char * <i>msg</i>, ... )</h3>
 <p>Calls the message handler with the critical message <i>msg</i>. If no message handler has been installed, the message is printed to stderr. Under Windows, the message is sent to the debugger.</p>
@@ -272,7 +272,7 @@
 <p><b>Warning:</b> The internal buffer is limited to 8192 bytes, including the '\0'-terminator.</p>
 <p>See also <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qWarning">qWarning</a>(), <a href="qtglobal.html#qFatal">qFatal</a>(), <a href="qtglobal.html#qInstallMsgHandler">qInstallMsgHandler</a>(), and <a href="debug.html">Debugging Techniques</a>.</p>
 <h3 class="fn"><a name="qDebug"></a>void qDebug ( const char * <i>msg</i>, ... )</h3>
-<p>Calls the message handler with the debug message <i>msg</i>. If no message handler has been installed, the message is printed to stderr. Under Windows, the message is sent to the debugger. This function does nothing if <tt>QT_NO_DEBUG_OUTPUT</tt> was defined during compilation.</p>
+<p>Calls the message handler with the debug message <i>msg</i>. If no message handler has been installed, the message is printed to stderr. Under Windows, the message is sent to the console, if it is a console application; otherwise, it is sent to the debugger. This function does nothing if <tt>QT_NO_DEBUG_OUTPUT</tt> was defined during compilation.</p>
 <p>If you pass the function a format string and a list of arguments, it works in similar way to the C printf() function.</p>
 <p>Example:</p>
 <pre> qDebug(&quot;Items in list: %d&quot;, myList.size());</pre>
@@ -288,7 +288,7 @@
 <p>Example:</p>
 <pre> int divide(int a, int b)
  {
-     if (b == 0)                                <span class="comment">// program error</span>
+     if (b == 0)                                <span class="comment">//</span> program error
          qFatal(&quot;divide: cannot divide by zero&quot;);
      return a / b;
  }</pre>
@@ -360,7 +360,7 @@
  int yourValue = 4;
 
  int maxValue = qMax(myValue, yourValue);
-<span class="comment"> // maxValue == myValue</span></pre>
+<span class="comment"> //</span> maxValue == myValue</pre>
 <p>See also <a href="qtglobal.html#qMin">qMin</a>() and <a href="qtglobal.html#qBound">qBound</a>().</p>
 <h3 class="fn"><a name="qMin"></a>const T &amp; qMin ( const T &amp; <i>value1</i>, const T &amp; <i>value2</i> )</h3>
 <p>Returns the minimum of <i>value1</i> and <i>value2</i>. For example:</p>
@@ -368,7 +368,7 @@
  int yourValue = 4;
 
  int minValue = qMin(myValue, yourValue);
-<span class="comment"> // minValue == yourValue</span></pre>
+<span class="comment"> //</span> minValue == yourValue</pre>
 <p>See also <a href="qtglobal.html#qMax">qMax</a>() and <a href="qtglobal.html#qBound">qBound</a>().</p>
 <h3 class="fn"><a name="qRound64"></a><a href="qtglobal.html#qint64-typedef">qint64</a> qRound64 ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>value</i> )</h3>
 <p>Rounds <i>value</i> to the nearest 64-bit integer. For example:</p>
@@ -495,7 +495,7 @@
 <p>Prints a warning message containing the source code file name and line number if <i>test</i> is false.</p>
 <p>Q_ASSERT() is useful for testing pre- and post-conditions during development. It does nothing if <tt>QT_NO_DEBUG</tt> was defined during compilation.</p>
 <p>Example:</p>
-<pre><span class="comment"> // File: div.cpp</span>
+<pre><span class="comment"> //</span> File: div.cpp
 
  #include &lt;QtGlobal&gt;
 
@@ -511,7 +511,7 @@
 <p>Prints the message <i>what</i> together with the location <i>where</i>, the source file name and line number if <i>test</i> is false.</p>
 <p>Q_ASSERT_X is useful for testing pre- and post-conditions during development. It does nothing if <tt>QT_NO_DEBUG</tt> was defined during compilation.</p>
 <p>Example:</p>
-<pre><span class="comment"> // File: div.cpp</span>
+<pre><span class="comment"> //</span> File: div.cpp
 
  #include &lt;QtGlobal&gt;
 
@@ -588,9 +588,9 @@
 <p>Example:</p>
 <pre> int *a;
 
- Q_CHECK_PTR(a = new int[80]);   <span class="comment">// WRONG!</span>
+ Q_CHECK_PTR(a = new int[80]);   <span class="comment">//</span> WRONG!
 
- a = new (nothrow) int[80];      <span class="comment">// Right</span>
+ a = new (nothrow) int[80];      <span class="comment">//</span> Right
  Q_CHECK_PTR(a);</pre>
 <p>See also <a href="qtglobal.html#qWarning">qWarning</a>() and <a href="debug.html">Debugging Techniques</a>.</p>
 <h3 class="fn"><a name="Q_DECLARE_TYPEINFO"></a>Q_DECLARE_TYPEINFO (  <i>Type</i>,  <i>Flags</i> )</h3>
@@ -757,8 +757,8 @@
 <p>See also <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qWarning">qWarning</a>(), <a href="qtglobal.html#qCritical">qCritical</a>(), and <a href="qtglobal.html#qFatal">qFatal</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1337,6 +1335,9 @@ void QMdiArea::activatePreviousSubWindow()
     (in which case the MDI area will create a subwindow and set the \a
     widget as the internal widget).
 
+    \note Once the subwindow has been added, its parent will be the
+    \e{viewport widget} of the QMdiArea.
+    
     \quotefromfile snippets/mdiareasnippets.cpp
     \skipto /QMdiArea mdiArea/
     \printto /subWindow1->show/
@@ -1686,6 +1687,13 @@ bool QMdiArea::event(QEvent *event)
 {
     Q_D(QMdiArea);
     switch (event->type()) {
+#ifdef Q_WS_WIN
+    // QWidgetPrivate::hide_helper activates another sub-window when closing a
+    // modal dialog on Windows (see activateWindow() inside the the ifdef).
+    case QEvent::WindowUnblocked:
+        d->activateCurrentWindow();
+        break;
+#endif
     case QEvent::WindowActivate: {
         d->isActivated = true;
         if (d->childWindows.isEmpty())

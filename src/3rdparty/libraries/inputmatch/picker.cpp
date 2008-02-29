@@ -185,7 +185,7 @@ bool Picker::filterKey(int, int keycode, int,
                 verticalScrollBar()->setValue(qMin(y - verticalScrollBar()->height() + ymargin, verticalScrollBar()->maximum()));
             }
 
-            update();
+            viewport()->update();
 	}
     }
 

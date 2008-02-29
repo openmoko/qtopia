@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,8 +24,14 @@
 
 #include <QtCore>
 
+
+namespace mediaplayer
+{
+
 class KeyFilter : public QObject
 {
+    Q_OBJECT
+
 public:
     KeyFilter( QObject* subject, QObject* target, QObject* parent = 0 );
 
@@ -37,5 +43,7 @@ private:
     QObject *m_target;
     QSet<int> m_keys;
 };
+
+}   // ns mediaplayer
 
 #endif // KEYFILTER_H

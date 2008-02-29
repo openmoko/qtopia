@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the Qt Designer of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1409,6 +1407,7 @@ void FormWindow::paste()
 
 }
 
+// Draw a dotted frame around containers
 bool FormWindow::frameNeeded(QWidget *w) const
 {
     if (!core()->widgetDataBase()->isContainer(w))
@@ -1429,23 +1428,31 @@ bool FormWindow::frameNeeded(QWidget *w) const
         return false;
     if (qobject_cast<QDialog *>(w))
         return false;
+    if (qobject_cast<QLayoutWidget *>(w))
+        return false;
     return true;
 }
 
 bool FormWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    bool ret = FormWindowBase::eventFilter(watched, event);
-    if (event->type() == QEvent::Paint) {
-        if (QWidget *w = qobject_cast<QWidget *>(watched)) {
-            QPainter p(w);
-            QPen pen(QColor(0, 0, 0, 32), 0, Qt::DotLine);
-            //QPen pen(QColor(0, 0, 0), 0, Qt::DashDotLine);
-            p.setPen(pen);
-            p.setBrush(QBrush(Qt::NoBrush));
-            p.drawRect(w->rect().adjusted(0, 0, -1, -1));
-            //p.drawRect(w->rect().adjusted(1, 1, -2, -2));
-        }
-    }
+    const bool ret = FormWindowBase::eventFilter(watched, event);
+    if (event->type() != QEvent::Paint)
+        return ret;
+
+    Q_ASSERT(watched->isWidgetType());
+    QWidget *w = static_cast<QWidget *>(watched);
+    QPaintEvent *pe = static_cast<QPaintEvent*>(event);
+    const QRect widgetRect = w->rect();
+    const QRect paintRect =  pe->rect();
+    // Does the paint rectangle touch the borders of the widget rectangle
+    if (paintRect.x()     > widgetRect.x()     && paintRect.y()      > widgetRect.y() &&
+        paintRect.right() < widgetRect.right() && paintRect.bottom() < paintRect.bottom())
+        return ret;
+    QPainter p(w);
+    const QPen pen(QColor(0, 0, 0, 32), 0, Qt::DotLine);
+    p.setPen(pen);
+    p.setBrush(QBrush(Qt::NoBrush));
+    p.drawRect(widgetRect.adjusted(0, 0, -1, -1));
     return ret;
 }
 
@@ -1481,6 +1488,9 @@ void FormWindow::unmanageWidget(QWidget *w)
     m_selection->removeWidget(w);
 
     emit aboutToUnmanageWidget(w);
+
+    if (w == m_currentWidget)
+        setCurrentWidget(mainContainer());
 
     core()->metaDataBase()->remove(w);
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -75,8 +75,11 @@
 #include <QDateEdit>
 #include <QCalendarWidget>
 #include <QDialogButtonBox>
+#include <QAbstractSpinBox>
 #include <QLayout>
 #include <QResizeEvent>
+#include <QLibrary>
+#include <QPluginLoader>
 #include <private/qlocale_p.h>
 #include <QDateTimeEdit>
 #ifdef Q_WS_QWS
@@ -883,7 +886,7 @@ void QtopiaApplicationLifeCycle::recalculateQuit()
 
     QWidgetList widgets = m_app->topLevelWidgets();
     for(int ii = 0; ii < widgets.count() && !uiActive; ++ii) {
-        if(!widgets.at(ii)->isHidden())
+        if(!widgets.at(ii)->isHidden() || widgets.at(ii)->isMinimized())
             uiActive = true;
     }
 
@@ -1261,6 +1264,20 @@ void ShadowWidget::resizeEvent(QResizeEvent *r)
 
 #endif // POPUP_SHADOWS
 
+
+// QETWidget is a friend of QApplication, which will allow us to call
+// QApplication::sendSpontaneousEvent() private method.
+// QETWidget is a class internal to one compilation unit in Qt,
+// so it is safe to reuse it.
+class QETWidget : public QWidget
+{
+public:
+    static void sendSpontaneousEvent(QObject *receiver, QEvent *event)
+    {
+        QApplication::sendSpontaneousEvent(receiver, event);
+    }
+};
+
 static const int npressticks=10;
 
 class PressTickWidget : public QWidget
@@ -1309,25 +1326,26 @@ public:
         hide();
     }
 
-    bool endPress(const QPoint &pos)
+    bool endPress(QWidget *widget, const QPoint &pos)
     {
         pressTimer.stop();
         hide();
         if (rightPressed && pressWidget ) {
-            // Right released
-            QApplication::postEvent(pressWidget,
-                new QMouseEvent(QEvent::MouseButtonRelease, pos,
-                        pressWidget->mapToGlobal(pos),
-                        Qt::RightButton, Qt::LeftButton|Qt::RightButton, 0));
-            // Left released, off-widget
-            QApplication::postEvent(pressWidget,
-                new QMouseEvent(QEvent::MouseMove, QPoint(-1,-1),
-                        Qt::LeftButton, Qt::LeftButton, 0 ) );
-            QApplication::postEvent(pressWidget,
-                new QMouseEvent(QEvent::MouseButtonRelease, QPoint(-1,-1),
-                        Qt::LeftButton, Qt::LeftButton, 0 ) );
+            QWidget *receiver = pressWidget;
             rightPressed = false;
             pressWidget = 0;
+            // Right released
+            QETWidget::sendSpontaneousEvent(widget,
+                new QMouseEvent(QEvent::MouseButtonRelease, pos,
+                        widget->mapToGlobal(pos),
+                        Qt::RightButton, Qt::LeftButton, 0));
+            // Left released, off-widget
+            QETWidget::sendSpontaneousEvent(receiver,
+                new QMouseEvent(QEvent::MouseMove, QPoint(-1,-1),
+                        Qt::LeftButton, Qt::LeftButton, 0 ) );
+            QETWidget::sendSpontaneousEvent(receiver,
+                new QMouseEvent(QEvent::MouseButtonRelease, QPoint(-1,-1),
+                        Qt::LeftButton, 0, 0 ) );
             return true; // don't send the real Left release
         }
         pressWidget = 0;
@@ -1370,10 +1388,10 @@ protected:
                 // Right pressed
                 pressTimer.stop();
                 hide();
-                QApplication::postEvent(pressWidget,
+                QETWidget::sendSpontaneousEvent(pressWidget,
                         new QMouseEvent(QEvent::MouseButtonPress, pressPos,
                             pressWidget->mapToGlobal(pressPos),
-                            Qt::RightButton, Qt::LeftButton, 0 ) );
+                            Qt::RightButton, Qt::LeftButton|Qt::RightButton, 0 ) );
                 rightPressed = true;
             }
         }
@@ -2263,6 +2281,8 @@ void QtopiaApplication::init(int argc, char **argv, Type t)
     // Start up the QCop server under X11.
     if ( t == GuiServer )
         new QCopServer(this);
+#else
+    Q_UNUSED(t);
 #endif
 
 #ifdef QTOPIA_KEYPAD_NAVIGATION
@@ -2785,7 +2805,6 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
         }
 
         QWSFocusEvent *fe = (QWSFocusEvent*)e;
-        QWidget* nfw = QWidget::find(e->window());
         if ( !fe->simpleData.get_focus ) {
             QWidget *active = activeWindow();
             while ( active && active->windowType() == Qt::Popup ) {
@@ -2937,15 +2956,23 @@ static void setPalEntry( QPalette &pal, const QSettings &config, const QString &
 */
 void QtopiaApplication::applyStyle()
 {
-    QString styleName;
     QSettings config(QLatin1String("Trolltech"),QLatin1String("qpe"));
-
     config.beginGroup( QLatin1String("Appearance") );
 
-    QString themeDir = Qtopia::qtopiaDir() + QLatin1String("etc/themes/");
+    QString themeFile = Qtopia::qtopiaDir() + QLatin1String("etc/themes/qtopia.conf"); // default
     QString theme = config.value("Theme").toString(); // The server ensures this value is present and correct
 
-    QSettings themeCfg(themeDir + theme, QSettings::IniFormat);
+    // Search for theme config in install paths.
+    QStringList instPaths = Qtopia::installPaths();
+    foreach (QString path, instPaths) {
+        QString themeDataPath( path + QLatin1String("etc/themes/") + theme );
+        if (QFile::exists(themeDataPath)) {
+            themeFile = themeDataPath;
+            break;
+        }
+    }
+
+    QSettings themeCfg(themeFile, QSettings::IniFormat);
     themeCfg.beginGroup(QLatin1String("Theme"));
 
     // Update the icon path
@@ -2955,7 +2982,7 @@ void QtopiaApplication::applyStyle()
         ip = iconPathText.split( ';', QString::SkipEmptyParts );
     d->fileengine->setIconPath( ip );
 
-    styleName = config.value( QLatin1String("Style"), QLatin1String("phonestyle") ).toString();
+    QString styleName = config.value( QLatin1String("Style"), QLatin1String("phonestyle") ).toString();
 
     // Widget style; 0 if not a QtopiaStyle subclass
     QtopiaStyle *style = internalSetStyle( styleName );
@@ -3630,7 +3657,7 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
               case QEvent::MouseButtonRelease:
                 if (d->pressHandler && d->pressHandler->active()
                     && me->button() == Qt::LeftButton) {
-                    int rv = d->pressHandler->endPress(me->pos());
+                    int rv = d->pressHandler->endPress(qobject_cast<QWidget*>(o), me->pos());
                     delete d->pressHandler;
                     d->pressHandler = 0;
                     return rv;
@@ -3641,7 +3668,14 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             }
             break;
           default:
-            ;
+            if (me->type() == QEvent::MouseButtonRelease
+                && d->pressHandler && d->pressHandler->active()
+                && me->button() == Qt::LeftButton) {
+                int rv = d->pressHandler->endPress(qobject_cast<QWidget*>(o), me->pos());
+                delete d->pressHandler;
+                d->pressHandler = 0;
+                return rv;
+            }
         }
     } else if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = (QKeyEvent *)e;
@@ -3965,6 +3999,8 @@ void QtopiaApplication::hideMessageBoxButtons( QMessageBox *mb )
 
         // show the dialog using our standard dialog geometry calcuation
         showDialog(mb);
+        if (mb->layout())
+            mb->layout()->activate();
         mb->setFocus();
     }
 }
@@ -4091,11 +4127,15 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
         }
     }
     bool r = QApplication::notify(o,e);
-    if (e->type() == QEvent::Show && o->isWidgetType()
-        && ((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
+    if ((e->type() == QEvent::Show || e->type() == QEvent::Resize)
+        && o->isWidgetType() && ((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
         QMessageBox *mb = qobject_cast<QMessageBox*>(o);
-        if (mb)
-            hideMessageBoxButtons( mb );
+        if (mb) {
+            if (e->type() == QEvent::Show)
+                hideMessageBoxButtons( mb );
+            else if (mb->isVisible())
+                showDialog(mb);
+        }
     }
     if ( e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease ) {
         QKeyEvent *ke = (QKeyEvent*)e;
@@ -4117,7 +4157,7 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
                     && !Qtopia::mousePreferred())) {
 
             // We already have special handling for Message Boxes.  Don't do so here
-            if (mb) {
+            if (mb || o->inherits("QAbstractMessageBox")) {
                 r = true;
             } else if (w && ke->key() == Qt::Key_Back && e->type() == QEvent::KeyPress) {
                 w = w->window();
@@ -4265,7 +4305,8 @@ void QtopiaApplication::tryQuit()
         e << d->appName;
     }
 
-    d->store_widget_rect(d->qpe_main_widget, d->appName);
+    if (d->qpe_main_widget)
+        d->store_widget_rect(d->qpe_main_widget, d->appName);
 
     processEvents();
 
@@ -4283,7 +4324,8 @@ void QtopiaApplication::tryQuit()
 */
 void QtopiaApplication::hideOrQuit()
 {
-    d->store_widget_rect(d->qpe_main_widget, d->appName);
+    if (d->qpe_main_widget)
+        d->store_widget_rect(d->qpe_main_widget, d->appName);
 
     processEvents();
 
@@ -4360,7 +4402,7 @@ void QtopiaApplication::showDialog( QDialog* dialog, bool noMaximize )
 
 
 /*!
-    Shows and calls exec() on \a dialog. A heuristic approach is taken to
+    Shows and calls \l{QDialog::exec()}{exec()} on the \a dialog. A heuristic approach is taken to
     determine the size of the dialog and whether it is maximized.
 
     If \a noMaximize is true then the dialog may not be maximized.  This
@@ -4528,34 +4570,74 @@ TestSlaveInterface* QtopiaApplication::testSlave()
     static bool init = false;
     static TestSlaveInterface* ret = 0;
 
-    if (!init) {
-        init = true;
-        if (!qgetenv("QTOPIA_TEST").isEmpty()) {
-            qLog(Qtopiatest) << "Qtopiatest is enabled.";
-            QPluginManager *mgr = new QPluginManager("qtopiatest", this);
-            QObject *o = 0;
-            if (type() == QApplication::GuiServer) {
-                /* Try to load server plugin first.  If it fails, we're not the server, so try to load app plugin. */
-                o = mgr->instance("qtopiaservertestslave");
-                ret = qobject_cast<TestSlaveInterface*>(o);
-                if (!ret)
-                    qWarning("Couldn't load qtopiatest server plugin");
-                else
-                    qLog(Qtopiatest) << "Loaded Qtopiatest server plugin.";
+    if (init) return ret;
+
+    init = true;
+    if (qgetenv("QTOPIA_TEST").isEmpty()) {
+        qLog(Qtopiatest) << "Qtopiatest is disabled because the QTOPIA_TEST "
+                            "environment variable is not set.";
+        return ret;
+    }
+
+    QList<QString> types;
+    types << "qtopiatest_application";
+    QString loadedPlugin;
+    if (type() == QApplication::GuiServer)
+        types << "qtopiatest_server";
+
+    QStringList pluginsToLoad;
+
+    foreach (QString pluginType, types) {
+        // Unfortunately we cannot use QPluginManager::instance, because we
+        // _must_ load the app plugin with RTLD_GLOBAL.
+
+        bool foundPlugin = false;
+
+        QPluginManager mgr(pluginType);
+        foreach (QString plugin, mgr.list()) {
+            foreach (QString path, Qtopia::installPaths()) {
+                QString libFile = path + "plugins/" + pluginType + "/lib" + plugin + ".so";
+                if ( QFile::exists(libFile) ) {
+                    foundPlugin = true;
+                    pluginsToLoad << libFile;
+                    break;
+                }
             }
-            if (!ret) {
-                if (o) delete o;
-                o = mgr->instance("qtopiaapptestslave");
-                ret = qobject_cast<TestSlaveInterface*>(o);
-                if (!ret) {
-                    qWarning("Couldn't load qtopiatest client plugin");
-                    if (o) delete o;
-                } else
-                    qLog(Qtopiatest) << "Loaded Qtopiatest app plugin.";
-            }
-        } else {
-            qLog(Qtopiatest) << "Qtopiatest is disabled.";
         }
+
+        if (!foundPlugin) {
+            qWarning() << "Qtopiatest: couldn't find plugin of type"
+                       << pluginType;
+        }
+    }
+
+    QPluginLoader pluginLoader;
+    QLibrary libLoader;
+    foreach (QString plugin, pluginsToLoad) {
+        libLoader.setFileName(plugin);
+
+        // enable RTLD_GLOBAL, so plugins can access each other's symbols
+        // xxx workaround for Qt bug: need to explicitly call this after
+        // xxx each call to setFileName
+        libLoader.setLoadHints(QLibrary::ExportExternalSymbolsHint);
+        libLoader.load();
+        libLoader.unload();
+
+        pluginLoader.setFileName(plugin);
+        QObject *o = pluginLoader.instance();
+        ret = qobject_cast<TestSlaveInterface*>(o);
+        if (!ret) {
+            qWarning() << "Qtopiatest: failed to load qtopiatest plugin"
+                       << "\n   plugin" << plugin
+                       << "\n   instance" << o
+                       << "\n   error" << pluginLoader.errorString();
+        }
+    }
+
+    if (ret) {
+        qLog(Qtopiatest) << "Qtopiatest is enabled.";
+    } else {
+        qWarning() << "Qtopiatest is disabled due to errors.";
     }
 
     return ret;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -124,7 +124,7 @@ InfoPage::InfoPage( InfoPageApp *_plugin, QWidget *parent )
     message += tr("Version %1<br>", "1=version number").arg(VERSION);
     message += tr("Built on %1<br>", "1=date").arg(__DATE__);
     message += tr("Built by %1<br>", "1=user@host").arg(BUILDER);
-    message += tr("Copyright (c) 2000-%1 %2").arg("2007").arg("TROLLTECH ASA");
+    message += tr("Copyright (c) 2000-%1 %2").arg("2008").arg("TROLLTECH ASA");
     info->setText( message );
 
     deviceIcon = new QLabel;

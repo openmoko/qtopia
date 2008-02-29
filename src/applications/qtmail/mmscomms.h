@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,7 +24,7 @@
 
 #include <QObject>
 
-class MailAccount;
+class QMailAccount;
 class MMSMessage;
 class QUrl;
 
@@ -32,7 +32,7 @@ class MmsComms : public QObject
 {
     Q_OBJECT
 public:
-    MmsComms(MailAccount *acc, QObject *parent=0);
+    MmsComms(QMailAccount *acc, QObject *parent=0);
     virtual ~MmsComms();
 
     virtual void sendMessage(MMSMessage &msg, const QByteArray& encoded) = 0;
@@ -53,7 +53,7 @@ signals:
     void transfersComplete();
 
 protected:
-    MailAccount *account;
+    QMailAccount *account;
 };
 
 #endif

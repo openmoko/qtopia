@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -34,6 +34,8 @@
 #include <QVBoxLayout>
 #include <QListView>
 #include <QAbstractListModel>
+#include <QPainter>
+#include <QPainterPath>
 
 
 class RemoteDeviceData
@@ -173,9 +175,11 @@ private slots:
     void pairingRemoved(const QBluetoothAddress &address);
 
 private:
-    void updateDeviceItem(RemoteDeviceData *data, const QBluetoothRemoteDevice &device, QBluetoothRemoteDeviceSelector::DisplayFlags flags);
+    bool updateDeviceItem(RemoteDeviceData *data, const QBluetoothRemoteDevice &device, QBluetoothRemoteDeviceSelector::DisplayFlags flags);
+    void initConnectedIcon();
 
     QIcon m_pairedIcon;
+    QPixmap m_connectedPixmap;
 };
 
 RemoteDeviceModel::RemoteDeviceModel(QBluetoothLocalDevice *local, QBluetoothRemoteDeviceSelector::DisplayFlags displayFlags, QObject *parent)
@@ -250,31 +254,57 @@ bool RemoteDeviceModel::addDevice(const QBluetoothRemoteDevice &device)
 
 void RemoteDeviceModel::updateDevice(const QBluetoothRemoteDevice &device, QBluetoothRemoteDeviceSelector::DisplayFlags flags)
 {
-    int index = m_rows.value(device.address(), -1);
+    QBluetoothAddress addr = device.address();
+    int index = m_rows.value(addr, -1);
     if (index != -1) {
-        updateDeviceItem(m_items[index], device, flags);
+        if (updateDeviceItem(m_items[index], device, flags)) {
+            QModelIndex modelIndex = indexFromAddress(addr);
+            emit dataChanged(modelIndex, modelIndex);
+        }
     }
 }
 
-void RemoteDeviceModel::updateDeviceItem(RemoteDeviceData *data, const QBluetoothRemoteDevice &device, QBluetoothRemoteDeviceSelector::DisplayFlags flags)
+bool RemoteDeviceModel::updateDeviceItem(RemoteDeviceData *data, const QBluetoothRemoteDevice &device, QBluetoothRemoteDeviceSelector::DisplayFlags flags)
 {
     if (!data || !m_local)
-        return;
+        return false;
 
+    bool needDisplayUpdate = false;
     QBluetoothAddress addr = device.address();
 
     if (flags & QBluetoothRemoteDeviceSelector::Name)
         data->setName(device.name());
     if (flags & QBluetoothRemoteDeviceSelector::Alias)
         data->setAlias(m_local->remoteAlias(addr));
-    if (flags & QBluetoothRemoteDeviceSelector::DeviceIcon)
-        data->updateIcon(device.deviceMajor(), device.deviceMinor(), device.serviceClasses());
-    if (flags & QBluetoothRemoteDeviceSelector::PairingStatus)
-        data->m_paired = m_local->isPaired(addr);
-    if (flags & QBluetoothRemoteDeviceSelector::ConnectionStatus)
-        data->m_connected = m_local->isConnected(addr);
+    if (data->updateLabel(flags))
+        needDisplayUpdate = true;
 
-    data->updateLabel(flags);
+    if (flags & QBluetoothRemoteDeviceSelector::DeviceIcon) {
+        if (data->updateIcon(device.deviceMajor(), device.deviceMinor(),
+                device.serviceClasses())) {
+            needDisplayUpdate = true;
+        }
+    }
+
+    if (flags & QBluetoothRemoteDeviceSelector::PairingStatus) {
+        bool paired = m_local->isPaired(addr);
+        if (data->m_paired != paired) {
+            data->m_paired = paired;
+            needDisplayUpdate = true;
+        }
+    }
+
+    if (flags & QBluetoothRemoteDeviceSelector::ConnectionStatus) {
+        bool connected = m_local->isConnected(addr);
+        if (data->m_connected != connected) {
+            data->m_connected = connected;
+            needDisplayUpdate = true;
+            if (data->m_connected && m_connectedPixmap.isNull())
+                initConnectedIcon();
+        }
+    }
+
+    return needDisplayUpdate;
 }
 
 bool RemoteDeviceModel::removeDevice(const QBluetoothAddress &address)
@@ -340,15 +370,22 @@ QVariant RemoteDeviceModel::data(const QModelIndex &index, int role) const
             // must set size if icon will be displayed, or rows will be sized
             // according to text height and won't grow when icons are added
             if (m_displayFlags & QBluetoothRemoteDeviceSelector::DeviceIcon) {
-                int dimens = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+                int extent = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
                 int margin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameVMargin);
-                return QSize(dimens + margin*2, dimens + margin*2);
+                return QSize(extent + margin*2, extent + margin*2);
             }
         case Qtopia::AdditionalDecorationRole:
-            if (m_displayFlags & QBluetoothRemoteDeviceSelector::PairingStatus &&
-                    data->m_paired) {
+        {
+            bool showPaired = (m_displayFlags & QBluetoothRemoteDeviceSelector::PairingStatus &&
+                    data->m_paired);
+            bool showConnected = (m_displayFlags & QBluetoothRemoteDeviceSelector::ConnectionStatus &&
+                    data->m_connected);
+            // if connected and paired, prefer connected icon to paired icon
+            if (showConnected)
+                return m_connectedPixmap;
+            else if (showPaired)
                 return m_pairedIcon;
-            }
+        }
         default:
             break;
     }
@@ -398,6 +435,8 @@ void RemoteDeviceModel::remoteDeviceConnected(const QBluetoothAddress &addr)
         RemoteDeviceData *data = m_items[i.row()];
         if (!data->m_connected) {
             data->m_connected = true;
+            if (m_connectedPixmap.isNull())
+                initConnectedIcon();
             emit dataChanged(i, i);
         }
     }
@@ -437,6 +476,14 @@ void RemoteDeviceModel::pairingRemoved(const QBluetoothAddress &addr)
             emit dataChanged(i, i);
         }
     }
+}
+
+//-----------------------------------------------------
+
+void RemoteDeviceModel::initConnectedIcon()
+{
+    int extent = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
+    m_connectedPixmap = QIcon(":icon/bluetooth/bluetooth-connected").pixmap(extent, extent);
 }
 
 
@@ -499,14 +546,10 @@ void QBluetoothRemoteDeviceSelectorPrivate::initView()
     /*
     QHeaderView *header = m_view->horizontalHeader();
     header->setResizeMode(0, QHeaderView::Stretch);
-
     if (header->count() > 1) {
         header->setResizeMode(1, QHeaderView::Fixed);
         header->setResizeMode(1, QHeaderView::ResizeToContents);
     }
-
-    header->hide();
-    m_view->verticalHeader()->hide();
     */
 }
 
@@ -566,7 +609,8 @@ void QBluetoothRemoteDeviceSelectorPrivate::currentRowChanged(const QModelIndex 
     \value DeviceIcon Display an icon for each device, according to the device's class of device information.
     \value Name Display the name of each device.
     \value Alias Display the alias of each device.
-    \value PairingStatus Display an icon that indicates whether a remote device is paired with the local bluetooth device.
+    \value PairingStatus Display an icon that indicates whether a remote device is paired with the local bluetooth device. (If the ConnectionStatus flag is also set, and a remote device is both paired and connected, the connection status icon will be displayed in preference to the pairing status icon.)
+    \value ConnectionStatus If a remote device is connected to the local device, display an icon that indicates the remote device is connected, and display the remote device name in bold text.
 
     If neither the Name nor Alias flags are set, or if they are set but a
     a device does not have a name or alias, the address of the device will be

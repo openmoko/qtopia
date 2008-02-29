@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,7 @@ const char* MailboxList::DraftsString = "drafts_ident"; // No tr
 const char* MailboxList::SentString = "sent_ident"; // No tr
 const char* MailboxList::TrashString = "trash_ident"; // No tr
 const char* MailboxList::LastSearchString = "last_search_ident"; // No tr
+const char* MailboxList::EmailString = "email_ident"; // No tr
 
 // Stores the translated names of mailbox properties
 struct MailboxProperties
@@ -66,14 +67,6 @@ static MailboxGroup initMailboxTr()
                 MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Inbox"), 
                                    QT_TRANSLATE_NOOP( "QtMail", "From"),
                                    ":icon/inbox") );
-    map.insert( MailboxList::OutboxString, 
-                MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Outbox"), 
-                                   QT_TRANSLATE_NOOP( "QtMail", "To"),
-                                   ":icon/outbox") );
-    map.insert( MailboxList::TrashString, 
-                MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Trash"), 
-                                   QT_TRANSLATE_NOOP( "QtMail", "From/To"),
-                                   ":icon/trash") );
     map.insert( MailboxList::SentString, 
                 MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Sent"), 
                                    QT_TRANSLATE_NOOP( "QtMail", "To"),
@@ -82,10 +75,22 @@ static MailboxGroup initMailboxTr()
                 MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Drafts"), 
                                    QT_TRANSLATE_NOOP( "QtMail", "To"),
                                    ":icon/drafts") );
+    map.insert( MailboxList::TrashString, 
+                MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Trash"), 
+                                   QT_TRANSLATE_NOOP( "QtMail", "From/To"),
+                                   ":icon/trash") );
+    map.insert( MailboxList::OutboxString, 
+                MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Outbox"), 
+                                   QT_TRANSLATE_NOOP( "QtMail", "To"),
+                                   ":icon/outbox") );
     map.insert( MailboxList::LastSearchString, 
                 MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Last search"),
                                    "",
                                    ":icon/find") );
+    map.insert( MailboxList::EmailString, 
+                MailboxProperties( QT_TRANSLATE_NOOP( "QtMail", "Email"),
+                                   "",
+                                   ":icon/email") );
 
     return map;
 }
@@ -112,12 +117,7 @@ MailboxList::MailboxList(QObject *parent)
             SIGNAL(stringStatus(QString&)) );
     _mailboxes.append( mailbox );
 
-    mailbox = new EmailFolderList(OutboxString, this);
-    connect(mailbox, SIGNAL(stringStatus(QString&)), this,
-            SIGNAL(stringStatus(QString&)) );
-    _mailboxes.append( mailbox );
-
-    mailbox = new EmailFolderList(TrashString, this);
+    mailbox = new EmailFolderList(SentString, this);
     connect(mailbox, SIGNAL(stringStatus(QString&)), this,
             SIGNAL(stringStatus(QString&)) );
     _mailboxes.append( mailbox );
@@ -127,7 +127,12 @@ MailboxList::MailboxList(QObject *parent)
             SIGNAL(stringStatus(QString&)) );
     _mailboxes.append( mailbox );
 
-    mailbox = new EmailFolderList(SentString, this);
+    mailbox = new EmailFolderList(TrashString, this);
+    connect(mailbox, SIGNAL(stringStatus(QString&)), this,
+            SIGNAL(stringStatus(QString&)) );
+    _mailboxes.append( mailbox );
+
+    mailbox = new EmailFolderList(OutboxString, this);
     connect(mailbox, SIGNAL(stringStatus(QString&)), this,
             SIGNAL(stringStatus(QString&)) );
     _mailboxes.append( mailbox );
@@ -198,6 +203,18 @@ EmailFolderList* MailboxList::mailbox(const QMailId& mailFolderId) const
 
 }
 
+EmailFolderList* MailboxList::owner(const QMailId& id) const
+{
+    QListIterator<EmailFolderList*> it(_mailboxes);
+    while (it.hasNext()) {
+        EmailFolderList* folder = it.next();
+        if (folder->contains(id))
+            return folder;
+    }
+
+    return 0;
+}
+
 QString MailboxList::mailboxTrName( const QString &s )
 {
     // Find the properties of the named mailbox
@@ -238,6 +255,105 @@ QIcon MailboxList::mailboxIcon( const QString &s )
     return QIcon(":icon/folder");
 }
 
+QMailIdList MailboxList::messages(QMailMessage::MessageType messageType, const EmailFolderList::SortOrder& order )
+{
+    return messages(messageFilterKey(messageType), order);
+}
+
+QMailIdList MailboxList::messages(QMailMessage::Status status, 
+                                  bool contains,
+                                  QMailMessage::MessageType messageType, 
+                                  const EmailFolderList::SortOrder& order)
+{
+    return messages(statusFilterKey(status, contains) & messageFilterKey(messageType), order);
+}
+
+QMailIdList MailboxList::messagesFromMailbox(const Mailbox& mailbox, 
+                                             QMailMessage::MessageType messageType, 
+                                             const EmailFolderList::SortOrder& order)
+{
+    return messages(messageFilterKey(messageType, mailbox.account()->id(), mailbox.pathName()), order);
+}
+
+QMailIdList MailboxList::messagesFromAccount(const QMailAccount& account,
+                                             QMailMessage::MessageType messageType,
+                                             const EmailFolderList::SortOrder& order)
+{
+    return messages(messageFilterKey(messageType, account.id()), order);
+}
+
+QMailIdList MailboxList::messages(QMailMessageKey queryKey, const EmailFolderList::SortOrder& order)
+{
+    if (order != EmailFolderList::Submission) {
+        Qt::SortOrder srtOrder(order == EmailFolderList::DescendingDate ? Qt::DescendingOrder : Qt::AscendingOrder);
+        QMailMessageSortKey sortKey(QMailMessageSortKey::TimeStamp, srtOrder);
+        return QMailStore::instance()->queryMessages(queryKey, sortKey);
+    } else {
+        return QMailStore::instance()->queryMessages(queryKey);
+    }
+}
+
+uint MailboxList::messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type )
+{
+    return messageCount(statusFilterKey(status) & messageFilterKey(type));
+}
+
+uint MailboxList::messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type, const QMailAccount& account )
+{
+    return messageCount(statusFilterKey(status) & messageFilterKey(type, account.id()));
+}
+
+uint MailboxList::messageCount( EmailFolderList::MailType status, QMailMessage::MessageType type, const Mailbox& mailbox, bool subfolders )
+{
+    return messageCount(statusFilterKey(status) & messageFilterKey(type, mailbox.account()->id(), mailbox.pathName(), subfolders));
+}
+
+uint MailboxList::messageCount(QMailMessageKey queryKey)
+{
+    return QMailStore::instance()->countMessages(queryKey);
+}
+
+QMailMessageKey MailboxList::statusFilterKey( EmailFolderList::MailType status )
+{
+    QMailMessageKey statusKey;
+
+    if (status == EmailFolderList::Unfinished) {
+        // Currently unhandled!
+    } else if (status == EmailFolderList::Unread) {
+        // Ensure 'read' flag is not set
+        statusKey = ~QMailMessageKey(QMailMessageKey::Status, QMailMessage::Read, QMailMessageKey::Contains);
+    } else if (status == EmailFolderList::Unsent) {
+        // Ensure 'sent' flag is not set
+        statusKey = ~QMailMessageKey(QMailMessageKey::Status, QMailMessage::Sent, QMailMessageKey::Contains);
+    }
+
+    return statusKey;
+}
+
+QMailMessageKey MailboxList::statusFilterKey( QMailMessage::Status status, bool contains )
+{
+    QMailMessageKey statusKey(QMailMessageKey::Status, static_cast<int>(status), QMailMessageKey::Contains);
+    return (contains ? statusKey : ~statusKey);
+}
+
+QMailMessageKey MailboxList::messageFilterKey( QMailMessage::MessageType type, const QString& account, const QString& mailbox, bool subfolders )
+{
+    QMailMessageKey filter;
+    
+    if (type != QMailMessage::AnyType)
+        filter = QMailMessageKey(QMailMessageKey::Type, type, QMailMessageKey::Contains);
+
+    if (!account.isNull()) {
+        filter &= QMailMessageKey(QMailMessageKey::FromAccount, account);
+
+        if (!mailbox.isNull()) {
+            filter &= QMailMessageKey(QMailMessageKey::FromMailbox, mailbox, (subfolders ? QMailMessageKey::Contains : QMailMessageKey::Equal));
+        }
+    }
+
+    return filter;
+}
+
 //===========================================================================
 
 /*  Email Folder List */
@@ -271,8 +387,8 @@ void EmailFolderList::openMailbox()
     }
     else //load folder
     {
-		QMailId folderId = folderIdList.first();
-		mFolder = QMailFolder(folderId);
+        QMailId folderId = folderIdList.first();
+        mFolder = QMailFolder(folderId);
     }
 
     //set the folder key   
@@ -308,236 +424,69 @@ bool EmailFolderList::removeMail(QMailId id)
     return true;
 }
 
-bool EmailFolderList::empty(int type)
+bool EmailFolderList::empty(QMailMessage::MessageType type)
 {
-    QMailMessageKey typeKey(QMailMessageKey::Type,type,QMailMessageKey::Contains);
-    
-    QMailIdList deleteList = QMailStore::instance()->queryMessages(mParentFolderKey & typeKey);
-
-    foreach(QMailId id, deleteList)
+    foreach(QMailId id, messages(type))
         QMailStore::instance()->removeMessage(id);
 
     return true;
 }
 
-QMailIdList EmailFolderList::messages(unsigned int messageType, const SortOrder& order ) const
-{
-    QMailMessageKey queryKey = mParentFolderKey;
-
-    if(messageType != QMailMessage::AnyType)
-        queryKey &= QMailMessageKey(QMailMessageKey::Type,messageType,QMailMessageKey::Contains);
-        
-    if(order != Submission )
-    {
-        Qt::SortOrder srtOrder;
-
-        if(order == DescendingDate)
-          srtOrder = Qt::DescendingOrder;
-        else
-          srtOrder = Qt::AscendingOrder;
-
-        QMailMessageSortKey sortKey(QMailMessageSortKey::TimeStamp,srtOrder);
-
-        return QMailStore::instance()->queryMessages(queryKey, sortKey);
-    }
-    else
-        return QMailStore::instance()->queryMessages(queryKey);
-
-}
-
-QMailIdList EmailFolderList::messages(const QMailMessage::Status& status, 
-                                      bool contains,
-                                      unsigned int messageType, 
-                                      const SortOrder& order) const
-{
-
-    QMailMessageKey queryKey = mParentFolderKey;
-
-    int flags = status;
-    QMailMessageKey statusKey(QMailMessageKey::Flags,flags,QMailMessageKey::Contains);
-
-    if(contains)
-        queryKey &=  statusKey;
-    else
-        queryKey &= ~statusKey;
-
-    if(messageType != QMailMessage::AnyType)
-        queryKey &= QMailMessageKey(QMailMessageKey::Type,messageType,QMailMessageKey::Contains);
-        
-    if(order != Submission )
-    {
-        Qt::SortOrder srtOrder;
-
-        if(order == DescendingDate)
-          srtOrder = Qt::DescendingOrder;
-        else
-          srtOrder = Qt::AscendingOrder;
-
-        QMailMessageSortKey sortKey(QMailMessageSortKey::TimeStamp,srtOrder);
-
-        return QMailStore::instance()->queryMessages(queryKey, sortKey);
-    }
-    else
-        return QMailStore::instance()->queryMessages(queryKey);
-
-
-}
-
-QMailIdList EmailFolderList::messagesFromMailbox(const QString& mailbox, 
-                                                 unsigned int messageType, 
-                                                 const SortOrder& order ) const
-{
-    QMailMessageKey queryKey = mParentFolderKey & QMailMessageKey(QMailMessageKey::FromMailbox,mailbox);
-
-    if(messageType != QMailMessage::AnyType)
-        queryKey &= QMailMessageKey(QMailMessageKey::Type, messageType, QMailMessageKey::Contains);
-
-    if(order != Submission )
-    {
-        Qt::SortOrder srtOrder;
-
-        if(order == DescendingDate)
-          srtOrder = Qt::DescendingOrder;
-        else
-          srtOrder = Qt::AscendingOrder;
-
-        QMailMessageSortKey sortKey(QMailMessageSortKey::TimeStamp,srtOrder);
-
-        return QMailStore::instance()->queryMessages(queryKey, sortKey);
-    }
-    else
-        return QMailStore::instance()->queryMessages(queryKey);
-}
-
-QMailIdList EmailFolderList::messagesFromAccount(const QString& account,
-                                                 unsigned int messageType,
-                                                 const SortOrder& order) const
-{
-    QMailMessageKey queryKey = mParentFolderKey & QMailMessageKey(QMailMessageKey::FromAccount,account);
-
-    if(messageType != QMailMessage::AnyType)
-        queryKey &= QMailMessageKey(QMailMessageKey::Type, messageType, QMailMessageKey::Contains);
-
-    if(order != Submission )
-    {
-        Qt::SortOrder srtOrder;
-
-        if(order == DescendingDate)
-          srtOrder = Qt::DescendingOrder;
-        else
-          srtOrder = Qt::AscendingOrder;
-
-        QMailMessageSortKey sortKey(QMailMessageSortKey::TimeStamp,srtOrder);
-
-        return QMailStore::instance()->queryMessages(queryKey, sortKey);
-    }
-    else
-        return QMailStore::instance()->queryMessages(queryKey);
-}
-
 bool EmailFolderList::contains(const QMailId& id) const
 {
-    QMailMessageKey idKey(QMailMessageKey::Id,id);
-    int count = QMailStore::instance()->countMessages(idKey & mParentFolderKey );
-    return count != 0;
+    return ( messageCount(QMailMessageKey(QMailMessageKey::Id, id)) > 0 );
 }
 
-uint EmailFolderList::mailCount( MailType status, 
-				 int type, 
-				 AccountList *accountList )
+QMailIdList EmailFolderList::messages(QMailMessage::MessageType messageType, const SortOrder& order ) const
 {
-    //bool isAnyType = (QMailMessage::AnyType == type);
-    QMap<MailAccount*,int> accountMap;
-    if ( accountList ) {
-        QListIterator<MailAccount*> it2 = accountList->accountIterator();
-        while (it2.hasNext()) {
-            accountMap.insert( it2.next(), 0 );
-        }
-    }
+    return messages(MailboxList::messageFilterKey(messageType), order);
+}
 
-    uint count = 0;
-    switch ( status )
-    {
-        case All:
-            {
-                QMailMessageKey typeKey(QMailMessageKey::Type,type,QMailMessageKey::Contains);
+QMailIdList EmailFolderList::messages(QMailMessage::Status status, 
+                                      bool contains,
+                                      QMailMessage::MessageType messageType, 
+                                      const SortOrder& order) const
+{
+    return messages(MailboxList::statusFilterKey(status, contains) & MailboxList::messageFilterKey(messageType), order);
+}
 
-                QMailMessageKey allKey = mParentFolderKey & typeKey;
+QMailIdList EmailFolderList::messagesFromMailbox(const Mailbox& mailbox, 
+                                                 QMailMessage::MessageType messageType, 
+                                                 const SortOrder& order ) const
+{
+    return messages(MailboxList::messageFilterKey(messageType, mailbox.account()->id(), mailbox.pathName()), order);
+}
 
-                count = QMailStore::instance()->countMessages(allKey);
+QMailIdList EmailFolderList::messagesFromAccount(const QMailAccount& account,
+                                                 QMailMessage::MessageType messageType,
+                                                 const SortOrder& order) const
+{
+    return messages(MailboxList::messageFilterKey(messageType, account.id()), order);
+}
 
-                if(accountList)
-                {
-                    QListIterator<MailAccount*> it2 = accountList->accountIterator();
-                    while (it2.hasNext()) {
-                        MailAccount *account = it2.next();
-                        QMailMessageKey accountKey(QMailMessageKey::FromAccount,account->id());
-                        accountMap[account] = QMailStore::instance()->countMessages( allKey & accountKey); 
-                    }
-                }
-                break;
-            }
+QMailIdList EmailFolderList::messages(QMailMessageKey queryKey, const SortOrder& order) const
+{
+    return MailboxList::messages(queryKey & mParentFolderKey, order);
+}
 
-        case New:
-            {
-                QMailMessageKey typeKey(QMailMessageKey::Type,type,QMailMessageKey::Contains);
-                QMailMessageKey readKey(QMailMessageKey::Flags,QMailMessage::Read,QMailMessageKey::Contains);
+uint EmailFolderList::messageCount( MailType status, QMailMessage::MessageType type ) const
+{
+    return messageCount(MailboxList::statusFilterKey(status) & MailboxList::messageFilterKey(type));
+}
 
-                QMailMessageKey newKey = mParentFolderKey & typeKey & ~readKey;
+uint EmailFolderList::messageCount( MailType status, QMailMessage::MessageType type, const QMailAccount& account ) const
+{
+    return messageCount(MailboxList::statusFilterKey(status) & MailboxList::messageFilterKey(type, account.id()));
+}
 
-                count = QMailStore::instance()->countMessages(newKey);
+uint EmailFolderList::messageCount( MailType status, QMailMessage::MessageType type, const Mailbox& mailbox, bool subfolders ) const
+{
+    return messageCount(MailboxList::statusFilterKey(status) & MailboxList::messageFilterKey(type, mailbox.account()->id(), mailbox.pathName(), subfolders));
+}
 
-                if ( accountList ) {
-                    QListIterator<MailAccount*> it2 = accountList->accountIterator();
-                    while (it2.hasNext()) {
-                        MailAccount *account = it2.next();
-                        QMailMessageKey accountKey(QMailMessageKey::FromAccount,account->id());
-                        accountMap[account] = QMailStore::instance()->countMessages(newKey & accountKey);
-                    }
-                }
-                break;
-            }
-
-        case Unsent:
-            {
-                QMailMessageKey typeKey(QMailMessageKey::Type,type,QMailMessageKey::Contains);
-                QMailMessageKey sentKey(QMailMessageKey::Flags,QMailMessage::Sent,QMailMessageKey::Contains);
-
-                QMailMessageKey unsentKey = mParentFolderKey & typeKey & ~sentKey;
-
-                //dunno about this hasRecipients
-
-                //if ( !(mail->status() & QMailMessage::Sent) 
-                //     && mail->hasRecipients() )
-                //   count++;
-
-                count = QMailStore::instance()->countMessages(unsentKey);
-
-                break;
-            }
-
-        case Unfinished:
-            {
-                // Currently unhandled!
-                break;
-            }
-    }
-
-    if ( accountList && status == All ) {
-        QListIterator<MailAccount*> it2 = accountList->accountIterator();
-        while (it2.hasNext()) {
-            MailAccount *account = it2.next();
-            account->setCount( accountMap[account] );
-        }
-    } else if ( accountList && status == New ) {
-        QListIterator<MailAccount*> it2 = accountList->accountIterator();
-        while (it2.hasNext()) {
-            MailAccount *account = it2.next();
-            account->setUnreadCount( accountMap[account] );
-        }
-    }
-    return count;
-
+uint EmailFolderList::messageCount( QMailMessageKey queryKey ) const
+{
+    return MailboxList::messageCount(queryKey & mParentFolderKey);
 }
 
 void EmailFolderList::externalChange()
@@ -547,9 +496,6 @@ void EmailFolderList::externalChange()
 
 bool EmailFolderList::moveMail(const QMailId& id, EmailFolderList& dest)
 {
-
-    //move the context information across
-
     QMailFolder otherFolder = dest.mFolder;
     QMailMessage m(id,QMailMessage::Header);
 
@@ -571,9 +517,6 @@ bool EmailFolderList::moveMail(const QMailId& id, EmailFolderList& dest)
 
 bool EmailFolderList::copyMail(const QMailId& id, EmailFolderList& dest)
 {
-//move the context information across
-
-    
     QMailFolder otherFolder = dest.mFolder;
     QMailMessage m(id,QMailMessage::HeaderAndBody);
 
@@ -587,6 +530,7 @@ bool EmailFolderList::copyMail(const QMailId& id, EmailFolderList& dest)
     m.setParentFolderId(otherFolder.id());
 
     if(!QMailStore::instance()->addMessage(&m))
+        return false;
 
     emit mailAdded(m.id(),dest.mailbox());
 
@@ -605,15 +549,32 @@ QMailFolder EmailFolderList::mailFolder() const
 
 bool EmailFolderList::moveMailList(const QMailIdList& list, EmailFolderList& dest)
 {
+
     // Check that these messages belong to our folder
-    QMailIdList folderIds(QMailStore::instance()->parentFolderIds(list));
+    /*QMailIdList folderIds(QMailStore::instance()->parentFolderIds(list));
 
     if ((folderIds.count() != 1) || (folderIds.first() != mFolder.id())) {
         qWarning() << "Cannot move mail that does not exist in folder " << mMailbox;
         return false;
+    }*/
+
+    QMailMessageList headers = QMailStore::instance()->messageHeaders(QMailMessageKey(list),
+                                                                      QMailMessageKey::ParentFolderId,
+                                                                      QMailStore::ReturnDistinct);
+
+
+    if((headers.count() != 1) || (headers.first().parentFolderId() != mFolder.id()))
+    {
+        qWarning() << "Cannot move mail that does not exist in folder " << mMailbox;
+        return false;
     }
 
-    if (!QMailStore::instance()->updateParentFolderIds(list, dest.mFolder.id()))
+/*    if (!QMailStore::instance()->updateParentFolderIds(list, dest.mFolder.id()))
+        return false; */
+    QMailMessage updateHeader;
+    updateHeader.setParentFolderId(dest.mFolder.id());
+
+    if(!QMailStore::instance()->updateMessages(QMailMessageKey(list),QMailMessageKey::ParentFolderId,updateHeader))
         return false;
 
     emit mailMoved(list, mailbox(), dest.mailbox());

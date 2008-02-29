@@ -14,45 +14,44 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Modem Simulator<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
-<li><a href="#using-the-phone-simulator">Using the Phone Simulator</a></li>
+<li><a href="#using-the-modem-simulator">Using the Modem Simulator</a></li>
 <li><a href="#special-phone-numbers">Special Phone Numbers</a></li>
-<li><a href="#gsm-07-10-multiplexing">GSM 07.10 multiplexing</a></li>
+<li><a href="#gsm-07-10-multiplexing">GSM 07.10 Multiplexing</a></li>
 <li><a href="#xml-response-file-format">XML Response File Format</a></li>
-<li><a href="#sim-application-toolkit-commands">SIM Application Toolkit commands</a></li>
-<li><a href="#sim-file-system-commands">SIM file system commands</a></li>
+<li><a href="#sim-application-toolkit-support">SIM Application Toolkit Support</a></li>
+<li><a href="#sim-file-system-commands">SIM File System Commands</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia provides a Modem Simulator (<tt>phonesim</tt>)to allow testing of telephony applications without the need for access to an actual modem. The simulator provides an AT command channel with responses defined by an XML description.</p>
-<p><b>Note:</b> It is preferred that a fully functioning phone be used where possible as <b>phonesim</b> is a simulated tool and not designed as a total replacement for a functioning phone.</p>
-<a name="using-the-phone-simulator"></a>
-<h2>Using the Phone Simulator</h2>
-<p>The command used to run the Phone Simulator is:</p>
-<p><tt>phonesim [-p port] filename</tt></p>
-<p>where the default <i>port</i> number is 12345 and <i>filename</i> indicates the <a href="#xml-response-file">XML Response file </a> to be used.</p>
-<p>To use the Qtopia dialer with the phone simulator, the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable must be set to:</p>
-<p><tt>sim:hostname</tt></p>
-<p>where <i>hostname</i> is the name of the host where the simulator resides. For most implementations this is set to <tt>localhost</tt>.</p>
+<p>Qtopia provides a Modem Simulator, <tt>phonesim</tt>, to allow testing of telephony applications without the need for access to an actual modem. The simulator provides an AT command channel with responses defined by an XML description.</p>
+<p><b>Note:</b> It is preferred that a fully functioning modem be used where possible as <tt>phonesim</tt> is a simulated tool and not designed as a total replacement for a functioning modem.</p>
+<a name="using-the-modem-simulator"></a>
+<h2>Using the Modem Simulator</h2>
+<p>The command used to run the Modem Simulator is:</p>
+<pre>    phonesim [-p port] [-gui] filename</pre>
+<p>where the default <i>port</i> number is 12345 and <i>filename</i> indicates the <a href="#xml-response-file">XML Response File</a> to be used (usually <tt>troll.xml</tt> from the <tt>src/tools/phonesim</tt> source directory).</p>
+<p>To use the Qtopia dialer with the modem simulator, the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable must be set to <tt>sim:</tt><i>hostname</i>, where <i>hostname</i> is the name of the host where the simulator resides. For most implementations this is set to <tt>localhost</tt>.</p>
+<p>The <tt>-gui</tt> option tells <tt>phonesim</tt> to display its control GUI when Qtopia connects to it. This control GUI provides options to simulate calls, send SMS messages, adjust operator registration, etc.</p>
 <a name="special-phone-numbers"></a>
 <h2>Special Phone Numbers</h2>
-<p>The Phone Simulator utilizes the following special phone numbers to simulate events:</p>
+<p>The Modem Simulator utilizes the following special phone numbers to simulate events:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Phone Number</th><th>Function</th></tr></thead>
-<tr valign="top" class="odd"><td><b>199</b></td><td>Initiate a <i>Dial Back</i>, that is, the simulator will immediately hang-up and then dial the user back after a delay of a few seconds. This is used to test incoming connections in a single-user environment.</td></tr>
-<tr valign="top" class="even"><td><b>199</b></td><td>Reflect outgoing SMS messages back into the incoming message queue.</td></tr>
-<tr valign="top" class="odd"><td><b>177</b></td><td>Simulate a missed call but intiating a dial back and hanging up after a number of retries.</td></tr>
-<tr valign="top" class="even"><td><b>166</b></td><td>Simulate a bad phone number or bad connection by making and outgoing call that does not connect.</td></tr>
+<tr valign="top" class="odd"><td><b>199</b></td><td>Initiate a <i>Dial Back</i>, that is, the simulator will immediately hang-up and then dial the user back after a delay of 5 seconds. This is used to test incoming connections in a single-user environment.</td></tr>
+<tr valign="top" class="even"><td><b>1993</b></td><td>Same as <b>199</b>, but use a delay of 30 seconds.</td></tr>
+<tr valign="top" class="odd"><td><b>177</b></td><td>Dials back after 2 seconds, but then hangs up after waiting 5 seconds for the call to be accepted. This is used to simulate an incoming call that does not connect.</td></tr>
+<tr valign="top" class="even"><td><b>166</b></td><td>Same as <b>177</b>, but dials back after 1 second and hangs up after 4.</td></tr>
+<tr valign="top" class="odd"><td><b>155</b></td><td>Immediately responds with <tt>BUSY</tt> to indicate that the call could not be connected to the other party due to them being busy.</td></tr>
+<tr valign="top" class="even"><td><b>12399</b></td><td>Simulates a call control event of &quot;allowed&quot;.</td></tr>
+<tr valign="top" class="odd"><td><b>12388</b></td><td>Simulates a call control event of &quot;allowed with modifications&quot;. The number will modified to <b>12389</b>.</td></tr>
+<tr valign="top" class="even"><td><b>12377</b></td><td>Simulates a call control event of &quot;disallowed&quot;.</td></tr>
 </table></p>
 <a name="gsm-07-10-multiplexing"></a>
-<h2>GSM 07.10 multiplexing</h2>
-<p>The Phone Simulator for the 2.x series of Qtopia Phone Editions includes support for GSM 07.10 multiplexing, that is, AT+CMUX. This removes the requirement for two phone simulator connections to emulate the high-priority and low-priority command channels. The channels will share the same state and state modification commands on one channel will affect the answer on the other channel, which is not the case with dual connections.</p>
-<p>To use multiplexing set the following environment variable:</p>
-<p><tt>export QTOPIA_PHONE_DEVICE=sim:localhost</tt></p>
-<p>The environment variable <tt>QTOPIA_PHONE_DEVICE_LOW</tt> no longer needs to be set.</p>
-<p><b>Note: </b> If both environment variables are set, the simulator will use separate connections rather than GSM 07.10 multiplexing.</p>
+<h2>GSM 07.10 Multiplexing</h2>
+<p>The Modem Simulator includes support for GSM 07.10 multiplexing, which is started using the <tt>AT+CMUX</tt> command. It will be activated as soon as Qtopia sends this command to the simulator. Up to 63 channels are supported, using the basic GSM 07.10 multiplexing mode and any valid GSM 07.10 packet size. Advanced mode is not supported.</p>
 <a name="xml-response-file"></a><a name="xml-response-file-format"></a>
 <h2>XML Response File Format</h2>
-<p>Phone Simulator responses are defined by an XML file (for example, troll.xml) with the following format:</p>
+<p>Modem Simulator responses are defined by an XML file (for example, troll.xml) with the following format:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>tag</th><th>description</th></tr></thead>
 <tr valign="top" class="odd"><td>&lt;simulator&gt;</td><td>Root element for the XML document.</td></tr>
@@ -61,43 +60,18 @@
 <tr valign="top" class="even"><td>&lt;command&gt;</td><td>(child of &lt;chat&gt;) Contains the text of the command to respond to. The wildcard character &quot;*&quot; at the end of the text can be used to match everything starting with a specific prefix.</td></tr>
 <tr valign="top" class="odd"><td>&lt;response delay=&quot;N&quot; eol=&quot;true|false&quot;&gt;</td><td>(child of &lt;chat&gt;) Contains the text of the response, with an optional delay prior to sending it back to the client. The delay is in milliseconds. The sequence &quot;${X}&quot; can be used in a response to indicate &quot;substitute the value of script variable X&quot;. If &quot;eol&quot; is &quot;true&quot; (the default), then the response will be followed by an end-of-line sequence.</td></tr>
 <tr valign="top" class="even"><td>&lt;switch name=&quot;X&quot;/&gt;</td><td>(child of &lt;chat&gt;) Switch into the specified state after issuing the response. An unspecified state name indicates to return to the top-level state. The name &quot;default&quot; can be used to switch back to the default state.</td></tr>
-<tr valign="top" class="odd"><td>&lt;unsolicited delay=&quot;N&quot; switch=&quot;X&quot;&gt;</td><td>(child of top-level or &lt;state&gt;) Indicates an unsolicited response to issue to the client after &quot;N&quot; milliseconds after switching into the current state. The optional &quot;switch&quot; tells the simulator to enter the specified state after sending the unsolicited response (e.g&#x2e; an unsolicited RING may put the simulator into a different state from the default). The sequence &quot;${X}&quot; can be used in a response to indicate &quot;substitute the value of script variable X&quot;.</td></tr>
+<tr valign="top" class="odd"><td>&lt;unsolicited delay=&quot;N&quot; switch=&quot;X&quot; [once=&quot;true&quot;]&gt;</td><td>(child of top-level or &lt;state&gt;) Indicates an unsolicited response to issue to the client after &quot;N&quot; milliseconds after switching into the current state. The optional &quot;switch&quot; tells the simulator to enter the specified state after sending the unsolicited response (e.g&#x2e; an unsolicited RING may put the simulator into a different state from the default). The sequence &quot;${X}&quot; can be used in a response to indicate &quot;substitute the value of script variable X&quot;. If once=&quot;true&quot; is supplied, then the unsolicited command will only be issued once, not every time the current state is entered.</td></tr>
 <tr valign="top" class="even"><td>&lt;set name=&quot;X&quot; value=&quot;Y&quot;/&gt;</td><td>(child of top-level or &lt;chat&gt;) When used at the top level, this sets the default value of a script variable called &quot;X&quot; to &quot;Y&quot;. When used within a &lt;chat&gt; element, this will set the value of the script variable &quot;X&quot; when the &lt;chat&gt;'s command is successfully matched. The value &quot;*&quot; can be used for the &quot;*&quot; part of a prefix command match. This allows parameter information to be copied from a command into a variable.</td></tr>
 <tr valign="top" class="odd"><td>&lt;start name=&quot;X&quot;/&gt;</td><td>Starting state, if not the same as the top-level state.</td></tr>
-<tr valign="top" class="even"><td>&lt;newcall name=&quot;VAR&quot;/&gt;</td><td>Allocate a new call identifier and put its number into &quot;VAR&quot;.</td></tr>
-<tr valign="top" class="odd"><td>&lt;forgetcall id=&quot;ID&quot;/&gt;</td><td>Forget a call with identifier &quot;ID&quot;, freeing up the identifier to be allocated to a new call.</td></tr>
-<tr valign="top" class="even"><td>&lt;toolkit&gt;</td><td>Define a program for the SIM Application Toolkit part of the simulator.</td></tr>
+<tr valign="top" class="even"><td>&lt;phonebook name=&quot;XX&quot; size=&quot;N&quot;&gt;</td><td>Define the phonebook called XX to have a size of N entries. Each entry is defined by an &lt;entry&gt; tag.</td></tr>
+<tr valign="top" class="odd"><td>&lt;entry index=&quot;IDX&quot; number=&quot;NUM&quot; name=&quot;NAME&quot;/&gt;</td><td>Define an entry in the surrounding &lt;phonebook&gt; definition.</td></tr>
 </table></p>
-<a name="sim-application-toolkit-commands"></a>
-<h2>SIM Application Toolkit commands</h2>
-<p>The &lt;toolkit&gt; tag is used to define a simple program to simulate an application running inside the SIM.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>tag</th><th>description</th></tr></thead>
-<tr valign="top" class="odd"><td>&lt;label name=&quot;NAME&quot;/&gt;</td><td>Define a program label, that can be used as the destination for &lt;goto&gt;, &lt;gosub&gt;, and similar commands.</td></tr>
-<tr valign="top" class="even"><td>&lt;goto name=&quot;NAME&quot;/&gt;</td><td>Jump to the point in the program that is defined by the label &quot;NAME&quot;.</td></tr>
-<tr valign="top" class="odd"><td>&lt;gosub name=&quot;NAME&quot;/&gt;</td><td>Set the return location to the current point in the program and then jump to the point in the program that is defined by the label &quot;NAME&quot;. Only one level of subroutine is currently supported.</td></tr>
-<tr valign="top" class="even"><td>&lt;return&gt;</td><td>Return from the current subroutine.</td></tr>
-<tr valign="top" class="odd"><td>&lt;set name=&quot;NAME&quot; value=&quot;VALUE&quot;/&gt;</td><td>Set the variable called &quot;NAME&quot; to &quot;VALUE&quot;. If &quot;VALUE&quot; contains a term of the form &quot;${X}&quot;, then the contents of the variable &quot;X&quot; will be inserted at that position.</td></tr>
-<tr valign="top" class="even"><td>&lt;ifeq var=&quot;NAME&quot; value=&quot;VALUE&quot; goto=&quot;LABEL&quot;/&gt;</td><td>Compare the contents of the variable &quot;NAME&quot; with &quot;VALUE&quot; and then jump to &quot;LABEL&quot; if they are the same.</td></tr>
-<tr valign="top" class="odd"><td>&lt;ifne var=&quot;NAME&quot; value=&quot;VALUE&quot; goto=&quot;LABEL&quot;/&gt;</td><td>Compare the contents of the variable &quot;NAME&quot; with &quot;VALUE&quot; and then jump to &quot;LABEL&quot; if they are not the same.</td></tr>
-<tr valign="top" class="even"><td>&lt;eval var=&quot;NAME&quot; left=&quot;LEFT&quot; op=&quot;OPERATOR&quot; right=&quot;RIGHT&quot;/&gt;</td><td>Evaluate an arithmetic expression and place the result into the variable &quot;NAME&quot;. &quot;OPERATOR&quot; may be one of &quot;+&quot;, &quot;-&quot;, &quot;*&quot;, &quot;/&quot;, &quot;%&quot;, &quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, }{&gt;&quot;, &quot;&amp;&amp;&quot;, &quot;||&quot;, &quot;!&quot;, or &quot;concat&quot;.</td></tr>
-<tr valign="top" class="odd"><td>&lt;mainmenu title=&quot;TITLE&quot;&gt;</td><td>Define the main program menu with the given &quot;TITLE&quot;.</td></tr>
-<tr valign="top" class="even"><td>&lt;menu title=&quot;TITLE&quot; default=&quot;ITEM&quot; [back=&quot;LABEL&quot;]&gt;</td><td>Define a program menu with the given &quot;TITLE&quot; and default &quot;ITEM&quot;. When the user selects &quot;Back&quot;, the program will jump to &quot;LABEL&quot;.</td></tr>
-<tr valign="top" class="odd"><td>&lt;item id=&quot;ID&quot; name=&quot;NAME&quot; [help=&quot;HELPLABEL&quot;] [iconid=&quot;ICONID&quot; [iconselfexplanatory=&quot;SEFLAG&quot;]] goto=&quot;LABEL&quot;/&gt;</td><td>Define an item within a &lt;mainmenu&gt; or &lt;menu&gt; element. &quot;ID&quot; is a numeric value that identifies the item; &quot;NAME&quot; is the text name to display on the user's screen; &quot;HELPLABEL&quot; is a label to jump to if the user selects &quot;Help&quot; for the item; and &quot;LABEL&quot; is the regular label to jump to when the user selects the item. If &quot;ICONID&quot; is supplied, then it indicates an icon to be associated with the menu item. If &quot;SEFLAG&quot; is set to &quot;true&quot;, then the icon is self-explanatory and the text does not need to be displayed.</td></tr>
-<tr valign="top" class="even"><td>&lt;displaytext [autoclear=&quot;CLEAR&quot;] [highpriority=&quot;HIGH&quot;&gt;TEXT&lt;/displaytext&gt;</td><td>Display &quot;TEXT&quot; on the user's screen. If &quot;CLEAR&quot; is &quot;true&quot;, then automatically clear the text after 3 seconds. If &quot;HIGH&quot; is &quot;true&quot;, then the text should be displayed with high priority.</td></tr>
-<tr valign="top" class="odd"><td>&lt;getkey type=&quot;TYPE&quot; [help=&quot;LABEL&quot;]/&gt;</td><td>Ask the user for a single keypress. &quot;TYPE&quot; may be one of &quot;digit&quot;, &quot;alpha&quot;, or &quot;ucs2&quot;. If the user selects &quot;Help&quot;, then the program will jump to &quot;LABEL&quot;.</td></tr>
-<tr valign="top" class="even"><td>&lt;getinput type=&quot;TYPE&quot; [help=&quot;LABEL&quot;] [echo=&quot;ECHO&quot;] [minlength=&quot;MIN&quot;] [maxlength=&quot;MAX&quot;]/&gt;</td><td>Ask the user for a line of input. &quot;TYPE&quot; may be one of &quot;digit&quot;, &quot;alpha&quot;, or &quot;ucs2&quot;. If the user selects &quot;Help&quot;, then the program will jump to &quot;LABEL&quot;. If &quot;ECHO&quot; is &quot;false&quot;, then the characters will not be echoed to the screen (e.g&#x2e; for passwords). &quot;MIN&quot; and &quot;MAX&quot; define the minimum and maximum text lengths (1 and 255 by default, respectively).</td></tr>
-<tr valign="top" class="odd"><td>&lt;setupcall number=&quot;NUMBER&quot; [subAddress=&quot;SUBADDR&quot;] [othercalls=&quot;OTHER&quot;] [class=&quot;CLASS&quot;]/&gt;</td><td>Ask the phone to set up a phone call to &quot;NUMBER&quot; (extension &quot;SUBADDR&quot;). &quot;OTHER&quot; should be one of &quot;notbusy&quot; (the default), &quot;hold&quot;, or &quot;hangup&quot;. &quot;notbusy&quot; indicates that the call should only be attempted if the user is not busy on another call. &quot;hold&quot; indicates that all other calls should be placed on hold. &quot;hangup&quot; indicates that all other calls should be hung up first. &quot;CLASS&quot; should be one of &quot;voice&quot; (the default), &quot;data&quot;, or &quot;fax&quot;.</td></tr>
-<tr valign="top" class="even"><td>&lt;play tone=&quot;TONE&quot; [interval=&quot;INTERVAL&quot;]/&gt;</td><td>Play the given &quot;TONE&quot; for &quot;INTERVAL&quot; milliseconds. &quot;TONE&quot; should be one of &quot;dial&quot;, &quot;busy&quot;, &quot;congestion&quot;, &quot;radio ack&quot;, &quot;dropped&quot;, &quot;error&quot;, &quot;call waiting&quot;, &quot;ringing&quot;, &quot;general beep&quot;, &quot;positive beep&quot;, or &quot;negative beep&quot;. If the interval is not supplied, it defaults to 1 second.</td></tr>
-<tr valign="top" class="odd"><td>&lt;refresh type=&quot;TYPE&quot;/&gt;</td><td>Inform the phone that a refresh has occurred. &quot;TYPE&quot; should be one of &quot;init and full file change&quot;, &quot;file change&quot;, &quot;init and file change&quot;, &quot;initialization&quot;, or &quot;reset&quot;.</td></tr>
-<tr valign="top" class="even"><td>&lt;sendss&gt;TEXT&lt;/sendss&gt;</td><td>Tell the user with the message &quot;TEXT&quot; that a supplementary service (SS) change is in progress.</td></tr>
-<tr valign="top" class="odd"><td>&lt;sendsms&gt;TEXT&lt;/sendsms&gt;</td><td>Tell the user with the message &quot;TEXT&quot; that an SMS message is being sent.</td></tr>
-<tr valign="top" class="even"><td>&lt;sendussd&gt;TEXT&lt;/sendussd&gt;</td><td>Tell the user with the message &quot;TEXT&quot; that Unstructured Supplementary Service Data (USSD) is being sent.</td></tr>
-<tr valign="top" class="odd"><td>&lt;setupeventlist type=&quot;TYPE&quot;/&gt;</td><td>Setup event reporting according to &quot;TYPE&quot;, which should be one of &quot;idle&quot;, &quot;user&quot;, &quot;idle and user&quot;, or &quot;cancel&quot;.</td></tr>
-<tr valign="top" class="even"><td>&lt;setupidle text=&quot;TEXT&quot; [iconid=&quot;ICONID&quot; [iconselfexplanatory=&quot;SEFLAG&quot;]]/&gt;</td><td>Set the idle mode text to &quot;TEXT&quot;. If &quot;ICONID&quot; is supplied, then it indicates an icon to be associated with the idle mode text. If &quot;SEFLAG&quot; is set to &quot;true&quot;, then the icon is self-explanatory and the text does not need to be displayed.</td></tr>
-</table></p>
+<a name="sim-application-toolkit-support"></a>
+<h2>SIM Application Toolkit Support</h2>
+<p>Prior to Qtopia 4.3, the SIM Application Toolkit application was defined in the simulator rule file using the &lt;toolkit&gt; tag. This was not flexible enough to handle all SIM Application Toolkit implementation scenarios.</p>
+<p>From Qtopia 4.3 onwards, the modem simulator source code must be modified to change the definition of the builtin SIM Toolkit Application, in the source files <tt>simapplication.h</tt> and <tt>simapplication.cpp</tt>.</p>
 <a name="sim-file-system-commands"></a>
-<h2>SIM file system commands</h2>
+<h2>SIM File System Commands</h2>
 <p>The &lt;filesystem&gt; tag is used to define the contents of the SIM file system for access via the <tt>AT+CRSM</tt> command. The body of the tag should be zero or more &lt;file&gt; tags, each of which defines the hexadecimal contents of a SIM file. The following attributes may be present for each file:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>attribute</th><th>description</th></tr></thead>
@@ -106,8 +80,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

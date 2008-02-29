@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothPasskeyAgent Class Reference</h1>
 <p>The QBluetoothPasskeyAgent class represents a passkey entry proxy. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothPasskeyAgent&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothPasskeyAgent&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbluetoothpasskeyagent-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -43,18 +43,17 @@
 <li><div class="fn"/>bool <b><a href="qbluetoothpasskeyagent.html#unregisterForAddress-2">unregisterForAddress</a></b> ( const QString &amp; <i>localDevice</i>, QBluetoothAddress &amp; <i>addr</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -77,28 +76,28 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothPasskeyAgent"></a>QBluetoothPasskeyAgent::QBluetoothPasskeyAgent ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothPasskeyAgent"></a>QBluetoothPasskeyAgent::QBluetoothPasskeyAgent ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a passkey agent. The <i>name</i> parameter specifies a unique name of the passkey agent. The name should be a valid identifier name, e.g&#x2e; it cannot contain special characters or start with a number. For instance: DefaultPasskeyAgent.</p>
-<p>The <i>parent</i> parameter holds the <a href="qobject.html">QObject</a> parent.</p>
+<p>The <i>parent</i> parameter holds the <a href="./qobject.html">QObject</a> parent.</p>
 <h3 class="fn"><a name="dtor.QBluetoothPasskeyAgent"></a>QBluetoothPasskeyAgent::~QBluetoothPasskeyAgent ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the passkey agent.</p>
-<h3 class="fn"><a name="cancelRequest"></a>void QBluetoothPasskeyAgent::cancelRequest ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteAddr</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="cancelRequest"></a>void QBluetoothPasskeyAgent::cancelRequest ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteAddr</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function will be called whenever a passkey authentication request has failed.</p>
 <p>The request being cancelled is on <i>localDevice</i> and the address of the paired device is <i>remoteAddr</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#confirmPasskey">confirmPasskey</a>() and <a href="qbluetoothpasskeyagent.html#requestPasskey">requestPasskey</a>().</p>
-<h3 class="fn"><a name="confirmPasskey"></a>bool QBluetoothPasskeyAgent::confirmPasskey ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteAddr</i>, const <a href="qstring.html">QString</a> &amp; <i>passkey</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="confirmPasskey"></a>bool QBluetoothPasskeyAgent::confirmPasskey ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i>, const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>remoteAddr</i>, const <a href="./qstring.html">QString</a> &amp; <i>passkey</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function will be called whenever a passkey needs to be confirmed by the user. The request came in on <i>localDevice</i> and the address of the paired device is <i>remoteAddr</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object. The <i>passkey</i> contains the passkey that should be confirmed.</p>
 <p>The method should return true if the passkeys match, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#requestPasskey">requestPasskey</a>() and <a href="qbluetoothpasskeyagent.html#cancelRequest">cancelRequest</a>().</p>
 <h3 class="fn"><a name="error"></a><a href="qbluetoothpasskeyagent.html#Error-enum">QBluetoothPasskeyAgent::Error</a> QBluetoothPasskeyAgent::error () const</h3>
 <p>Returns the last error that has occurred.</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QBluetoothPasskeyAgent::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QBluetoothPasskeyAgent::name () const</h3>
 <p>Returns the name of the passkey agent as a string.</p>
 <h3 class="fn"><a name="registerDefault"></a>bool QBluetoothPasskeyAgent::registerDefault ()</h3>
 <p>Register the passkey agent as the default agent for all local devices.</p>
 <p>Returns true if the agent could be registered successfully, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#unregisterDefault">unregisterDefault</a>().</p>
-<h3 class="fn"><a name="registerDefault-2"></a>bool QBluetoothPasskeyAgent::registerDefault ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i> )</h3>
+<h3 class="fn"><a name="registerDefault-2"></a>bool QBluetoothPasskeyAgent::registerDefault ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Register the passkey agent as the default agent for device given by <i>localDevice</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object.</p>
 <p>Returns true if the agent could be registered successfully, and false otherwise.</p>
@@ -108,7 +107,7 @@
 <p>Note that once pairing is complete, or a timeout has been hit, the agent will be automatically unregistered. The <tt>release()</tt> method will be called. It is up to the application to register the agent again.</p>
 <p>Returns true if the agent could be registered successfully, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#unregisterForAddress">unregisterForAddress</a>().</p>
-<h3 class="fn"><a name="registerForAddress-2"></a>bool QBluetoothPasskeyAgent::registerForAddress ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
+<h3 class="fn"><a name="registerForAddress-2"></a>bool QBluetoothPasskeyAgent::registerForAddress ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i>, <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Register the passkey agent for local device represented by <i>localDevice</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object. It will only handle pairing requests associated with remote device which is given in <i>addr</i>.</p>
 <p>Note that once pairing is complete, or a timeout has been hit, the agent will be automatically unregistered. The <tt>release()</tt> method will be called. It is up to the application to register the agent again.</p>
@@ -125,7 +124,7 @@
 <p>Unregister the passkey agent as the default agent for all local devices.</p>
 <p>Returns true if the agent could be unregistered successfully, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#registerDefault">registerDefault</a>().</p>
-<h3 class="fn"><a name="unregisterDefault-2"></a>bool QBluetoothPasskeyAgent::unregisterDefault ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i> )</h3>
+<h3 class="fn"><a name="unregisterDefault-2"></a>bool QBluetoothPasskeyAgent::unregisterDefault ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Unregister the passkey agent as the default agent for device given by <i>localDevice</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object.</p>
 <p>Returns true if the agent could be unregistered successfully, and false otherwise.</p>
@@ -134,15 +133,15 @@
 <p>Unregister the passkey agent for all local devices. This method attempts to unregister an agent that would have only handled pairing requests associated with remote device at address <i>addr</i>.</p>
 <p>Returns true if the agent could be unregistered successfully, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#registerForAddress">registerForAddress</a>().</p>
-<h3 class="fn"><a name="unregisterForAddress-2"></a>bool QBluetoothPasskeyAgent::unregisterForAddress ( const <a href="qstring.html">QString</a> &amp; <i>localDevice</i>, <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
+<h3 class="fn"><a name="unregisterForAddress-2"></a>bool QBluetoothPasskeyAgent::unregisterForAddress ( const <a href="./qstring.html">QString</a> &amp; <i>localDevice</i>, <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Unregister the passkey agent for local device <i>localDevice</i>. The <i>localDevice</i> is of the form hciX, and can be used to construct a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object. This method attempts to unregister an agent that would have only handled pairing requests associated with remote device at address <i>addr</i>.</p>
 <p>Returns true if the agent could be unregistered successfully, and false otherwise.</p>
 <p>See also <a href="qbluetoothpasskeyagent.html#registerForAddress">registerForAddress</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -31,33 +31,33 @@
 <p>QIrIasDatabase class provides access to the local IAS Database, and gives the ability to add, query and delete attributes. This class also allows to modify the advertised major classes this device supports. These are generally referred to as service hints.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="attribute"></a><a href="qvariant.html">QVariant</a> QIrIasDatabase::attribute ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the value of an attribute from the local IAS Database. The <i>className</i> parameter specifies the class name of the attribute. The <i>attribName</i> parameter specifies the attribute name. Returns an invalid <a href="qvariant.html">QVariant</a> in case of failure, and valid otherwise. The value of <a href="qvariant.html">QVariant</a> can be one of:</p>
+<h3 class="fn"><a name="attribute"></a><a href="./qvariant.html">QVariant</a> QIrIasDatabase::attribute ( const <a href="./qstring.html">QString</a> &amp; <i>className</i>, const <a href="./qstring.html">QString</a> &amp; <i>attribName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the value of an attribute from the local IAS Database. The <i>className</i> parameter specifies the class name of the attribute. The <i>attribName</i> parameter specifies the attribute name. Returns an invalid <a href="./qvariant.html">QVariant</a> in case of failure, and valid otherwise. The value of <a href="./qvariant.html">QVariant</a> can be one of:</p>
 <ul>
-<li><b><a href="qstring.html">QString</a></b> - Represents a String IAS attribute.</li>
+<li><b><a href="./qstring.html">QString</a></b> - Represents a String IAS attribute.</li>
 <li><b>uint</b> - Represents an Integer IAS attribute.</li>
-<li><b><a href="qbytearray.html">QByteArray</a></b> - Represents an octet sequence IAS attribute.</li>
+<li><b><a href="./qbytearray.html">QByteArray</a></b> - Represents an octet sequence IAS attribute.</li>
 </ul>
 <p>NOTE: Under linux this function requires administrator privileges. Under windows this function has no effect and always returns an invalid value.</p>
 <p>See also <a href="qiriasdatabase.html#setAttribute">setAttribute</a>() and <a href="qiriasdatabase.html#removeAttribute">removeAttribute</a>().</p>
-<h3 class="fn"><a name="removeAttribute"></a>bool QIrIasDatabase::removeAttribute ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="removeAttribute"></a>bool QIrIasDatabase::removeAttribute ( const <a href="./qstring.html">QString</a> &amp; <i>className</i>, const <a href="./qstring.html">QString</a> &amp; <i>attribName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Attempts to remove the attribute from the local IAS Database. The <i>className</i> parameter specifies the class name of the attribute. The <i>attribName</i> parameter specifies the attribute name. Returns true if the attribute could be removed, false otherwise.</p>
 <p>NOTE: Under linux this function requires administrator privileges. Under Windows this function has no effect and always returns false</p>
 <p>See also <a href="qiriasdatabase.html#setAttribute">setAttribute</a>() and <a href="qiriasdatabase.html#attribute">attribute</a>().</p>
-<h3 class="fn"><a name="setAttribute"></a>bool QIrIasDatabase::setAttribute ( const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>attr</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="setAttribute"></a>bool QIrIasDatabase::setAttribute ( const <a href="./qstring.html">QString</a> &amp; <i>className</i>, const <a href="./qstring.html">QString</a> &amp; <i>attribName</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>attr</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets a new attribute into the IAS Database returning true if successful; otherwise returning false. The <i>attr</i> parameter holds the attribute to be set. Attr can be of the following types:</p>
 <ul>
-<li><b><a href="qstring.html">QString</a></b> - Represents a String IAS attribute.</li>
+<li><b><a href="./qstring.html">QString</a></b> - Represents a String IAS attribute.</li>
 <li><b>uint</b> - Represents an Integer IAS attribute.</li>
-<li><b><a href="qbytearray.html">QByteArray</a></b> - Represents an octet sequence IAS attribute.</li>
+<li><b><a href="./qbytearray.html">QByteArray</a></b> - Represents an octet sequence IAS attribute.</li>
 </ul>
 <p>Any other type will be treated as invalid. The <i>className</i> parameter holds the class name of the IAS attribute. The <i>attribName</i> parameter holds the attribute name of the attribute.</p>
 <p>NOTE: Under linux this function requires administrator privileges.</p>
 <p>See also <a href="qiriasdatabase.html#attribute">attribute</a>() and <a href="qiriasdatabase.html#removeAttribute">removeAttribute</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

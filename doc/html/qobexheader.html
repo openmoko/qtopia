@@ -77,7 +77,7 @@
 <p>The QObexHeader class contains header information for an OBEX request or response.</p>
 <p>The QObexHeader class provides a container for a set of headers for an OBEX request or response.</p>
 <p>Convenience methods are provided to set and get header values for all header identifiers that are defined in the IrOBEX specification; for example, <a href="qobexheader.html#setName">setName</a>(), <a href="qobexheader.html#name">name</a>(), <a href="qobexheader.html#setType">setType</a>(), <a href="qobexheader.html#type">type</a>().</p>
-<p>Additionally, <a href="qobexheader.html#setValue">setValue</a>() and <a href="qobexheader.html#value">value</a>() can be used to set and retrieve custom header values as <a href="qvariant.html">QVariant</a> values.</p>
+<p>Additionally, <a href="qobexheader.html#setValue">setValue</a>() and <a href="qobexheader.html#value">value</a>() can be used to set and retrieve custom header values as <a href="./qvariant.html">QVariant</a> values.</p>
 <p>See also <a href="qobexclientsession.html">QObexClientSession</a> and <a href="qobexserversession.html">QObexServerSession</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -113,161 +113,160 @@
 <p>Constructs a <a href="qobexheader.html">QObexHeader</a> with the contents from <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QObexHeader"></a>QObexHeader::~QObexHeader ()</h3>
 <p>Destroys the header.</p>
-<h3 class="fn"><a name="appParameters"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::appParameters () const</h3>
+<h3 class="fn"><a name="appParameters"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::appParameters () const</h3>
 <p>Returns the value of the OBEX header field <tt>Application Parameters</tt>.</p>
 <p>Returns an empty byte array if the <tt>Application Parameters</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setAppParameters">setAppParameters</a>().</p>
 <h3 class="fn"><a name="clear"></a>void QObexHeader::clear ()</h3>
 <p>Removes all header entries.</p>
-<h3 class="fn"><a name="connectionId"></a>quint32 QObexHeader::connectionId () const</h3>
+<h3 class="fn"><a name="connectionId"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QObexHeader::connectionId () const</h3>
 <p>Returns the value of the OBEX header field <tt>Connection Id</tt>.</p>
 <p>Returns 0 if the <tt>Connection Id</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setConnectionId">setConnectionId</a>().</p>
 <h3 class="fn"><a name="contains"></a>bool QObexHeader::contains ( int <i>headerId</i> ) const</h3>
 <p>Returns true if this set of headers has a header entry with the header identifier <i>headerId</i>; otherwise returns false.</p>
 <p>See also <a href="qobexheader.html#headerIds">headerIds</a>().</p>
-<h3 class="fn"><a name="count"></a>quint32 QObexHeader::count () const</h3>
+<h3 class="fn"><a name="count"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QObexHeader::count () const</h3>
 <p>Returns the value of the OBEX header field <tt>Count</tt>.</p>
 <p>Returns 0 if the <tt>Count</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setCount">setCount</a>().</p>
-<h3 class="fn"><a name="creatorId"></a>quint32 QObexHeader::creatorId () const</h3>
+<h3 class="fn"><a name="creatorId"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QObexHeader::creatorId () const</h3>
 <p>Returns the value of the OBEX header field <tt>Connection Id</tt>.</p>
 <p>Returns 0 if the <tt>Creator ID</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setCreatorId">setCreatorId</a>().</p>
-<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QObexHeader::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> QObexHeader::description () const</h3>
 <p>Returns the value of the OBEX header field <tt>Description</tt>.</p>
 <p>Returns an empty string if the <tt>Description</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setDescription">setDescription</a>().</p>
-<h3 class="fn"><a name="headerIds"></a><a href="qlist.html">QList</a>&lt;int&gt; QObexHeader::headerIds () const</h3>
+<h3 class="fn"><a name="headerIds"></a><a href="./qlist.html">QList</a>&lt;int&gt; QObexHeader::headerIds () const</h3>
 <p>Returns a list of the header identifiers in this set of headers.</p>
-<p>The list is not sorted in any particular order.</p>
 <p>See also <a href="qobexheader.html#contains">contains</a>().</p>
-<h3 class="fn"><a name="http"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::http () const</h3>
+<h3 class="fn"><a name="http"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::http () const</h3>
 <p>Returns the value of the OBEX header field <tt>HTTP</tt>.</p>
 <p>Returns an empty byte array if the <tt>HTTP</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setHttp">setHttp</a>().</p>
-<h3 class="fn"><a name="length"></a>quint32 QObexHeader::length () const</h3>
+<h3 class="fn"><a name="length"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QObexHeader::length () const</h3>
 <p>Returns the value of the OBEX header field <tt>Length</tt>.</p>
 <p>Returns 0 if the <tt>Length</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setLength">setLength</a>().</p>
-<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QObexHeader::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QObexHeader::name () const</h3>
 <p>Returns the value of the OBEX header field <tt>Name</tt>.</p>
 <p>Returns an empty string if the <tt>Name</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setName">setName</a>().</p>
-<h3 class="fn"><a name="objectClass"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::objectClass () const</h3>
+<h3 class="fn"><a name="objectClass"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::objectClass () const</h3>
 <p>Returns the value of the OBEX header field <tt>Object Class</tt>.</p>
 <p>Returns an empty byte array if the <tt>Object Class</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setObjectClass">setObjectClass</a>().</p>
 <h3 class="fn"><a name="remove"></a>bool QObexHeader::remove ( int <i>headerId</i> )</h3>
 <p>Removes the header entry with identifier <i>headerId</i>.</p>
 <p>Returns true if the value was removed, or returns false if no entry exists for the identifier <i>headerId</i>.</p>
-<h3 class="fn"><a name="sessionParameters"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::sessionParameters () const</h3>
+<h3 class="fn"><a name="sessionParameters"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::sessionParameters () const</h3>
 <p>Returns the value of the OBEX header field <tt>Session-Parameters</tt>.</p>
 <p>Returns an empty byte array if the <tt>Session-Parameters</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setSessionParameters">setSessionParameters</a>().</p>
-<h3 class="fn"><a name="sessionSequenceNumber"></a>quint8 QObexHeader::sessionSequenceNumber () const</h3>
+<h3 class="fn"><a name="sessionSequenceNumber"></a><a href="./qtglobal.html#quint8-typedef">quint8</a> QObexHeader::sessionSequenceNumber () const</h3>
 <p>Returns the value of the OBEX header field <tt>Session-Sequence-Number</tt>.</p>
 <p>Returns 0 if the <tt>Session-Sequence-Number</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setSessionSequenceNumber">setSessionSequenceNumber</a>().</p>
-<h3 class="fn"><a name="setAppParameters"></a>void QObexHeader::setAppParameters ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>params</i> )</h3>
+<h3 class="fn"><a name="setAppParameters"></a>void QObexHeader::setAppParameters ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>params</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Application Parameters</tt> to <i>params</i>.</p>
 <p>See also <a href="qobexheader.html#appParameters">appParameters</a>().</p>
-<h3 class="fn"><a name="setAuthenticationChallenge"></a>void QObexHeader::setAuthenticationChallenge ( <a href="qobex.html#AuthChallengeOption-enum">QObex::AuthChallengeOptions</a> <i>options</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>realm</i> = QString() )</h3>
+<h3 class="fn"><a name="setAuthenticationChallenge"></a>void QObexHeader::setAuthenticationChallenge ( <a href="qobex.html#AuthChallengeOption-enum">QObex::AuthChallengeOptions</a> <i>options</i> = 0, const <a href="./qstring.html">QString</a> &amp; <i>realm</i> = QString() )</h3>
 <p>Sets the value of the OBEX header field <tt>Authentication Challenge</tt> to an authentication challenge generated using the given <i>options</i> and <i>realm</i>.</p>
 <p>The <i>realm</i> is a string that can be displayed to users to inform them of the username and password to be used for authentication. The supported encodings for the <i>realm</i> are ASCII, ISO-8859-1 and Unicode.</p>
 <p>The options and realm fields are optional when creating a challenge.</p>
-<h3 class="fn"><a name="setConnectionId"></a>void QObexHeader::setConnectionId ( quint32 <i>connectionId</i> )</h3>
+<h3 class="fn"><a name="setConnectionId"></a>void QObexHeader::setConnectionId ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>connectionId</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Connection Id</tt> to <i>connectionId</i>.</p>
 <p>This value identifies the OBEX connection to which an OBEX request belongs, in order to differentiate between multiple clients on the same connection.</p>
 <p><b>Note:</b> If this header is to be sent in an OBEX request, you should not also add a <tt>Target</tt> value, as it is illegal to send a <tt>Target</tt> header and a <tt>Connection Id</tt> header in the same <i>request</i> (as stated in the OBEX specification).</p>
 <p>See also <a href="qobexheader.html#connectionId">connectionId</a>() and <a href="qobexclientsession.html#connectionId">QObexClientSession::connectionId</a>().</p>
-<h3 class="fn"><a name="setCount"></a>void QObexHeader::setCount ( quint32 <i>count</i> )</h3>
+<h3 class="fn"><a name="setCount"></a>void QObexHeader::setCount ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>count</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Count</tt> to <i>count</i>.</p>
 <p>This value indicates the number of objects involved in the OBEX operation.</p>
 <p>See also <a href="qobexheader.html#count">count</a>().</p>
-<h3 class="fn"><a name="setCreatorId"></a>void QObexHeader::setCreatorId ( quint32 <i>creatorId</i> )</h3>
+<h3 class="fn"><a name="setCreatorId"></a>void QObexHeader::setCreatorId ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>creatorId</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Creator ID</tt> to <i>creatorId</i>.</p>
 <p>See also <a href="qobexheader.html#creatorId">creatorId</a>().</p>
-<h3 class="fn"><a name="setDescription"></a>void QObexHeader::setDescription ( const <a href="qstring.html">QString</a> &amp; <i>description</i> )</h3>
+<h3 class="fn"><a name="setDescription"></a>void QObexHeader::setDescription ( const <a href="./qstring.html">QString</a> &amp; <i>description</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Description</tt> to <i>description</i>.</p>
 <p>This value can be used to provide additional information about the operation.</p>
 <p>See also <a href="qobexheader.html#description">description</a>().</p>
-<h3 class="fn"><a name="setHttp"></a>void QObexHeader::setHttp ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>http</i> )</h3>
+<h3 class="fn"><a name="setHttp"></a>void QObexHeader::setHttp ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>http</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>HTTP</tt> to <i>http</i>.</p>
 <p>This value should be a byte sequence containing a HTTP 1.x header.</p>
 <p>See also <a href="qobexheader.html#http">http</a>().</p>
-<h3 class="fn"><a name="setLength"></a>void QObexHeader::setLength ( quint32 <i>length</i> )</h3>
+<h3 class="fn"><a name="setLength"></a>void QObexHeader::setLength ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>length</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Length</tt> to <i>length</i>.</p>
 <p>If the length of the object to be transferred is known in advance, this header should be used.</p>
 <p>See also <a href="qobexheader.html#length">length</a>().</p>
-<h3 class="fn"><a name="setName"></a>void QObexHeader::setName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="setName"></a>void QObexHeader::setName ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Name</tt> to <i>name</i>.</p>
 <p>If an object is being sent to another device, this value should generally be the filename of the object.</p>
 <p>An empty <i>name</i> string is used to specify particular behaviors for some <tt>GET</tt> and <tt>SETPATH</tt> operations. For <tt>GET</tt>, an empty string means that the &quot;default&quot; object should be retrieved. For <tt>SETPATH</tt>, an empty string means the path should be reset to the &quot;default&quot; folder.</p>
 <p>See also <a href="qobexheader.html#name">name</a>().</p>
-<h3 class="fn"><a name="setObjectClass"></a>void QObexHeader::setObjectClass ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>objectClass</i> )</h3>
+<h3 class="fn"><a name="setObjectClass"></a>void QObexHeader::setObjectClass ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>objectClass</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Object Class</tt> to <i>objectClass</i>.</p>
 <p>See also <a href="qobexheader.html#objectClass">objectClass</a>().</p>
-<h3 class="fn"><a name="setSessionParameters"></a>void QObexHeader::setSessionParameters ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>params</i> )</h3>
+<h3 class="fn"><a name="setSessionParameters"></a>void QObexHeader::setSessionParameters ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>params</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Session-Parameters</tt> to <i>params</i>.</p>
 <p>See also <a href="qobexheader.html#sessionParameters">sessionParameters</a>().</p>
-<h3 class="fn"><a name="setSessionSequenceNumber"></a>void QObexHeader::setSessionSequenceNumber ( quint8 <i>num</i> )</h3>
+<h3 class="fn"><a name="setSessionSequenceNumber"></a>void QObexHeader::setSessionSequenceNumber ( <a href="./qtglobal.html#quint8-typedef">quint8</a> <i>num</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Session-Sequence-Number</tt> to <i>num</i>.</p>
 <p>See also <a href="qobexheader.html#sessionSequenceNumber">sessionSequenceNumber</a>().</p>
-<h3 class="fn"><a name="setTarget"></a>void QObexHeader::setTarget ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>target</i> )</h3>
+<h3 class="fn"><a name="setTarget"></a>void QObexHeader::setTarget ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>target</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Target</tt> to <i>target</i>.</p>
 <p>This value should identify the intended target of an OBEX operation.</p>
 <p><b>Note:</b> If this header is to be sent in an OBEX request, you should not also add a <tt>Connection Id</tt> value, as it is illegal to send a <tt>Target</tt> header and a <tt>Connection Id</tt> header in the same <i>request</i> (as stated in the OBEX specification).</p>
 <p>See also <a href="qobexheader.html#target">target</a>().</p>
-<h3 class="fn"><a name="setTime"></a>void QObexHeader::setTime ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
-<p>Sets the value of the OBEX header field <tt>Time</tt> to <i>dateTime</i>, if <i>dateTime</i> is a valid <a href="qdatetime.html">QDateTime</a> object.</p>
+<h3 class="fn"><a name="setTime"></a>void QObexHeader::setTime ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
+<p>If <i>dateTime</i> is a valid <a href="./qdatetime.html">QDateTime</a> object, sets the value of the OBEX header field <tt>Time</tt> to <i>dateTime</i>.</p>
 <p>See also <a href="qobexheader.html#time">time</a>().</p>
-<h3 class="fn"><a name="setType"></a>void QObexHeader::setType ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="setType"></a>void QObexHeader::setType ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Type</tt> to <i>type</i>.</p>
 <p>This header corresponds to the content-type header in HTTP. The <i>type</i> value should be a standard ASCII mime type string, e.g&#x2e; &quot;text/plain&quot;, &quot;image/jpeg&quot;.</p>
 <p>See also <a href="qobexheader.html#type">type</a>().</p>
-<h3 class="fn"><a name="setValue"></a>bool QObexHeader::setValue ( int <i>headerId</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>variant</i> )</h3>
+<h3 class="fn"><a name="setValue"></a>bool QObexHeader::setValue ( int <i>headerId</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>variant</i> )</h3>
 <p>Sets the value of the header entry with identifier <i>headerId</i> to the value in <i>variant</i>.</p>
 <p>The <i>variant</i> must be able to be converted into one of the following types:</p>
 <ul>
-<li><a href="qstring.html">QString</a></li>
-<li><a href="qbytearray.html">QByteArray</a></li>
+<li><a href="./qstring.html">QString</a></li>
+<li><a href="./qbytearray.html">QByteArray</a></li>
 <li><tt>quint8</tt></li>
 <li><tt>quint32</tt></li>
 </ul>
 <p>The header encoding of <i>headerId</i> will be used to determine which of the data types should be used for conversion.</p>
 <p>Returns true if the value was set for the header. Otherwise, returns <tt>false</tt> (for example, if the value in <i>variant</i> cannot be converted to the data type specified by <i>headerId</i>).</p>
 <p>See also <a href="qobexheader.html#value">value</a>().</p>
-<h3 class="fn"><a name="setWanUuid"></a>void QObexHeader::setWanUuid ( <a href="quuid.html">QUuid</a> <i>uuid</i> )</h3>
+<h3 class="fn"><a name="setWanUuid"></a>void QObexHeader::setWanUuid ( <a href="./quuid.html">QUuid</a> <i>uuid</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>WAN UUID</tt> to <i>uuid</i>.</p>
 <p>See also <a href="qobexheader.html#wanUuid">wanUuid</a>().</p>
-<h3 class="fn"><a name="setWho"></a>void QObexHeader::setWho ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>who</i> )</h3>
+<h3 class="fn"><a name="setWho"></a>void QObexHeader::setWho ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>who</i> )</h3>
 <p>Sets the value of the OBEX header field <tt>Who</tt> to <i>who</i>.</p>
 <p>This value can be used to allow peer applications to identify each other.</p>
 <p>See also <a href="qobexheader.html#who">who</a>().</p>
 <h3 class="fn"><a name="size"></a>int QObexHeader::size () const</h3>
 <p>Returns the number of entries in the OBEX header.</p>
-<h3 class="fn"><a name="target"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::target () const</h3>
+<h3 class="fn"><a name="target"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::target () const</h3>
 <p>Returns the value of the OBEX header field <tt>Target</tt>.</p>
 <p>Returns an empty byte array if the <tt>Target</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setTarget">setTarget</a>().</p>
-<h3 class="fn"><a name="time"></a><a href="qdatetime.html">QDateTime</a> QObexHeader::time () const</h3>
+<h3 class="fn"><a name="time"></a><a href="./qdatetime.html">QDateTime</a> QObexHeader::time () const</h3>
 <p>Returns the value of the OBEX header field <tt>Time</tt>.</p>
-<p>Returns an invalid <a href="qdatetime.html">QDateTime</a> object if the <tt>Time</tt> header is not present, or if the header value does not conform to the ISO 8601 format.</p>
+<p>Returns an invalid <a href="./qdatetime.html">QDateTime</a> object if the <tt>Time</tt> header is not present, or if the header value does not conform to the ISO 8601 format.</p>
 <p>See also <a href="qobexheader.html#setTime">setTime</a>().</p>
-<h3 class="fn"><a name="type"></a><a href="qstring.html">QString</a> QObexHeader::type () const</h3>
+<h3 class="fn"><a name="type"></a><a href="./qstring.html">QString</a> QObexHeader::type () const</h3>
 <p>Returns the value of the OBEX header field <tt>Type</tt>.</p>
 <p>Returns an empty string if the <tt>Type</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setType">setType</a>().</p>
-<h3 class="fn"><a name="value"></a><a href="qvariant.html">QVariant</a> QObexHeader::value ( int <i>headerId</i> ) const</h3>
+<h3 class="fn"><a name="value"></a><a href="./qvariant.html">QVariant</a> QObexHeader::value ( int <i>headerId</i> ) const</h3>
 <p>Returns the value of the header entry with identifier <i>headerId</i>.</p>
 <p>Returns an invalid variant if no entry exists for <i>headerId</i>.</p>
 <p>See also <a href="qobexheader.html#setValue">setValue</a>().</p>
-<h3 class="fn"><a name="wanUuid"></a><a href="quuid.html">QUuid</a> QObexHeader::wanUuid () const</h3>
+<h3 class="fn"><a name="wanUuid"></a><a href="./quuid.html">QUuid</a> QObexHeader::wanUuid () const</h3>
 <p>Returns the value of the OBEX header field <tt>WAN UUID</tt>.</p>
 <p>Returns a null UUID if the <tt>WAN UUID</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setWanUuid">setWanUuid</a>().</p>
-<h3 class="fn"><a name="who"></a><a href="qbytearray.html">QByteArray</a> QObexHeader::who () const</h3>
+<h3 class="fn"><a name="who"></a><a href="./qbytearray.html">QByteArray</a> QObexHeader::who () const</h3>
 <p>Returns the value of the OBEX header field <tt>Who</tt>.</p>
 <p>Returns an empty byte array if the <tt>Who</tt> header is not present.</p>
 <p>See also <a href="qobexheader.html#setWho">setWho</a>().</p>
@@ -277,12 +276,12 @@
 <h3 class="fn"><a name="operator-eq"></a>QObexHeader &amp; QObexHeader::operator= ( const QObexHeader &amp; <i>other</i> )</h3>
 <p>Assigns the contents of <i>other</i> to this object and returns a reference to this header.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QObexHeader::operator== ( const QObexHeader &amp; <i>other</i> ) const</h3>
-<p>Returns <tt>true</tt> if <i>other</i> is equal to this header; otherwise returns <tt>false</tt>.</p>
+<p>Returns <tt>true</tt> if <i>other</i> contains the same values as this header; otherwise returns <tt>false</tt>.</p>
 <p>See also <a href="qobexheader.html#operator-not-eq">operator!=</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

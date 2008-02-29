@@ -20,6 +20,61 @@
 <h1 align="center">Modem Emulator - Supplementary Services<br /><span class="subtitle"></span>
 </h1>
 <p>The AT commands in this section are used for accessing GSM supplementary services such as call waiting, caller-id, etc.</p>
+<p><b>AT+CCFC Call Forwarding</b></p>
+<p>The <tt>AT+CCFC</tt> command allows control of the call forwarding supplementary service according to 3GPP TS 22.082.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CCFC=&lt;reason&gt;,&lt;mode&gt;[,&lt;number&gt;[,&lt;type&gt;[,&lt;class&gt;[,&lt;subaddr&gt;[,&lt;satype&gt;[,&lt;time&gt;]]]]]]</tt></td><td><ul>
+<li><tt>+CME ERROR: &lt;err&gt;</tt></li>
+<li><b>when &lt;mode&gt;=2 and command successful:</b> <tt>+CCFC: &lt;status&gt;,&lt;class1&gt;[,&lt;number&gt;,&lt;type&gt;[,&lt;subaddr&gt;,&lt;satype&gt;[,&lt;time&gt;]]] [&lt;CR&gt;&lt;LF&gt;+CCFC: &lt;status&gt;,&lt;class2&gt;[,&lt;number&gt;,&lt;type&gt;[,&lt;subaddr&gt;,&lt;satype&gt;[,&lt;time&gt;]]] [...]]</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CCFC=?</tt></td><td><tt>+CCFC:</tt>(list of supported <tt>&lt;reason&gt;</tt>s)</td></tr>
+</table></p>
+<p>Defined Values:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Values</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>&lt;reason&gt;</tt></td><td><ul>
+<li>0 Unconditional</li>
+<li>1 Mobile Busy</li>
+<li>2 No Reply</li>
+<li>3 Not Reachable</li>
+<li>4 All Call Forwarding</li>
+<li>5 All Conditional Call Forwarding</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;mode&gt;</tt></td><td><ul>
+<li>0 Disable</li>
+<li>1 Enable</li>
+<li>2 Query Status</li>
+<li>3 Registration</li>
+<li>4 Erasure</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;number&gt;</tt></td><td>string type phone number of forwarding address in format specified by <tt>type</tt></td></tr>
+<tr valign="top" class="even"><td><tt>&lt;type&gt;</tt></td><td>type of address octet in integer format (see TS 24.008 [8]); default 145 when dialling string includes international access code character `+', else 129</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;subaddr&gt;</tt></td><td>string type subaddress of the format specified by <tt>&lt;satype&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>&lt;satype&gt;</tt></td><td>type of subaddress octet in integer format (see TS 24.008 [8]); default 128</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;class\e{x}&gt;</tt></td><td>sum of integers representing a class of information (default 7):<ul>
+<li>1 voice (telephony)</li>
+<li>2 data (refers to all bearer services)</li>
+<li>4 fax (facsimile services)</li>
+<li>8 short message service</li>
+<li>16 data circuit sync</li>
+<li>32 data circuit async</li>
+<li>64 dedicated packet access</li>
+<li>128 dedicated PAD access</li>
+<li>7 default (voice, data and fax)</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;time&gt;</tt></td><td>1..30; when &quot;no reply&quot; is enabled or queried, this gives the time in seconds to wait before the call is forwarded. Default value of 20</td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;status&gt;</tt></td><td><ul>
+<li>0 Not Active</li>
+<li>1 Active</li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><b>AT+CCWA Call Waiting</b></p>
 <p>The <tt>AT+CCWA</tt> command allows control of the Call Waiting supplementary service according to 3GPP TS 22.083.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -76,6 +131,61 @@
 <tr valign="top" class="odd"><td><tt>&lt;priority&gt;</tt></td><td>Digit indicating eMLPP priority level of incoming call (refer 3GPP TS 22.067).</td></tr>
 </table></p>
 <p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CLIR Calling Line Identification Restriction</b></p>
+<p>This command allows a calling subscriber to enable or disable the presentation of the CLI to the called party when originating a call.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CLIR=[&lt;n&gt;]</tt></td><td></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CLIR?</tt></td><td><tt>+CLIR: &lt;n&gt;,&lt;m&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CLIR=?</tt></td><td><tt>+CLIR:</tt>(list of supported <tt>&lt;n&gt;</tt>s)</td></tr>
+</table></p>
+<p>The <tt>&lt;n&gt;</tt> parameter sets the adjustment for outgoing calls, and can be 0 (default; according to CLIR subscription), 1 (invocation), or 2 (suppression).</p>
+<p>The <tt>&lt;m&gt;</tt> parameter shows the subscriber CLIR service status in the network. It can be one of:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td>0</td><td>CLIR not provisioned</td></tr>
+<tr valign="top" class="even"><td>1</td><td>CLIR provisioned in permanent mode</td></tr>
+<tr valign="top" class="odd"><td>2</td><td>unknown (no network, etc)</td></tr>
+<tr valign="top" class="even"><td>3</td><td>CLIR temporary mode presentation restricted</td></tr>
+<tr valign="top" class="odd"><td>4</td><td>CLIR temporary mode presentation allowed</td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+COLP Connected Line Identification Presentation</b></p>
+<p>This command enables a calling subscriber to get the line identity of the called party after setting up a mobile originated call. The command enables or disables the presentation of the connected line identity at the TE.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+COLP=[&lt;n&gt;]</tt></td><td></td></tr>
+<tr valign="top" class="even"><td><tt>AT+COLP?</tt></td><td><tt>+COLP: &lt;n&gt;,&lt;m&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+COLP=?</tt></td><td><tt>+COLP:</tt>(list of supported <tt>&lt;n&gt;</tt>s)</td></tr>
+</table></p>
+<p>In this implementation of <tt>AT+COLP</tt> the line identity information is presented after the establishment of any type of call.</p>
+<p>The <tt>&lt;n&gt;</tt> parameter can be 0 (default; disable) or 1. The <tt>&lt;m&gt;</tt> parameter shows the subscriber COLP service status in the network. See 27.007 for complete details.</p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CUSD Unstructured Supplementary Service Data</b></p>
+<p>The <tt>AT+CUSD</tt> command allows control of the Unstructured Supplementary Service Data (USSD).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CUSD=[&lt;n&gt;[,&lt;str&gt;[,&lt;dcs&gt;]]]</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CUSD?</tt></td><td><tt>+CUSD: &lt;n&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CUSD=?</tt></td><td><tt>+CUSD:</tt>(list of supported <tt>&lt;n&gt;</tt>s)</td></tr>
+</table></p>
+<p>The <tt>&lt;n&gt;</tt> parameter can take the following values:</p>
+<ul>
+<li>0 Disable result code presentation to TE (default)</li>
+<li>1 Enable result code presentation to TE</li>
+<li>2 Cancel session (not applicable to read command response)</li>
+</ul>
+<p>When <tt>&lt;str&gt;</tt> is given, a mobile initiated USSD string is sent to the network. The response USSD string from the network is returned in a subsequent unsolicited +CUSD result code.</p>
+<p>The <tt>&lt;dcs&gt;</tt> parameter defines the Cell Broadcast Data Coding Scheme in integer format (default 0).</p>
+<p>The unstructured supplementary service data response is of the form <tt>+CUSD: &lt;m&gt;[,&lt;str&gt;,&lt;dcs&gt;]</tt> where <tt>&lt;m&gt;</tt> can take the following values:</p>
+<ul>
+<li>0 No further user action required</li>
+<li>1 Further user action required</li>
+<li>2 USSD terminated by network</li>
+<li>3 Other local client has responded</li>
+<li>4 Operation not supported</li>
+<li>5 Network time-out</li>
+</ul>
+<p>Conforms with 3GPP TS 27.007.</p>
 <p><b>AT+CLIP Calling line identification presentation</b></p>
 <p>The <tt>AT+CLIP</tt> command allows control of the calling line identification presentation supplementary service.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -111,6 +221,16 @@
 </td></tr>
 </table></p>
 <p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CSSN Supplementary Service Notifications</b></p>
+<p>The <tt>AT+CSSN</tt> command refers to supplementary services related network initiated notifications. It controls the presentation of notification result codes from TA to TE.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CSSN=[&lt;n&gt;[,&lt;m&gt;]]</tt></td><td></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CSSN?</tt></td><td><tt>+CSSN: &lt;n&gt;,&lt;m&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSSN=?</tt></td><td><tt>+CSSN:</tt>(list of supported <tt>&lt;n&gt;</tt>s)<tt>,</tt>(list of supported <tt>&lt;m&gt;</tt>s)</td></tr>
+</table></p>
+<p><tt>&lt;n&gt;</tt> parameter enables presentation of the +CSSI result code to the TE. <tt>&lt;m&gt;</tt> parameter enables presentation of the +CSSU result code to the TE. For each, values of 0 (disable; default) and 1 (enable) are supported.</p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -119,8 +239,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

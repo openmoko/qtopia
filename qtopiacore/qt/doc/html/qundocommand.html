@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/util/qundostack.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/util/qundostack.cpp -->
 <head>
   <title>Qt 4.3: QUndoCommand Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -61,15 +61,15 @@
  stack-&gt;undo();
 
  MyCommand *command3 = new MyCommand();
- stack-&gt;push(command3); <span class="comment">// command2 gets deleted</span></pre>
+ stack-&gt;push(command3); <span class="comment">//</span> command2 gets deleted</pre>
 <p>In effect, when a command is pushed, it becomes the top-most command on the stack.</p>
 <p>To support command compression, QUndoCommand has an <a href="qundocommand.html#id">id</a>() and the virtual function <a href="qundocommand.html#mergeWith">mergeWith</a>(). These functions are used by <a href="qundostack.html#push">QUndoStack::push</a>().</p>
 <p>To support command macros, a QUndoCommand object can have any number of child commands. Undoing or redoing the parent command will cause the child commands to be undone or redone. A command can be assigned to a parent explicitly in the constructor. In this case, the command will be owned by the parent.</p>
 <p>The parent in this case is usually an empty command, in that it doesn't provide its own implementation of <a href="qundocommand.html#undo">undo</a>() and <a href="qundocommand.html#redo">redo</a>(). Instead, it uses the base implementations of these functions, which simply call <a href="qundocommand.html#undo">undo</a>() or <a href="qundocommand.html#redo">redo</a>() on all its children. The parent should, however, have a meaningful <a href="qundocommand.html#text">text</a>().</p>
-<pre> QUndoCommand *insertRed = new QUndoCommand(); <span class="comment">// an empty command</span>
+<pre> QUndoCommand *insertRed = new QUndoCommand(); <span class="comment">//</span> an empty command
  insertRed-&gt;setText(&quot;insert red text&quot;);
 
- new InsertText(document, idx, text, insertRed); <span class="comment">// becomes child of insertRed</span>
+ new InsertText(document, idx, text, insertRed); <span class="comment">//</span> becomes child of insertRed
  new SetColor(document, idx, text.length(), Qt::red, insertRed);
 
  stack.push(insertRed);</pre>
@@ -101,7 +101,7 @@
 <p>The default implementation returns false.</p>
 <pre> bool AppendText::mergeWith(const QUndoCommand *other)
  {
-     if (other-&gt;id() != id()) <span class="comment">// make sure other is also an AppendText command</span>
+     if (other-&gt;id() != id()) <span class="comment">//</span> make sure other is also an AppendText command
          return false;
      m_text += static_cast&lt;const AppendText*&gt;(other)-&gt;m_text;
      return true;
@@ -125,8 +125,8 @@
 <p>See also <a href="qundocommand.html#redo">redo</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

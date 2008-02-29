@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -77,11 +77,6 @@ public:
     void paint(QPainter *p, const QRect &r);
 
     enum DisplayMode { ScaleAndCrop, Stretch, Tile, Center, Scale };
-
-#ifdef QTOPIA4_TODO
-    QRESULT queryInterface(const QUuid&, QUnknownInterface**);
-    Q_REFCOUNT
-#endif
 
 private:
     void renderSvg(int width, int height, Qt::AspectRatioMode mode);

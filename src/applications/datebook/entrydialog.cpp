@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -50,10 +50,10 @@
 
 //------------------------------------------------------------------------------
 
-EntryDialog::EntryDialog( bool startOnMonday, const QAppointment &appointment, const QTime& defaultAllDayReminder,
+EntryDialog::EntryDialog( bool startOnMonday, const QAppointment &appointment, const QTime& defaultAllDayReminder, int defaultTimedReminder,
                           QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f ), mAppointment(appointment), mOrigAppointment( appointment ),
-    startWeekOnMonday( startOnMonday ), allDayReminder(defaultAllDayReminder),
+    startWeekOnMonday( startOnMonday ), allDayReminder(defaultAllDayReminder), timedReminder(defaultTimedReminder), 
     comboCategory(0), recurDetails(0), reminderPicker(0), editNote(0),
     editnoteQC(0), mDescription(0), mLocation(0), checkAllDay(0),
     startDate(0), endDate(0), startTime(0), endTime(0), startTimeLabel(0),
@@ -163,7 +163,7 @@ void EntryDialog::initEventDetails(QScrollArea *sc)
     // Reminder (stick it in an anonymous groupbox)
     groupbox = new QGroupBox();
     gfl = new QFormLayout();
-    reminderPicker = new ReminderPicker(this, gfl);
+    reminderPicker = new ReminderPicker(this, gfl, mAppointment);
     groupbox->setLayout(gfl);
     fl->addRow(groupbox);
 
@@ -178,11 +178,6 @@ void EntryDialog::initEventDetails(QScrollArea *sc)
     setDates(mAppointment.start(),mAppointment.end());
     mDescription->setText(mAppointment.description());
     mLocation->setText(mAppointment.location());
-
-    reminderPicker->setDefaultAllDayReminderTime(allDayReminder);
-    reminderPicker->setAllDay(mAppointment.isAllDay());
-    reminderPicker->setReminderType(mAppointment.alarm());
-    reminderPicker->setReminderMinutes(mAppointment.alarmDelay());
 
     checkAllDay->setChecked( mAppointment.isAllDay() );
 
@@ -406,8 +401,6 @@ QAppointment EntryDialog::appointment( const bool includeQdlLinks )
 
     if (recurDetails)
         recurDetails->updateAppointment();
-    if (reminderPicker)
-        mAppointment.setAlarm(reminderPicker->reminderMinutes(), reminderPicker->reminderType());
 
     return mAppointment;
 }
@@ -415,18 +408,36 @@ QAppointment EntryDialog::appointment( const bool includeQdlLinks )
 void EntryDialog::updateTimeUI()
 {
     if (checkAllDay->checkState() == Qt::Checked) {
-        reminderPicker->setAllDay(true);
         startTime->hide();
         startTimeLabel->hide();
         endTime->hide();
         endTimeLabel->hide();
     } else {
-        reminderPicker->setAllDay(false);
         startTime->show();
         startTimeLabel->show();
         endTime->show();
         endTimeLabel->show();
     }
+
+    if (mAppointment.isAllDay() != checkAllDay->isChecked()) {
+        mAppointment.setAllDay( checkAllDay->isChecked() );
+
+        // Try to keep the days/weeks before portion of all day/timed events the same
+        int daysportion = (24 * 60) * (timedReminder / (24 * 60));
+
+        // Since we've toggled the state, reset the reminder
+        if (mAppointment.isAllDay())
+            mAppointment.setAlarm(daysportion - (allDayReminder.hour() * 60 + allDayReminder.minute()), mAppointment.alarm());
+        else
+            mAppointment.setAlarm(timedReminder, mAppointment.alarm());
+    }
+
+    reminderPicker->updateUI();
+
+    // Force this now, since otherwise it can take an event loop
+    // and you can see the change in state
+    startTime->parentWidget()->layout()->activate();
+    endTime->parentWidget()->layout()->activate();
 }
 
 void EntryDialog::accept()

@@ -48,4 +48,4 @@ servicedef.path=/services
 INSTALLS+=servicedef
 
 pkg.desc=Radio player for Qtopia.
-pkg.domain=window,doc_server,doc_edit,qds,dbmigrate
+pkg.domain=trusted

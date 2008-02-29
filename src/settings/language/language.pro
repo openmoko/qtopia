@@ -20,4 +20,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.description=Language settings application
-pkg.domain=window,language
+pkg.domain=trusted

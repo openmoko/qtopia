@@ -23,4 +23,4 @@ pics.hint=pics
 INSTALLS+=pics
 
 pkg.desc=Telephony settings dialog for Qtopia.
-pkg.domain=phonecomm,window,doc_server,pim
+pkg.domain=trusted

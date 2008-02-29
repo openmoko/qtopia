@@ -116,6 +116,8 @@ private:
     // Worker functions for interpreting input
     bool processInputMatcherChar(InputMatcher *matcher, int unicode, int keycode, bool isPress, bool autoRepeat);
     bool processBackspace();
+    bool filterMouseButtonDown(const QPoint &pos, int state, int w);
+    bool filterMouseButtonUp(const QPoint &pos, int state, int w);
 
     void selectProfile(const QString &);
     void appendGuess(const InputMatcherGuessList &);
@@ -146,7 +148,6 @@ private:
     int hold_uc;
     int hold_key;
     InputMatcherChar hold_item;
-    bool waitforrelease;
     QPointer<SymbolPicker> symbolPicker;
     QPointer<WordPicker> wordPicker;
     QPointer<ModePicker> modePicker;

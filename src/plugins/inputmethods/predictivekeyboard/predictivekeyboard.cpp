@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -70,7 +70,6 @@ static KeyboardWidget::Config createKeyboardConfig()
     config.keySize.setHeight(config.keySize.height() / 4);
     config.keyMargin = swidth / 10;
     config.bottomMargin = sheight / 24;
-    config.trieFile = Qtopia::qtopiaDir() + "/etc/words.qtrie";
     config.maxGuesses = 5;
     config.optionsWindowHeight = -1;
     config.optionWordSpacing = swidth / 24;
@@ -109,8 +108,6 @@ static KeyboardWidget::Config createKeyboardConfig()
         cfg.value("KeyMargin", config.keyMargin).toInt();
     config.bottomMargin = 
         cfg.value("BottomMargin", config.bottomMargin).toInt();
-    config.trieFile = 
-        cfg.value("TrieFile", config.trieFile).toString();
     config.maxGuesses = 
         cfg.value("MaxGuesses", 5).toInt();
     config.optionWordSpacing = 
@@ -207,7 +204,6 @@ void PredictiveKeyboard::erase()
     
 //    QWSInputMethod::sendCommitString (QString(), -1, 1); // TODO - fix case where no text to left of cursor (currently deletes character on right)
 
-    //qDebug() << int(QChar(Qt::Key_Backspace).unicode()); // shows 3 
     // 8 for unicode is from pkim. It doesn't match any source I could find.
     QWSServer::sendKeyEvent (8, Qt::Key_Backspace, 0, true, false); 
     QWSServer::sendKeyEvent (8, Qt::Key_Backspace, 0, false, false); 
@@ -235,19 +231,22 @@ bool PredictiveKeyboard::filter ( int unicode, int keycode, int modifiers, bool 
     Q_UNUSED(modifiers);
     Q_UNUSED(autoRepeat);
 
-    //Select is  Qt::Key_Select
-    if (!isPress || !mKeyboard->hasText())
+    if (isPress && !mKeyboard->hasText())
         return false;
     
     //Handle backspace
     if(keycode == Qt::Key_Back) {
-        mKeyboard->doBackspace();
+        if(!isPress){
+            mKeyboard->doBackspace();
+        }
         return true;
     }
 
     //Handle Select Key
     if(keycode == Qt::Key_Select) {
-        mKeyboard->acceptWord();
+        if(!isPress){
+            mKeyboard->acceptWord();
+        }
         return true;
     }
 

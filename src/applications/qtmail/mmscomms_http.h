@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,7 +25,7 @@
 #include "mmscomms.h"
 #include <qlist.h>
 
-class MailAccount;
+class QMailAccount;
 class MMSMessage;
 class QTimer;
 class QUrl;
@@ -37,7 +37,7 @@ class MmsCommsHttp : public MmsComms
 {
     Q_OBJECT
 public:
-    MmsCommsHttp(MailAccount *acc, QObject *parent=0);
+    MmsCommsHttp(QMailAccount *acc, QObject *parent=0);
     ~MmsCommsHttp();
 
     virtual void sendMessage(MMSMessage &msg, const QByteArray& encoded);

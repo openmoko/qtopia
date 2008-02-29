@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -81,7 +81,7 @@ QDLinkPluginData::QDLinkPluginData()
 
   See \l{qdautoplugin.cpp} for the implementation used by the build system.
 
-  \sa QDPlugin, {Qtopia Sync Agent Plugins}
+  \sa QDPlugin
 */
 
 /*!
@@ -128,7 +128,7 @@ QDPluginFactory::~QDPluginFactory()
   When creating a plugin you can use the QD_CONSTRUCT_PLUGIN macro to simplify the
   construction boilerplate that must be created.
 
-  \sa <qdplugindefs.h>, {Qtopia Sync Agent Plugins}
+  \sa <qdplugindefs.h>
 */
 
 /*!
@@ -234,8 +234,6 @@ bool QDPlugin::locked() const
   An App plugin must create an application widget (which appears in the main chooser).
   It can optionally create a settings widget (which appears in the settings dialog)
   and an info widget.
-
-  \sa {Qtopia Sync Agent Plugins}
 */
 
 /*!
@@ -252,16 +250,6 @@ QDAppPlugin::QDAppPlugin( QObject *parent )
 QDAppPlugin::~QDAppPlugin()
 {
 }
-
-/*!
-  \fn QDAppPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDAppPlugin::displayName()
-  \reimp
-*/
 
 /*!
   \fn QDAppPlugin::icon()
@@ -290,8 +278,6 @@ QWidget *QDAppPlugin::initSettings()
 
   This plugin should be used to bring up a network interface and provide an IP address
   for Qtopia Sync Agent to connect to.
-
-  \sa {Qtopia Sync Agent Plugins}
 */
 
 /*!
@@ -384,16 +370,6 @@ void QDLinkPlugin::removeHelper()
 }
 
 /*!
-  \fn QDLinkPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDLinkPlugin::displayName()
-  \reimp
-*/
-
-/*!
   \fn bool QDLinkPlugin::tryConnect( QDConPlugin *connection )
   Attempt to bring up the link, using the port from \a connection (for TCP/IP-based links).
   Return false to indicate immediate failure and the setState() signal to indicate asynchronous failure.
@@ -425,8 +401,6 @@ void QDLinkPlugin::removeHelper()
   \mainclass
 
   This plugin should be used to establish a connection to a device.
-
-  \sa {Qtopia Sync Agent Plugins}
 */
 
 /*!
@@ -443,16 +417,6 @@ QDConPlugin::QDConPlugin( QObject *parent )
 QDConPlugin::~QDConPlugin()
 {
 }
-
-/*!
-  \fn QDConPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDConPlugin::displayName()
-  \reimp
-*/
 
 /*!
   \fn QString QDConPlugin::conProperty( const QString &key )
@@ -519,8 +483,6 @@ QDConPlugin::~QDConPlugin()
   \mainclass
 
   This plugin needs to work with a QDConPlugin in order to talk to a device.
-
-  \sa {Qtopia Sync Agent Plugins}
 */
 
 /*!
@@ -537,16 +499,6 @@ QDDevPlugin::QDDevPlugin( QObject *parent )
 QDDevPlugin::~QDDevPlugin()
 {
 }
-
-/*!
-  \fn QDDevPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDDevPlugin::displayName()
-  \reimp
-*/
 
 /*!
   \fn QString QDDevPlugin::model()
@@ -587,6 +539,11 @@ QDDevPlugin::~QDDevPlugin()
   to report that it is no longer connected.
 */
 
+/*!
+  \fn QDDevPlugin::connection()
+  Returns the connection that the device is connected to.
+*/
+
 // ====================================================================
 
 /*!
@@ -595,8 +552,6 @@ QDDevPlugin::~QDDevPlugin()
   \mainclass
 
   All Qtopia Sync Agent sync plugins inherit from QDSyncPlugin but the class itself is abstract.
-
-  \sa QDPlugin
 */
 
 /*!
@@ -613,16 +568,6 @@ QDSyncPlugin::QDSyncPlugin( QObject *parent )
 QDSyncPlugin::~QDSyncPlugin()
 {
 }
-
-/*!
-  \fn QDSyncPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDSyncPlugin::displayName()
-  \reimp
-*/
 
 /*!
   Returns an example xml schema for the records handled by the plugin. This schema
@@ -688,9 +633,13 @@ void QDSyncPlugin::finishSync()
   \brief The QDClientSyncPlugin class represents a sync client.
   \mainclass
 
-  The sync implementation uses both client and server plugins. A typical client plugin
-  is expected to pass messages between a real device and the sync implementation, doing
-  no actual work itself.
+  The sync implementation uses both client and server plugins. Client plugins
+  represent a dataset on a Qtopia device and are expected to handle the entire
+  sync protocol. If you do not know what datasets will be supported at compile
+  time, use QDClientSyncPluginFactory instead.
+
+  Note that this class is designed to be remoted. The methods can return
+  immediately as status is returned via signals.
 */
 
 /*!
@@ -709,139 +658,171 @@ QDClientSyncPlugin::~QDClientSyncPlugin()
 }
 
 /*!
-  \fn QDClientSyncPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDClientSyncPlugin::displayName()
-  \reimp
-*/
-
-/*!
-  \fn QString QDClientSyncPlugin::dataset()
-  \reimp
-*/
-
-/*!
   \fn void QDClientSyncPlugin::serverSyncRequest(const QString &source)
-  Notify the client that the server has requested a sync with datasource \a source.
+  The server has requested a sync with datasource \a source.
 */
 
 /*!
   \fn void QDClientSyncPlugin::serverIdentity(const QString &server)
-  Notify the client that the server's identity is \a server.
+  The server's identity is \a server.
 */
 
 /*!
   \fn void QDClientSyncPlugin::serverVersion(int major, int minor, int patch)
-  Notify the client that the server's version is equivalent to the values \a major, \a minor and \a patch.
+  The server's version is equivalent to the values \a major, \a minor and \a patch.
 */
 
 /*!
   \fn void QDClientSyncPlugin::serverSyncAnchors(const QDateTime &serverLastSync, const QDateTime &serverNextSync)
-  Notify the client that the server's sync anchors are \a serverLastSync and \a serverNextSync.
+  The server's sync anchors are \a serverLastSync and \a serverNextSync.
 */
 
 /*!
   \fn void QDClientSyncPlugin::createServerRecord(const QByteArray &record)
-  Notify the client that the server has created \a record.
+  Create the item specified in \a record. Emit mappedId() so that the server record
+  can be matched to the client record.
 */
 
 /*!
   \fn void QDClientSyncPlugin::replaceServerRecord(const QByteArray &record)
-  Notify the client that the server has replaced \a record.
+  Update the item specified in \a record.
 */
 
 /*!
-  \fn void QDClientSyncPlugin::removeServerRecord(const QString &serverId)
-  Notify the client that the server has removed the record with id \a serverId.
+  \fn void QDClientSyncPlugin::removeServerRecord(const QString &clientId)
+  Remove the item indicated by client id \a clientId.
 */
 
 /*!
   \fn void QDClientSyncPlugin::requestTwoWaySync()
-  Notify the client that the server wants to perform a two-way sync.
+  Perform a two-way (fast) sync. Only changes since the last sync should be sent.
 */
 
 /*!
   \fn void QDClientSyncPlugin::requestSlowSync()
-  Notify the client that the server wants to perform a slow sync.
+  Perform a slow sync. All changes should be sent.
 */
 
 /*!
   \fn void QDClientSyncPlugin::serverError()
-  Notify the client that the server has encountered an error.
+  The server has encountered an error. The sync will be aborted.
 */
 
 /*!
   \fn void QDClientSyncPlugin::serverEnd()
-  Notify the client that the server has finished.
-*/
-
-/*!
-  \fn void QDClientSyncPlugin::clientSyncRequest(const QString &source)
-  Notify the sync manager that the client wants to request a sync with dataset \a source.
+  The server has finished sending changes.
 */
 
 /*!
   \fn void QDClientSyncPlugin::clientIdentity(const QString &id)
-  Notify the sync manager that the client's identity is \a id.
+  Emit this signal to set the client's identity to \a id.
 */
 
 /*!
   \fn void QDClientSyncPlugin::clientVersion(int major, int minor, int patch)
-  Notify the sync manager that the client's version is equivalent to the values \a major, \a minor and \a patch.
+  Emit this signal to set the client's version to the values \a major, \a minor and \a patch.
 */
 
 /*!
   \fn void QDClientSyncPlugin::clientSyncAnchors(const QDateTime &clientLastSync, const QDateTime &clientNextSync)
-  Notify the sync manager that the client's sync anchors are \a clientLastSync and \a clientNextSync.
+  Emit this signal to set the client's sync anchors to \a clientLastSync and \a clientNextSync.
 */
 
 /*!
   \fn void QDClientSyncPlugin::createClientRecord(const QByteArray &record)
-  Notify the sync manager that the client has created \a record.
+  Emit this signal to send a new \a record.
+  \sa replaceClientRecord(), removeClientRecord(), clientEnd()
 */
 
 /*!
   \fn void QDClientSyncPlugin::replaceClientRecord(const QByteArray &record)
-  Notify the sync manager that the client has replaced \a record.
+  Emit this signal to send a modified \a record.
+  \sa createClientRecord(), removeClientRecord(), clientEnd()
 */
 
 /*!
   \fn void QDClientSyncPlugin::removeClientRecord(const QString &clientId)
-  Notify the sync manager that the client has removed the record with id \a clientId.
+  Emit this signal to send a delete of the record with client id \a clientId.
+  \sa createClientRecord(), replaceClientRecord(), clientEnd()
 */
 
 /*!
-  \fn void QDClientSyncPlugin::mapId(const QString &serverId, const QString &clientId)
-  Notify the sync manager that the client has mapped the server identifier \a serverId to the client identifier \a clientId.
+  \fn void QDClientSyncPlugin::mappedId(const QString &serverId, const QString &clientId)
+  Emit this signal in response to createServerRecord(). It maps server id \a serverId to
+  client id \a clientId.
 */
 
 /*!
   \fn void QDClientSyncPlugin::clientError()
-  Notify the sync manager that the client has encountered an error.
+  Emit this signal to send an error. The sync will be aborted.
 */
 
 /*!
   \fn void QDClientSyncPlugin::clientEnd()
-  Notify the sync manager that the client has finished.
+  Emit this signal when all changes have been sent.
+*/
+
+// ====================================================================
+
+/*!
+  \class QDClientSyncPluginFactory 
+  \brief The QDClientSyncPluginFactory class creates instances of QDClientSyncPlugin.
+  \mainclass
+
+  The sync implementation uses both remote and local plugins. For each dataset supported
+  by the remote system a QDClientSyncPlugin instance must be created. The
+  QDClientSyncPluginFactory class allows this creation to happen at the time the sync
+  is started so that the remote system's datasets can be queried.
+*/
+
+/*!
+  Construct a QDClientSyncPluginFactory with \a parent as the owning QObject.
+*/
+QDClientSyncPluginFactory::QDClientSyncPluginFactory( QObject *parent )
+    : QDPlugin( parent )
+{
+}
+
+/*!
+  Destructor.
+*/
+QDClientSyncPluginFactory::~QDClientSyncPluginFactory()
+{
+}
+
+/*!
+  \fn QDClientSyncPluginFactory::datasets()
+  Returns a list of the datasets this factory can handle.
+*/
+
+/*!
+  \fn QDClientSyncPluginFactory::pluginForDataset( const QString &dataset )
+  Returns a QDClientSyncPlugin for \a dataset. It is recommended to use
+  CenterInterface::syncObject() as the parent of any plugins created to
+  ensure they are removed when the sync is finished.
 */
 
 // ====================================================================
 
 /*!
   \class QDServerSyncPlugin 
-  \brief The QDServerSyncPlugin class represents a sync server.
+  \brief The QDServerSyncPlugin class handles a single dataset on the desktop.
   \mainclass
 
-  The sync implementation uses both client and server plugins. A typical server plugin
-  is expected to fetch changes from and submit changes back to the data store of another
-  application (either directly or via some third party API).
+  This class is implemented to add support for a new dataset to Qtopia Sync Agent.
+  It is called by the Sync Manager. Note that the sync process is designed to
+  be asynchronous. The methods of this class can return immediately as status
+  is returned via signals.
+
+  Here is an example of how the plugin is used by the Sync Manager.
+  
+  \image qdserversyncplugin.png QDServerSyncPlugin message flow.
+
+  \sa {Add a new desktop plugin}
 */
 
 /*!
-  Construct a QDClientSyncPlugin with \a parent as the owning QObject.
+  Construct a QDServerSyncPlugin with \a parent as the owning QObject.
 */
 QDServerSyncPlugin::QDServerSyncPlugin( QObject *parent )
     : QDSyncPlugin( parent )
@@ -856,31 +837,16 @@ QDServerSyncPlugin::~QDServerSyncPlugin()
 }
 
 /*!
-  \fn QDServerSyncPlugin::id()
-  \reimp
-*/
-
-/*!
-  \fn QDServerSyncPlugin::displayName()
-  \reimp
-*/
-
-/*!
-  \fn QString QDServerSyncPlugin::dataset()
-  \reimp
-*/
-
-/*!
-  \fn void QDServerSyncPlugin::performSync(const QDateTime &timestamp)
-  Perform a sync on items modified after \a timestamp. The work can be done asynchronously
-  and progress should be indicated via signals.
+  \fn void QDServerSyncPlugin::fetchChangesSince(const QDateTime &timestamp)
+  Fetch changes since \a timestamp. Data and progress should be reported by emitting signals.
+  This funtion can return before the fetching is completed.
   \sa createServerRecord(), replaceServerRecord(), removeServerRecord(), serverChangesCompleted()
 */
 
 /*!
   \fn void QDServerSyncPlugin::createClientRecord(const QByteArray &record)
-  Create the item specified in \a record.
-  \sa mappedId()
+  Create the item specified in \a record. Emit mappedId() so that the client record
+  can be matched to the server record.
 */
 
 /*!
@@ -894,33 +860,53 @@ QDServerSyncPlugin::~QDServerSyncPlugin()
 */
 
 /*!
-  \fn void QDServerSyncPlugin::mappedId(const QString &serverId, const QString &clientId)
-  Emit this signal when a client id (\a clientId) can be mapped to a server id (\a serverId).
-  \sa createClientRecord()
+  \fn void QDServerSyncPlugin::mappedId(const QString &clientId, const QString &serverId)
+  Emit this signal in response to createClientRecord(). It maps client id \a clientId to
+  server id \a serverId.
 */
 
 /*!
   \fn void QDServerSyncPlugin::createServerRecord(const QByteArray &record)
-  Emit this signal when a new item has been created. The item is passed via \a record.
-  \sa performSync()
+  Emit this signal in response to fetchChangesSince() to send a new \a record.
+  \sa replaceServerRecord(), removeServerRecord(), serverChangesCompleted()
 */
 
 /*!
   \fn void QDServerSyncPlugin::replaceServerRecord(const QByteArray &record)
-  Emit this signal when an item has been modified. The item is passed via \a record.
-  \sa performSync()
+  Emit this signal in response to fetchChangesSince() to send a modified \a record.
+  \sa createServerRecord(), removeServerRecord(), serverChangesCompleted()
 */
 
 /*!
   \fn void QDServerSyncPlugin::removeServerRecord(const QString &identifier)
-  Emit this signal when an item has been removed. The identifier of the item is passed via \a identifier.
-  \sa performSync()
+  Emit this signal in response to fetchChangesSince() to send a delete of \a identifier.
+  \sa createServerRecord(), replaceServerRecord(), serverChangesCompleted()
 */
 
 /*!
   \fn void QDServerSyncPlugin::serverChangesCompleted()
-  Emit this signal when the item fetching is complete.
-  \sa performSync()
+  Emit this signal in response to fetchChangesSince() when all changes have been reported.
+*/
+
+/*!
+  \fn void QDServerSyncPlugin::serverError()
+  Emit this signal any time if an error is encountered and the sync will be aborted.
+*/
+
+/*!
+  \fn void QDServerSyncPlugin::beginTransaction( const QDateTime &timestamp )
+  Begin a transaction. The \a timestamp may be ignored.
+  \sa abortTransaction(), commitTransaction()
+*/
+
+/*!
+  \fn void QDServerSyncPlugin::abortTransaction()
+  Abort the transaction started with beginTransaction().
+*/
+
+/*!
+  \fn void QDServerSyncPlugin::commitTransaction()
+  Commit the transaction started with beginTransaction().
 */
 
 // ====================================================================

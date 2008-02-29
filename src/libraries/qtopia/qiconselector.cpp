@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -182,7 +182,7 @@ QString QIconSelector::text() const
 /*!
   Returns the number of items the QIconSelector contains.
 */
-uint QIconSelector::count()
+uint QIconSelector::count() const
 {
     return d->data.count();
 }

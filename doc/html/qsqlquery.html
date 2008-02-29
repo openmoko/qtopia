@@ -143,7 +143,7 @@
      query.bindValue(0, &quot;A&quot;);
      query.bindValue(1, 0, QSql::Out);
      query.exec();
-     int i = query.boundValue(1).toInt(); <span class="comment">// i is 65</span></pre>
+     int i = query.boundValue(1).toInt(); <span class="comment">//</span> i is 65</pre>
 <p>Note that unbound parameters will retain their values.</p>
 <p>Stored procedures that uses the return statement to return values, or return multiple result sets, are not fully supported. For specific details see <a href="sql-driver.html">SQL Database Drivers</a>.</p>
 <p><b>Warning:</b> You must load the SQL driver and open the connection before a QSqlQuery is created. Also, the connection must remain open while the query exists; otherwise, the behavior of QSqlQuery is undefined.</p>
@@ -331,9 +331,9 @@
 
  qDebug() &lt;&lt; &quot;Number of columns: &quot; &lt;&lt; rec.count();
 
- int nameCol = rec.indexOf(&quot;name&quot;); <span class="comment">// index of the field &quot;name&quot;</span>
+ int nameCol = rec.indexOf(&quot;name&quot;); <span class="comment">//</span> index of the field &quot;name&quot;
  while (q.next())
-     qDebug() &lt;&lt; q.value(nameCol).toString(); <span class="comment">// output all names</span></pre>
+     qDebug() &lt;&lt; q.value(nameCol).toString(); <span class="comment">//</span> output all names</pre>
 <p>See also <a href="qsqlquery.html#value">value</a>().</p>
 <h3 class="fn"><a name="result"></a>const <a href="qsqlresult.html">QSqlResult</a> * QSqlQuery::result () const</h3>
 <p>Returns the result associated with the query.</p>
@@ -376,14 +376,10 @@
 <p>See also <a href="qsqlquery.html#previous">previous</a>(), <a href="qsqlquery.html#next">next</a>(), <a href="qsqlquery.html#first">first</a>(), <a href="qsqlquery.html#last">last</a>(), <a href="qsqlquery.html#seek">seek</a>(), <a href="qsqlquery.html#isActive">isActive</a>(), and <a href="qsqlquery.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QSqlQuery &amp; QSqlQuery::operator= ( const QSqlQuery &amp; <i>other</i> )</h3>
 <p>Assigns <i>other</i> to this object.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="prev"></a>bool QSqlQuery::prev ()</h3>
-<p>Use <a href="qsqlquery.html#previous">previous</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,7 +27,7 @@
 #include <QSlider>
 #include <QComboBox>
 #include <QVBoxLayout>
-#include <QPushButton>  //HACK
+#include <QPushButton>
 #include <QScrollArea>
 #include <QGroupBox>
 #include <QSettings>

@@ -32,12 +32,14 @@ my $print_usage = 0;
 my (  $make, $format, $working_path, $arch, $project_root, $languages,
       $pkg_path, $srcdir, $out_pwd,
       $pkg_name, $pkg_desc, $domain, $pkg_deps, $pkg_multi, $pkg_version, $pkg_trust,
-      $pkg_license, $pkg_maintainer, $pkg_targets ) = ();
+      $pkg_license, $pkg_maintainer, $pkg_targets, $pkg_quicklaunch,
+      $split_i18n ) = ();
 
 for ( $make, $format, $working_path, $arch, $project_root, $languages,
       $pkg_path, $srcdir, $out_pwd,
       $pkg_name, $pkg_desc, $domain, $pkg_deps, $pkg_multi, $pkg_version, $pkg_trust,
-      $pkg_license, $pkg_maintainer, $pkg_targets ) {
+      $pkg_license, $pkg_maintainer, $pkg_targets, $pkg_quicklaunch,
+      $split_i18n ) {
     $_ = shift(@ARGV);
     if ( !defined($_) ) {
         $print_usage = 1;
@@ -47,6 +49,19 @@ for ( $make, $format, $working_path, $arch, $project_root, $languages,
 
 # Defaults
 if ( !$format ) { $format = "qpk"; }
+if ( $split_i18n eq "" ) {
+    if ( $format eq "qpk" ) {
+        $split_i18n = 0;
+    } else {
+        $split_i18n = 1;
+    }
+}
+# Clean this up (the build system makes a mess of the values when catenating multiple domain sets)
+{
+    my %tmp;
+    map { $tmp{$_}++ } split(/[, ]/, $domain);
+    $domain = join(",", keys(%tmp));
+}
 
 if ( DEBUG )
 {
@@ -70,11 +85,16 @@ if ( DEBUG )
     License:       $pkg_license
     Maintainer:    $pkg_maintainer
     Targets:       $pkg_targets
+    Quicklaunch:   $pkg_quicklaunch
 DUMP_END
 }
 
 if ( $print_usage ) {
     usage();
+}
+
+if ( $format eq "qpk" && $pkg_quicklaunch ) {
+    die basename($srcdir).".pro: You must add CONFIG+=no_quicklaunch and rebuild in order to create a package.\n";
 }
 
 my $data_path = "$working_path/data";
@@ -128,22 +148,25 @@ for my $target ( split(/\s+/, $pkg_targets) ) {
 }
 
 print "\n\nCreating packages...\n\n";
-for my $lang ( split(/\s+/, $languages) ) {
-    my $suffix = "_i18n_$lang";
-    my $deps = $pkg_name;
-    # this looks like a nasty hack - what is it doing??
-    if ( $pkg_name =~ /^qpe-/ && $pkg_name ne "qpe-taskbar" ) {
-        $pkg_deps .= " qpe-taskbar_i18n_$lang";
-    }
-    my $path = "$prefix/i18n/$lang";
-    mkdir "$prefix/i18n" unless ( -d "$prefix/i18n" );
-    mkdir $path unless ( -d $path );
-    make_pkg($suffix, $deps, $path);
-}
 
-# remove i18n stuff so it doesn't get in the regular package
-if ( -d "$prefix/i18n" ) {
-    rmrf("$prefix/i18n");
+if ( $split_i18n ) {
+    for my $lang ( split(/\s+/, $languages) ) {
+        my $suffix = "_i18n_$lang";
+        my $deps = $pkg_name;
+        # this looks like a nasty hack - what is it doing??
+        if ( $pkg_name =~ /^qpe-/ && $pkg_name ne "qpe-taskbar" ) {
+            $pkg_deps .= " qpe-taskbar_i18n_$lang";
+        }
+        my $path = "$prefix/i18n/$lang";
+        mkdir "$prefix/i18n" unless ( -d "$prefix/i18n" );
+        mkdir $path unless ( -d $path );
+        make_pkg($suffix, $deps, $path);
+    }
+
+    # remove i18n stuff so it doesn't get in the regular package
+    if ( -d "$prefix/i18n" ) {
+        rmrf("$prefix/i18n");
+    }
 }
 
 make_pkg("", $pkg_deps, $prefix);

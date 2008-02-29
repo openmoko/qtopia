@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -76,12 +74,12 @@ inline int qws_read_uint(QIODevice *socket)
     return i;
 }
 
-inline void qws_write_uint(QIODevice *socket, int i)
+inline qint64 qws_write_uint(QIODevice *socket, int i)
 {
     if (!socket)
-        return;
+        return -1;
 
-    socket->write(reinterpret_cast<char*>(&i), sizeof(i));
+    return socket->write(reinterpret_cast<char*>(&i), sizeof(i));
 }
 
 #endif // QT_NO_QWS_MULTIPROCESS

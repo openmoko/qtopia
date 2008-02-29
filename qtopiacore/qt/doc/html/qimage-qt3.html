@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/image/qimage.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/image/qimage.cpp -->
 <head>
   <title>Qt 4.3: Qt 3 Support Members for QImage</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -84,9 +84,9 @@
 <p>you can rewrite it as</p>
 <pre> QImage image(width, height, format);
 
-<span class="comment"> // For 8 bit images the default number of colors is 256. If</span>
-<span class="comment"> // another number of colors is required it can be specified</span>
-<span class="comment"> // using the setNumColors() function.</span>
+<span class="comment"> //</span> For 8 bit images the default number of colors is 256. If
+<span class="comment"> //</span> another number of colors is required it can be specified
+<span class="comment"> //</span> using the setNumColors() function.
  image.setNumColors(numColors);</pre>
 <h3 class="fn"><a name="QImage-13"></a>QImage::QImage ( const <a href="qsize.html">QSize</a> &amp; <i>size</i>, int <i>depth</i>, int <i>numColors</i> = 0, <a href="qimage-qt3.html#Endian-enum">Endian</a> <i>bitOrder</i> = IgnoreEndian )</h3>
 <p>Constructs an image with the given <i>size</i>, <i>depth</i>, <i>numColors</i> and <i>bitOrder</i>.</p>
@@ -98,9 +98,9 @@
 <pre> QSize mySize(width, height);
  QImage image(mySize, format);
 
-<span class="comment"> // For 8 bit images the default number of colors is 256. If</span>
-<span class="comment"> // another number of colors is required it can be specified</span>
-<span class="comment"> // using the setNumColors() function.</span>
+<span class="comment"> //</span> For 8 bit images the default number of colors is 256. If
+<span class="comment"> //</span> another number of colors is required it can be specified
+<span class="comment"> //</span> using the setNumColors() function.
  image.setNumColors(numColors);</pre>
 <h3 class="fn"><a name="QImage-14"></a>QImage::QImage ( <a href="qtglobal.html#uchar-typedef">uchar</a> * <i>data</i>, int <i>width</i>, int <i>height</i>, int <i>depth</i>, const <a href="qcolor.html#QRgb-typedef">QRgb</a> * <i>colortable</i>, int <i>numColors</i>, <a href="qimage-qt3.html#Endian-enum">Endian</a> <i>bitOrder</i> )</h3>
 <p>Constructs an image with the given <i>width</i>, <i>height</i>, depth, <i>colortable</i>, <i>numColors</i> and <i>bitOrder</i>, that uses an existing memory buffer, <i>data</i>.</p>
@@ -235,8 +235,8 @@
 <p>Use copy() or <a href="qpainter.html#drawImage">QPainter::drawImage</a>() instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

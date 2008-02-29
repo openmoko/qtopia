@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -66,21 +66,18 @@ ContextKeyManager::ContextKeyManager()
             buttons.append(btn);
         }
 
-
         // Setup non-standard class context labels.
         QSoftMenuBar::StandardLabel lbl = QSoftMenuBar::NoLabel;
         if( !Qtopia::mousePreferred() )
             lbl = QSoftMenuBar::EndEdit;
 
-
-
-        setClassStandardLabel("QDateTimeEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
 #ifndef  QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
         setClassStandardLabel("QLineEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
+        setClassStandardLabel("QDateTimeEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
+        setClassStandardLabel("QSpinBox", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
 #endif
         setClassStandardLabel("QTextEdit", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QSlider", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
-        setClassStandardLabel("QSpinBox", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QComboBox", Qt::Key_Select, lbl, QSoftMenuBar::EditFocus);
 
         setClassStandardLabel("QButton", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
@@ -88,12 +85,12 @@ ContextKeyManager::ContextKeyManager()
         setClassStandardLabel("QTextBrowser", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::EditFocus);
         setClassStandardLabel("QComboBoxPrivateContainer", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
 
-        setClassStandardLabel("QDateTimeEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
 #ifndef  QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
         setClassStandardLabel("QLineEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QDateTimeEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
+        setClassStandardLabel("QSpinBox", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
 #endif
         setClassStandardLabel("QTextEdit", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
-        setClassStandardLabel("QSpinBox", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
         setClassStandardLabel("QTabBar", Qt::Key_Select, QSoftMenuBar::NoLabel, QSoftMenuBar::NavigationFocus);
         setClassStandardLabel("QSlider", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
 
@@ -104,9 +101,9 @@ ContextKeyManager::ContextKeyManager()
         setClassStandardLabel("QCalendarPopup", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
 
         if( !Qtopia::mousePreferred() ) {
-            setClassStandardLabel("QDateTimeEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
 #ifndef  QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
             setClassStandardLabel("QLineEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
+            setClassStandardLabel("QDateTimeEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
 #endif
             setClassStandardLabel("QTextEdit", Qt::Key_Back, QSoftMenuBar::BackSpace, QSoftMenuBar::EditFocus);
             setClassStandardLabel("QSlider", Qt::Key_Back, QSoftMenuBar::RevertEdit, QSoftMenuBar::EditFocus);
@@ -131,6 +128,7 @@ ContextKeyManager::ContextKeyManager()
 void ContextKeyManager::setupStandardSoftKeyHelpers()
 {
     new QLineEditSoftKeyLabelHelper();
+    new QDateTimeEditSoftKeyLabelHelper();
 
     updateContextLabels();
 }
@@ -162,6 +160,7 @@ void ContextKeyManager::updateLabelsForFocused()
         {
             classHelper->setCurrentWidget(w);
             classHelper->updateAllLabels();
+            return;
         }
     }
 
@@ -185,8 +184,10 @@ void ContextKeyManager::updateLabelsForFocused()
     if( !Qtopia::mousePreferred() ) {
         if (modal) {
             QLineEdit *l = qobject_cast<QLineEdit*>(w);
+#ifndef  QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
             if (!l && w->inherits("QSpinBox"))
                 l = (static_cast<ContextKeyManagerQSpinBoxLineEditAccessor*>(w))->getLineEdit();
+#endif
             if (!l && w->inherits("QComboBox"))
                 l = (static_cast<QComboBox*>(w))->lineEdit();
             if (l) {
@@ -305,7 +306,7 @@ QAbstractSoftKeyLabelHelper *ContextKeyManager::findClassHelper(QWidget *w)
 
 QAbstractSoftKeyLabelHelper *ContextKeyManager::findHelper(QWidget *w)
 {
-        return helperMap.value(w);
+    return helperMap.value(w);
 }
 
 bool ContextKeyManager::updateContextLabel(QWidget *w, bool modal, int key)
@@ -592,7 +593,9 @@ ContextKeyManager *ContextKeyManager::instance()
 {
     if (!contextKeyMgr) {
         contextKeyMgr = new ContextKeyManager();
-//        contextKeyMgr->setupStandardSoftKeyHelpers();
+#ifdef QTOPIA_TURN_OFF_OLD_SOFTKEY_HANDLING
+        contextKeyMgr->setupStandardSoftKeyHelpers();
+#endif
     }
 
     return contextKeyMgr;

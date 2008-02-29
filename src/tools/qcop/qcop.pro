@@ -10,5 +10,5 @@ enable_singleexec {
 }
 
 pkg.desc=Interprocess communication client for Qtopia.
-#pkg.domain=comm
-pkg.domain=base,qdsync,tmp_write
+#pkg.domain=trusted
+pkg.domain=trusted

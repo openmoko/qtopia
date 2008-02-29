@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/xml/qdom.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/xml/qdom.cpp -->
 <head>
   <title>Qt 4.3: QDomAttr Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -41,15 +41,15 @@
 <h2>Detailed Description</h2>
 <p>The QDomAttr class represents one attribute of a <a href="qdomelement.html">QDomElement</a>.</p>
 <p>For example, the following piece of XML produces an element with no children, but two attributes:</p>
-<pre> &lt;link href=&quot;http:<span class="comment">//www.trolltech.com&quot; color=&quot;red&quot; /&gt;</span></pre>
+<pre> &lt;link href=&quot;http:<span class="comment">//</span>www.trolltech.com&quot; color=&quot;red&quot; /&gt;</pre>
 <p>You can access the attributes of an element with code like this:</p>
-<pre> QDomElement e = <span class="comment">//...</span>
-<span class="comment"> //...</span>
+<pre> QDomElement e = <span class="comment">//</span>...
+<span class="comment"> //</span>...
  QDomAttr a = e.attributeNode(&quot;href&quot;);
- cout &lt;&lt; a.value() &lt;&lt; endl;                <span class="comment">// prints &quot;http://www.trolltech.com&quot;</span>
- a.setValue(&quot;http:<span class="comment">//doc.trolltech.com&quot;); // change the node's attribute</span>
+ cout &lt;&lt; a.value() &lt;&lt; endl;                <span class="comment">//</span> prints &quot;http:<span class="comment">//</span>www.trolltech.com&quot;
+ a.setValue(&quot;http:<span class="comment">//</span>doc.trolltech.com&quot;); <span class="comment">//</span> change the node's attribute
  QDomAttr a2 = e.attributeNode(&quot;href&quot;);
- cout &lt;&lt; a2.value() &lt;&lt; endl;               <span class="comment">// prints &quot;http://doc.trolltech.com&quot;</span></pre>
+ cout &lt;&lt; a2.value() &lt;&lt; endl;               <span class="comment">//</span> prints &quot;http:<span class="comment">//</span>doc.trolltech.com&quot;</pre>
 <p>This example also shows that changing an attribute received from an element changes the attribute of the element. If you do not want to change the value of the element's attribute you must use <a href="qdomnode.html#cloneNode">cloneNode</a>() to get an independent copy of the attribute.</p>
 <p>QDomAttr can return the <a href="qdomattr.html#name">name</a>() and <a href="qdomattr.html#value">value</a>() of an attribute. An attribute's value is set with <a href="qdomattr.html#setValue">setValue</a>(). If <a href="qdomattr.html#specified">specified</a>() returns true the value was either set in the document or set with <a href="qdomattr.html#setValue">setValue</a>(); otherwise the value hasn't been set. The node this attribute is attached to (if any) is returned by <a href="qdomattr.html#ownerElement">ownerElement</a>().</p>
 <p>For further information about the Document Object Model see <a href="http://www.w3.org/TR/REC-DOM-Level-1/">http://www.w3.org/TR/REC-DOM-Level-1/</a> and <a href="http://www.w3.org/TR/DOM-Level-2-Core/">http://www.w3.org/TR/DOM-Level-2-Core/</a>. For a more general introduction of the DOM implementation see the <a href="qdomdocument.html">QDomDocument</a> documentation.</p>
@@ -80,8 +80,8 @@
 <p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

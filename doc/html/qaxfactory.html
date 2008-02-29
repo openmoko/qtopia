@@ -133,14 +133,14 @@
  }
 
  QAXFACTORY_EXPORT(
-     ActiveQtFactory,                          <span class="comment">// factory class</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     ActiveQtFactory,                          <span class="comment">//</span> factory class
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )</pre>
 <p>If you use the <tt>Q_CLASSINFO()</tt> macro to provide the unique identifiers or other attributes for your class you can use the <tt>QAXFACTORY_BEGIN()</tt>, <tt>QAXCLASS()</tt> and <tt>QAXFACTORY_END()</tt> macros to expose one or more classes as COM objects.</p>
 <pre> QAXFACTORY_BEGIN(
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )
      QAXCLASS(Class1)
      QAXCLASS(Class2)
@@ -152,12 +152,12 @@
  #include &quot;theactivex.h&quot;
 
  QAXFACTORY_DEFAULT(
-     TheActiveX,                           <span class="comment">// widget class</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// class ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// interface ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// event interface ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     TheActiveX,                           <span class="comment">//</span> widget class
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> class ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> interface ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> event interface ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )</pre>
 <p>Only one QAxFactory implementation may be instantiated and exported by an ActiveX server application. This instance is accessible through the global qAxFactory() function.</p>
 <p>A factory can also reimplement the <a href="qaxfactory.html#registerClass">registerClass</a>() and <a href="qaxfactory.html#unregisterClass">unregisterClass</a>() functions to set additional flags for an ActiveX control in the registry. To limit the number of methods or properties a widget class exposes from its parent classes reimplement <a href="qaxfactory.html#exposeToSuperClass">exposeToSuperClass</a>().</p>
@@ -219,7 +219,7 @@
  {
      QApplication app(argc, argv);
      if (!QAxFactory::isServer()) {
-         <span class="comment">// initialize for stand-alone execution</span>
+         <span class="comment">//</span> initialize for stand-alone execution
      }
      return app.exec();
  }</pre>
@@ -282,8 +282,8 @@
 <p>This macro can be used to export multiple <a href="qobject.html">QObject</a> classes through an implicitly declared <a href="qaxfactory.html">QAxFactory</a> implementation. All <a href="qobject.html">QObject</a> classes have to declare the ClassID, InterfaceID and EventsID (if applicable) through the <a href="qobject.html#Q_CLASSINFO">Q_CLASSINFO</a>() macro. All declarations will be in a type library with the id <i>IDTypeLib</i>, and if the server is an executable server then it will have the application id <i>IDApp</i>.</p>
 <p>This macro needs to be used together with the <a href="qaxfactory.html#QAXCLASS">QAXCLASS</a>(), <a href="qaxfactory.html#QAXTYPE">QAXTYPE</a>() and <a href="qaxfactory.html#QAXFACTORY_END">QAXFACTORY_END</a>() macros.</p>
 <pre> QAXFACTORY_BEGIN(
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )
      QAXCLASS(Class1)
      QAXCLASS(Class2)
@@ -296,12 +296,12 @@
  #include &quot;theactivex.h&quot;
 
  QAXFACTORY_DEFAULT(
-     TheActiveX,                           <span class="comment">// widget class</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// class ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// interface ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// event interface ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     TheActiveX,                           <span class="comment">//</span> widget class
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> class ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> interface ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> event interface ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )</pre>
 <p>See also <a href="qaxfactory.html#QAXFACTORY_EXPORT">QAXFACTORY_EXPORT</a>() and <a href="qaxfactory.html#QAXFACTORY_BEGIN">QAXFACTORY_BEGIN</a>().</p>
 <h3 class="fn"><a name="QAXFACTORY_END"></a>QAXFACTORY_END ()</h3>
@@ -310,9 +310,9 @@
 <h3 class="fn"><a name="QAXFACTORY_EXPORT"></a>QAXFACTORY_EXPORT (  <i>Class</i>,  <i>LibID</i>,  <i>AppID</i> )</h3>
 <p>This macro can be used to export a <a href="qaxfactory.html">QAxFactory</a> implementation <i>Class</i> from a COM server. All declarations will be in a type library with the id <i>LibID</i>, and if the server is an executable server then it will have the application id <i>AppID</i>.</p>
 <pre> QAXFACTORY_EXPORT(
-     MyFactory,                                <span class="comment">// factory class</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">// type library ID</span>
-     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">// application ID</span>
+     MyFactory,                                <span class="comment">//</span> factory class
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;, <span class="comment">//</span> type library ID
+     &quot;{01234567-89AB-CDEF-0123-456789ABCDEF}&quot;  <span class="comment">//</span> application ID
  )</pre>
 <p>See also <a href="qaxfactory.html#QAXFACTORY_BEGIN">QAXFACTORY_BEGIN</a>().</p>
 <h3 class="fn"><a name="QAXTYPE"></a>QAXTYPE (  <i>Class</i> )</h3>
@@ -321,8 +321,8 @@
 <p>See also <a href="qaxfactory.html#QAXFACTORY_BEGIN">QAXFACTORY_BEGIN</a>(), <a href="qaxfactory.html#QAXCLASS">QAXCLASS</a>(), <a href="qaxfactory.html#QAXFACTORY_END">QAXFACTORY_END</a>(), and <a href="qobject.html#Q_CLASSINFO">Q_CLASSINFO</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,11 +19,12 @@
 **
 ****************************************************************************/
 
-#include <QMediaPipe>
 #include <QMediaDevice>
 #include <QMediaDecoder>
+#include <QDebug>
 
-#include "cruxusoutputthread.h"
+#include "cruxusurihandlers.h"
+#include "cruxusoutputdevices.h"
 
 #include "cruxussimplesession.h"
 
@@ -36,7 +37,8 @@ namespace cruxus
 class SimpleSessionPrivate
 {
 public:
-    bool                activated;
+    bool                opened;
+    bool                connected;
     QMediaDevice*       source;
     QMediaDevice*       sink;
     QMediaDecoder*      coder;
@@ -44,6 +46,7 @@ public:
 
     QMediaHandle        handle;
     QString             domain;
+    QString             errorString;
     QtopiaMedia::State  state;
 };
 // }}}
@@ -64,67 +67,91 @@ SimpleSession::SimpleSession
 ):
     d(new SimpleSessionPrivate)
 {
-    d->activated = false;
+    d->opened = false;
+    d->connected = false;
     d->handle = handle;
     d->source = source;
     d->sink = sink;
     d->coder = coder;
+    d->state = QtopiaMedia::Stopped;
 
-    connect(d->coder, SIGNAL(playerStateChanged(QtopiaMedia::State)),
-            this, SIGNAL(playerStateChanged(QtopiaMedia::State)));
+    connect(d->coder, SIGNAL(playerStateChanged(QtopiaMedia::State)), SIGNAL(playerStateChanged(QtopiaMedia::State)));
+    connect(d->coder, SIGNAL(positionChanged(quint32)), SIGNAL(positionChanged(quint32)));
+    connect(d->coder, SIGNAL(lengthChanged(quint32)), SIGNAL(lengthChanged(quint32)));
+    connect(d->coder, SIGNAL(volumeChanged(int)),SIGNAL(volumeChanged(int)));
+    connect(d->coder, SIGNAL(volumeMuted(bool)),SIGNAL(volumeMuted(bool)));
 
-    connect(d->coder, SIGNAL(positionChanged(quint32)),
-            this, SIGNAL(positionChanged(quint32)));
-
-    connect(d->coder, SIGNAL(lengthChanged(quint32)),
-            this, SIGNAL(lengthChanged(quint32)));
-
-    connect(d->coder, SIGNAL(volumeChanged(int)),
-            this, SIGNAL(volumeChanged(int)));
-
-    connect(d->coder, SIGNAL(volumeMuted(bool)),
-            this, SIGNAL(volumeMuted(bool)));
+    connect(d->coder, SIGNAL(playerStateChanged(QtopiaMedia::State)), SLOT(stateChanged(QtopiaMedia::State)));
 }
 
 SimpleSession::~SimpleSession()
 {
+    if (d->connected) {
+        d->coder->disconnectFromInput(d->source);
+        d->sink->disconnectFromInput(d->coder);
+    }
+
+    if (d->opened) {
+        d->source->close();
+        d->sink->close();
+    }
+
+    delete d->coder;
+
+    UriHandlers::destroyInputDevice(d->source);
+    OutputDevices::destroyOutputDevice(d->sink);
+
     delete d;
 }
 
 void SimpleSession::start()
 {
-    if (!d->activated)
-    {
-        QMediaPipe*     pipe;
+    if (d->state == QtopiaMedia::Playing || d->state == QtopiaMedia::Error)
+        return;
 
-        pipe = new QMediaPipe(d->source, d->coder, this);
-        pipe = new QMediaPipe(d->coder, d->sink, this);
+    if (!d->opened) {
+        if (!d->source->open(QIODevice::ReadOnly) ||
+            !d->sink->open(QIODevice::WriteOnly | QIODevice::Unbuffered)) {
+            d->errorString = "Cruxus; Unable to open devices for media session";
+            qWarning() << d->errorString;
 
-        d->activated = true;
+            emit playerStateChanged(d->state = QtopiaMedia::Error);
+        }
+        else
+            d->opened = true;
     }
 
-    // Prep
-    d->source->open(QIODevice::ReadOnly);
-    d->sink->open(QIODevice::WriteOnly | QIODevice::Unbuffered);
-    d->coder->start();
+    if (d->opened && !d->connected) {
+        d->coder->connectToInput(d->source);
+        d->sink->connectToInput(d->coder);
+
+        d->connected = true;
+    }
+
+    if (d->connected)
+        d->coder->start();
 }
 
 void SimpleSession::pause()
 {
-    d->coder->pause();
+    if (d->connected)
+        d->coder->pause();
 }
 
 void SimpleSession::stop()
 {
-    d->coder->stop();
+    if (d->connected)
+        d->coder->stop();
 }
 
 void SimpleSession::suspend()
 {
+    pause();
 }
 
 void SimpleSession::resume()
 {
+    start();
 }
 
 void SimpleSession::seek(quint32 ms)
@@ -190,6 +217,11 @@ QString SimpleSession::id() const
 QString SimpleSession::reportData() const
 {
     return QString();
+}
+
+void SimpleSession::stateChanged(QtopiaMedia::State state)
+{
+    d->state = state;
 }
 // }}}
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -643,6 +641,18 @@ void QVNCServer::readClient()
     }
 }
 
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+bool QVNCScreen::swapBytes() const
+{
+    if (depth() != 16)
+        return false;
+
+    if (d_ptr->subscreen)
+        return d_ptr->subscreen->frameBufferLittleEndian();
+    return frameBufferLittleEndian();
+}
+#endif
+
 void QVNCServer::setPixelFormat()
 {
     if (client->bytesAvailable() >= 19) {
@@ -669,6 +679,9 @@ void QVNCServer::setPixelFormat()
         handleMsg = false;
         sameEndian = (QSysInfo::ByteOrder == QSysInfo::BigEndian) == !!pixelFormat.bigEndian;
         needConversion = pixelConversionNeeded();
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+        swapBytes = qvnc_screen->swapBytes();
+#endif
     }
 }
 
@@ -1165,6 +1178,11 @@ bool QVNCServer::pixelConversionNeeded() const
     if (!sameEndian)
         return true;
 
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    if (qvnc_screen->swapBytes())
+        return true;
+#endif
+
     const int screendepth = qvnc_screen->depth();
     if (screendepth != pixelFormat.bitsPerPixel)
         return true;
@@ -1186,6 +1204,9 @@ void QVNCServer::convertPixels(char *dst, const char *src, int count) const
     const int screendepth = qvnc_screen->depth();
 
     // cutoffs
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+    if (!swapBytes)
+#endif
     if (sameEndian) {
         if (screendepth == pixelFormat.bitsPerPixel) { // memcpy cutoffs
 
@@ -1267,6 +1288,10 @@ void QVNCServer::convertPixels(char *dst, const char *src, int count) const
         }
         case 16: {
             quint16 p = *reinterpret_cast<const quint16*>(src);
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+            if (swapBytes)
+                p = ((p & 0xff) << 8) | ((p & 0xff00) >> 8);
+#endif
             r = (p >> 11) & 0x1f;
             g = (p >> 5) & 0x3f;
             b = p & 0x1f;

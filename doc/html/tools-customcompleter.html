@@ -20,6 +20,7 @@
 <li><a href="tools-customcompleter-textedit-cpp.html">tools/customcompleter/textedit.cpp</a></li>
 <li><a href="tools-customcompleter-textedit-h.html">tools/customcompleter/textedit.h</a></li>
 <li><a href="tools-customcompleter-main-cpp.html">tools/customcompleter/main.cpp</a></li>
+<li><a href="tools-customcompleter-customcompleter-pro.html">tools/customcompleter/customcompleter.pro</a></li>
 <li><a href="tools-customcompleter-customcompleter-qrc.html">tools/customcompleter/customcompleter.qrc</a></li>
 </ul>
 <p>The Custom Completer example shows how to provide string-completion facilities for an input widget based on data provided by a model. The completer pops up suggestions for possible words based on the first three characters input by the user and the user's choice of word is inserted into the <tt>TextEdit</tt> using <a href="qtextcursor.html">QTextCursor</a>.</p>
@@ -132,7 +133,7 @@
 <pre> void TextEdit::keyPressEvent(QKeyEvent *e)
  {
      if (c &amp;&amp; c-&gt;popup()-&gt;isVisible()) {
-         <span class="comment">// The following keys are forwarded by the completer to the widget</span>
+         <span class="comment">//</span> The following keys are forwarded by the completer to the widget
         switch (e-&gt;key()) {
         case Qt::Key_Enter:
         case Qt::Key_Return:
@@ -140,21 +141,21 @@
         case Qt::Key_Tab:
         case Qt::Key_Backtab:
              e-&gt;ignore();
-             return; <span class="comment">// let the completer do default behavior</span>
+             return; <span class="comment">//</span> let the completer do default behavior
         default:
             break;
         }
      }
 
-     bool isShortcut = ((e-&gt;modifiers() &amp; Qt::ControlModifier) &amp;&amp; e-&gt;key() == Qt::Key_E); <span class="comment">// CTRL+E</span>
-     if (!c || !isShortcut) <span class="comment">// dont process the shortcut when we have a completer</span>
+     bool isShortcut = ((e-&gt;modifiers() &amp; Qt::ControlModifier) &amp;&amp; e-&gt;key() == Qt::Key_E); <span class="comment">//</span> CTRL+E
+     if (!c || !isShortcut) <span class="comment">//</span> dont process the shortcut when we have a completer
          QTextEdit::keyPressEvent(e);</pre>
 <p>We also handle other modifiers and shortcuts for which we do not want the completer to respond to.</p>
 <pre>     const bool ctrlOrShift = e-&gt;modifiers() &amp; (Qt::ControlModifier | Qt::ShiftModifier);
      if (!c || (ctrlOrShift &amp;&amp; e-&gt;text().isEmpty()))
          return;
 
-     static QString eow(&quot;~!@#$%^&amp;*()_+{}|:\&quot;&lt;&gt;?,./;'[]\\-=&quot;); <span class="comment">// end of word</span>
+     static QString eow(&quot;~!@#$%^&amp;*()_+{}|:\&quot;&lt;&gt;?,./;'[]\\-=&quot;); <span class="comment">//</span> end of word
      bool hasModifier = (e-&gt;modifiers() != Qt::NoModifier) &amp;&amp; !ctrlOrShift;
      QString completionPrefix = textUnderCursor();
 
@@ -171,7 +172,7 @@
      QRect cr = cursorRect();
      cr.setWidth(c-&gt;popup()-&gt;sizeHintForColumn(0)
                  + c-&gt;popup()-&gt;verticalScrollBar()-&gt;sizeHint().width());
-     c-&gt;complete(cr); <span class="comment">// popup it up!</span>
+     c-&gt;complete(cr); <span class="comment">//</span> popup it up!
  }</pre>
 <p>Finally, we pop up the completer.</p>
 <a name="mainwindow-class-definition"></a>
@@ -269,8 +270,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

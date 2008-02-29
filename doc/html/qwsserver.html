@@ -313,17 +313,17 @@
      switch ( level ) {
          case 0:
              if ( dim_enabled ) {
-                 <span class="comment">// dim the screen</span>
+                 <span class="comment">//</span> dim the screen
              }
              return true;
          case 1:
              if ( screenoff_enabled ) {
-                 <span class="comment">// turn off the screen</span>
+                 <span class="comment">//</span> turn off the screen
              }
              return true;
          case 2:
              if ( suspend_enabled ) {
-                 <span class="comment">// suspend</span>
+                 <span class="comment">//</span> suspend
              }
              return true;
          default:
@@ -334,19 +334,19 @@
  ...
 
  int timings[4];
- timings[0] = 5000;  <span class="comment">// dim after 5 seconds</span>
- timings[1] = 10000; <span class="comment">// light off after 15 seconds</span>
- timings[2] = 45000; <span class="comment">// suspend after 60 seconds</span>
+ timings[0] = 5000;  <span class="comment">//</span> dim after 5 seconds
+ timings[1] = 10000; <span class="comment">//</span> light off after 15 seconds
+ timings[2] = 45000; <span class="comment">//</span> suspend after 60 seconds
  timings[3] = 0;
  QWSServer::setScreenSaverIntervals( timings );
 
-<span class="comment"> // ignore the key/mouse event that turns on the screen</span>
+<span class="comment"> //</span> ignore the key/mouse event that turns on the screen
  int blocklevel = 1;
  if ( !screenoff_enabled ) {
-     <span class="comment">// screenoff is disabled, ignore the key/mouse event that wakes from suspend</span>
+     <span class="comment">//</span> screenoff is disabled, ignore the key/mouse event that wakes from suspend
      blocklevel = 2;
      if ( !suspend_enabled ) {
-         <span class="comment">// suspend is disabled, never ignore events</span>
+         <span class="comment">//</span> suspend is disabled, never ignore events
          blocklevel = -1;
      }
  }
@@ -372,33 +372,10 @@
 <h3 class="fn"><a name="windowEvent"></a>void QWSServer::windowEvent ( <a href="qwswindow.html">QWSWindow</a> * <i>window</i>, <a href="qwsserver.html#WindowEvent-enum">QWSServer::WindowEvent</a> <i>eventType</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever something happens to a top-level window (e.g&#x2e;, it's created or destroyed), passing a pointer to the window and the event's type in the <i>window</i> and <i>eventType</i> parameters, respectively.</p>
 <p>See also <a href="qwsserver.html#markedText">markedText</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QWSServer-2"></a>QWSServer::QWSServer ( int <i>flags</i>, <a href="qobject.html">QObject</a> * <i>parent</i>, const char * <i>name</i> )</h3>
-<p>Use the two-argument overload and call the <a href="qobject.html#objectName-prop">QObject::setObjectName</a>() function instead.</p>
-<h3 class="fn"><a name="setDesktopBackground"></a>void QWSServer::setDesktopBackground ( const <a href="qimage.html">QImage</a> &amp; <i>image</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Sets the image used as background in the absence of obscuring windows, to be the given <i>image</i>.</p>
-<p>Use the <a href="qwsserver.html#setBackground">setBackground</a>() function instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QImage image;
- setDesktopBackground(image);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QImage image;
- setBackground(QBrush(image));</pre>
-<h3 class="fn"><a name="setDesktopBackground-2"></a>void QWSServer::setDesktopBackground ( const <a href="qcolor.html">QColor</a> &amp; <i>color</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Sets the color used as background in the absence of obscuring windows, to be the given <i>color</i>.</p>
-<p>Use the <a href="qwsserver.html#setBackground">setBackground</a>() function instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QColor color;
- setDesktopBackground(color);</font></pre>
-<p>you can rewrite it as</p>
-<pre> QColor color;
- setBackground(QBrush(color));</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

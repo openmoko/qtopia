@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -251,7 +251,7 @@ void QtopiaAbstractService::publishAll()
             if ( method.methodType() == QMetaMethod::Slot &&
                  method.access() == QMetaMethod::Public) {
                 QByteArray name = method.signature();
-                QtopiaIpcAdaptor::connect(m_data->m_copobject, "2" + name, this, "1" + name);
+                QtopiaIpcAdaptor::connect(m_data->m_copobject, "3" + name, this, "1" + name);
             }
         }
         m_data->m_publishAllCalled = true;

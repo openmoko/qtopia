@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,11 +23,8 @@
 #define WORLDTIME_H
 
 // Qt4 Headers
-#include <QStackedWidget>
-#include <QList>
 #include <QTimerEvent>
 #include <QPushButton>
-#include <QToolButton>
 #include <QGridLayout>
 
 #include "cityinfo.h"
@@ -50,7 +47,6 @@ const int CITIES = 6;    // the number of cities...
 
 class QTimeZone;
 class QWorldmap;
-class QStackedWidget;
 class QComboBox;
 
 class WORLDTIME_EXPORT WorldTime : public QWidget
@@ -62,23 +58,20 @@ public:
 
 public slots:
     void beginNewTz();
-    void beginNewTz(int);
-    void addClock();
-    void removeClock();
     void slotNewTz( const QTimeZone& zone );
-    void slotComboSetZone( const int index );
+    void slotSetZone();
     void slotNewTzCancelled();
     void saveChanges();
     void cancelChanges();
-    void applyChange();
-
+ 
 signals:
     void timeZoneListChange();
 
 protected:
-    void timerEvent( QTimerEvent* );
-    void keyReleaseEvent( QKeyEvent * );
-    
+    bool isEditMode;
+    void timerEvent( QTimerEvent* );void keyReleaseEvent( QKeyEvent * );
+
+
 private slots:
     void showTime();
     void editMode();
@@ -86,34 +79,27 @@ private slots:
     void selected();
 
 private:
+    int isHighlighted;
     void readInTimes( void );   // a method to get information from the config
     void writeTimezoneChanges();
-    QString strRealTz;  // save the TZ var
-    bool bAdded;        // a flag to indicate things have been added...
+    int findCurrentButton();
+    void setButtonAvailable(int selButton);
+   
     int timerId;
-    int currentCombo;
-    int currentComboIndex;
-    QString currentCity;
-    int visibleZones;
     int maxVisibleZones;
     QGridLayout *gl;
-    int getCurrentComboIndex(int);
-    QAction *addClockAction;
-    QAction *removeClockAction;
-    void checkMenu();
-    
+
     // a spot to hold the time zone for each city
     QString strCityTz[CITIES];
     QList<QPushButton *> listCities;
-    QList<QComboBox *> listBoxes;    
+    QPushButton *currentPushButton;
     QList<CityInfo *> listTimes;
-    QStackedWidget *mStack;
-//    QComboBox *mCombo;
     bool changed;
-    QToolButton *tb;
+
     QWorldmap *frmMap;
     enum SizeMode {
         Minimal,
+        Medium,
         Tall,
         Wide
     } mMode;

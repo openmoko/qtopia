@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -347,7 +347,7 @@ void QTextEntryProxy::setTarget ( QWidget * target )
 }
 
 
-void QTextEntryProxy::targetDestroyed(QObject *obj)
+void QTextEntryProxy::targetDestroyed(QObject * /*obj*/)
 {
     disconnect(d->target, SIGNAL(destroyed(QObject*)), this, SLOT(targetDestroyed(QObject*)));
     d->target->removeEventFilter(this);

@@ -93,10 +93,10 @@
  ...
  while (!xml.atEnd()) {
        xml.readNext();
-       ... <span class="comment">// do processing</span>
+       ... <span class="comment">//</span> do processing
  }
  if (xml.hasError()) {
-       ... <span class="comment">// do error handling</span>
+       ... <span class="comment">//</span> do error handling
  }</pre>
 <p>QXmlStreamReader is a well-formed XML 1.0 parser that does <i>not</i> include external parsed entities. As long as no error occurs, the application code can thus be assured that the data provided by the stream reader satisfies the W3C's criteria for well-formed XML. For example, you can be certain that all tags are indeed nested and closed properly, that references to internal entities have been replaced with the correct replacement text, and that attributes have been normalized or added according to the internal subset of the DTD.</p>
 <p>If an error does occur while parsing, <a href="qxmlstreamreader.html#atEnd">atEnd</a>() returns true and <a href="qxmlstreamreader.html#error">error</a>() returns the kind of error that occurred. <a href="qxmlstreamreader.html#hasError">hasError</a>() can also be used to check whether an error has occurred. The functions <a href="qxmlstreamreader.html#errorString">errorString</a>(), <a href="qxmlstreamreader.html#lineNumber">lineNumber</a>(), <a href="qxmlstreamreader.html#columnNumber">columnNumber</a>(), and <a href="qxmlstreamreader.html#characterOffset">characterOffset</a>() make it possible to generate a verbose human-understandable error or warning message. In order to simplify application code, QXmlStreamReader contains a <a href="qxmlstreamreader.html#raiseError">raiseError</a>() mechanism that makes it possible to raise custom errors that then trigger the same error handling code path.</p>
@@ -291,8 +291,8 @@
 <p>See also <a href="qxmlstreamreader.html#tokenString">tokenString</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

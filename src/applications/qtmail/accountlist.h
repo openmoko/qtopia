@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -39,26 +39,26 @@ class QTOPIAMAIL_EXPORT AccountList : public QObject
 public:
     AccountList(QObject *parent=0, const char *name=0);
 
-    QListIterator<MailAccount*> accountIterator();
+    QListIterator<QMailAccount*> accountIterator();
     int count();
 
     //temp while converting
-    MailAccount* at(int x);
-    void append(MailAccount *a);
+    QMailAccount* at(int x);
+    void append(QMailAccount *a);
     void remove(int pos);
-    void remove(MailAccount* const a);
+    void remove(QMailAccount* const a);
 
     void readAccounts();
     void saveAccounts();
 
     uint defaultMailServerCount();
-    MailAccount* defaultMailServer();
-    void setDefaultMailServer(MailAccount *account);
+    QMailAccount* defaultMailServer();
+    void setDefaultMailServer(QMailAccount *account);
 
-    MailAccount* getSmtpRef();
-    MailAccount* getPopRefByAccount(QString user);
-    MailAccount* getAccountById(QString id);
-    MailAccount* getSmtpRefByMail(QString email);
+    QMailAccount* getSmtpRef();
+    QMailAccount* getPopRefByAccount(QString user);
+    QMailAccount* getAccountById(QString id);
+    QMailAccount* getSmtpRefByMail(QString email);
     QStringList emailAccounts();
     QString getUserName();
 
@@ -67,10 +67,10 @@ signals:
     void checkAccount(int);
 
 public slots:
-    void intervalCheck(MailAccount*);
+    void intervalCheck(QMailAccount*);
 
 private:
-    QList<MailAccount*> list;
+    QList<QMailAccount*> list;
 };
 
 #endif

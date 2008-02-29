@@ -1,7 +1,5 @@
 qtopia_project(qtopia app)
 TARGET=malpkg
-# Disable i18n support
-CONFIG+=no_tr
 
 # Input
 HEADERS += malpkg.h \
@@ -25,13 +23,12 @@ INSTALLS+=pics
 
 pkg.name=malpkg
 pkg.desc=Sample Malware Application
-pkg.domain=graphics
+pkg.domain=trusted
 pkg.version=1.0.0
 pkg.multi=pkgA pkgB pkgC pkgD pkgE pkgF pkgG pkgH pkgJ pkgK
 pkg.maintainer=Sarah Smith <sarah.smith@trolltech.com>
 pkg.license=Commercial
 
-help.source=$$PWD
 help.files=malpkg.html
 help.hint=help
 INSTALLS+=help

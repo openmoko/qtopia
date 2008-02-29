@@ -175,14 +175,14 @@
 <p>ItemAt() returns the item at the given index. takeAt() removes the item at the given index, and returns it. In this case we use the list index as the layout index. In other cases where we have a more complex data structure, we may have to spend more effort defining a linear order for the items.</p>
 <pre> QLayoutItem *CardLayout::itemAt(int idx) const
  {
-     <span class="comment">// QList::value() performs index checking, and returns 0 if we are</span>
-     <span class="comment">// outside the valid range</span>
+     <span class="comment">//</span> QList::value() performs index checking, and returns 0 if we are
+     <span class="comment">//</span> outside the valid range
      return list.value(idx);
  }
 
  QLayoutItem *CardLayout::takeAt(int idx)
  {
-     <span class="comment">// QList::take does not do index checking</span>
+     <span class="comment">//</span> QList::take does not do index checking
      return idx &gt;= 0 &amp;&amp; idx &lt; list.size() ? list.takeAt(idx) : 0;
  }</pre>
 <p>addItem() implements the default placement strategy for layout items. It must be implemented. It is used by <a href="qlayout-qt3.html#add">QLayout::add</a>(), by the <a href="qlayout.html">QLayout</a> constructor that takes a layout as parent. If your layout has advanced placement options that require parameters, you must provide extra access functions such as the row and column spanning overloads of <a href="qgridlayout.html#addItem">QGridLayout::addItem</a>(), addWidget(), and addLayout().</p>
@@ -219,7 +219,7 @@
      QSize s(0,0);
      int n = list.count();
      if (n &gt; 0)
-         s = QSize(100,70); <span class="comment">//start with a nice default size</span>
+         s = QSize(100,70); <span class="comment">//</span>start with a nice default size
      int i = 0;
      while (i &lt; n) {
          QLayoutItem *o = list.at(i);
@@ -250,8 +250,8 @@
 <p>You should not call <a href="qlayoutitem.html#setGeometry">QLayoutItem::setGeometry</a>() twice on the same item in the same function. That can be very expensive if the item has several child widgets, because it must do a complete layout every time. Instead, calculate the geometry and then set it. (This doesn't only apply to layouts, you should do the same if you implement your own resizeEvent().)</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

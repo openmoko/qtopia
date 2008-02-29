@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,13 +27,13 @@
 
 #include "searchview.h"
 #include "accountlist.h"
-#include "emailfolderlist.h"
 
 #include <qmessagebox.h>
 #include <qcursor.h>
 #include <qpainter.h>
 #include <qdesktopwidget.h>
 #include <qevent.h>
+#include <qscrollbar.h>
 #include <QHeaderView>
 
 static QPixmap* pm_normal = 0;
@@ -50,37 +50,67 @@ static void ensurePixmaps()
     }
 }
 
-FolderListItem::FolderListItem(QTreeWidget *parent, Folder *in, const QString& mailboxName)
-    : QTreeWidgetItem( parent ),
-      _folder(in),
-      _highlight(false)
-{
-    init(mailboxName);
-}
-
-FolderListItem::FolderListItem(QTreeWidgetItem *parent, Folder *in, const QString& mailboxName)
+FolderListItem::FolderListItem(QTreeWidget *parent, Folder *in)
     : QTreeWidgetItem(parent),
       _folder(in),
       _highlight(false)
 {
-    init(mailboxName);
+    init();
 }
 
-void FolderListItem::init(QString name)
+FolderListItem::FolderListItem(QTreeWidget *parent, QTreeWidgetItem* predecessor, Folder *in)
+    : QTreeWidgetItem(parent, predecessor),
+      _folder(in),
+      _highlight(false)
 {
-    if (name.isNull())
-        name = _folder->mailbox();
+    init();
+}
 
-    QIcon icon = MailboxList::mailboxIcon(name);
+FolderListItem::FolderListItem(QTreeWidgetItem *parent, Folder *in)
+    : QTreeWidgetItem(parent),
+      _folder(in),
+      _highlight(false)
+{
+    init();
+}
 
-    setText(0, _folder->displayName() );
+FolderListItem::FolderListItem(QTreeWidgetItem *parent, QTreeWidgetItem* predecessor, Folder *in)
+    : QTreeWidgetItem(parent, predecessor),
+      _folder(in),
+      _highlight(false)
+{
+    init();
+}
+
+void FolderListItem::init()
+{
+    QIcon icon;
+    if (_folder->folderType() == FolderTypeSystem) {
+        icon = MailboxList::mailboxIcon(_folder->mailbox());
+    } else if (_folder->folderType() == FolderTypeAccount) {
+        icon = QIcon(":icon/account");
+    } else if (_folder->folderType() == FolderTypeMailbox) {
+        icon = QIcon(":icon/folder");
+    }
+
+    setName( _folder->displayName() );
     int extent = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
     setIcon( 0, icon.pixmap(extent));
 }
 
-Folder* FolderListItem::folder()
+Folder* FolderListItem::folder() const
 {
     return _folder;
+}
+
+void FolderListItem::setName(const QString& name)
+{
+    setText(0, name);
+}
+
+QString FolderListItem::name() const 
+{
+    return text(0);
 }
 
 void FolderListItem::setStatusText( const QString &str, bool highlight, IconType type )
@@ -95,12 +125,16 @@ void FolderListItem::statusText( QString *str, bool *highlight, IconType *type )
     *str = _statusText;
     *highlight = _highlight;
     *type = _type;
+
+    // Don't show the excess indicators if this item is expanded
+    if (isExpanded())
+        str->remove(FolderListView::excessIndicator());
 }
 
-int FolderListItem::depth()
+int FolderListItem::depth() const
 {
     int count = 0;
-    QTreeWidgetItem *item = this;
+    const QTreeWidgetItem *item = this;
     while (item->parent()) {
         ++count;
         item = item->parent();
@@ -140,15 +174,15 @@ QString FolderListItem::key(int c, bool) const
     }
     case FolderTypeAccount:
     {
-      return "2" + text(0);
+      return "2" + name();
     }
     case FolderTypeMailbox:
     {
-      return "3" + text(0);
+      return "3" + name();
     }
     default:    //folderTypeSearch
     {
-      return "4" + text(0);
+      return "4" + name();
     }
   }
 }
@@ -160,6 +194,8 @@ FolderListView::FolderListView(MailboxList *list, QWidget *parent, const char *n
 {
     setObjectName( name );
     setFrameStyle( NoFrame );
+    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
     sortItems(0, Qt::AscendingOrder );
 
     _mailboxList = list;
@@ -202,10 +238,56 @@ bool FolderListView::setCurrentFolder(const Folder* folder)
     return false;
 }
 
-MailAccount* FolderListView::currentAccount() const
+Folder* FolderListView::systemFolder(const QString& identifier) const
 {
-    FolderListItem *item = currentFolderItem();
-    MailAccount *account = 0;
+    QModelIndex index(systemFolderIndex(identifier));
+    if (index.isValid())
+        return folderItemFromIndex( index )->folder();
+    else if (systemFolders.contains(identifier))
+        return systemFolders[identifier];
+
+    return 0;
+}
+
+QModelIndex FolderListView::systemFolderIndex(const QString& identifier) const
+{
+    bool search = (identifier == MailboxList::LastSearchString);
+
+    QModelIndex index = model()->index( 0, 0 );
+    for ( ; index.isValid(); index = next( index ) ) {
+        Folder* folder = folderItemFromIndex( index )->folder();
+        if ( folder->folderType() == FolderTypeSystem ) {
+            if ( (search && static_cast<SystemFolder*>(folder)->isSearch()) ||
+                 (folder->mailbox() == identifier) ) {
+                break;
+            }
+        }
+    }
+
+    return index;
+}
+
+Folder* FolderListView::accountFolder(const Folder* account, const QString& mailbox) const
+{
+    QModelIndex index(accountFolderIndex(account, mailbox));
+    if (index.isValid())
+        return folderItemFromIndex( index )->folder();
+
+    return 0;
+}
+
+const QTreeWidgetItem* FolderListView::accountFolderItem(const Folder* account, const QString& mailbox) const
+{
+    QModelIndex index(accountFolderIndex(account, mailbox));
+    if (index.isValid())
+        return itemFromIndex( index );
+
+    return 0;
+}
+
+static QMailAccount* itemAccount(const FolderListItem* item)
+{
+    QMailAccount *account = 0;
 
     while (item &&
            item->folder() &&
@@ -215,9 +297,32 @@ MailAccount* FolderListView::currentAccount() const
     if (item &&
         item->folder() &&
         item->folder()->folderType() == FolderTypeAccount)
-        account = static_cast<MailAccount*>(item->folder());
+        account = static_cast<QMailAccount*>(item->folder());
 
     return account;
+}
+
+QModelIndex FolderListView::accountFolderIndex(const Folder* account, const QString& mailbox) const
+{
+    QModelIndex index = model()->index( 0, 0 );
+    for ( ; index.isValid(); index = next( index ) ) {
+        FolderListItem* item = folderItemFromIndex( index );
+        Folder* folder = item->folder();
+        if ( ( mailbox.isNull() &&
+               (folder == account) ) ||
+             ( (folder->folderType() == FolderTypeMailbox) &&
+               (static_cast<Mailbox*>(folder)->pathName() == mailbox) &&
+               (itemAccount(item) == account) ) ) {
+            break;
+        }
+    }
+
+    return index;
+}
+
+QMailAccount* FolderListView::currentAccount() const
+{
+    return itemAccount(currentFolderItem());
 }
 
 void FolderListView::keyPressEvent( QKeyEvent *e )
@@ -257,30 +362,61 @@ QSize FolderListView::minimumSizeHint() const
 void FolderListView::setupFolders(AccountList *list)
 {
     clear();
+
+    if (systemFolders.isEmpty()) {
+        // Create the persistent system folder entries
+        foreach (const QString& mailbox, _mailboxList->mailboxes())
+            systemFolders.insert(mailbox, new SystemFolder(SystemTypeMailbox, mailbox));
+    }
+
+    QList<QMailAccount*> accounts;
+    QListIterator<QMailAccount*> itAccount = list->accountIterator();
+    while (itAccount.hasNext()) {
+        QMailAccount* accountInfo = itAccount.next();
+        if (accountInfo->accountType() == QMailAccount::POP ||
+            accountInfo->accountType() == QMailAccount::IMAP) {
+            accounts.append(accountInfo);
+        }
+    }
+
+    bool withInbox = (accounts.count() != 1);
+    if (!withInbox) {
+        // Add our single account folder first
+        FolderListItem* accountItem = new FolderListItem(this, accounts.first());
+        synchroniseFolderStructure(accountItem, accounts.first());
+        setCurrentItem(accountItem);
+
+        setItemExpanded(accountItem, true);
+    }
+
     //build system folders
     QStringList mboxList = _mailboxList->mailboxes();
     for (QStringList::Iterator it = mboxList.begin(); it != mboxList.end(); ++it) {
-        new FolderListItem(this, new SystemFolder(SystemTypeMailbox, *it ) );
+        if (withInbox || (*it != MailboxList::InboxString))
+            new FolderListItem(this, systemFolders[*it]);
     }
 
-    //build inbox
-    FolderListItem* inbox = static_cast<FolderListItem*>(topLevelItem(0));
+    if (withInbox) {
+        //build inbox
+        FolderListItem* inbox = static_cast<FolderListItem*>(topLevelItem(0));
 
-    //build all other accounts
-    QListIterator<MailAccount*> itAccount = list->accountIterator();
-    while (itAccount.hasNext()) {
-        MailAccount* accountInfo = itAccount.next();
-        if (accountInfo->accountType() == MailAccount::POP ||
-            accountInfo->accountType() == MailAccount::IMAP) {
-            FolderListItem* accountItem = new FolderListItem(inbox, accountInfo, "");
-            buildImapFolder(accountItem,accountInfo);
+        //build all other accounts
+        QListIterator<QMailAccount*> itAccount = list->accountIterator();
+        while (itAccount.hasNext()) {
+            QMailAccount* accountInfo = itAccount.next();
+            if (accountInfo->accountType() == QMailAccount::POP ||
+                accountInfo->accountType() == QMailAccount::IMAP) {
+                FolderListItem* accountItem = new FolderListItem(inbox, accountInfo);
+                synchroniseFolderStructure(accountItem, accountInfo);
+            }
         }
+
+        setItemExpanded(inbox, true);
+        setCurrentItem(inbox);
     }
-    setItemExpanded(inbox, true);
-    setCurrentItem(inbox);
 }
 
-QModelIndex FolderListView::next(QModelIndex mi, bool nextParent)
+QModelIndex FolderListView::next(QModelIndex mi, bool nextParent) const
 {
     if (mi.child(0,0).isValid() && !nextParent)
       return mi.child(0,0);
@@ -291,7 +427,7 @@ QModelIndex FolderListView::next(QModelIndex mi, bool nextParent)
     return QModelIndex(); // invalid e.g. correct
 }
 
-QTreeWidgetItem* FolderListView::next(QTreeWidgetItem *item)
+QTreeWidgetItem* FolderListView::next(QTreeWidgetItem *item) const
 {
   QModelIndex m = indexFromItem(item);
   QModelIndex nextIndex = next(m);
@@ -303,180 +439,252 @@ QTreeWidgetItem* FolderListView::next(QTreeWidgetItem *item)
 
 // receives an account, finds it in the listview and makes
 // any necessary updates
-void FolderListView::updateAccountFolder(MailAccount *account)
+void FolderListView::updateAccountFolder(QMailAccount *account)
 {
-    QModelIndex index = model()->index( 0, 0 ); //inbox
-    FolderListItem *inbox_item = folderItemFromIndex( index );
-    FolderListItem *item = static_cast<FolderListItem *>(inbox_item->child(0));
-    Folder *folder;
+    QModelIndex index(accountFolderIndex(account, QString()));
+    if (index.isValid()) {
+        FolderListItem *item = folderItemFromIndex(index);
+        synchroniseFolderStructure(item, account);
+        folderChanged( currentItem() );
 
-    while (item != NULL) {
-        folder = item->folder();
-        if (folder->folderType() == FolderTypeAccount ) {
-            if ( folder == account ) {
-                bool selected = selectedChildOf(item);
-                QString statusText;
-                bool statusHighlight;
-                IconType type;
-                item->statusText( &statusText, &statusHighlight, &type );
-                buildImapFolder(item,account); //rebuild imap subtree
-                item->setStatusText( statusText, statusHighlight, type );
+        QModelIndex rootIndex = model()->index(0, 0);
+        if ((rootIndex == index) && (item->childCount() != 0)) {
+            // This account is the only one - expand if necessary
+            setItemExpanded(item, true);
+        }
+    } else {
+        // New account folder
+        FolderListItem *item = 0;
+        FolderListItem *inbox = folderItemFromIndex(model()->index(0, 0));
+        if (inbox->folder()->folderType() == FolderTypeAccount) {
+            // There is only a single account currently, in place of the inbox
+            QMailAccount* firstAccount = static_cast<QMailAccount*>(inbox->folder());
 
-                if ( selected ) {
-                    setCurrentItem( item );
-                    setItemExpanded(item, true);
-                }
+            // Delete the existing folder
+            delete inbox;
 
-                folderChanged( currentItem() );
-                return;
+            // Add the inbox to precede the existing folders
+            new FolderListItem(this, 0, systemFolders[MailboxList::InboxString]);
+            inbox = folderItemFromIndex(model()->index(0, 0));
+
+            // Add the previous folder back to the inbox
+            item = new FolderListItem(inbox, firstAccount);
+            synchroniseFolderStructure(item, firstAccount);
+
+            setItemExpanded(inbox, true);
+            item = 0;
+        } else {
+            // If this is the first account, remove the empty inbox
+            if (inbox->childCount() == 0) {
+                delete inbox;
+
+                // Add the new account to precede the existing folders
+                item = new FolderListItem(this, 0, account);
             }
         }
-        item = static_cast<FolderListItem *>(next( item ));
-    }
 
-    //if we get here, it was a new folder
-    item = new FolderListItem(inbox_item,account);
-    buildImapFolder(item,account);
+        if (!item)
+            item = new FolderListItem(inbox, account);
+
+        synchroniseFolderStructure(item, account);
+
+        emit folderModified(inbox->folder());
+        folderChanged(inbox);
+    }
 }
 
-void FolderListView::deleteAccountFolder(MailAccount *account)
+void FolderListView::deleteAccountFolder(QMailAccount *account)
 {
     Folder *folder;
 
     QModelIndex rootindex = model()->index( 0, 0 );
-    QModelIndex index = next( rootindex);
-    if(index == rootindex)
-      return;
-    for ( ; index.isValid(); index = next( index ) ) {
-        folder = folderItemFromIndex( index )->folder();
-        if ( folder->folderType() == FolderTypeAccount ) {
+    QModelIndex index;
 
-            //make updates
-            if ( folder == account ) {
-                EmailFolderList *inbox = _mailboxList->mailbox(MailboxList::InboxString);
-                QMailIdList accountMessages = inbox->messagesFromAccount(account->id());
-                foreach(QMailId id, accountMessages)
-                    inbox->removeMail(id);
+    folder = folderItemFromIndex( rootindex )->folder();
+    if ( (folder->folderType() == FolderTypeAccount) && (folder == account) ) {
+        index = rootindex;
+    } else {
+        index = next(rootindex);
+        if(index == rootindex)
+            return;
+
+        for ( ; index.isValid(); index = next( index ) ) {
+            folder = folderItemFromIndex( index )->folder();
+            if ( (folder->folderType() == FolderTypeAccount) && (folder == account) )
+                break;
+        }
+    }
+
+    if (folder == account) {
+        delete itemFromIndex( index );
+
+        if (index == rootindex) {
+            // We deleted the top-level single account - restore the inbox in its place
+            new FolderListItem(this, 0, systemFolders[MailboxList::InboxString]);
+        } else {
+            FolderListItem *inbox = folderItemFromIndex(model()->index(0, 0));
+            if (inbox->childCount() == 1) {
+                // We only have a single child left - replace the inbox
+                QTreeWidgetItem *remainingAccount = inbox->takeChild(0);
                 
-//                QListIterator<Email*> it2 = inbox->entryIterator();
-//                while ( it2.hasNext() ) {
-//                   Email *mail = it2.next();
-//                    if ( mail->fromAccount() == account->id() ) {
-//                        inbox->removeMail( mail->id(), true );
-//                    }
-                delete itemFromIndex( index );
-                folderChanged( currentItem() );
-                return;
+                insertTopLevelItem(0, remainingAccount);
+                setItemExpanded(remainingAccount, true);
+                delete inbox;
             }
         }
+
+        emit folderModified( folderItemFromIndex( model()->index(0, 0) )->folder() );
+        folderChanged( currentItem() );
     }
 }
 
-bool FolderListView::selectedChildOf(FolderListItem *folder)
+void FolderListView::changeToSystemFolder(const QString &identifier)
 {
-   FolderListItem *selected = currentFolderItem();
-
-   if (selected == NULL)
-       return false;
-
-    if (folder == selected)
-        return true;
-
-    while ( ( selected = static_cast<FolderListItem *>( selected->parent() ) ) != NULL ) {
-        if (folder == selected)
-            return true;
-    }
-
-    return false;
-}
-
-void FolderListView::changeToSystemFolder(const QString &str)
-{
-    Folder *folder;
-    bool search = (str == MailboxList::LastSearchString);
-
-    QModelIndex index = model()->index( 0, 0 ); //inbox
-    for ( ; index.isValid(); index = next( index ) ) {
-        FolderListItem *item = folderItemFromIndex( index );
-        folder = item->folder();
-        if ( folder->folderType() == FolderTypeSystem ) {
-            if ( search && static_cast<SystemFolder *>(folder)->isSearch() ) {
-                setCurrentItem( item );
-                break;
-            } else if ( folder->mailbox() == str ) {
-                setCurrentItem( item );
-                break;
-            }
-        }
+    QModelIndex index(systemFolderIndex(identifier));
+    if (index.isValid()) {
+        setCurrentItem(itemFromIndex(index));
+    } else if (identifier == MailboxList::InboxString) {
+        // There may be no inbox present, if there is a single account
+        setCurrentItem(itemFromIndex(model()->index(0,0)));
     }
 }
 
 void FolderListView::updateFolderStatus(const QString &mailbox, const QString &txt, bool highlight, IconType type)
 {
-    Folder *folder;
-    QModelIndex index = model()->index( 0, 0 );
-    for ( ; index.isValid(); index = next( index ) ) {
+    QModelIndex index(systemFolderIndex(mailbox));
+    if (index.isValid()) {
         FolderListItem *item = folderItemFromIndex( index );
-        folder = item->folder();
-        if ( folder->folderType() == FolderTypeSystem ) {
-            if ( static_cast<SystemFolder *>( folder )->mailbox() == mailbox ) {
-                item->setStatusText( txt, highlight, type );
-                dataChanged( index, index );
-                return;
-            }
-        }
+        item->setStatusText( txt, highlight, type );
+
+        dataChanged( index, index );
     }
 }
 
-void FolderListView::updateAccountStatus(const Folder *account, const QString &txt, bool highlight, IconType type)
+void FolderListView::updateAccountStatus(const Folder *account, const QString &txt, bool highlight, IconType type, const QString& mailbox)
 {
-    Folder *folder;
-    QModelIndex index = model()->index( 0, 0 );
-    for ( ; index.isValid(); index = next( index ) ) {
+    QModelIndex index(accountFolderIndex(account, mailbox));
+    if (index.isValid()) {
         FolderListItem *item = folderItemFromIndex( index );
-        folder = item->folder();
-        if ( folder == account ) {
-            item->setStatusText( txt, highlight, type );
-            dataChanged( index, index );
-            return;
-        }
+        item->setStatusText( txt, highlight, type );
+
+        dataChanged( index, index );
     }
 }
 
-void FolderListView::folderChanged(QTreeWidgetItem *folder)
+void FolderListView::folderChanged(QTreeWidgetItem *item)
 {
     QString str;
 
-    if ( folder == NULL ) {
+    if ( item == NULL ) {
         emit folderSelected( reinterpret_cast<Folder *>( NULL ) );
         return;
     }
 
-    emit folderSelected( static_cast<FolderListItem *>(folder)->folder() );
+    emit folderSelected( static_cast<FolderListItem *>(item)->folder() );
 }
 
-void FolderListView::buildImapFolder(FolderListItem *item, MailAccount* account)
+static QString folderPath(const QTreeWidgetItem* item, const FolderListItem* root, const QString& delimiter)
+{
+    QString path = item->text(0);
+
+    item = item->parent();
+    while (item && (item != root)) {
+        path.prepend(delimiter).prepend(item->text(0));
+        item = item->parent();
+    }
+
+    return path;
+}
+
+static bool mailboxExists(QTreeWidgetItem* item, const FolderListItem* root, const QString& delimiter,
+                          QList<QList<Mailbox*>::const_iterator>& existing)
+{
+    QString mailboxName = folderPath(item, root, delimiter);
+
+    QList<QList<Mailbox*>::const_iterator>::iterator it = existing.begin(), end = existing.end();
+    for ( ; it != end; ++it) {
+        Mailbox* box = *(*it);
+        if (box->pathName() == mailboxName) {
+            // This mail box is in the list of extant mailboxes
+            existing.erase(it);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool verifyChildren(QTreeWidgetItem* item, const FolderListItem* root, const QString& delimiter,
+                           QList<QList<Mailbox*>::const_iterator>& existing)
+{
+    QList<QTreeWidgetItem*> nonexistent;
+
+    for (int i = 0; i < item->childCount(); ++i) {
+        QTreeWidgetItem* child = item->child(i);
+
+        if (verifyChildren(child, root, delimiter, existing) == false)
+            nonexistent.prepend(child);
+    }
+
+    foreach (QTreeWidgetItem* child, nonexistent) {
+        item->removeChild(child);
+        delete child;
+    }
+
+    if (item == root)
+        return true;
+
+    return mailboxExists(item, root, delimiter, existing);
+}
+
+void FolderListView::synchroniseFolderStructure(FolderListItem *item, QMailAccount* account)
 {
     Q_ASSERT(item);
     Q_ASSERT(account);
-    Mailbox *box = 0;
-    FolderListItem* subfolder = 0;
 
-    //delete current subtree
-    blockSignals(true);
-    QList<QTreeWidgetItem*> children = item->takeChildren();
-    while (!children.isEmpty())
-        delete children.takeFirst();
-    blockSignals(false);
+    QString delimiter;
+    QList<QList<Mailbox*>::const_iterator> mailboxes;
 
-    //build new subtree
-    QListIterator<Mailbox*> it(account->mailboxes);
-    while ( it.hasNext()) {
-        box = it.next();
+    const QList<Mailbox*>& boxes(account->mailboxes());
+    if (!boxes.isEmpty()) {
+        // Create a list of the mailboxes in this account
+        QList<Mailbox*>::const_iterator it = boxes.begin(), end = boxes.end();
+        delimiter = (*it)->getDelimiter();
+
+        for ( ; it != end; ++it)
+            mailboxes.append(it);
+    }
+
+    // If we have only a single mailbox, do not present any folder hierarchy
+    if (mailboxes.count() == 1)
+        mailboxes.clear();
+
+    // Remove any mailboxes no longer present in the tree
+    verifyChildren(item, item, delimiter, mailboxes);
+
+    // Add any new mailboxes not in the tree
+    foreach (QList<Mailbox*>::const_iterator it, mailboxes) {
+        Mailbox* box(*it);
         if ( !box->isDeleted() && box->localCopy()) {
-            subfolder = new FolderListItem(getParent(item, box->pathName(), box->getDelimiter()), box, box->displayName());
+            FolderListItem* parent = getParent(item, box->pathName(), box->getDelimiter());
+            QTreeWidgetItem* predecessor = getPredecessor(parent, box->displayName());
+            new FolderListItem(parent, predecessor, box);
         }
     }
+
+    // Check whether the account name has changed
+    if (account->displayName() != item->name())
+        item->setName(account->displayName());
+}
+
+static QString parentFolderName(const QString& path, const QString& delimiter)
+{
+    QStringList list = path.split(delimiter);
+    if (list.isEmpty())
+        return QString();
+
+    list.removeLast();
+    return list.join(delimiter);
 }
 
 /*  Returns the parent mailbox/account in the treewidget of the given account.
@@ -485,13 +693,9 @@ void FolderListView::buildImapFolder(FolderListItem *item, MailAccount* account)
 */
 FolderListItem* FolderListView::getParent(FolderListItem *parent, QString name, QString delimiter)
 {
-    QStringList list = name.split(delimiter);
-    list.removeAll( list.last() );
-
-    if (list.count() == 0)
+    QString target = parentFolderName(name, delimiter);
+    if (target.isEmpty())
         return parent;
-
-    QString target = list.join(delimiter);
 
     int level = parent->depth();
     Folder *folder;
@@ -512,6 +716,23 @@ FolderListItem* FolderListView::getParent(FolderListItem *parent, QString name, 
     }
 
     return parent;
+}
+
+QTreeWidgetItem* FolderListView::getPredecessor(FolderListItem *parent, QString name)
+{
+    QTreeWidgetItem* predecessor = 0;
+
+    // Find the last child whose name precedes this name in lexicographical order
+    for (int i = 0; i < parent->childCount(); ++i) {
+        QTreeWidgetItem* child = parent->child(i);
+        if (child->text(0) < name) {
+            predecessor = child;
+        } else {
+            break;
+        }
+    }
+
+    return predecessor;
 }
 
 void FolderListView::itemClicked(QTreeWidgetItem *i)
@@ -554,11 +775,18 @@ void FolderListView::rememberCurrentFolder()
     currentIndex = indexFromItem( currentItem() );
 }
 
+QString FolderListView::excessIndicator()
+{
+    return QString("*");
+}
+
+
 /* Folder List Item Delegate */
 
 FolderListItemDelegate::FolderListItemDelegate(FolderListView *parent)
     : QtopiaItemDelegate(parent),
-      mParent(parent)
+      mParent(parent),
+      mScrollBar(mParent->verticalScrollBar())
 {
     ensurePixmaps();
 }
@@ -577,11 +805,18 @@ void FolderListItemDelegate::paint(QPainter *painter,
 }
 
 void FolderListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionViewItem &option,
-                     const QRect &rect, const QString &text) const
+                     const QRect &originalRect, const QString &text) const
 {
-    QtopiaItemDelegate::drawDisplay(painter, option, rect, text);
+    // Workaround for QtopiaItemDelegate bug?
+    // Reduce the available width by the scrollbar size, if necessary
+    QRect rect(originalRect);
+    if (mScrollBar && mScrollBar->isVisible())
+        rect.setWidth(rect.width() - mParent->style()->pixelMetric(QStyle::PM_ScrollBarExtent));
+
+    int tw = 0;
+    QString str;
     if (!statusText.isEmpty()) {
-        QString str = statusText;
+        str = statusText;
         if (option.direction == Qt::RightToLeft) {
             QString trim = statusText.trimmed();
             // swap new/total counts in rtl mode
@@ -592,6 +827,19 @@ void FolderListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
                 str += trim.left( sepPos );
             }
         }
+        QFontMetrics fontMetrics(option.font);
+        tw = fontMetrics.width(str);
+    }
+
+    QRect textRect(rect);
+    textRect.setWidth(rect.width() - tw);
+    QtopiaItemDelegate::drawDisplay(painter, option, textRect, text);
+
+    if (tw || (type != NoIcon)) {
+        int margin = 5;
+        int pw = margin;
+        int ph = 0;
+
         QPixmap *pm = 0;
         if (type == UnreadMessages) {
             pm = pm_unread;
@@ -600,11 +848,6 @@ void FolderListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
         } else if (type == AllMessages) {
             pm = pm_normal;
         }
-        QFontMetrics fontMetrics(option.font);
-        int tw = fontMetrics.width(str);
-        int margin = 5;
-        int pw = margin;
-        int ph = 0;
         if (pm) {
             pw = pm->width() + 2*margin;
             ph = pm->height();
@@ -617,7 +860,8 @@ void FolderListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
         QRect pixRect = option.direction == Qt::RightToLeft
             ? QRect(margin, rect.top(), pw-margin, v)
             : QRect(rect.left()+rect.width()-pw+margin, rect.top() + v, pw-2*margin, ph);
-        painter->drawText(statusRect, Qt::AlignCenter, str);
+        if (!str.isEmpty())
+            painter->drawText(statusRect, Qt::AlignCenter, str);
         if (pm)
             painter->drawPixmap(pixRect, *pm);
     }

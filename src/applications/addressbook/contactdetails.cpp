@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,7 +22,7 @@
 #include "contactdetails.h"
 #include "contactbrowser.h"
 #include "contactoverview.h"
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 #include "contactcallhistorylist.h"
 #endif
 #include "contactmessagehistorylist.h"
@@ -74,14 +74,14 @@ void ContactDetails::init( const QContact &entry )
 
         mQuickTab = new ContactOverview(0);
         mDetailsTab = new ContactBrowser(0);
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         mCallHistoryTab = new ContactCallHistoryList(0);
 #endif
         mMessageHistoryTab = new ContactMessageHistoryList(0);
 
         mTabs->addTab(mQuickTab, QIcon(":icon/contactdetails"), tr("Overview"));
         mTabs->addTab(mDetailsTab, QIcon(":icon/details"), tr("Details"));
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         mTabs->addTab(mCallHistoryTab, QIcon(":icon/phone/calls"), tr("Calls"));
 #endif
         mTabs->addTab(mMessageHistoryTab, QIcon(":icon/email"), tr("Messages"));
@@ -90,7 +90,7 @@ void ContactDetails::init( const QContact &entry )
         connect(mQuickTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
         connect(mDetailsTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
         connect(mDetailsTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         connect(mCallHistoryTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
         connect(mCallHistoryTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
 #endif
@@ -121,14 +121,14 @@ void ContactDetails::modelChanged()
     if (mTabs && mModel) {
         mQuickTab->setModel(mModel);
         mDetailsTab->setModel(mModel);
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         mCallHistoryTab->setModel(mModel);
 #endif
         mMessageHistoryTab->setModel(mModel);
 
         mQuickTab->init(ent);
         mDetailsTab->init(ent, ContactDocument::Details);
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
         mCallHistoryTab->init(ent);
 #endif
         mMessageHistoryTab->init(ent);

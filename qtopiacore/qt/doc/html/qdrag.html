@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/kernel/qdrag.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/kernel/qdrag.cpp -->
 <head>
   <title>Qt 4.3: QDrag Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -86,7 +86,7 @@
 <p>See also <a href="qdrag.html#targetChanged">targetChanged</a>().</p>
 <h3 class="fn"><a name="exec"></a><a href="qt.html#DropAction-enum">Qt::DropAction</a> QDrag::exec ( <a href="qt.html#DropAction-enum">Qt::DropActions</a> <i>supportedActions</i> = Qt::MoveAction )</h3>
 <p>Starts the drag and drop operation and returns a value indicating the requested drop action when it is completed. The drop actions that the user can choose from are specified in <i>supportedActions</i>. The default proposed action will be selected among the allowed actions in the following order: Move, Copy and Link.</p>
-<p><b>Note:</b> Although the drag and drop operation can take some time, this function does not block the event loop. Other events are still delivered to the application while the operation is performed.</p>
+<p><b>Note:</b> On Linux and Mac OS X, the drag and drop operation can take some time, but this function does not block the event loop. Other events are still delivered to the application while the operation is performed. On Windows, the Qt event loop is blocked while during the operation.</p>
 <p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="exec-2"></a><a href="qt.html#DropAction-enum">Qt::DropAction</a> QDrag::exec ( <a href="qt.html#DropAction-enum">Qt::DropActions</a> <i>supportedActions</i>, <a href="qt.html#DropAction-enum">Qt::DropAction</a> <i>defaultDropAction</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -125,8 +125,8 @@
 <p>See also <a href="qdrag.html#target">target</a>() and <a href="qdrag.html#actionChanged">actionChanged</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

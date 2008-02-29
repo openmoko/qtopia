@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -320,6 +320,7 @@ DemoSimApplication::~DemoSimApplication()
 #define MainMenu_Tones      5
 #define MainMenu_Icons      6
 #define MainMenu_IconsSE    7
+#define MainMenu_Finance    8
 
 #define SportsMenu_Chess        1
 #define SportsMenu_Painting     2
@@ -362,9 +363,31 @@ void DemoSimApplication::mainMenu()
     item.setLabel( "Icons (self-explanatory)" );
     items += item;
 
+    item.setIdentifier( MainMenu_Finance );
+    item.setLabel( "Finance" );
+    items += item;
+
     cmd.setMenuItems( items );
 
     command( cmd, 0, 0 );
+}
+
+void DemoSimApplication::sendDisplayText()
+{
+    // Display a text string and then go back to the main menu once the
+    // text is accepted by the user.
+    QSimCommand cmd;
+    cmd.setType( QSimCommand::DisplayText );
+    cmd.setDestinationDevice( QSimCommand::Display );
+    cmd.setClearAfterDelay(false);
+    cmd.setImmediateResponse(true);
+    cmd.setHighPriority(false);
+    immediateResponse = true;
+    cmd.setText( "Police today arrested a man on suspicion "
+            "of making phone calls while intoxicated.  Witnesses claimed "
+            "that they heard the man exclaim \"I washent dwinkn!\" as "
+            "officers escorted him away." );
+    command( cmd, this, SLOT(displayTextResponse(QSimTerminalResponse)) );
 }
 
 void DemoSimApplication::mainMenuSelection( int id )
@@ -375,15 +398,7 @@ void DemoSimApplication::mainMenuSelection( int id )
 
         case MainMenu_News:
         {
-            // Display a text string and then go back to the main menu once the
-            // text is accepted by the user.
-            cmd.setType( QSimCommand::DisplayText );
-            cmd.setDestinationDevice( QSimCommand::Display );
-            cmd.setText( "Police today arrested a man on suspicion "
-                         "of making phone calls while intoxicated.  Witnesses claimed "
-                         "that they heard the man exclaim \"I washent dwinkn!\" as "
-                         "officers escorted him away." );
-            command( cmd, this, SLOT(mainMenu()) );
+            QTimer::singleShot( 0, this, SLOT(sendDisplayText()) );
         }
         break;
 
@@ -423,6 +438,17 @@ void DemoSimApplication::mainMenuSelection( int id )
         case MainMenu_IconsSE:
         {
             sendIconSEMenu();
+        }
+        break;
+
+        case MainMenu_Finance:
+        {
+            cmd.setType( QSimCommand::GetInput );
+            cmd.setText( "Enter code" );
+            cmd.setWantDigits( true );
+            cmd.setMinimumLength( 3 );
+            cmd.setHasHelp( true );
+            command( cmd, this, SLOT(getInputLoop(QSimTerminalResponse)) );
         }
         break;
 
@@ -583,6 +609,20 @@ void DemoSimApplication::sticksGamePlayAgain( const QSimTerminalResponse& resp )
         mainMenu();
 }
 
+void DemoSimApplication::getInputLoop( const QSimTerminalResponse& resp )
+{
+    QSimCommand cmd;
+    if ( resp.result() == QSimTerminalResponse::HelpInformationRequested ) {
+        // Display help for the game.
+        cmd.setType( QSimCommand::DisplayText );
+        cmd.setDestinationDevice( QSimCommand::Display );
+        cmd.setText("Enter code of the company." );
+        command( cmd, this, SLOT(mainMenu()) );
+    } else {
+        mainMenu();
+    }
+}
+
 void DemoSimApplication::sendToneMenu()
 {
     QSimCommand cmd;
@@ -740,3 +780,21 @@ void DemoSimApplication::iconSEMenu( const QSimTerminalResponse& resp )
     else
         mainMenu();
 }
+
+void DemoSimApplication::displayTextResponse( const QSimTerminalResponse& resp )
+{
+    QSimCommand cmd;
+
+    if ( resp.result() == QSimTerminalResponse::Success ) {
+        if ( immediateResponse )
+            return;
+        mainMenu();
+    } else if ( resp.result() == QSimTerminalResponse::BackwardMove ) {
+        // Request to move backward.
+        mainMenu();
+    } else {
+        // Unknown response - just go back to the main menu.
+        mainMenu();
+    }
+}
+

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,7 +40,7 @@ class QValueSpaceObject;
 class QLabel;
 
 #ifndef QTOPIA_TEST
-#include "../../server/applicationlauncher.h"
+#include "../../server/core_server/applicationlauncher.h"
 #endif
 
 class SimApp : public QMainWindow
@@ -79,6 +79,7 @@ private slots:
 
 public slots:
     void terminateSession();
+    void hideApp();
 
 signals:
     void viewChanged(SimCommandView *);
@@ -118,6 +119,7 @@ private:
     uint idleModeMsgId;
     QLabel *failLabel;
     bool commandOutsideMenu;
+    bool hasSustainedDisplayText;
 
     void createIconReader();
     void changeEventList(int newEvents);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2006-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2006-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -18,6 +18,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #include "startupflags.h"
 
 #include <Qtopia>
@@ -47,18 +48,10 @@ StartupFlags::StartupFlags( QWidget* parent, Qt::WFlags fl )
 #ifdef QTOPIA_PHONE
     QMenu* menu = QSoftMenuBar::menuFor( this );
 
-    // This implementation is a generic mechanism for adding a What's This?
-    // menu item to the softmenubar menu.
-    //
-    // This is a prototype for a mechanism to be put into a Qtopia library,
-    // potentially Qtopia Core or Qt proper.
-    //
-    // See also StartupFlags::showWhatsThis below.
-    //
     QAction *aWhatsThis = QWhatsThis::createAction(this);
     QAction *qtopiaWhatsThis = new QAction(aWhatsThis->icon(),aWhatsThis->text(),this);
-    connect( qtopiaWhatsThis, SIGNAL(triggered()), this, SLOT(showWhatsThis()) );
-    menu->addAction( qtopiaWhatsThis );
+    connect(qtopiaWhatsThis, SIGNAL(triggered()), this, SLOT(showWhatsThis()));
+    menu->addAction(qtopiaWhatsThis);
     delete aWhatsThis;
 #endif
 
@@ -87,27 +80,10 @@ StartupFlags::~StartupFlags()
 
 void StartupFlags::showWhatsThis()
 {
-    // This implementation is a generic mechanism for finding the widget
-    // and the point of interest within that widget for which a QHelpEvent
-    // can be sent (and send it).
-    //
-    // This is a prototype for a mechanism to be put into a Qtopia library,
-    // potentially Qtopia Core or Qt proper.
-    //
-    // See also qtopiaWhatsThis above.
-    //
-    QWidget* whatswhat = QApplication::focusWidget();
-    if ( whatswhat ) {
-        QPoint p = whatswhat->inputMethodQuery(Qt::ImMicroFocus).toRect().center();
-        QPoint gp = whatswhat->mapToGlobal(p);
-        QWidget *whatsreallywhat = QApplication::widgetAt(gp);
-        if ( whatsreallywhat ) {
-            whatswhat = whatsreallywhat;
-            p = whatsreallywhat->mapFromGlobal(gp);
-        }
-        QHelpEvent e(QEvent::WhatsThis, p, gp);
-        QApplication::sendEvent(whatswhat, &e);
-    }
+    QTreeWidgetItem *item = list->currentItem();
+    QPoint p = list->visualItemRect(item).center();
+
+    QWhatsThis::showText(p, item->whatsThis(0), list);
 }
 
 void StartupFlags::flagChanged(QTreeWidgetItem *item, int column)
@@ -261,7 +237,7 @@ void StartupFlags::loadSettings()
                 } else {
                     i->setFlags(i->flags() & ~Qt::ItemIsSelectable);
                 }
-            } 
+            }
 
             i->setWhatsThis(0, settings.value("Help[]").toString());
             item.insert(group, i);

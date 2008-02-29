@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -25,14 +25,6 @@
 #include "emailhandler.h"
 #include <longstream_p.h>
 
-namespace QtMail
-{
-    bool compareMailboxes(Mailbox* a, Mailbox* b)
-    {
-        return (a->pathName() < b->pathName());
-    }
-}
-
 ImapClient::ImapClient()
 {
     connect(&client, SIGNAL(finished(ImapCommand&,OperationState&)),
@@ -44,7 +36,7 @@ ImapClient::ImapClient()
     connect(&client, SIGNAL(nonexistentMessage(QString)),
             this, SLOT(nonexistentMessage(QString)) );
     connect(&client, SIGNAL(downloadSize(int)),
-            this, SIGNAL(downloadedSize(int)) );
+            this, SLOT(downloadSize(int)) );
     connect(&client, SIGNAL(updateStatus(QString)),
             this, SIGNAL(updateStatus(QString)) );
     connect(&client, SIGNAL(connectionError(int,QString)),
@@ -58,7 +50,7 @@ ImapClient::~ImapClient()
 void ImapClient::newConnection()
 {
     if ( client.connected() ) {
-        qWarning("socket in use, connection refused");
+        qLog(IMAP) << "socket in use, connection refused";
         return;
     }
 
@@ -86,7 +78,7 @@ void ImapClient::operationDone(ImapCommand &command, OperationState &state)
             case IMAP_UIDStore:
             {
                 // Couldn't set a flag, ignore as we can stil continue
-                qWarning("could not store message flag");
+                qLog(IMAP) << "could not store message flag";
                 break;
             }
 
@@ -201,7 +193,7 @@ void ImapClient::handleUidFetch()
             emit updateStatus( tr("Checking ") + currentBox->displayName() );
             client.select( currentBox->pathName() );
         } else {
-            emit mailTransferred( 0 );
+            previewCompleted();
             return;
         }
     } else if (status == Rfc822) {    //getting complete messages
@@ -220,37 +212,47 @@ void ImapClient::handleSearch()
 
         if (client.mailboxUidList().count() == 0 &&
             client.mailboxUidList().count() != client.exists()) {
-          qWarning("Inconsistent UID SEARCH result. Trying SEEN/UNSEEN");
+            qLog(IMAP) << "Inconsistent UID SEARCH result. Trying SEEN/UNSEEN";
             _searchStatus = Seen;
             client.uidSearch(MFlag_Seen);
         } else {
             _mailboxUidList = client.mailboxUidList();
-            uniqueUidList = currentBox->getNewUid( _mailboxUidList );
-            if (!messagesToDelete())
-                handleUid();
+
+            searchCompleted();
         }
         break;
     }
     case Seen:
     {
         _mailboxUidList = client.mailboxUidList();
-        uniqueUidList = currentBox->getNewUid( _mailboxUidList );
         _searchStatus = Unseen;
+
         client.uidSearch(MFlag_Unseen);
         break;
     }
     case Unseen:
     {
         _mailboxUidList += client.mailboxUidList();
-        uniqueUidList += currentBox->getNewUid(client.mailboxUidList());
         _searchStatus = All; //reset
-        if (!messagesToDelete())
-            handleUid();
+
+        searchCompleted();
         break;
     }
     default:
-        qWarning("Unknown search status");
+        qLog(IMAP) << "Unknown search status";
     }
+}
+
+void ImapClient::searchCompleted()
+{
+    uniqueUidList = currentBox->getNewUids( _mailboxUidList );
+    expiredUidList = currentBox->getExpiredUids( _mailboxUidList );
+
+    if (!expiredUidList.isEmpty())
+        emit expiredMessages( expiredUidList, currentBox->pathName(), true );
+
+    if (!messagesToDelete())
+        handleUid();
 }
 
 void ImapClient::handleUid()
@@ -266,7 +268,7 @@ void ImapClient::handleUid()
         emit updateStatus( tr("Checking ") + currentBox->displayName() );
         client.select( currentBox->pathName() );
     } else {
-        emit mailTransferred( 0 );
+        previewCompleted();
     }
 
 //    currentBox->setServerUid( client.mailboxUidList() );
@@ -320,7 +322,7 @@ void ImapClient::handleSelect()
         emit updateStatus( tr("Checking ") + currentBox->displayName() );
         client.select( currentBox->pathName() );
     } else {    //last box checked
-        emit mailTransferred( 0 );
+        previewCompleted();
     }
 }
 
@@ -329,10 +331,10 @@ bool ImapClient::nextMailbox()
     bool found = false;
 
     while (!found) {
-        if (atCurrentBox >= static_cast<uint>(account->mailboxes.count()))
+        if (atCurrentBox >= static_cast<uint>(account->mailboxes().count()))
             return false;
 
-        currentBox = account->mailboxes.at(atCurrentBox);
+        currentBox = account->mailboxes().at(atCurrentBox);
         if (currentBox == NULL) {
             return false;
         }
@@ -382,6 +384,8 @@ void ImapClient::fetchNextMail()
 
     if (currentBox != NULL) {
         internalId = mailList->currentId();
+        retrieveUid = *mPtr;
+        retrieveLength = mailList->currentSize();
 
         if ((currentBox->pathName()) == client.selected()) {
             emit updateStatus( tr("Completing %1 / %2").arg(messageCount).arg(mailList->count()) );
@@ -412,29 +416,16 @@ void ImapClient::mailboxListed(QString &flags, QString &del, QString &name)
     QStringList list = name.split(del);
     QString item;
 
-    bool needSort = false;
-
     for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
         item += *it;
         if ( ( box = account->getMailboxRef(item) ) == NULL ) {
             box = new Mailbox(account, flags, del, item);
-//          if ( item == "INBOX" )
-                box->setLocalCopy( true );
-
-            account->mailboxes.append(box);
-            needSort = true;
-        } else {
-//      box->setflags....
-//      box->setDel...
+            box->setLocalCopy( true );
+            account->addBox(box);
         }
 
-        // sanders - get mail in all folders
-//      box->setLocalCopy( true );
         item += del;
     }
-
-    if (needSort)
-        qSort(account->mailboxes.begin(),account->mailboxes.end(),QtMail::compareMailboxes);
 
     mailboxNames.append(name);
 }
@@ -454,6 +445,11 @@ void ImapClient::messageFetched(QMailMessage& mail)
     }
 
     emit newMessage(mail);
+
+    if (!retrieveUid.isEmpty()) {
+        emit messageProcessed(retrieveUid);
+        retrieveUid = QString();
+    }
 }
 
 void ImapClient::nonexistentMessage(const QString& uid)
@@ -468,7 +464,7 @@ void ImapClient::nonexistentMessage(const QString& uid)
     }
 }
 
-void ImapClient::setAccount(MailAccount *_account)
+void ImapClient::setAccount(QMailAccount *_account)
 {
     account = _account;
 }
@@ -507,28 +503,32 @@ void ImapClient::setSelectedMails(MailList *list, bool connected)
 */
 void ImapClient::removeDeletedMailboxes()
 {
-    QList<Mailbox*>::iterator box;
-    bool exists;
-
-    for (box = account->mailboxes.begin(); box != account->mailboxes.end();
-        box++) {
-
-        if ( !(*box)->userCreated() ) {
-            exists = false;
+    QList<Mailbox*> nonexistent;
+    foreach (Mailbox* box, account->mailboxes()) {
+        if ( !box->userCreated() ) {
+            bool exists = false;
             for (QStringList::Iterator it = mailboxNames.begin();
                  it != mailboxNames.end(); ++it) {
-                if ( *it == (*box)->pathName() ) {
+                if ( *it == box->pathName() ) {
                     exists = true;
-                } else if ( *it == (*box)->nameChanged() ) {
-                    (*box)->changeName(*it, false);
+                } else if ( *it == box->nameChanged() ) {
+                    box->changeName(*it, false);
                     exists = true;
                 }
             }
             if (!exists) {
-                account->removeBox((*box));
-                box = account->mailboxes.begin();
+                nonexistent.append(box);
             }
         }
+    }
+
+    foreach (Mailbox* box, nonexistent) {
+        // Any messages in this box should be removed also
+        QStringList expiredUidList = box->getExpiredUids(QStringList());
+        if (!expiredUidList.isEmpty())
+            emit expiredMessages( expiredUidList, box->pathName(), false );
+
+        account->removeBox(box);
     }
 }
 
@@ -541,5 +541,18 @@ void ImapClient::checkForNewMessages()
 int ImapClient::newMessageCount()
 {
     return 0;
+}
+
+void ImapClient::previewCompleted()
+{
+    emit mailTransferred(0);
+}
+
+void ImapClient::downloadSize(int length)
+{
+    if (!retrieveUid.isEmpty() && retrieveLength) {
+        uint percentage = qMin<uint>(length * 100 / retrieveLength, 100);
+        emit retrievalProgress(retrieveUid, percentage);
+    }
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,12 +53,14 @@ public:
 
 signals:
     void editItem();
+    void newItem();
+
+public slots:
+    void addEmail(const QString& email);
+    void updateEmail(const QString& email);
+    void deleteEmail();
 
 protected slots:
-    void setCurrentText( const QString &t );
-    void newEmail();
-    void newEmail( const QString &email );
-    void deleteEmail();
     void setAsDefault();
     void editItem(QListWidgetItem* i);
     void updateMenus();
@@ -83,14 +85,9 @@ public:
     EmailLineEdit( QWidget *parent, const char *name = 0 );
 
 signals:
-    void newEmail();
-    void deleteEmail();
     void setAsDefault();
     void moveUp();
     void moveDown();
-
-protected slots:
-    void currentChanged( QListWidgetItem* current, QListWidgetItem *previous );
 
 protected:
     void keyPressEvent( QKeyEvent *ke );
@@ -112,16 +109,20 @@ public:
 protected:
     void showEvent( QShowEvent *e );
     bool eventFilter( QObject *o, QEvent *e );
+    void addEmail(const QString& email);
 
 protected slots:
     void currentChanged( QListWidgetItem* current );
+    void updateCurrentText( );
     void edit();
+    void newEmail();
 
 private:
     EmailDialogList *mList;
     QGroupBox *mEditBox;
     EmailLineEdit *mEdit;
     QString mSelected;
+    bool mCreatingEmail;
 };
 
 #endif // EMAILDIALOGPHONE_H

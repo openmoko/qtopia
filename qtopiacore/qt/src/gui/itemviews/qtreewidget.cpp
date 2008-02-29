@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -733,10 +731,7 @@ bool QTreeModel::executePendingSort() const
         int column = view()->header()->sortIndicatorSection();
         Qt::SortOrder order = view()->header()->sortIndicatorOrder();
         QTreeModel *that = const_cast<QTreeModel*>(this);
-        const bool blocked = that->signalsBlocked();
-        that->blockSignals(true);
         that->sort(column, order);
-        that->blockSignals(blocked);
         emit that->itemsSorted();
         return true;
     }
@@ -1309,7 +1304,7 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidget *view, int type)
         QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
         model->rootItem->addChild(this);
         values.reserve(model->headerItem->columnCount());
-
+        model->executePendingSort();
     }
 }
 
@@ -1603,7 +1598,7 @@ void QTreeWidgetItem::setFlags(Qt::ItemFlags flags)
 void QTreeWidgetItemPrivate::propagateDisabled(QTreeWidgetItem *item)
 {
     Q_ASSERT(item);
-    const bool enable = item->par ? (item->par->itemFlags & Qt::ItemIsEnabled) : true;
+    const bool enable = item->par ? (item->par->itemFlags.testFlag(Qt::ItemIsEnabled)) : true;
 
     QStack<QTreeWidgetItem*> parents;
     parents.push(item);

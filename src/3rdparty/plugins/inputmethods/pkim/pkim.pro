@@ -1,6 +1,7 @@
 qtopia_project(qtopia plugin)
 TARGET       = pkim
 VERSION      = 4.1.0
+license(FREEWARE)
 
 depends(3rdparty/libraries/inputmatch)
 # if commercial only?
@@ -39,6 +40,6 @@ fspics.path=/pics/fshw
 fspics.hint=pics
 INSTALLS+=fspics
 
-pkg.domain=window
+pkg.domain=trusted
 
 

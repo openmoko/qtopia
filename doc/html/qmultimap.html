@@ -56,13 +56,13 @@
 
  map1.insert(&quot;plenty&quot;, 100);
  map1.insert(&quot;plenty&quot;, 2000);
-<span class="comment"> // map1.size() == 2</span>
+<span class="comment"> //</span> map1.size() == 2
 
  map2.insert(&quot;plenty&quot;, 5000);
-<span class="comment"> // map2.size() == 1</span>
+<span class="comment"> //</span> map2.size() == 1
 
  map3 = map1 + map2;
-<span class="comment"> // map3.size() == 3</span></pre>
+<span class="comment"> //</span> map3.size() == 3</pre>
 <p>Unlike <a href="qmap.html">QMap</a>, QMultiMap provides no operator[]. Use <a href="qmap.html#value">value</a>() or <a href="qmultimap.html#replace">replace</a>() if you want to access the most recently inserted item with a certain key.</p>
 <p>If you want to retrieve all the values for a single key, you can use values(const Key &amp;key), which returns a <a href="qlist.html">QList</a>&lt;T&gt;:</p>
 <pre> QList&lt;int&gt; values = map.values(&quot;plenty&quot;);
@@ -153,8 +153,8 @@
 <p>See also <a href="qmultimap.html#insert">insert</a>() and <a href="qmultimap.html#operator-2b">operator+</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

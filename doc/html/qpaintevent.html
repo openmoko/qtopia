@@ -53,17 +53,10 @@
 <h3 class="fn"><a name="region"></a>const <a href="qregion.html">QRegion</a> &amp; QPaintEvent::region () const</h3>
 <p>Returns the region that needs to be updated.</p>
 <p>See also <a href="qpaintevent.html#rect">rect</a>() and <a href="qpainter.html#setClipRegion">QPainter::setClipRegion</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPaintEvent-3"></a>QPaintEvent::QPaintEvent ( const <a href="qregion.html">QRegion</a> &amp; <i>paintRegion</i>, const <a href="qrect.html">QRect</a> &amp; <i>paintRect</i> )</h3>
-<p>Constructs a paint event object with both a <i>paintRegion</i> and a <i>paintRect</i>, both of which represent the area of the widget that needs to be updated.</p>
-<h3 class="fn"><a name="erased"></a>bool QPaintEvent::erased () const</h3>
-<p>Returns true if the paint event region (or rectangle) has been erased with the widget's background; otherwise returns false.</p>
-<p>Qt 4 <i>always</i> erases regions that require painting. The exception to this rule is if the widget sets the <a href="qt.html#WidgetAttribute-enum">Qt::WA_OpaquePaintEvent</a> or <a href="qt.html#WidgetAttribute-enum">Qt::WA_NoSystemBackground</a> attributes. If either one of those attributes is set <i>and</i> the window system does not make use of subwidget alpha composition (currently X11 and Windows, but this may change), then the region is not erased.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

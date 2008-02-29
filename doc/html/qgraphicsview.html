@@ -298,7 +298,7 @@
 </ul>
 <h3 class="fn"><a name="foregroundBrush-prop"></a>foregroundBrush : <a href="qbrush.html">QBrush</a></h3>
 <p>This property holds the foreground brush of the scene.</p>
-<p>This property sets the foreground brush for the scene in this view. It is used to override the scene's own foreground, and defines the behavior of <a href="qgraphicsview.html#drawForeground">drawForeground</a>(). To provide custom background drawing for this view, you can reimplement <a href="qgraphicsview.html#drawBackground">drawBackground</a>() instead.</p>
+<p>This property sets the foreground brush for the scene in this view. It is used to override the scene's own foreground, and defines the behavior of <a href="qgraphicsview.html#drawForeground">drawForeground</a>(). To provide custom foreground drawing for this view, you can reimplement <a href="qgraphicsview.html#drawForeground">drawForeground</a>() instead.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>QBrush foregroundBrush () const</b></li>
@@ -420,13 +420,13 @@
 <p>If all you want is to define a color, texture or gradient for the background, you can call <a href="qgraphicsview.html#backgroundBrush-prop">setBackgroundBrush</a>() instead.</p>
 <p>All painting is done in <i>scene</i> coordinates. <i>rect</i> is the exposed rectangle.</p>
 <p>The default implementation fills <i>rect</i> using the view's <a href="qgraphicsview.html#backgroundBrush-prop">backgroundBrush</a>. If no such brush is defined (the default), the scene's drawBackground() function is called instead.</p>
-<p>See also <a href="qgraphicsview.html#drawForeground">drawForeground</a>() and <a href="qgraphicsscene.html#drawForeground">QGraphicsScene::drawForeground</a>().</p>
+<p>See also <a href="qgraphicsview.html#drawForeground">drawForeground</a>() and <a href="qgraphicsscene.html#drawBackground">QGraphicsScene::drawBackground</a>().</p>
 <h3 class="fn"><a name="drawForeground"></a>void QGraphicsView::drawForeground ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Draws the foreground of the scene using <i>painter</i>, after the background and all items are drawn. Reimplement this function to provide a custom foreground for this view.</p>
 <p>If all you want is to define a color, texture or gradient for the foreground, you can call <a href="qgraphicsview.html#foregroundBrush-prop">setForegroundBrush</a>() instead.</p>
 <p>All painting is done in <i>scene</i> coordinates. <i>rect</i> is the exposed rectangle.</p>
 <p>The default implementation fills <i>rect</i> using the view's <a href="qgraphicsview.html#foregroundBrush-prop">foregroundBrush</a>. If no such brush is defined (the default), the scene's drawForeground() function is called instead.</p>
-<p>See also <a href="qgraphicsview.html#drawBackground">drawBackground</a>() and <a href="qgraphicsscene.html#drawBackground">QGraphicsScene::drawBackground</a>().</p>
+<p>See also <a href="qgraphicsview.html#drawBackground">drawBackground</a>() and <a href="qgraphicsscene.html#drawForeground">QGraphicsScene::drawForeground</a>().</p>
 <h3 class="fn"><a name="drawItems"></a>void QGraphicsView::drawItems ( <a href="qpainter.html">QPainter</a> * <i>painter</i>, int <i>numItems</i>, <a href="qgraphicsitem.html">QGraphicsItem</a> *[] <i>items</i>, const <a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a>[] <i>options</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Draws the items <i>items</i> in the scene using <i>painter</i>, after the background and before the foreground are drawn. <i>numItems</i> is the number of items in <i>items</i> and options in <i>options</i>. <i>options</i> is a list of styleoptions; one for each item. Reimplement this function to provide custom item drawing for this view.</p>
 <p>The default implementation calls the scene's drawItems() function.</p>
@@ -456,7 +456,7 @@
 <h3 class="fn"><a name="invalidateScene"></a>void QGraphicsView::invalidateScene ( const <a href="qrectf.html">QRectF</a> &amp; <i>rect</i> = QRectF(), <a href="qgraphicsscene.html#SceneLayer-enum">QGraphicsScene::SceneLayers</a> <i>layers</i> = QGraphicsScene::AllLayers )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Invalidates and schedules a redraw of <i>layers</i> inside <i>rect</i>. <i>rect</i> is in scene coordinates. Any cached content for <i>layers</i> inside <i>rect</i> is unconditionally invalidated and redrawn.</p>
 <p>You can call this function to notify <a href="qgraphicsview.html">QGraphicsView</a> of changes to the background or the foreground of the scene. It is commonly used for scenes with tile-based backgrounds to notify changes when <a href="qgraphicsview.html">QGraphicsView</a> has enabled background caching.</p>
-<p>Note that <a href="qgraphicsview.html">QGraphicsView</a> currently supports background caching only (see CachedBackground). This function is equivalent to calling <a href="qwidget.html#update">update</a>() if any layer but <a href="qgraphicsscene.html#SceneLayer-enum">QGraphicsScene::BackgroundLayer</a> is passed.</p>
+<p>Note that <a href="qgraphicsview.html">QGraphicsView</a> currently supports background caching only (see <a href="qgraphicsview.html#CacheModeFlag-enum">QGraphicsView::CacheBackground</a>). This function is equivalent to calling <a href="qwidget.html#update">update</a>() if any layer but <a href="qgraphicsscene.html#SceneLayer-enum">QGraphicsScene::BackgroundLayer</a> is passed.</p>
 <p>See also <a href="qgraphicsscene.html#invalidate">QGraphicsScene::invalidate</a>() and <a href="qwidget.html#update">update</a>().</p>
 <h3 class="fn"><a name="itemAt"></a><a href="qgraphicsitem.html">QGraphicsItem</a> * QGraphicsView::itemAt ( const <a href="qpoint.html">QPoint</a> &amp; <i>pos</i> ) const</h3>
 <p>Returns the item at position <i>pos</i>, which is in viewport coordinates. If there are several items at this position, this function returns the topmost item.</p>
@@ -568,11 +568,11 @@
  printer.setPageSize(QPrinter::A4);
  QPainter painter(&amp;printer);
 
-<span class="comment"> // print, fitting the viewport contents into a full page</span>
+<span class="comment"> //</span> print, fitting the viewport contents into a full page
  view.render(&amp;painter);
 
-<span class="comment"> // print the upper half of the viewport into the lower.</span>
-<span class="comment"> // half of the page.</span>
+<span class="comment"> //</span> print the upper half of the viewport into the lower.
+<span class="comment"> //</span> half of the page.
  QRect viewport = view.viewport()-&gt;rect();
  view.render(&amp;painter,
              QRectF(0, printer.height() / 2,
@@ -608,7 +608,7 @@
  scene.addText(&quot;GraphicsView rotated clockwise&quot;);
 
  QGraphicsView view(&amp;scene);
- view.rotate(90); <span class="comment">// the text is rendered with a 90 degree clockwise rotation</span>
+ view.rotate(90); <span class="comment">//</span> the text is rendered with a 90 degree clockwise rotation
  view.show();</pre>
 <p>To simplify interation with items using a transformed view, <a href="qgraphicsview.html">QGraphicsView</a> provides mapTo... and mapFrom... functions that can translate between scene and view coordinates. For example, you can call <a href="qgraphicsview.html#mapToScene">mapToScene</a>() to map a view coordinate to a floating point scene coordinate, or <a href="qgraphicsview.html#mapFromScene">mapFromScene</a>() to map from floating point scene coordinates to view coordinates.</p>
 <p>See also <a href="qgraphicsview.html#matrix">matrix</a>(), <a href="qgraphicsview.html#rotate">rotate</a>(), <a href="qgraphicsview.html#scale">scale</a>(), <a href="qgraphicsview.html#shear">shear</a>(), and <a href="qgraphicsview.html#translate">translate</a>().</p>
@@ -631,7 +631,7 @@
  scene.addText(&quot;GraphicsView rotated clockwise&quot;);
 
  QGraphicsView view(&amp;scene);
- view.rotate(90); <span class="comment">// the text is rendered with a 90 degree clockwise rotation</span>
+ view.rotate(90); <span class="comment">//</span> the text is rendered with a 90 degree clockwise rotation
  view.show();</pre>
 <p>To simplify interation with items using a transformed view, <a href="qgraphicsview.html">QGraphicsView</a> provides mapTo... and mapFrom... functions that can translate between scene and view coordinates. For example, you can call <a href="qgraphicsview.html#mapToScene">mapToScene</a>() to map a view coordiate to a floating point scene coordinate, or <a href="qgraphicsview.html#mapFromScene">mapFromScene</a>() to map from floating point scene coordinates to view coordinates.</p>
 <p>See also <a href="qgraphicsview.html#transform">transform</a>(), <a href="qgraphicsview.html#rotate">rotate</a>(), <a href="qgraphicsview.html#scale">scale</a>(), <a href="qgraphicsview.html#shear">shear</a>(), and <a href="qgraphicsview.html#translate">translate</a>().</p>
@@ -658,8 +658,8 @@
 <p>See also <a href="qgraphicsview.html#mapToScene">mapToScene</a>() and <a href="qgraphicsview.html#mapFromScene">mapFromScene</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

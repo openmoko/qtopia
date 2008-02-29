@@ -28,7 +28,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -36,7 +36,7 @@
 <li><div class="fn"/>virtual void <b><a href="qsmssender.html#send-2">send</a></b> ( const QString &amp; <i>id</i>, const QSMSMessage &amp; <i>msg</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -45,17 +45,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -65,26 +64,26 @@
 <p>See also <a href="qsmsmessage.html">QSMSMessage</a>, <a href="qsmsreader.html">QSMSReader</a>, and <a href="qcomminterface.html">QCommInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSMSSender"></a>QSMSSender::QSMSSender ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QSMSSender"></a>QSMSSender::QSMSSender ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new SMS sending object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports SMS sending. If there is more than one service that supports SMS sending, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qsmssender.html">QSMSSender</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
 <h3 class="fn"><a name="dtor.QSMSSender"></a>QSMSSender::~QSMSSender ()</h3>
 <p>Destroy this SMS sending object.</p>
-<h3 class="fn"><a name="finished"></a>void QSMSSender::finished ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="finished"></a>void QSMSSender::finished ( const <a href="./qstring.html">QString</a> &amp; <i>id</i>, <a href="qtelephony.html#Result-enum">QTelephony::Result</a> <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the message associated with <i>id</i> has been sent, or the send failed for some reason. The reason for the failure is specified by <i>result</i>.</p>
 <p>See also <a href="qsmssender.html#send">send</a>().</p>
-<h3 class="fn"><a name="send"></a><a href="qstring.html">QString</a> QSMSSender::send ( const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>msg</i> )</h3>
-<p>Send the SMS message <i>msg</i> and return an identifier for it. This is a convenience method around QSMSSender::send(const <a href="qstring.html">QString</a>&amp;, const <a href="qsmsmessage.html">QSMSMessage</a>&amp;).</p>
+<h3 class="fn"><a name="send"></a><a href="./qstring.html">QString</a> QSMSSender::send ( const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>msg</i> )</h3>
+<p>Send the SMS message <i>msg</i> and return an identifier for it. This is a convenience method around QSMSSender::send(const <a href="./qstring.html">QString</a>&amp;, const <a href="qsmsmessage.html">QSMSMessage</a>&amp;).</p>
 <p>See also <a href="qsmssender.html#finished">finished</a>().</p>
-<h3 class="fn"><a name="send-2"></a>void QSMSSender::send ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="send-2"></a>void QSMSSender::send ( const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="qsmsmessage.html">QSMSMessage</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Send the SMS message <i>msg</i>, and associate the <a href="qsmssender.html#finished">finished</a>() response with the identifier <i>id</i>.</p>
 <p>See also <a href="qsmssender.html#finished">finished</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

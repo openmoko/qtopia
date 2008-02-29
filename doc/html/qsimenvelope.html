@@ -105,7 +105,7 @@
 <p>Construct a new envelope object as a copy of <i>value</i>.</p>
 <h3 class="fn"><a name="dtor.QSimEnvelope"></a>QSimEnvelope::~QSimEnvelope ()</h3>
 <p>Destruct an envelope object.</p>
-<h3 class="fn"><a name="addExtensionField"></a>void QSimEnvelope::addExtensionField ( int <i>tag</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="addExtensionField"></a>void QSimEnvelope::addExtensionField ( int <i>tag</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
 <p>Adds an extension field to the data from <a href="qsimenvelope.html#extensionData">extensionData</a>(). The field will have the specified <i>tag</i> and contents given by <i>value</i>.</p>
 <p>See also <a href="qsimenvelope.html#extensionField">extensionField</a>().</p>
 <h3 class="fn"><a name="destinationDevice"></a><a href="qsimcommand.html#Device-enum">QSimCommand::Device</a> QSimEnvelope::destinationDevice () const</h3>
@@ -116,17 +116,17 @@
 <p>Returns the event type for <tt>EventDownload</tt> envelopes. The default value is <tt>NoEvent</tt>.</p>
 <p>Applies to: <tt>EventDownload</tt></p>
 <p>See also <a href="qsimenvelope.html#setEvent">setEvent</a>().</p>
-<h3 class="fn"><a name="extensionData"></a><a href="qbytearray.html">QByteArray</a> QSimEnvelope::extensionData () const</h3>
+<h3 class="fn"><a name="extensionData"></a><a href="./qbytearray.html">QByteArray</a> QSimEnvelope::extensionData () const</h3>
 <p>Returns the extension data for this envelope. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimenvelope.html#setExtensionData">setExtensionData</a>() and <a href="qsimenvelope.html#extensionField">extensionField</a>().</p>
-<h3 class="fn"><a name="extensionField"></a><a href="qbytearray.html">QByteArray</a> QSimEnvelope::extensionField ( int <i>tag</i> ) const</h3>
+<h3 class="fn"><a name="extensionField"></a><a href="./qbytearray.html">QByteArray</a> QSimEnvelope::extensionField ( int <i>tag</i> ) const</h3>
 <p>Returns the contents of an extension field. The <i>tag</i> is an 8-bit value, from 3GPP TS 11.14, that specifies the particular field the caller is interested in. The most significant bit of <i>tag</i> is ignored when searching for the field, as it contains the &quot;must comprehend&quot; status from 3GPP TS 11.14, and is not important for locating the desired field.</p>
 <p>This is a simpler method than <a href="qsimenvelope.html#extensionData">extensionData</a>() for accessing values within the extension data.</p>
 <p>See also <a href="qsimenvelope.html#addExtensionField">addExtensionField</a>().</p>
-<h3 class="fn"><a name="fromPdu"></a>QSimEnvelope QSimEnvelope::fromPdu ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromPdu"></a>QSimEnvelope QSimEnvelope::fromPdu ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns an envelope object corresponding to the data in <i>pdu</i>. The data is decoded as described in 3GPP TS 11.14.</p>
 <p>See also <a href="qsimenvelope.html#toPdu">toPdu</a>().</p>
-<h3 class="fn"><a name="menuItem"></a>uint QSimEnvelope::menuItem () const</h3>
+<h3 class="fn"><a name="menuItem"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimEnvelope::menuItem () const</h3>
 <p>Returns the menu item to be selected. The default value is zero.</p>
 <p>Applies to: <tt>MenuSelection</tt></p>
 <p>See also <a href="qsimenvelope.html#setMenuItem">setMenuItem</a>().</p>
@@ -142,10 +142,10 @@
 <p>Sets the event type for <tt>EventDownload</tt> envelopes to <i>value</i>.</p>
 <p>Applies to: <tt>EventDownload</tt></p>
 <p>See also <a href="qsimenvelope.html#event">event</a>().</p>
-<h3 class="fn"><a name="setExtensionData"></a>void QSimEnvelope::setExtensionData ( <a href="qbytearray.html">QByteArray</a> <i>value</i> )</h3>
+<h3 class="fn"><a name="setExtensionData"></a>void QSimEnvelope::setExtensionData ( <a href="./qbytearray.html">QByteArray</a> <i>value</i> )</h3>
 <p>Sets the extension data for this envelope to <i>value</i>. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimenvelope.html#extensionData">extensionData</a>() and <a href="qsimenvelope.html#addExtensionField">addExtensionField</a>().</p>
-<h3 class="fn"><a name="setMenuItem"></a>void QSimEnvelope::setMenuItem ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setMenuItem"></a>void QSimEnvelope::setMenuItem ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the menu item to be selected to <i>value</i>.</p>
 <p>Applies to: <tt>MenuSelection</tt></p>
 <p>See also <a href="qsimenvelope.html#menuItem">menuItem</a>().</p>
@@ -164,7 +164,7 @@
 <p>Returns the source device that generated the envelope. The default value is <a href="qsimcommand.html#Device-enum">QSimCommand::ME</a>.</p>
 <p>Applies to: all commands.</p>
 <p>See also <a href="qsimenvelope.html#setSourceDevice">setSourceDevice</a>().</p>
-<h3 class="fn"><a name="toPdu"></a><a href="qbytearray.html">QByteArray</a> QSimEnvelope::toPdu () const</h3>
+<h3 class="fn"><a name="toPdu"></a><a href="./qbytearray.html">QByteArray</a> QSimEnvelope::toPdu () const</h3>
 <p>Returns the PDU form of this envelope, encoded as described in 3GPP TS 11.14.</p>
 <p>See also <a href="qsimenvelope.html#fromPdu">fromPdu</a>().</p>
 <h3 class="fn"><a name="type"></a><a href="qsimenvelope.html#Type-enum">QSimEnvelope::Type</a> QSimEnvelope::type () const</h3>
@@ -174,8 +174,8 @@
 <p>Copy the <a href="qsimenvelope.html">QSimEnvelope</a> <i>value</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -13,11 +13,20 @@
    <string>Clock</string>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
    <property name="spacing" >
     <number>6</number>
+   </property>
+   <property name="leftMargin" >
+    <number>9</number>
+   </property>
+   <property name="topMargin" >
+    <number>9</number>
+   </property>
+   <property name="rightMargin" >
+    <number>9</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>9</number>
    </property>
    <item>
     <widget class="QCheckBox" name="alarmEnabled" >
@@ -38,10 +47,22 @@
       <string/>
      </property>
      <layout class="QGridLayout" >
-      <property name="margin" >
+      <property name="leftMargin" >
        <number>9</number>
       </property>
-      <property name="spacing" >
+      <property name="topMargin" >
+       <number>9</number>
+      </property>
+      <property name="rightMargin" >
+       <number>9</number>
+      </property>
+      <property name="bottomMargin" >
+       <number>9</number>
+      </property>
+      <property name="horizontalSpacing" >
+       <number>6</number>
+      </property>
+      <property name="verticalSpacing" >
        <number>6</number>
       </property>
       <item row="0" column="0" >
@@ -58,7 +79,11 @@
        </widget>
       </item>
       <item row="0" column="1" colspan="2" >
-       <widget class="QTimeEdit" name="alarmTimeEdit" />
+       <widget class="QTimeEdit" name="alarmTimeEdit" >
+        <property name="wrapping" >
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0" >
        <widget class="QLabel" name="TextLabel1" >
@@ -83,9 +108,7 @@
       <item row="2" column="1" colspan="2" >
        <widget class="QPushButton" name="changeAlarmDaysButton" >
         <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>0</vsizetype>
+         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>

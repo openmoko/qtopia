@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,43 +22,52 @@
 #include "actionlistview.h"
 #include <QtopiaItemDelegate>
 #include <QPainter>
+#include <QPair>
 
 class ActionListItem : public QListWidgetItem
 {
 public:
-    ActionListItem(QListWidget *parent, const QIcon &icon, QString name, QString in);
-    QString name();
-    void setStatusText( const QString &str, IconType type );
-    void statusText( QString *str, IconType *type );
+    ActionListItem(QListWidget *parent, const QIcon &icon, const QString& name, const QString& mailbox, const QString& in);
+
+    QString name() const;
+    QString mailbox() const;
+
+    void setStatus( const QString &str, IconType type );
+    QPair<const QString*, IconType> status() const;
     
 private:
-    QString mInternalName;
+    QString _mailbox;
+    QString _internalName;
     QString _statusText;
     IconType _type;
 };
 
-ActionListItem::ActionListItem(QListWidget *parent, const QIcon &icon, QString name, QString in)
-  : QListWidgetItem(icon, name, parent), mInternalName( in )
+ActionListItem::ActionListItem(QListWidget *parent, const QIcon &icon, const QString& name, const QString& mailbox, const QString& in)
+  : QListWidgetItem(icon, name, parent), _mailbox(mailbox), _internalName( in ), _type( AllMessages )
 {
-    _type = AllMessages;
 }
 
-QString ActionListItem::name()
+QString ActionListItem::name() const
 {
-    return mInternalName;
+    return _internalName;
 }
 
-void ActionListItem::setStatusText( const QString &str, IconType type )
+QString ActionListItem::mailbox() const
+{
+    return _mailbox;
+}
+
+void ActionListItem::setStatus( const QString &str, IconType type )
 {
     _statusText = str;
     _type = type;
+
     listWidget()->update();
 }
 
-void ActionListItem::statusText( QString *str, IconType *type )
+QPair<const QString*, IconType> ActionListItem::status() const
 {
-    *str = _statusText;
-    *type = _type;
+    return qMakePair(&_statusText, _type);
 }
 
 
@@ -74,23 +83,24 @@ public:
 
 private:
     ActionListView *mParent;
-    mutable QString statusText;
-    mutable IconType type;
+    mutable QPair<const QString*, IconType> status;
 };
 
-/* Folder List Item Delegate */
 static QPixmap* pm_normal = 0;
 static QPixmap* pm_unread = 0;
 static QPixmap* pm_unsent = 0;
 
-static void ensurePixmaps()
+static bool ensurePixmaps()
 {
-    if ( !pm_normal ) {
-	// These should be replaced once new icons are available
+    if(!pm_normal)
+    {
+        // These should be replaced once new icons are available
         pm_normal = new QPixmap(":image/flag_normal");
         pm_unread = new QPixmap(":image/flag_unread");
         pm_unsent = new QPixmap(":image/flag_tosend");
-    }
+    } 
+
+    return true;
 }
 
 ActionListItemDelegate::ActionListItemDelegate(ActionListView *parent)
@@ -104,10 +114,8 @@ void ActionListItemDelegate::paint(QPainter *painter,
                                    const QStyleOptionViewItem &option,
                                    const QModelIndex &index) const
 {
-    ActionListItem *item = static_cast<ActionListItem *>(mParent->actionItemFromIndex( index ));
-    statusText = QString();
-    if (item)
-        item->statusText( &statusText, &type );
+    if (ActionListItem* item = mParent->actionItemFromIndex(index))
+        status = item->status();
 
     QtopiaItemDelegate::paint(painter, option, index);
 }
@@ -116,10 +124,10 @@ void ActionListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
                      const QRect &rect, const QString &text) const
 {
     QtopiaItemDelegate::drawDisplay(painter, option, rect, text);
-    if (!statusText.isEmpty()) {
-        QString str = statusText;
+    if (!status.first->isEmpty()) {
+        QString str = *status.first;
         if (option.direction == Qt::RightToLeft) {
-	    QString trim = statusText.trimmed();
+            QString trim = str.trimmed();
             // swap new/total counts in rtl mode
             int sepPos = trim.indexOf( "/" );
             if (sepPos != -1) {
@@ -129,13 +137,14 @@ void ActionListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
             }
         }
         QPixmap *pm = 0;
-        if (type == UnreadMessages) {
+        if (status.second == UnreadMessages) {
             pm = pm_unread;
-        } else if (type == UnsentMessages) {
+        } else if (status.second == UnsentMessages) {
             pm = pm_unsent;
-        } else if (type == AllMessages) {
+        } else if (status.second == AllMessages) {
             pm = pm_normal;
         }
+
         QFontMetrics fontMetrics(option.font);
         int tw = fontMetrics.width(str);
         int margin = 5;
@@ -159,27 +168,34 @@ void ActionListItemDelegate::drawDisplay(QPainter *painter, const QStyleOptionVi
     }
 }
 
+
 ActionListView::ActionListView(QWidget *parent)
     : QListWidget( parent )
 {
     setObjectName( "actionView" );
+
     ActionListItemDelegate *delegate = new ActionListItemDelegate( this );
     setItemDelegate( delegate );
-    mComposeItem = newItem( QT_TRANSLATE_NOOP("ActionListView","New message"),"ActionListView", true );
+
+    mComposeItem = newItem( QT_TRANSLATE_NOOP("ActionListView","New message"), "ActionListView", QString() );
     mComposeItem->setIcon(QIcon(":icon/new"));
-    mInboxItem = newItem( MailboxList::InboxString,"", false );
-    mSentItem = newItem( MailboxList::SentString,"", false );
-    mDraftsItem = newItem( MailboxList::DraftsString,"", false );
-    mTrashItem = newItem( MailboxList::TrashString,"", false );
-    mOutboxItem = newItem( MailboxList::OutboxString,"", false );
-    mEmailItem = newItem( QT_TRANSLATE_NOOP("ActionListView","Email"),"ActionListView", true );
+
+    mInboxItem = newItem( MailboxList::InboxString );
+    mSentItem = newItem( MailboxList::SentString );
+    mDraftsItem = newItem( MailboxList::DraftsString );
+    mTrashItem = newItem( MailboxList::TrashString );
+    mOutboxItem = newItem( MailboxList::OutboxString );
+    mEmailItem = newItem( MailboxList::EmailString );
+
     setCurrentRow( 0 );
+
     connect( this, SIGNAL(itemActivated(QListWidgetItem*)),
              this, SLOT(itemSlot(QListWidgetItem*)) );
     connect( this, SIGNAL(currentRowChanged(int)),
              this, SLOT(currentFolderChanged(int)) );
 
-    // Required to work around bug in Qt 4.3.2:
+    // Required to work around bug in Qt 4.3.2, where additional vertical
+    // space is allocated but not used for the listview
     setVerticalScrollMode(ScrollPerPixel);
 }
 
@@ -188,14 +204,15 @@ ActionListView::~ActionListView()
 }
 
 // Simple convenience function
-ActionListItem *ActionListView::newItem( const char *name, const char* context, bool useTr )
+ActionListItem *ActionListView::newItem( const char *name, const char* context )
 {
-    QString displayName;
-    if (useTr) // use tr
-        displayName = qApp->translate( context, name );
-    else // use mailboxTrName
-        displayName = MailboxList::mailboxTrName( name );
-    return new ActionListItem( this, MailboxList::mailboxIcon(name), displayName , name );
+    return newItem( name, context, QString(name) );
+}
+
+ActionListItem *ActionListView::newItem( const char *name, const char* context, const QString& mailbox )
+{
+    QString displayName( context ? qApp->translate( context, name ) : MailboxList::mailboxTrName( name ) );
+    return new ActionListItem( this, MailboxList::mailboxIcon(name), displayName, mailbox, name );
 }
 
 void ActionListView::itemSlot(QListWidgetItem *item)
@@ -205,48 +222,48 @@ void ActionListView::itemSlot(QListWidgetItem *item)
     else if (item == mEmailItem)
         emit emailSelected();
     else
-        emit displayFolder( (static_cast<ActionListItem *>(item))->name() );
+        emit displayFolder( static_cast<ActionListItem *>(item)->mailbox() );
 }
 
 void ActionListView::currentFolderChanged(int row)
 {
-    ActionListItem *aItem = (static_cast<ActionListItem *>(item(row) ));
-    if (aItem == mComposeItem)
-        emit currentFolderChanged(QString::null);
-    else if (aItem == mEmailItem)
-        emit currentFolderChanged(QString::null);
-    else
-        emit currentFolderChanged( aItem->name() );
+    emit currentFolderChanged( actionItemFromRow(row)->mailbox() );
 }
 
-ActionListItem *ActionListView::folder(const QString &mailbox)
+ActionListItem *ActionListView::folder(const QString &mailbox) const
 {
-    for (int i = 1; i < count(); ++i) {
-        ActionListItem *aItem = static_cast<ActionListItem *>(item( i ));
-        if (mailbox == aItem->name()) {
-            return aItem;
-        }
-    }
+    for (int i = 1; i < count(); ++i)
+        if (ActionListItem* item = actionItemFromRow(i))
+            if (item->mailbox() == mailbox)
+                return item;
 
     return 0;
 }
 
 void ActionListView::updateFolderStatus(const QString &mailbox, const QString &txt, IconType type)
 {
-    if (ActionListItem *aItem = folder(mailbox)) {
-        aItem->setStatusText( txt, type );
-    }
+    if (ActionListItem *aItem = folder(mailbox))
+        aItem->setStatus( txt, type );
+}
+
+QString ActionListView::currentFolder() const
+{
+    return actionItemFromIndex(currentIndex())->mailbox();
 }
 
 void ActionListView::setCurrentFolder(const QString &mailbox)
 {
-    if (ActionListItem *aItem = folder(mailbox)) {
+    if (ActionListItem *aItem = folder(mailbox))
         setCurrentItem(aItem);
-    }
 }
 
 ActionListItem *ActionListView::actionItemFromIndex( QModelIndex index ) const
 {
     return static_cast<ActionListItem *>(itemFromIndex( index ));
+}
+
+ActionListItem *ActionListView::actionItemFromRow( int row ) const
+{
+    return static_cast<ActionListItem *>(item( row ));
 }
 

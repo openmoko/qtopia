@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -23,10 +23,11 @@
 #define PLAYLIST_H
 
 #include <qcontentset.h>
+#include <QSharedData>
 
 #include <QtGui>
 
-class Playlist : public QAbstractListModel
+class Playlist : public QAbstractListModel, public QSharedData
 {
     Q_OBJECT
 public:
@@ -35,6 +36,7 @@ public:
     virtual QModelIndex playing() const = 0;
     virtual void setPlaying( const QModelIndex& index ) = 0;
 
+    static QExplicitlySharedDataPointer<Playlist> construct_playlist( const QString& filename );
 signals:
     void playingChanged( const QModelIndex& index );
 };
@@ -44,8 +46,8 @@ class PlaylistCue
 public:
     virtual ~PlaylistCue() { }
 
-    virtual void cue( Playlist* playlist ) = 0;
-    virtual void playNow( Playlist* playlist ) = 0;
+    virtual void cue( QExplicitlySharedDataPointer<Playlist> playlist ) = 0;
+    virtual void playNow( QExplicitlySharedDataPointer<Playlist> playlist ) = 0;
 };
 
 Q_DECLARE_INTERFACE(PlaylistCue,
@@ -134,8 +136,8 @@ public:
     void reset();
 
     // PlaylistCue
-    void cue( Playlist* playlist );
-    void playNow( Playlist* playlist );
+    void cue( QExplicitlySharedDataPointer<Playlist> playlist );
+    void playNow( QExplicitlySharedDataPointer<Playlist> playlist );
 
     // Playlist
     QModelIndex playing() const;
@@ -176,8 +178,8 @@ public:
     QModelIndex playing() const;
 
     // PlaylistCue
-    void cue( Playlist* playlist );
-    void playNow( Playlist* playlist );
+    void cue( QExplicitlySharedDataPointer<Playlist> playlist );
+    void playNow( QExplicitlySharedDataPointer<Playlist> playlist );
 
     // PlaylistRemove
     void remove( const QModelIndex& index );

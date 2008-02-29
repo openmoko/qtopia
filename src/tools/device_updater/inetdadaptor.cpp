@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -127,7 +127,6 @@ void InetdAdaptor::start()
     }
     connect( mTcpServer, SIGNAL(newConnection()),
             this, SLOT(newConnection()) );
-    // qDebug() << "started running";
     emit startedRunning();
 }
 
@@ -145,7 +144,6 @@ void InetdAdaptor::stop()
         delete mTcpServer;
     mTcpServer = 0;
     mServerLock.unlock();
-    // qDebug() << "stopped running";
     emit stoppedRunning();
 }
 
@@ -181,7 +179,6 @@ void InetdAdaptor::newConnection()
     {
         mShowingProgressLock.unlock();
     }
-    // qDebug() << "newConnection()" << ( mShowingProgress == worker ? "showing progress" : "not showing progress" );
     worker->socket = mTcpServer->nextPendingConnection();
     Q_ASSERT( worker->socket != NULL );
     connect( worker->socket, SIGNAL(disconnected()),
@@ -193,7 +190,6 @@ void InetdAdaptor::newConnection()
     mWorkersLock.lock();
     mWorkers.append( worker );
     mWorkersLock.unlock();
-    // qDebug() << "newConnection() done";
 }
 
 /*!
@@ -201,7 +197,6 @@ void InetdAdaptor::newConnection()
 */
 void InetdAdaptor::runMicroHttpd( HttpWorker *worker )
 {
-    // qDebug() << "runMicroHttpd()";
     worker->httpd = new QProcess();
     connect( worker->httpd, SIGNAL(readyRead()),
             this, SLOT(httpdReadyRead()) );
@@ -214,7 +209,6 @@ void InetdAdaptor::runMicroHttpd( HttpWorker *worker )
     if ( !QFile::exists( httpdPath ))
         qFatal( "Could not find micro_httpd binary" );
     worker->httpd->start( httpdPath, QStringList( QDir::currentPath() ));
-    // qDebug() << "runMicroHttpd() done";
 }
 
 /*!
@@ -227,25 +221,20 @@ void InetdAdaptor::httpdError( QProcess::ProcessError error )
     {
         case QProcess::FailedToStart:
             emit adaptorMessage( tr( "Could not start web server" ));
-            // qDebug() << "Could not start web server";
             break;
         case QProcess::Crashed:
             emit adaptorMessage( tr( "Web server crashed" ));
-            // qDebug() << "Web server crashed" ;
             break;
         case QProcess::Timedout:
             emit adaptorMessage( tr( "Web server timed out" ));
-            // qDebug() << "Web server timed out" ;
             break;
         case QProcess::WriteError:
         case QProcess::ReadError:
             emit adaptorMessage( tr( "Error reading/writing webserver" ));
-            // qDebug() << "Error reading/writing webserver" ;
             break;
         case QProcess::UnknownError:
         default:
             emit adaptorMessage( tr( "Unknown error with webserver" ));
-            // qDebug() << "Unknown error with webserver" ;
     }
 }
 
@@ -255,7 +244,6 @@ void InetdAdaptor::httpdError( QProcess::ProcessError error )
 */
 void InetdAdaptor::socketReadyRead()
 {
-    // qDebug() << "socketReadyRead()";
     QTcpSocket *sock = 0;
     HttpWorker *workerReady = 0;
     sock = qobject_cast<QTcpSocket*>( sender() );

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,10 +44,10 @@ public:
     virtual ~MailTransport();
 
     // Open a connection to the server of the specified account
-    void open(const MailAccount& account);
+    void open(const QMailAccount& account);
 
     // Open a connection to the specified server
-    void open(const QString& url, int port, MailAccount::EncryptType encryptionType);
+    void open(const QString& url, int port, QMailAccount::EncryptType encryptionType);
 
 #ifndef QT_NO_OPENSSL
     // If connection is not currently encrypted, switch to encrypted mode
@@ -65,7 +65,7 @@ public:
     QByteArray readLine(qint64 maxSize = 0);
 
 signals:
-    void connected(MailAccount::EncryptType encryptType);
+    void connected(QMailAccount::EncryptType encryptType);
     void readyRead();
     void bytesWritten(qint64 transmitted);
 
@@ -85,8 +85,8 @@ protected slots:
 #endif
 
 private:
-    void createSocket(MailAccount::EncryptType encryptType);
-    MailAccount::EncryptType mailEncryption() const;
+    void createSocket(QMailAccount::EncryptType encryptType);
+    QMailAccount::EncryptType mailEncryption() const;
 
 private:
 #ifndef QT_NO_OPENSSL
@@ -97,7 +97,7 @@ private:
 
     SocketType *mSocket;
 #ifndef QT_NO_OPENSSL
-    MailAccount::EncryptType encryption;
+    QMailAccount::EncryptType encryption;
 #endif
     QTextStream *mStream;
     const char *mName;

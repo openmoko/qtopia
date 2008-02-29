@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,39 +20,15 @@
 ****************************************************************************/
 
 #include <QString>
-#include <QDebug>
 #include <QXmlAttributes>
 
 #include <QDateTime>
 
 #include <private/qobexfolderlisting_p.h>
 
-#undef QOBEXFOLDERLISTING_DEBUG
 
 static const QString LOCAL_TIME_FORMAT = "yyyyMMddThhmmss";
 static const QString UTC_TIME_FORMAT = LOCAL_TIME_FORMAT + 'Z';
-
-#ifdef QOBEXFOLDERLISTING_DEBUG
-QDebug& operator<<(QDebug debug, const QXmlAttributes &attributes)
-{
-    for (int i = 0; i < attributes.count(); i++) {
-        qDebug() << attributes.value(i);
-    }
-
-    return debug;
-}
-
-QDebug& operator<<(QDebug debug, const QObexFolderListingEntryInfo &info)
-{
-    debug << "FolderListing(" << info.name() << info.size() << info.lastModified() <<
-            info.timeCreated() << info.lastAccessed() << info.isFolder() <<
-            info.isFile() << info.isParent() << info.permissions() <<
-            info.owner() << info.group() << info.mimetype() << info.description() <<
-            info.extensionAttributes();
-
-    return debug;
-}
-#endif
 
 QObexFolderListingHandler::QObexFolderListingHandler()
 {
@@ -190,9 +166,6 @@ bool QObexFolderListingHandler::endElement(const QString &,
                                            const QString &qName)
 {
     if (qName == "file" || qName == "folder" || qName == "parent-folder") {
-#ifdef QOBEXFOLDERLISTING_DEBUG
-        qDebug() << "InfoIs:" << m_info;
-#endif
         m_valid_elem = false;
         emit info(m_info);
         return true;
@@ -216,31 +189,16 @@ bool QObexFolderListingHandler::characters(const QString &ch)
 
 bool QObexFolderListingHandler::fatalError(const QXmlParseException &/*err*/)
 {
-#ifdef QOBEXFOLDERLISTING_DEBUG
-    qDebug() << "Line:" << err.lineNumber() << "Column: " << err.columnNumber() <<
-            err.message();
-#endif
-
     return false;
 }
 
 bool QObexFolderListingHandler::error(const QXmlParseException &/*err*/)
 {
-#ifdef QOBEXFOLDERLISTING_DEBUG
-    qDebug() << "Line:" << err.lineNumber() << "Column: " << err.columnNumber() <<
-            err.message();
-#endif
-
     return false;
 }
 
 bool QObexFolderListingHandler::warning(const QXmlParseException &/*err*/)
 {
-#ifdef QOBEXFOLDERLISTING_DEBUG
-    qDebug() << "Line:" << err.lineNumber() << "Column: " << err.columnNumber() <<
-            err.message();
-#endif
-
     return false;
 }
 

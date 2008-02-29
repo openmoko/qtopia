@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -49,17 +49,25 @@ SyncManager::SyncManager( QWidget *parent )
     connect( this, SIGNAL(finished(int)), this, SLOT(_finished(int)) );
     connect( qApp, SIGNAL(setConnectionState(int)), this, SLOT(abort()) );
 
-    foreach ( QDSyncPlugin *plugin, qdPluginManager()->syncPlugins() ) {
-        server = qobject_cast<QDServerSyncPlugin*>(plugin);
-        if ( server ) {
-            LOG() << "server" << server->id() << server->dataset();
-            foreach ( QDSyncPlugin *plugin, qdPluginManager()->syncPlugins() ) {
-                client = qobject_cast<QDClientSyncPlugin*>(plugin);
-                if ( client && client->dataset() == server->dataset() ) {
-                    Q_ASSERT(!pending.contains(server));
-                    LOG() << "matched to" << client->id();
-                    pending[server] = client;
-                }
+    QList<QDServerSyncPlugin*> serverPlugins;
+    QList<QDClientSyncPlugin*> clientPlugins;
+    foreach ( QDPlugin *plugin, qdPluginManager()->plugins() ) {
+        if ( QDServerSyncPlugin *server = qobject_cast<QDServerSyncPlugin*>(plugin) )
+            serverPlugins << server;
+        else if ( QDClientSyncPluginFactory *factory = qobject_cast<QDClientSyncPluginFactory*>(plugin) )
+            foreach ( const QString &dataset, factory->datasets() )
+                clientPlugins << factory->pluginForDataset( dataset );
+        else if ( QDClientSyncPlugin *client = qobject_cast<QDClientSyncPlugin*>(plugin) )
+            clientPlugins << client;
+    }
+
+    foreach ( server, serverPlugins ) {
+        LOG() << "server" << server->id() << server->dataset();
+        foreach ( client, clientPlugins ) {
+            if ( client->dataset() == server->dataset() ) {
+                Q_ASSERT(!pending.contains(server));
+                LOG() << "matched to" << client->id();
+                pending[server] = client;
             }
         }
     }

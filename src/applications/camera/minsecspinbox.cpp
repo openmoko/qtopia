@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -22,6 +22,7 @@
 #include "minsecspinbox.h"
 
 #include <QDebug>
+#include <QSoftMenuBar>
 
 /*
     A spin box displaying length of time in minutes and seconds
@@ -32,6 +33,7 @@ CameraMinSecSpinBox::CameraMinSecSpinBox(QWidget *parent)
 {
     lineEdit()->setReadOnly(true);
     //TODO: ideally, disable or hide selection as well
+
 }
 
 CameraMinSecSpinBox::~CameraMinSecSpinBox()
@@ -39,8 +41,8 @@ CameraMinSecSpinBox::~CameraMinSecSpinBox()
 
 QString CameraMinSecSpinBox::textFromValue(int value) const
 {
-    if (value == minimum())
-        return tr("Off");
+    //if (value == minimum())
+    //    return tr("Off");
     
     if (value > 59) {
         int m = value/60;
@@ -54,8 +56,8 @@ QString CameraMinSecSpinBox::textFromValue(int value) const
 
 int CameraMinSecSpinBox::valueFromText(const QString& text) const
 {
-    if (text == tr("Off"))
-        return minimum();
+//    if (text == tr("Off"))
+//        return minimum();
     QRegExp regExp("((\\d+)m)?((\\d+)s?)?");
     if (regExp.exactMatch(text)) {
         int s = regExp.cap(2).toInt()*60 + regExp.cap(4).toInt();
@@ -95,4 +97,10 @@ QSize CameraMinSecSpinBox::sizeHint() const
         normal += QSize(dif, 0);
     
     return normal;
+}
+
+// Hack: make this spinbox conform to the expected behaviour within the photo timer dialog.
+void CameraMinSecSpinBox::focusInEvent(QFocusEvent * /*f*/)
+{
+    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
 }

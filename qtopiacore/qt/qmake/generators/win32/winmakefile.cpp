@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the qmake application of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -53,7 +51,7 @@ Win32MakefileGenerator::Win32MakefileGenerator() : MakefileGenerator()
 }
 
 int
-Win32MakefileGenerator::findHighestVersion(const QString &d, const QString &stem)
+Win32MakefileGenerator::findHighestVersion(const QString &d, const QString &stem, const QString &ext)
 {
     QString bd = Option::fixPathToLocalOS(d, true);
     if(!exists(bd))
@@ -75,7 +73,7 @@ Win32MakefileGenerator::findHighestVersion(const QString &d, const QString &stem
     if(!project->isActiveConfig("no_versionlink")) {
         QDir dir(bd);
         QStringList entries = dir.entryList();
-        QRegExp regx("((lib)?" + dllStem + "([0-9]*)).(a|lib|prl)$", Qt::CaseInsensitive);
+        QRegExp regx(QString("((lib)?%1([0-9]*)).(%2|prl)$").arg(dllStem).arg(ext), Qt::CaseInsensitive);
         for(QStringList::Iterator it = entries.begin(); it != entries.end(); ++it) {
             if(regx.exactMatch((*it))) {
 				if (!regx.cap(3).isEmpty()) {
@@ -683,7 +681,7 @@ void Win32MakefileGenerator::writeLibDirPart(QTextStream &t)
 
 void Win32MakefileGenerator::writeObjectsPart(QTextStream &t)
 {
-    t << "OBJECTS       = " << valList(escapeFilePaths(project->values("OBJECTS"))) << endl;
+    t << "OBJECTS       = " << valList(escapeDependencyPaths(project->values("OBJECTS"))) << endl;
 }
 
 void Win32MakefileGenerator::writeImplicitRulesPart(QTextStream &t)
@@ -719,6 +717,11 @@ void Win32MakefileGenerator::writeRcFilePart(QTextStream &t)
     }
 }
 
+QString Win32MakefileGenerator::getLibTarget()
+{
+    return QString(project->first("TARGET") + project->first("TARGET_VERSION_EXT") + ".lib");
+}
+
 QString Win32MakefileGenerator::defaultInstall(const QString &t)
 {
     if((t != "target" && t != "dlltarget") ||
@@ -748,9 +751,9 @@ QString Win32MakefileGenerator::defaultInstall(const QString &t)
             uninst.append("-$(DEL_FILE) \"" + dst_prl + "\"");
         }
         if(project->isActiveConfig("shared") && !project->isActiveConfig("plugin")) {
-            QString lib_target = QString(project->first("TARGET")+project->first("TARGET_VERSION_EXT")+".lib");
+            QString lib_target = getLibTarget();
             lib_target.remove('"');
-            QString src_targ = "$(DESTDIR)" + lib_target;
+            QString src_targ = (project->isEmpty("DESTDIR") ? QString("$(DESTDIR)") : project->first("DESTDIR")) + lib_target;
             QString dst_targ = filePrefixRoot(root, fileFixify(targetdir + lib_target, FileFixifyAbsolute));
             if(!ret.isEmpty())
                 ret += "\n\t";

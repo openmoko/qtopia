@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -57,6 +57,8 @@ class RingToneButton;
 class ReminderPicker;
 class GroupView;
 class QCategoryManager;
+class AbFullEditor;
+class PhoneFieldManager;
 
 //-----------------------------------------------------------------------
 
@@ -99,12 +101,13 @@ protected slots:
     void emitFieldChanged();
     void userChangedType( int idx );
 signals:
-    void typeChanged(const PhoneFieldType&);
-    void userChangedType(const PhoneFieldType&);
-    void internalChangedType(const PhoneFieldType&);
+    void typeChanged(const PhoneFieldType& newType);
+    void userChangedType(const PhoneFieldType& newType);
+    void internalChangedType(const PhoneFieldType& newType);
     void numberChanged(const QString&);
     void fieldChanged(const QString&,const PhoneFieldType&);
 protected:
+    friend class PhoneFieldManager;
     QLineEdit *numberLE;
 
     QIconSelector *typeIS;
@@ -121,7 +124,7 @@ class PhoneFieldManager : public QObject
     Q_OBJECT
 
 public:
-    PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc );
+    PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc, AbFullEditor *editor);
     ~PhoneFieldManager();
 
     //add field. use existing empty field if available, otherwise, addBlank
@@ -129,6 +132,9 @@ public:
     void addEmpty();
     bool isFull() const;
     bool isEmpty() const;
+
+    bool removeNumber(QWidget *victim);
+    bool removeNumber(PhoneFieldType type);
 
     void setTypes( const QList<PhoneFieldType> &newTypes );
     QList<PhoneFieldType> types() const;
@@ -155,6 +161,7 @@ protected:
     int firstRow;
     QList<PhoneField*> phoneFields;
     QList<PhoneFieldType> mTypes;
+    AbFullEditor *mEditor;
 
 private:
     bool mEmitFieldChanged;
@@ -292,11 +299,13 @@ public:
 
     void setEntry(const QContact &entry, bool newEntry);
 
-    virtual QAppointment::AlarmFlags anniversaryReminder() {updateAppts(); return anniversaryAppt.alarm();}
-    virtual int anniversaryReminderDelay() {updateAppts(); return anniversaryAppt.alarmDelay();}
+    virtual QAppointment::AlarmFlags anniversaryReminder() {return anniversaryAppt.alarm();}
+    virtual int anniversaryReminderDelay() {return anniversaryAppt.alarmDelay();}
 
-    virtual QAppointment::AlarmFlags birthdayReminder() {updateAppts(); return birthdayAppt.alarm();}
-    virtual int birthdayReminderDelay() {updateAppts(); return birthdayAppt.alarmDelay();}
+    virtual QAppointment::AlarmFlags birthdayReminder() {return birthdayAppt.alarm();}
+    virtual int birthdayReminderDelay() {return birthdayAppt.alarmDelay();}
+
+    void addRemoveNumberMenu(QWidget *field);
 
 protected slots:
     void editPhoto();
@@ -314,11 +323,15 @@ protected slots:
     void phoneFieldsToDetailsFilter( const QString &newNumber, const PhoneFieldType &newType );
     void detailsToPhoneFieldsFilter( const QString &newNumber );
 
+    PhoneFieldType findPhoneField(QLineEdit *detail);
+
     void accept();
     void reject();
     void tabClicked( QWidget *tab );
     void editEmails();
     void prepareTab(int);
+
+    void removeNumber();
 
     void toneSelected( const QContent &tone );
 
@@ -425,7 +438,7 @@ private:
     PhoneFieldManager *phoneMan;
 
     QAction *actionEmailDetails;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     RingToneButton *editTonePB, *editVideoTonePB;
 #endif
     QWidget *wOtherTab;
@@ -439,9 +452,10 @@ private:
     QAction* actionAddGroup;
     QAction* actionRemoveGroup;
     QAction* actionRenameGroup;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     QAction* actionSetRingTone;
 #endif
+    QAction *actionRemoveNumber;
 };
 
 #ifdef QTOPIA_CELL

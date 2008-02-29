@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1736,15 +1734,20 @@ void WriteInitialization::initializeQ3TableItems(const QString &className, const
 
 QString WriteInitialization::pixCall(const DomProperty *p) const
 {
-    Q_ASSERT(p->kind() == DomProperty::IconSet || p->kind() == DomProperty::Pixmap);
-
     QString type, s;
-    if (p->kind() == DomProperty::IconSet) {
+    switch (p->kind()) {
+    case DomProperty::IconSet:
         type = QLatin1String("QIcon");
         s = p->elementIconSet()->text();
-    } else {
+        break;
+    case DomProperty::Pixmap:
         type = QLatin1String("QPixmap");
         s = p->elementPixmap()->text();
+        break;
+    default:
+        qWarning() << "Warning: Unknown icon format encountered. The ui-file was generated with a too-recent version of Designer.";
+        return QLatin1String("QIcon()");
+        break;
     }
 
     if (s.isEmpty()) {

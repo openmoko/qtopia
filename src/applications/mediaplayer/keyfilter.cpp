@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,9 +19,12 @@
 **
 ****************************************************************************/
 
+#include <QKeyEvent>
+
 #include "keyfilter.h"
 
-#include <QKeyEvent>
+namespace mediaplayer
+{
 
 KeyFilter::KeyFilter( QObject* subject, QObject* target, QObject* parent )
     : QObject( parent ), m_target( target )
@@ -51,3 +54,5 @@ bool KeyFilter::eventFilter( QObject*, QEvent* e )
 
     return false;
 }
+
+} // ns mediaplayer

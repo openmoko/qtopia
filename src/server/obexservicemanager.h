@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -55,8 +55,8 @@ struct BluetoothPushRequest
     Type m_type;
     QByteArray m_vobj;
     QBluetoothAddress m_addr;
-    QString m_mimetype;
-    QString m_filename;
+    QString m_mimeType;
+    QString m_fileName;
     QString m_prettyFile;
     QString m_description;
     bool m_autodelete;
@@ -79,11 +79,12 @@ public slots:
 
     void pushCalendar(const QDSActionRequest &request);
 
-    void pushFile(const QString &filename, const QString &mimetype, const QString &description, bool autodelete);
+    void pushFile(const QString &fileName, const QString &mimeType, const QString &description, bool autodelete);
     void pushFile(const QContentId &id);
     void pushFile(const QBluetoothAddress &addr, const QContentId &id);
 
 private slots:
+    void bluetoothDown();
     void sdapQueryComplete(const QBluetoothSdpQueryResult &result);
     void pushCommandFinished(int id, bool error);
     void donePushingVObj(bool error);
@@ -146,7 +147,7 @@ public slots:
     void beamBusinessCard(const QContact &contact);
     void beamBusinessCard(const QDSActionRequest &request);
 
-    void beamFile(const QString &filename, const QString &mimetype, const QString &description, bool autodelete);
+    void beamFile(const QString &fileName, const QString &mimeType, const QString &description, bool autodelete);
     void beamFile(const QContentId &id);
 
     void beamCalendar(const QDSActionRequest &request);
@@ -165,8 +166,8 @@ private slots:
     void remoteDevicesFound(const QList<QIrRemoteDevice> &devices);
 
 private:
-    void startBeamingFile(const QString &filename, const QString &mimetype, const QString &displayName, const QString &description, bool autodelete);
-    void startBeamingVObj(const QByteArray &data, const QString &mimetype);
+    void startBeamingFile(const QString &fileName, const QString &mimeType, const QString &displayName, const QString &description, bool autodelete);
+    void startBeamingVObj(const QByteArray &data, const QString &mimeType);
 
     bool m_busy;
     ObexServiceManager *m_parent;
@@ -174,8 +175,8 @@ private:
     QFile *m_file;
     QDSActionRequest *m_current;
     bool m_autodelete;
-    QString m_filename;
-    QString m_mimetype;
+    QString m_fileName;
+    QString m_mimeType;
     QString m_prettyFile;
     QString m_description;
     QPointer<QCommDeviceSession> m_session;
@@ -201,16 +202,19 @@ public:
     ~ObexServiceManager();
 
     void setupConnection(QObexPushService *opush);
-    void setupConnection(QObexPushClient *client, const QString &filename, const QString &mimetype);
+    void setupConnection(QObexPushClient *client, const QString &fileName, const QString &mimeType, const QString &description);
+
+public slots:
+    void abortTransfer(int id);
 
 signals:
-    void receiveInitiated(int id, const QString &filename, const QString &mime, const QString &description);
-    void sendInitiated(int id, const QString &filename, const QString &mime);
+    void receiveInitiated(int id, const QString &fileName, const QString &mime, const QString &description);
+    void sendInitiated(int id, const QString &fileName, const QString &mime, const QString &description);
     void progress(int id, qint64 bytes, qint64 total);
     void completed(int id, bool error);
 
 private slots:
-    void putRequested(const QString &filename, const QString &mimetype, qint64, const QString &);
+    void putRequested(const QString &fileName, const QString &mimeType, qint64, const QString &);
     void businessCardRequested();
     void requestFinished(bool error);
     void progress(qint64, qint64);

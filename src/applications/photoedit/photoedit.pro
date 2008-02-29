@@ -3,6 +3,8 @@ TARGET=photoedit
 CONFIG+=qtopia_main
 
 HEADERS    = photoeditui.h \
+                imageviewer.h \
+                thumbnailmodel.h \
                 editor/imageui.h \
                 editor/slider.h \
                 editor/navigator.h \
@@ -16,6 +18,8 @@ HEADERS    = photoeditui.h \
 
 SOURCES    = main.cpp \
                 photoeditui.cpp \
+                imageviewer.cpp \
+                thumbnailmodel.cpp \
                 editor/imageui.cpp \
                 editor/slider.cpp \
                 editor/navigator.cpp \
@@ -46,4 +50,4 @@ qdsservice.path=/etc/qds
 INSTALLS+=qdsservice
 
 pkg.desc=An image manager for Qtopia.
-pkg.domain=window,qds,beaming,cardreader,drm,pictures,print,doc_server,doc_write,bluetooth
+pkg.domain=trusted

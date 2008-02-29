@@ -52,45 +52,45 @@
 <h3 class="fn"><a name="hasHelp"></a>bool QSimMenuItem::hasHelp () const</h3>
 <p>Returns true if this menu item has help available; otherwise returns false.</p>
 <p>See also <a href="qsimmenuitem.html#setHasHelp">setHasHelp</a>().</p>
-<h3 class="fn"><a name="iconId"></a>uint QSimMenuItem::iconId () const</h3>
+<h3 class="fn"><a name="iconId"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimMenuItem::iconId () const</h3>
 <p>Returns the icon identifier associated with this menu item. Returns zero if there is no icon.</p>
 <p>See also <a href="qsimmenuitem.html#setIconId">setIconId</a>().</p>
 <h3 class="fn"><a name="iconSelfExplanatory"></a>bool QSimMenuItem::iconSelfExplanatory () const</h3>
 <p>Returns true if the icon specified by <a href="qsimmenuitem.html#iconId">iconId</a>() is self-explanatory without the display of <a href="qsimmenuitem.html#label">label</a>(). If this function returns false, then <a href="qsimmenuitem.html#label">label</a>() should be displayed next to the icon. If <a href="qsimmenuitem.html#iconId">iconId</a>() returns zero, then iconSelfExplanatory() should be ignored.</p>
 <p>See also <a href="qsimmenuitem.html#setIconSelfExplanatory">setIconSelfExplanatory</a>().</p>
-<h3 class="fn"><a name="identifier"></a>uint QSimMenuItem::identifier () const</h3>
+<h3 class="fn"><a name="identifier"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimMenuItem::identifier () const</h3>
 <p>Returns the menu item's numeric identifier.</p>
 <p>See also <a href="qsimmenuitem.html#setIdentifier">setIdentifier</a>().</p>
-<h3 class="fn"><a name="label"></a><a href="qstring.html">QString</a> QSimMenuItem::label () const</h3>
+<h3 class="fn"><a name="label"></a><a href="./qstring.html">QString</a> QSimMenuItem::label () const</h3>
 <p>Returns the menu item's label.</p>
 <p>See also <a href="qsimmenuitem.html#setLabel">setLabel</a>().</p>
-<h3 class="fn"><a name="nextAction"></a>uint QSimMenuItem::nextAction () const</h3>
+<h3 class="fn"><a name="nextAction"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSimMenuItem::nextAction () const</h3>
 <p>Returns the next action indicator for this menu item. Next action indicators have the same values as command types from the <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> list. The default value is zero, indicating no next action indicator for this menu item.</p>
 <p>See also <a href="qsimmenuitem.html#setNextAction">setNextAction</a>().</p>
 <h3 class="fn"><a name="setHasHelp"></a>void QSimMenuItem::setHasHelp ( bool <i>value</i> )</h3>
 <p>Sets the flag that indicates if this menu item has help available to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#hasHelp">hasHelp</a>().</p>
-<h3 class="fn"><a name="setIconId"></a>void QSimMenuItem::setIconId ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setIconId"></a>void QSimMenuItem::setIconId ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the icon identifier associated with this menu item to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#iconId">iconId</a>().</p>
 <h3 class="fn"><a name="setIconSelfExplanatory"></a>void QSimMenuItem::setIconSelfExplanatory ( bool <i>value</i> )</h3>
 <p>Sets the self-explanatory flag to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#iconSelfExplanatory">iconSelfExplanatory</a>().</p>
-<h3 class="fn"><a name="setIdentifier"></a>void QSimMenuItem::setIdentifier ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setIdentifier"></a>void QSimMenuItem::setIdentifier ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the menu item's numeric identifier to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#identifier">identifier</a>().</p>
-<h3 class="fn"><a name="setLabel"></a>void QSimMenuItem::setLabel ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setLabel"></a>void QSimMenuItem::setLabel ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the menu item's label to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#label">label</a>().</p>
-<h3 class="fn"><a name="setNextAction"></a>void QSimMenuItem::setNextAction ( uint <i>value</i> )</h3>
+<h3 class="fn"><a name="setNextAction"></a>void QSimMenuItem::setNextAction ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the next action indicator for this menu item to <i>value</i>. Next action indicators have the same values as command types from the <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> list. The value zero indicates that there is no next action indicator for this menu item.</p>
 <p>See also <a href="qsimmenuitem.html#nextAction">nextAction</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QSimMenuItem &amp; QSimMenuItem::operator= ( const QSimMenuItem &amp; <i>value</i> )</h3>
 <p>Make a copy of <i>value</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

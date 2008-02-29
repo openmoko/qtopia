@@ -108,7 +108,7 @@ sub processFiles
             "       Untranslated files should be in:\n".
             "  $helpSource/html\n".
             "       Translated files should be in:\n".
-            "  $helpSource/i18n/<lang>\n";
+            "  $helpSource/<lang>/html\n";
     }
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,6 +37,7 @@
 #include <qsqlquery.h>
 #include <qvariant.h>
 #include <qmap.h>
+#include <qhash.h>
 #include <qlist.h>
 #include <qcache.h>
 
@@ -218,6 +219,9 @@ private:
     QSqlPimTableModel *searchTable;
 
     bool tmptable;
+
+    typedef QMultiHash<QString, QPair<QUniqueId, QString> > LocalNumberCache;
+    mutable LocalNumberCache mLocalNumberCache;
 
     static QMap<QContactModel::Field, QString> mFields;
     static QMap<QContactModel::Field, bool> mUpdateable;

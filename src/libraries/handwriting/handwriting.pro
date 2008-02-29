@@ -25,7 +25,7 @@ sdk_hw_headers.hint=sdk headers
 INSTALLS+=sdk_hw_headers
 
 pkg.desc=Multi-stroke gesture recognition library for Qtopia.
-pkg.domain=libs
+pkg.domain=trusted
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

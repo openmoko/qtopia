@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 
 class QMenu;
 class QTabWidget;
+class QBluetoothLocalDevice;
 
 class BTSettingsMainWindow : public QMainWindow
 {
@@ -36,12 +37,15 @@ public:
     virtual ~BTSettingsMainWindow();
 
 private slots:
+    void init();
     void tabChanged(int index);
     void setTabsEnabled(QCommDeviceController::PowerState state);
 
 private:
     QMenu *m_menu;
     QTabWidget *m_tabs;
+    QBluetoothLocalDevice *const m_localDevice;
+    QCommDeviceController *m_controller;
 };
 
 #endif

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -256,6 +256,14 @@ QDocumentPropertiesWidget::~QDocumentPropertiesWidget()
 }
 
 /*!
+    Returns the document the widget displays the properties of.
+*/
+QContent QDocumentPropertiesWidget::document() const
+{
+    return lnk;
+}
+
+/*!
   Applies any changes made on the QDocumentPropertiesWidget 
  */
 void QDocumentPropertiesWidget::applyChanges()
@@ -301,7 +309,6 @@ void QDocumentPropertiesWidget::applyChanges()
     }
 }
 
-// QTOPIA_DOCAPI_TODO: does this need to be moved to QContent?
 /*!
   Create a duplicate of the document in the document system.
  */
@@ -367,7 +374,6 @@ QString QDocumentPropertiesWidget::safePath( const QString &name, const QString 
     return fn + fileExtn;
 }
 
-// QTOPIA_DOCAPI_TODO: does this need to be moved to QContent?
 /*!
   \internal
  */
@@ -391,7 +397,6 @@ void QDocumentPropertiesWidget::beamLnk()
     emit done();
 }
 
-// QTOPIA_DOCAPI_TODO: does this need to be moved to QContent?
 /*!
   Deletes the document.  
  */
@@ -537,12 +542,12 @@ QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &doc, QWidg
 
     QScrollArea *scrollArea = new QScrollArea( this );
     scrollArea->setFrameStyle( QFrame::NoFrame );
+    scrollArea->setFocusPolicy( Qt::NoFocus );
     scrollArea->setWidgetResizable( true );
     scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     vbox->addWidget( scrollArea );
     d = new QDocumentPropertiesWidget( doc, this );
     scrollArea->setWidget( d );
-    scrollArea->setFocusProxy( d );
     connect( d, SIGNAL(done()), this, SLOT(reject()) );
 }
 
@@ -551,6 +556,14 @@ QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &doc, QWidg
  */
 QDocumentPropertiesDialog::~QDocumentPropertiesDialog()
 {
+}
+
+/*!
+    Returns the document the dialog displays the properties of.
+*/
+QContent QDocumentPropertiesDialog::document() const
+{
+    return d->document();
 }
 
 /*!

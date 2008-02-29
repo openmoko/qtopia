@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,13 +24,24 @@
 
 #include <QMainWindow>
 #include <QList>
+#include <qcontent.h>
 
-class ReceivedFilesModel;
+class FileTransferListModel;
 class QModelIndex;
-class ReceivedFile;
-class QTableView;
+class FileTransfer;
+class QListView;
 class QCloseEvent;
-class RunningApplicationsViewItem;
+class TaskManagerEntry;;
+class QAction;
+class QTabWidget;
+
+struct VObjectTransfer
+{
+    int id;
+    QString fileName;
+    QString mimeType;
+};
+
 
 class ReceiveWindow : public QMainWindow
 {
@@ -38,29 +49,41 @@ class ReceiveWindow : public QMainWindow
 
 public:
     ReceiveWindow(QWidget *parent = 0);
-    ~ReceiveWindow();
 
 public slots:
-    void receiveInitiated(int id, const QString &filename, const QString &mime, const QString &description);
-    void sendInitiated(int id, const QString &filename, const QString &mime);
+    void receiveInitiated(int id, const QString &filename,
+            const QString &mime, const QString &description);
+    void sendInitiated(int id, const QString &filename, const QString &mime,
+            const QString &description);
     void progress(int id, qint64 bytes, qint64 total);
     void completed(int id, bool error);
+
+signals:
+    void abortTransfer(int id);
 
 protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
+    void activated(const QModelIndex &index);
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
     void showWindow();
-    void saveFile(int index);
+    void stopCurrentTransfer();
 
 private:
-    void handleSupportedFormatRecv(int id, const QString &filename, const QString &mime, const QString &description);
-    bool handleSupportedFormatComplete(int id, bool error);
+    void setUpView(QListView *view);
+    QContentId saveFile(const FileTransfer &file);
+    void handleIncomingVObject(int id, const QString &fileName,
+            const QString &mime, const QString &description);
+    bool handleVObjectReceived(int id, bool error);
 
-    QTableView *m_files;
-    ReceivedFilesModel *m_model;
-    QList<ReceivedFile> m_list;
-    RunningApplicationsViewItem *m_runningAppsItem;
+    FileTransferListModel *m_model;
+    QList<VObjectTransfer> m_vObjects;
+    TaskManagerEntry *m_taskManagerEntry;
+    QAction *m_cancelAction;
+    QTabWidget *m_tabs;
+    QListView *m_incomingView;
+    QListView *m_outgoingView;
 };
 
 #endif

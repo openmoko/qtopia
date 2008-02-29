@@ -20,6 +20,7 @@ embedded {
 		    embedded/qwscommand_qws_p.h \
 		    embedded/qwscursor_qws.h \
 		    embedded/qwsdisplay_qws.h \
+		    embedded/qwsdisplay_qws_p.h \
 		    embedded/qwsevent_qws.h \
 		    embedded/qwsmanager_qws.h \
 		    embedded/qwsmanager_p.h \

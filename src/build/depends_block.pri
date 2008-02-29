@@ -9,10 +9,14 @@ for(dep,QTOPIA_DEPENDS) {
             file~=s,$$fixpath($$PROJECT_ROOT/),,q
             pro=$$file/$$tail($$file).pro
             # Make sure that the project exists
+            # Make sure that the project is enabled (in PROJECTS)
             # Don't let a project depend on itself
-            exists($$PROJECT_ROOT/$$pro):!equals(s,$$file):QTOPIA_DEPENDS+=$$file
+            exists($$PROJECT_ROOT/$$pro):contains(PROJECTS,$$file):!equals(s,$$file) {
+                echo(Dependency $$dep caused dependency on $$file)
+                QTOPIA_DEPENDS+=$$file
+            }
         }
-        QTOPIA_DEPENDS+=$$files($$dep)
+        #QTOPIA_DEPENDS+=$$files($$dep)
     }
 }
 
@@ -22,6 +26,7 @@ for(it,QTOPIA_DEPENDS) {
     echo($$self depends on $$it)
     found=0
     foundempty=0
+    founddisabled=0
     # Start looking in the current project root
     ROOTS=$$PROJECT_ROOT
     # Then look in Qtopia
@@ -34,6 +39,11 @@ for(it,QTOPIA_DEPENDS) {
         file=$$root/$$it/$$tail($$it).pro
         echo(Trying $$file)
         exists($$file) {
+            !isProjectEnabled($$root,$$it) {
+                foundempty=1
+                founddisabled=1
+                next()
+            }
             profile=$$tail($$file)
             echo(Using $$file)
             found=1
@@ -59,6 +69,19 @@ for(it,QTOPIA_DEPENDS) {
             break()
         }
     }
-    equals(found,0):!equals(foundempty,1):warning($$self depends on $$it/$$tail($$it).pro but it doesn't exist in $$ROOTS!)
+    equals(found,0) {
+        !equals(foundempty,1) {
+            warning($$self depends on $$it/$$tail($$it).pro but it doesn't exist in $$ROOTS!)
+            requires($$it/$$tail($$it).pro)
+        }
+        equals(founddisabled,1) {
+            disabled_deps_are_non_fatal {
+                warning($$self depends on $$it but it is not listed in PROJECTS!)
+                requires("contains(PROJECTS,$$it)")
+            } else {
+                error($$self depends on $$it but it is not listed in PROJECTS!)
+            }
+        }
+    }
 }
 

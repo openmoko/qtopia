@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,6 +24,7 @@
 
 #include <qstring.h>
 #include <qstringlist.h>
+#include <QDateTime>
 
 class QTextCodec;
 
@@ -52,6 +53,18 @@ public:
     bool qsq;               // *QSQ signal quality notification state
     bool qbc;               // *QBC battery charge notification state
     int creg;               // +CREG unsolicited notification state
+    bool cr;                // +CR unsolicited notification state
+    bool colp;              // +COLP unsolicited notification state
+    bool clae;              // +CLAE unsolicited notification state
+    bool cssi;              // +CSSI unsolicited notification state
+    bool cssu;              // +CSSU unsolicited notification state
+    bool ccwv;              // +CCWV unsolicited notification state
+    bool cccm;              // +CCCM unsolicited notification state
+    QDateTime lastTimeCCCM; // last time of +CCCM unsolicited notification
+
+    bool cusd;              // +CUSD mode
+    uint cmod;              // +CMOD mode
+    uint csns;              // +CSNS mode
 
     bool contextSet;        // +CGDCONT context has been set prior to dial
     QString apn;            // +CGDCONT Access Point Name
@@ -60,9 +73,25 @@ public:
     int cbstName;           // +CBST name value
     int cbstCe;             // +CBST ce value
 
+    uint cpls;              // +CPLS list value
+    uint cpolFormat;        // +CPOL format value
+    uint timeFormat;        // +CSTF value
+    uint dateFormat;        // +CSDF primary value
+    uint auxDateFormat;     // +CSDF auxillary value
+    int mtDateTimeOffset;   // the "faked" time offset (seconds) from real time
+    int mtTimeZoneSeconds;  // the "faked" time zone offset in seconds from UTC
+    uint curr_call_mode;    // not used atm - if voice, ath disconn etc.
+
+    bool csvm;              // +CSVM <mode> value
+    bool ignore_ath;        // +ATH behaviour value
+    bool ignore_drop_dtr;   // "Drop DTR" behaviour value
+
     int smsService;         // +CSMS value
     bool messageFormat;     // +CMGF value
     bool csdh;              // +CSDH value
+
+    bool csgt;              // +CSGT mode value
+    QString greetingText;   // the greeting text
 
     QString phoneStore;     // +CPBS value
     //QString phoneStorePw;   // +CPBS value
@@ -77,6 +106,8 @@ public:
     bool hasStartupOption( const QString& option );
 
     void clearDataOptions();
+
+    QString nextString( const QString& buf, uint& posn );
 };
 
 #endif // ATOPTIONS_H

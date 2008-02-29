@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/corelib/plugin/quuid.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/corelib/plugin/quuid.cpp -->
 <head>
   <title>Qt 4.3: QUuid Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -54,8 +54,8 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QDataStream &amp; <b><a href="quuid.html#operator-lt-lt-27">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>s</i>, const QUuid &amp; <i>id</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="quuid.html#operator-gt-gt-15">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>s</i>, QUuid &amp; <i>id</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="quuid.html#operator-lt-lt-74">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>s</i>, const QUuid &amp; <i>id</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="quuid.html#operator-gt-gt-47">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>s</i>, QUuid &amp; <i>id</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -94,7 +94,7 @@
 <h3 class="fn"><a name="QUuid-2"></a>QUuid::QUuid ( <a href="qtglobal.html#uint-typedef">uint</a> <i>l</i>, <a href="qtglobal.html#ushort-typedef">ushort</a> <i>w1</i>, <a href="qtglobal.html#ushort-typedef">ushort</a> <i>w2</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b1</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b2</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b3</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b4</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b5</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b6</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b7</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>b8</i> )</h3>
 <p>Creates a UUID with the value specified by the parameters, <i>l</i>, <i>w1</i>, <i>w2</i>, <i>b1</i>, <i>b2</i>, <i>b3</i>, <i>b4</i>, <i>b5</i>, <i>b6</i>, <i>b7</i>, <i>b8</i>.</p>
 <p>Example:</p>
-<pre><span class="comment"> // {67C8770B-44F1-410A-AB9A-F9B5446F13EE}</span>
+<pre><span class="comment"> //</span> {67C8770B-44F1-410A-AB9A-F9B5446F13EE}
  QUuid IID_MyInterface(0x67c8770b, 0x44f1, 0x410a, 0xab, 0x9a, 0xf9, 0xb5, 0x44, 0x6f, 0x13, 0xee)</pre>
 <h3 class="fn"><a name="QUuid-3"></a>QUuid::QUuid ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
 <p>Creates a <a href="quuid.html">QUuid</a> object from the string <i>text</i>. The function can only convert a string in the format {HHHHHHHH-HHHH-HHHH-HHHH-HHHHHHHHHHHH} (where 'H' stands for a hex digit). If the conversion fails a null UUID is created.</p>
@@ -142,16 +142,16 @@
 <p>See also <a href="quuid.html#variant">variant</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-lt-lt-27"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, const QUuid &amp; <i>id</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-74"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, const QUuid &amp; <i>id</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the uuid <i>id</i> to the datastream <i>s</i>.</p>
-<h3 class="fn"><a name="operator-gt-gt-15"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, QUuid &amp; <i>id</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-47"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, QUuid &amp; <i>id</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads uuid from from the stream <i>s</i> into <i>id</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

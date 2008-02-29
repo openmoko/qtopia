@@ -32,8 +32,8 @@ hide='>/dev/null 2>&1'
 [ "$VERBOSE" = 1 ] && echo "COMPILE: $CXX $CXXFLAGS $LFLAGS -o $binary $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp"
 eval '$CXX $CXXFLAGS $LFLAGS -o $binary $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp' $hide || exit 1
 if [ -f $binary ]; then
-    [ "$VERBOSE" = 1 ] && echo "CHECK: strings $binary | grep 'GCC VERSION 4'"
-    strings $binary | grep 'GCC VERSION 4'
+    [ "$VERBOSE" = 1 ] && echo "CHECK: strings $binary | grep -e 'GCC VERSION 4' -e 'SignificantByteFirst'"
+    strings $binary | grep -e 'GCC VERSION 4' -e 'SignificantByteFirst'
     if [ "$HOST" = "host" ]; then
         [ "$VERBOSE" = 1 ] && echo "RUN: $binary"
         eval '$binary' $hide || { echo CANNOT RUN BINARIES; exit 1; }

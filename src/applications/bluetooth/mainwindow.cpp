@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -541,6 +541,8 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
     widgetLayout->addWidget(m_data->m_progress);
 
     setWindowTitle(tr("Bluetooth FTP Client"));
+
+    QTimer::singleShot(0, m_data, SLOT(browseDevice()));
 }
 
 BtFtp::~BtFtp()
@@ -847,7 +849,7 @@ void BtFtpPrivate::commandFinished(int, bool error)
         switch (command) {
             case QObexFtpClient::Connect:
                 message = tr("Connection failed.");
-                delete m_client;
+                m_client->deleteLater();
                 m_client = 0;
                 m_rfcommSock->close();
                 break;
@@ -884,7 +886,7 @@ void BtFtpPrivate::commandFinished(int, bool error)
                 message = tr("Could not remove file");
                 break;
             case QObexFtpClient::Disconnect:
-                delete m_client;
+                m_client->deleteLater();
                 m_client = 0;
                 m_rfcommSock->close();
                 break;
@@ -1032,6 +1034,9 @@ void BtFtpPrivate::deleteFileOrFolder()
     if (info.isParent())
         return;
 
+    if (!Qtopia::confirmDelete(0, tr("Delete"), info.name()))
+        return;
+
     if (info.isFolder()) {
         QObject::disconnect(m_client, SIGNAL(commandFinished(int,bool)),
                          this, SLOT(commandFinished(int,bool)));
@@ -1068,15 +1073,24 @@ void BtFtpPrivate::createFolder()
     if (index.isValid()) {
         m_files->setCurrentIndex(index);
         m_files->edit(index);
+        if (QApplication::focusWidget()) {
+            QApplication::postEvent(QApplication::focusWidget(),
+                                    new QKeyEvent(QEvent::KeyPress, Qt::Key_Select,
+                                    Qt::NoModifier));
+        }
 
         m_folderBeingCreated = index.row();
+        m_createAction->setVisible(false);
+        m_deleteAction->setVisible(false);
+        m_putAction->setVisible(false);
+        m_disconnectAction->setVisible(false);
     }
 }
 
 void BtFtpPrivate::commitCreateFolder()
 {
+    enableActions();
     QString name = m_model->info(m_folderBeingCreated).name();
-
     m_client->mkdir(name);
 }
 

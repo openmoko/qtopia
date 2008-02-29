@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -86,6 +86,7 @@ public:
     QString status() const;
     void readSettings();
     void deactivate();
+    void setForwardingResult( QTelephony::Result );
 
 private:
     void init();
@@ -97,12 +98,11 @@ private:
     void setText( bool enabled, const QString &number = QString() );
 
 signals:
-    void sendRequest( CallForwardItem *sender, QCallForwarding::Reason reason, QString number );
+    void sendRequest( QCallForwarding::Reason reason, QString number );
     void keyPressed( Qt::Key key );
 
 private slots:
     void checked( bool on );
-    void setForwardingResult(bool);
 
 private:
     QTelephony::CallClass classX;
@@ -129,12 +129,12 @@ private:
     void showEvent( QShowEvent *e );
 
 signals:
-    void sendRequest( QCallForwarding::Reason reaso, QString number, QTelephony::CallClass c );
-    void setForwardingResult(bool);
+    void sendRequest( QCallForwarding::Reason reason, QString number, QTelephony::CallClass c );
 
 public slots:
     void alwaysChecked( const bool on );
-    void receiveRequest( CallForwardItem *sender, const QCallForwarding::Reason reason, const QString number );
+    void receiveRequest( const QCallForwarding::Reason reason, const QString number );
+    void setForwardingResult( QCallForwarding::Reason, QTelephony::Result );
 
 friend class CallForwarding;
 

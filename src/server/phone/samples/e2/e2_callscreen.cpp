@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,13 +26,13 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include "phone/dialercontrol.h"
+#include "dialercontrol.h"
 #include <QPainter>
 #include <QTimer>
 #include <QContact>
 #include <QContactModel>
 #include "e2_bar.h"
-#include "phone/cellmodemmanager.h"
+#include "cellmodemmanager.h"
 #include "phone/samples/e1/e1_error.h"
 #include <QMouseEvent>
 #include <QCallList>

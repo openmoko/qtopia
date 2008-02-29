@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -220,7 +218,7 @@ public:
     void emitAboutToDestroyContext(const QGLContext *context) {
         emit aboutToDestroyContext(context);
     }
-
+    static QGLSignalProxy *instance();
 Q_SIGNALS:
     void aboutToDestroyContext(const QGLContext *context);
 };
@@ -268,7 +266,8 @@ public:
         FramebufferObject       = 0x00000040,
         StencilTwoSide          = 0x00000080,
         StencilWrap             = 0x00000100,
-        PackedDepthStencil      = 0x00000200
+        PackedDepthStencil      = 0x00000200,
+        NVFloatBuffer           = 0x00000400
     };
     Q_DECLARE_FLAGS(Extensions, Extension)
 

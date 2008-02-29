@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,8 +27,8 @@
 
 
 #include <themedview.h>
-#include "phone/dialercontrol.h"
-#include "phone/cellmodemmanager.h"
+#include "dialercontrol.h"
+#include "cellmodemmanager.h"
 
 #include <QWindowsStyle>
 #include <QUniqueId>

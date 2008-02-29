@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -24,13 +24,15 @@
 #ifndef QTMailWindow_H
 #define QTMailWindow_H
 
-#include <qstackedwidget.h>
 #include <qevent.h>
 #include "emailclient.h"
 #include "readmail.h"
 
 class MailListView;
 class WriteMail;
+class StatusDisplay;
+
+class QStackedWidget;
 
 class QTMailWindow: public QMainWindow
 {
@@ -54,10 +56,10 @@ protected:
 
     EmailClient *emailClient;
     QStackedWidget *views;
-    bool mOpenedByUser;
-    static QTMailWindow *self; //singleton
-    QWidget *parentWidget;
+    StatusDisplay *status;
     bool noShow;
+
+    static QTMailWindow *self; //singleton
 };
 
 #endif

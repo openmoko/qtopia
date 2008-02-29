@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -44,6 +44,26 @@
 #include "account.h"
 #include "editaccount.h"
 
+static const QMailAccount::AuthType authenticationType[] = {
+    QMailAccount::Auth_NONE,
+#ifndef QT_NO_OPENSSL
+    QMailAccount::Auth_LOGIN,
+    QMailAccount::Auth_PLAIN,
+#endif
+    QMailAccount::Auth_INCOMING
+};
+
+static int authenticationIndex(QMailAccount::AuthType type)
+{
+    const int numTypes = sizeof(authenticationType)/sizeof(QMailAccount::AuthType);
+    for (int i = 0; i < numTypes; ++i)
+        if (type == authenticationType[i])
+            return i;
+
+    return 0;
+};
+
+
 class PortValidator : public QValidator
 {
 public:
@@ -73,8 +93,10 @@ public:
 EditAccount::EditAccount( QWidget* parent, const char* name, Qt::WFlags fl )
     : QDialog(parent, fl)
     , tabWidget(0)
+    , accountNameInput(new QLineEdit)
 {
     setupUi(this);
+    setObjectName(name);
 
     //connect custom slots
     connect(ToolButton2,SIGNAL(clicked()),SLOT(sigPressed()));
@@ -83,12 +105,20 @@ EditAccount::EditAccount( QWidget* parent, const char* name, Qt::WFlags fl )
     connect(emailInput,SIGNAL(textChanged(QString)),SLOT(emailModified()));
     //connect(mailboxButton,SIGNAL(clicked()),SLOT(configureFolders()));
 
-    setObjectName(name);
     emailTyped = false;
 
-    QtopiaApplication::InputMethodHint imHint = QtopiaApplication::Number;
-    QtopiaApplication::setInputMethodHint(mailPortInput, imHint);
-    QtopiaApplication::setInputMethodHint(smtpPortInput, imHint);
+    QtopiaApplication::setInputMethodHint(mailPortInput, QtopiaApplication::Number);
+    QtopiaApplication::setInputMethodHint(smtpPortInput, QtopiaApplication::Number);
+
+    const QString uncapitalised("email noautocapitalization");
+
+    // These fields should not be autocapitalised
+    QtopiaApplication::setInputMethodHint(mailUserInput, QtopiaApplication::Named, uncapitalised);
+    QtopiaApplication::setInputMethodHint(mailServerInput, QtopiaApplication::Named, uncapitalised);
+
+    QtopiaApplication::setInputMethodHint(emailInput, QtopiaApplication::Named, uncapitalised);
+    QtopiaApplication::setInputMethodHint(smtpUsernameInput, QtopiaApplication::Named, uncapitalised);
+    QtopiaApplication::setInputMethodHint(smtpServerInput, QtopiaApplication::Named, uncapitalised);
 
     // Too easy to mistype numbers in phone mode
     mailPasswInput->installEventFilter( this );
@@ -109,15 +139,19 @@ EditAccount::EditAccount( QWidget* parent, const char* name, Qt::WFlags fl )
     smtpUsernameInput->hide();
     smtpPasswordInput->hide();
     encryptionCheckBox->hide();
+#else
+    authentication->addItem("INCOMING"); // notr
 #endif
     typeChanged(1);
     createTabbedView();
     setLayoutDirection( qApp->layoutDirection() );
     mailPasswInput->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     smtpPasswordInput->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+
+    currentTabChanged(0);
 }
 
-void EditAccount::setAccount(MailAccount *in, bool newOne)
+void EditAccount::setAccount(QMailAccount *in, bool newOne)
 {
     account = in;
 
@@ -145,9 +179,10 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
         typeChanged( 0 );
     } else {
 
-        if ( account->accountType() == MailAccount::POP ) {
-
-        } else if ( account->accountType() == MailAccount::IMAP ) {
+        if ( account->accountType() == QMailAccount::POP ) {
+            accountType->setCurrentIndex(0);
+            typeChanged(0);
+        } else if ( account->accountType() == QMailAccount::IMAP ) {
             accountType->setCurrentIndex(1);
             typeChanged(1);
             imapBaseDir->setText( account->baseFolder() );
@@ -177,11 +212,13 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
 #ifndef QT_NO_OPENSSL
         smtpUsernameInput->setText(account->smtpUsername());
         smtpPasswordInput->setText(account->smtpPassword());
-        authentication->setCurrentIndex(static_cast<int>(account->smtpAuthentication()));
+        authentication->setItemText(3, accountType->currentText());
+        authentication->setCurrentIndex(authenticationIndex(account->smtpAuthentication()));
         encryption->setCurrentIndex(static_cast<int>(account->smtpEncryption()));
-        smtpUsernameInput->setEnabled(authentication->currentIndex() != 0);
-        smtpPasswordInput->setEnabled(authentication->currentIndex() != 0);
-        encryptionCheckBox->setChecked(account->mailEncryption() != MailAccount::Encrypt_NONE);
+        QMailAccount::AuthType type = authenticationType[authentication->currentIndex()];
+        smtpUsernameInput->setEnabled(type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
+        smtpPasswordInput->setEnabled(type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
+        encryptionCheckBox->setChecked(account->mailEncryption() != QMailAccount::Encrypt_NONE);
 #endif
     }
 
@@ -191,10 +228,24 @@ void EditAccount::setAccount(MailAccount *in, bool newOne)
 void EditAccount::createTabbedView()
 {
     delete layout();
-    QHBoxLayout* thelayout = new QHBoxLayout(this);
+
+    QVBoxLayout* thelayout = new QVBoxLayout(this);
     thelayout->setMargin(0);
-    thelayout->setSpacing(0);
+    thelayout->setSpacing(4);
+
+    QHBoxLayout* formLayout = new QHBoxLayout;
+    formLayout->setMargin(6);
+    formLayout->setSpacing(4);
+    formLayout->addWidget(new QLabel(tr("Acct")));
+    formLayout->addWidget(accountNameInput);
+    thelayout->addLayout(formLayout);
+
+    QFrame* separator = new QFrame;
+    separator->setFrameStyle(QFrame::HLine);
+    thelayout->addWidget(separator);
+
     tabWidget = new QTabWidget(this);
+    connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
     thelayout->addWidget(tabWidget);
 
     QScrollArea* scroll = new QScrollArea(tabWidget);
@@ -220,6 +271,14 @@ void EditAccount::createTabbedView()
     tabWidget->addTab(scroll,tr("Outgoing"));
 
     updateGeometry();
+
+    accountNameInput->setFocus();
+}
+
+void EditAccount::currentTabChanged(int index)
+{
+    // Change the name to select the relevant help page
+    setObjectName(index == 0 ? "email-account-in" : "email-account-out");
 }
 
 // bool EditAccount::event(QEvent* e)
@@ -240,13 +299,7 @@ void EditAccount::createTabbedView()
 
 bool EditAccount::eventFilter( QObject* o, QEvent *e )
 {
-    if ((o == accountNameInput) && (e->type() == QEvent::FocusIn))
-    {
-        if (tabWidget && tabWidget->currentIndex() != 1)
-            tabWidget->setCurrentIndex( 1 );
-        return QWidget::eventFilter( o, e );
-    }
-    else if ((o == defaultMailCheckBox) && (e->type() == QEvent::FocusIn)) {
+    if ((o == defaultMailCheckBox) && (e->type() == QEvent::FocusIn)) {
         if (tabWidget && tabWidget->currentIndex() != 1)
             tabWidget->setCurrentIndex( 1 );
         return QWidget::eventFilter( o, e );
@@ -286,17 +339,29 @@ void EditAccount::emailModified()
 
 void EditAccount::authChanged(int index)
 {
-        smtpUsernameInput->setEnabled(index != 0);
-        smtpPasswordInput->setEnabled(index != 0);
-        if(index == 0)
-        {
+    QMailAccount::AuthType type = authenticationType[index];
+    bool enableFields =
+#ifndef QT_NO_OPENSSL
+        (type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
+#else
+        false;
+#endif
+
+    smtpUsernameInput->setEnabled(enableFields);
+    smtpPasswordInput->setEnabled(enableFields);
+    if (!enableFields) {
         smtpUsernameInput->clear();
         smtpPasswordInput->clear();
-        }
+    }
 }
 
 void EditAccount::typeChanged(int)
 {
+#ifndef QT_NO_OPENSSL
+    // Keep the authentication option in sync with the selected account type
+    authentication->setItemText(3, accountType->currentText());
+#endif
+
     if ( accountType->currentText() == tr("Sync") ) {
         imapSettings->hide();
         syncCheckBox->hide();
@@ -331,7 +396,7 @@ void EditAccount::typeChanged(int)
     } else if (accountType->currentText() == "IMAP") {
         syncCheckBox->hide();
         imapSettings->show();
-        mailboxButton->setEnabled( account->mailboxes.count() > 0 );
+        mailboxButton->setEnabled( account->mailboxes().count() > 0 );
         mailPortInput->setText("143");
         deleteCheckBox->setChecked( true );
     }
@@ -371,11 +436,11 @@ void EditAccount::accept()
     account->setDeleteMail( deleteCheckBox->isChecked() );
 
     if ( accountType->currentText() == "POP" ) {
-        account->setAccountType( MailAccount::POP );
+        account->setAccountType( QMailAccount::POP );
     } else if ( accountType->currentText() == "IMAP") {
-        account->setAccountType( MailAccount::IMAP );
+        account->setAccountType( QMailAccount::IMAP );
     } else {
-        account->setAccountType( MailAccount::Synchronized );
+        account->setAccountType( QMailAccount::Synchronized );
     }
 
     account->setUseSig( sigCheckBox->isChecked() );
@@ -388,7 +453,7 @@ void EditAccount::accept()
         account->setMaxMailSize( -1 );
     }
     account->setCheckInterval( -1 );
-    if ( account->accountType() == MailAccount::IMAP )
+    if ( account->accountType() == QMailAccount::IMAP )
         account->setBaseFolder( imapBaseDir->text() );
 
     QString temp;
@@ -436,14 +501,14 @@ void EditAccount::accept()
     }
 
 #ifndef QT_NO_OPENSSL
-        account->setSmtpUsername(smtpUsernameInput->text());
-        account->setSmtpPassword(smtpPasswordInput->text());
-        account->setSmtpAuthentication(static_cast<MailAccount::AuthType>(authentication->currentIndex()));
-        account->setSmtpEncryption(static_cast<MailAccount::EncryptType>(encryption->currentIndex()));
+    account->setSmtpUsername(smtpUsernameInput->text());
+    account->setSmtpPassword(smtpPasswordInput->text());
+    account->setSmtpAuthentication(authenticationType[authentication->currentIndex()]);
+    account->setSmtpEncryption(static_cast<QMailAccount::EncryptType>(encryption->currentIndex()));
     if(encryptionCheckBox->isChecked())
-        account->setMailEncryption(MailAccount::Encrypt_SSL);
+        account->setMailEncryption(QMailAccount::Encrypt_SSL);
     else
-        account->setMailEncryption(MailAccount::Encrypt_NONE);
+        account->setMailEncryption(QMailAccount::Encrypt_NONE);
 #endif
 
     QDialog::accept();
@@ -511,7 +576,7 @@ SigEntry::SigEntry(QWidget *parent, const char *name, Qt::WFlags fl )
 // }
 //
 // /*  Class MailboxSelector   */
-// MailboxSelector::MailboxSelector(QWidget *parent, const char *name, MailAccount *account)
+// MailboxSelector::MailboxSelector(QWidget *parent, const char *name, QMailAccount *account)
 //     : QDialog(parent)
 // {
 //     setObjectName(name);

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -36,6 +36,7 @@
 #include <QImageReader>
 #include <QMenu>
 #include <QTimer>
+#include <QDesktopWidget>
 
 #define DEFAULT_VIEW QImageDocumentSelector::Thumbnail
 
@@ -47,6 +48,9 @@ QImageDocumentSelectorPrivate::QImageDocumentSelectorPrivate( QWidget* parent )
     , sort_mode( QDocumentSelector::Alphabetical )
     , drm_content( QDrmRights::Display )
     , current_view( DEFAULT_VIEW )
+    , category_dialog( 0 )
+    , category_label( 0 )
+    , loader( 0 )
 {
     setFilter( QContentFilter( QContent::Document ) & QContentFilter( QContentFilter::MimeType, QLatin1String( "image/*" ) ) );
 
@@ -58,22 +62,15 @@ void QImageDocumentSelectorPrivate::init()
     model = new QContentSetModel(&image_collection, this);
     // Update selection and view when model changes
     connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)), this,
-             SLOT(rowAddedSelection()) );
-    connect( model, SIGNAL(rowsInserted(QModelIndex,int,int)), this,
              SIGNAL(documentsChanged()) );
-    connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this,
-             SLOT(rowRemovedSelection(QModelIndex,int,int)) );
     connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this,
              SIGNAL(documentsChanged()) );
 
     connect( model, SIGNAL(updateFinished()), this, SLOT(updateFinished()) );
 
-    // Initialize selection and update view when model reset
-    connect( model, SIGNAL(modelReset()), this, SIGNAL(documentsChanged()) );
-    connect( model, SIGNAL(modelReset()), this, SLOT(resetSelection()) );
 
     // Construct widget stack
-    widget_stack = new QStackedLayout( this );
+    widget_stack = new QStackedLayout;
 
     // Construct single view
     single_view = new SingleView( this );
@@ -85,8 +82,15 @@ void QImageDocumentSelectorPrivate::init()
     // Construct thumbnail repository
     ThumbnailCache *cache = new ThumbnailCache( this );
 
-    ThumbnailLoader *loader = new DRMThumbnailLoader( cache, this );
+    loader = new ThumbnailLoader;
+
+    connect( loader, SIGNAL(loaded(ThumbnailRequest,QPixmap)), cache, SLOT(insert(ThumbnailRequest,QPixmap)) );
+
+    loader->start( QThread::LowPriority );
+
     ThumbnailRepository *repository = new ThumbnailRepository( cache, loader, this );
+
+    int iconSize = (36 * QApplication::desktop()->screen()->logicalDpiY()+50) / 100;
 
     // Construct thumbnail view
     thumbnail_view = new ThumbnailView( this );
@@ -94,7 +98,7 @@ void QImageDocumentSelectorPrivate::init()
              thumbnail_view, SLOT(repaintThumbnail(ThumbnailRequest)) );
     connect( thumbnail_view, SIGNAL(selected()), this, SLOT(emitSelected()) );
     thumbnail_view->setViewMode( QListView::IconMode );
-    thumbnail_view->setIconSize( QSize( 64, 64 ) );
+    thumbnail_view->setIconSize( QSize( iconSize, iconSize ) );
     thumbnail_view->setSpacing( 2 );
     thumbnail_view->setUniformItemSizes( true );
 
@@ -130,20 +134,17 @@ void QImageDocumentSelectorPrivate::init()
     QMenu *context_menu = QSoftMenuBar::menuFor( this );
 
     // Add view category to context menu
-    QContentFilterModel::Template categoryPage;
-
-    categoryPage.setOptions( QContentFilterModel::CheckList | QContentFilterModel::SelectAll |
-            QContentFilterModel::AndCheckedFilters );
-
-    categoryPage.addList( QContentFilter::Category );
-    categoryPage.addList( QContentFilter::Category, QLatin1String( "Documents" ) );
-
-    category_dialog = new QContentFilterDialog( categoryPage, this );
-
-    category_dialog->setFilter( content_filter );
-
     context_menu->addAction( QIcon( ":icon/viewcategory" ),
                              tr( "View Category..." ), this, SLOT(launchCategoryDialog()) );
+
+    category_label = new QLabel( this );
+    category_label->setVisible( false );
+
+    QVBoxLayout *layout = new QVBoxLayout( this );
+    layout->setMargin( 0 );
+    layout->setSpacing( 0 );
+    layout->addLayout( widget_stack );
+    layout->addWidget( category_label );
 
     connect( &drm_content, SIGNAL(rightsExpired(QDrmContent)), this, SLOT(setViewThumbnail()) );
 
@@ -157,6 +158,15 @@ void QImageDocumentSelectorPrivate::init()
     //QTimer::singleShot(0, this, SLOT(delayResetSelection()));
 }
 
+QImageDocumentSelectorPrivate::~QImageDocumentSelectorPrivate()
+{
+    loader->setCacheRule( CacheRule() );
+    loader->setVisibleRule( VisibleRule() );
+
+    connect( loader, SIGNAL(terminated()), loader, SLOT(deleteLater()) );
+
+    loader->quit();
+}
 void QImageDocumentSelectorPrivate::setViewMode( QImageDocumentSelector::ViewMode mode )
 {
     // If there are images in the visible collection
@@ -343,6 +353,7 @@ void QImageDocumentSelectorPrivate::launchCategoryDialog()
 
         category_dialog = new QContentFilterDialog( categoryPage, this );
 
+        category_dialog->setWindowTitle( tr( "View Category" ) );
         category_dialog->setFilter( content_filter );
     }
 
@@ -351,63 +362,17 @@ void QImageDocumentSelectorPrivate::launchCategoryDialog()
     category_filter = category_dialog->checkedFilter();
 
     applyFilters();
-}
 
-void QImageDocumentSelectorPrivate::rowRemovedSelection(const QModelIndex &,
-        int rstart, int rend)
-{
-    Q_UNUSED(rend);
+    QString label = category_dialog->checkedLabel();
 
-    if (!model->rowCount())
-        return;
-
-    QModelIndexList selection = single_view->selectionModel()->selectedIndexes();
-
-    // If the selection contains some indexes, proceed
-    if (selection.size() > 0)
-        return;
-
-    // Otherwise the currently selected row was removed, update the selection
-    int desired_row_to_select = rstart;
-    if (rstart >= model->rowCount())
-        desired_row_to_select = model->rowCount() - 1;
-
-    QModelIndex current = model->index(desired_row_to_select);
-    single_view->selectionModel()->setCurrentIndex(current, QItemSelectionModel::SelectCurrent);
-}
-
-void QImageDocumentSelectorPrivate::rowAddedSelection()
-{
-    if (!model->rowCount())
-        return;
-
-    QModelIndexList selection = single_view->selectionModel()->selectedIndexes();
-
-    // If the selection contains some indexes, proceed
-    if (selection.size() > 0)
-        return;
-
-    // Otherwise a new row was added and we have not selected anything, select the first
-    // item
-    QModelIndex current = model->index(0);
-    single_view->selectionModel()->setCurrentIndex(current, QItemSelectionModel::SelectCurrent);
-}
-
-void QImageDocumentSelectorPrivate::resetSelection()
-{
-    // TODO: Figure out why this is really needed, something is wrong with
-    // QContentSetModel
-    QTimer::singleShot(0, this, SLOT(delayResetSelection()));
-}
-
-void QImageDocumentSelectorPrivate::delayResetSelection()
-{
-    // If there are images, set selection to first image in collection
-    if( model->rowCount() > 0 ) {
-        QModelIndex idx = model->index(0);
-        single_view->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectCurrent);
-        // Ensure scrollbar is positioned at the top once visible images are loaded.
-        thumbnail_view->scrollToTop();
+    if( !category_filter.isValid() || label.isEmpty() )
+    {
+        category_label->hide();
+    }
+    else
+    {
+        category_label->setText( tr("Category: %1").arg( label ) );
+        category_label->show();
     }
 }
 

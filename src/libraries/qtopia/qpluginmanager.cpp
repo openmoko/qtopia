@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -35,6 +35,7 @@
 #include <QTranslator>
 #include <QMap>
 #include <QPointer>
+#include <QtDebug>
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -303,10 +304,8 @@ QObject *QPluginManager::instance( const QString &name )
             break;
     }
     QPluginLoader *lib = pluginLibraryManagerInstance()->refLibrary( libFile );
-    if ( !lib ) {
-        qWarning( "Plugin not loaded: %s", (const char *)lname.toLatin1() );
+    if ( !lib ) // error reported by refLibrary
         return 0;
-    }
 
 #ifdef QTOPIA_DISABLE_ONLY_BROKEN_PLUGINS
     bool enabled = isEnabled( name );
@@ -527,6 +526,7 @@ QPluginLoader *PluginLibraryManager::refLibrary( const QString &file )
         lib = new QPluginLoader( file );
         lib->load();
         if ( !lib->isLoaded() ) {
+            qWarning() << "Coult not load" << file << "errorString()" << lib->errorString();
             delete lib;
             return 0;
         }

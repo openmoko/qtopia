@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "pred.h"
+#include <qtopianamespace.h>
 #include <QSet>
 #include <math.h>
 #include <QFile>
@@ -39,7 +40,6 @@ class DawgReduction
 public:
     DawgReduction();
     ~DawgReduction();
-    bool load(const QString &);
 
     void reset();
     void addPossibleCharacters(const QByteArray &);
@@ -63,8 +63,6 @@ public:
     WordList words() const;
 
 private:
-    QDawg dawg;
-
     void updateWords(const QByteArray &characters);
     WordList updateWords(const T *, const QByteArray &characters);
 
@@ -83,12 +81,6 @@ template<class T>
 DawgReduction<T>::~DawgReduction()
 {
     qDeleteAll(m_words);
-}
-
-template<class T>
-bool DawgReduction<T>::load(const QString &file)
-{
-    return dawg.readFile(file);
 }
 
 template<class T>
@@ -114,7 +106,7 @@ void DawgReduction<T>::updateWords(const QByteArray &characters)
 
     if(m_words.isEmpty()) {
         T base;
-        base.node = dawg.root();
+        base.node = Qtopia::fixedDawg().root();
 
         total = updateWords(&base, characters);
     } else {
@@ -205,8 +197,8 @@ public:
     }
 
 private:
-    qreal m_minWeight;
     int m_max;
+    qreal m_minWeight;
     QStringList m_words;
     QList<qreal> m_weights;
 };
@@ -233,10 +225,9 @@ public:
 };
 
 WordPredict::WordPredict(const Config &config, int max, bool includePrefix)
-: m_max(max), m_config(config), reduction(0), m_includePre(includePrefix)
+: m_max(max), reduction(0), m_includePre(includePrefix), m_config(config)
 {
     reduction = new DawgReduction<WPWord>();
-    reduction->load(m_config.trie);
 }
 
 WordPredict::~WordPredict()
@@ -247,7 +238,7 @@ WordPredict::~WordPredict()
 
 void WordPredict::setLetter(char c, const QPoint &p)
 {
-    m_layout[c] = p;
+    m_layout[(int)c] = p;
 }
 
 WordPredict::Movement 
@@ -277,10 +268,10 @@ WordPredict::movement(const QPoint &p1, const QPoint &p2)
 
 void WordPredict::addLetter(char l)
 {
-    m_points << m_layout[l];
+    m_points << m_layout[(int)l];
     m_mPoints << Perfect;
     reduction->addPossibleCharacters(&l);
-    m_latestDfp[l] = 0;
+    m_latestDfp[(int)l] = 0;
 
     updateWords();
 }
@@ -297,7 +288,7 @@ void WordPredict::addTouch(const QPoint &p)
     QByteArray reduce;
     for(char *alpha = "abcdefghijklmnopqrstuvwxyz"; *alpha; ++alpha) {
         int dist = distanceForPoint(p, *alpha);
-        m_latestDfp[*alpha] = dist;
+        m_latestDfp[(int)*alpha] = dist;
         if(dist != -1)
             reduce.append(*alpha);
     }
@@ -450,7 +441,7 @@ QString WordPredict::movementDesc() const
 #define EXCLUDE_DISTANCE 50
 int WordPredict::distanceForPoint(const QPoint &pos, char c)
 {
-    QPoint center = m_layout[c];
+    QPoint center = m_layout[(int)c];
     if(center.isNull())
         return -1;
 
@@ -482,9 +473,9 @@ qreal WordPredict::incrWeightForWord(WPWord *w)
 
         int len = w->word.length();
         char c = w->word.at(len - 1).toLower().toLatin1();
-        QPoint cWordPoint = m_layout[c];
+        QPoint cWordPoint = m_layout[(int)c];
 
-        int distweight = m_latestDfp[c];
+        int distweight = m_latestDfp[(int)c];
         if(distweight == -1) {
             w->weight = -1.0f;
             return w->weight;
@@ -493,7 +484,7 @@ qreal WordPredict::incrWeightForWord(WPWord *w)
 
         QPoint lastWordPoint;
         if(len > 1)
-            lastWordPoint = m_layout[w->word.at(len - 2).toLower().toLatin1()];
+            lastWordPoint = m_layout[(int)(w->word.at(len - 2).toLower().toLatin1())];
 
         Movement expected = None;
         if(!lastWordPoint.isNull())
@@ -591,10 +582,10 @@ qreal WordPredict::weightForWord(const Word &word)
 
         if(lastWordPoint.isNull()) {
             wordMovement << None;
-            QPoint cwordpoint = m_layout[c];
+            QPoint cwordpoint = m_layout[(int)c];
             lastWordPoint = cwordpoint;
         } else {
-            QPoint cwordpoint = m_layout[c];
+            QPoint cwordpoint = m_layout[(int)c];
             wordMovement << movement(lastWordPoint, cwordpoint);
             lastWordPoint = cwordpoint;
         }

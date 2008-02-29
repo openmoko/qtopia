@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -37,10 +37,9 @@ class QLineEdit;
 class QSpinBox;
 class QCheckBox;
 class QComboBox;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
 class RingToneButton;
 #endif
-class QToolButton;
 class QTimeEdit;
 class QPushButton;
 class QSlider;
@@ -70,7 +69,7 @@ private:
     bool showSettingList( QStringList &settingList );
 
 private slots:
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     void updateState();
     void toneSelected(const QContent& tone);
 #endif
@@ -85,7 +84,7 @@ private slots:
 private:
     QTabWidget *tabWidget;
     QWidget *infoTab, *settingTab;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     QWidget *toneTab;
 #endif
     QGridLayout *infoLayout;
@@ -93,15 +92,15 @@ private:
     QLabel *profileLabel;
     QLineEdit *profileName;
     QSlider *masterVolume;
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     QCheckBox *autoAnswer, *vibrateAlert;
 #endif
     QCheckBox *autoActivation;
     QPushButton *editSchedule;
     QTimeEdit *time;
-    QToolButton **days;
+    QCheckBox **days;
 
-#if defined(QTOPIA_CELL) || defined(QTOPIA_VOIP)
+#if defined(QTOPIA_TELEPHONY)
     QComboBox *ringType;
     RingToneButton *ringTone;
     RingToneButton *videoTone;

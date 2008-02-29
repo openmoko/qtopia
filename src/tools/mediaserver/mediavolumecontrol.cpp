@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -26,6 +26,8 @@
 #include "sessionmanager.h"
 #include "mediavolumecontrol.h"
 
+#include <qmediaserversession.h>
+#include <QTimer>
 
 namespace mediaserver
 {
@@ -34,6 +36,14 @@ class MediaVolumeControlPrivate
 {
 public:
     SessionManager* sessionManager;
+   
+    void sendCurrentVolume(int val) 
+    {
+        QString volume;
+        volume.setNum(val);
+        QtopiaIpcEnvelope e("QPE/AudioVolumeManager","currentVolume(QString)");
+        e << volume;
+    };
 };
 
 
@@ -45,13 +55,16 @@ MediaVolumeControl::MediaVolumeControl(SessionManager* sessionManager):
     d->sessionManager = sessionManager;
 
     //
+    publishAll(Slots);
+
+    //
     QtopiaIpcEnvelope   e("QPE/AudioVolumeManager", "registerHandler(QString,QString)");
 
     e << QString("Media") << QString("QPE/MediaServer/MediaVolumeControl");
 
-    //
-    publishAll(Slots);
+    setCallDomain(true);
 }
+
 
 MediaVolumeControl::~MediaVolumeControl()
 {
@@ -64,22 +77,98 @@ MediaVolumeControl::~MediaVolumeControl()
 //public slots:
 void MediaVolumeControl::setVolume(int volume)
 {
-    d->sessionManager->setVolume(volume);
+    if(d->sessionManager->sessions().isEmpty())
+        return;
+
+    foreach(QMediaServerSession *s, d->sessionManager->sessions())
+    {
+
+        if(s)
+        {
+            d->sendCurrentVolume(volume);
+            s->setVolume(volume);
+        }
+    }    
 }
 
 void MediaVolumeControl::increaseVolume(int increment)
 {
-    d->sessionManager->increaseVolume(increment);
+    if(d->sessionManager->sessions().isEmpty())
+        return;
+
+    //Condition: there should only be one Session  playing
+    foreach(QMediaServerSession *s, d->sessionManager->sessions())
+    {
+        int state = s->playerState();
+        if( state == QtopiaMedia::Playing || state == QtopiaMedia::Buffering || state == QtopiaMedia::Paused)
+        {
+            int val;
+            val = increment + s->volume();
+            if(val > 0)
+                s->setMuted(false);
+            if(val >= 100)
+                val = 100;
+
+            d->sendCurrentVolume(val);
+            s->setVolume(val);
+
+        }    
+    }    
 }
 
 void MediaVolumeControl::decreaseVolume(int decrement)
 {
-    d->sessionManager->decreaseVolume(decrement);
+    if(d->sessionManager->sessions().isEmpty())
+        return;
+
+    //Condition: there should only be one active Session  playing
+    foreach(QMediaServerSession *s, d->sessionManager->sessions())
+    {
+        int state = s->playerState();
+        if( state == QtopiaMedia::Playing || state == QtopiaMedia::Buffering || state == QtopiaMedia::Paused)
+        {
+            int val;
+            val = s->volume() - decrement;
+            if(val <= 0)
+            {
+                s->setMuted(true);
+                val = 0;    
+            }    
+            d->sendCurrentVolume(val);  
+            s->setVolume(val);
+        }
+    }    
+    
 }
 
 void MediaVolumeControl::setMuted(bool mute)
 {
-    d->sessionManager->setMuted(mute);
+    if(d->sessionManager->sessions().isEmpty())
+        return;
+
+    foreach(QMediaServerSession *s,  d->sessionManager->sessions())
+    {
+        if(s)
+        {
+            s->setMuted(mute);
+        }
+    }
+}
+
+void MediaVolumeControl::setCallDomain(bool active)
+{
+    QString str; 
+    
+    if(active)
+        str += "setActiveDomain(QString)";
+    else
+        str += "resetActiveDomain(QString)";
+
+   QtopiaIpcEnvelope   e2("QPE/AudioVolumeManager", str);
+   e2 << QString("Media");
 }
 
 }   // ns mediaserver
+
+
+

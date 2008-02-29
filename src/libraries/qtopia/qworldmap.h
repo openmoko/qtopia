@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -90,6 +90,7 @@ private slots:
     void redraw( void );
     void initCities();
     void cursorTimeout();
+    void cityLabelTimeout();
     void selectCanceled();
 
 private:
@@ -109,6 +110,7 @@ private:
     void stopSelecting();
 
     QWorldmapPrivate* d;
+    void setCityLabelText();
 };
 
 #endif //QWORLDMAP_H

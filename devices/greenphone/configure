@@ -9,8 +9,8 @@
 -sxe 
 -no-drm
 -no-infrared
+-no-test
 -dbus
--dbuspath "/opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux/arm-linux"
 -bluetooth
 -extra-qtopiacore-config "-qt-libjpeg"
 -extra-qtopiacore-config "-qt-libmng"

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/dialogs/qfiledialog.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/dialogs/qfiledialog.cpp -->
 <head>
   <title>Qt 4.3: QFileDialog Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -443,44 +443,10 @@
 <p>Returns a list of urls that are currently in the sidebar</p>
 <p>This function was introduced in Qt 4.3.</p>
 <p>See also <a href="qfiledialog.html#setSidebarUrls">setSidebarUrls</a>().</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="getExistingDirectory-2"></a><a href="qstring.html">QString</a> QFileDialog::getExistingDirectory ( const <a href="qstring.html">QString</a> &amp; <i>dir</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>caption</i> = QString(), bool <i>dirOnly</i> = true, bool <i>resolveSymlinks</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the <a href="qfiledialog.html#getExistingDirectory">getExistingDirectory</a>() overload that takes <i>parent</i> as the first argument instead.</p>
-<h3 class="fn"><a name="getOpenFileName-2"></a><a href="qstring.html">QString</a> QFileDialog::getOpenFileName ( const <a href="qstring.html">QString</a> &amp; <i>dir</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i> = QString(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>caption</i> = QString(), <a href="qstring.html">QString</a> * <i>selectedFilter</i> = 0, bool <i>resolveSymlinks</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the <a href="qfiledialog.html#getOpenFileName">getOpenFileName</a>() overload that takes <i>parent</i> as the first argument instead.</p>
-<h3 class="fn"><a name="getOpenFileNames-2"></a><a href="qstringlist.html">QStringList</a> QFileDialog::getOpenFileNames ( const <a href="qstring.html">QString</a> &amp; <i>filter</i>, const <a href="qstring.html">QString</a> &amp; <i>dir</i> = QString(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>caption</i> = QString(), <a href="qstring.html">QString</a> * <i>selectedFilter</i> = 0, bool <i>resolveSymlinks</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the <a href="qfiledialog.html#getOpenFileNames">getOpenFileNames</a>() overload that takes <i>parent</i> as the first argument instead.</p>
-<h3 class="fn"><a name="getSaveFileName-2"></a><a href="qstring.html">QString</a> QFileDialog::getSaveFileName ( const <a href="qstring.html">QString</a> &amp; <i>dir</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i> = QString(), <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, const <a href="qstring.html">QString</a> &amp; <i>caption</i> = QString(), <a href="qstring.html">QString</a> * <i>selectedFilter</i> = 0, bool <i>resolveSymlinks</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use the <a href="qfiledialog.html#getSaveFileName">getSaveFileName</a>() overload that takes <i>parent</i> as the first argument instead.</p>
-<h3 class="fn"><a name="mode"></a><a href="qfiledialog.html#FileMode-enum">FileMode</a> QFileDialog::mode () const</h3>
-<p>Use <a href="qfiledialog.html#fileMode-prop">fileMode</a>() instead.</p>
-<p>See also <a href="qfiledialog-qt3.html#setMode">setMode</a>().</p>
-<h3 class="fn"><a name="selectedFile"></a><a href="qstring.html">QString</a> QFileDialog::selectedFile () const</h3>
-<p>Use <a href="qfiledialog.html#selectedFiles">selectedFiles</a>() instead.</p>
-<p>For example, if you have code like</p>
-<pre><font color="#404040"> QString selected = dialog-&gt;selectedFile();</font></pre>
-<p>you can rewrite it as</p>
-<pre>  QStringList files = dialog-&gt;selectedFiles();
-  QString selected;
-  if (!files.isEmpty())
-      selected = files[0];</pre>
-<h3 class="fn"><a name="setDir"></a>void QFileDialog::setDir ( const <a href="qstring.html">QString</a> &amp; <i>directory</i> )</h3>
-<p>Use <a href="qfiledialog.html#setDirectory">setDirectory</a>() instead.</p>
-<h3 class="fn"><a name="setDir-2"></a>void QFileDialog::setDir ( const <a href="qdir.html">QDir</a> &amp; <i>directory</i> )</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Use <a href="qfiledialog.html#setDirectory">setDirectory</a>() instead.</p>
-<h3 class="fn"><a name="setMode"></a>void QFileDialog::setMode ( <a href="qfiledialog.html#FileMode-enum">FileMode</a> <i>m</i> )</h3>
-<p>Use <a href="qfiledialog.html#fileMode-prop">setFileMode</a>() instead.</p>
-<p>See also <a href="qfiledialog-qt3.html#mode">mode</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -53,6 +53,9 @@ public:
 
     int count() const;
 
+    void setBlankSetEnabled(bool);
+    bool isBlankSetEnabled() const;
+
 public slots:
     void reload(const QString& sd);
     void editItem(int row);
@@ -63,6 +66,7 @@ public slots:
 signals:
     void currentRowChanged(int row);
     void rowClicked(int row);
+    void itemSelected(QString);
 
 protected:
     void keyPressEvent(QKeyEvent*);
@@ -77,6 +81,7 @@ private slots:
 private:
     void init(const QString&);
     QSpeedDialList(const QString& label, const QString& icon, QWidget* parent);
+    void setActionChooserEnabled(bool);
 
     QSpeedDialListPrivate* d;
 };
@@ -90,7 +95,7 @@ public:
 
     static QString addWithDialog(const QString& label, const QString& icon,
         const QtopiaServiceRequest& action, QWidget* parent);
-
+    static QString selectWithDialog(QWidget* parent);
     static QList<QString> assignedInputs();
     static QList<QString> possibleInputs();
     static QtopiaServiceDescription* find(const QString& input);

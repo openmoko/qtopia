@@ -26,7 +26,7 @@ PROJECT_KEYWORDS*=lib
 # Plugins
 keyword.plugin.commands+=\
     "TEMPLATE=lib"\
-    "CONFIG*=plugin link_test"
+    "CONFIG*=plugin"
 PROJECT_KEYWORDS*=plugin
 
 # Subdirectories

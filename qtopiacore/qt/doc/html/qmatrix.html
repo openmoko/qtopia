@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/src/gui/painting/qmatrix.cpp -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/painting/qmatrix.cpp -->
 <head>
   <title>Qt 4.3: QMatrix Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -64,16 +64,16 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>QPoint <b><a href="qmatrix.html#operator-2a-5">operator*</a></b> ( const QPoint &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QPointF <b><a href="qmatrix.html#operator-2a-6">operator*</a></b> ( const QPointF &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QLineF <b><a href="qmatrix.html#operator-2a-7">operator*</a></b> ( const QLineF &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QLine <b><a href="qmatrix.html#operator-2a-8">operator*</a></b> ( const QLine &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QPolygon <b><a href="qmatrix.html#operator-2a-9">operator*</a></b> ( const QPolygon &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QPolygonF <b><a href="qmatrix.html#operator-2a-10">operator*</a></b> ( const QPolygonF &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QRegion <b><a href="qmatrix.html#operator-2a-11">operator*</a></b> ( const QRegion &amp; <i>region</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QPainterPath <b><a href="qmatrix.html#operator-2a-12">operator*</a></b> ( const QPainterPath &amp; <i>path</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qmatrix.html#operator-lt-lt-81">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QMatrix &amp; <i>matrix</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qmatrix.html#operator-gt-gt-51">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QPoint <b><a href="qmatrix.html#operator-2a-2">operator*</a></b> ( const QPoint &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QPointF <b><a href="qmatrix.html#operator-2a-3">operator*</a></b> ( const QPointF &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QLineF <b><a href="qmatrix.html#operator-2a-4">operator*</a></b> ( const QLineF &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QLine <b><a href="qmatrix.html#operator-2a-5">operator*</a></b> ( const QLine &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QPolygon <b><a href="qmatrix.html#operator-2a-6">operator*</a></b> ( const QPolygon &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QPolygonF <b><a href="qmatrix.html#operator-2a-7">operator*</a></b> ( const QPolygonF &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QRegion <b><a href="qmatrix.html#operator-2a-8">operator*</a></b> ( const QRegion &amp; <i>region</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QPainterPath <b><a href="qmatrix.html#operator-2a-9">operator*</a></b> ( const QPainterPath &amp; <i>path</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qmatrix.html#operator-lt-lt-18">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QMatrix &amp; <i>matrix</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qmatrix.html#operator-gt-gt-10">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QMatrix &amp; <i>matrix</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -296,62 +296,50 @@
 <p>Returns true if this matrix is equal to the given <i>matrix</i>, otherwise returns false.</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-2a-5"></a><a href="qpoint.html">QPoint</a> operator* ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-2"></a><a href="qpoint.html">QPoint</a> operator* ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>point</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-6"></a><a href="qpointf.html">QPointF</a> operator* ( const <a href="qpointf.html">QPointF</a> &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-3"></a><a href="qpointf.html">QPointF</a> operator* ( const <a href="qpointf.html">QPointF</a> &amp; <i>point</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Same as <i>matrix</i>.map(<i>point</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-7"></a><a href="qlinef.html">QLineF</a> operator* ( const <a href="qlinef.html">QLineF</a> &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-4"></a><a href="qlinef.html">QLineF</a> operator* ( const <a href="qlinef.html">QLineF</a> &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>line</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-8"></a><a href="qline.html">QLine</a> operator* ( const <a href="qline.html">QLine</a> &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-5"></a><a href="qline.html">QLine</a> operator* ( const <a href="qline.html">QLine</a> &amp; <i>line</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>line</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-9"></a><a href="qpolygon.html">QPolygon</a> operator* ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-6"></a><a href="qpolygon.html">QPolygon</a> operator* ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>polygon</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-10"></a><a href="qpolygonf.html">QPolygonF</a> operator* ( const <a href="qpolygonf.html">QPolygonF</a> &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-7"></a><a href="qpolygonf.html">QPolygonF</a> operator* ( const <a href="qpolygonf.html">QPolygonF</a> &amp; <i>polygon</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>polygon</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-11"></a><a href="qregion.html">QRegion</a> operator* ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-8"></a><a href="qregion.html">QRegion</a> operator* ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>region</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-2a-12"></a><a href="qpainterpath.html">QPainterPath</a> operator* ( const <a href="qpainterpath.html">QPainterPath</a> &amp; <i>path</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-2a-9"></a><a href="qpainterpath.html">QPainterPath</a> operator* ( const <a href="qpainterpath.html">QPainterPath</a> &amp; <i>path</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This is the same as <i>matrix</i>.map(<i>path</i>).</p>
 <p>See also <a href="qmatrix.html#map">QMatrix::map</a>().</p>
-<h3 class="fn"><a name="operator-lt-lt-81"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-18"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>matrix</i> to the given <i>stream</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-gt-gt-51"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QMatrix &amp; <i>matrix</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-10"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QMatrix &amp; <i>matrix</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads the given <i>matrix</i> from the given <i>stream</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<hr />
-<h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="invert"></a>QMatrix QMatrix::invert ( bool * <i>invertible</i> = 0 ) const</h3>
-<p>Returns an inverted copy of this matrix.</p>
-<p>Use the <a href="qmatrix.html#inverted">inverted</a>() function instead.</p>
-<h3 class="fn"><a name="map-2"></a><a href="qrect.html">QRect</a> QMatrix::map ( const <a href="qrect.html">QRect</a> &amp; <i>rect</i> ) const</h3>
-<p>This is an overloaded member function, provided for convenience.</p>
-<p>Creates and returns a <a href="qrect.html">QRect</a> object that is a copy of the given rectangle, mapped into the coordinate system defined by this matrix.</p>
-<p>Use the <a href="qmatrix.html#mapRect">mapRect</a>() function instead.</p>
-<h3 class="fn"><a name="mapToRegion"></a><a href="qregion.html">QRegion</a> QMatrix::mapToRegion ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> ) const</h3>
-<p>Returns the transformed rectangle <i>rectangle</i> as a <a href="qregion.html">QRegion</a> object. A rectangle which has been rotated or sheared may result in a non-rectangular region being returned.</p>
-<p>Use the <a href="qmatrix.html#mapToPolygon">mapToPolygon</a>() or <a href="qmatrix.html#map">map</a>() function instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

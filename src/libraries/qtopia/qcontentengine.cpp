@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -719,6 +719,10 @@ void QContentEngine::loadIcon()
     Q_D(QContentEngine);
 
     d->icon = !iconName().isEmpty() ? QIcon( QLatin1String( ":icon/" ) + iconName() ) : QIcon();
+
+    // Check if a valid icon was actually loaded.
+    if( !d->icon.actualSize( QSize( 32, 32 ) ).isValid() )
+        d->icon = QIcon();
 
     d->loadedAttributes |= Icon;
 }

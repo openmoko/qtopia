@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -40,8 +40,10 @@ class QDSActionRequest;
 class QResizeEvent;
 class QMenu;
 class QStackedLayout;
-class QImageDocumentSelector;
-
+class ThumbnailContentSetModel;
+class ImageViewer;
+class QListView;
+class QContentFilterDialog;
 
 class PhotoEditUI : public QWidget
 {
@@ -58,18 +60,6 @@ public slots:
 private slots:
     // Respond to service request
     void appMessage( const QString&, const QByteArray& );
-
-    // Open given image for editing
-    void processSetDocument();
-
-    // Open given image for editing
-    void processGetImage();
-
-    // Toggle actions dependant of images in image selector
-    void toggleActions();
-
-    // Raise selector to top of widget stack
-    void enterSelector();
 
     // Raise slide show to top of widget stack and start
     void enterSlideShow();
@@ -135,21 +125,35 @@ private slots:
     // Show selector if image currently being edited is deleted
     void contentChanged( const QContentIdList &id, const QContent::ChangeType type );
 
-    // Rights to the open image have expired so close.
-    void rightsExpired( const QDrmContent &content );
+    void rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end );
+    void rowsInserted( const QModelIndex &parent, int start, int end );
 
     // Edit an image contained within the QDS request
     void editImage( const QDSActionRequest& request );
+
+    void imageSelected( const QModelIndex &index );
+
+    void viewImage( const QContent &content );
+
+    void selectType();
+
+    void selectCategory();
+
+    void viewerMenuAboutToShow();
+    void selectorMenuAboutToShow();
 
 protected:
     // Move to previous state, close application if no previous state exists
     void keyPressEvent( QKeyEvent * );
 
-    void showEvent(QShowEvent *event);
+    void timerEvent( QTimerEvent *event );
 
+    bool event( QEvent *event );
 private:
 
-    void init(bool listMode);
+    ImageViewer *imageViewer();
+    QWidget *selectorWidget();
+    ImageUI *imageEditor();
 
     // Hide editor controls, clear and show editor
     void clearEditor();
@@ -160,13 +164,9 @@ private:
     // Send modified image back in qcop message
     void sendValueSupplied();
 
-    enum { SELECTOR, SLIDE_SHOW, EDITOR } ui_state;
+    bool service_requested;
 
-    enum { VIEW, FULL_SCREEN, ZOOM, BRIGHTNESS, CROP } editor_state;
-
-    bool only_editor, service_requested;
-
-    bool was_fullscreen, edit_canceled, editor_state_changed;
+    bool is_fullscreen, was_fullscreen, edit_canceled;
 
     QContent service_lnk;
     QCategoryFilter service_category;
@@ -176,28 +176,47 @@ private:
     QImage service_image;
 
     QContent current_image;
-    QDrmContent selector_image;
 
     QAction *separator_action, *properties_action, *beam_action, *print_action;
     QAction *delete_action, *edit_action, *slide_show_action;
-    QMenu *selector_menu;
-    QImageDocumentSelector *image_selector;
+    QAction *fullscreen_action;
+    QAction *viewer_edit_action;
+
+    ImageViewer *image_viewer;
+    QListView *selector_view;
+    QLabel *type_label;
+    QLabel *category_label;
+    QWidget *selector_widget;
+    QContentSet *image_set;
+    ThumbnailContentSetModel *image_model;
 
     RegionSelector *region_selector;
     Navigator *navigator;
-    Slider *brightness_slider, *zoom_slider;
+    QSlider *brightness_slider, *zoom_slider;
+    QWidget *brightness_widget;
+    QWidget *zoom_widget;
 
     ImageUI *image_ui;
     ImageProcessor *image_processor;
     ImageIO *image_io;
+    QStackedLayout *editor_stack;
 
     SlideShowDialog *slide_show_dialog;
     SlideShowUI *slide_show_ui;
     SlideShow *slide_show;
 
     QStackedLayout *widget_stack;
+    QList< QWidget * > navigation_stack;
+
+    QContentFilterDialog *type_dialog;
+    QContentFilterDialog *category_dialog;
+
+    QContentFilter type_filter;
+    QContentFilter category_filter;
 
     QDSActionRequest* currEditImageRequest;
+
+    int list_init_timer_id;
 };
 
 class PhotoEditService : public QtopiaAbstractService

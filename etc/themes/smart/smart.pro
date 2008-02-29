@@ -24,4 +24,4 @@ INSTALLS+=smartbgimage
 
 pkg.name=qpe-theme-smart
 pkg.desc=Smart theme
-pkg.domain=theme
+pkg.domain=trusted

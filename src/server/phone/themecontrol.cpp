@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -72,20 +72,6 @@ bool ThemeControl::exportBackground() const
     return m_exportBackground;
 }
 
-/*! \internal */
-QString ThemeControl::themeDir() const
-{
-    return m_theme;
-}
-
-/*!
-  Returns the current theme directory.
-  */
-QString ThemeControl::currentTheme() const
-{
-    return m_themeDir;
-}
-
 /*!
   Update themed views.
   */
@@ -97,10 +83,8 @@ void ThemeControl::refresh()
     qpeCfg.beginGroup("Appearance");
     m_exportBackground = qpeCfg.value("ExportBackground", true).toBool();
 
-    m_themeDir = Qtopia::qtopiaDir() + "etc/themes/";
-    m_theme = qpeCfg.value("Theme").toString(); // The server ensures this value is present and correct
-
-    QSettings cfg(m_themeDir + m_theme, QSettings::IniFormat);
+    QString themeFile = findFile(qpeCfg.value("Theme").toString()); // The server ensures this value is present and correct
+    QSettings cfg(themeFile, QSettings::IniFormat);
     cfg.beginGroup("Theme");
     m_themeName = cfg.value("Name[]", "Unnamed").toString(); //we must use the untranslated theme name
     if ( m_themeName == "Unnamed" )
@@ -145,13 +129,25 @@ void ThemeControl::setThemeWidgetFactory(QAbstractThemeWidgetFactory *factory)
   Emitted immediately after the theme changes.
  */
 
+QString ThemeControl::findFile(const QString &file) const
+{
+    QStringList instPaths = Qtopia::installPaths();
+    foreach (QString path, instPaths) {
+        QString themeDataPath(path + QLatin1String("etc/themes/") + file);
+        if (QFile::exists(themeDataPath)) {
+            return themeDataPath;
+        }
+    }
+
+    return QString();
+}
+
 void ThemeControl::doTheme(ThemedView *view, const QString &name)
 {
     QString path = m_themeFiles[name + "Config"];
     if(!path.isEmpty()) {
-        QString file = m_themeDir + path;
         view->setThemeName(m_themeName);
-        view->loadSource(m_themeDir + path);
+        view->loadSource(findFile(path));
         doThemeWidgets(view);
     } else {
         qWarning("Invalid %s theme.", name.toAscii().constData());

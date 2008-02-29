@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,7 +27,6 @@
 
 #include <stdlib.h>
 
-#define QTOPIA_INTERNAL_QDAWG_TRIE
 #include <qdawg.h>
 
 static void usage( const char *progname )
@@ -38,14 +37,9 @@ static void usage( const char *progname )
     printf("%s converts word list files into the qdawg format\n", progname);
     printf("Usage:\n");
     printf("\t%s "
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-        "[-t] "
-#endif
         "[-v] [-d] <output directory> <input file> [input file...]\n", progname);
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-    printf("\t  [-t]  Output a Trie (one-node-per-word)\n");
-#endif
     printf("\t  [-v]  Verify result\n");
+    printf("\t  [-e]  Reverse endianness of resulting file\n");
     printf("\t  [-d]  Dump result\n");
     exit(-1);
 }
@@ -54,13 +48,10 @@ static void usage( const char *progname )
 
 int main(int argc, char **argv)
 {
-    QFile qdawgFile;
     QFile wordlistFile;
     QFile e(argv[0]);
     bool error=false,dump=false;
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-    bool trie=false;
-#endif
+    bool swapbytes=false;
     int verify=0;
     if (argc < 3)
         error=true;
@@ -68,11 +59,8 @@ int main(int argc, char **argv)
     QString path( argv[1] );
 
     while ( path[0] == '-' ) {
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-        if ( path == "-t" ) trie=true;
-        else
-#endif
         if ( path == "-v" ) ++verify;
+        else if ( path == "-e" ) swapbytes=!swapbytes;
         else if ( path == "-d" ) dump=true;
         else error=true;
         --argc; ++argv; path=argv[1];
@@ -110,13 +98,11 @@ int main(int argc, char **argv)
 
         printf("qdawggen %s %s\n", wordlistFile.fileName().toLocal8Bit().constData(),
                 qdawgFile.fileName().toLocal8Bit().constData());
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-        if ( trie )
-            dawg.createTrieFromWords(&wordlistFile);
+        dawg.createFromWords(&wordlistFile);
+        if ( swapbytes )
+            dawg.writeByteSwapped(&qdawgFile);
         else
-#endif
-            dawg.createFromWords(&wordlistFile);
-        dawg.write(&qdawgFile);
+            dawg.write(&qdawgFile);
         if ( dump )
             dawg.dump();
 

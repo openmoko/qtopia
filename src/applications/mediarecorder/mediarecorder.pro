@@ -36,4 +36,4 @@ INSTALLS+=qdsservice
 #INSTALLS+=categories
 
 pkg.desc=Media recorder for Qtopia.
-pkg.domain=window,qds,mediarecorder,mediasession,cardreader,doc_server,doc_write,directaudio
+pkg.domain=trusted

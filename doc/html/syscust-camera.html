@@ -14,15 +14,29 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Cameras on Embedded Devices<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#building-options">Building Options</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>The Camera Device model supports Video For Linux (V4L) 1 and 2 devices. The kernel must have a correct V4L compatible driver for the device,which is accessed via <tt>/dev/video</tt></p>
-<p><a href="tut-camera.html">Tutorial: Extending the Camera Device Model</a></p>
+<p>This discussion is limited solely to integrating a camera device into the camera application on Qtopia.</p>
+<a name="setup"></a>
+<h2>Setup</h2>
+<p>In the Qtopia camera application, the Camera Device model has support for Video For Linux 1(V4L1) and 2(V4L2) camera device drivers. The Qtopia Greenphone and associated device profile provides a good example of what needs to be done for non-conforming drivers. See: <a href="tut-camera.html">Tutorial: Extending the Camera Device Model</a></p>
+<p>To let the camera application know of the camera device add the following lines to custom.h which is located in the devices profile directory.</p>
+<pre>    #ifndef V4L_VIDEO_DEVICE
+    #define V4L_VIDEO_DEVICE            &quot;/dev/video&quot;
+    #endif</pre>
+<p>Change the device string accordingly.</p>
+<a name="building-options"></a>
+<h2>Building Options</h2>
+<p>If V4L2 is supported on the device, it is recommended to pass the <tt>-v4l2</tt> flag to the configure script, eg:</p>
+<pre>    # $QTOPIA_DEPO_PATH/configure -platform desktop -v4l2</pre>
+<p>This allows one to indicate a preference for V4L2 drivers in Qtopia. Otherwise V4L1 drivers will be assumed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

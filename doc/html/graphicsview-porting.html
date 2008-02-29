@@ -226,10 +226,10 @@
 <h4>Q3CanvasEllipse</h4>
 <p>The closest equivalent to <a href="#q3canvasellipse">Q3CanvasEllipse</a> in Graphics View is called <a href="qgraphicsellipseitem.html">QGraphicsEllipseItem</a>. The most noticable difference to <a href="qgraphicsellipseitem.html">QGraphicsEllipseItem</a> is that the ellipse is not longer drawn centered around its position; rather, it is drawn using a bounding <a href="qrectf.html">QRectF</a>, just like <a href="qpainter.html#drawEllipse">QPainter::drawEllipse</a>().</p>
 <p>For compatibility, you may want to shift the ellipse up and to the left to keep the ellipse centered. Example:</p>
-<pre>         <span class="comment">// Before</span>
+<pre>         <span class="comment">//</span> Before
          Q3CanvasEllipse ellipse(10, 10);
 
-         <span class="comment">// After</span>
+         <span class="comment">//</span> After
          QGraphicsEllipseItem ellipse(-5, -5, 10, 10);</pre>
 <p>Note: <a href="qgraphicsellipseitem.html">QGraphicsEllipseItem</a> uses <a href="qabstractgraphicsshapeitem.html#pen">QAbstractGraphicsShapeItem::pen</a>() for outlines, whereas <a href="#q3canvasellipse">Q3CanvasEllipse</a> did not use Q3CanvasPolygonalItem::pen().</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -314,8 +314,8 @@
 <p>Use <a href="qlist.html">QList</a> instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

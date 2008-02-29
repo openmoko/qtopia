@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDocumentSelectorService Class Reference</h1>
 <p>The QDocumentSelectorService class provides an interface for low-privilege applications to open to user selected documents. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDocumentSelectorService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QDocumentSelectorService&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdocumentselectorservice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -34,7 +34,7 @@
 <li><div class="fn"/>QContentSortCriteria <b><a href="qdocumentselectorservice.html#sortCriteria">sortCriteria</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -42,7 +42,7 @@
 <li><div class="fn"/>void <b><a href="qdocumentselectorservice.html#close">close</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -50,16 +50,15 @@
 <li><div class="fn"/>void <b><a href="qdocumentselectorservice.html#documentOpened">documentOpened</a></b> ( const QContent &amp; <i>document</i>, QIODevice * <i>data</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -67,54 +66,54 @@
 <p>The QDocumentSelectorService class provides an interface for low-privilege applications to open to user selected documents.</p>
 <p>Applications with insufficient permissions to access the Qtopia Document System directly may use the document selector service to request that a server application open files on their behalf. Rather that opening a document specified by the application, the server displays a document selector for the user to select a document which is then opened and read access granted to the application.</p>
 <p>Documents may also write to files by requesting permission to either save an already open document or create a new document. In both cases the user must confirm they wish to save the document before the server will open it in write-only mode.</p>
-<p>Only one document may be opened by the service at a time. The currently opened document may be retrieved using the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() method and the <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() method returns a <a href="qiodevice.html">QIODevice</a> through the the document may be read from or written to.</p>
+<p>Only one document may be opened by the service at a time. The currently opened document may be retrieved using the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() method and the <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() method returns a <a href="./qiodevice.html">QIODevice</a> through the the document may be read from or written to.</p>
 <p>See also <a href="qdocumentselector.html">QDocumentSelector</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDocumentSelectorService"></a>QDocumentSelectorService::QDocumentSelectorService ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QDocumentSelectorService"></a>QDocumentSelectorService::QDocumentSelectorService ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Contructs a new document selector service with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QDocumentSelectorService"></a>QDocumentSelectorService::~QDocumentSelectorService ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the document selector service.</p>
 <h3 class="fn"><a name="close"></a>void QDocumentSelectorService::close ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Closes the selected document <a href="qiodevice.html">QIODevice</a> and clears the selected document.</p>
+<p>Closes the selected document <a href="./qiodevice.html">QIODevice</a> and clears the selected document.</p>
 <p>If the service is displaying a dialog that will also be closed.</p>
-<p>To close the document without clearing the selection close the <a href="qiodevice.html">QIODevice</a> returned by <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() instead.</p>
-<h3 class="fn"><a name="documentOpened"></a>void QDocumentSelectorService::documentOpened ( const <a href="qcontent.html">QContent</a> &amp; <i>document</i>, <a href="qiodevice.html">QIODevice</a> * <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>To close the document without clearing the selection close the <a href="./qiodevice.html">QIODevice</a> returned by <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() instead.</p>
+<h3 class="fn"><a name="documentOpened"></a>void QDocumentSelectorService::documentOpened ( const <a href="qcontent.html">QContent</a> &amp; <i>document</i>, <a href="./qiodevice.html">QIODevice</a> * <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signals that a <i>document</i> has been opened and it may be read from or written to using <i>data</i>.</p>
 <p>After this signal has been emitted the values of <i>document</i> and <i>data</i> may be acquired from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods.</p>
 <h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QDocumentSelectorService::filter () const</h3>
 <p>Returns the services document selector's content filter.</p>
 <p>See also <a href="qdocumentselectorservice.html#setFilter">setFilter</a>().</p>
-<h3 class="fn"><a name="newDocument"></a>bool QDocumentSelectorService::newDocument ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
+<h3 class="fn"><a name="newDocument"></a>bool QDocumentSelectorService::newDocument ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>type</i>, <a href="./qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
 <p>Attempts to create a new document.</p>
 <p>The user will be prompted with a suggested <i>name</i> and the <i>type</i> to save the document as. Returns true if the user accepts and the document was succesfully created; false otherwise.</p>
-<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
+<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="./qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
 <p>The dialog displayed will parented off the given <i>widget</i>.</p>
 <p>See also <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>().</p>
-<h3 class="fn"><a name="newDocument-2"></a>bool QDocumentSelectorService::newDocument ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>types</i>, <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
+<h3 class="fn"><a name="newDocument-2"></a>bool QDocumentSelectorService::newDocument ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>types</i>, <a href="./qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Attempts to create a new document.</p>
 <p>The user will be prompted with a suggested <i>name</i> and possible mime <i>types</i> to save the document as. Returns true if the user accepts and the document was succesfully created; false otherwise.</p>
-<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
+<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="./qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
 <p>The dialog displayed will parented off the given <i>widget</i>.</p>
 <p>See also <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>().</p>
-<h3 class="fn"><a name="openDocument"></a>bool QDocumentSelectorService::openDocument ( <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
+<h3 class="fn"><a name="openDocument"></a>bool QDocumentSelectorService::openDocument ( <a href="./qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
 <p>Prompts the user to select a document to open in read-only mode. Returns true if the user selects a document and it is successfully opened; false otherwise.</p>
 <p>The content displayed in the selector may be altered by setting the content filter with <a href="qdocumentselectorservice.html#setFilter">setFilter</a>() and the sort order with sortOrder().</p>
-<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="qiodevice.html">QIODevice</a> opened in read-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
+<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="./qiodevice.html">QIODevice</a> opened in read-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
 <p>The dialog displayed will parented off the given <i>widget</i>.</p>
 <p>See also <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>().</p>
-<h3 class="fn"><a name="saveDocument"></a>bool QDocumentSelectorService::saveDocument ( <a href="qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
+<h3 class="fn"><a name="saveDocument"></a>bool QDocumentSelectorService::saveDocument ( <a href="./qwidget.html">QWidget</a> * <i>widget</i> = 0 )</h3>
 <p>Tries to open the last opened document in write only mode so changes can be saved.</p>
 <p>The user will be prompted before the document is opened. Returns true if the user accepts and the document was succesfully opened; false otherwise.</p>
-<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
+<p>If successful the <a href="qdocumentselectorservice.html#documentOpened">documentOpened</a>() signal will be emitted with the document <a href="qcontent.html">QContent</a> and a pointer to the document <a href="./qiodevice.html">QIODevice</a> opened in write-only mode. These can also be obtained from the <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>() methods respectively upon return.</p>
 <p>The dialog displayed will parented off the given <i>widget</i>.</p>
 <p>See also <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>() and <a href="qdocumentselectorservice.html#selectedDocumentData">selectedDocumentData</a>().</p>
 <h3 class="fn"><a name="selectedDocument"></a><a href="qcontent.html">QContent</a> QDocumentSelectorService::selectedDocument () const</h3>
 <p>Returns the last selected document.</p>
-<h3 class="fn"><a name="selectedDocumentData"></a><a href="qiodevice.html">QIODevice</a> * QDocumentSelectorService::selectedDocumentData ()</h3>
+<h3 class="fn"><a name="selectedDocumentData"></a><a href="./qiodevice.html">QIODevice</a> * QDocumentSelectorService::selectedDocumentData ()</h3>
 <p>Returns a pointer to the data of the selected document.</p>
-<p>The service retains ownership of the returned <a href="qiodevice.html">QIODevice</a>.</p>
+<p>The service retains ownership of the returned <a href="./qiodevice.html">QIODevice</a>.</p>
 <p>See also <a href="qdocumentselectorservice.html#selectedDocument">selectedDocument</a>().</p>
 <h3 class="fn"><a name="setFilter"></a>void QDocumentSelectorService::setFilter ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i> )</h3>
 <p>Sets the service document selector's content <i>filter</i>.</p>
@@ -127,8 +126,8 @@
 <p>See also <a href="qdocumentselectorservice.html#setSortCriteria">setSortCriteria</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

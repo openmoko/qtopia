@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -32,6 +32,7 @@
 MmsEditAccount::MmsEditAccount(QWidget *parent)
     : QDialog(parent)
 {
+    setObjectName("mms-account");
     setupUi(this);
     connect(networkBtn, SIGNAL(clicked()), this, SLOT(configureNetworks()));
     QtopiaIpcAdaptor* netChannel = new QtopiaIpcAdaptor("QPE/NetworkState", this);
@@ -81,7 +82,7 @@ void MmsEditAccount::populateNetwork()
     }
 }
 
-void MmsEditAccount::setAccount(MailAccount *in)
+void MmsEditAccount::setAccount(QMailAccount *in)
 {
     account = in;
     populateNetwork();
@@ -93,8 +94,10 @@ void MmsEditAccount::accept()
     int currItem = networkCombo->currentIndex();
     if (currItem >= 0 && networkCombo->itemData(currItem).isValid()) {
         account->setNetworkConfig(networkCombo->itemData(currItem).toString());
-        account->setAutoDownload(autoRetrieve->isChecked());
+    } else {
+        account->setNetworkConfig(QString());
     }
+    account->setAutoDownload(autoRetrieve->isChecked());
     QDialog::accept();
 }
 

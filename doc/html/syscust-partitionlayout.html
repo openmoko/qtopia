@@ -33,22 +33,22 @@
 <p>Journaling file systems, such as <tt>ext3</tt>, are more robust and less susceptible to corruption that file systems without journaling. However, there is a performance penalty for maintaining the journal.</p>
 <p>RAM discs are typically used for temporary storage, they eliminate the need for an extra read-write partition and do not contribute to write cycles to internal flash.</p>
 <p>The size of each partition is determined by the expected size of it contents and whether additional space should be reserved in each partition for future software expansion.</p>
-<p>The size of user-data partitions is dependent on the targeted use case of the device. For example, low-end phone devices with limited address book and message data would need only a few Mb of space allocated for the User Documents and Settings partition. Whereas a Media Playback device would typically have a User Documents and Settings partition in excess of 1Gb for storing media files.</p>
+<p>The size of user-data partitions is dependent on the targeted use case of the device. For example, low-end phone devices with limited address book and message data would need only a few MB of space allocated for the User Documents and Settings partition. Whereas a Media Playback device would typically have a User Documents and Settings partition in excess of 1GB for storing media files.</p>
 <a name="typical-partition-layout"></a>
 <h2>Typical Partition Layout</h2>
 <p>A typical Qtopia device contains the following partitions:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Contents</th><th>Path</th><th>Size</th><th>Mode</th><th>File System</th></tr></thead>
-<tr valign="top" class="odd"><td>System Software</td><td><tt>/</tt></td><td>less than 10Mb</td><td>read-only</td><td>cramfs</td></tr>
-<tr valign="top" class="even"><td>UI Software</td><td><tt>/opt/Qtopia</tt></td><td>greater than 20Mb</td><td>read-only</td><td>cramfs</td></tr>
-<tr valign="top" class="odd"><td>User Documents and Settings</td><td><tt>/home</tt></td><td>at least 5Mb</td><td>read-write</td><td>jffs2, ext2, ext3</td></tr>
-<tr valign="top" class="even"><td>Temporary Storage</td><td><tt>/var</tt></td><td>500Kb</td><td>read-write</td><td>tmpfs</td></tr>
+<tr valign="top" class="odd"><td>System Software</td><td><tt>/</tt></td><td>less than 10MB</td><td>read-only</td><td>cramfs</td></tr>
+<tr valign="top" class="even"><td>UI Software</td><td><tt>/opt/Qtopia</tt></td><td>greater than 20MB</td><td>read-only</td><td>cramfs</td></tr>
+<tr valign="top" class="odd"><td>User Documents and Settings</td><td><tt>/home</tt></td><td>at least 5MB</td><td>read-write</td><td>jffs2, ext2, ext3</td></tr>
+<tr valign="top" class="even"><td>Temporary Storage</td><td><tt>/var</tt></td><td>500KB</td><td>read-write</td><td>tmpfs</td></tr>
 <tr valign="top" class="odd"><td>Temporary Storage</td><td><tt>/tmp</tt></td><td>0</td><td>symbolic link to <tt>/var/tmp</tt></td><td>tmpfs</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -65,14 +65,14 @@
 <p>When the request is processed and a reply is available, it should be sent using the <tt>QDBusMessage</tt> object that was obtained. In our example, the reply code could be something as follows:</p>
 <pre> void sendReply(RequestData *data)
  {
-     <span class="comment">// data-&gt;processedData has been initialized with the request's reply</span>
+     <span class="comment">//</span> data-&gt;processedData has been initialized with the request's reply
      QDBusMessage &amp;reply = &amp;data-&gt;reply;
 
-     <span class="comment">// send the reply over D-Bus:</span>
+     <span class="comment">//</span> send the reply over D-Bus:
      reply &lt;&lt; data-&gt;processedData;
      QDBusConnection::sessionBus().send(reply);
 
-     <span class="comment">// dispose of the transaction data</span>
+     <span class="comment">//</span> dispose of the transaction data
      delete data;
  }</pre>
 <p>As can be seen in the example, when a delayed reply is in place, the return value(s) from the slot will be ignored by <a href="qtdbus.html">QtDBus</a>. They are used only to determine the slot's signature when communicating the adaptor's description to remote applications, or in case the code in the slot decides not to use a delayed reply.</p>
@@ -81,8 +81,8 @@
 <p>See also <a href="usingadaptors.html">Using QtDBus Adaptors</a>, <a href="qdbusdeclaringsignals.html">Declaring Signals in D-Bus Adaptors</a>, <a href="qdbustypesystem.html">The QtDBus Type System</a>, <a href="qdbusconnection.html">QDBusConnection</a>, and <a href="qdbusmessage.html">QDBusMessage</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

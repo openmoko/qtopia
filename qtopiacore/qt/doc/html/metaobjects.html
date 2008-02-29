@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.2/doc/src/metaobjects.qdoc -->
+<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/metaobjects.qdoc -->
 <head>
   <title>Qt 4.3: Meta-Object System</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -38,7 +38,7 @@
 <pre>     MyWidget *myWidget = qobject_cast&lt;MyWidget *&gt;(obj);</pre>
 <p>The cast to <tt>MyWidget</tt> is successful because <a href="qobject.html#qobject_cast">qobject_cast</a>() makes no distinction between built-in Qt types and custom types.</p>
 <pre>     QLabel *label = qobject_cast&lt;QLabel *&gt;(obj);
-     <span class="comment">// label is 0</span></pre>
+     <span class="comment">//</span> label is 0</pre>
 <p>The cast to <a href="qlabel.html">QLabel</a>, on the other hand, fails. The pointer is then set to 0. This makes it possible to handle objects of different types differently at run-time, based on the type:</p>
 <pre>     if (QLabel *label = qobject_cast&lt;QLabel *&gt;(obj)) {
          label-&gt;setText(tr(&quot;Ping&quot;));
@@ -50,8 +50,8 @@
 <p>See also <a href="qmetaobject.html">QMetaObject</a>, <a href="properties.html">Qt's Property System</a>, and <a href="signalsandslots.html">Signals and Slots</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.2</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -849,8 +847,19 @@ void QWSClient::sendRegionEvent(int winid, QRegion rgn, int type)
 
     sendEvent(&event);
 #ifndef QT_NO_QWS_MULTIPROCESS
-    if (d->clientLock && d->numUnbufferedSurfaces > 0)
-        csocket->waitForBytesWritten(); // ### must flush to prevent deadlock
+    if (d->clientLock && d->numUnbufferedSurfaces > 0) {
+        // ### must flush to prevent deadlock
+        if (csocket->flush()) {
+            // We don't know if flushing is complete until flush() returns false
+            unsigned int delay = 1;
+            while (csocket->flush()) {
+                // Pause before we make another attempt to flush
+                ::usleep(delay * 1000);
+                if (delay < 1024) 
+                    delay *= 2;
+            }
+        }
+    }
 #endif
 }
 
@@ -2101,7 +2110,7 @@ void QWSServer::setMaxWindowRect(const QRect &rect)
 
         QApplicationPrivate *ap = QApplicationPrivate::instance();
         if (ap->maxWindowRect(screen) != r) {
-            ap->setMaxWindowRect(screen, r);
+            ap->setMaxWindowRect(screen, i, r);
             qwsServerPrivate->sendMaxWindowRectEvents(r);
         }
     }
@@ -2201,8 +2210,8 @@ void QWSServer::sendMouseEvent(const QPoint& pos, int state, int wheel)
 #ifndef QT_NO_QWS_INPUTMETHODS
     const int btnMask = Qt::LeftButton | Qt::RightButton | Qt::MidButton;
     int stroke_count; // number of strokes to keep shown.
-    if (force_reject_strokeIM || qwsServerPrivate->mouseGrabber
-	    || !current_IM) {
+    if (force_reject_strokeIM || !current_IM)
+    {
 	stroke_count = 0;
     } else {
 	stroke_count = current_IM->filter(tpos, state, wheel);
@@ -2228,9 +2237,34 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
     const int btnMask = Qt::LeftButton | Qt::RightButton | Qt::MidButton;
     QWSMouseEvent event;
 
+    QWSWindow *win = qwsServer->windowAt(pos);
+
+    QWSClient *serverClient = qwsServerPrivate->clientMap.value(-1);
+    QWSClient *winClient = win ? win->client() : 0;
+
+
+    bool imMouse = false;
+#ifndef QT_NO_QWS_INPUTMETHODS
+    // check for input method window
+    if (current_IM && current_IM_winId != -1) {
+        QWSWindow *kbw = keyboardGrabber ? keyboardGrabber :
+                         qwsServerPrivate->focusw;
+
+        imMouse = kbw == win;
+        if ( !imMouse ) {
+            QWidget *target = winClient == serverClient ?
+                              QApplication::widgetAt(pos) : 0;
+            imMouse = target && (target->testAttribute(Qt::WA_InputMethodTransparent));
+        }
+    }
+#endif
+
     //If grabbing window disappears, grab is still active until
     //after mouse release.
-    QWSWindow *win = qwsServerPrivate->mouseGrabber ? qwsServerPrivate->mouseGrabber : qwsServer->windowAt(pos);
+    if ( qwsServerPrivate->mouseGrabber && !imMouse ) {
+        win = qwsServerPrivate->mouseGrabber;
+        winClient = win ? win->client() : 0;
+    }
     event.simpleData.window = win ? win->id : 0;
 
 #ifndef QT_NO_QWS_CURSOR
@@ -2260,24 +2294,13 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
     event.simpleData.delta = wheel;
     event.simpleData.time=qwsServerPrivate->timer.elapsed();
 
-    QWSClient *serverClient = qwsServerPrivate->clientMap.value(-1);
-    QWSClient *winClient = win ? win->client() : 0;
+    static int oldstate = 0;
 
 #ifndef QT_NO_QWS_INPUTMETHODS
     //tell the input method if we click on a different window that is not IM transparent
-
-    static int oldstate = 0;
     bool isPress = state > oldstate;
-    oldstate = state;
-    if (isPress && current_IM && current_IM_winId != -1) {
-        QWSWindow *kbw = keyboardGrabber ? keyboardGrabber :
-                         qwsServerPrivate->focusw;
-
-        QWidget *target = winClient == serverClient ?
-                          QApplication::widgetAt(pos) : 0;
-        if (kbw != win && (!target || !(target->testAttribute(Qt::WA_InputMethodTransparent))))
-            current_IM->mouseHandler(-1, QWSServer::MouseOutside);
-    }
+    if (isPress && !imMouse && current_IM && current_IM_winId != -1)
+        current_IM->mouseHandler(-1, QWSServer::MouseOutside);
 #endif
 
     if (serverClient)
@@ -2285,13 +2308,19 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
     if (winClient && winClient != serverClient)
        winClient->sendEvent(&event);
 
-    // Make sure that if we leave a window, that window gets one last mouse
-    // event so that it knows the mouse has left.
-    QWSClient *oldClient = qwsServer->d_func()->cursorClient;
-    if (oldClient && oldClient != winClient && oldClient != serverClient)
-        oldClient->sendEvent(&event);
+    if ( !imMouse ) {
+        // Make sure that if we leave a window, that window gets one last mouse
+        // event so that it knows the mouse has left.
+        QWSClient *oldClient = qwsServer->d_func()->cursorClient;
+        if (oldClient && oldClient != winClient && oldClient != serverClient) {
+            event.simpleData.state = oldstate | qws_keyModifiers;
+            oldClient->sendEvent(&event);
+        }
+    }
 
-    qwsServer->d_func()->cursorClient = winClient;
+    oldstate = state;
+    if ( !imMouse )
+        qwsServer->d_func()->cursorClient = winClient;
 
     if (!(state&btnMask) && !qwsServerPrivate->mouseGrabbing)
         qwsServerPrivate->releaseMouse(qwsServerPrivate->mouseGrabber);
@@ -2526,7 +2555,7 @@ void QWSServer::endDisplayReconfigure()
     qt_screencursor->show();
 #endif
     QApplicationPrivate *ap = QApplicationPrivate::instance();
-    ap->setMaxWindowRect(qt_screen,
+    ap->setMaxWindowRect(qt_screen, 0,
                          QRect(0, 0, qt_screen->width(), qt_screen->height()));
     QSize olds = qApp->desktop()->size();
     qApp->desktop()->resize(qt_screen->width(), qt_screen->height());

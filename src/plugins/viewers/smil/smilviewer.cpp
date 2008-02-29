@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -30,10 +30,12 @@
 #include <QBuffer>
 #include <QKeyEvent>
 #include <QMailMessage>
+#include <QSoftMenuBar>
 
 SmilViewer::SmilViewer( QWidget* parent )
     : QMailViewerInterface( parent ),
       view( new SmilView( parent ) ),
+      menuKey( QSoftMenuBar::menuKey() ),
       mail( 0 )
 {
     view->setGeometry(parent->rect());
@@ -58,11 +60,12 @@ QWidget* SmilViewer::widget() const
     return view;
 }
 
-QString SmilViewer::findStartMarker() const
+// This logic is replicated in the MMS composer...
+static QString smilStartMarker(const QMailMessage& mail)
 {
-    QMailMessageContentType type(mail->headerField("X-qtmail-internal-original-content-type"));
+    QMailMessageContentType type(mail.headerField("X-qtmail-internal-original-content-type"));
     if (type.isNull()) {
-        type = QMailMessageContentType(mail->headerField("Content-Type"));
+        type = QMailMessageContentType(mail.headerField("Content-Type"));
     }
     if (!type.isNull()) {
         QString startElement = type.parameter("start");
@@ -73,19 +76,32 @@ QString SmilViewer::findStartMarker() const
     return QString("<presentation-part>");
 }
 
+static uint smilStartIndex(const QMailMessage& mail)
+{
+    QString startMarker(smilStartMarker(mail));
+
+    for (uint i = 0; i < mail.partCount(); ++i)
+        if (mail.partAt(i).contentID() == startMarker)
+            return i;
+
+    return 0;
+}
+
+static bool smilPartMatch(const QString identifier, const QMailMessagePart& part)
+{
+    // See if the identifer is a Content-ID marker
+    QString id(identifier);
+    if (id.toLower().startsWith("cid:"))
+        id.remove(0, 4);
+
+    return ((part.contentID() == id) || (part.displayName() == id) || (part.contentLocation() == id));
+}
+
 bool SmilViewer::setMessage(const QMailMessage& msg)
 {
     mail = &msg;
-    QString start = findStartMarker();
 
-    uint smilPartIndex = 0;
-    for ( uint i = 1; i < mail->partCount(); i++ ) {
-        const QMailMessagePart &part = mail->partAt( i );
-        if (part.contentID() == start) {
-            smilPartIndex = i;
-            break;
-        }
-    }
+    uint smilPartIndex = smilStartIndex(*mail);
 
     const QMailMessagePart &part = mail->partAt( smilPartIndex );
     QString smil(part.body().data());
@@ -108,6 +124,9 @@ bool SmilViewer::eventFilter(QObject* watched, QEvent* event)
                 return true;
             } else if (keyEvent->key() == Qt::Key_Back) {
                 emit finished();
+                return true;
+            } else if (keyEvent->key() == menuKey) {
+                // The menu should not be activated while we're active
                 return true;
             }
         }
@@ -200,19 +219,9 @@ void SmilViewer::advanceSlide()
 
 void SmilViewer::requestTransfer(SmilDataSource* dataSource, const QString &src)
 {
-    bool isId = false;
-    QString source = src;
-    if (source.startsWith("cid:")) {
-        source = source.mid(4);
-        isId = true;
-    }
-
     for ( uint i = 0; i < mail->partCount(); i++ ) {
         const QMailMessagePart &part = mail->partAt( i );
-        if ((isId && part.contentID() == source) ||
-            (part.displayName() == source) ||
-            (part.contentLocation() == source)) 
-        {
+        if (smilPartMatch(src, part)) {
             dataSource->setMimeType(part.contentType().content());
 
             const QString filename(part.attachmentPath());

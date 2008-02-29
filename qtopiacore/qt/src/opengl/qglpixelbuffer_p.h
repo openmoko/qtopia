@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -50,7 +48,11 @@
 // We mean it.
 //
 
-#if defined (Q_OS_HPUX)
+// The below is a hack to make this compile with the
+// broken HPUX GL headers. They define GLX_VERSION_1_3
+// without defining the GLXFBConfig structure, which
+// is wrong. 
+#if defined (Q_OS_HPUX) && !defined(GLX_SGIX_pbuffer)
 typedef unsigned long GLXPbuffer;
 
 struct GLXFBConfig {

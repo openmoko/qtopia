@@ -21,20 +21,28 @@ ORIG_TARGET=$$TARGET
 # Sanity check
 !contains(PROCESSED_PRI,qtopia_project):error(You must specify the project type with qtopia_project())
 
+# Set TRANSLATIONS and ALL_TRANSLATIONS
+TRANSLATIONS=$$LANGUAGES
+TRANSLATIONS-=$$STRING_LANGUAGE
+ALL_TRANSLATIONS=$$AVAILABLE_LANGUAGES
+ALL_TRANSLATIONS-=$$STRING_LANGUAGE
+
 # Desktop projects have a different library location
 contains(PROJECT_TYPE,desktop) {
     LIBS-=-L$$QPEDIR/lib
     LIBS+=-L$$QPEDIR/lib/host
 }
 
-# Was i18n disabled?
+# Do we have translations? Enable i18n.
+!isEmpty(TRANSLATIONS):CONFIG+=i18n
+# If no_tr, disable i18n.
 no_tr:CONFIG-=i18n
 
 # Was installs disabled?
 no_install:CONFIG-=installs
 
-# Projects that are part of Qtopia can install packages
-part_of_qtopia:!subdirs:CONFIG+=packages
+# Any embedded project can install packages (use CONFIG+=no_pkg to suppress)
+embedded:!subdirs:CONFIG+=packages
 
 # Singleexec only applies to Qtopia projects
 part_of_qtopia:!desktop:enable_singleexec:CONFIG+=singleexec

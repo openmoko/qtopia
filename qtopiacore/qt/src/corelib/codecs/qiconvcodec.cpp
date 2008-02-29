@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,10 +35,13 @@
 ****************************************************************************/
 
 #include "qiconvcodec_p.h"
+#include <qlibrary.h>
+#include <qdebug.h>
 
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
+#include <dlfcn.h>
 
 // unistd.h is needed for the _XOPEN_UNIX macro
 #include <unistd.h>
@@ -58,6 +59,19 @@
 #  define UTF16 "UTF-16"
 #endif
 
+#ifdef Q_OS_MAC
+#ifndef GNU_LIBICONV
+#define GNU_LIBICONV
+#endif
+typedef iconv_t (*Ptr_iconv_open) (const char*, const char*);
+typedef size_t (*Ptr_iconv) (iconv_t, const char **, size_t *, char **, size_t *);
+typedef int (*Ptr_iconv_close) (iconv_t);
+
+static Ptr_iconv_open ptr_iconv_open = 0;
+static Ptr_iconv ptr_iconv = 0;
+static Ptr_iconv_close ptr_iconv_close = 0;
+#endif
+
 QIconvCodec::QIconvCodec()
     : utf16Codec(0)
 {
@@ -69,6 +83,26 @@ QIconvCodec::QIconvCodec()
         fprintf(stderr, "QIconvCodec::convertToUnicode: internal error, UTF-16 codec not found\n");
         utf16Codec = reinterpret_cast<QTextCodec *>(~0);
     }
+#ifdef Q_OS_MAC
+    if (ptr_iconv_open == 0) {
+        QLibrary libiconv(QLatin1String("/usr/lib/libiconv"));
+
+        ptr_iconv_open = reinterpret_cast<Ptr_iconv_open>(libiconv.resolve("libiconv_open"));
+        ptr_iconv = reinterpret_cast<Ptr_iconv>(libiconv.resolve("libiconv"));
+        ptr_iconv_close = reinterpret_cast<Ptr_iconv_close>(libiconv.resolve("libiconv_close"));
+
+        Q_ASSERT_X(ptr_iconv_open && ptr_iconv && ptr_iconv_close,
+        "QIconvCodec::QIconvCodec()",
+        "internal error, could not resolve the iconv functions");
+
+#       undef iconv_open
+#       define iconv_open ptr_iconv_open
+#       undef iconv
+#       define iconv ptr_iconv
+#       undef iconv_close
+#       define iconv_close ptr_iconv_close
+    }
+#endif
 }
 
 QIconvCodec::~QIconvCodec()

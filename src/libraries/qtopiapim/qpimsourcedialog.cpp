@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -76,6 +76,7 @@ QPimSourceDialog::QPimSourceDialog(QWidget *parent)
     d->view->setSelectionMode(QAbstractItemView::SingleSelection);
     d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->view->setWordWrap(true);
+    d->view->setFrameStyle(QFrame::NoFrame);
     d->view->setResizeMode(QListView::Adjust);
     d->view->setItemDelegate(new QtopiaItemDelegate());
     QVBoxLayout *layout = new QVBoxLayout;

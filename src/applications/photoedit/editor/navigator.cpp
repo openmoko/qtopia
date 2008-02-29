@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -28,9 +28,10 @@
 #include <qregion.h>
 
 #include <QKeyEvent>
+#include <QStyle>
 
 Navigator::Navigator( ImageUI* iui, QWidget* parent, Qt::WFlags f )
-    : QWidget( parent, f ), image_ui( iui )
+    : QWidget( parent, f ), image_ui( iui ), valid( false )
 {
     setSizePolicy( QSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum ) );
     setFocusPolicy( Qt::StrongFocus );
@@ -54,7 +55,13 @@ void Navigator::updateNavigator()
     actual_viewport = image_ui->viewport();
 
     // Update display
-    if( !actual_viewport.contains( actual_space ) ) calculateReduced();
+    if ( !actual_viewport.contains( actual_space ) && actual_viewport != actual_space ) {
+        calculateReduced();
+        valid = true;
+    } else {
+        valid = false;
+    }
+
     update();
 }
 
@@ -119,12 +126,8 @@ void Navigator::paintEvent( QPaintEvent* )
 #define SPACE_FILL_PATTERN Qt::Dense6Pattern
 #define PEN_WIDTH 1
 
-    QPainter painter( this );
-
-    painter.setPen( PAINTER_COLOR );
-
-    if( actual_space.contains( actual_viewport ) &&
-        actual_space != actual_viewport ) {
+    if ( valid )  {
+        QPainter painter( this );
         // Draw navigator onto widget
         painter.setPen( PAINTER_COLOR );
         // painter.setRasterOp( Qt::XorROP );
@@ -141,24 +144,15 @@ void Navigator::paintEvent( QPaintEvent* )
     }
 }
 
-void Navigator::resizeEvent( QResizeEvent* )
-{
-    // Update display
-    if( !actual_viewport.contains( actual_space ) ) calculateReduced();
-    update();
-}
-
 QSize Navigator::sizeHint() const
 {
-#define PREFERRED_WIDTH 65
-#define PREFERRED_HEIGHT 65
-
-    return QSize( PREFERRED_WIDTH, PREFERRED_HEIGHT );
+    return reduced_space.size();
 }
 
 void Navigator::calculateReduced()
 {
-#define BORDER 5
+#define PREFERRED_WIDTH 65
+#define PREFERRED_HEIGHT 65
 #define REDUCTION_RATIO( dw, dh, sw, sh ) \
     ( (dw)*(sh) > (dh)*(sw) ? (double)(dh)/(double)(sh) : \
     (double)(dw)/(double)(sw) )
@@ -174,14 +168,14 @@ void Navigator::calculateReduced()
     }
 
     // Reduce viewport to fit within widget dimensions
-    reduction_ratio = REDUCTION_RATIO( width() - BORDER, height() - BORDER,
+    reduction_ratio = REDUCTION_RATIO( PREFERRED_WIDTH, PREFERRED_HEIGHT,
         actual_space.width(), actual_space.height() );
     // Reduce and center space
     reduced_space = QRect( actual_space.topLeft() * reduction_ratio,
         actual_space.bottomRight() * reduction_ratio );
 
-    centered_origin.setX( width() - reduced_space.width() );
-    centered_origin.setY( height() - reduced_space.height() );
+    centered_origin.setX( width() - reduced_space.width() - style()->pixelMetric( QStyle::PM_LayoutRightMargin ) );
+    centered_origin.setY( height() - reduced_space.height() - style()->pixelMetric( QStyle::PM_LayoutBottomMargin ) );
     reduced_space.translate( centered_origin.x(), centered_origin.y() );
 
     // Reduce and center viewport by same amount

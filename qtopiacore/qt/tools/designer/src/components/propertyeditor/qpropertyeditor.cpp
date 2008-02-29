@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the Qt Designer of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -61,6 +59,8 @@ QPropertyEditor::QPropertyEditor(QWidget *parent)    :
     m_model(new QPropertyEditorModel(this)),
     m_itemDelegate(new QPropertyEditorDelegate(this))
 {
+    connect(m_itemDelegate, SIGNAL(editorOpened()), this, SIGNAL(editorOpened()));
+    connect(m_itemDelegate, SIGNAL(editorClosed()), this, SIGNAL(editorClosed()));
     setModel(m_model);
     setItemDelegate(m_itemDelegate);
     setTextElideMode (Qt::ElideMiddle);

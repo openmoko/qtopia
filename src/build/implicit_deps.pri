@@ -25,6 +25,6 @@ qtopiadesktop:!contains(PROJECT_TYPE,core) {
     depends(libraries/qtopiadesktop)
 }
 
-unittest:depends(libraries/qtopiatest/target)
-systemtest:depends(libraries/qtopiatest/host)
+systemtest:depends(tools/qtopiatestrunner/lib)
+unittest:!contains(PROJECT_TYPE,desktop):depends(tests/shared/qtopiaunittest)
 

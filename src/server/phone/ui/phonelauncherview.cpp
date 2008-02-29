@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -91,8 +91,8 @@ PhoneLauncherView::PhoneLauncherView(int _rows, int _columns, const QString &map
                                      const QString &_animatorDescription,const QString &_animatorBackgroundDescription,
                                      QWidget *parent)
     : QGraphicsView(parent)
-    , rows(_rows)
-    , columns(_columns)
+    , m_rows(_rows)
+    , m_columns(_columns)
     , scene(0)
     , selectedItem(0)
     , pressedItem(0)
@@ -124,7 +124,6 @@ PhoneLauncherView::PhoneLauncherView(int _rows, int _columns, const QString &map
         margin = MARGIN_DEFAULT;
     }
 
-    // !!!!!!!!!!!!!HACK FOR QT BUG
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -152,6 +151,13 @@ PhoneLauncherView::~PhoneLauncherView()
      if ( animatorBackground )
          delete animatorBackground;
 }
+
+/*!
+  \fn void PhoneLauncherView::pressed(QContent content)
+  Indicates that a key or mouse press has occurred which, when released, will
+  result in the item on the grid with the given content to be selected.
+  \a content See description.
+*/
 
 /*!
   \fn void PhoneLauncherView::clicked(QContent content)
@@ -182,11 +188,9 @@ GridItem *PhoneLauncherView::createItem(QContent *content,int row,int column) co
     bool loadMovie = false;
 
     if ( content ) {
-        // The Animator objects could be shared by all GridItems -
-        // however, we have not done that here, since the Animators may need to cache
-        // values (specific to GridItem objects) to speed up processing - so for now, each
-        // GridItem has its own Animator, although that design decision may be reversed in
-        // future.
+        // Each GridItem has its own animator, since the Animators may need to cache
+        // values (specific to GridItem objects) to speed up processing.
+        // That design decision may need to be reassessed in the future.
         // Note: the animatorBackground IS shared among GridItems and thus must be cleaned up
         // by the phonelauncherview.
         // Note: there is no memory leak here, since QGraphicsScene will delete all of its
@@ -203,8 +207,10 @@ GridItem *PhoneLauncherView::createItem(QContent *content,int row,int column) co
         }
     }
 
-    GridItem *item = new GridItem(content,row,column,rows,columns,
+    GridItem *item = new GridItem(content,row,column,m_rows,m_columns,
                             animator,background,loadMovie);
+    if (animator)
+        animator->initFromGridItem(item);
 
     // Add the item to both the scene and the SelectedItem.
     if ( selectedItem->addItem(item) ) {
@@ -238,6 +244,8 @@ void PhoneLauncherView::addSelectedItem(const QString &backgroundFileName,int mo
     selectedItem = new SelectedItem(backgroundFileName,margin,moveTimeDuration);
     // Signal for when a GridItem object is invoked, eg by pressing the Qt::Select key.
     connect(selectedItem->connector(),SIGNAL(itemSelected(GridItem*)),this,SLOT(itemSelectedHandler(GridItem*)));
+    // Signal for when a GridItem object is about to be invoked, eg by pressing the Qt::Select key.
+    connect(selectedItem->connector(),SIGNAL(itemPressed(GridItem*)),this,SLOT(itemPressedHandler(GridItem*)));
     // Signal for when the current GridItem object changes.
     connect(selectedItem->connector(),SIGNAL(selectionChanged(GridItem*)),this,SLOT(selectionChangedHandler(GridItem*)));
 
@@ -255,11 +263,11 @@ void PhoneLauncherView::addSelectedItem(const QString &backgroundFileName,int mo
 
 /*!
   \internal
-  \fn void PhoneLauncherView::itemDimensions(int &itemWidth,int &itemHeight) const
+  \fn void PhoneLauncherView::itemDimensions(int *itemWidth,int *itemHeight) const
   Retrieves the appropriate width and height for each GridItem object, according to the
   current dimensions of the view.
 */
-void PhoneLauncherView::itemDimensions(int &itemWidth,int &itemHeight) const
+void PhoneLauncherView::itemDimensions(int *itemWidth,int *itemHeight) const
 {
     // Get the pixel size of the view's margins.
     int left,top,right,bottom;
@@ -267,8 +275,8 @@ void PhoneLauncherView::itemDimensions(int &itemWidth,int &itemHeight) const
 
     int viewWidth = size().width() - left - right - 1;
     int viewHeight = size().height() - top - bottom - 1;
-    itemWidth = viewWidth/columns;
-    itemHeight = viewHeight/rows;
+    if (itemWidth)  *itemWidth  = viewWidth/m_columns;
+    if (itemHeight) *itemHeight = viewHeight/m_rows;
 }
 
 /*!
@@ -279,8 +287,26 @@ void PhoneLauncherView::itemDimensions(int &itemWidth,int &itemHeight) const
 */
 void PhoneLauncherView::rowAndColumn(int idx,int &row,int &column) const
 {
-    row = idx/columns;
-    column = idx - (columns*row);
+    row = idx/m_columns;
+    column = idx - (m_columns*row);
+}
+
+/*!
+  \internal
+  Returns the row count for this view.
+*/
+int PhoneLauncherView::rows() const
+{
+    return m_rows;
+}
+
+/*!
+  \internal
+  Returns the column count for this view.
+*/
+int PhoneLauncherView::columns() const
+{
+    return m_columns;
 }
 
 /*!
@@ -384,6 +410,7 @@ void PhoneLauncherView::setBusy(bool flag)
     /*if ( selectedItem ) {
         selectedItem->setActive(flag);
     }*/ //active means 'pressed', so don't use it here
+    Q_UNUSED(flag);
 }
 
 /*!
@@ -405,7 +432,7 @@ void PhoneLauncherView::updateImages()
 */
 void PhoneLauncherView::resizeEvent(QResizeEvent *event)
 {
-    scene->setSceneRect(0,0,event->size().width(),event->size().height());    //MWB
+    scene->setSceneRect(0,0,event->size().width(),event->size().height());
 
     if ( !selectedItem ) {
         return;
@@ -414,11 +441,11 @@ void PhoneLauncherView::resizeEvent(QResizeEvent *event)
     // Get the width and height of each item.
     int itemWidth;
     int itemHeight;
-    itemDimensions(itemWidth,itemHeight);
+    itemDimensions(&itemWidth,&itemHeight);
 
     // Loop through all the GridItem objects and reset their sizes.
-    for ( int row = 0; row < rows; row++ ) {
-        for ( int col = 0; col < columns; col++ ) {
+    for ( int row = 0; row < m_rows; row++ ) {
+        for ( int col = 0; col < m_columns; col++ ) {
             GridItem *item = selectedItem->item(row,col);
             if ( !item ) {
                 // Create and add an empty content for this row and column.
@@ -479,6 +506,19 @@ void PhoneLauncherView::itemSelectedHandler(GridItem *item)
 
 /*!
   \internal
+  \fn void PhoneLauncherView::itemPressedHandler(GridItem *item)
+  Called when the key press for activating an \a item occurs.
+  Extracts information from the item and emits the signal pressed(QContent).
+*/
+void PhoneLauncherView::itemPressedHandler(GridItem *item)
+{
+    if ( item && item->content() && !(item->content()->name().isEmpty()) ) {
+        emit pressed(*(item->content()));
+    }
+}
+
+/*!
+  \internal
   \fn void PhoneLauncherView::selectionChangedHandler(GridItem *item)
   Called in response to the current item changing (i.e. SelectedItem has shifted position,
   highlight a different GridItem object). Updates the window title, and emits the
@@ -513,22 +553,58 @@ void PhoneLauncherView::selectionChangedHandler(GridItem *item)
 
 /*!
   \internal
-  \fn GridItem *PhoneLauncherView::itemAt(const QPoint &point) const
+  \fn QContent *PhoneLauncherView::itemAt(int row, int column) const
+  Returns the QContent object that resides at the given row and column.
+*/
+QContent *PhoneLauncherView::itemAt(int row, int column) const
+{
+    QContent *ret = 0;
+    GridItem *gridItem = gridItemAt(row, column);
+    if (gridItem) {
+        ret = gridItem->content();
+    }
+    return ret;
+}
+
+/*!
+  \internal
+  \fn QContent *PhoneLauncherView::itemAt(const QPoint &point) const
+  Returns the QContent object that resides at the given pixel position.
+*/
+QContent *PhoneLauncherView::itemAt(const QPoint &point) const
+{
+    QContent *ret = 0;
+    GridItem *gridItem = gridItemAt(point);
+    if (gridItem) {
+        ret = gridItem->content();
+    }
+    return ret;
+}
+
+/*!
+  \internal
+  \fn GridItem *PhoneLauncherView::gridItemAt(int row, int column) const
+  Returns the GridItem object that resides at the given row and column.
+*/
+GridItem *PhoneLauncherView::gridItemAt(int row, int column) const
+{
+    return (selectedItem) ? selectedItem->item(row,column) : 0;
+}
+
+/*!
+  \internal
+  \fn GridItem *PhoneLauncherView::gridItemAt(const QPoint &point) const
   Returns the GridItem object that resides at the given pixel position.
 */
-GridItem *PhoneLauncherView::itemAt(const QPoint &point) const
+GridItem *PhoneLauncherView::gridItemAt(const QPoint &point) const
 {
-    if ( !selectedItem ) {
-        return 0;
-    }
-
     // Get the item at position 'point'.
     int itemWidth, itemHeight;
-    itemDimensions(itemWidth,itemHeight);
+    itemDimensions(&itemWidth,&itemHeight);
     int column = point.x()/itemWidth;
     int row = point.y()/itemHeight;
 
-    return selectedItem->item(row,column);
+    return gridItemAt(row, column);
 }
 
 /*!
@@ -543,7 +619,7 @@ void PhoneLauncherView::keyPressEvent(QKeyEvent *event)
     const char a = event->text()[0].toLatin1();
     int index = iconMapping.toLatin1().indexOf(a);
 
-    if ( selectedItem && (index >= 0) && (index < rows * columns) && !event->isAutoRepeat()) {
+    if ( selectedItem && (index >= 0) && (index < m_rows * m_columns) && !event->isAutoRepeat()) {
         pressedindex = index;
         // Find out what row/column index maps to, and set that GridItem to
         // be current (i.e. SelectedItem will shift over to it).
@@ -555,6 +631,8 @@ void PhoneLauncherView::keyPressEvent(QKeyEvent *event)
         selectedItem->setCurrent(row,column, false);
         // Change the selected item's appearance.
         selectedItem->setActive(true);
+
+        emit pressed(*selectedItem->current()->content());
     } else {
         // Key not handled by PhoneLauncherView.
         QGraphicsView::keyPressEvent(event);
@@ -569,7 +647,7 @@ void PhoneLauncherView::keyReleaseEvent(QKeyEvent *event)
     const char a = event->text()[0].toLatin1();
     int index = iconMapping.toLatin1().indexOf(a);
 
-    if ( selectedItem && (index >= 0) && (index < rows * columns) && pressedindex == index && !event->isAutoRepeat()) {
+    if ( selectedItem && (index >= 0) && (index < m_rows * m_columns) && pressedindex == index && !event->isAutoRepeat()) {
         pressedindex = -1;
         // Change the selected item's appearance.
         selectedItem->setActive(false);
@@ -591,7 +669,7 @@ void PhoneLauncherView::keyReleaseEvent(QKeyEvent *event)
 */
 void PhoneLauncherView::mousePressEvent(QMouseEvent *event)
 {
-    pressedItem = itemAt(event->pos());
+    pressedItem = gridItemAt(event->pos());
     if ( selectedItem ) {
         if ( selectedItem->current() != pressedItem ) {
             // This is different to the current item - so we make the new one current.
@@ -600,6 +678,7 @@ void PhoneLauncherView::mousePressEvent(QMouseEvent *event)
             // selectionChangedHandler(), which emits highlighted(...) and causes the
             // window title to be updated.
             selectedItem->setCurrent(pressedItem, false);
+            emit pressed(*selectedItem->current()->content());
         }
         selectedItem->setActive(true);
     }
@@ -615,7 +694,7 @@ void PhoneLauncherView::mousePressEvent(QMouseEvent *event)
 */
 void PhoneLauncherView::mouseReleaseEvent(QMouseEvent *event)
 {
-    GridItem *releasedItem = itemAt(event->pos());
+    GridItem *releasedItem = gridItemAt(event->pos());
 
     if ( releasedItem && (pressedItem == releasedItem) ) {
         // We've got an item that we've released the button on, and it's the
@@ -647,13 +726,16 @@ void PhoneLauncherView::mouseReleaseEvent(QMouseEvent *event)
 void PhoneLauncherView::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::PaletteChange && selectedItem) {
-        for ( int row = 0; row < rows; row++ ) {
-            for ( int col = 0; col < columns; col++ ) {
+        for ( int row = 0; row < m_rows; row++ ) {
+            for ( int col = 0; col < m_columns; col++ ) {
                 GridItem *item = selectedItem->item(row,col);
                 if ( item )
                     item->paletteChanged();
             }
         }
         selectedItem->paletteChanged();
+    } else if (e->type() == QEvent::StyleChange) {
+        //icons may have changed size
+        updateImages();
     }
 }

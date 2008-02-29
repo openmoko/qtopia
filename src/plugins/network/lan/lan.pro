@@ -40,10 +40,9 @@ conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/lan.conf \
 conf.path	= /etc/network
 INSTALLS += conf
 
-bin.files   = $$QTOPIA_DEPOT_PATH/src/plugins/network/lan/lan-network 
-bin.path    = /bin
-bin.hint=script
-INSTALLS +=bin
+script=$$PWD/lan-network
+variable=$$LAN_NETWORK_SCRIPT
+include(../network_script.pri)
 
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/lan/* 
 pics.path	= /pics/Network/lan

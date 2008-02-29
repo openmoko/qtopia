@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMailViewerInterface Class Reference</h1>
 <p>The QMailViewerInterface class defines the interface to objects that can display a mail message. <a href="#details">More...</a></p>
-<pre>    #include &lt;QMailViewerInterface&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QMailViewerInterface&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qmailviewerinterface-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,7 +27,7 @@
 <li><div class="fn"/>virtual QWidget * <b><a href="qmailviewerinterface.html#widget">widget</a></b> () const = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -37,7 +37,7 @@
 <li><div class="fn"/>virtual void <b><a href="qmailviewerinterface.html#setResource">setResource</a></b> ( const QUrl &amp; <i>name</i>, QVariant <i>value</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -46,16 +46,15 @@
 <li><div class="fn"/>void <b><a href="qmailviewerinterface.html#finished">finished</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -71,30 +70,30 @@
 <p>See also <a href="qmailviewerfactory.html">QMailViewerFactory</a> and <a href="qmailviewerplugin.html">QMailViewerPlugin</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMailViewerInterface"></a>QMailViewerInterface::QMailViewerInterface ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QMailViewerInterface"></a>QMailViewerInterface::QMailViewerInterface ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs the <a href="qmailviewerinterface.html">QMailViewerInterface</a> object with the parent widget <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QMailViewerInterface"></a>QMailViewerInterface::~QMailViewerInterface ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructs the <a href="qmailviewerinterface.html">QMailViewerInterface</a> object.</p>
-<h3 class="fn"><a name="addActions"></a>void QMailViewerInterface::addActions ( <a href="qmenu.html">QMenu</a> * <i>menu</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="addActions"></a>void QMailViewerInterface::addActions ( <a href="./qmenu.html">QMenu</a> * <i>menu</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Allows the viewer object to add any relevant actions to the application <i>menu</i> supplied.</p>
-<h3 class="fn"><a name="anchorClicked"></a>void QMailViewerInterface::anchorClicked ( const <a href="qurl.html">QUrl</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="anchorClicked"></a>void QMailViewerInterface::anchorClicked ( const <a href="./qurl.html">QUrl</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the user presses the select key while the display has the anchor <i>link</i> selected.</p>
 <h3 class="fn"><a name="clear"></a>void QMailViewerInterface::clear ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Resets the display to have no content, and removes any resource associations.</p>
 <h3 class="fn"><a name="finished"></a>void QMailViewerInterface::finished ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the display of the current mail message is completed. This signal is emitted only for message types that define a concept of completion, such as SMIL slideshows.</p>
-<h3 class="fn"><a name="scrollToAnchor"></a>void QMailViewerInterface::scrollToAnchor ( const <a href="qstring.html">QString</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="scrollToAnchor"></a>void QMailViewerInterface::scrollToAnchor ( const <a href="./qstring.html">QString</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Scrolls the display to position the <i>link</i> within the viewable area.</p>
 <h3 class="fn"><a name="setMessage"></a>bool QMailViewerInterface::setMessage ( const <a href="qmailmessage.html">QMailMessage</a> &amp; <i>mail</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Displays the contents of <i>mail</i>. Returns whether the message could be successfully displayed.</p>
-<h3 class="fn"><a name="setResource"></a>void QMailViewerInterface::setResource ( const <a href="qurl.html">QUrl</a> &amp; <i>name</i>, <a href="qvariant.html">QVariant</a> <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setResource"></a>void QMailViewerInterface::setResource ( const <a href="./qurl.html">QUrl</a> &amp; <i>name</i>, <a href="./qvariant.html">QVariant</a> <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Supplies the viewer object with a resource that may be referenced by a mail message. The resource identified as <i>name</i> will be displayed as the object <i>value</i>.</p>
-<h3 class="fn"><a name="widget"></a><a href="qwidget.html">QWidget</a> * QMailViewerInterface::widget () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="widget"></a><a href="./qwidget.html">QWidget</a> * QMailViewerInterface::widget () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the widget implementing the display interface.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXEPolicyManager Class Reference</h1>
 <p>The SXEPolicyManager class provides a management interface for Qtopia Safe Execution Environment policies <a href="#details">More...</a></p>
-<pre>    #include &lt;SXEPolicyManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<pre>    #include &lt;SXEPolicyManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="sxepolicymanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -25,7 +25,7 @@
 <li><div class="fn"/>QString <b><a href="sxepolicymanager.html#findRequest">findRequest</a></b> ( QString <i>request</i>, QStringList <i>prof</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -34,7 +34,7 @@
 <li><div class="fn"/>void <b><a href="sxepolicymanager.html#resetDateCheck">resetDateCheck</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="./qobject.htmlqobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -42,16 +42,15 @@
 <li><div class="fn"/>SXEPolicyManager * <b><a href="sxepolicymanager.html#getInstance">getInstance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="./qobject.htmlqobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="./qobject.htmlqobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="./qobject.htmlqobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.htmlqobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.htmlqobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -63,7 +62,7 @@
 <p>In the context of SXE Policy, a <i>program</i> is a number of (at least one) binary executable files, and support files that are installed onto the storage media available to the Qtopia device. Any binary installed with the program or executing on its behalf is identified by that program's unique Program Identity, a number between 1 and 255 inclusive. Program Identity 0 is reserved for the Qtopia server.</p>
 <p>SXE Policies provide a list of profile names for each Program Identity. Each profile name stands for a list of service request names. Some examples of service request names are:</p>
 <ul>
-<li>openURL(<a href="qstring.html">QString</a> url)</li>
+<li>openURL(<a href="./qstring.html">QString</a> url)</li>
 <li>removeEvent(PimEvent)</li>
 <li>mtabChanged()</li>
 </ul>
@@ -80,9 +79,9 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.SXEPolicyManager"></a>SXEPolicyManager::~SXEPolicyManager ()</h3>
 <p>Destruct a <a href="sxepolicymanager.html">SXEPolicyManager</a>.</p>
-<h3 class="fn"><a name="findPolicy"></a><a href="qstringlist.html">QStringList</a> SXEPolicyManager::findPolicy ( unsigned char <i>progId</i> )</h3>
+<h3 class="fn"><a name="findPolicy"></a><a href="./qstringlist.html">QStringList</a> SXEPolicyManager::findPolicy ( unsigned char <i>progId</i> )</h3>
 <p>Given the <i>progId</i> return a list of the profile names which that program is authorised to access. The information is read from the Qtopia SXE policy file [qt_prefix]/etc/sxe.policy. A caching algorithm is used to lessen the number of file accesses required for recurring lookups. The cache is checked for freshness against this files last modify time, as the Qtopia installer may have changed it since it was last accessed.</p>
-<h3 class="fn"><a name="findRequest"></a><a href="qstring.html">QString</a> SXEPolicyManager::findRequest ( <a href="qstring.html">QString</a> <i>request</i>, <a href="qstringlist.html">QStringList</a> <i>prof</i> )</h3>
+<h3 class="fn"><a name="findRequest"></a><a href="./qstring.html">QString</a> SXEPolicyManager::findRequest ( <a href="./qstring.html">QString</a> <i>request</i>, <a href="./qstringlist.html">QStringList</a> <i>prof</i> )</h3>
 <p>Given a <i>request</i> return the profile name containing that request. If the request exists in multiple profiles, this method will return a random profile name which contains that request. If the request is not found, a null string is returned.</p>
 <p>If the list <i>prof</i> is non-empty, just those profiles are searched, and a profile name from amongst them returned if the request is found. If the <i>prof</i> list is empty (the default) all profiles are searched.</p>
 <p>The meaning of not found (null string return) is defined by the caller. For a secure system <i>not found</i> equals deny.</p>
@@ -100,7 +99,7 @@
 <p>Note that a cache freshness check is not performed since the sxe.profiles file is not altered during run-time.</p>
 <h3 class="fn"><a name="getInstance"></a>SXEPolicyManager * SXEPolicyManager::getInstance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return an pointer to this processes <a href="sxepolicymanager.html">SXEPolicyManager</a> instance.</p>
-<h3 class="fn"><a name="policyCheck"></a>void SXEPolicyManager::policyCheck ( QTransportAuth::Data &amp; <i>d</i>, const <a href="qstring.html">QString</a> &amp; <i>req</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="policyCheck"></a>void SXEPolicyManager::policyCheck ( QTransportAuth::Data &amp; <i>d</i>, const <a href="./qstring.html">QString</a> &amp; <i>req</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This slot is for receiving signals from a QTransportAuth object alerting the presence of an incoming message for authentication against policy. The QTransportAuth should already have taken care of confirming the identity of message originator, and validity of the message transport.</p>
 <p>Note that any number of authorisers can connect to this slot. If any one of them sets the permit Status bits to Deny, then the request will be denied regardless of other authorisers. In other words all must either provide Allow status (or leave the status unchanged) for the request to pass.</p>
 <p>The QTransportAuth::Data item <i>d</i> is the connection data representing the source of the <i>req</i>.</p>
@@ -108,8 +107,8 @@
 <p>Receive a time-out signal to reset the checkDate flag. This flag prevents the date check mechanism from DoS'ing the out-of-date code.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

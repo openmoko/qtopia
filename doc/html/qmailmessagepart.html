@@ -22,7 +22,6 @@
 <h3>Public Functions</h3>
 <ul>
 <li><div class="fn"/><b><a href="qmailmessagepart.html#QMailMessagePart">QMailMessagePart</a></b> ()</li>
-<li><div class="fn"/>virtual <b><a href="qmailmessagepart.html#dtor.QMailMessagePart">~QMailMessagePart</a></b> ()</li>
 <li><div class="fn"/>QString <b><a href="qmailmessagepart.html#attachmentPath">attachmentPath</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qmailmessagepart.html#contentDescription">contentDescription</a></b> () const</li>
 <li><div class="fn"/>QMailMessageContentDisposition <b><a href="qmailmessagepart.html#contentDisposition">contentDisposition</a></b> () const</li>
@@ -63,65 +62,63 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailMessagePart"></a>QMailMessagePart::QMailMessagePart ()</h3>
 <p>Constructs an empty message part object.</p>
-<h3 class="fn"><a name="dtor.QMailMessagePart"></a>QMailMessagePart::~QMailMessagePart ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Destructor; called immediately before the object is deleted.</p>
-<h3 class="fn"><a name="attachmentPath"></a><a href="qstring.html">QString</a> QMailMessagePart::attachmentPath () const</h3>
+<h3 class="fn"><a name="attachmentPath"></a><a href="./qstring.html">QString</a> QMailMessagePart::attachmentPath () const</h3>
 <p>Returns the path to a <a href="qmailmessagepart.html">QMailMessagePart</a> attachment file. Returns an empty path for parts that are not attachments or have not been detached.</p>
-<h3 class="fn"><a name="contentDescription"></a><a href="qstring.html">QString</a> QMailMessagePart::contentDescription () const</h3>
+<h3 class="fn"><a name="contentDescription"></a><a href="./qstring.html">QString</a> QMailMessagePart::contentDescription () const</h3>
 <p>Returns the Content-Description header field for the part, if present; otherwise returns an empty string.</p>
 <p>See also <a href="qmailmessagepart.html#setContentDescription">setContentDescription</a>().</p>
 <h3 class="fn"><a name="contentDisposition"></a><a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> QMailMessagePart::contentDisposition () const</h3>
 <p>Returns the Content-Disposition header field for the part.</p>
 <p>See also <a href="qmailmessagepart.html#setContentDisposition">setContentDisposition</a>().</p>
-<h3 class="fn"><a name="contentIDx"></a><a href="qstring.html">QString</a> QMailMessagePart::contentID () const</h3>
+<h3 class="fn"><a name="contentIDx"></a><a href="./qstring.html">QString</a> QMailMessagePart::contentID () const</h3>
 <p>Returns the Content-Id header field for the part, if present; otherwise returns an empty string.</p>
 <p>See also <a href="qmailmessagepart.html#setContentID">setContentID</a>().</p>
-<h3 class="fn"><a name="contentLanguage"></a><a href="qstring.html">QString</a> QMailMessagePart::contentLanguage () const</h3>
+<h3 class="fn"><a name="contentLanguage"></a><a href="./qstring.html">QString</a> QMailMessagePart::contentLanguage () const</h3>
 <p>Returns the Content-Language header field for the part, if present; otherwise returns an empty string.</p>
 <p>See also <a href="qmailmessagepart.html#setContentLanguage">setContentLanguage</a>().</p>
-<h3 class="fn"><a name="contentLocation"></a><a href="qstring.html">QString</a> QMailMessagePart::contentLocation () const</h3>
+<h3 class="fn"><a name="contentLocation"></a><a href="./qstring.html">QString</a> QMailMessagePart::contentLocation () const</h3>
 <p>Returns the Content-Location header field for the part, if present; otherwise returns an empty string.</p>
 <p>See also <a href="qmailmessagepart.html#setContentLocation">setContentLocation</a>().</p>
-<h3 class="fn"><a name="detachAttachment"></a>bool QMailMessagePart::detachAttachment ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
+<h3 class="fn"><a name="detachAttachment"></a>bool QMailMessagePart::detachAttachment ( const <a href="./qstring.html">QString</a> &amp; <i>path</i> )</h3>
 <p>Detaches a file attachment <a href="qmailmessagepart.html">QMailMessagePart</a>, decoding and saving the file part into the directory specified by <i>path</i>. The name of the file is taken from the part. If another file already exists in the path a new unique name of the format &lt;filename&gt;.&lt;random chars&gt; is saved. Returns <tt>true</tt> on success or <tt>false</tt> otherwise.</p>
-<h3 class="fn"><a name="displayName"></a><a href="qstring.html">QString</a> QMailMessagePart::displayName () const</h3>
+<h3 class="fn"><a name="displayName"></a><a href="./qstring.html">QString</a> QMailMessagePart::displayName () const</h3>
 <p>Returns a non-empty string to identify the part, appropriate for display. If the part 'Content-Type' header field contains a 'name' parameter, that value is used. Otherwise, if the part has a 'Content-Disposition' header field containing a 'filename' parameter, that value is used. Otherwise, if the part has a 'Content-ID' header field, that value is used. Finally, a usable name will be created by combining the content type of the part with the part's number.</p>
 <p>See also <a href="qmailmessagepart.html#identifier">identifier</a>().</p>
-<h3 class="fn"><a name="fromData"></a>QMailMessagePart QMailMessagePart::fromData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>input</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromData"></a>QMailMessagePart QMailMessagePart::fromData ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>input</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Creates a <a href="qmailmessagepart.html">QMailMessagePart</a> containing an attachment of type <i>disposition</i>, from the data contained in <i>input</i>, of content type <i>type</i> and using the transfer encoding <i>encoding</i>. The current status of the data is specified as <i>status</i>.</p>
 <p>See also <a href="qmailmessagebody.html#fromData">QMailMessageBody::fromData</a>().</p>
-<h3 class="fn"><a name="fromData-2"></a>QMailMessagePart QMailMessagePart::fromData ( const <a href="qstring.html">QString</a> &amp; <i>input</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromData-2"></a>QMailMessagePart QMailMessagePart::fromData ( const <a href="./qstring.html">QString</a> &amp; <i>input</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Creates a <a href="qmailmessagepart.html">QMailMessagePart</a> containing an attachment of type <i>disposition</i>, from the data contained in <i>input</i>, of content type <i>type</i> and using the transfer encoding <i>encoding</i>.</p>
 <p>See also <a href="qmailmessagebody.html#fromData">QMailMessageBody::fromData</a>().</p>
-<h3 class="fn"><a name="fromFile"></a>QMailMessagePart QMailMessagePart::fromFile ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromFile"></a>QMailMessagePart QMailMessagePart::fromFile ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Creates a <a href="qmailmessagepart.html">QMailMessagePart</a> containing an attachment of type <i>disposition</i>, from the data contained in <i>filename</i>, of content type <i>type</i> and using the transfer encoding <i>encoding</i>. The current status of the data is specified as <i>status</i>.</p>
 <p>See also <a href="qmailmessagebody.html#fromFile">QMailMessageBody::fromFile</a>().</p>
-<h3 class="fn"><a name="fromStream"></a>QMailMessagePart QMailMessagePart::fromStream ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromStream"></a>QMailMessagePart QMailMessagePart::fromStream ( <a href="./qdatastream.html">QDataStream</a> &amp; <i>in</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i>, <a href="qmailmessagebody.html#EncodingStatus-enum">QMailMessageBody::EncodingStatus</a> <i>status</i> = QMailMessageBody::RequiresEncoding )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Creates a <a href="qmailmessagepart.html">QMailMessagePart</a> containing an attachment of type <i>disposition</i>, from the data read from <i>in</i>, of content type <i>type</i> and using the transfer encoding <i>encoding</i>. The current status of the data is specified as <i>status</i>.</p>
 <p>See also <a href="qmailmessagebody.html#fromStream">QMailMessageBody::fromStream</a>().</p>
-<h3 class="fn"><a name="fromStream-2"></a>QMailMessagePart QMailMessagePart::fromStream ( <a href="qtextstream.html">QTextStream</a> &amp; <i>in</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromStream-2"></a>QMailMessagePart QMailMessagePart::fromStream ( <a href="./qtextstream.html">QTextStream</a> &amp; <i>in</i>, const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i>, const <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> &amp; <i>type</i>, <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> <i>encoding</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Creates a <a href="qmailmessagepart.html">QMailMessagePart</a> containing an attachment of type <i>disposition</i>, from the data read from <i>in</i>, of content type <i>type</i> and using the transfer encoding <i>encoding</i>.</p>
 <p>See also <a href="qmailmessagebody.html#fromStream">QMailMessageBody::fromStream</a>().</p>
-<h3 class="fn"><a name="identifier"></a><a href="qstring.html">QString</a> QMailMessagePart::identifier () const</h3>
+<h3 class="fn"><a name="identifier"></a><a href="./qstring.html">QString</a> QMailMessagePart::identifier () const</h3>
 <p>Returns a non-empty string to identify the part, appropriate for storage. If the part has a 'Content-ID' header field, that value is used. Otherwise, if the part has a 'Content-Disposition' header field containing a 'filename' parameter, that value is used. Otherwise, if the part 'Content-Type' header field contains a 'name' parameter, that value is used. Finally, the part's number will be returned.</p>
 <h3 class="fn"><a name="partNumber"></a>int QMailMessagePart::partNumber () const</h3>
 <p>Returns the number of the part, if it has been set; otherwise returns -1.</p>
 <p>See also <a href="qmailmessagepart.html#setPartNumber">setPartNumber</a>().</p>
-<h3 class="fn"><a name="setContentDescription"></a>void QMailMessagePart::setContentDescription ( const <a href="qstring.html">QString</a> &amp; <i>description</i> )</h3>
+<h3 class="fn"><a name="setContentDescription"></a>void QMailMessagePart::setContentDescription ( const <a href="./qstring.html">QString</a> &amp; <i>description</i> )</h3>
 <p>Sets the Content-Description header field for the part to contain <i>description</i>.</p>
 <p>See also <a href="qmailmessagepart.html#contentDescription">contentDescription</a>().</p>
 <h3 class="fn"><a name="setContentDisposition"></a>void QMailMessagePart::setContentDisposition ( const <a href="qmailmessagecontentdisposition.html">QMailMessageContentDisposition</a> &amp; <i>disposition</i> )</h3>
 <p>Sets the Content-Disposition header field for the part to contain <i>disposition</i>.</p>
 <p>See also <a href="qmailmessagepart.html#contentDisposition">contentDisposition</a>().</p>
-<h3 class="fn"><a name="setContentID"></a>void QMailMessagePart::setContentID ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )</h3>
+<h3 class="fn"><a name="setContentID"></a>void QMailMessagePart::setContentID ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> )</h3>
 <p>Sets the Content-Id header field for the part to contain <i>id</i>.</p>
 <p>See also <a href="qmailmessagepart.html#contentIDx">contentID</a>().</p>
-<h3 class="fn"><a name="setContentLanguage"></a>void QMailMessagePart::setContentLanguage ( const <a href="qstring.html">QString</a> &amp; <i>language</i> )</h3>
+<h3 class="fn"><a name="setContentLanguage"></a>void QMailMessagePart::setContentLanguage ( const <a href="./qstring.html">QString</a> &amp; <i>language</i> )</h3>
 <p>Sets the Content-Language header field for the part to contain <i>language</i>.</p>
 <p>See also <a href="qmailmessagepart.html#contentLanguage">contentLanguage</a>().</p>
-<h3 class="fn"><a name="setContentLocation"></a>void QMailMessagePart::setContentLocation ( const <a href="qstring.html">QString</a> &amp; <i>location</i> )</h3>
+<h3 class="fn"><a name="setContentLocation"></a>void QMailMessagePart::setContentLocation ( const <a href="./qstring.html">QString</a> &amp; <i>location</i> )</h3>
 <p>Sets the Content-Location header field for the part to contain <i>location</i>.</p>
 <p>See also <a href="qmailmessagepart.html#contentLocation">contentLocation</a>().</p>
 <h3 class="fn"><a name="setPartNumber"></a>void QMailMessagePart::setPartNumber ( int <i>partNumber</i> )</h3>
@@ -129,8 +126,8 @@
 <p>See also <a href="qmailmessagepart.html#partNumber">partNumber</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.0</div></td>
+<td align="right"><div align="right">Qtopia 4.3.1</div></td>
 </tr></table></div></address></body>
 </html>

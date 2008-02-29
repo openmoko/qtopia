@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -31,11 +31,11 @@
 #include <QDBusReply>
 #include <QDBusMessage>
 #include <QDBusAbstractAdaptor>
+#include <QDebug>
 
 #include <stdio.h>
 #include <string.h>
 
-#include <QDebug>
 
 class PasskeyAgentDBusAdaptor : public QDBusAbstractAdaptor
 {
@@ -122,9 +122,6 @@ static bluez_error_mapping bluez_errors[] = {
 void QBluetoothPasskeyAgent_Private::handleError(const QDBusError &error)
 {
     m_error = QBluetoothPasskeyAgent::UnknownError;
-#ifdef QBLUETOOTH_DEBUG
-    qDebug() << "Decoding error:" << error;
-#endif
 
     int i = 0;
     while (bluez_errors[i].name) {

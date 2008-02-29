@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -125,6 +123,7 @@ extern void qt_directpainter_embedevent(QDirectPainter *dp,
 const int qwsSharedRamSize = 1 * 1024; // misc data, written by server, read by clients
 
 extern QApplication::Type qt_appType;
+extern QDesktopWidget *qt_desktopWidget;
 
 //these used to be environment variables, they are initialized from
 //environment variables in
@@ -220,18 +219,20 @@ static void setMaxWindowRect(const QRect &rect)
 {
     const QList<QScreen*> subScreens = qt_screen->subScreens();
     QScreen *screen = qt_screen;
+    int screenNo = 0;
     for (int i = 0; i < subScreens.size(); ++i) {
         if (subScreens.at(i)->region().contains(rect)) {
             screen = subScreens.at(i);
+            screenNo = i;
             break;
         }
     }
 
     QApplicationPrivate *ap = QApplicationPrivate::instance();
-    ap->setMaxWindowRect(screen, rect);
+    ap->setMaxWindowRect(screen, screenNo, rect);
 }
 
-void QApplicationPrivate::setMaxWindowRect(const QScreen *screen,
+void QApplicationPrivate::setMaxWindowRect(const QScreen *screen, int screenNo,
                                            const QRect &rect)
 {
     if (maxWindowRects.value(screen) == rect)
@@ -247,6 +248,9 @@ void QApplicationPrivate::setMaxWindowRect(const QScreen *screen,
         if (w->isMaximized() && s == screen)
             w->d_func()->setMaxWindowState_helper();
     }
+
+    if ( qt_desktopWidget ) // XXX workaround crash
+        emit QApplication::desktop()->workAreaResized(screenNo);
 }
 
 /*****************************************************************************
@@ -513,7 +517,19 @@ void QWSDisplay::Data::sendSynchronousCommand(QWSCommand & cmd)
     if  (csocket) {
         lockClient(QWSLock::Communication);
         cmd.write(csocket);
-        csocket->waitForBytesWritten();
+
+        // It is only safe to wait for the server if we have flushed the command to the socket
+        if (csocket->flush()) {
+            // We don't know if flushing is complete until flush() returns false
+            unsigned int delay = 1;
+            while (csocket->flush()) {
+                // Pause before we make another attempt to flush
+                ::usleep(delay * 1000);
+                if (delay < 1024) 
+                    delay *= 2;
+            }
+        }
+
         waitClient(QWSLock::Communication);
     } else
 #endif
@@ -546,7 +562,6 @@ void Q_GUI_EXPORT qt_app_reinit( const QString& newAppName )
 #endif // QT_NO_QWS_MULTIPROCESS
 
 class QDesktopWidget;
-extern QDesktopWidget *qt_desktopWidget;
 
 #ifndef QT_NO_QWS_MULTIPROCESS
 void QWSDisplay::Data::reinit( const QString& newAppName )
@@ -830,7 +845,7 @@ void QWSDisplay::Data::fillQueue()
 #endif
     while (e) {
 #ifndef QT_NO_QWS_MULTIPROCESS
-        bytesRead += 2* sizeof(int) + e->simpleLen + e->rawLen;
+        bytesRead += QWS_PROTOCOL_ITEM_SIZE((*e));
 #endif
         if (e->type == QWSEvent::Connected) {
             connected_event = static_cast<QWSConnectedEvent *>(e);
@@ -982,9 +997,10 @@ void QWSDisplay::Data::offsetPendingExpose(int window, const QPoint &offset)
 }
 #endif
 
+#ifndef QT_NO_QWS_MULTIPROCESS
+
 static int qws_connection_timeout = 5;
 
-#ifndef QT_NO_QWS_MULTIPROCESS
 void QWSDisplay::Data::connectToPipe()
 {
     Q_ASSERT(csocket);

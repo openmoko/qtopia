@@ -1,26 +1,103 @@
 
+#include <QTimer>
+
+#include <qtopianamespace.h>
+#include <qtopialog.h>
+
+#include <timidity.h>
+
 #include "mididecoder.h"
 #include "midiplugin.h"
 
 
-class MidiPlugin::MidiPluginPrivate
+class MidiPlugin::MidiPluginPrivate : public QObject
 {
+    Q_OBJECT
+
 public:
+    MidiPluginPrivate();
+    ~MidiPluginPrivate();
+
+    bool        initialized;
+    int         active;
     QStringList mimeTypes;
     QStringList fileExtensions;
+    QTimer*     cleanupTimer;
+
+public slots:
+    void init();
+    void cleanup();
+    void unload();
 };
 
+MidiPlugin::MidiPluginPrivate::MidiPluginPrivate():
+    initialized(false),
+    active(0)
+{
+    mimeTypes << "audio/midi" << "audio/x-midi";
+    fileExtensions << "mid" << "midi";
+
+    cleanupTimer = new QTimer(this);
+    cleanupTimer->setSingleShot(true);
+    cleanupTimer->setInterval(30000);       // XXX: magic number
+
+    connect(cleanupTimer, SIGNAL(timeout()), SLOT(unload()));
+}
+
+MidiPlugin::MidiPluginPrivate::~MidiPluginPrivate()
+{
+}
+
+void MidiPlugin::MidiPluginPrivate::init()
+{
+    if (active++ > 0)
+        return;
+
+    if (initialized) {
+        cleanupTimer->stop();
+        return;
+    }
+
+    // Load .cfg
+    foreach (QString configPath, Qtopia::installPaths()) {
+        configPath += QLatin1String("etc/timidity/timidity.cfg");
+
+        qLog(Media) << "MidiDecoder::MidiDecoder(); searching for config -" << configPath;
+
+        if (QFileInfo(configPath).exists()) {
+            qLog(Media) << "MidiDecoder::MidiDecoder(); found timidity.cfg";
+
+            if (mid_init(configPath.toLocal8Bit().data()) == -1)
+                qLog(Media) << "MidiDecoder::MidiDecoder(); Invalid config file";
+
+            initialized = true;
+            break;
+        }
+    }
+}
+
+void MidiPlugin::MidiPluginPrivate::cleanup()
+{
+    if (--active == 0)
+        cleanupTimer->start();
+}
+
+void MidiPlugin::MidiPluginPrivate::unload()
+{
+    mid_exit();
+    initialized = false;
+}
 
 
 MidiPlugin::MidiPlugin():
     d(new MidiPluginPrivate)
 {
-    d->mimeTypes << "audio/midi" << "audio/x-midi";
-    d->fileExtensions << "mid" << "midi";
 }
 
 MidiPlugin::~MidiPlugin()
 {
+    d->cleanup();
+
     delete d;
 }
 
@@ -60,16 +137,6 @@ bool MidiPlugin::canDecode() const
     return true;
 }
 
-bool MidiPlugin::supportsVideo() const
-{
-    return false;
-}
-
-bool MidiPlugin::supportsAudio() const
-{
-    return true;
-}
-
 
 QMediaEncoder* MidiPlugin::encoder(QString const&)
 {
@@ -78,12 +145,17 @@ QMediaEncoder* MidiPlugin::encoder(QString const&)
 
 QMediaDecoder* MidiPlugin::decoder(QString const& mimeType)
 {
-//    if (d->mimeTypes.indexOf(mimeType) != -1)
-        return new MidiDecoder;
+    d->init();
 
-//   return 0;
+    QMediaDecoder*  decoder = new MidiDecoder;
+    connect(decoder, SIGNAL(destroyed(QObject*)), d, SLOT(cleanup()));
+
+    return decoder;
+
+    Q_UNUSED(mimeType);
 }
 
-
 QTOPIA_EXPORT_PLUGIN(MidiPlugin);
+
+#include "midiplugin.moc"
 

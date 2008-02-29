@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -27,6 +27,7 @@
 #include <qtablewidget.h>
 #include <qtimer.h>
 #include <qsettings.h>
+#include <qsoftmenubar.h>
 #include <QMailMessage>
 #include "emaillistitem.h"
 
@@ -56,8 +57,8 @@ public:
     QString currentMailbox();
     void setCurrentMailbox(const QString &mailbox);
 
-    void treeInsert(const QMailId& id);
-    void treeInsert(const QMailIdList& idList);
+    void treeInsert(const QMailId& id, const QSoftMenuBar::StandardLabel );
+    void treeInsert(const QMailIdList& idList, const QSoftMenuBar::StandardLabel );
     void clear();
 
     void ensureWidthSufficient(const QString &text);
@@ -72,6 +73,7 @@ public:
     void setSelectedItem(QTableWidgetItem* item);
     void setSelectedId(const QMailId& id);
     void setSelectedRow(int row);
+    void resetNameCaches();
 
 signals:
     void itemPressed(EmailListItem *);

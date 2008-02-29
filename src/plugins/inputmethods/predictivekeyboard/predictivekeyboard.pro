@@ -15,7 +15,7 @@ SOURCES		= predictivekeyboard.cpp \
                   proxyscreen.cpp
 
 pkg.name=qpe-predictivekeyboard
-pkg.domain=libs
+pkg.domain=trusted
 
 dict.files=
 dict.files=words.qtrie

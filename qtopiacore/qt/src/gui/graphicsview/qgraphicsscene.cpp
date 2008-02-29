@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
@@ -28,8 +28,6 @@
 ** functionality provided by Qt Designer and its related libraries.
 **
 ** Trolltech reserves all rights not expressly granted herein.
-** 
-** Trolltech ASA (c) 2007
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2436,7 +2434,7 @@ void QGraphicsScene::update(const QRectF &rect)
     \endcode
 
     Note that QGraphicsView currently supports background caching only (see
-    QGraphicsView::CachedBackground). This function is equivalent to calling
+    QGraphicsView::CacheBackground). This function is equivalent to calling
     update() if any layer but BackgroundLayer is passed.
 
     \sa QGraphicsView::resetCachedContent()
@@ -2450,6 +2448,7 @@ void QGraphicsScene::invalidate(const QRectF &rect, SceneLayers layers)
 
 /*!
     \fn void QGraphicsScene::invalidate(qreal x, qreal y, qreal w, qreal h, SceneLayers layers)
+    \overload
     \since 4.3
 
     This convenience function is equivalent to calling invalidate(QRectF(\a x, \a
@@ -3138,6 +3137,9 @@ void QGraphicsScene::inputMethodEvent(QInputMethodEvent *event)
     All painting is done in \e scene coordinates. The \a rect
     parameter is the exposed rectangle.
 
+    If all you want is to define a color, texture, or gradient for the
+    background, you can call setBackgroundBrush() instead.
+
     \sa drawForeground(), drawItems()
 */
 void QGraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
@@ -3162,6 +3164,9 @@ void QGraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 
     All painting is done in \e scene coordinates. The \a rect
     parameter is the exposed rectangle.
+
+    If all you want is to define a color, texture or gradient for the
+    foreground, you can call setForegroundBrush() instead.
 
     \sa drawBackground(), drawItems()
 */
@@ -3262,7 +3267,7 @@ void QGraphicsScene::drawItems(QPainter *painter,
     contains a list of scene rectangles that indicate the area that
     has been changed.
 
-    \sa QGraphicsView::update()
+    \sa QGraphicsView::updateScene()
 */
 
 /*!

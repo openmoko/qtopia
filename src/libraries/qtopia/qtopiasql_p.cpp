@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -96,20 +96,20 @@ void QtopiaSqlPrivate::systemMessage(const QString &message, const QByteArray &d
     {
         // okay we need to flush all (old) the database handles here...
 
-        QHash<QtopiaDatabaseId, QSqlDatabase> hash;
-        foreach(hash, QtopiaSqlPrivate::dbs)
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QSqlDatabase> >::iterator hash;
+        for( hash = dbs.begin(); hash != dbs.end(); hash++ )
         {
-            foreach(QtopiaDatabaseId id, hash.keys())
+            foreach(QtopiaDatabaseId id, hash->keys())
             {
                 if(!masterAttachedConns.contains(id))
                 {
-                    hash.take(id).close();
-                    QHash<QtopiaDatabaseId, QString> hash2;
-                    foreach(hash2, QtopiaSqlPrivate::connectionNames)
+                    hash->take(id).close();
+                    QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QString> >::iterator hash2;
+                    for( hash2 = connectionNames.begin(); hash2 != connectionNames.end(); hash2++ )
                     {
-                        if(hash2.keys().contains(id))
+                        if(hash2->keys().contains(id))
                         {
-                            QSqlDatabase::removeDatabase(hash2.take(id));
+                            QSqlDatabase::removeDatabase(hash2->take(id));
                         }
                     }
                 }
@@ -155,7 +155,18 @@ void QtopiaSqlPrivate::disksChanged ()
 
     foreach ( const QFileSystem *fs, fileSystems ) {
         // Have I seen this database already?
-        if ( fs->isConnected() && QtopiaSql::instance()->databaseIdForPath(fs->path()) == 0 && fs->contentDatabase()) {
+        if( !fs->isConnected() && fs->contentDatabase() ) {
+            if ( !fs->prevPath().isEmpty() && dbPaths.key( fs->prevPath(), quint32(-1) ) != quint32(-1) ) {
+                // Better late than never... detach this database now
+                qLog(Sql) << "Detaching database for path" << fs->prevPath();
+                QtopiaSql::instance()->detachDB(fs->prevPath());
+            }
+        } else if ( fs->contentDatabase() ) {
+            QtopiaDatabaseId databaseId = QtopiaSql::instance()->databaseIdForPath(fs->path());
+
+            if ( databaseId != quint32(-1) && databaseId != 0 ) {
+                continue;
+            }
             // qLog(Sql) << "fs->path() =" << fs->path() << "fs->isRemovable() =" << fs->isRemovable() << "fs->isWritable() =" << fs->isWritable();
             if ( !fs->isRemovable() && fs->isWritable() ) {
                 // Simple case, just attach normally
@@ -210,13 +221,18 @@ void QtopiaSqlPrivate::disksChanged ()
                 qLog(Sql) << "Attaching database" << dbPath << "for path" << fs->path();
                 QtopiaSql::instance()->attachDB(fs->path(), dbPath);
             }
-            // Tell ContentServer to scan for documents (if this location contains them)
-            if ( qApp->type() == QApplication::GuiServer && fs->documents() )
+
+            // Media may have been removed while dbmigrate was occuring, in this case we want to detach the database
+            // and not scan the media.
+            if( !fs->isConnected() ) {
+                if ( !fs->prevPath().isEmpty() ) {
+                    qLog(Sql) << "Detaching database for path" << fs->prevPath();
+                    QtopiaSql::instance()->detachDB(fs->prevPath());
+                }
+            } else if ( qApp->type() == QApplication::GuiServer && fs->documents() ) {
+                // Tell ContentServer to scan for documents (if this location contains them)
                 QContentSet::scan(fs->path());
-        } else if ( !fs->isConnected() && !fs->prevPath().isEmpty() ) {
-            // Better late than never... detach this database now
-            qLog(Sql) << "Detaching database for path" << fs->prevPath();
-            QtopiaSql::instance()->detachDB(fs->prevPath());
+            }
         }
     }
 

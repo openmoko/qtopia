@@ -52,7 +52,7 @@ SOURCES		= \
     wavoutputstream.cpp
 
 pkg.desc=SIP agent
-pkg.domain=window,mediasession,phonecomm,netadmin,directaudio
+pkg.domain=trusted
 
 depends(libraries/qtopiaphone)
 depends(libraries/qtopiaaudio)

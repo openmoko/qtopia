@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2007 Trolltech AS. All rights reserved.
+** Copyright (C) 2000-2008 Trolltech AS. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -54,6 +54,8 @@ const QString QPackageRegistry::profilesFileName = "sxe.profiles";
 const QString QPackageRegistry::binInstallPath = "/bin/";
 const QString QPackageRegistry::qlLibInstallPath = "/plugins/application/";
 const QString QPackageRegistry::packageDirectory = "packages";
+const QString QPackageRegistry::procLidsKeysPath = "/proc/lids/keys";
+const int QPackageRegistry::maxProgId = 2;
 
 ////////////////////////////////////////////////////////////////////////
 /////
@@ -732,7 +734,7 @@ void QPackageRegistry::initialiseInstallDicts()
     KeyFiler kf;
     const unsigned char *authData;
     qLog(SXE) << "Initialise install dictionaries";
-    for ( unsigned char progId = 0; progId < QSXE_MAX_PROG_ID; progId++ )
+    for ( unsigned char progId = 0; progId <= maxProgId; progId++ )
     {
         authData = getClientKey( progId );
         // qLog(SXE) << "\ttrying to load keys for progId" << progId;
@@ -901,7 +903,7 @@ void QPackageRegistry::registerBinary( SxeProgramInfo &pi )
     {
         pi.id = profileDict.value( pi.domain );
         Q_ASSERT( progDict.contains( pi.id ));
-        ::memcpy( &pi.key, progDict.value( pi.id ), QSXE_KEY_LEN );
+        KeyFiler::randomizeKey( (char*)pi.key );
         qLog(SXE) << "\tprofile" << pi.domain << "matched, using existing progId" << pi.id;
     }
     else
@@ -921,7 +923,10 @@ void QPackageRegistry::registerBinary( SxeProgramInfo &pi )
         qWarning( "\tno safe-exec install on %s", qPrintable( fpath ));
     }
 
-    updateProcKeyFile( pi, kf.fileDescriptor() );
+    //only modify Keyfile if not on a lids enabled device 
+    if ( !QFile::exists( procLidsKeysPath ))
+        updateProcKeyFile( pi, kf.fileDescriptor() );
+    
     addToManifest( pi, kf.fileDescriptor() );
     if ( !profileDict.contains( pi.domain ))
     {
@@ -1005,14 +1010,26 @@ bool QPackageRegistry::unregisterPackageBinaries( const QString &packagePath )
     checkList = removeFromRegistry( packagePath, Installs, result ).toList();
     if ( !result )
     {
-        qWarning("QPackageRegistry::unregisterPackageBinaries could not unregister from installs");
+        qLog(SXE) << "QPackageRegistry::unregisterPackageBinaries could not unregister from installs "
+                  << "(Note:if the package hasn't been registered yet, this warning can be ignored)";
         goto endUnregisterPackageBinaries;
     }
 
-    removeFromRegistry( checkList, Manifest, result );
+    checkList = removeFromRegistry( checkList, Manifest, result ).toList();
     if ( !result)
+    {
+        goto endUnregisterPackageBinaries;
         qWarning("QPackageRegistry::unregisterPackageBinaries could not unregister from manifest");
-          
+    }
+
+    //only modify Keyfile if not on a lids enabled device
+    if ( !QFile::exists( procLidsKeysPath ))
+    {
+        removeFromRegistry( checkList, Keyfile, result );
+        if ( !result )
+            qWarning("QPackageRegistry::unregisterPackageBinaries could not unregister from keyfile");
+    }
+
 endUnregisterPackageBinaries:
     closeSystemFiles();
     return result;
@@ -1032,6 +1049,10 @@ endUnregisterPackageBinaries:
   If \a type is Manifest, then \a checkList is a QList<QVariant> of the
   installId's associated with a package.  The package's entries in the
   manifest file is deleted and an empty QList<variant> is returned.
+
+  If \a type is Keyfile, then \a checkList is a QList<QVariant> of the
+  inode and device numbers of the package binaries.  The inodes and device
+  numbers are listed the following pattern: inode1, device1, inode2, device2...
 
   The param \a result is modified depending on whether the removal operation
   was successful or not.
@@ -1059,13 +1080,17 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
             stream = fdopen( manifestFd, "w+" );
             fd = manifestFd;
             break;
+        case ( Keyfile ):
+            fd = ::open( qPrintable(sxeConfPath() + "/" QSXE_KEYFILE), O_RDWR );
+            stream = fdopen( fd, "w+" );
+            break;
         default:
             qWarning( "QPackageRegistry::removeFromRegistry invalid control type" );
             return ret;
     }
-    
+
     if ( fstat( fd, &st ) == -1 )
-    { 
+    {
         qWarning("QPackageRegistry::removeFromRegistry error; %s", strerror( errno ));
         return ret;
     }
@@ -1082,6 +1107,9 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
 
     //specific variables for Manifest
     IdBlock idBuf;
+    
+    //specific variables for Keyfile
+    struct usr_key_entry kBuf;
 
     off_t currPos;
     bool match;
@@ -1117,9 +1145,27 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
         {
             if ( !::fread( &idBuf, sizeof( struct IdBlock ), 1, stream ) )
                 break;
-            
+
             if ( checkList.toList().contains( idBuf.installId ) )
-                match = true;    
+            {
+                match = true;
+                ret.append( idBuf.inode );
+                ret.append( idBuf.device );
+            }
+
+        } else if ( type == Keyfile )
+        {
+            if ( !::fread( &kBuf, sizeof( struct usr_key_entry ), 1, stream ) )
+                    break;
+            QList<QVariant> ino_devs = checkList.toList();
+            for ( int i = 0; i < ino_devs.count(); i=i+2 )
+            {
+                if ( kBuf.ino == (ino_t)ino_devs[i].toLongLong()
+                        && kBuf.dev == (dev_t)ino_devs[i+1].toLongLong() )
+                {
+                    match = true;
+                }
+            }
         }
 
         if ( match ) //if a match has been made
@@ -1141,7 +1187,7 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
 
     if ( beginPos == -1 )
     {
-        qWarning( "QPackageRegistry::Package to be removed not found in %s", (type == Installs ) ? "installs" : "manifest" );
+        qLog(SXE) << "QPackageRegistry::Package to be removed not found in %s", (type == Installs ) ? "installs" : "manifest";
         return ret;
     }
     
@@ -1160,13 +1206,22 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
 
         fseek ( stream, beginPos, SEEK_SET );
         ::fwrite(charBuf, sizeof( char ), numItems, stream );
-        
+
         beginPos =  ftello( stream );
         fseek ( stream, afterEndPos, SEEK_SET ); 
     }
 
     //registry file could become corrupt if not properly truncated
-    Q_ASSERT( ftruncate( fd, newSize ) == 0 );
+
+    int r = ftruncate( fd, newSize );
+    Q_UNUSED(r);//assert is removed in release mode so r becomes unused.
+    Q_ASSERT( r == 0 );
+
+    if ( type == Keyfile )
+    {
+       fclose( stream );
+       close( fd );
+    }
     result = true;
     return ret;
 }

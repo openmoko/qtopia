@@ -1,8 +1,12 @@
 qtopia_project(qtopia app)
+
 TARGET=mediaserver
 CONFIG+=singleexec_main
+
 # Give us a direct connection to the document system
 DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
+
+DEFINES+="CONFIGURED_ENGINES=$$LITERAL_QUOTE$$LITERAL_ESCAPED_QUOTE$$QTOPIAMEDIA_ENGINES$$LITERAL_ESCAPED_QUOTE$$LITERAL_QUOTE"
 
 HEADERS =   \
             sessionmanager.h \
@@ -16,11 +20,11 @@ HEADERS =   \
             mediacontrolserver.h \
             mediacontentserver.h \
             domainmanager.h \
-            domainmanagerservice.h \
             sessionmanagersession.h \
             mediaagentsession.h \
             drmsession.h \
-            mediapowercontrol.h
+            mediapowercontrol.h\
+            mediavolumecontrol.h
 
 SOURCES =   \
             main.cpp \
@@ -35,14 +39,14 @@ SOURCES =   \
             mediacontrolserver.cpp \
             mediacontentserver.cpp \
             domainmanager.cpp \
-            domainmanagerservice.cpp \
             sessionmanagersession.cpp \
             mediaagentsession.cpp \
             drmsession.cpp \
-            mediapowercontrol.cpp
+            mediapowercontrol.cpp\
+            mediavolumecontrol.cpp
 
 pkg.desc = Media Server
-pkg.domain = mediaserver,window,graphics,docapi,drm,cardreader,audio-policy,bluetooth,directaudio,launcher,directvideo
+pkg.domain = trusted 
 
 mediaserverservice.files = $$QTOPIA_DEPOT_PATH/services/MediaServer/mediaserver
 mediaserverservice.path = /services/MediaServer

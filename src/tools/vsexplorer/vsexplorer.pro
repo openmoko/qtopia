@@ -14,4 +14,4 @@ enable_bluetooth {
 }
 
 pkg.desc=Value Space explorer for Qtopia
-pkg.domain=base
+pkg.domain=trusted
