@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt Toolkit - QScreenCursor Class</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style>
+</head><body bgcolor="#ffffff">
+
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+
+<h1 align=center>QScreenCursor Class Reference</h1><br clear="all">
+<p>
+The QScreenCursor class manages the onscreen mouse cursor in Qt/Embedded. It provides an implementation of a software mouse cursor and can be subclassed by hardware drivers which support a hardware mouse cursor. There may only be one QScreenCursor at a time; it is constructed by <a href="qscreen.html">QScreen</a> or one of its descendants.
+<a href="#details">More...</a>
+<p>
+<code>#include &lt;<a href="qgfx_qws-h.html">qgfx_qws.h</a>&gt;</code>
+<p><a href="qscreencursor-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class="fn"><a href="#462151"><b>QScreenCursor</b></a> () </div>
+<li><div class="fn">virtual <a href="#8873f8"><b>~QScreenCursor</b></a> () </div>
+<li><div class="fn">virtual void <b>init</b> ( SWCursorData * da, bool init = FALSE ) </div>
+<li><div class="fn">virtual void <b>set</b> ( const QImage &amp; image, int hotx, int hoty ) </div>
+<li><div class="fn">virtual void <a href="#0876bc"><b>move</b></a> ( int x, int y ) </div>
+<li><div class="fn">virtual void <b>show</b> () </div>
+<li><div class="fn">virtual void <b>hide</b> () </div>
+<li><div class="fn">virtual bool <a href="#d9a709"><b>restoreUnder</b></a> ( const QRect &amp; r, QGfxRasterBase * g = 0 ) </div>
+<li><div class="fn">virtual void <b>saveUnder</b> () </div>
+<li><div class="fn">virtual void <b>drawCursor</b> () </div>
+<li><div class="fn">void <b>draw</b> () </div>
+<li><div class="fn">virtual bool <b>supportsAlphaCursor</b> () </div>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class="fn">bool <b>enabled</b> () </div>
+</ul>
+<hr><h2><a name="details"></a>Detailed Description</h2>
+The QScreenCursor class manages the onscreen mouse cursor in Qt/Embedded. It provides an implementation of a software mouse cursor and can be subclassed by hardware drivers which support a hardware mouse cursor. There may only be one QScreenCursor at a time; it is constructed by <a href="qscreen.html">QScreen</a> or one of its descendants.
+<p>
+This class is non-portable. It is available <em>only</em> in Qt/Embedded.
+It is also internal - this documentation is intended for those subclassing
+it in hardware drivers, not for application developers.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="462151"></a>QScreenCursor::QScreenCursor ()</h3>
+<p>Constructs a screen cursor.
+<h3 class="fn"><a name="8873f8"></a>QScreenCursor::~QScreenCursor () <code>[virtual]</code></h3>
+<p>Destructs a screen cursor, deleting its gfxes, cursor image and
+under-cursor storage.
+<h3 class="fn">void <a name="0876bc"></a>QScreenCursor::move ( int x, int y ) <code>[virtual]</code></h3>
+<p>Move the mouse cursor to point x,y on the screen. This should be done
+in such a way that the hotspot of the cursor is at x,y - e.g. if the
+hotspot is at 5,5 within the image then the top left of the image should
+be at x-5,y-5.
+<h3 class="fn">bool <a name="d9a709"></a>QScreenCursor::restoreUnder ( const <a href="qrect.html">QRect</a> &amp; r, <a href="qgfxrasterbase.html">QGfxRasterBase</a> * g = 0 ) <code>[virtual]</code></h3>
+<p>This is relevant to only the software mouse cursor and should be
+reimplemented as a null method in hardware cursor drivers. It redraws
+what was under the mouse cursor when the cursor is moved.
+<hr><p>
+Search the documentation, FAQ, qt-interest archive and more (uses
+<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
+<form method=post action="http://www.trolltech.com/search.cgi">
+<input type=hidden name="version" value="2.3.12"><nobr>
+<input size="50" name="search"><input type=submit value="Search">
+</nobr></form><hr><p>
+This file is part of the <a href="index.html">Qt toolkit</a>,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

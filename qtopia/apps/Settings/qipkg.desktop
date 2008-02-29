@@ -1,0 +1,11 @@
+[Translation]
+File=QtopiaSettings
+Context=Software Packages
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Type=Application
+Exec=qipkg
+MimeType=application/ipkg
+Icon=Ipkg
+Name[]=Soft­ware Pack­ages
+CanFastload=0

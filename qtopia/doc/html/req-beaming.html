@@ -1,0 +1,94 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/settings/beaming.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>&lt;b&gt;Beaming&lt;/b&gt; Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center><b>Beaming</b> Specification</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Send/Receive Data in Various Formats
+</a>
+<li><a href="#1-2"> Activate or Deactivate the Infrared Port
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <b>Beaming</b> is a settings application. It allows the user to set-up the device to
+receive and send data via an integrated infra-red (IR) port.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> Devices fitted with an infra-red port may use infra-red communications
+(IR) or &quot;beaming&quot; to transmit and receive data with other
+devices, desktop computers or printers and the like which have IR
+capability. There are a number of different IR protocols and in
+order for the transmission to succeed a protocol must be used
+that matches that expected by the other device.
+<p> <h3> Send/Receive Data in Various Formats
+</h3>
+<a name="1-1"></a><p> With this feature the protocol to be used for IR beaming may be changed
+from Qtopia's standard protocol (Object Exchange or OBEX) to another IR
+protocol that suits the target device for the transmission.
+<p> Protocols which may be selected are:
+<p> <ul>
+<li> Standard
+<li> Palm OS 
+<li> quoted ASCII
+</ul>
+<p> <h3> Activate or Deactivate the Infrared Port
+</h3>
+<a name="1-2"></a><p> For convenience of different types of beaming usage it is possible for
+the IR capability to be: enabled indefinitely; enabled in a one-shot
+mode; or set to turn off automatically after 5 minutes. These last two
+modes have the advantage that the user does not need to remember
+to deactivate IR beaming after the transmissions have been completed.
+<p> <b>Note:</b> If the IR function is left on more power may be used by
+the device and undesired interactions with IR capable devices may take
+place. It is therefore recommended that it be turned off when not needed.
+<p> The user is able to: 
+<p> <ul>
+<li> Select "Off" to <b>deactivate</b> the IR port. (Used if the IR
+port has been set to "On" using the next option).
+<li> Select "On" to <b>activate</b> the IR port and have it remain on until turned off (caution: see Note above).
+<li> Activate the IR port and automatically deactivate after 5 minutes (delay fixed, not user configurable).
+<li> Activate the IR port and automatically deactivate after transmitting one item.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

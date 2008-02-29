@@ -1,0 +1,9 @@
+[CharSets]
+#Lowercase = hiragana.qpt
+Combining = quickcombining.qpt
+Lowercase = quicklower.qpt
+Numeric = quicknumeric.qpt
+Punctuation = quickpunct.qpt
+Symbol = quicksymbol.qpt
+Uppercase = quickupper.qpt
+

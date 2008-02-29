@@ -1,0 +1,425 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:37 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaPlayerDecoder Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaPlayerDecoder Class Reference</h1>
+
+<p>The MediaPlayerDecoder class provides an abstract base class for
+Qtopia MediaPlayer decoder plugins.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediaplayerplugininterface-h.html">qtopia/mediaplayerplugininterface.h</a>&gt;</tt>
+<p>Inherited by <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>, <a href="libflashplugin.html">LibFlashPlugin</a>, and <a href="libmadplugin.html">LibMadPlugin</a>.
+<p><a href="mediaplayerdecoder-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual <a href="#~MediaPlayerDecoder"><b>~MediaPlayerDecoder</b></a> ()</li>
+<li class=fn>virtual const char * <a href="#pluginName"><b>pluginName</b></a> () = 0</li>
+<li class=fn>virtual const char * <a href="#pluginComment"><b>pluginComment</b></a> () = 0</li>
+<li class=fn>virtual double <a href="#pluginVersion"><b>pluginVersion</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#isFileSupported"><b>isFileSupported</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;file ) = 0</li>
+<li class=fn>virtual bool <a href="#open"><b>open</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;file ) = 0</li>
+<li class=fn>virtual bool <a href="#close"><b>close</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#isOpen"><b>isOpen</b></a> () = 0</li>
+<li class=fn>virtual const QString &amp; <a href="#fileInfo"><b>fileInfo</b></a> () = 0</li>
+<li class=fn>virtual int <a href="#audioStreams"><b>audioStreams</b></a> () = 0</li>
+<li class=fn>virtual int <a href="#audioChannels"><b>audioChannels</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual int <a href="#audioFrequency"><b>audioFrequency</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual int <a href="#audioSamples"><b>audioSamples</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual bool <a href="#audioSetSample"><b>audioSetSample</b></a> ( long&nbsp;sample, int&nbsp;stream ) = 0</li>
+<li class=fn>virtual long <a href="#audioGetSample"><b>audioGetSample</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual bool <a href="#audioReadSamples"><b>audioReadSamples</b></a> ( short&nbsp;*&nbsp;samples, int&nbsp;channels, long&nbsp;sampleCount, long&nbsp;&amp;&nbsp;samplesRead, int&nbsp;stream ) = 0</li>
+<li class=fn>virtual int <a href="#videoStreams"><b>videoStreams</b></a> () = 0</li>
+<li class=fn>virtual int <a href="#videoWidth"><b>videoWidth</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual int <a href="#videoHeight"><b>videoHeight</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual double <a href="#videoFrameRate"><b>videoFrameRate</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual int <a href="#videoFrames"><b>videoFrames</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual bool <a href="#videoSetFrame"><b>videoSetFrame</b></a> ( long&nbsp;frame, int&nbsp;stream ) = 0</li>
+<li class=fn>virtual long <a href="#videoGetFrame"><b>videoGetFrame</b></a> ( int&nbsp;stream ) = 0</li>
+<li class=fn>virtual bool <a href="#videoReadFrame"><b>videoReadFrame</b></a> ( unsigned char **, int, int, int, int, ColorFormat, int ) = 0</li>
+<li class=fn>virtual bool <a href="#videoReadScaledFrame"><b>videoReadScaledFrame</b></a> ( unsigned&nbsp;char&nbsp;**&nbsp;output_rows, int&nbsp;in_x, int&nbsp;in_y, int&nbsp;in_w, int&nbsp;in_h, int&nbsp;out_w, int&nbsp;out_h, ColorFormat&nbsp;color_model, int&nbsp;stream ) = 0</li>
+<li class=fn>virtual bool <a href="#videoReadYUVFrame"><b>videoReadYUVFrame</b></a> ( char *, char *, char *, int, int, int, int, int ) = 0</li>
+<li class=fn>virtual double <a href="#getTime"><b>getTime</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#setSMP"><b>setSMP</b></a> ( int&nbsp;CPUs ) = 0</li>
+<li class=fn>virtual bool <a href="#setMMX"><b>setMMX</b></a> ( bool&nbsp;useMMX ) = 0</li>
+<li class=fn>virtual bool <a href="#supportsAudio"><b>supportsAudio</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsVideo"><b>supportsVideo</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsYUV"><b>supportsYUV</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsMMX"><b>supportsMMX</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsSMP"><b>supportsSMP</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsStereo"><b>supportsStereo</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#supportsScaling"><b>supportsScaling</b></a> () = 0</li>
+<li class=fn>virtual long <a href="#getPlayTime"><b>getPlayTime</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The MediaPlayerDecoder class provides an abstract base class for
+Qtopia <a href="mediaplayer.html">MediaPlayer</a> decoder plugins.
+<p> Writing a decoder plugin is achieved by subclassing this base class,
+reimplementing the pure virtual functions and exporting the class with
+the <tt>Q_EXPORT_PLUGIN</tt> macro. See the Plugins
+    documentation for details.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="~MediaPlayerDecoder"></a>MediaPlayerDecoder::~MediaPlayerDecoder ()<tt> [virtual]</tt>
+</h3>
+
+<p> This function is called when a decoder plugin object is deleted.
+It closes any open streams, and releases any memory which has been
+allocated for decoding.
+
+<h3 class=fn>int <a name="audioChannels"></a>MediaPlayerDecoder::audioChannels ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the number of audio channels for the given <em>stream</em>. A mono
+file will return 1, stereo returns 2, and so on.
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently only supports decoding up to the first
+2 channels of audio, however it is quite possible for a <em>stream</em> to have
+up to 6 channels, and for those to be decoded when audioReadSamples is
+called with 6 channels requested.)
+
+<h3 class=fn>int <a name="audioFrequency"></a>MediaPlayerDecoder::audioFrequency ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the frequency of the audio <em>stream</em>. A typical value is 44100
+which represents that there are 44100 audio samples per second per channel
+(for example, if it is 16-bit stereo, then there will be a total of 44100*2*2
+bytes available per second).
+
+<h3 class=fn>long <a name="audioGetSample"></a>MediaPlayerDecoder::audioGetSample ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function retrieves the decoders sample postion in the given <em>stream</em>. The
+sample position can change due to <a href="#audioReadSamples">audioReadSamples</a>() being called or if supported,
+from <a href="#audioSetSample">audioSetSample</a>() being called.
+
+<h3 class=fn>bool <a name="audioReadSamples"></a>MediaPlayerDecoder::audioReadSamples ( short&nbsp;*&nbsp;samples, int&nbsp;channels, long&nbsp;sampleCount, long&nbsp;&amp;&nbsp;samplesRead, int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function reads <em>sampleCount</em> number of samples in to the <em>samples</em> buffer from the given <em>stream</em>.
+<p> The <em>samples</em> buffer is filled with 16 bit wide values, therefore if the samples are only
+8 bit, they are expanded to shorts before being stored by the decoder. The <em>channels</em> value
+specifies how many channels to decoded.
+<p> The samples for multiple channels are placed together, for example in the following order:
+<p> sample1channel1, sample1channel2, sample2channel1, sample2channel2 etc.
+<p> On success, TRUE is returned, otherwise FALSE is returned which indicates
+the end of the file has been reached. The value in <em>samplesRead</em> on return contains the number
+of samples actually read.
+<p> In the case of streamed media, when no input is currently available, a return value of TRUE
+is returned, however <em>samplesRead</em> is set to 0 after a suitable timeout has elapsed and
+no samples have been able to be read.
+
+<h3 class=fn>int <a name="audioSamples"></a>MediaPlayerDecoder::audioSamples ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the total number of audio samples in the given <em>stream</em>.
+<p> As an example, if there is 10 seconds of music at 44100Hz with stereo
+samples, this function would return 441000 samples (each sample in a
+stereo pair is only counted once).
+<p> If the media file is being streamed, it may not always be possible to
+determine the length of the streamed data (for example a radio webcast
+which continuously streams audio data), in which case the return value
+is -1 which indicates that the <em>stream</em> is not seekable. In such cases
+attempts to call <a href="#audioSetSample">audioSetSample</a>() will most likely fail.
+
+<h3 class=fn>bool <a name="audioSetSample"></a>MediaPlayerDecoder::audioSetSample ( long&nbsp;sample, int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function causes the decoder to seek to the given <em>sample</em> postion in the
+media file.
+<p> If the open <em>stream</em> is not a file, but is instead for example a URL, then
+it may not be possible to seek to the given <em>sample</em> and FALSE will be returned, otherwise
+the next time either <a href="#audioReadSamples">audioReadSamples</a>() or <a href="#videoReadFrame">videoReadFrame</a>() is called, decoding will
+continue from the set position in the file.
+<p> Note this function repositions both the audio and video if there are also video streams
+to the appropriate positions.
+<p> <p>See also <a href="#videoSetFrame">videoSetFrame</a>().
+
+<h3 class=fn>int <a name="audioStreams"></a>MediaPlayerDecoder::audioStreams ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> If the opened file contains audio streams, the number of audio streams
+are returned here, otherwise zero is returned. The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently
+only supports opening the first stream (stream 0) from a decoder if there is
+more than one stream.
+<p> The return value is normally 1 or 0.
+
+<h3 class=fn>bool <a name="close"></a>MediaPlayerDecoder::close ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function closes all open streams. If there is a failure or no streams
+are open, this function returns FALSE;
+
+<h3 class=fn>const QString &amp; <a name="fileInfo"></a>MediaPlayerDecoder::fileInfo ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns an internationalized QString which describes
+information fields which are comma seperated and paired with colons
+about the currently open stream.
+<p> An example would be:
+<pre>
+        "Format: MPEG1 Layer3, Year: 1998"
+    </pre>
+ 
+<p> The internationalization is achieved inside the plugin using the
+qApp->translate() function around the translatable strings.
+<p> For the above example, the code to generate the string might be written like this:
+<pre>
+        qApp-&gt;translate( "PluginName", "Format: MPEG1 Layer3" ) + ", " +
+            qApp-&gt;translate( "PluginName", "Year: " + "1998";
+    </pre>
+ 
+<p> Please refer to the Qt Internationalization documentation for more detailed
+information on creating code which makes good translations possible.
+<p> The translation files are loaded by the Qtopia <a href="mediaplayer.html">MediaPlayer</a> for the decoder
+plugin by searching the language directories for files matching
+$QPEDIR/i18n/[LANG]/[PLUGIN].qm for the supported languages.
+
+<h3 class=fn>long <a name="getPlayTime"></a>MediaPlayerDecoder::getPlayTime ()<tt> [virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+<p> The most accurate way to get the elapsed play time for files which contain
+audio is to use the <a href="#audioGetSample">audioGetSample</a>() function and derive the elapsed time
+from the sample rate, or for files without audio is to use <a href="#videoGetFrame">videoGetFrame</a>() and
+derive the elapsed time from the frame rate.
+
+<h3 class=fn>double <a name="getTime"></a>MediaPlayerDecoder::getTime ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is for profiling decoders. It returns the last decoded timestamp from
+the media stream.
+<p> Please refer to <a href="#getPlayTime">getPlayTime</a>() for a discussion on how best to query the elapsed time.
+
+<h3 class=fn>bool <a name="isFileSupported"></a>MediaPlayerDecoder::isFileSupported ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
+</h3>
+
+<p> If the given <em>file</em> can be decoded successfully by this plugin, a return
+value of TRUE is returned, otherwise FALSE is returned.
+
+<h3 class=fn>bool <a name="isOpen"></a>MediaPlayerDecoder::isOpen ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> If a stream has been successfully opened with a call to <a href="#open">open</a>() and has not yet
+been closed with a call to <a href="#close">close</a>(), this function returns TRUE, otherwise it
+returns FALSE;
+
+<h3 class=fn>bool <a name="open"></a>MediaPlayerDecoder::open ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [pure virtual]</tt>
+</h3>
+
+<p> If the given <em>file</em> is opened successfully by this plugin, a return
+value of TRUE is returned, otherwise FALSE is returned. After this has been
+called, functions which return information about the stream can be used.
+For example, after a call to <a href="#open">open</a>() it is possible to query the channels,
+frequency, video width and height with calls to the appropriate functions.
+
+<h3 class=fn>const char * <a name="pluginComment"></a>MediaPlayerDecoder::pluginComment ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns a string which provides copyright or a small
+amount of text that gives a brief description of the plugin.
+This string may be helpful for developers using the plugin
+to find out how the plugin authors might be able to be contacted,
+or a pointer to a web page which provides more information about
+the plugin.
+<p> The output of this function is not intented to be used in any
+user interface. Future decoder APIs may be extended to provide
+an additional function which should be internationalized and
+appropriate to be used in a user interface if nessaccery.
+
+<h3 class=fn>const char * <a name="pluginName"></a>MediaPlayerDecoder::pluginName ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns a string which is used to identify the plugin.
+The primary use of this string is for providing debug information.
+<p> The output of this function is never used in any user interface, so
+it is safe to provide a non-internationalized string. (Future decoder
+APIs will provide a replacement/additional function which will be
+declared const and will expect an internationalized QString return
+value that will be able to be used in user interfaces if nessaccery).
+
+<h3 class=fn>double <a name="pluginVersion"></a>MediaPlayerDecoder::pluginVersion ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns a number which represents the version
+of the decoder plugin. For example, if it is version 1.6 of
+the plugin, then a value of (double)1.6 would be returned.
+
+<h3 class=fn>bool <a name="setMMX"></a>MediaPlayerDecoder::setMMX ( bool&nbsp;useMMX )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is used as a hint to the decoder to use MMX specific
+optimizations if being used on an x86 processor and <em>useMMX</em> is true. On other binary
+incompatible processors, this function is interpreted to mean use the MMX equivelant
+optimizations for that processor family. For example on MIPS, this function
+translates to using MMI optimizations.
+<p> (Currently the Qtopia <a href="mediaplayer.html">MediaPlayer</a> doesn't use this function.)
+
+<h3 class=fn>bool <a name="setSMP"></a>MediaPlayerDecoder::setSMP ( int&nbsp;CPUs )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is used as a hint to the decoder for how many decoding threads
+it should consider using based on the provided number of <em>CPUs</em>.
+<p> (Currently the Qtopia <a href="mediaplayer.html">MediaPlayer</a> doesn't use this function.)
+
+<h3 class=fn>bool <a name="supportsAudio"></a>MediaPlayerDecoder::supportsAudio ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns the audio capability of the decoder. If audio can
+be decoded, this function returns TRUE, otherwise it returns FALSE.
+If audio is not supported, all virtual audio functions are still provided,
+however the return values for those functions will always be FALSE or 0 as
+applicable.
+
+<h3 class=fn>bool <a name="supportsMMX"></a>MediaPlayerDecoder::supportsMMX ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+
+<h3 class=fn>bool <a name="supportsSMP"></a>MediaPlayerDecoder::supportsSMP ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+
+<h3 class=fn>bool <a name="supportsScaling"></a>MediaPlayerDecoder::supportsScaling ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+
+<h3 class=fn>bool <a name="supportsStereo"></a>MediaPlayerDecoder::supportsStereo ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+
+<h3 class=fn>bool <a name="supportsVideo"></a>MediaPlayerDecoder::supportsVideo ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function returns the video capability of the decoder. If video can
+be decoded, this function returns TRUE, otherwise it returns FALSE.
+If video is not supported, all virtual video functions are still provided,
+however the return values for those functions will always be FALSE or 0 as
+applicable.
+
+<h3 class=fn>bool <a name="supportsYUV"></a>MediaPlayerDecoder::supportsYUV ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+
+<h3 class=fn>double <a name="videoFrameRate"></a>MediaPlayerDecoder::videoFrameRate ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the frames per second of the given video <em>stream</em>.
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> makes its best effort to play the video frames at the specified rate.)
+
+<h3 class=fn>int <a name="videoFrames"></a>MediaPlayerDecoder::videoFrames ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the total number of video frames in the given <em>stream</em>.
+
+<h3 class=fn>long <a name="videoGetFrame"></a>MediaPlayerDecoder::videoGetFrame ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function retrieves the decoders frame postion in the given <em>stream</em>.
+<p> The frame position can change due to <a href="#videoReadScaledFrame">videoReadScaledFrame</a>() being called or if supported,
+from <a href="#videoSetFrame">videoSetFrame</a>() being called.
+
+<h3 class=fn>int <a name="videoHeight"></a>MediaPlayerDecoder::videoHeight ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the height of video frames for the given <em>stream</em>.
+
+<h3 class=fn>bool <a name="videoReadFrame"></a>MediaPlayerDecoder::videoReadFrame ( unsigned char **, int, int, int, int, ColorFormat, int )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+<p> Please use <a href="#videoReadScaledFrame">videoReadScaledFrame</a>() instead.
+
+<h3 class=fn>bool <a name="videoReadScaledFrame"></a>MediaPlayerDecoder::videoReadScaledFrame ( unsigned&nbsp;char&nbsp;**&nbsp;output_rows, int&nbsp;in_x, int&nbsp;in_y, int&nbsp;in_w, int&nbsp;in_h, int&nbsp;out_w, int&nbsp;out_h, ColorFormat&nbsp;color_model, int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function decodes the current video frame from the given <em>stream</em> in to the
+buffer at <em>output_rows</em>.
+<p> The <em>in_x</em> and <em>in_y</em> parameters specify where to decode from and the <em>in_w</em> and <em>in_h</em>
+parameters specify the width and height of the input stream to decode.
+<p> The <em>out_w</em> and <em>out_h</em> parameters specify the width and height to scale the input to.
+<p> The <em>color_model</em> specifies the format of the bits for color in the output_rows.
+A typical value for the color_model is RGB565.
+<p> This function can be used (as is done in the Qtopia <a href="mediaplayer.html">MediaPlayer</a>)
+to decode video directly to a frame buffer device using the QDirectPainter class or
+directly to a QImage. In the case of decoding to a QImage, the
+QImage::jumpTable() of the QImage is provided as the first parameter
+to this function. In the QDirectPainter case, a jump table for the frame
+buffer's scanlines needs to be constructed, but this is only required to be done
+once, and could be reused by the caller for every subsequent call to this function.
+
+<h3 class=fn>bool <a name="videoReadYUVFrame"></a>MediaPlayerDecoder::videoReadYUVFrame ( char *, char *, char *, int, int, int, int, int )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function is deprecated.
+<p> Please use <a href="#videoReadScaledFrame">videoReadScaledFrame</a>() instead.
+(Future decoder interfaces may provide a similar function to this in the future).
+
+<h3 class=fn>bool <a name="videoSetFrame"></a>MediaPlayerDecoder::videoSetFrame ( long&nbsp;frame, int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> This function causes the decoder to seek to the given <em>frame</em> postion in the
+given media file's <em>stream</em>. If the open stream is not a file, but is instead for example a URL,
+then it may not be possible to seek to the given frame and FALSE will be returned, otherwise
+the next time either <a href="#audioReadSamples">audioReadSamples</a>() or <a href="#videoReadFrame">videoReadFrame</a>() is called, decoding will
+continue from the set position in the file.
+<p> Note this function repositions both the audio and video if there are also audio streams
+to the appropriate positions.
+<p> <p>See also <a href="#audioSetSample">audioSetSample</a>().
+
+<h3 class=fn>int <a name="videoStreams"></a>MediaPlayerDecoder::videoStreams ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> If the opened file contains video streams, the number of video streams
+is returned, otherwise zero is returned.
+<p> (The Qtopia <a href="mediaplayer.html">MediaPlayer</a> currently only supports opening the first
+stream (stream 0) from a decoder if there is more than one stream.)
+<p> The return value is normally 1 or 0.
+
+<h3 class=fn>int <a name="videoWidth"></a>MediaPlayerDecoder::videoWidth ( int&nbsp;stream )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the width of video frames for the given <em>stream</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

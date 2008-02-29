@@ -1,0 +1,68 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/fontfactoryinterface.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>FontFactoryInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FontFactoryInterface Class Reference</h1>
+
+<p>The FontFactoryInterface class provides an interface for
+adding font renderers to Qtopia.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="fontfactoryinterface-h.html">qtopia/fontfactoryinterface.h</a>&gt;</tt>
+<p><a href="fontfactoryinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual QFontFactory * <a href="#fontFactory"><b>fontFactory</b></a> () = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The FontFactoryInterface class provides an interface for
+adding font renderers to Qtopia.
+<p> Font factories may be added to Qtopia via plug-ins. In order to write a
+font factory plug-in you must create an interface to your QFontFactory
+derived class by deriving from the FontFactoryInterface class and
+implementing the <a href="#fontFactory">fontFactory</a>() function.
+<p> You must also subclass QRenderedFont to provide the actual rendering
+implementation.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QFontFactory * <a name="fontFactory"></a>FontFactoryInterface::fontFactory ()<tt> [pure virtual]</tt>
+</h3> 
+<p> Returns an instance of your font factory.  You should always return the same
+font factory instance if this function is called multiple times.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,281 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/voip_overview.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>VoIP Overview</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>VoIP Overview</h1>
+
+
+
+<a name="top"></a>
+This document provides an introduction to the Qtopia VoIP infrastructure. For a detailed user-guide please refer to : <a href="voip_user_guide.pdf">  Qtopia VoIP User Guide</a>
+<h2> Qtopia VoIP Architecture
+</h2>
+<a name="1"></a><p> VoIP is a Qtopia application integrated with the Qtopia server. The key features are:
+<ul>
+<li> supports Session Initiated Protocol (SIP) 
+<li> VoIP is provided as a compiler option
+<li> provides an interface to abstract the VoIP SIP stack from the VoIP application
+<li> provides basic call management functionality - VoIP call initiation/origination and termination
+<li> implements a statusQuery API to allow other applications to query information and status
+<li> integrated with Qtopia QuickDialer
+</ul>
+<p> An overview of the VoIP Framework Architecture is provided in the following diagram:
+<center><img src="../pics/voipIntegration.png" width="353" height="301"></center> 
+<p> <h2> Handler Interface 
+</h2>
+<a name="2"></a><p> The handler interface communicates with vendor SIP stacks via the vendor wrapper software.  For integration information refer to <a href="voip-integration.html">VoIP Integration</a>.
+<p> <h2> Qtopia VoIP Applications
+</h2>
+<a name="3"></a><p> Qtopia VoIP is integrated with the following applications:
+<ul>
+<li> Call History
+<li> Contacts
+<li> Settings 
+<li> Quick Dial
+</ul>
+<p> <h3> Call History
+</h3>
+<a name="3-1"></a><p> Call History is a Qtopia module providing the history of all calls received, missed and dialled. VoIP call details are displayed and calls can be initiated from the Call History screen.
+<p> <h3> Settings
+</h3>
+<a name="3-2"></a><p> Qtopia provides a basic settings application for VoIP. However, integration of a settings application and design of the settings GUI is largely the responsibility of the vendor. The following describes commonly supported functionality:
+<ol type=1>
+<li> User profile management -  save/edit/view user profile 
+<li> Preferences management -  manage the SIP, audio call preferences
+<li> Initiating registration of the SIP client to presence server
+<li> Interaction with the PIM component (Contacts) to access the contacts list.
+</ol>
+<p> The screen displays comprising the settings application are described in the following table:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Display Name
+<th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top">Display
+<td valign="top">Displays the: 
+<ul>
+<li> audio preferences
+<li> identity
+<li> registration status
+<li> SIP preferences 
+<li> user profiler
+</ul>
+as set by the user.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Identity
+<td valign="top">Allows the user to set 
+<ul>
+<li> full name
+<li> user and host parts of a SIP URL
+<li> auto-register option.
+</ul>
+<tr bgcolor="#f0f0f0">
+<td valign="top">SIP Settings
+<td valign="top">Allows the user to set:
+<ul>
+<li> call forwarding preferences
+<li> expire time of registration
+<li> expire time of subscription
+</ul>
+<tr bgcolor="#d0d0d0">
+<td valign="top">Socket 
+<td valign="top">Allows the user to set socket parameters for SIP protocol including:
+<ul>
+<li> socket protocol (UDP or TCP)
+<li> use STUNServer
+<li> symmetric signalling
+<li> STUN Server address and port number
+<li> request period of STUN Server
+</ul>
+<tr bgcolor="#f0f0f0">
+<td valign="top">Audio Preferences
+<td valign="top">Allows the user to specify OSS Device mode
+<ul>
+<li> device parameters
+<li> preferred codec
+<li> payload size
+<li> ring tone usage.
+</ul>
+</table></center>
+<p> <h3> Quick Dial
+</h3>
+<a name="3-3"></a><p> Quick Dial component is a Qtopia module that provides a dialing facility from the Home screen and is integrated with the Qtopia phone edition. VoIP identifiers are taken as input Call History matches are presented and the VoIP call is initiated.
+<p> <h3> Contacts
+</h3>
+<a name="3-4"></a><p> The Contacts application stores, edits, and displays the  VoIP identifier and status of a contact. It interacts with the VoIP framework for:
+<ol type=1>
+<li> VoIP Contact additions/deletions/edits
+<li> Getting updates on VoIP status of contacts (available/unavailable)
+</ol>
+<p> The Contact application receives updates from VoIP server regarding VoIP user status (online/offline) and is responsible for keeping it up-to-date in its database. 
+<p> <h3> Phone Manager/Dial Control
+</h3>
+<a name="3-5"></a><p> In a standard telephony application, the phone manager/dial control components interact on the behalf of Call History, Quick Dialer and Contact dialing applications with the phone server using Phone line and Phone call objects. 
+The Qtopia VoIP application uses these components to support VoIP Line and VoIP Call objects. When a VoIP service is registered, the user is prompted to check if the dialled call needs to be made on VoIP or <n>GSM</n> line. If the VoIP service is not up, the call will be assumed to be <n>GSM</n> call unless it is initiated using a VoIP identifier. If the call is initiated using a VoIP identifier and the service is not registered, the user will be asked to register with a SIP server and a VoIP settings application will be launched based on user response.
+<p> <h3> VoIP Line and Call APIs
+</h3>
+<a name="3-6"></a><p> VoIP Line and Call APIs provide line and call management functionality on the VoIP line as described in the following tables:
+<p> <h4> Call Management APIs and Callbacks
+</h4>
+<a name="3-6-1"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top">acceptCall
+<td valign="top">Configures the user-profile in the stack.
+<tr bgcolor="#f0f0f0">
+<td valign="top">closeCall
+<td valign="top">Closes the call
+<tr bgcolor="#d0d0d0">
+<td valign="top">feedTone
+<td valign="top">Feeds the tone to the specified call.
+<tr bgcolor="#f0f0f0">
+<td valign="top">hangupCall
+<td valign="top">Saves the user-profile.
+<tr bgcolor="#d0d0d0">
+<td valign="top">makeCall 
+<td valign="top">Retrieves the saved user-profile. 
+<tr bgcolor="#f0f0f0">
+<td valign="top">notification
+<td valign="top">Call-back to communicate notifications.
+<tr bgcolor="#d0d0d0">
+<td valign="top">statusUpdate
+<td valign="top">Call-back to communicate call status.
+</table></center>
+<p> <h4> VoIP Query APIs
+</h4>
+<a name="3-6-2"></a><p> VoIP Query APIs provide functionality to retrieve information based on a database query.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> 
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top">query
+<td valign="top">Retrieves the information queried based on query type.
+</table></center>
+<p> <h3> VoIP Configure APIs
+</h3>
+<a name="3-7"></a><p> VoIP configuration APIs are used by the setting application to configure: 
+<ul>
+<li> audio preferences
+<li> profile preferences
+<li> SIP preferences.
+</ul>
+These APIs and callbacks are presented in the tableis below:
+<p> <h4>  VoIP Stack Initialization/De-initialization APIs and Callbacks
+</h4>
+<a name="3-7-1"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top">commandStatus
+<td valign="top">Call-back indicating the status of initStack/deInitStack operation.
+<tr bgcolor="#f0f0f0">
+<td valign="top">deInitStack
+<td valign="top">De-initializes the VoIP stack.
+<tr bgcolor="#d0d0d0">
+<td valign="top">getStackdetails 
+<td valign="top">Details the VoIP stack information.
+<tr bgcolor="#f0f0f0">
+<td valign="top">initStack
+<td valign="top">Initializes the VoIP stack.
+</table></center>
+<p> <h4> User-profile/Contact Management APIs and Callbacks
+</h4>
+<a name="3-7-2"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top">addContact
+<td valign="top">Configures the SIP stack to function with an added contact.
+<tr bgcolor="#f0f0f0">
+<td valign="top">configureUserProfile
+<td valign="top">Configures the user-profile in the stack.
+<tr bgcolor="#d0d0d0">
+<td valign="top">deleteContact
+<td valign="top">Deletes a specified contact from the SIP stack.
+<tr bgcolor="#f0f0f0">
+<td valign="top">getUserProfile
+<td valign="top">Retrieves the saved user-profile.
+<tr bgcolor="#d0d0d0">
+<td valign="top">setUserProfile
+<td valign="top">Saves the user-profile.
+<tr bgcolor="#f0f0f0">
+<td valign="top">statusUpdate
+<td valign="top">Callback to communicate the contact status as updated from the presence server.
+</table></center>
+<p> <h4> Registration APIs and Callbacks
+</h4>
+<a name="3-7-3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top">register
+<td valign="top">Registers the client with the SIP server. 
+<tr bgcolor="#f0f0f0">
+<td valign="top">logout
+<td valign="top">Logs out the client from SIP server.
+<tr bgcolor="#d0d0d0">
+<td valign="top">commandStatus
+<td valign="top">Call-back indicating the status of register/logout operation.
+</table></center>
+<p> <h4> Preferences Management APIs
+</h4>
+<a name="3-7-4"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Name
+<th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top">getSipPreferences
+<td valign="top">Retrieves the saved SIP preferences.
+<tr bgcolor="#d0d0d0">
+<td valign="top">setSipPreferences
+<td valign="top">Saves the specified SIP preferences. 
+<tr bgcolor="#f0f0f0">
+<td valign="top">getAudioPreferences
+<td valign="top">Retrieves the audio preferences. 
+<tr bgcolor="#d0d0d0">
+<td valign="top">setAudioPreferences
+<td valign="top">Saves the specified audio preferences.
+</table></center>
+<p> <h2> Outgoing Call Control Flow Diagram
+</h2>
+<a name="4"></a><p> After adding VoIP functionality, the outgoing call control flow of a phone application will be as shown below:
+<p> <center><img src="../pics/voipControlFlow.png" width="331" height="354"></center> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

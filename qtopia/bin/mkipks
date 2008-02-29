@@ -1,0 +1,286 @@
+#!/bin/sh
+
+DEB_VERSION=2.0
+
+LIBQPE_VERSION=1.5.3
+LIBQPE_VERSION_MAJ=1
+LIBQPE_VERSION_MIN=5
+LIBQPE_VERSION_PAT=3
+
+# Have to do this here, since CVS can't store symlinks
+mkdir -p $QPEDIR/etc/rc2.d
+rm -f $QPEDIR/etc/rc2.d/S98qpe
+ln -s ../init.d/qpe $QPEDIR/etc/rc2.d/S98qpe
+
+get_version()
+{
+    version_h=$1
+    while :; do
+	orig=`head -1 $version_h | sed 's/^#include "\(.*\)"$/\1/'`
+	if [ -e "$orig" ]; then
+	    version_h=$orig
+	else
+	    break
+	fi
+    done
+    VERSION_MAJ=$(sed -n -e 's/.*'$2' "\([0-9]*\)\..*\..*".*/\1/p' <$version_h)
+    VERSION_MIN=$(sed -n -e 's/.*'$2' ".*\.\([0-9]*\)\..*".*/\1/p' <$version_h)
+    VERSION_PAT=$(sed -n -e 's/.*'$2' ".*\..*\.\([0-9]*\).*/\1/p' <$version_h)
+    if [ $2 = QPE_VERSION ]; then
+	if grep -q $2' .*snapshot' $version_h; then
+	    VERSION_CVS="_$(date +%Y%m%d)"
+	else
+	    VERSION_CVS=""
+	fi
+    fi
+    echo $VERSION_MAJ.$VERSION_MIN.$VERSION_PAT
+}
+
+QTE_VERSION=$(get_version $QTDIR/include/qglobal.h QT_VERSION_STR)
+QPE_VERSION=$(get_version $QPEDIR/include/qtopia/version.h QPE_VERSION)
+
+ARCH=arm
+CPU_ARCH=arm
+DEVICE_ARCH=SHARP
+STRIP=arm-linux-strip
+STRIP_FILES="*ARM*not stripped"
+
+TDIR=/tmp/ipk$$
+DATADIR=$TDIR/data
+CTRLDIR=$TDIR/control
+
+IMAGEDIR=
+VERB=
+LIST=
+RPM=
+QUICKLAUNCH=
+RDIR=$PWD
+
+while [ $# -ne 0 ]
+do
+    case "$1" in
+     -v)
+	VERB=1
+	echo >&2 "Packaging for version $QPE_VERSION$VERSION_CVS"
+    ;; -l)
+	LIST=1
+    ;; -i)
+	shift
+	IMAGEDIR=$1
+	DATADIR=$IMAGEDIR
+	mkdir -p $IMAGEDIR
+    ;; -rpm)
+	if [ "$QPEDIR" != "/opt/Qtopia" ]
+	then
+	    echo >&2 '$QPEDIR is not the standard /opt/Qtopia directory.'
+	    sleep 1
+	    #exit 1
+	fi
+	RPM=1
+    ;; -arch)
+	shift
+	ARCH=$1
+	STRIP=
+	STRIP_FILES=
+    ;; -platform)
+	shift
+	DEVICE_ARCH=$1
+	CPU_ARCH=arm
+    ;; -o)
+	shift
+	RDIR=$1
+    ;; -quicklaunch)
+	QUICKLAUNCH=1
+    ;; /*)
+	FILES="$FILES $1"
+    ;; *)
+	FILES="$FILES $PWD/$1"
+    esac
+    shift
+done
+
+
+if [ -z "$FILES" ]
+then
+    FILES=`find $QPEDIR -name "*.control" -print`
+fi
+
+cd $QPEDIR
+
+for i in $FILES
+do
+    rm -rf $TDIR
+
+    mkdir -p $DATADIR
+    mkdir -p $CTRLDIR
+
+    packagename=${i##*/}; packagename=${packagename%.control}
+    version=$(eval echo '"'$(sed -n -e "s/^Version: *//p" $i)'"')
+    depends=$(eval echo '"'$(sed -n -e "s/^Depends: *//p" $i)'"')
+    files=$(eval echo $(sed -n -e "s/^Files://p" $i))
+    arch=$(eval echo '"'$(sed -n -e "s/^Arch: *//p" $i)'"')
+    platform=$(eval echo '"'$(sed -n -e "s/^Architecture: *//p" $i)'"')
+    section=$(sed -n -e "s/^Section: *//p" $i)
+    license=$(sed -n -e "s/^License: *//p" $i)
+    summary=$(sed -n -e "s/^Description: *//p" $i)
+    package=${packagename}_${version}_$ARCH
+    ERROR=
+    if [ -z "$files" ]
+    then
+	mkdir -p $DATADIR/usr/share/doc/$packagename
+    else
+	if [ -n "$QUICKLAUNCH" ]
+	then
+	    for f in $files
+	    do
+		case $f in
+		    bin/*)
+		    # if the bin name is a link then we assume quicklauncher is
+		    # being used and add the application plugin to the project
+		    if [ -L $QPEDIR/$f ]
+		    then
+			plugin=$(echo $f | sed -n -e "s/^bin\/*//p")
+			pfiles=$(find $QPEDIR/plugins/application -name "lib$plugin.so*")
+			for pf in $pfiles
+			do
+			    pf=$(basename $pf)
+			    files="$files plugins/application/$pf"
+			done
+		    fi
+		esac
+	    done
+	fi
+
+	for f in $files
+	do
+	    if [ -d $f ]
+	    then
+		ffiles=$(find $f -type f -o -type b -o -type c -o -type l)
+	    else
+		ffiles=$f
+	    fi
+	    for ff in $ffiles
+	    do
+		case $ff in
+		    */CVS/*)
+		    continue
+		;;	*~)
+		    continue
+		;;	*.control)
+		    continue
+		;; $QTDIR/*)
+		    BASE=/opt/Qtopia/$(dirname ${ff#$QTDIR/})
+		;; etc/*.d/*)
+		    BASE=$(dirname /$ff)
+		;; ipaq/*)
+		    BASE=$(dirname ${ff#ipaq})
+		;; *)
+		    BASE=/opt/Qtopia/$(dirname $ff)
+		esac
+
+		if [ -f $ff -o -b $ff -o -c $ff -o -L $ff ]
+		then
+		    D=$DATADIR$BASE
+		    if [ -x $ff -a -n "$STRIP" ]
+		    then
+			case $(file $ff) in
+			 $STRIP_FILES)
+			    $STRIP $ff
+			 ;; *)
+			esac
+		    fi
+		    if [ -n "$RPM" ]
+		    then
+			case "$ff" in
+			 /*) RPMFILES="$RPMFILES $ff"
+			;; *) RPMFILES="$RPMFILES $QPEDIR/$ff"
+			esac
+		    else
+			mkdir -p $D
+			if cp -a $ff $D
+			then
+			    true
+			else
+			    ERROR=1
+			fi
+		    fi
+		else
+		    echo >&2 "$0: $i: No such file: $ff"
+		    ERROR=1
+		fi
+	    done
+	done
+    fi
+    if [ -z "$ERROR" ]
+    then
+	if [ -n "$RPM" ]
+	then
+	    SPEC=/tmp/mkipks-rpm-$$.spec
+	    echo >$SPEC "Summary: $summary"
+	    echo >>$SPEC "Name: $packagename"
+	    echo >>$SPEC "Group: $section" ##########
+	    echo >>$SPEC "License: $license"
+	    echo >>$SPEC "Version: ${version%-*}"
+	    echo >>$SPEC "Release: ${version#*-}"
+ 
+	    echo >>$SPEC "%description"
+	    sed -n -e '/^Description:/,$ p' $i | tail +2 >>$SPEC
+	    echo >>$SPEC "%files"
+	    echo >>$SPEC "%defattr(-,root,root)"
+	    /bin/ls $RPMFILES >>$SPEC
+	    rpm -bb --target $ARCH-unknown-linux $SPEC
+	    # rm $SPEC
+	elif [ -z "$IMAGEDIR" ]
+	then
+	    if [ ! -x "`which mkfs.jffs2`" ]
+	    then
+		size=$(du -h -s $DATADIR | sed -e 's/[	 ].*//')
+	    else
+	        size=$(mkfs.jffs2 -r $DATADIR | wc -c)
+	    fi
+	    echo "Package: $packagename" >$CTRLDIR/control
+	    echo "Installed-Size: $size" >>$CTRLDIR/control
+	    echo "Filename: $package.ipk" >>$CTRLDIR/control
+	    if [ -n $platform ]
+            then
+		echo "Architecture: $platform" >> $CTRLDIR/control
+	    fi
+	    if [ -n $arch ]
+	    then
+		echo "Arch: $arch" >> $CTRLDIR/control
+	    fi
+	    echo "Version: $version" >>$CTRLDIR/control
+	    if [ -n "$depends" ]; then echo "Depends: $depends" >>$CTRLDIR/control; fi
+	    egrep -v "^(Files|Version|Depends|Arch|Architecture):" >>$CTRLDIR/control $i
+	    echo "$DEB_VERSION" >$TDIR/debian-binary
+	    base=${i%.control}
+	    scripts="preinst postinst prerm postrm"
+	    for pf in $scripts
+	    do
+		if [ -x ${base}.$pf ]
+		then
+		    cp ${base}.$pf $CTRLDIR/$pf
+		fi
+	    done
+	    if [ "$UID" = 0 ]
+	    then
+		chown -R root.root $TDIR
+	    fi
+	    ( cd $CTRLDIR; tar cfz ../control.tar.gz ./*; )
+	    ( cd $DATADIR; tar cfz ../data.tar.gz ./*; )
+	    ( cd $TDIR; rm -rf control data; tar cf - ./debian-binary ./control.tar.gz ./data.tar.gz; ) | gzip >$RDIR/$package.ipk
+	    rm -rf $TDIR
+	    RESULT=$package.ipk
+	    if [ -n "$VERB" ]
+	    then
+		echo >&2 "Built $RESULT ($size)"
+	    fi
+	    if [ -n "$LIST" ]
+	    then
+		echo $RESULT
+	    fi
+	fi
+    else
+	echo >&2 "Not building $package package"
+    fi
+done

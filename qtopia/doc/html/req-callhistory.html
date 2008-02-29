@@ -1,0 +1,133 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/callhistory.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Call History Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Call History Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Display Separate Dialed, Received and Missed Call Lists
+</a>
+<li><a href="#1-2"> Display Detailed Call Information
+</a>
+<li><a href="#1-3"> Display Related Calls
+</a>
+<li><a href="#1-4"> Managing Call History 
+</a>
+<li><a href="#1-5"> Contact Creation
+</a>
+<li><a href="#1-6"> Other Application Integration
+</a>
+</ul>
+<li><a href="#2"> Dependencies
+</a>
+<ul>
+<li><a href="#2-1"> Contacts
+</a>
+<li><a href="#2-2"> Messages
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> Call History provides a record of calls that have been dialed, received,
+and missed on the phone. A single Call History record represents a single
+phone call and contains the various attributes of the call. The call record
+may be further associated with a contact through its phone number in which
+case the contact information is utilized when displaying the record.
+Call History allows up to 50 call records.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Display Separate Dialed, Received and Missed Call Lists
+</h3>
+<a name="1-1"></a><p> Call History is able to display dialed, received and missed call lists separately. Each item in the list shows the following partial information of the call.
+<p> <ul>
+<li> If the call record is associated with a contact, then the contact name, phone number type and photo otherwise the literal number of the call.
+<li> The type of phone call (either dialed, received, or missed).
+<li> The week day and time the call originated.
+</ul>
+<p> <h3> Display Detailed Call Information
+</h3>
+<a name="1-2"></a><p> The general dialed, received and missed call lists provide access to a detailed view of the full information of a call record. The following details of the call record are displayed:
+<p> <ul>
+<li> If the call record is associated with a contact, the contact name, phone number type and photo, otherwise the literal number of the call.
+<li> The week day, day, month and time the call originated.
+<li> For calls that resulted in a connection, the duration and the week day, day, month and time the call was terminated.
+<li> An indicator for dialed calls which never resulted in a connection.
+<li> Related calls information (see next section).
+</ul>
+<p> <h3> Display Related Calls
+</h3>
+<a name="1-3"></a><p> Call records are related if one of the following conditions are met:
+<ul>
+<li> The calls are either dialed, received or missed calls to/from the same number.
+<li> The calls are either dialed, received or missed calls to/from the same contact.
+</ul>
+<p> The detailed view displays up to 10 related records. The related calls are the closest calls in terms of the time they originated, and are shown in ascending order based on this time. The information shown is the same as that shown in the lists.
+<p> <h3> Managing Call History 
+</h3>
+<a name="1-4"></a><p> Call History allows the deletion of records so the user has the ability to keep the information as relevant as possible.
+<p> When viewing the general call lists, the user is able to clear just the visible list, as well as having the option to clear all lists.
+<p> When viewing detailed information, the user has the option to delete the call record being viewed.
+<p> <h3> Contact Creation
+</h3>
+<a name="1-5"></a><p> Call History can be a source of new contacts, since the user
+might often dial or receive phone calls to/from numbers that have no
+associated contact. Call History provides the option to save the phone
+number of call record not associated with a contact to an existing contact,
+or create a new contact based on the call record.
+<p> <h3> Other Application Integration
+</h3>
+<a name="1-6"></a><p> For call records associated with a contact, Call History provides the access to view that contact when viewing the call record in one of the lists or the detailed view.
+<p> For all call records not associated with a contact, or call records associated
+with a contact that have a mobile phone number type, the Call History allows
+the user to create a Message using the phone number of the record.
+<p> <h2> Dependencies
+</h2>
+<a name="2"></a><p> <h3> Contacts
+</h3>
+<a name="2-1"></a><p> Call History associates a call record with a contact where possible. Call
+History provides the ability to create new contacts from call records that
+have no associated contact.
+<p> <h3> Messages
+</h3>
+<a name="2-2"></a><p> Call History allows the creation of Messages based on call records.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

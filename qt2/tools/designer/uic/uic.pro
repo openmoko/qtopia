@@ -1,0 +1,9 @@
+TEMPLATE	= app
+CONFIG		+= qt console warn_on release
+HEADERS		= uic.h ../shared/widgetdatabase.h ../shared/domtool.h ../integration/kdevelop/kdewidgets.h
+SOURCES		= uic.cpp ../shared/widgetdatabase.cpp ../shared/domtool.cpp ../integration/kdevelop/kdewidgets.cpp
+TARGET		= uic
+INCLUDEPATH	= ../shared ../../../src/3rdparty/zlib/
+cygwin:LIBS+= -lz
+DEFINES 	+= UIC
+DESTDIR		= $(QTDIR)/bin

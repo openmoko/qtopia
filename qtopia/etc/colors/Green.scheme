@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Greenish
+[Colors]
+Background=#EDFAE1
+Button=#DEECD1
+Highlight=#085500
+AlternateBase=#DDEBDC

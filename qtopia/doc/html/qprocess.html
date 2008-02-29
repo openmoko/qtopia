@@ -1,0 +1,452 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/qprocess.cpp:49 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QProcess Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QProcess Class Reference</h1>
+
+<p>The QProcess class is used to start external programs and to
+communicate with them.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qprocess-h.html">qtopia/qprocess.h</a>&gt;</tt>
+<p><a href="qprocess-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QProcess"><b>QProcess</b></a> ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#QProcess-2"><b>QProcess</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;arg0, QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#QProcess-3"><b>QProcess</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args, QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#~QProcess"><b>~QProcess</b></a> ()</li>
+<li class=fn>QStringList <a href="#arguments"><b>arguments</b></a> () const</li>
+<li class=fn>void <a href="#clearArguments"><b>clearArguments</b></a> ()</li>
+<li class=fn>virtual void <a href="#setArguments"><b>setArguments</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args )</li>
+<li class=fn>virtual void <a href="#addArgument"><b>addArgument</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;arg )</li>
+<li class=fn>QDir <a href="#workingDirectory"><b>workingDirectory</b></a> () const</li>
+<li class=fn>virtual void <a href="#setWorkingDirectory"><b>setWorkingDirectory</b></a> ( const&nbsp;QDir&nbsp;&amp;&nbsp;dir )</li>
+<li class=fn>int <b>priority</b> () const</li>
+<li class=fn>void <a href="#setPriority"><b>setPriority</b></a> ( int&nbsp;p )</li>
+<li class=fn>enum <a href="#Communication-enum"><b>Communication</b></a> { Stdin = 0x01, Stdout = 0x02, Stderr = 0x04, DupStderr = 0x08 }</li>
+<li class=fn>void <a href="#setCommunication"><b>setCommunication</b></a> ( int&nbsp;commFlags )</li>
+<li class=fn>int <a href="#communication"><b>communication</b></a> () const</li>
+<li class=fn>virtual bool <a href="#start"><b>start</b></a> ( QStringList&nbsp;*&nbsp;env = 0 )</li>
+<li class=fn>virtual bool <a href="#launch-2"><b>launch</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;buf, QStringList&nbsp;*&nbsp;env = 0 )</li>
+<li class=fn>virtual bool <a href="#launch"><b>launch</b></a> ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;buf, QStringList&nbsp;*&nbsp;env = 0 )</li>
+<li class=fn>bool <a href="#isRunning"><b>isRunning</b></a> () const</li>
+<li class=fn>bool <a href="#normalExit"><b>normalExit</b></a> () const</li>
+<li class=fn>int <a href="#exitStatus"><b>exitStatus</b></a> () const</li>
+<li class=fn>virtual QByteArray <a href="#readStdout"><b>readStdout</b></a> ()</li>
+<li class=fn>virtual QByteArray <a href="#readStderr"><b>readStderr</b></a> ()</li>
+<li class=fn>bool <a href="#canReadLineStdout"><b>canReadLineStdout</b></a> () const</li>
+<li class=fn>bool <a href="#canReadLineStderr"><b>canReadLineStderr</b></a> () const</li>
+<li class=fn>virtual QString <a href="#readLineStdout"><b>readLineStdout</b></a> ()</li>
+<li class=fn>virtual QString <a href="#readLineStderr"><b>readLineStderr</b></a> ()</li>
+<li class=fn>typedef long&nbsp;<b>Q_LONG</b></li>
+<li class=fn>PID <a href="#processIdentifier"><b>processIdentifier</b></a> ()</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#tryTerminate"><b>tryTerminate</b></a> () const</li>
+<li class=fn>void <a href="#kill"><b>kill</b></a> () const</li>
+<li class=fn>virtual void <a href="#writeToStdin"><b>writeToStdin</b></a> ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;buf )</li>
+<li class=fn>virtual void <a href="#writeToStdin-2"><b>writeToStdin</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;buf )</li>
+<li class=fn>virtual void <a href="#closeStdin"><b>closeStdin</b></a> ()</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#readyReadStdout"><b>readyReadStdout</b></a> ()</li>
+<li class=fn>void <a href="#readyReadStderr"><b>readyReadStderr</b></a> ()</li>
+<li class=fn>void <a href="#processExited"><b>processExited</b></a> ()</li>
+<li class=fn>void <a href="#wroteToStdin"><b>wroteToStdin</b></a> ()</li>
+<li class=fn>void <a href="#launchFinished"><b>launchFinished</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The QProcess class is used to start external programs and to
+communicate with them.
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="Communication-enum"></a>QProcess::Communication</h3>
+
+<p> This enum type defines the communication channels connected to the
+process.
+<ul>
+<li><tt>QProcess::Stdin</tt> - Data can be written to the process's standard input.
+<li><tt>QProcess::Stdout</tt> - Data can be read from the process's standard output.
+<li><tt>QProcess::Stderr</tt> - Data can be read from the process's standard error.
+<li><tt>QProcess::DupStderr</tt> - Duplicates standard error to standard output for new
+processes; i.e.  everything that the process writes to standard error, is
+reported by QProcess on standard output instead. This is especially useful if
+your application requires that the output on standard output and standard
+error is read in the same order as the process output it. Please note that
+this is a binary flag, so if you want to activate this together with standard
+input, output and error redirection (the default), you have to specify
+<tt>Stdin|Stdout|Stderr|DupStderr</tt> for the <a href="#setCommunication">setCommunication</a>() call.
+</ul><p> <p>See also <a href="#setCommunication">setCommunication</a>() and <a href="#communication">communication</a>().
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QProcess"></a>QProcess::QProcess ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a QProcess object. The <em>parent</em> and <em>name</em> parameters are passed
+to the QObject constructor.
+<p> <p>See also <a href="#setArguments">setArguments</a>(), <a href="#addArgument">addArgument</a>(), and <a href="#start">start</a>().
+
+<h3 class=fn><a name="QProcess-2"></a>QProcess::QProcess ( const&nbsp;QString&nbsp;&amp;&nbsp;arg0, QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a QProcess with <em>arg0</em> as the command to be executed. The
+<em>parent</em> and <em>name</em> parameters are passed to the QObject constructor.
+<p> The process is not started. You must call <a href="#start">start</a>() or <a href="#launch">launch</a>()
+to start the process.
+<p> <p>See also <a href="#setArguments">setArguments</a>(), <a href="#addArgument">addArgument</a>(), and <a href="#start">start</a>().
+
+<h3 class=fn><a name="QProcess-3"></a>QProcess::QProcess ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args, QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a QProcess with <em>args</em> as the arguments of the process. The first
+element in the list is the command to be executed. The other elements in the
+list are the arguments to this command. The <em>parent</em> and <em>name</em>
+parameters are passed to the QObject constructor.
+<p> The process is not started. You must call <a href="#start">start</a>() or <a href="#launch">launch</a>()
+to start the process.
+<p> <p>See also <a href="#setArguments">setArguments</a>(), <a href="#addArgument">addArgument</a>(), and <a href="#start">start</a>().
+
+<h3 class=fn><a name="~QProcess"></a>QProcess::~QProcess ()
+</h3>
+Destroys the class.
+<p> If the process is running, it is NOT terminated! Standard input, standard
+output and standard error of the process are closed.
+<p> You can connect the destroyed() signal to the <a href="#kill">kill</a>() slot, if you want the
+process to be terminated automatically when the class is destroyed.
+<p> <p>See also <a href="#tryTerminate">tryTerminate</a>() and <a href="#kill">kill</a>().
+
+<h3 class=fn>void <a name="addArgument"></a>QProcess::addArgument ( const&nbsp;QString&nbsp;&amp;&nbsp;arg )<tt> [virtual]</tt>
+</h3>
+Adds <em>arg</em> to the end of the list of arguments.
+<p> The first element in the list of arguments is the command to be
+executed; the following elements are the arguments to the command.
+<p> <p>See also <a href="#arguments">arguments</a>() and <a href="#setArguments">setArguments</a>().
+
+<h3 class=fn>QStringList <a name="arguments"></a>QProcess::arguments () const
+</h3>
+Returns the list of arguments that are set for the process. Arguments can be
+specified with the constructor or with the functions <a href="#setArguments">setArguments</a>() and
+<a href="#addArgument">addArgument</a>().
+<p> <p>See also <a href="#setArguments">setArguments</a>() and <a href="#addArgument">addArgument</a>().
+
+<h3 class=fn>bool <a name="canReadLineStderr"></a>QProcess::canReadLineStderr () const
+</h3>
+Returns TRUE if it's possible to read an entire line of text from
+standard error at this time; otherwise returns FALSE.
+<p> <p>See also <a href="#readLineStderr">readLineStderr</a>() and <a href="#canReadLineStdout">canReadLineStdout</a>().
+
+<h3 class=fn>bool <a name="canReadLineStdout"></a>QProcess::canReadLineStdout () const
+</h3>
+Returns TRUE if it's possible to read an entire line of text from
+standard output at this time; otherwise returns FALSE.
+<p> <p>See also <a href="#readLineStdout">readLineStdout</a>() and <a href="#canReadLineStderr">canReadLineStderr</a>().
+
+<h3 class=fn>void <a name="clearArguments"></a>QProcess::clearArguments ()
+</h3>
+Clears the list of arguments that are set for the process.
+<p> <p>See also <a href="#setArguments">setArguments</a>() and <a href="#addArgument">addArgument</a>().
+
+<h3 class=fn>void <a name="closeStdin"></a>QProcess::closeStdin ()<tt> [virtual slot]</tt>
+</h3>
+Closes standard input of the process.
+<p> This function also deletes pending data that is not written to standard input
+yet.
+<p> <p>See also <a href="#wroteToStdin">wroteToStdin</a>().
+
+<h3 class=fn>int <a name="communication"></a>QProcess::communication () const
+</h3>
+Returns the communication required with the process.
+<p> <p>See also <a href="#setCommunication">setCommunication</a>().
+
+<h3 class=fn>int <a name="exitStatus"></a>QProcess::exitStatus () const
+</h3>
+Returns the exit status of the process or 0 if the process is still
+running. This function returns immediately and does not wait until
+the process is finished.
+<p> If <a href="#normalExit">normalExit</a>() is FALSE (e.g. if the program was killed or
+crashed), this function returns 0, so you should check the return
+value of normalExit() before relying on this value.
+<p> <p>See also <a href="#normalExit">normalExit</a>() and <a href="#processExited">processExited</a>().
+
+<h3 class=fn>bool <a name="isRunning"></a>QProcess::isRunning () const
+</h3>
+Returns TRUE if the process is running, otherwise FALSE.
+<p> <p>See also <a href="#normalExit">normalExit</a>(), <a href="#exitStatus">exitStatus</a>(), and <a href="#processExited">processExited</a>().
+
+<h3 class=fn>void <a name="kill"></a>QProcess::kill () const<tt> [slot]</tt>
+</h3>
+Terminates the process. This is not a safe way to end a process since the
+process will not be able to do cleanup. <a href="#tryTerminate">tryTerminate</a>() is a safer way to do
+it, but processes might ignore a tryTerminate().
+<p> The nice way to end a process and to be sure that it is finished, is doing
+something like this:
+<pre>
+    process-&gt;tryTerminate();
+    QTimer::singleShot( 5000, process, SLOT( <a href="#kill">kill</a>() ) );
+  </pre>
+ 
+<p> This tries to terminate the process the nice way. If the process is still
+running after 5 seconds, it terminates the process the hard way. The timeout
+should be chosen depending on the time the process needs to do all the
+cleanup: use a higher value if the process is likely to do heavy computation
+on cleanup.
+<p> The slot returns immediately: it does not wait until the process has
+finished. When the process really exited, the signal <a href="#processExited">processExited</a>() is
+emitted.
+<p> <p>See also <a href="#tryTerminate">tryTerminate</a>() and <a href="#processExited">processExited</a>().
+
+<h3 class=fn>bool <a name="launch"></a>QProcess::launch ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;buf, QStringList&nbsp;*&nbsp;env = 0 )<tt> [virtual]</tt>
+</h3>
+Runs the process and writes the data <em>buf</em> to the process's standard input.
+If all the data is written to standard input, standard input is
+closed. The command is searched for in the path for executable programs;
+you can also use an absolute path in the command itself.
+<p> If <em>env</em> is null, then the process is started with the same environment as
+the starting process. If <em>env</em> is non-null, then the values in the
+stringlist are interpreted as environment setttings of the form <tt>key=value</tt> and the process is started with these environment settings. For
+convenience, there is a small exception to this rule under Unix: if <em>env</em>
+does not contain any settings for the environment variable <tt>LD_LIBRARY_PATH</tt>, then this variable is inherited from the starting process.
+<p> Returns TRUE if the process could be started; otherwise returns FALSE.
+<p> Note that you should not use the slots <a href="#writeToStdin">writeToStdin</a>() and <a href="#closeStdin">closeStdin</a>() on
+processes started with <a href="#launch">launch</a>(), since the result is not well-defined. If you
+need these slots, use <a href="#start">start</a>() instead.
+<p> The process may or may not read the <em>buf</em> data sent to its standard
+input.
+<p> You can call this function even when a process that was started with
+this instance is still running. Be aware that if you do this the
+standard input of the process that was launched first will be
+closed, with any pending data being deleted, and the process will be
+left to run out of your control. Similarly, if the process could not
+be started the standard input will be closed and the pending data
+deleted. (On operating systems that have zombie processes, Qt will
+also wait() on the old process.)
+<p> The object emits the signal <a href="#launchFinished">launchFinished</a>() when this function
+call is finished. If the start was successful, this signal is
+emitted after all the data has been written to standard input. If
+the start failed, then this signal is emitted immediately.
+<p> <p>See also <a href="#start">start</a>() and <a href="#launchFinished">launchFinished</a>().
+
+<h3 class=fn>bool <a name="launch-2"></a>QProcess::launch ( const&nbsp;QString&nbsp;&amp;&nbsp;buf, QStringList&nbsp;*&nbsp;env = 0 )<tt> [virtual]</tt>
+</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> The data <em>buf</em> is written to standard input with <a href="#writeToStdin">writeToStdin</a>()
+using the QString::local8Bit() representation of the strings.
+
+<h3 class=fn>void <a name="launchFinished"></a>QProcess::launchFinished ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the process was started with <a href="#launch">launch</a>().
+If the start was successful, this signal is emitted after all the
+data has been written to standard input. If the start failed, then
+this signal is emitted immediately.
+<p> <p>See also <a href="#launch">launch</a>() and QObject::deleteLater().
+
+<h3 class=fn>bool <a name="normalExit"></a>QProcess::normalExit () const
+</h3>
+Returns TRUE if the process has exited normally; otherwise returns
+FALSE. This implies that this function returns FALSE if the process
+is still running.
+<p> <p>See also <a href="#isRunning">isRunning</a>(), <a href="#exitStatus">exitStatus</a>(), and <a href="#processExited">processExited</a>().
+
+<h3 class=fn>void <a name="processExited"></a>QProcess::processExited ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the process has exited.
+<p> <p>See also <a href="#isRunning">isRunning</a>(), <a href="#normalExit">normalExit</a>(), <a href="#exitStatus">exitStatus</a>(), <a href="#start">start</a>(), and <a href="#launch">launch</a>().
+
+<h3 class=fn>PID <a name="processIdentifier"></a>QProcess::processIdentifier ()
+</h3>
+Returns platform dependent information about the process. This can be used
+together with platform specific system calls.
+<p> Under Unix the return value is the PID of the process, or -1 if no process is
+belonging to this object.
+<p> Under Windows it is a pointer to the <tt>PROCESS_INFORMATION</tt> struct, or 0 if
+no process is belonging to this object.
+
+<h3 class=fn>QString <a name="readLineStderr"></a>QProcess::readLineStderr ()<tt> [virtual]</tt>
+</h3>
+Reads a line of text from standard error, excluding any trailing newline or
+carriage return characters and returns it. Returns QString::null if
+<a href="#canReadLineStderr">canReadLineStderr</a>() returns FALSE.
+<p> <p>See also <a href="#canReadLineStderr">canReadLineStderr</a>(), <a href="#readyReadStderr">readyReadStderr</a>(), <a href="#readStderr">readStderr</a>(), and <a href="#readLineStdout">readLineStdout</a>().
+
+<h3 class=fn>QString <a name="readLineStdout"></a>QProcess::readLineStdout ()<tt> [virtual]</tt>
+</h3>
+Reads a line of text from standard output, excluding any trailing newline or
+carriage return characters, and returns it. Returns QString::null if
+<a href="#canReadLineStdout">canReadLineStdout</a>() returns FALSE.
+<p> <p>See also <a href="#canReadLineStdout">canReadLineStdout</a>(), <a href="#readyReadStdout">readyReadStdout</a>(), <a href="#readStdout">readStdout</a>(), and <a href="#readLineStderr">readLineStderr</a>().
+
+<h3 class=fn>QByteArray <a name="readStderr"></a>QProcess::readStderr ()<tt> [virtual]</tt>
+</h3>
+Reads the data that the process has written to standard error. When
+new data is written to standard error, the class emits the signal
+<a href="#readyReadStderr">readyReadStderr</a>().
+<p> If there is no data to read, this function returns a QByteArray of
+size 0: it does not wait until there is something to read.
+<p> <p>See also <a href="#readyReadStderr">readyReadStderr</a>(), <a href="#readLineStderr">readLineStderr</a>(), <a href="#readStdout">readStdout</a>(), and <a href="#writeToStdin">writeToStdin</a>().
+
+<h3 class=fn>QByteArray <a name="readStdout"></a>QProcess::readStdout ()<tt> [virtual]</tt>
+</h3>
+Reads the data that the process has written to standard output. When
+new data is written to standard output, the class emits the signal
+<a href="#readyReadStdout">readyReadStdout</a>().
+<p> If there is no data to read, this function returns a QByteArray of
+size 0: it does not wait until there is something to read.
+<p> <p>See also <a href="#readyReadStdout">readyReadStdout</a>(), <a href="#readLineStdout">readLineStdout</a>(), <a href="#readStderr">readStderr</a>(), and <a href="#writeToStdin">writeToStdin</a>().
+
+<h3 class=fn>void <a name="readyReadStderr"></a>QProcess::readyReadStderr ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the process has written data to standard error.
+You can read the data with <a href="#readStderr">readStderr</a>().
+<p> Note that this signal is only emitted when there is new data and not
+when there is old, but unread data. In the slot connected to this signal, you
+should always read everything that is available at that moment to make sure
+that you don't lose any data.
+<p> <p>See also <a href="#readStderr">readStderr</a>(), <a href="#readLineStderr">readLineStderr</a>(), and <a href="#readyReadStdout">readyReadStdout</a>().
+
+<h3 class=fn>void <a name="readyReadStdout"></a>QProcess::readyReadStdout ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the process has written data to standard output.
+You can read the data with <a href="#readStdout">readStdout</a>().
+<p> Note that this signal is only emitted when there is new data and not
+when there is old, but unread data. In the slot connected to this signal, you
+should always read everything that is available at that moment to make sure
+that you don't lose any data.
+<p> <p>See also <a href="#readStdout">readStdout</a>(), <a href="#readLineStdout">readLineStdout</a>(), and <a href="#readyReadStderr">readyReadStderr</a>().
+
+<h3 class=fn>void <a name="setArguments"></a>QProcess::setArguments ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args )<tt> [virtual]</tt>
+</h3>
+Sets <em>args</em> as the arguments for the process. The first element in the list
+is the command to be executed. The other elements in the list are the
+arguments to the command. Any previous arguments are deleted.
+<p> <p>See also <a href="#arguments">arguments</a>() and <a href="#addArgument">addArgument</a>().
+
+<h3 class=fn>void <a name="setCommunication"></a>QProcess::setCommunication ( int&nbsp;commFlags )
+</h3>
+Sets <em>commFlags</em> as the communication required with the process.
+<p> <em>commFlags</em> is a bitwise OR between the flags defined in <a href="#Communication-enum">Communication</a>.
+<p> The default is <tt>Stdin|Stdout|Stderr</tt>.
+<p> <p>See also <a href="#communication">communication</a>().
+
+<h3 class=fn>void <a name="setPriority"></a>QProcess::setPriority ( int&nbsp;p )
+</h3>
+Sets the process priority to <em>p</em>, a value from -20 to 20,
+where 0 is normal, lower values a give more favourable
+priority, larger values less favourable.
+
+<h3 class=fn>void <a name="setWorkingDirectory"></a>QProcess::setWorkingDirectory ( const&nbsp;QDir&nbsp;&amp;&nbsp;dir )<tt> [virtual]</tt>
+</h3>
+Sets <em>dir</em> as the working directory for a process. This does not affect
+running processes; only processes that are started afterwards are affected.
+<p> Setting the working directory is especially useful for processes that try to
+access files with relative filenames.
+<p> <p>See also <a href="#workingDirectory">workingDirectory</a>() and <a href="#start">start</a>().
+
+<h3 class=fn>bool <a name="start"></a>QProcess::start ( QStringList&nbsp;*&nbsp;env = 0 )<tt> [virtual]</tt>
+</h3>
+Tries to run a process for the command and arguments that were specified with
+<a href="#setArguments">setArguments</a>(), <a href="#addArgument">addArgument</a>() or that were specified in the constructor. The
+command is searched in the path for executable programs; you can also use an
+absolute path to the command.
+<p> If <em>env</em> is null, then the process is started with the same environment as
+the starting process. If <em>env</em> is non-null, then the values in the
+stringlist are interpreted as environment setttings of the form <tt>key=value</tt> and the process is started in these environment settings. For
+convenience, there is a small exception to this rule: under Unix, if <em>env</em>
+does not contain any settings for the environment variable <tt>LD_LIBRARY_PATH</tt>, then this variable is inherited from the starting process;
+under Windows the same applies for the enverionment varialbe <tt>PATH</tt>.
+<p> Returns TRUE if the process could be started, otherwise FALSE.
+<p> You can write data to standard input of the process with
+<a href="#writeToStdin">writeToStdin</a>(), you can close standard input with <a href="#closeStdin">closeStdin</a>() and you can
+terminate the process <a href="#tryTerminate">tryTerminate</a>() resp. <a href="#kill">kill</a>().
+<p> You can call this function even when there already is a running
+process in this object. In this case, QProcess closes standard input
+of the old process and deletes pending data, i.e., you loose all
+control over that process, but the process is not terminated. This applies
+also if the process could not be started. (On operating systems that have
+zombie processes, Qt will also wait() on the old process.)
+<p> <p>See also <a href="#launch">launch</a>() and <a href="#closeStdin">closeStdin</a>().
+
+<h3 class=fn>void <a name="tryTerminate"></a>QProcess::tryTerminate () const<tt> [slot]</tt>
+</h3>
+Asks the process to terminate. Processes can ignore this wish. If you want to
+be sure that the process really terminates, you must use <a href="#kill">kill</a>() instead.
+<p> The slot returns immediately: it does not wait until the process has
+finished. When the process really exited, the signal <a href="#processExited">processExited</a>() is
+emitted.
+<p> <p>See also <a href="#kill">kill</a>() and <a href="#processExited">processExited</a>().
+
+<h3 class=fn>QDir <a name="workingDirectory"></a>QProcess::workingDirectory () const
+</h3>
+Returns the working directory that was set with
+<a href="#setWorkingDirectory">setWorkingDirectory</a>(), or the current directory if none has been
+set.
+<p> <p>See also <a href="#setWorkingDirectory">setWorkingDirectory</a>().
+
+<h3 class=fn>void <a name="writeToStdin"></a>QProcess::writeToStdin ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;buf )<tt> [virtual slot]</tt>
+</h3>
+Writes the data <em>buf</em> to the standard input of the process. The process may
+or may not read this data.
+<p> This function returns immediately; the QProcess class might write the data at
+a later point (you have to enter the event loop for that). When all the data
+is written to the process, the signal <a href="#wroteToStdin">wroteToStdin</a>() is emitted. This does
+not mean that the process really read the data, since this class only detects
+when it was able to write the data to the operating system.
+<p> <p>See also <a href="#wroteToStdin">wroteToStdin</a>(), <a href="#closeStdin">closeStdin</a>(), <a href="#readStdout">readStdout</a>(), and <a href="#readStderr">readStderr</a>().
+
+<h3 class=fn>void <a name="writeToStdin-2"></a>QProcess::writeToStdin ( const&nbsp;QString&nbsp;&amp;&nbsp;buf )<tt> [virtual slot]</tt>
+</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> The string <em>buf</em> is handled as text using
+the QString::local8Bit() representation.
+
+<h3 class=fn>void <a name="wroteToStdin"></a>QProcess::wroteToStdin ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted if the data sent to standard input (via
+<a href="#writeToStdin">writeToStdin</a>()) was actually written to the process. This does not
+imply that the process really read the data, since this class only detects
+when it was able to write the data to the operating system. But it is now
+safe to close standard input without losing pending data.
+<p> <p>See also <a href="#writeToStdin">writeToStdin</a>() and <a href="#closeStdin">closeStdin</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

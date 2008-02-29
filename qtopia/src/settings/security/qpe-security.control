@@ -1,0 +1,10 @@
+Files: bin/security apps/Settings/Security.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Security settings dialog
+ For the Qtopia environment.

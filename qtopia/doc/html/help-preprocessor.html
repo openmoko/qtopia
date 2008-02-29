@@ -1,0 +1,221 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/help-preprocessor.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Help Browser Preprocessor</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Help Browser Preprocessor</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Syntax
+</a>
+<ul>
+<li><a href="#2-1"> AND
+</a>
+<li><a href="#2-2"> OR
+</a>
+<li><a href="#2-3"> Variable Substitution
+</a>
+</ul>
+<li><a href="#3"> Qtopia Documentation
+</a>
+<ul>
+<li><a href="#3-1"> Tags
+</a>
+<ul>
+<li><a href="#3-1-1"> Examples
+</a>
+</ul>
+</ul>
+<li><a href="#4"> hpp script (for compile-time pre-processing)
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Help Browser Preprocessor is an extension to Help Browser that enables the maintenance
+of a single source of html help files from which device-specific help can be extracted.
+<p> The Help Browser Preprocessor is flexible so that different configurations
+are possible (eg, <b>KEYPAD PDA</b>, <b>CLAMSHELL KEYPAD PHONE</b>). The supported syntax includes
+<b>AND</b> logic, <b>OR</b> logic and variable substitution.
+<p> <h2> Syntax
+</h2>
+<a name="2"></a><p> The Help Browser Preprocessor supports <b>AND</b> and <b>OR</b> logic when including blocks of text.
+Place the %% (start) tags at the beginning of the section of text that is to be included
+in that build and the @@ (close) at end of the text.
+<p> <h3> AND
+</h3>
+<a name="2-1"></a><p> <pre>
+%%tag1%%
+%%tag2%%
+</pre>
+ 
+<b>Note: </b> Interleaving is not a problem: the tags can be closed in any order and both of the
+following are valid examples of how to close the above:
+<pre>
+@@tag1@@
+@@tag2@@
+</pre>
+ 
+<pre>
+@@tag2@@
+@@tag1@@
+</pre>
+ 
+Here's an example of complex interleaving (this is not recommended usage, but it is still valid):
+<pre>
+%%CONFIG1%%
+some stuff
+%%FEATURE1%%
+this is for CONFIG1 and FEATURE1
+%%FEATURE2%%
+this is for CONFIG1, FEATURE1 and FEATURE2
+@@CONFIG1@@
+this is for FEATURE1 and FEATURE2
+@@FEATURE1@@
+@@FEATURE2@@
+</pre>
+ 
+<p> <h3> OR
+</h3>
+<a name="2-2"></a><p> The OR syntax can be used to indicate that certain text should be present in the PDA and
+the Touch Phone builds. In this case the pre-processor reads that if PDA or Touch Phone
+then include this text in the build.
+<p> <pre>
+%%tag1%% %%tag2%%
+</pre>
+ 
+<b>Note: </b> the closing tags must appear in the same order. The following is valid:
+<pre>
+@@tag1@@ @@tag2@@
+</pre>
+ 
+<em>The following is not valid:</em>
+<pre>
+@@tag2@@ @@tag1@@
+</pre>
+ 
+<p> <h3> Variable Substitution
+</h3>
+<a name="2-3"></a><p> The string $${FOO} is replaced with the value of the variable FOO. You can escape the
+variable to prevent it from being replaced. &#92;$${FOO} will appear in the output as $${FOO}.
+The name of a variable must match the regular expression [a-zA-Z0-9._]+.
+<p> The syntax for setting a variable is:
+<pre>
+{VariableName}={The text to replace it with}
+</pre>
+ 
+<p> <b>Note: </b> This must be at the start of the line.
+<p> It is usually useful to define variables inside configuration blocks. Like this:
+<pre>
+%%tag1%%
+{FOO}={Foo}
+@@tag1@@
+%%tag2%%
+{FOO}={Bar}
+@@tag2@@
+</pre>
+ 
+<p> <b>Note: </b> It is not considered an error to reference a non-existent variable (but it produces no output).
+<p> Here is an example of variable substitution in use:
+<pre>
+%%tag1%%
+{FOO}={Foo}
+@@tag1@@
+%%tag2%%
+{FOO}={Bar}
+@@tag2@@
+
+ The button is called $${Foo}&lt;/p&gt;
+</pre>
+ 
+<p> <h2> Qtopia Documentation
+</h2>
+<a name="3"></a><p> <h3> Tags
+</h3>
+<a name="3-1"></a><p> The following tags are available for Qtopia Documentation:
+<ul>
+<li> PDA - PDA
+<li> Keypad Phone - KEYPAD PHONE
+<li> Touchscreen Phone - TOUCH PHONE
+</ul>
+<p> Through the use of these tags it is possible to build the help documentation for the
+keypad phone and automatically exclude all files and content related exclusively
+to the touch phone (tag=TOUCH) or the pda (tag=PDA) and all documentation related to
+both the touch phone and the pda (tags=PDA TOUCH with the appropriate start and close symbols).
+<p> <h4> Examples
+</h4>
+<a name="3-1-1"></a><p> <pre>
+%%PDA%%
+Stuff for the PDA
+@@PDA@@
+</pre>
+ 
+<p> <pre>
+%%PDA%% %%TOUCH%%
+Stuff for the PDA or Touchscreen Phone
+%%PDA%%
+Here's some PDA specific stuff in the middle
+@@PDA@@
+Here's some more PDA/Touchscreen stuff
+@@PDA@@ @@TOUCH@@
+</pre>
+ 
+<p> <pre>
+%%PHONE%%
+Stuff for any Phone
+%%KEYPAD%%
+Stuff for a Keypad Phone
+@@KEYPAD@@
+@@PHONE@@
+</pre>
+ 
+<p> <h2> hpp script (for compile-time pre-processing)
+</h2>
+<a name="4"></a><p> <b>Note: </b> The use of hpp is not supported.
+<p> To avoid storing excess documentation, you can use the hpp script (in $QPEDIR/scripts)
+to do the preprocessing before the documentation is installed. The script is run as follows:
+<p> <pre>
+hpp -c "CONFIG VALUES" -o /path/to/store/files/in file1.html ... filen.html
+</pre>
+ 
+<p> hpp uses the same parsing rules as the runtime help preprocessor so it should produce identical output.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

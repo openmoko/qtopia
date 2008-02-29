@@ -1,0 +1,181 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qcop.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia QCop Messages</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia QCop Messages</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> The System-wide Channels and Messages.
+</a>
+<ul>
+<li><a href="#2-1"> QPE/System
+</a>
+<li><a href="#2-2"> QPE/TaskBar
+</a>
+<li><a href="#2-3"> QPE/Card
+</a>
+<li><a href="#2-4"> QPE/Network
+</a>
+<li><a href="#2-5"> Qt/Tray
+</a>
+</ul>
+<li><a href="#3"> The Application Channel
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> QCop messages allow applications to communicate with each other.
+These messages are sent using <a href="qcopenvelope.html">QCopEnvelope</a>, and received by connecting
+to a QCopChannel.
+<p> The <tt>channelname</tt> of channels within Qtopia all start with "QPE/".
+The <tt>messagename</tt> is a function identifier followed by a list of types
+in parentheses. There is no whitespace in the message name.
+<p> The variable names shown in this documentation are purely for
+information purposes. A message shown as <em>messageName(Type1 varname1, Type2 varname2, Type2 varname3)</em> would be used in program
+code as:
+<p> <pre>
+   <a href="qcopenvelope.html">QCopEnvelope</a> e(channelname, "messageName(Type1,Type2,Type2)");
+   e &lt;&lt; parameter1 &lt;&lt; parameter2 &lt;&lt; parameter3;
+</pre>
+ 
+<p> Hint: The QCop message system uses the event-processing loop. So if you create a QCop message it will not be send until the next qApp::processEvents.
+<p> <h2> The System-wide Channels and Messages.
+</h2>
+<a name="2"></a><p> <h3> QPE/System
+</h3>
+<a name="2-1"></a><p> <ul>
+<li> busy() -- Causes a wait indicator to be shown to the user.
+<li> notBusy() -- Cancels the wait indicator.
+<li> linkChanged(QString) -- Sent whenever a link is changed. It is sent
+by <a href="filemanager.html#saveFile">FileManager::saveFile</a>() and others, and received by the Launcher.
+<li> applyStyle() -- Sent when user changes style. It is received by
+<a href="qpeapplication.html">QPEApplication</a> and the application will redraw accordingly.
+<li> quit() -- Shuts down all running applications.
+<li> shutdown() -- Shows the shutdown window.
+<li> restart() -- Restarts the Qtopia environment.
+<li> execute(QString) -- Executes or raises the given application.
+<li> execute(QString,QString) -- Executes or raises the given
+application, passing an argument. Note that you should consider
+using the <b>QPE/Application/<em>appname</em></b> channels described
+below.
+<li> setMouseProto(QString) -- Changes $QWS_MOUSE_PROTO dynamically.
+<li> setKeyboard(QString) -- Changes $QWS_KEYBOARD dynamically.
+<li> addAlarm(QDateTime,QCString,QCString,int) -- Internal. See
+<a href="alarmserver.html#addAlarm">AlarmServer::addAlarm</a>()
+<li> deleteAlarm(QDateTime,QCString,QCString,int) -- Internal. See
+<a href="alarmserver.html#deleteAlarm">AlarmServer::deleteAlarm</a>()
+<li> setDefaultRotation(int) -- Internal.
+<li> grabKeyboard(QString) -- Internal.
+<li> timeChange(QString) -- Internal.
+<li> clockChange(bool) -- Internal.
+<li> setScreenSaverInterval(int) -- Internal.
+<li> language(QString) -- Internal.
+<li> resetPowerTimeout(int) - Internal.
+</ul>
+<p> <h3> QPE/TaskBar
+</h3>
+<a name="2-2"></a><p> <ul>
+<li> message(QString) -- Internal. See <a href="global.html#statusMessage">Global::statusMessage</a>()
+<li> showInputMethod() -- Internal.
+<li> hideInputMethod() -- Internal.
+<li> reloadInputMethods() -- Internal.
+<li> reloadApplets() -- Internal.
+</ul>
+<p> <h3> QPE/Card
+</h3>
+<a name="2-3"></a><p> <ul>
+<li> mtabChanged() -- Sent when <tt>/etc/mtab</tt> may have changed.
+<li> stabChanged() -- Sent when <tt>/var/run/stab</tt>,
+<tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> may have
+changed.
+</ul>
+<p> <h3> QPE/Network
+</h3>
+<a name="2-4"></a><p> <ul>
+<li> up() -- Sent when a network connection is running.
+<li> down() -- Sent when a running network connection is closed.
+<li> failed() -- Sent when a network connection failed to start.
+<li> available(QStringList) -- Sent whenever the available network connections
+may have changed, or in a response to an announceChoices() message.
+<li> announceChoices() -- Forces the network monitor to send a list of
+available connections.
+</ul>
+<p> <h3> Qt/Tray
+</h3>
+<a name="2-5"></a><p> This channel allows Qt applications (not just Qtopia applications) to
+show system-tray status in a cross-platform manner, but it is not
+currently supported. See <a href="taskbarappletinterface.html">TaskbarAppletInterface</a> for a more powerful
+alternative for system tray applications.
+<ul>
+<li> popup(int,QPoint) - Sent
+<li> doubleClicked(int,QPoint)
+<li> clicked(int,QPoint)
+<li> remove(int)
+<li> setIcon(int,QPixmap)
+<li> setToolTip(int,QString)
+</ul>
+<p> <h2> The Application Channel
+</h2>
+<a name="3"></a><p> Each application listens on a channel called
+<b>QPE/Application/<em>appname</em></b>, where <b><em>appname</em></b> is
+the executable name (the application identifier). Standard messages on
+this channel are:
+<p> <b>QPE/Application/<em>appname</em></b>
+<p> <ul>
+<li> setDocument(QString) -- Internal. Causes the setDocument(const
+QString&) slot of <a href="docwidget.html">the main document
+   widget</a> to be called.
+<li> nextView() -- Applications connected to hardware buttons will
+receive this message if they are already visible.
+<li> raise() -- Internal. Causes the the main document widget and the
+current modal widget to be raised.
+<li> quit() -- Internal. Terminates the application.
+<li> quitIfInvisible() -- Internal. Terminates the application if it is
+not shown.
+</ul>
+<p> The <b>QPE/Application/<em>appname</em></b> channel has a special
+property: when messages are sent to these channels via <a href="qcopenvelope.html">QCopEnvelope</a>,
+the message is delivered even if the application is not yet running
+(the application is run and the message is then sent).
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

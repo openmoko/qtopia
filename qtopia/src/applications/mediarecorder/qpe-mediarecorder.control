@@ -1,0 +1,10 @@
+Files: bin/mediarecorder apps/Applications/voicerecorder.desktop pics/record-blank.png pics/record-light.png
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
+Description: Media Recorder
+ The multimedia recorder for the Qtopia environment.

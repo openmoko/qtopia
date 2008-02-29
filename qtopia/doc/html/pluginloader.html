@@ -1,0 +1,136 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/pluginloader.cpp:141 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>PluginLoader Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>PluginLoader Class Reference</h1>
+
+<p>The PluginLoader class simplifies plugin loading and allows plugins to be
+enabled/disabled.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="pluginloader-h.html">qtopia/pluginloader.h</a>&gt;</tt>
+<p><a href="pluginloader-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#PluginLoader"><b>PluginLoader</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type )</li>
+<li class=fn><a href="#~PluginLoader"><b>~PluginLoader</b></a> ()</li>
+<li class=fn>void <a href="#clear"><b>clear</b></a> ()</li>
+<li class=fn>const QStringList &amp; <a href="#list"><b>list</b></a> () const</li>
+<li class=fn>const QStringList &amp; <a href="#disabledList"><b>disabledList</b></a> () const</li>
+<li class=fn>QRESULT <a href="#queryInterface"><b>queryInterface</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, const&nbsp;QUuid&nbsp;&amp;&nbsp;id, QUnknownInterface&nbsp;**&nbsp;iface )</li>
+<li class=fn>void <a href="#releaseInterface"><b>releaseInterface</b></a> ( QUnknownInterface&nbsp;*&nbsp;iface )</li>
+<li class=fn>void <a href="#setEnabled"><b>setEnabled</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, bool&nbsp;enabled = TRUE )</li>
+<li class=fn>bool <a href="#isEnabled"><b>isEnabled</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name ) const</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>bool <a href="#inSafeMode"><b>inSafeMode</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The PluginLoader class simplifies plugin loading and allows plugins to be
+enabled/disabled.
+<p> PluginLoader simplifies loading plugins.  The most common use is to
+iterate over the list of plugins and load each one:
+<p> <pre>
+    PluginLoader loader( "Effects" );
+    QStringList list = pluginLoader.list();
+    QStringList::Iterator it;
+    QValueList&lt;EffectsInterface*&gt; effectList;
+    for ( it = list.begin(); it != list.end(); ++it ) {
+        EffectsInterface *iface = 0;
+        if ( pluginLoader.queryInterface( *it, IID_Effects, (QUnknownInterface**)&amp;iface ) == QS_OK &amp;&amp; iface ) {
+            effectList.append( iface );
+        }
+    }
+  </pre>
+ 
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="PluginLoader"></a>PluginLoader::PluginLoader ( const&nbsp;QString&nbsp;&amp;&nbsp;type )
+</h3>
+Creates a PluginLoader for plugins of type <em>type</em>.
+<p> The plugins must be installed in the $QPEDIR/plugins/<i>type<i> directory.
+
+<h3 class=fn><a name="~PluginLoader"></a>PluginLoader::~PluginLoader ()
+</h3>
+Destroys the PluginLoader.  Note that this does not release any
+interfaces.
+
+<h3 class=fn>void <a name="clear"></a>PluginLoader::clear ()
+</h3>
+Releases all interfaces.
+
+<h3 class=fn>const QStringList &amp; <a name="disabledList"></a>PluginLoader::disabledList () const
+</h3>
+Returns the list of plugins that have been disabled.
+
+<h3 class=fn>bool <a name="inSafeMode"></a>PluginLoader::inSafeMode ()<tt> [static]</tt>
+</h3>
+Returns TRUE if Qtopia is currently in <i>Safe Mode</i>.  In Safe Mode
+<a href="#list">list</a>() will return an empty list and no plugins should be loaded.  This
+is to allow misbehaving plugins to be disbled.
+
+<h3 class=fn>bool <a name="isEnabled"></a>PluginLoader::isEnabled ( const&nbsp;QString&nbsp;&amp;&nbsp;name ) const
+</h3>
+Returns TRUE is the plugin <em>name</em> is enabled.
+
+<h3 class=fn>const QStringList &amp; <a name="list"></a>PluginLoader::list () const
+</h3>
+Returns the list of plugins that are available.
+
+<h3 class=fn>QRESULT <a name="queryInterface"></a>PluginLoader::queryInterface ( const&nbsp;QString&nbsp;&amp;&nbsp;name, const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;id, QUnknownInterface&nbsp;**&nbsp;iface )
+</h3>
+Query the plugin for the interface specified by <em>id</em> in plugin <em>name</em>.
+If the interface is available, <em>iface</em> will contain the pointer to it.
+<p> Returns QS_OK if the interface was found or QS_FALSE otherwise.
+
+<h3 class=fn>void <a name="releaseInterface"></a>PluginLoader::releaseInterface ( QUnknownInterface&nbsp;*&nbsp;iface )
+</h3>
+Releases the interface <em>iface</em>.  The interface must have previously been
+returned by queryInterface.
+
+<h3 class=fn>void <a name="setEnabled"></a>PluginLoader::setEnabled ( const&nbsp;QString&nbsp;&amp;&nbsp;name, bool&nbsp;enabled = TRUE )
+</h3>
+Enables or disables plugin <em>name</em> depending on the value of <em>enabled</em>.
+A disabled plugin can still be queried, but it will not be returned by <a href="#list">list</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

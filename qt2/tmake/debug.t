@@ -1,0 +1,3 @@
+# Compiling application source
+SYSCONF_CXXFLAGS	= #$ Expand('TMAKE_CXXFLAGS'); Expand('TMAKE_CXXFLAGS_DEBUG'); Expand('TMAKE_CXXFLAGS_WARN_ON');
+SYSCONF_CFLAGS		= #$ Expand('TMAKE_CFLAGS'); Expand('TMAKE_CFLAGS_DEBUG'); Expand('TMAKE_CFLAGS_WARN_ON');

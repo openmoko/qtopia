@@ -1,0 +1,117 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/mimetype.cpp:169 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MimeType Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MimeType Class Reference</h1>
+
+<p>The MimeType class provides MIME type information.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mimetype-h.html">qtopia/mimetype.h</a>&gt;</tt>
+<p><a href="mimetype-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#MimeType"><b>MimeType</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;ext_or_id )</li>
+<li class=fn><a href="#MimeType-2"><b>MimeType</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;lnk )</li>
+<li class=fn>QString <a href="#id"><b>id</b></a> () const</li>
+<li class=fn>QString <a href="#description"><b>description</b></a> () const</li>
+<li class=fn>QPixmap <a href="#pixmap"><b>pixmap</b></a> () const</li>
+<li class=fn>QPixmap <a href="#bigPixmap"><b>bigPixmap</b></a> () const</li>
+<li class=fn>const AppLnk * <a href="#application"><b>application</b></a> () const</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QString <a href="#appsFolderName"><b>appsFolderName</b></a> ()</li>
+<li class=fn>void <a href="#updateApplications"><b>updateApplications</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The MimeType class provides MIME type information.
+<p> A MimeType object is a light-weight value which
+provides information about a MIME type.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="MimeType"></a>MimeType::MimeType ( const&nbsp;QString&nbsp;&amp;&nbsp;ext_or_id )
+</h3>
+Constructs a MimeType.
+Normally, <em>ext_or_id</em> is a MIME type,
+but if <em>ext_or_id</em> starts with / or contains no /,
+it is interpretted as a filename and the
+extension (eg. .txt) is used as the
+MIME type.
+
+<h3 class=fn><a name="MimeType-2"></a>MimeType::MimeType ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;lnk )
+</h3>
+Constructs a MimeType from the type() of <em>lnk</em>.
+
+<h3 class=fn>const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;* <a name="application"></a>MimeType::application () const
+</h3>
+Returns the <a href="applnk.html">AppLnk</a> defining the application associated
+with this MIME type, or 0 if none is associated.
+<p> The caller must not retain the pointer,
+but of course you can dereference it to take a copy if needed.
+<p> <p>See also <a href="service.html#binding">Service::binding</a>().
+
+<h3 class=fn>QString <a name="appsFolderName"></a>MimeType::appsFolderName ()<tt> [static]</tt>
+</h3>
+Returns a Qtopia folder containing application definitions.
+
+<h3 class=fn>QPixmap <a name="bigPixmap"></a>MimeType::bigPixmap () const
+</h3>
+Returns a larger QPixmap appropriate for the MIME type.
+
+<h3 class=fn>QString <a name="description"></a>MimeType::description () const
+</h3>
+Returns a description of the MIME Type. This is usually based
+on the <a href="#application">application</a>() associated with the type.
+
+<h3 class=fn>QString <a name="id"></a>MimeType::id () const
+</h3>
+Returns the MIME type identifier.
+
+<h3 class=fn>QPixmap <a name="pixmap"></a>MimeType::pixmap () const
+</h3>
+Returns a small QPixmap appropriate for the MIME type.
+
+<h3 class=fn>void <a name="updateApplications"></a>MimeType::updateApplications ()<tt> [static]</tt>
+</h3>
+Reloads application definitions.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

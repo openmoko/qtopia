@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Clock
+Comment[]=Displays a clock in the Taskbar.
+X-QPE-Library=libclockapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

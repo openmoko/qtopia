@@ -1,0 +1,88 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/javaintegration.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table>
+<p> 
+<p> <a name="top"></a>
+<p> <h2> Qtopia - Java Integration
+</h2>
+<a name="1"></a><p> When integrating a Java VM into Qtopia, it is important for
+the end-user that installed Java applications operate seamlessly
+along with native Qtopia applications. To ensure this, the
+following considerations should be made. These items are listed
+in order of the Qtopia aplication execution control flow and
+so correspond to the order in which they can be easily tested.
+<p> <ul>
+<li> <b>Use .desktop files</b> 
+Like native Qtopia applications, Java applications should
+be referenced by .desktop files in the $QPEDIR/apps/Applications
+or $QPEDIR/apps/Games directory (depending whether it is an application
+or a game); they should not be boxed off into a seperate tab,
+or in a wholy different interface.
+</p>
+<li> <b>Use unique executables</b> 
+In order that Qtopia's execution model works, the Exec= line
+of the .desktop file should specify a <em>unique</em> executable name.
+Of course, this executable name may simply be a symbolic link
+to the actual executable which then uses argv[0] to determine
+its behaviour. This is essential for QCop communication between
+the application and the launcher. In particular, it will <em>not</em>
+work to use "Exec=jvm appname".
+</p>
+<li> <b>Use <a href="qpeapplication.html">QPEApplication</a></b> 
+You must use QPEApplication, not QApplication, otherwise all
+of the framework provided for Qtopia will not function. In particular,
+QPEApplication communicates with the launcher via QCop to handle
+things such as the taskbar icon, raising, quitting, openning
+documents, and changing styles and fonts.
+</p>
+<li> <b>Use QPEApplication::exec()</b> 
+This ensures that various things such as QCop processing is
+initiated. If you must use your own event loop rather than
+exec(), you must at least call QPEApplication::setMainWidget().
+If even this is not possible, additional functionality will
+need to be added to QPEApplication to support your event loop.
+</p>
+<li> <b>Follow Qtopia Conventions</b> 
+The widget toolkit or bindings used by the JVM should wherever
+possible follow Qtopia's conventions. For example, it should
+use <a href="qpeapplication.html#execDialog">QPEApplication::execDialog</a>() rather than QDialog::exec().
+</p>
+</ul>
+<p> The above rules can all be bent to various degrees, but that will
+involve additional integration coding in <a href="qpeapplication.html">QPEApplication</a> and in the
+Qtopia launcher (qpe) process.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

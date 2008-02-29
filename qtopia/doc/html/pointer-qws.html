@@ -1,0 +1,223 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qws.doc:579 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt/Embedded Pointer Handling</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qt/Embedded Pointer Handling</h1>
+
+ 
+Pointer handling in Qt/Embedded works for any mouse-like device such as
+a touchpanel, a trackball, or real mouse.
+<p> In a real device, only a small number of pointer devices (usually one)
+would be supported, but for demonstration purposes, Qt/Embedded includes
+a large number of supported devices.
+<p> <h2>Mouse Protocols</h2>
+<p> Qt/Embedded normally auto-detects the mouse type and device if it is one of
+the supported types on <tt>/dev/psaux</tt> or one of the <tt>/dev/ttyS?</tt>
+serial lines. If multiple mice are detected, all may be used simultaneously.
+<p> Alternatively, you may set the environment variable QWS_MOUSE_PROTO to
+determine which mouse to use. This environment variable may be set to:
+<blockquote>
+<i>&lt;protocol&gt;</i><tt>:</tt><i>&lt;device&gt;</i>
+</blockquote>
+where <i>&lt;protocol&gt;</i> is one of:
+<ul>
+<li>MouseMan
+<li>IntelliMouse
+<li>Microsoft
+</ul>
+and <i>&lt;device&gt;</i> is the mouse device, often <tt>/dev/mouse</tt>.
+If no such variable is specified, the built-in default
+is <tt>Auto</tt> which enables auto-detection of the mouse protocol
+and device.
+<p> To add another protocol, new subclasses of QAutoMouseSubHandler or
+QMouseHandler can be written in <tt>kernel/qwsmouse_qws.cpp</tt>.
+<p> <h2>Touch Panels</h2>
+<p> Qt/Embedded ships with support for the NEC Vr41XX touchpanel
+and the iPAQ touchpanel.
+These are subclasses of QCalibratedMouseHandler which is in turn
+a subclass of QMouseHandler in <tt>kernel/qwsmouse_qws.cpp</tt>.
+<p> The following table summarizes what touch screen device is used when the TPanel mouse driver selected.
+<p> <table> 
+<tr><th>Macros defined at Qte compile time</th><th>Default mouse device used</th><th>Class name used</th></tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QWS_CUSTOMTOUCHPANEL&lt;/td&gt;</tt>
+<td><tt>/dev/ts&lt;/td&gt;</tt>
+<td>QCustomTPanelHandlerPrivate</td>
+</tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QT_QWS_IPAQ</tt> and <tt>QT_QWS_IPAQ_RAW&lt;/td&gt;</tt>
+<td><tt>/dev/h3600_tsraw&lt;/td&gt;</tt>
+<td>QTPanelHandlerPrivate</td>
+</tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QT_QWS_IPAQ&lt;/td&gt;</tt>
+<td><tt>/dev/h3600_ts&lt;/td&gt;</tt>
+<td>QTPanelHandlerPrivate</td>
+</tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QT_QWS_SL5XXX&lt;/td&gt;</tt>
+<td><tt>/dev/ts&lt;/td&gt;</tt>
+<td>QTPanelHandlerPrivate</td>
+</tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QT_QWS_TSLIB&lt;/td&gt;</tt>
+<td><tt>/dev/ts&lt;/td&gt;</tt>
+<td>QTSLibHandlerPrivate</td>
+</tr>
+<tr bgcolor=#f0f0f0>
+<td><tt>QT_QWS_YOPY&lt;/td&gt;</tt>
+<td><tt>/dev/ts&lt;/td&gt;</tt>
+<td>QYopyTPanelHandlerPrivate</td>
+</tr>
+</table>
+<p> <b>Note:</b> tslib support can be enabled via passing <tt>-tslib</tt> to Qt/Embedded's configure.
+<p> Writing a custom touch panel handler for Qt/Embedded is not as
+hard as the QVrTPanelHandlerPrivate class makes it look.
+The Vr41XX touch panel handler is complex; it handles filtering of
+noisy input data, and it generates mouse release events by using a
+timer. 
+<p> Many touch panel devices have a much simpler interface, so a
+port to  Qt/Embedded can be written in a few minutes, without expert
+knowledge of Qt/Embedded.
+<p> The Qt/Embedded release contains an example touch panel handler in the
+class QCustomTPanelHandlerPrivate, located in the file
+<tt>$QTDIR/src/kernel/qwsmouse_qws.cpp</tt>. It is protected by<tt>#ifdef
+QWS_CUSTOMTOUCHPANEL</tt>.
+<p> The example reads data from /dev/ts with the following format:
+Each packet consists of 5 bytes. 
+<ul>
+<li>Byte 0 gives status information, in particular, bit 6 (0x40)
+is 1 when the stylus is down, 0 if it is released.
+<li> Bytes 1 and 2 give the x position;
+<li> Bytes 3 and 4 give the y position;
+</ul>
+<p> To enable this driver, uncomment the line <tt>#define QWS_CUSTOMTOUCHPANEL</tt>
+in the file qwsmouse_qws.cpp.
+<p> Chances are, your touch panel device will not match exactly the
+example device.  As an example, take a hypothetical device located at
+/dev/touchpanel. This device uses 6-byte packets. Byte 0 and 1 give
+status and pressure information. In particular, bit 5 (0x20) of byte 1
+tells whether the stylus is down or up. Bytes 2 and 3 give x position and
+bytes 4 and 5 give y position.
+<p> Pressure information is not necessary for basic Qt/Embedded operation,
+so we will ignore that for now. The following shows the modified touch
+panel handler for the hypothetical device, with  comments marked with
+<tt>//***<tt> indicating the changes made. You can also see some printf
+calls left over from the (hypothetical) debugging.
+<p> <pre>
+//*** Modified Trolltech's example handler to handle the
+//*** hypothetical touch panel.
+QCustomTPanelHandlerPrivate::QCustomTPanelHandlerPrivate( MouseProtocol, QString mouseDev )
+{
+    //*** changed device name to /dev/touchpanel
+    if ( mouseDev.isEmpty() )
+        device= "/dev/touchpanel";
+
+    if ((mouseFD = open( mouseDev.local8Bit().data(), O_RDONLY)) &lt; 0) {
+        qWarning( "Cannot open %s (%s)", mouseDev.local8Bit().data(), strerror(errno));
+        return;
+    } 
+    //*** removed the delay since our device does not need it.
+    //else {
+    //    sleep(1);
+    //}
+
+    QSocketNotifier *mouseNotifier;
+    mouseNotifier = new QSocketNotifier( mouseFD, QSocketNotifier::Read,
+                                         this );
+    connect(mouseNotifier, SIGNAL(activated(int)),this, SLOT(readMouseData()));
+}
+
+QCustomTPanelHandlerPrivate::~QCustomTPanelHandlerPrivate()
+{
+    if (mouseFD &gt;= 0)
+        close(mouseFD);
+}
+
+struct CustomTPdata {
+
+  unsigned char status;
+  unsigned short xpos;
+  unsigned short ypos;
+
+};
+
+void QCustomTPanelHandlerPrivate::readMouseData()
+{
+    if(!qt_screen)
+        return;
+    CustomTPdata data;
+
+    //*** changed size to 6 bytes
+    unsigned char data2[6];
+
+    int ret;
+
+    //*** read 6 bytes
+    ret=read(mouseFD,data2,6);
+
+    if(ret==6) { //*** change to 6
+        //*** all the indexes changed:
+        data.status=data2[1]; 
+        data.xpos=(data2[2] &lt;&lt; 8) | data2[3];
+        data.ypos=(data2[4] &lt;&lt; 8) | data2[5];
+        QPoint q;
+        q.setX(data.xpos);
+        q.setY(data.ypos);
+        mousePos=q;
+        if(data.status &amp; 0x20) { //*** Changed to 0x20 (bit 5)
+          emit mouseChanged(mousePos,Qt::LeftButton);
+          //printf( "Stylus press/move %d,%d\n", data.xpos, data.ypos );
+        } else {
+          emit mouseChanged(mousePos,0);
+          //printf( "Stylus release %d,%d\n", data.xpos, data.ypos );
+        }
+    }
+    if(ret&lt;0) { 
+        qDebug("Error %s",strerror(errno));
+    }
+}
+</pre>
+ 
+<p> Once you have your touch panel handler working, you may choose to keep
+it like it is. However, if you want to switch between different
+mouse/touch panel devices at run time, you will have to modify
+QWSServer::newMouseHandler() (also in qwsmouse_qws.cpp) to instantiate
+your new handler(s). You will also need to add to the enum
+<tt>MouseProtocol</tt> and the table <tt>mouseConfig[]</tt>. Note that
+the precise details on how mouse and touch panel drivers are instantiated
+may have to be changed in future versions of Qt/Embedded.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

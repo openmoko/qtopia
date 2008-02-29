@@ -1,0 +1,88 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/alarmserver.cpp:296 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>AlarmServer Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AlarmServer Class Reference</h1>
+
+<p>The AlarmServer class allows alarms to be scheduled and unscheduled.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="alarmserver-h.html">qtopia/alarmserver.h</a>&gt;</tt>
+<p><a href="alarmserver-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#addAlarm"><b>addAlarm</b></a> ( QDateTime&nbsp;when, const&nbsp;QCString&nbsp;&amp;&nbsp;channel, const&nbsp;QCString&nbsp;&amp;&nbsp;message, int&nbsp;data = 0 )</li>
+<li class=fn>void <a href="#deleteAlarm"><b>deleteAlarm</b></a> ( QDateTime&nbsp;when, const&nbsp;QCString&nbsp;&amp;&nbsp;channel, const&nbsp;QCString&nbsp;&amp;&nbsp;message, int&nbsp;data = 0 )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The AlarmServer class allows alarms to be scheduled and unscheduled.
+<p> Applications can schedule alarms with <a href="#addAlarm">addAlarm</a>() and can
+unschedule alarms with <a href="#deleteAlarm">deleteAlarm</a>(). When the time for an alarm
+to go off is reached the specified <a href="qcop.html">QCop</a>
+message is sent on the specified channel (optionally with
+additional data).
+<p> Scheduling an alarm using this class is important (rather just using
+a QTimer) since the machine may be asleep and needs to get woken up using
+the Linux kernel which implements this at the kernel level to minimize
+battery usage while asleep.
+<p> 
+<p>See also <a href="qcopenvelope.html">QCopEnvelope</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="addAlarm"></a>AlarmServer::addAlarm ( QDateTime&nbsp;when, const&nbsp;QCString&nbsp;&amp;&nbsp;channel, const&nbsp;QCString&nbsp;&amp;&nbsp;message, int&nbsp;data = 0 )<tt> [static]</tt>
+</h3>
+Schedules an alarm to go off at (or soon after) time <em>when</em>. When
+the alarm goes off, the <a href="qcop.html">QCop</a> <em>message</em> will
+be sent to <em>channel</em>, with <em>data</em> as a parameter.
+<p> If this function is called with exactly the same data as a previous
+call the subsequent call is ignored, so there is only ever one alarm
+with a given set of parameters.
+<p> <p>See also <a href="#deleteAlarm">deleteAlarm</a>().
+
+<h3 class=fn>void <a name="deleteAlarm"></a>AlarmServer::deleteAlarm ( QDateTime&nbsp;when, const&nbsp;QCString&nbsp;&amp;&nbsp;channel, const&nbsp;QCString&nbsp;&amp;&nbsp;message, int&nbsp;data = 0 )<tt> [static]</tt>
+</h3>
+Deletes previously scheduled alarms which match <em>when</em>, <em>channel</em>,
+<em>message</em>, and <em>data</em>.
+<p> Passing null values for <em>when</em>, <em>channel</em>, or for the <a href="qcop.html">QCop</a> <em>message</em>, acts as a wildcard meaning "any".
+Similarly, passing -1 for <em>data</em> indicates "any".
+<p> If there is no matching alarm, nothing happens.
+<p> <p>See also <a href="#addAlarm">addAlarm</a>().
+
+<p> 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

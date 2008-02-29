@@ -1,0 +1,11 @@
+Files: bin/calculator apps/Applications/calculator.desktop plugins/calculator/libsimple.so* lib/libqtopiacalc.so*
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Calculator
+ A pluggable calculator for the Qtopia environment.
+ Includes a simple interface.

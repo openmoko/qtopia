@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Dial-up Monitor
+Comment[]=Monitor for dial-up internet connections.
+X-QPE-Library=libnetmonapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

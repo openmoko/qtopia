@@ -1,0 +1,9 @@
+Files: lib/libjpeg.so lib/libjpeg.so.62
+Priority: optional
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QTE_VERSION-22
+Description: JPEG libraries
+ Needed if Qt/Embedded has JPEG support builtin

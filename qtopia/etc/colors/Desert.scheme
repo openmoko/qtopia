@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Desert
+[Colors]
+Background=#EBE8E1
+Button=#E9DFCC
+Highlight=#800000
+AlternateBase=#F1E4DA

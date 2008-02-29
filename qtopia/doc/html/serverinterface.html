@@ -1,0 +1,246 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/server/serverinterface.cpp:186 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ServerInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ServerInterface Class Reference</h1>
+
+<p>The ServerInterface class provides an interface for Qtopia
+custom launchers.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="serverinterface-h.html">serverinterface.h</a>&gt;</tt>
+<p><a href="serverinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual <b>~ServerInterface</b> ()</li>
+<li class=fn>virtual void <a href="#createGUI"><b>createGUI</b></a> () = 0</li>
+<li class=fn>virtual void <a href="#showGUI"><b>showGUI</b></a> () = 0</li>
+<li class=fn>virtual void <a href="#destroyGUI"><b>destroyGUI</b></a> () = 0</li>
+<li class=fn>virtual void <a href="#typeAdded"><b>typeAdded</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;QString&nbsp;&amp;&nbsp;name, const&nbsp;QPixmap&nbsp;&amp;&nbsp;pixmap, const&nbsp;QPixmap&nbsp;&amp;&nbsp;bgPixmap ) = 0</li>
+<li class=fn>virtual void <a href="#typeRemoved"><b>typeRemoved</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type ) = 0</li>
+<li class=fn>virtual void <a href="#applicationAdded"><b>applicationAdded</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;AppLnk&nbsp;&amp;&nbsp;app ) = 0</li>
+<li class=fn>virtual void <a href="#applicationRemoved"><b>applicationRemoved</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;AppLnk&nbsp;&amp;&nbsp;app ) = 0</li>
+<li class=fn>virtual void <a href="#allApplicationsRemoved"><b>allApplicationsRemoved</b></a> () = 0</li>
+<li class=fn>enum <a href="#ApplicationState-enum"><b>ApplicationState</b></a> { Launching, Running, Terminated, Raised }</li>
+<li class=fn>virtual void <a href="#applicationStateChanged"><b>applicationStateChanged</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, ApplicationState&nbsp;state ) = 0</li>
+<li class=fn>virtual void <a href="#documentAdded"><b>documentAdded</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;doc ) = 0</li>
+<li class=fn>virtual void <a href="#documentRemoved"><b>documentRemoved</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;doc ) = 0</li>
+<li class=fn>virtual void <a href="#allDocumentsRemoved"><b>allDocumentsRemoved</b></a> () = 0</li>
+<li class=fn>virtual void <a href="#documentChanged"><b>documentChanged</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;oldDoc, const&nbsp;DocLnk&nbsp;&amp;&nbsp;newDoc ) = 0</li>
+<li class=fn>virtual void <a href="#storageChanged"><b>storageChanged</b></a> ( const QList&lt;FileSystem&gt; &amp; ) = 0</li>
+<li class=fn>virtual void <a href="#applicationScanningProgress"><b>applicationScanningProgress</b></a> ( int&nbsp;percent ) = 0</li>
+<li class=fn>virtual void <a href="#documentScanningProgress"><b>documentScanningProgress</b></a> ( int&nbsp;percent ) = 0</li>
+<li class=fn>virtual bool <a href="#requiresApplications"><b>requiresApplications</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#requiresDocuments"><b>requiresDocuments</b></a> () const = 0</li>
+<li class=fn>enum <a href="#DockArea-enum"><b>DockArea</b></a> { Top, Bottom, Left, Right }</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>const AppLnkSet &amp; <a href="#appLnks"><b>appLnks</b></a> ()</li>
+<li class=fn>void <a href="#dockWidget"><b>dockWidget</b></a> ( QWidget&nbsp;*&nbsp;w, DockArea&nbsp;placement )</li>
+<li class=fn>void <b>dockWidget</b> ( QWidget&nbsp;*&nbsp;w, DockArea&nbsp;placement, const&nbsp;QSize&nbsp;&amp;&nbsp;s )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The ServerInterface class provides an interface for Qtopia
+custom launchers.
+<p> The ServerInterface allows the user interface of the launcher to be
+customized to suit the device.  For a PDA style device, the default
+launcher is strongly recommended, however specialist devices may
+choose to provide a launcher better suited to the application.
+<p> The launcher is fixed for any particular device and is not loaded
+as a plugin.  Launcher interfaces must
+be compilied into the server by editing server.pro and server.cpp.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="ApplicationState-enum"></a>ServerInterface::ApplicationState</h3>
+
+<p> The ApplicationState enum type specifies the state of an application.
+The possible values are: <ul>
+<li> <a href="#ApplicationState-enum">Launching</a> - the application has been requested, but is not yet running.
+<li> <a href="#ApplicationState-enum">Running</a> - the application is running.
+<li> <a href="#ApplicationState-enum">Terminated</a> - the application has been terminated.
+</ul>
+
+<h3 class=fn><a name="DockArea-enum"></a>ServerInterface::DockArea</h3>
+
+<p> The DockArea enum type defines the areas where widgets can be docked:
+<ul>
+<li> <a href="#DockArea-enum">Top</a> - the top of the screen.
+<li> <a href="#DockArea-enum">Bottom</a> - the Bottom of the screen.
+<li> <a href="#DockArea-enum">Left</a> - the Left of the screen.
+<li> <a href="#DockArea-enum">Right</a> - the Right of the screen.
+</ul>
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="allApplicationsRemoved"></a>ServerInterface::allApplicationsRemoved ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Remove all applications from the launcher.
+
+<h3 class=fn>void <a name="allDocumentsRemoved"></a>ServerInterface::allDocumentsRemoved ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Remove all documents from the launcher.
+
+<h3 class=fn>const&nbsp;<a href="applnkset.html">AppLnkSet</a>&nbsp;&amp; <a name="appLnks"></a>ServerInterface::appLnks ()<tt> [static]</tt>
+</h3>
+
+<p> Returns the current set of available applications.
+
+<h3 class=fn>void <a name="applicationAdded"></a>ServerInterface::applicationAdded ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;&amp;&nbsp;app )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Add an application <em>app</em> of type <em>type</em> to the launcher.
+<p> <p>See also <a href="#applicationRemoved">applicationRemoved</a>().
+
+<h3 class=fn>void <a name="applicationRemoved"></a>ServerInterface::applicationRemoved ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;&amp;&nbsp;app )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Remove an application <em>app</em> of type <em>type</em> from the launcher.
+<p> <p>See also <a href="#applicationAdded">applicationAdded</a>().
+
+<h3 class=fn>void <a name="applicationScanningProgress"></a>ServerInterface::applicationScanningProgress ( int&nbsp;percent )<tt> [pure virtual]</tt>
+</h3>
+
+<p> The system is scanning for installed applications.  <em>percent</em>
+provides the percentage of the filesystems scanned.  This function will
+always be called with <em>percent</em> equal to zero when scanning starts,
+and with <em>percent</em> equal to 100 when scanning is complete.
+
+<h3 class=fn>void <a name="applicationStateChanged"></a>ServerInterface::applicationStateChanged ( const&nbsp;QString&nbsp;&amp;&nbsp;name, <a href="serverinterface.html#ApplicationState-enum">ApplicationState</a>&nbsp;state )<tt> [pure virtual]</tt>
+</h3>
+
+<p> The application <em>name</em> has changed state to <em>state</em>.  This can be used
+to show launch notification and update a list of running applications.
+
+<h3 class=fn>void <a name="createGUI"></a>ServerInterface::createGUI ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Implement this function to create the custom launcher UI.
+<p> <p>See also <a href="#showGUI">showGUI</a>().
+
+<h3 class=fn>void <a name="destroyGUI"></a>ServerInterface::destroyGUI ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Implement this function to destroy the custom launcher UI.  All resources
+allocated by <a href="#createGUI">createGUI</a>() must be released.
+
+<h3 class=fn>void <a name="dockWidget"></a>ServerInterface::dockWidget ( QWidget&nbsp;*&nbsp;w, <a href="serverinterface.html#DockArea-enum">DockArea</a>&nbsp;placement )<tt> [static]</tt>
+</h3>
+
+<p> Docks a top-level widget <em>w</em> on a side of the screen specified by
+<em>placement</em>.  The widget is placed
+according to the order that it was docked, its sizeHint() and whether
+previously docked widgets are visible.  The desktop area available to
+QWidget::showMaximized() will exclude any visible docked widgets.
+<p> For example, if a widget is
+docked at the bottom of the screen, its sizeHint() will define its
+height and it will use the full width of the screen.  If a widget is
+then docked to the right, its sizeHint() will define its width and
+it will be as high as possible without covering
+the widget docked at the bottom.
+<p> This function is useful for reserving system areas such as taskbars
+and input methods that should not be covered by applications.
+
+<h3 class=fn>void <a name="documentAdded"></a>ServerInterface::documentAdded ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;doc )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Add a document <em>doc</em> to the launcher.
+<p> <p>See also <a href="#documentRemoved">documentRemoved</a>().
+
+<h3 class=fn>void <a name="documentChanged"></a>ServerInterface::documentChanged ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;oldDoc, const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;newDoc )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Change document properties of existing document <em>oldDoc</em> to <em>newDoc</em>.
+
+<h3 class=fn>void <a name="documentRemoved"></a>ServerInterface::documentRemoved ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;doc )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Remove a document <em>doc</em> to the launcher.
+<p> <p>See also <a href="#documentAdded">documentAdded</a>().
+
+<h3 class=fn>void <a name="documentScanningProgress"></a>ServerInterface::documentScanningProgress ( int&nbsp;percent )<tt> [pure virtual]</tt>
+</h3>
+
+<p> The system is scanning for documents.  <em>percent</em>
+provides the percentage of the filesystems scanned.  This function will
+always be called with <em>percent</em> equal to zero when scanning starts,
+and with <em>percent</em> equal to 100 when scanning is complete.
+
+<h3 class=fn>bool <a name="requiresApplications"></a>ServerInterface::requiresApplications () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Return TRUE if the custom launcher requires the server to scan for
+applications.
+
+<h3 class=fn>bool <a name="requiresDocuments"></a>ServerInterface::requiresDocuments () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Return TRUE if the custom launcher requires the server to scan for
+documents.
+
+<h3 class=fn>void <a name="showGUI"></a>ServerInterface::showGUI ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Implement this function to show the custom launcher UI for
+the first time. Will be called after <a href="#createGUI">createGUI</a>().
+
+<h3 class=fn>void <a name="storageChanged"></a>ServerInterface::storageChanged ( const QList&lt;FileSystem&gt; &amp; )<tt> [pure virtual]</tt>
+</h3>
+
+<p> A filesystem has been added or removed.
+
+<h3 class=fn>void <a name="typeAdded"></a>ServerInterface::typeAdded ( const&nbsp;QString&nbsp;&amp;&nbsp;type, const&nbsp;QString&nbsp;&amp;&nbsp;name, const&nbsp;QPixmap&nbsp;&amp;&nbsp;pixmap, const&nbsp;QPixmap&nbsp;&amp;&nbsp;bgPixmap )<tt> [pure virtual]</tt>
+</h3>
+
+<p> An application category <em>type</em> has been added, for example "Games".
+<em>name</em> is the translated name of the category.  <em>pixmap</em> and
+<em>bgPixmap</em> are small and large icons for the new type.
+<p> Types can be added or removed at any time, for example, when a storage
+card containing a non-standard category is inserted or removed.
+<p> <p>See also <a href="#typeRemoved">typeRemoved</a>().
+
+<h3 class=fn>void <a name="typeRemoved"></a>ServerInterface::typeRemoved ( const&nbsp;QString&nbsp;&amp;&nbsp;type )<tt> [pure virtual]</tt>
+</h3>
+
+<p> An application category <em>type</em> has been removed.
+<p> Types can be added or removed at any time, for example, when a storage
+card containing a non-standard category is inserted or removed.
+<p> <p>See also <a href="#typeAdded">typeAdded</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

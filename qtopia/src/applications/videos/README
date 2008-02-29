@@ -1,0 +1,98 @@
+
+Qtopia Media Player Design
+--------------------------
+
+The Qtopia Media Player has some design complexity to it
+so this document aims to inform and help understand the
+code.
+
+MultiThreaded
+-------------
+
+The first thing to understand is that it is multithreaded.
+The reason it is multithreaded is as follows:
+
+On PDAs like the Zaurus and iPAQ, the audio device has an audio
+buffer of approximately 32k. This determines the maximum amount
+of audio data which can be queued at any one time. Commonly
+audio streams are 44kHz, 16bit stereo, which generates 44100*2*2
+number of bytes per second to send to the audio device. When you
+do the maths (44100*2*2) / (32*1024) rounds up to 6, which is
+the least number of times you must refill the audio buffer per
+second. This is ideal conditions discounting how long it takes
+to decode the audio or do anything else. Ultimately what this
+means is that if it takes longer than 1/6th of a second to
+decode a video frame, then for a single threaded implementation
+you will loose audio. Remember this is assuming nothing else is
+running and absolutely ideal conditions. In reality if the
+framerate drops below 10 frames per second and only for
+one single frame, you are dead. The audio misses filling the
+audio buffer and there are completely unacceptable gaps in
+the audio. When you consider that an mpeg could be streamed or
+being read off a CF card or microDrive in addition some
+background task could be running, it seems almost inevitable
+that on a PDA that for one frame the rate could drop below
+10 frames per second. A multithreaded approach has
+independent scheduling for decoding the audio and video which
+completely solves this problem since filling the audio
+buffer (which is virtually a real-time task, but a slow one at
+1/6th of a second) is now never effected by the video decoding.
+It turns out that it also smooths out the playback of
+video frames giving a slightly more even frame rate since 
+the video frames are nolonger interspursed with audio decoding
+and buffering. The slower the CPU the more critical mutlithreaded
+decoding becomes.  As you would expect, a faster CPU would decode
+everything fast enough that none of these issues are a problem
+so a single threaded implementation could work.
+
+Okay, so hopefully I've convinced you that multithreaded
+decoding is required. If not, too bad, that's the way it is! :)
+One problem is that Qt is not very thread safe, specially with
+anything to do with painting. Additionally, for various reasons
+the Qt/Embedded library on the Zaurus does not support Qt threads,
+therefore pthreads are used instead.
+
+Because of the thread safety issues, the audio is decoded
+in the created thread without using Qt. There needs to
+be a few mutexes to ensure safety in loopcontrol.
+The decoders also must be able to handle there own thread
+safety. This can either be added in to the plugin wrapper
+or could be a builtin characteristic of the decoder. For
+instance in the ffmpeg plugin, mutexes surround loading
+packets for both the audio and video decoding but are not
+needed around the actual decoding because both video 
+decoding and audio decoding have their own contexts. With
+the libmpeg3 plugin, it handles loading mpeg packets
+internally, but also completely handles thread safetly
+itself also. Audio or Video only decoders obviously don't
+have to handle thread safetly.
+
+Model-Controller-View
+---------------------
+
+Moving on from the multithreaded nature of the player,
+lets look at the GUI side of things. The basic framework
+loosely follows a model-controller-view framework. It's
+worth noteing that I didn't start out to design it that
+way but it evolved to resemble this framework as I guess
+that must be the best abstraction for a media player.
+It's not exactly a strict seperation, but it's close.
+The 'model' is encapsulated by the decoder plugins which
+provide an abstraction to the data. Also the
+MediaPlayerState class also maintains the current state
+of decoding, options etc and holds the pointer to the decoder,
+so it is really the hub of access to the model. The 'controller'
+is in loopcontrol.cpp with the LoopControl class. It handles
+controlling the decoding. It does rate-control (ensuring the
+frame rate etc) and user control such as pause and so on.
+The 'view' is the VideoWidget and the AudioWidget
+classes which show the output and interact with the
+LoopControl class to allow the user to control the playback.
+If you think about the code in these terms it helps in
+understanding it better. There are other surrounding classes
+and widgets such as the playlist, file selection classes
+as well as the info / ID3 tag classes which are about
+selecting and controlling the media files.
+
+
+

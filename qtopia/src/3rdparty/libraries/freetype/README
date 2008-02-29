@@ -1,0 +1,2 @@
+We use the freetype library included in Qt/Embedded.  Only the build and
+packaging process resides here.

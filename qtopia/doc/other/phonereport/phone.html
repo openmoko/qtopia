@@ -1,0 +1,89 @@
+<html>
+<head>
+<title>Qtopia component sizes</title>
+
+<STYLE type="text/css">
+BODY { background:#FFFFFF; color:#000000; }
+TABLE { border:solid; border-spacing:0; }
+TD { padding:5; margin:0; border:solid; border-width:1; text-align:right; }
+TD.onep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#EEEEFF }
+TD.twop { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#DDDDFF }
+TD.fivep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#CCCCFF }
+TD.tenp { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#BBBBFF }
+
+TH { background:#E0E0E0; color: #000000; padding:5; margin:0; border:solid; border-width:1; }
+</STYLE>
+
+</head>
+<body>
+<h1>Qtopia component sizes</title>
+<h2>phone: dynamic</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>22561 kb</td><td>9714 kb</td><td>8968 kb</td><td>7840 kb</td></tr>
+<tr><th>Minimal build</th><td>13539 kb</td><td>6103 kb</td><td>5648 kb</td><td>4924 kb</td></tr>
+</table>
+<p><img src="phone-dynamic.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>addressbook</th><td class=twop>721 kb</td><td class=twop>238 kb</td><td class=twop>216 kb</td><td class=twop>184 kb</td></tr>
+<tr><th>appearance</th><td>120 kb</td><td>30 kb</td><td>28 kb</td><td>36 kb</td></tr>
+<tr><th>camera</th><td class=onep>228 kb</td><td>57 kb</td><td>48 kb</td><td>44 kb</td></tr>
+<tr><th>clock</th><td>200 kb</td><td>82 kb</td><td>76 kb</td><td>64 kb</td></tr>
+<tr><th>datebook</th><td class=twop>597 kb</td><td class=twop>209 kb</td><td class=twop>188 kb</td><td class=onep>156 kb</td></tr>
+<tr><th>fifteen</th><td>32 kb</td><td>14 kb</td><td>16 kb</td><td>16 kb</td></tr>
+<tr><th>games</th><td class=fivep>1353 kb</td><td class=twop>445 kb</td><td class=twop>412 kb</td><td class=twop>368 kb</td></tr>
+<tr><th>handwriting</th><td class=onep>445 kb</td><td class=onep>145 kb</td><td class=onep>132 kb</td><td class=onep>120 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>180 kb</td><td>43 kb</td><td>36 kb</td><td>32 kb</td></tr>
+<tr><th>language</th><td>128 kb</td><td>36 kb</td><td>36 kb</td><td>24 kb</td></tr>
+<tr><th>mediaplayer</th><td class=tenp>2643 kb</td><td class=tenp>1265 kb</td><td class=tenp>1180 kb</td><td class=tenp>1016 kb</td></tr>
+<tr><th>mediarecorder</th><td class=onep>357 kb</td><td class=onep>106 kb</td><td class=onep>96 kb</td><td class=onep>80 kb</td></tr>
+<tr><th>minesweep</th><td>120 kb</td><td>17 kb</td><td>12 kb</td><td>8 kb</td></tr>
+<tr><th>notes</th><td>156 kb</td><td>43 kb</td><td>40 kb</td><td>28 kb</td></tr>
+<tr><th>parashoot</th><td class=onep>249 kb</td><td>92 kb</td><td>88 kb</td><td>76 kb</td></tr>
+<tr><th>photo</th><td class=onep>284 kb</td><td>70 kb</td><td>60 kb</td><td>52 kb</td></tr>
+<tr><th>qasteroids</th><td class=twop>803 kb</td><td class=twop>220 kb</td><td class=twop>200 kb</td><td class=twop>172 kb</td></tr>
+<tr><th>qtmail</th><td class=fivep>1307 kb</td><td class=fivep>536 kb</td><td class=fivep>492 kb</td><td class=fivep>432 kb</td></tr>
+<tr><th>smil</th><td class=onep>344 kb</td><td class=onep>138 kb</td><td class=onep>124 kb</td><td class=onep>112 kb</td></tr>
+<tr><th>snake</th><td>56 kb</td><td>8 kb</td><td>8 kb</td><td>12 kb</td></tr>
+<tr><th>solitaire</th><td class=onep>312 kb</td><td>96 kb</td><td>88 kb</td><td>64 kb</td></tr>
+<tr><th>themes</th><td class=twop>996 kb</td><td class=twop>295 kb</td><td class=twop>260 kb</td><td class=twop>216 kb</td></tr>
+<tr><th>todo</th><td>220 kb</td><td>66 kb</td><td>60 kb</td><td>60 kb</td></tr>
+<tr><th>worldtime</th><td>140 kb</td><td>49 kb</td><td>44 kb</td><td>48 kb</td></tr>
+</table>
+<h2>phone: static</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>16151 kb</td><td>7126 kb</td><td>6632 kb</td><td>5548 kb</td></tr>
+<tr><th>Minimal build</th><td>9349 kb</td><td>4329 kb</td><td>4032 kb</td><td>3392 kb</td></tr>
+</table>
+<p><img src="phone-static.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>addressbook</th><td class=twop>438 kb</td><td class=twop>148 kb</td><td class=twop>136 kb</td><td class=onep>108 kb</td></tr>
+<tr><th>appearance</th><td>116 kb</td><td>41 kb</td><td>40 kb</td><td>40 kb</td></tr>
+<tr><th>camera</th><td>72 kb</td><td>30 kb</td><td>28 kb</td><td>20 kb</td></tr>
+<tr><th>clock</th><td>120 kb</td><td>70 kb</td><td class=onep>68 kb</td><td class=onep>60 kb</td></tr>
+<tr><th>datebook</th><td class=twop>369 kb</td><td class=twop>144 kb</td><td class=onep>132 kb</td><td class=onep>96 kb</td></tr>
+<tr><th>fifteen</th><td>24 kb</td><td>9 kb</td><td>8 kb</td><td>12 kb</td></tr>
+<tr><th>games</th><td class=fivep>1097 kb</td><td class=fivep>365 kb</td><td class=fivep>340 kb</td><td class=fivep>288 kb</td></tr>
+<tr><th>handwriting</th><td class=onep>228 kb</td><td class=onep>82 kb</td><td class=onep>76 kb</td><td class=onep>68 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>72 kb</td><td>19 kb</td><td>20 kb</td><td>12 kb</td></tr>
+<tr><th>language</th><td>36 kb</td><td>12 kb</td><td>12 kb</td><td>4 kb</td></tr>
+<tr><th>mediaplayer</th><td class=tenp>1870 kb</td><td class=tenp>1047 kb</td><td class=tenp>992 kb</td><td class=tenp>832 kb</td></tr>
+<tr><th>mediarecorder</th><td>0 kb</td><td>0 kb</td><td>0 kb</td><td>0 kb</td></tr>
+<tr><th>minesweep</th><td>44 kb</td><td>14 kb</td><td>16 kb</td><td>8 kb</td></tr>
+<tr><th>notes</th><td>60 kb</td><td>20 kb</td><td>20 kb</td><td>8 kb</td></tr>
+<tr><th>parashoot</th><td class=onep>213 kb</td><td class=onep>91 kb</td><td class=onep>88 kb</td><td class=onep>72 kb</td></tr>
+<tr><th>photo</th><td>128 kb</td><td>43 kb</td><td>40 kb</td><td>28 kb</td></tr>
+<tr><th>qasteroids</th><td class=twop>628 kb</td><td class=twop>179 kb</td><td class=twop>164 kb</td><td class=twop>148 kb</td></tr>
+<tr><th>qtmail</th><td class=fivep>982 kb</td><td class=fivep>406 kb</td><td class=fivep>376 kb</td><td class=fivep>304 kb</td></tr>
+<tr><th>smil</th><td class=onep>249 kb</td><td class=onep>119 kb</td><td class=onep>112 kb</td><td class=onep>80 kb</td></tr>
+<tr><th>snake</th><td>40 kb</td><td>19 kb</td><td>20 kb</td><td>20 kb</td></tr>
+<tr><th>solitaire</th><td>144 kb</td><td>52 kb</td><td>48 kb</td><td>40 kb</td></tr>
+<tr><th>themes</th><td class=fivep>961 kb</td><td class=twop>299 kb</td><td class=twop>268 kb</td><td class=twop>216 kb</td></tr>
+<tr><th>todo</th><td>144 kb</td><td>51 kb</td><td>48 kb</td><td>32 kb</td></tr>
+<tr><th>worldtime</th><td>76 kb</td><td>31 kb</td><td>28 kb</td><td>24 kb</td></tr>
+</table>
+</body>
+</html>

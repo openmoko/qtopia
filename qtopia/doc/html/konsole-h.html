@@ -1,0 +1,193 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/internal/konsole.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>konsole.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>konsole.h</h1>
+
+<p>This is the verbatim text of the konsole.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/* ----------------------------------------------------------------------- */
+/*                                                                         */
+/* [konsole.h]                      Konsole                                   */
+/*                                                                            */
+/* -------------------------------------------------------------------------- */
+/*                                                                            */
+/* Copyright (c) 1997,1998 by Lars Doelle &lt;lars.doelle@on-line.de&gt;            */
+/*                                                                            */
+/* This file is part of Konsole, an X terminal.                               */
+/*                                                                            */
+/* The material contained in here more or less directly orginates from        */
+/* kvt, which is copyright (c) 1996 by Matthias Ettrich &lt;ettrich@kde.org&gt;     */
+/*                                                                            */
+/* -------------------------------------------------------------------------- */
+/*                        */
+/* Konsole ported to Qt/Embedded by Trolltech                                 */
+/*                        */
+/* -------------------------------------------------------------------------- */
+
+#ifndef KONSOLE_H
+#define KONSOLE_H
+
+
+#include &lt;qmainwindow.h&gt;
+#include &lt;qaction.h&gt;
+#include &lt;qpopupmenu.h&gt;
+#include &lt;qstrlist.h&gt;
+#include &lt;qintdict.h&gt;
+#include &lt;qptrdict.h&gt;
+#include &lt;qtabwidget.h&gt;
+#include &lt;qtopia/qpetoolbar.h&gt;
+#include &lt;qcombobox.h&gt;
+
+#include "MyPty.h"
+#include "TEWidget.h"
+#include "TEmuVt102.h"
+#include "session.h"
+
+class EKNumTabWidget;
+
+class Konsole : public QMainWindow
+{
+Q_OBJECT
+
+public:
+
+  Konsole(QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
+//  Konsole(const char * name, const char* pgm, QStrList &amp; _args, int histon);
+  ~Konsole();
+  void setColLin(int columns, int lines);
+  QPEToolBar *secondToolBar; 
+  void show();
+  void setColor();
+  int lastSelectedMenu;
+private slots:
+  void doneSession(TESession*,int);
+  void changeColumns(int);
+  void fontChanged(int);
+  void configMenuSelected(int );
+  void colorMenuSelected(int);
+  void enterCommand(int);
+  void hitEnter();
+  void hitSpace();
+  void hitTab();
+  void hitPaste();
+  void hitUp();
+  void hitDown();
+  void switchSession(QWidget *);
+  void newSession();
+  void changeCommand(const QString &amp;, int);
+
+private:
+  void init(const char* _pgm, QStrList &amp; _args);
+  void initSession(const char* _pgm, QStrList &amp; _args);
+  void runSession(TESession* s);
+  void setColorPixmaps();
+  void setHistory(bool);
+  QSize calcSize(int columns, int lines);
+  TEWidget* getTe();
+
+private:
+  class VTFont 
+  {
+  public:
+    VTFont(QString name, QFont&amp; font) 
+    {
+      this-&gt;name = name;
+      this-&gt;font = font;
+    }
+
+    QFont&amp; getFont() 
+    {
+      return font;
+    }
+
+    QString getName() 
+    {
+      return name;
+    }
+
+  private:
+    QString name;
+    QFont font;
+  };
+
+  EKNumTabWidget* tab;
+  int nsessions;
+  QList&lt;VTFont&gt; fonts;
+  int cfont;
+  QCString se_pgm;
+  QStrList se_args;
+
+  QPopupMenu* fontList,*configMenu,*colorMenu;
+  QComboBox *commonCombo;
+    // history scrolling I think
+  bool        b_scroll;
+
+  int         n_keytab;
+  int         n_scroll;
+  int         n_render;
+  QString     pmPath; // pixmap path
+  QString     dropText;
+  QFont       defaultFont;
+  QSize       defaultSize;
+  QAction *   newAct;    
+};
+
+#endif
+
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

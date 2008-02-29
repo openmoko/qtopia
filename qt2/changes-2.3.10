@@ -1,0 +1,9 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+- Sound server performance improvements
+
+- Added tslib support
+
+- Various minor bug fixes.

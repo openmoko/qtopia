@@ -1,0 +1,168 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/settings/sysinfo.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>&lt;b&gt;System Info&lt;/b&gt; Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center><b>System Info</b> Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Software Information
+</a>
+<li><a href="#1-2"> System Information
+</a>
+<ul>
+<li><a href="#1-2-1"> Storage 
+</a>
+<li><a href="#1-2-2"> Clean-up Wizard
+</a>
+<li><a href="#1-2-3"> Memory
+</a>
+<li><a href="#1-2-4"> Data
+</a>
+</ul>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <b>System Info</b> is a Qtopia application. It displays system information
+about the device such as how much space is left and the software version.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> This application is a reporting tool and gathers system information
+from the device for presentation to the user. <b>System Info</b> provides
+the user with accurate information to determine if it is necessary
+to carry out maintenance on the device such as removing unwanted
+files or arranging for a firmware upgrade.
+<p> As well as the provision for selecting among the different
+information tabs, <b>System Info</b> gives the user the option of running the
+Clean-up Wizard enabling removal of unwanted files to recover space.
+<p> <h3> Software Information
+</h3>
+<a name="1-1"></a><p> The "Version" tab displays information about the firmware/software
+on the device: this includes the Qtopia name and icon accompanied
+by the current software version number and copyright statement. If
+updated Qtopia firmware is available to suit the device an
+upgrade may be appropriate.
+<p> <h3> System Information
+</h3>
+<a name="1-2"></a><p> After "Version" three other tabs - "Storage", "Memory" and "Data"
+- present information about resource usage on the device.
+<p> <h4> Storage 
+</h4>
+<a name="1-2-1"></a><p> <ul>
+<li> The "Storage" tab displays the current state of non-volatile storage
+devices (such as compact flash cards).
+<li> A separate bar graph shows how much of each device is being used (ie a
+unit fitted with two storage devices will have two bar graphs).  
+<li> At the bottom of the tab there is a button for starting the Clean-up Wizard.
+</ul>
+<p> <h4> Clean-up Wizard
+</h4>
+<a name="1-2-2"></a><p> The Clean-up Wizard is invoked by clicking the button at the bottom
+of the "Storage" tab.  Items for clean-up are broken into 3 catetories
+and a sequence of pages is displayed to the user depending on which
+categories the user selects.  If any items are chosen for clean-up
+then the wizard will delete those items and report on recovered space.
+<p> At each page in the sequence a "Next" button is available once the
+page has been completed. Selecting the "Next" button displays
+the next page in the sequence, as listed below.
+<p> The pages in the Clean-up Wizard are:
+<p> <ul>
+<li> <b>Page 1 What items would you like to clean-up?</b> A choice
+of Documents, Messages and Events is offered. The user may select
+any or all of these for clean-up.
+<li> <b>Page 2 clean-up Documents:</b>. If Documents was chosen on Page 1,
+then this page is displayed. It allows the user to specify the minimum size 
+and category of documents that will be selected for clean-up. Clicking
+the "OK" button commits the size and category choices made and allows
+moving forward to the documents found page.
+<li> <b>Page 3 Documents found:</b> this page lists details of how many
+documents were found and the space that can be recovered by deleting
+them. A "Details" button takes the user to a checklist page.
+<li> <b>Page 4 Uncheck Documents:</b> this page provides a checklist
+that initially lists as checked all items available for clean-up
+(deletion).  They may be unchecked to preserve them from being
+cleaned-up.
+<li> <b>Dialog: Warning:</b> If items were checked in the previous screen
+then the user is allowed the opportunity to back out by selecting
+"No". Selecting "Yes" permits the system to go ahead and delete
+the items.
+<li> <b>Dialog: Deleting items:</b> A progress bar shows the deletion
+of items being completed.
+<li> <b>Page 5 clean-up Messages:</b> If Messages was chosen on
+Page 1 then this page is displayed. On this page the user may set
+parameters by which to search for messages (emails) to clean-up. The
+user may minimum size and use a date picker to select an "older than"
+date to by which to filter.
+<li> <b>Dialog: Warning:</b> A warning for Messages is displayed as
+per the Documents warning above.
+<li> <b>Dialog: Deleting items:</b> A progress dialog is displayed as above.
+<li> <b>Page 6 clean-up Events:</b> If Events was chosen on Page 1 then
+this page is displayed. On this page the user may set parameters to
+search for events (from the <a href="calendar.html">Calendar</a>) to clean-up. A date picker is
+available to allow the user to select an "older than" date by which
+to filter.
+<li> <b>Dialog: Warning:</b> A warning for Events is displayed as
+per the Documents warning above.
+<li> <b>Dialog: Deleting items:</b> A progress dialog is displayed as above.
+<li> <b>Page 7 Items deleted:</b> A final page summarising the item
+deletions with a count of items removed is displayed.
+</ul>
+<p> <h4> Memory
+</h4>
+<a name="1-2-3"></a><p> <ul>
+<li> The "Memory" tab contains a bar graph showing how much memory is
+currently being used to run the device and its applications.
+</ul>
+<p> <h4> Data
+</h4>
+<a name="1-2-4"></a><p> <ul>
+<li> The "Data" tab shows 5 different types of files and the amount of
+space each type is using (in kilobytes or megabytes).
+<li> The file types presented are: audio, images, mail, text and video.
+A bar indicator with a color for each file type is used to show the
+share of storage each is using. Another color denotes free space.
+</ul>
+<p> Note that if one file type is using a sufficiently large share then
+the other colors may not show and the bar may be all one color.
+For example if Free space is greater than 95% a solid purple bar
+will show.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Volume
+Comment[]=Sets the sound volume.
+X-QPE-Library=libvolumeapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

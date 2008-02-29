@@ -1,0 +1,9 @@
+Files: sounds/*.wav
+Priority: required
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-9
+Description: Basic sounds for Qtopia environment
+ These icons are available to all QPE application.

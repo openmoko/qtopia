@@ -1,0 +1,130 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/todayplugininterface.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TodayPluginInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>TodayPluginInterface Class Reference</h1>
+
+<p>The TodayPluginInterface class provides an interface for the Qtopia
+Today application.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="todayplugininterface-h.html">qtopia/todayplugininterface.h</a>&gt;</tt>
+<p><a href="todayplugininterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual QString <a href="#name"><b>name</b></a> () const = 0</li>
+<li class=fn>virtual QPixmap <a href="#icon"><b>icon</b></a> () const = 0</li>
+<li class=fn>virtual QString <a href="#html"><b>html</b></a> ( uint&nbsp;charWidth, uint&nbsp;lineHeight ) const = 0</li>
+<li class=fn>virtual bool <a href="#configurable"><b>configurable</b></a> () const = 0</li>
+<li class=fn>virtual QWidget * <a href="#widget"><b>widget</b></a> ( QWidget * ) = 0</li>
+<li class=fn>virtual void <a href="#accepted"><b>accepted</b></a> ( QWidget * ) const = 0</li>
+<li class=fn>virtual void <a href="#itemSelected"><b>itemSelected</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;param ) const = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The TodayPluginInterface class provides an interface for the Qtopia
+Today application.
+<p> The interface relies on markup language for display and interaction in the Today
+application.  A plug-in can be informed of a link being clicked in its view by properly
+encoding the links as laid out in <a href="#html">html</a>() function.
+<p> The layout and format of the embedded html is entirely managed by each plug-in.
+A plug-in can inform the Today application to reload its contents by either emitting
+a reload() signal or sending a reload() qcop message to the Today application.
+<p> The tags that can be used in the returned text are limited to the capabilities
+of the default QStyleSheet
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="accepted"></a>TodayPluginInterface::accepted ( QWidget * ) const<tt> [pure virtual]</tt>
+</h3> 
+<p> This method is called if the user accepted any changes made to the configure
+options of your plug-in.  You can safely cast this QWidget back to the type
+you created in <a href="#widget">widget</a>(QWidget *).  Any state changes must be read and stored
+by your plug-in within the scope of this function, as the Today application would
+normally delete the widget upon exit of this function.
+<p> If you do not wish to provide configurability there is no need to reimplement
+this method.
+
+<h3 class=fn>bool <a name="configurable"></a>TodayPluginInterface::configurable () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#configurable">configurable</a>() function is used by the Today application for presenting a list
+of configurable plug-ins to the user.  Reimplement this method to return TRUE
+if you want to provide a configurable widget for your plug-in.
+You also need to reimplement both the <a href="#widget">widget</a>(QWidget *) and <a href="#accepted">accepted</a>(QWidget *) functions
+if your plug-in provides a configure option.
+
+<h3 class=fn>QString <a name="html"></a>TodayPluginInterface::html ( uint&nbsp;charWidth, uint&nbsp;lineHeight ) const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#html">html</a>() function should return the formatted text to be displayed 
+in the Today application.  The parameter <em>charWidth</em> is a size hint of the horizontal amount
+of characters (based on the default font) allocated to your plug-in.  Similarily the
+<em>lineHeight</em> is a size hint of the vertical amount of character lines allocated
+to your plug-in.  You may override these size hints, but please bear in mind that ultimately
+the user should, through configure options, decide what amount of screen space your
+plug-in should be given.
+<p> Links can be embedded in the html in the following format:
+<p> raise:application (E.g. &lt;a href="raise:datebook"&gt; Launch Datebook &lt;/a&gt; )
+<p> qcop:pluginName:parameters  (E.g. &lt;a href="qcop:myplugin:sendshowsignal"&gt; View document &lt;/a&gt; )
+<p> With the qcop command. the parameters would be passed to the <a href="#itemSelected">itemSelected</a>() function
+of your plug-in (provided pluginName matches the <a href="#name">name</a>() function of your plug-in)
+
+<h3 class=fn>QPixmap <a name="icon"></a>TodayPluginInterface::icon () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#icon">icon</a>() function returns the pixmap associated with this plug-in.  This icon,
+along with the <a href="#name">name</a>() function, will identify the plug-in in the configure
+option of the Today application.
+
+<h3 class=fn>void <a name="itemSelected"></a>TodayPluginInterface::itemSelected ( const&nbsp;QString&nbsp;&amp;&nbsp;param ) const<tt> [pure virtual]</tt>
+</h3> 
+<p> This function is called by the Today app when a user clicks on a link matching
+the qcop format described in the <a href="#html">html</a>() function.
+<p> The <em>param</em> is the parameters string embedded in the link encoding of the html()
+function.
+
+<h3 class=fn>QString <a name="name"></a>TodayPluginInterface::name () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#name">name</a>() function returns the name of the Today plug-in.  This name,
+along with the <a href="#icon">icon</a>() function, will identify the plug-in in the configure
+option of the Today application.
+
+<h3 class=fn>QWidget * <a name="widget"></a>TodayPluginInterface::widget ( QWidget * )<tt> [pure virtual]</tt>
+</h3> 
+<p> This method is called to display the configure widget for your plug-in.
+The caller assumes ownership of the returned <a href="#widget">widget</a>(E.g. do not delete it).
+<p> If you do not wish to provide configurability there is no need to reimplement
+this method.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

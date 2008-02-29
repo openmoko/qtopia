@@ -1,0 +1,142 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/qdawg.cpp:508 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QDawg Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QDawg Class Reference</h1>
+
+<p>The QDawg class provides an implementation of a Directed Acyclic Word Graph.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qdawg-h.html">qtopia/qdawg.h</a>&gt;</tt>
+<p><a href="qdawg-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QDawg"><b>QDawg</b></a> ()</li>
+<li class=fn><a href="#~QDawg"><b>~QDawg</b></a> ()</li>
+<li class=fn>bool <a href="#readFile"><b>readFile</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</li>
+<li class=fn>bool <a href="#read"><b>read</b></a> ( QIODevice&nbsp;*&nbsp;dev )</li>
+<li class=fn>bool <a href="#write"><b>write</b></a> ( QIODevice&nbsp;*&nbsp;dev ) const</li>
+<li class=fn>bool <a href="#createFromWords-2"><b>createFromWords</b></a> ( QIODevice&nbsp;*&nbsp;dev )</li>
+<li class=fn>void <a href="#createFromWords"><b>createFromWords</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;list )</li>
+<li class=fn>QStringList <a href="#allWords"><b>allWords</b></a> () const</li>
+<li class=fn>bool <a href="#contains"><b>contains</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s ) const</li>
+<li class=fn>int <a href="#countWords"><b>countWords</b></a> () const</li>
+<li class=fn>class <a href="#Node"><b>Node</b></a> { }</li>
+<li class=fn>const Node * <a href="#root"><b>root</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QDawg class provides an implementation of a Directed Acyclic Word Graph.
+<p> A DAWG provides very fast look-up of words in a word list.
+<p> The word list is created using <a href="#readFile">readFile</a>(), <a href="#read">read</a>() or
+<a href="#createFromWords">createFromWords</a>(). A list of all the DAWG's words is returned by
+<a href="#allWords">allWords</a>(), and the total number of words is returned by
+<a href="#countWords">countWords</a>(). Use <a href="#contains">contains</a>() to see if a particular word is in the
+DAWG. The root <a href="qdawg-node.html">node</a> is returned by <a href="#root">root</a>().
+<p> A global DAWG is maintained for the current locale. See the
+<a href="global.html">Global</a> class for details.
+<p> The structure of a DAWG is a graph of <a href="qdawg-node.html">Nodes</a>. There are no cycles in the graph (since there are no
+inifinitely repeating words). Each <a href="qdawg-node.html">Node</a> is a member of a list of <a href="qdawg-node.html">Nodes</a> called a child list. Each <a href="qdawg-node.html">Node</a> in the child list has a <em>letter</em>, an <em>isWord</em> flag,
+at most one <em>jump</em> arc, and at most one arc to the next child in
+the list.
+<p> If you traverse the <a href="qdawg-node.html">Nodes</a> in a DAWG,
+starting from the root(), and you concatenate all the letters from
+the single child in each child list that you visit, at every <a href="qdawg-node.html">Node</a> which has the isWord flag set your
+concatenation will be a word in the list represented by the DAWG.
+<p> For example, the DAWG below represents the word list:
+ban, band, can, cane, cans, pan, pane, pans.
+<p> This structuring not only provides O(1) lookup of words in the word list,
+but also produces a smaller storage file than a plain text file word list.
+<p> <center><img src="qdawg.png" width="405" height="276"></center> 
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QDawg"></a>QDawg::QDawg ()
+</h3>
+Constructs a new empty DAWG.
+
+<h3 class=fn><a name="~QDawg"></a>QDawg::~QDawg ()
+</h3>
+Deletes the DAWG.
+
+<h3 class=fn>QStringList <a name="allWords"></a>QDawg::allWords () const
+</h3>
+Returns a list of all the words in the DAWG.
+
+<h3 class=fn>bool <a name="contains"></a>QDawg::contains ( const&nbsp;QString&nbsp;&amp;&nbsp;s ) const
+</h3>
+Returns TRUE if the DAWG contains the word <em>s</em>; otherwise returns
+FALSE.
+
+<h3 class=fn>int <a name="countWords"></a>QDawg::countWords () const
+</h3>
+Returns the number of words in the DAWG.
+
+<h3 class=fn>void <a name="createFromWords"></a>QDawg::createFromWords ( const&nbsp;QStringList&nbsp;&amp;&nbsp;list )
+</h3>
+Replaces all the DAWG's words with the words in the <em>list</em>.
+
+<h3 class=fn>bool <a name="createFromWords-2"></a>QDawg::createFromWords ( QIODevice&nbsp;*&nbsp;dev )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Replaces all the DAWG's words with words read from <em>dev</em>.
+
+<h3 class=fn>bool <a name="read"></a>QDawg::read ( QIODevice&nbsp;*&nbsp;dev )
+</h3>
+Replaces the DAWG with the DAWG in <em>dev</em>.
+The file is memory-mapped.
+<p> <p>See also <a href="#write">write</a>().
+
+<h3 class=fn>bool <a name="readFile"></a>QDawg::readFile ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
+</h3>
+Replaces the DAWG with the DAWG in <em>filename</em>.
+The file is memory-mapped.
+<p> <p>See also <a href="#write">write</a>().
+
+<h3 class=fn>const&nbsp;<a href="qdawg::node.html">Node</a>&nbsp;* <a name="root"></a>QDawg::root () const
+</h3>
+Returns the root <a href="qdawg-node.html">Node</a> of the DAWG.
+
+<h3 class=fn>bool <a name="write"></a>QDawg::write ( QIODevice&nbsp;*&nbsp;dev ) const
+</h3>
+Writes the DAWG to <em>dev</em>, in a custom QDAWG format.
+<p> <b>Warning:</b> QDawg memory maps DAWG files.
+The safe method for writing to DAWG files is to
+write the data to a new file and move the new
+file to the old file name. QDawgs using the old
+file will continue using that file.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

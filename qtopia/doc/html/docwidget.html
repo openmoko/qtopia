@@ -1,0 +1,94 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/mainwidget.doc:86 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table>
+<p> 
+<p> <a name="top"></a>
+<p> <h2> Qtopia - The Main Document Widget
+</h2>
+<a name="1"></a><p> Applications that view or edit a particular type or types of files are
+called <em>document-oriented</em> applications. Qtopia has framework
+support to simplify the implementation of such applications.
+<p> The top-level widget of a document-oriented application must have a
+<a href="metaobjects.html">slot</a> declared:
+<p> <pre>
+public slot:
+    void setDocument( const QString&amp; applnk_filename );
+</pre>
+ 
+<p> This slot should then be implemented to save the application's current
+document (if any) and to show (and possibly edit) the specified
+document. An example implementation is:
+<p> <pre>
+void Main::setDocument( const QString&amp; applnk_filename )
+{
+    <a href="filemanager.html">FileManager</a> fm;
+
+    if ( current ) {
+        if ( !fm.<a href="filemanager.html#saveFile">saveFile</a>( *current, data ) ) {
+            // error
+            return;
+        }
+        delete current;
+    }
+
+    current = new <a href="doclnk.html">DocLnk</a>( applnk_filename );
+
+    if ( !fm.<a href="filemanager.html#loadFile">loadFile</a>( *current, data ) ) {
+        // error
+    }
+}
+</pre>
+ 
+<p> Document-oriented applications will always declare the the MIME types that they
+support by adding a line to their <a href="files.html#desktop">.desktop</a> file,
+specifying each supported type, seperated by semi-colons:
+<p> <pre>
+    MimeType=type/subtype;type/subtype;...
+</pre>
+ 
+<p> The subtype can be "*", indicating that this application can process
+all forms of the given type. Such an application is only invoked
+if no other more specific application is available.
+<p> At <a href="distrib.html">installation</a>, you may also choose to
+execute the following:
+<p> <pre>
+    qtopia-addmimetype type/subtype extension
+</pre>
+ 
+<p> This will allow plain filenames such as those on CF or SD cards inserted into
+the device to be recognized as MIME-typed documents.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

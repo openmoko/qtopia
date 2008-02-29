@@ -1,0 +1,324 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/backend/categories.cpp:252 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Categories Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Categories Class Reference</h1>
+
+<p>The Categories class is a database that groups categories and maps ids to names.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="categories-h.html">qtopia/categories.h</a>&gt;</tt>
+<p><a href="categories-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#Categories"><b>Categories</b></a> ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#Categories-2"><b>Categories</b></a> ( const&nbsp;Categories&nbsp;&amp;&nbsp;copyFrom )</li>
+<li class=fn>virtual <a href="#~Categories"><b>~Categories</b></a> ()</li>
+<li class=fn>Categories &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;Categories&nbsp;&amp;&nbsp;c )</li>
+<li class=fn>void <a href="#clear"><b>clear</b></a> ()</li>
+<li class=fn>int <a href="#addCategory"><b>addCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname )</li>
+<li class=fn>int <a href="#addGlobalCategory"><b>addGlobalCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;catname )</li>
+<li class=fn>bool <a href="#removeCategory"><b>removeCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname, bool&nbsp;checkGlobal = TRUE )</li>
+<li class=fn>bool <a href="#removeCategory-2"><b>removeCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )</li>
+<li class=fn>bool <a href="#removeGlobalCategory"><b>removeGlobalCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;catname )</li>
+<li class=fn>bool <a href="#removeGlobalCategory-2"><b>removeGlobalCategory</b></a> ( int&nbsp;uid )</li>
+<li class=fn>QArray&lt;int&gt; <a href="#ids"><b>ids</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QStringList&nbsp;&amp;&nbsp;labels ) const</li>
+<li class=fn>QArray&lt;int&gt; <a href="#ids-2"><b>ids</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, bool&nbsp;includeGlobal = TRUE ) const</li>
+<li class=fn>int <a href="#id"><b>id</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QString&nbsp;&amp;&nbsp;cat ) const</li>
+<li class=fn>QString <a href="#label"><b>label</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, int&nbsp;id ) const</li>
+<li class=fn>enum <a href="#ExtraLabels-enum"><b>ExtraLabels</b></a> { NoExtra, AllUnfiled, AllLabel, UnfiledLabel }</li>
+<li class=fn>QStringList <a href="#labels"><b>labels</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, bool&nbsp;includeGlobal = TRUE, ExtraLabels&nbsp;extra = NoExtra ) const</li>
+<li class=fn>QStringList <a href="#labels-2"><b>labels</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids ) const</li>
+<li class=fn>enum <a href="#DisplaySingle-enum"><b>DisplaySingle</b></a> { ShowMulti, ShowAll, ShowFirst }</li>
+<li class=fn>QString <a href="#displaySingle"><b>displaySingle</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids, DisplaySingle&nbsp;display ) const</li>
+<li class=fn>QStringList <a href="#globalCategories"><b>globalCategories</b></a> () const</li>
+<li class=fn>bool <a href="#renameCategory"><b>renameCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;oldName, const&nbsp;QString&nbsp;&amp;&nbsp;newName )</li>
+<li class=fn>bool <a href="#renameGlobalCategory"><b>renameGlobalCategory</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;oldName, const&nbsp;QString&nbsp;&amp;&nbsp;newName )</li>
+<li class=fn>void <a href="#setGlobal"><b>setGlobal</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname, bool&nbsp;global )</li>
+<li class=fn>bool <a href="#isGlobal"><b>isGlobal</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const</li>
+<li class=fn>bool <a href="#exists"><b>exists</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const</li>
+<li class=fn>bool <a href="#exists-2"><b>exists</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const</li>
+<li class=fn>bool <a href="#save"><b>save</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;fname ) const</li>
+<li class=fn>bool <a href="#load"><b>load</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;fname )</li>
+<li class=fn>void <a href="#dump"><b>dump</b></a> () const</li>
+<li class=fn>const QMap&lt;QString, CategoryGroup&gt; &amp; <a href="#appGroupMap"><b>appGroupMap</b></a> () const</li>
+<li class=fn>const CategoryGroup &amp; <a href="#globalGroup"><b>globalGroup</b></a> () const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#categoryAdded"><b>categoryAdded</b></a> ( const&nbsp;Categories&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )</li>
+<li class=fn>void <a href="#categoryRemoved"><b>categoryRemoved</b></a> ( const&nbsp;Categories&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )</li>
+<li class=fn>void <a href="#categoryRenamed"><b>categoryRenamed</b></a> ( const&nbsp;Categories&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Categories class is a database that groups categories and maps ids to names.
+<p> The Categories class is the low level Categories accessor class. To
+add a category menu and filter for your application, see <a href="categorymenu.html">CategoryMenu</a>.
+<p> The Categories class allows the developer to add, remove, and rename
+categories. Categories can be created for an individual application
+such as Todo List or to be used for all applications. Categories
+that can be used by all applications are called global
+categories. Each <a href="pimrecord.html">PimRecord</a> subclass stores categories as an
+QArray<int> using <a href="pimrecord.html#setCategories">PimRecord::setCategories</a>() and
+<a href="pimrecord.html#categories">PimRecord::categories</a>(). This allows each record to be assigned
+to multiple categories. This also allows the user to rename a
+category and for it to update automatically in all records.
+<p> This class provides several methods to convert between a category id
+and it's associated string such as <a href="#id">id</a>(), <a href="#ids">ids</a>(), <a href="#label">label</a>() and <a href="#labels">labels</a>(). A
+helper class called <a href="categorygroup.html">CategoryGroup</a> is used to access categories of a
+single application group, such as Todo List. <a href="global.html">Global</a> categories can
+also be accessed via CategoryGroup objects.  See <a href="#appGroupMap">appGroupMap</a>() and
+<a href="#globalGroup">globalGroup</a>() for the appropriate accessor methods.
+<p> Categories are stored in an xml file in the Settings directory
+(Categories.xml). A global function called categoryFileName() will
+return to appropriate QString file location to be passed to <a href="#load">load</a>()
+and <a href="#save">save</a>() for the master categories database.
+<p> 
+
+<b>Warning:</b> Categories API will likely change after Qtopia 2.
+<p>See also <a href="categorygroup.html">CategoryGroup</a>, <a href="categorymenu.html">CategoryMenu</a>, <a href="pimrecord.html">PimRecord</a>, <a href="qtopiadesktop.html">Qtopia Desktop Classes</a>, and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="DisplaySingle-enum"></a>Categories::DisplaySingle</h3>
+
+<ul>
+<li><tt>Categories::ShowMulti</tt>
+<li><tt>Categories::ShowAll</tt>
+<li><tt>Categories::ShowFirst</tt>
+</ul>
+<h3 class=fn><a name="ExtraLabels-enum"></a>Categories::ExtraLabels</h3>
+
+<ul>
+<li><tt>Categories::NoExtra</tt> - only the category labels
+<li><tt>Categories::AllUnfiled</tt> - add All and Unfiled labels
+<li><tt>Categories::AllLabel</tt> - add All label
+<li><tt>Categories::UnfiledLabel</tt> - add Unfiled label
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Categories"></a>Categories::Categories ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3> 
+<p> Constructor for an empty Categories object. The standard <em>parent</em> and <em>name</em>
+parameters are passed on.
+
+<h3 class=fn><a name="Categories-2"></a>Categories::Categories ( const&nbsp;<a href="categories.html">Categories</a>&nbsp;&amp;&nbsp;copyFrom )
+</h3> 
+<p> Constructors a deep copy of <em>copyFrom</em>.
+
+<h3 class=fn><a name="~Categories"></a>Categories::~Categories ()<tt> [virtual]</tt>
+</h3> 
+<p> Empty destructor. Call <a href="#save">save</a>() before destruction if there are changes
+that need to be saved.
+
+<h3 class=fn>int <a name="addCategory"></a>Categories::addCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname )
+</h3>
+Add the category name <em>catname</em> for the application <em>appname</em>.
+Return UID if added, 0 if the category already exists locally
+for any application or globally.
+
+<h3 class=fn>int <a name="addGlobalCategory"></a>Categories::addGlobalCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;catname )
+</h3>
+Add the global category <em>catname</em> while checking that it doesn't
+already exist globally. Return UID if added, 0 if conflicts.
+<p> <p>See also <a href="#addCategory">addCategory</a>().
+
+<h3 class=fn>const QMap&lt;QString, CategoryGroup&gt; &amp; <a name="appGroupMap"></a>Categories::appGroupMap () const
+</h3> 
+<p> Returns a map of application names to <a href="categorygroup.html">CategoryGroup</a>. The CategoryGroup
+class defines a map of ids to category labels and category labels to ids.
+
+<h3 class=fn>void <a name="categoryAdded"></a>Categories::categoryAdded ( const&nbsp;<a href="categories.html">Categories</a>&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )<tt> [signal]</tt>
+</h3> 
+<p> Emitted if a category is added.
+<p> <em>cats</em> is a const reference to this object
+<em>appname</em> is the <a href="categorygroup.html">CategoryGroup</a> application name that the category was added to or QString::null if it was global
+<em>uid</em> is the unique identifier associated with the added category
+
+<h3 class=fn>void <a name="categoryRemoved"></a>Categories::categoryRemoved ( const&nbsp;<a href="categories.html">Categories</a>&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )<tt> [signal]</tt>
+</h3> 
+<p> Emitted if removed category is removed.
+<p> <em>cats</em> is a const reference to this object
+<em>appname</em> is the <a href="categorygroup.html">CategoryGroup</a> application name that the category was removed from or QString::null if it was the global CategoryGroup
+<em>uid</em> is the unique identifier associated with the removed category
+
+<h3 class=fn>void <a name="categoryRenamed"></a>Categories::categoryRenamed ( const&nbsp;<a href="categories.html">Categories</a>&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )<tt> [signal]</tt>
+</h3> 
+<p> Emitted if <em>uid</em> in the <em>appname</em> <a href="categorygroup.html">CategoryGroup</a> is renamed in <em>cats</em>
+object.
+<p> <em>cats</em> is a const reference to this object
+<em>appname</em> is the CategoryGroup application name that the category was renamed in or QString::null if it was the global CategoryGroup
+<em>uid</em> is the unique identifier associated with the renamed category
+
+<h3 class=fn>void <a name="clear"></a>Categories::clear ()
+</h3>
+Clear the categories in memory. Equivelent to creating an empty Categories
+object.
+
+<h3 class=fn>QString <a name="displaySingle"></a>Categories::displaySingle ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids, <a href="categories.html#DisplaySingle-enum">DisplaySingle</a>&nbsp;display ) const
+</h3>
+Returns a single string associated with <em>catids</em> for applications <em>app</em>.
+The returned string is for display in a
+combobox or any area that requires one string.  If <em>catids</em> are empty
+then "Unfiled" will be returned.  If multiple categories are
+assigned then the behavior depends on the DisplaySingle type.
+<p> If <em>display</em> is set to ShowMulti then " (multi)" appended to the
+first string. If <em>display</em> is set to ShowAll, then a space
+seperated string is returned with all categories.  If ShowFirst is
+set, the just the first string is returned.
+<p> Note that the returned string may be translated, so while it is
+ideal for display to the user, it should not be passed back to Categories
+functions as a 'label'.
+
+<h3 class=fn>void <a name="dump"></a>Categories::dump () const
+</h3>
+Dump the contents to standard out. Used for debugging only.
+
+<h3 class=fn>bool <a name="exists"></a>Categories::exists ( const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const
+</h3>
+Returns true if the <em>catname</em> is associated with any <a href="categorygroup.html">CategoryGroup</a>,
+including global.
+
+<h3 class=fn>bool <a name="exists-2"></a>Categories::exists ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const
+</h3>
+Returns TRUE if the <em>catname</em> is associated with the <em>appname</em>
+<a href="categorygroup.html">CategoryGroup</a>, FALSE if not found.
+
+<h3 class=fn>QStringList <a name="globalCategories"></a>Categories::globalCategories () const
+</h3> 
+<p> Returns list of all global category labels
+
+<h3 class=fn>const&nbsp;<a href="categorygroup.html">CategoryGroup</a>&nbsp;&amp; <a name="globalGroup"></a>Categories::globalGroup () const
+</h3> 
+<p> Returns the global <a href="categorygroup.html">CategoryGroup</a>. The CategoryGroup
+class defines a map of ids to category labels and category labels to ids.
+
+<h3 class=fn>int <a name="id"></a>Categories::id ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QString&nbsp;&amp;&nbsp;cat ) const
+</h3>
+Returns the id associated with <em>cat</em> in application <em>app</em>. If the id is not found in the
+application <a href="categorygroup.html">CategoryGroup</a>, then it searches the global CategoryGroup.
+If it is not found it either, 0 is returned.
+
+<h3 class=fn>QArray&lt;int&gt; <a name="ids"></a>Categories::ids ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QStringList&nbsp;&amp;&nbsp;labels ) const
+</h3>
+<p> Returns all ids associated with the application <a href="categorygroup.html">CategoryGroup</a> <em>app</em>
+and the passed in <em>labels</em> in that group.
+
+<h3 class=fn>QArray&lt;int&gt; <a name="ids-2"></a>Categories::ids ( const&nbsp;QString&nbsp;&amp;&nbsp;app, bool&nbsp;includeGlobal = TRUE ) const
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Returns list of category ids associated with the application <em>app</em>,
+and, if <em>includeGlobal</em> is true, the global category ids.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>bool <a name="isGlobal"></a>Categories::isGlobal ( const&nbsp;QString&nbsp;&amp;&nbsp;catname ) const
+</h3>
+Returns TRUE if the <em>catname</em> is in the global <a href="categorygroup.html">CategoryGroup</a>, FALSE if not.
+
+<h3 class=fn>QString <a name="label"></a>Categories::label ( const&nbsp;QString&nbsp;&amp;&nbsp;app, int&nbsp;id ) const
+</h3>
+Returns the label associated with <em>id</em> in application <em>app</em>.
+
+<h3 class=fn>QStringList <a name="labels"></a>Categories::labels ( const&nbsp;QString&nbsp;&amp;&nbsp;app, bool&nbsp;includeGlobal = TRUE, <a href="categories.html#ExtraLabels-enum">ExtraLabels</a>&nbsp;extra = NoExtra ) const
+</h3>
+Returns the sorted list of all categories that are associated with
+the <em>app</em>.  If <em>includeGlobal</em> is TRUE then the returned
+categories will include the global category items.
+<em>extra</em> specifies which extra labels should be added.
+
+<h3 class=fn>QStringList <a name="labels-2"></a>Categories::labels ( const&nbsp;QString&nbsp;&amp;&nbsp;app, const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids ) const
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Returns list of labels associated with the application <em>app</em> and <em>catids</em>.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="load"></a>Categories::load ( const&nbsp;QString&nbsp;&amp;&nbsp;fname )
+</h3>
+Loads the Categories database using <em>fname</em>. See categoryFileName()
+for the default file name string used for the shared category database.
+<p> Returns FALSE if there is error reading the file or TRUE on success.
+
+<h3 class=fn><a href="categories.html">Categories</a>&nbsp;&amp; <a name="operator-eq"></a>Categories::operator= ( const&nbsp;<a href="categories.html">Categories</a>&nbsp;&amp;&nbsp;c )
+</h3> 
+<p> Performs deep copy of <em>c</em>.
+
+<h3 class=fn>bool <a name="removeCategory"></a>Categories::removeCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname, bool&nbsp;checkGlobal = TRUE )
+</h3>
+Removes the <em>catname</em> from the application group. If it is not
+found in the application group <em>appname</em> and <em>checkGlobal</em> is TRUE, then it
+attempts to remove it from the global list
+
+<h3 class=fn>bool <a name="removeCategory-2"></a>Categories::removeCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, int&nbsp;uid )
+</h3>
+Removes the <em>uid</em> from the application group <em>appname</em>. Returns TRUE
+if success, FALSE if not found.
+
+<h3 class=fn>bool <a name="removeGlobalCategory"></a>Categories::removeGlobalCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;catname )
+</h3>
+Removes the global category <em>catname</em>. Returns TRUE
+if success, FALSE if not found.
+
+<h3 class=fn>bool <a name="removeGlobalCategory-2"></a>Categories::removeGlobalCategory ( int&nbsp;uid )
+</h3>
+Removes the global category <em>uid</em>. Returns TRUE
+if success, FALSE if not found.
+
+<h3 class=fn>bool <a name="renameCategory"></a>Categories::renameCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;oldName, const&nbsp;QString&nbsp;&amp;&nbsp;newName )
+</h3>
+Return TRUE if renaming succeeded; FALSE if <em>appname</em> or <em>oldName</em>
+is not found, or if <em>newName</em> conflicts with an existing category
+name in any <a href="categorygroup.html">CategoryGroup</a>.
+
+<h3 class=fn>bool <a name="renameGlobalCategory"></a>Categories::renameGlobalCategory ( const&nbsp;QString&nbsp;&amp;&nbsp;oldName, const&nbsp;QString&nbsp;&amp;&nbsp;newName )
+</h3>
+Return TRUE if renaming succeeded; FALSE if <em>oldName</em> or <em>newName</em>
+is not found, or if <em>newName</em> conflicts with an existing category
+in any <a href="categorygroup.html">CategoryGroup</a>. This function will only rename categories found
+in the global CategoryGroup.
+
+<h3 class=fn>bool <a name="save"></a>Categories::save ( const&nbsp;QString&nbsp;&amp;&nbsp;fname ) const
+</h3>
+Saves the Categories database to the <em>fname</em>. See categoryFileName()
+for the default file name string used for the shared category database.
+<p> Returns FALSE if there is error writing the file or TRUE on success.
+
+<h3 class=fn>void <a name="setGlobal"></a>Categories::setGlobal ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;catname, bool&nbsp;global )
+</h3>
+Changes the grouping of a category. If a category was global and <em>global</em>
+is set to TRUE, then the <em>catname</em> will be moved to the <em>appname</em> group.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

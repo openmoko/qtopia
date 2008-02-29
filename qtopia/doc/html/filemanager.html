@@ -1,0 +1,136 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/filemanager.cpp:52 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>FileManager Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FileManager Class Reference</h1>
+
+<p>The FileManager class assists with AppLnk input/output.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="filemanager-h.html">qtopia/filemanager.h</a>&gt;</tt>
+<p><a href="filemanager-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#FileManager"><b>FileManager</b></a> ()</li>
+<li class=fn><a href="#~FileManager"><b>~FileManager</b></a> ()</li>
+<li class=fn>bool <a href="#saveFile-2"><b>saveFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )</li>
+<li class=fn>bool <a href="#saveFile"><b>saveFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f, const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>bool <a href="#loadFile"><b>loadFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f, QByteArray&nbsp;&amp;&nbsp;ba )</li>
+<li class=fn>bool <a href="#loadFile-2"><b>loadFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f, QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>bool <a href="#copyFile"><b>copyFile</b></a> ( const&nbsp;AppLnk&nbsp;&amp;&nbsp;src, const&nbsp;AppLnk&nbsp;&amp;&nbsp;dest )</li>
+<li class=fn>QIODevice * <a href="#openFile"><b>openFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f )</li>
+<li class=fn>QIODevice * <a href="#saveFile-3"><b>saveFile</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f )</li>
+<li class=fn>bool <a href="#exists"><b>exists</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f )</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>bool <a href="#ensurePathExists"><b>ensurePathExists</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;fn )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The FileManager class assists with <a href="applnk.html">AppLnk</a> input/output.
+<p> The FileManager class is used to <a href="#loadFile">loadFile</a>()s and
+<a href="#saveFile">saveFile</a>()s. It also provides a <a href="#copyFile">copyFile</a>() function and a
+function to test for a file's existence, <a href="#exists">exists</a>(). It also provides
+<a href="#openFile">openFile</a>() that provides an IO device for reading.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="FileManager"></a>FileManager::FileManager ()
+</h3>
+Constructs a FileManager object.
+
+<h3 class=fn><a name="~FileManager"></a>FileManager::~FileManager ()
+</h3>
+Destroys the FileManager object.
+
+<h3 class=fn>bool <a name="copyFile"></a>FileManager::copyFile ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;&amp;&nbsp;src, const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;&amp;&nbsp;dest )
+</h3>
+Copies the document specified by <em>src</em> to the document specified
+by <em>dest</em>.
+<p> Returns TRUE if the operation succeeded; otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="ensurePathExists"></a>FileManager::ensurePathExists ( const&nbsp;QString&nbsp;&amp;&nbsp;fn )<tt> [protected]</tt>
+</h3>
+Ensures that the path <em>fn</em> exists, by creating required directories.
+<p> Returns TRUE if it succeededs; otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="exists"></a>FileManager::exists ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f )
+</h3>
+Returns TRUE if the document specified by <em>f</em> current exists
+as a file on disk; otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="loadFile"></a>FileManager::loadFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f, QByteArray&nbsp;&amp;&nbsp;ba )
+</h3>
+Loads <em>ba</em> from the document specified by <em>f</em>.
+<p> Returns TRUE if the operation succeeded; otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="loadFile-2"></a>FileManager::loadFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f, QString&nbsp;&amp;&nbsp;text )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Loads <em>text</em> from the document specified by <em>f</em>.
+<p> The text must be in UTF8 format.
+<p> Returns TRUE if the operation succeeded; otherwise returns FALSE.
+
+<h3 class=fn>QIODevice * <a name="openFile"></a>FileManager::openFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f )
+</h3>
+Opens the document specified by <em>f</em> as a readable QIODevice.
+The caller must delete the return value.
+<p> Returns 0 if the operation fails.
+
+<h3 class=fn>bool <a name="saveFile"></a>FileManager::saveFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f, const&nbsp;QString&nbsp;&amp;&nbsp;text )
+</h3>
+Saves <em>text</em> as the document specified by <em>f</em>.
+<p> The text is saved in UTF8 format.
+<p> Returns TRUE if the operation succeeded; otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="saveFile-2"></a>FileManager::saveFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Saves <em>data</em> as the document specified by <em>f</em>.
+<p> Returns TRUE if the operation succeeded; otherwise returns FALSE.
+
+<h3 class=fn>QIODevice * <a name="saveFile-3"></a>FileManager::saveFile ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Opens the document specified by <em>f</em> as a writable QIODevice.
+The caller must delete the return value.
+<p> Returns 0 if the operation fails.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

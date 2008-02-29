@@ -1,0 +1,81 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/phonelauncher.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Phone Launcher Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Phone Launcher Specification</h1>
+
+
+<p> 
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Grid Menu
+</a>
+<li><a href="#1-2"> Application List
+</a>
+<li><a href="#1-3"> Documents List
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Qtopia Launcher</b> is the access point for all applications installed on
+the device. It also allows the user to manage their documents. The primary requirement
+of the <b>Launcher</b> is to provide fast access to the most frequently used applications.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Grid Menu
+</h3>
+<a name="1-1"></a><p> This menu allows the user to directly access the most frequently used applications. It also provides access to lists of applications, games, settings and documents.
+<p> Items in this menu are positioned in a grid. The user is able to launch items by using the keypad or arrow keys. Pressing a key in the keypad launches the corresponding item in the grid. Pressing an arrow key moves a selector around the grid.
+The user is able to launch the item under the selector by pressing the select key.
+<p> It is possible for the OEM/ODM to configure the arrangement and contents of the grid menu.
+<p> <h3> Application List
+</h3>
+<a name="1-2"></a><p> This list displays all applications, games, and settings available to the user.
+<p> The user is able to navigate the list using the arrow keys or by typing the name of the application using the keypad.
+Selecting an item in the list launches that item.
+<p> The user is able to add items from the list to <a href="req-speeddial.html"><b>Speed Dial</b></a>.
+<p> <h3> Documents List
+</h3>
+<a name="1-3"></a><p> This list displays all documents on the device.
+The user is able to filter documents by category, by mime type, or by both.
+<p> The user is able to navigate the list using the arrow keys or by typing the name of the document using the keypad.
+Selecting a document launches the associated application and opens the document in that application.
+<p> The user is able to edit the properties of documents from the list. The user is able to rename, change storage location, and change the category of the document. In addition the user is able to delete documents and send documents over an infrared link from the list.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

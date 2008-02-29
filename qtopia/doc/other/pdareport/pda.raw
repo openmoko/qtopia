@@ -1,0 +1,581 @@
+Edition: pda
+Build: dynamic
+du -k output:
+2098	image/opt/Qtopia/bin
+16	image/opt/Qtopia/etc/im/pkim
+16	image/opt/Qtopia/etc/im
+16	image/opt/Qtopia/etc/calculator
+12	image/opt/Qtopia/etc/beam/targets
+12	image/opt/Qtopia/etc/beam
+448	image/opt/Qtopia/etc/dict
+24	image/opt/Qtopia/etc/default
+32	image/opt/Qtopia/etc/colors
+12	image/opt/Qtopia/etc/network
+64	image/opt/Qtopia/etc/qimpen
+632	image/opt/Qtopia/etc
+378	image/opt/Qtopia/lib/fonts
+8937	image/opt/Qtopia/lib
+32	image/opt/Qtopia/apps/Games
+77	image/opt/Qtopia/apps/Applications
+77	image/opt/Qtopia/apps/Settings
+185	image/opt/Qtopia/apps
+4	image/opt/Qtopia/i18n/en_US
+4	image/opt/Qtopia/i18n
+1058	image/opt/Qtopia/help/html
+1058	image/opt/Qtopia/help
+16	image/opt/Qtopia/pics/qpe/pda
+201	image/opt/Qtopia/pics/qpe
+8	image/opt/Qtopia/pics/calculator
+16	image/opt/Qtopia/pics/fshw
+20	image/opt/Qtopia/pics/help
+97	image/opt/Qtopia/pics/pkim
+16	image/opt/Qtopia/pics/Button
+4	image/opt/Qtopia/pics/datebook/icons/14x14
+4	image/opt/Qtopia/pics/datebook/icons
+24	image/opt/Qtopia/pics/datebook
+256	image/opt/Qtopia/pics/wallpaper
+65	image/opt/Qtopia/pics/qasteroids/bits
+129	image/opt/Qtopia/pics/qasteroids/ship
+129	image/opt/Qtopia/pics/qasteroids/rock2
+129	image/opt/Qtopia/pics/qasteroids/rock3
+4	image/opt/Qtopia/pics/qasteroids/missile
+4	image/opt/Qtopia/pics/qasteroids/exhaust
+20	image/opt/Qtopia/pics/qasteroids/powerups
+28	image/opt/Qtopia/pics/qasteroids/shield
+516	image/opt/Qtopia/pics/qasteroids
+32	image/opt/Qtopia/pics/cards/small
+52	image/opt/Qtopia/pics/cards
+48	image/opt/Qtopia/pics/clock
+435	image/opt/Qtopia/pics/icons/14x14
+435	image/opt/Qtopia/pics/icons
+8	image/opt/Qtopia/pics/music
+4	image/opt/Qtopia/pics/qipkg
+16	image/opt/Qtopia/pics/snake
+4	image/opt/Qtopia/pics/sound
+4	image/opt/Qtopia/pics/today
+20	image/opt/Qtopia/pics/words/icons/14x14
+20	image/opt/Qtopia/pics/words/icons
+28	image/opt/Qtopia/pics/words
+4	image/opt/Qtopia/pics/solitaire
+4	image/opt/Qtopia/pics/light-and-power
+4	image/opt/Qtopia/pics/appservices
+20	image/opt/Qtopia/pics/minesweep
+4	image/opt/Qtopia/pics/pluginmanager
+8	image/opt/Qtopia/pics/systemtime
+20	image/opt/Qtopia/pics/worldtime
+4	image/opt/Qtopia/pics/fifteen
+12	image/opt/Qtopia/pics/hwsettings
+4	image/opt/Qtopia/pics/textedit
+8	image/opt/Qtopia/pics/camera
+32	image/opt/Qtopia/pics/mindbreaker
+4	image/opt/Qtopia/pics/buttoneditor
+4	image/opt/Qtopia/pics/launchersettings
+12	image/opt/Qtopia/pics/sysinfo
+4	image/opt/Qtopia/pics/keypebble
+4	image/opt/Qtopia/pics/mountmon
+4	image/opt/Qtopia/pics/security
+8	image/opt/Qtopia/pics/backuprestore
+8	image/opt/Qtopia/pics/netmon
+4	image/opt/Qtopia/pics/calibrate
+20	image/opt/Qtopia/pics/todolist
+4	image/opt/Qtopia/pics/rotation
+20	image/opt/Qtopia/pics/mediaplayer/icons/14x14
+20	image/opt/Qtopia/pics/mediaplayer/icons
+193	image/opt/Qtopia/pics/mediaplayer/skins/default
+265	image/opt/Qtopia/pics/mediaplayer/skins/techno
+457	image/opt/Qtopia/pics/mediaplayer/skins
+477	image/opt/Qtopia/pics/mediaplayer
+69	image/opt/Qtopia/pics/addressbook/icons/14x14
+69	image/opt/Qtopia/pics/addressbook/icons
+137	image/opt/Qtopia/pics/addressbook
+8	image/opt/Qtopia/pics/appearance/icons/14x14
+8	image/opt/Qtopia/pics/appearance/icons
+12	image/opt/Qtopia/pics/appearance
+48	image/opt/Qtopia/pics/qtmail/icons/14x14
+48	image/opt/Qtopia/pics/qtmail/icons
+61	image/opt/Qtopia/pics/qtmail/smiley
+165	image/opt/Qtopia/pics/qtmail
+4	image/opt/Qtopia/pics/netsetup
+4	image/opt/Qtopia/pics/videos
+28	image/opt/Qtopia/pics/mediarecorder
+8	image/opt/Qtopia/pics/language
+12	image/opt/Qtopia/pics/Network
+12	image/opt/Qtopia/pics/photoedit
+4	image/opt/Qtopia/pics/cardmon
+185	image/opt/Qtopia/pics/parashoot
+4	image/opt/Qtopia/pics/helpbrowser
+24	image/opt/Qtopia/pics/embeddedkonsole/icons/14x14
+24	image/opt/Qtopia/pics/embeddedkonsole/icons
+28	image/opt/Qtopia/pics/embeddedkonsole
+3090	image/opt/Qtopia/pics
+56	image/opt/Qtopia/sounds/qasteroids
+80	image/opt/Qtopia/sounds
+12	image/opt/Qtopia/services/qdl
+4	image/opt/Qtopia/services/Date
+4	image/opt/Qtopia/services/Time
+4	image/opt/Qtopia/services/Alarm
+4	image/opt/Qtopia/services/Email
+4	image/opt/Qtopia/services/TimeMonitor
+4	image/opt/Qtopia/services/Calendar
+4	image/opt/Qtopia/services/Tasks
+4	image/opt/Qtopia/services/GetValue/audio
+8	image/opt/Qtopia/services/GetValue/image
+12	image/opt/Qtopia/services/GetValue
+4	image/opt/Qtopia/services/Contacts
+4	image/opt/Qtopia/services/shutdown
+4	image/opt/Qtopia/services/Receive/text/x-vCard
+4	image/opt/Qtopia/services/Receive/text/x-vCalendar-Events
+4	image/opt/Qtopia/services/Receive/text/x-vCalendar-Tasks
+12	image/opt/Qtopia/services/Receive/text
+12	image/opt/Qtopia/services/Receive
+4	image/opt/Qtopia/services/SetValue/v-card
+4	image/opt/Qtopia/services/SetValue
+4	image/opt/Qtopia/services/PhotoEdit
+4	image/opt/Qtopia/services/calibrate
+4	image/opt/Qtopia/services/CleanupWizard
+157	image/opt/Qtopia/services
+145	image/opt/Qtopia/plugins/calculator
+116	image/opt/Qtopia/plugins/obex
+204	image/opt/Qtopia/plugins/textcodecs
+149	image/opt/Qtopia/plugins/today
+33	image/opt/Qtopia/plugins/imagecodecs
+2753	image/opt/Qtopia/plugins/application
+32	image/opt/Qtopia/plugins/decorations
+125	image/opt/Qtopia/plugins/codecs
+224	image/opt/Qtopia/plugins/network
+36	image/opt/Qtopia/plugins/styles
+298	image/opt/Qtopia/plugins/applets
+573	image/opt/Qtopia/plugins/inputmethods
+16	image/opt/Qtopia/plugins/fontfactories
+4702	image/opt/Qtopia/plugins
+20942	image/opt/Qtopia
+all mkcramfs: 8456 kilobytes
+all mkjffs2: 9141 kilobytes
+all mksquashfs: 7492 kilobytes
+all uncompressed: 20942 kilobytes
+minimal mkcramfs: 4956 kilobytes
+minimal mkjffs2: 5355 kilobytes
+minimal mksquashfs: 4364 kilobytes
+minimal uncompressed: 12048 kilobytes
+addressbook mkcramfs: 8264 kilobytes
+addressbook mkjffs2: 8930 kilobytes
+addressbook mksquashfs: 7336 kilobytes
+addressbook uncompressed: 20372 kilobytes
+appearance mkcramfs: 8404 kilobytes
+appearance mkjffs2: 9085 kilobytes
+appearance mksquashfs: 7452 kilobytes
+appearance uncompressed: 20846 kilobytes
+buttons mkcramfs: 8416 kilobytes
+buttons mkjffs2: 9100 kilobytes
+buttons mksquashfs: 7472 kilobytes
+buttons uncompressed: 20910 kilobytes
+camera mkcramfs: 8388 kilobytes
+camera mkjffs2: 9066 kilobytes
+camera mksquashfs: 7436 kilobytes
+camera uncompressed: 20794 kilobytes
+clock mkcramfs: 8364 kilobytes
+clock mkjffs2: 9045 kilobytes
+clock mksquashfs: 7412 kilobytes
+clock uncompressed: 20798 kilobytes
+datebook mkcramfs: 8248 kilobytes
+datebook mkjffs2: 8912 kilobytes
+datebook mksquashfs: 7320 kilobytes
+datebook uncompressed: 20393 kilobytes
+fifteen mkcramfs: 8448 kilobytes
+fifteen mkjffs2: 9134 kilobytes
+fifteen mksquashfs: 7488 kilobytes
+fifteen uncompressed: 20958 kilobytes
+games mkcramfs: 8000 kilobytes
+games mkjffs2: 8653 kilobytes
+games mksquashfs: 7072 kilobytes
+games uncompressed: 19613 kilobytes
+handwriting mkcramfs: 8276 kilobytes
+handwriting mkjffs2: 8942 kilobytes
+handwriting mksquashfs: 7328 kilobytes
+handwriting uncompressed: 20465 kilobytes
+handwriting_fsim mkcramfs: 8416 kilobytes
+handwriting_fsim mkjffs2: 9096 kilobytes
+handwriting_fsim mksquashfs: 7464 kilobytes
+handwriting_fsim uncompressed: 20874 kilobytes
+handwriting_popup mkcramfs: 8404 kilobytes
+handwriting_popup mkjffs2: 9080 kilobytes
+handwriting_popup mksquashfs: 7444 kilobytes
+handwriting_popup uncompressed: 20818 kilobytes
+keyboard mkcramfs: 8408 kilobytes
+keyboard mkjffs2: 9090 kilobytes
+keyboard mksquashfs: 7448 kilobytes
+keyboard uncompressed: 20838 kilobytes
+keypebble mkcramfs: 8396 kilobytes
+keypebble mkjffs2: 9077 kilobytes
+keypebble mksquashfs: 7440 kilobytes
+keypebble uncompressed: 20814 kilobytes
+konsole mkcramfs: 8368 kilobytes
+konsole mkjffs2: 9049 kilobytes
+konsole mksquashfs: 7416 kilobytes
+konsole uncompressed: 20770 kilobytes
+language mkcramfs: 8408 kilobytes
+language mkjffs2: 9091 kilobytes
+language mksquashfs: 7460 kilobytes
+language uncompressed: 20870 kilobytes
+launchersettings mkcramfs: 8396 kilobytes
+launchersettings mkjffs2: 9081 kilobytes
+launchersettings mksquashfs: 7444 kilobytes
+launchersettings uncompressed: 20838 kilobytes
+mediaplayer mkcramfs: 7160 kilobytes
+mediaplayer mkjffs2: 7763 kilobytes
+mediaplayer mksquashfs: 6352 kilobytes
+mediaplayer uncompressed: 18346 kilobytes
+mediarecorder mkcramfs: 8352 kilobytes
+mediarecorder mkjffs2: 9027 kilobytes
+mediarecorder mksquashfs: 7408 kilobytes
+mediarecorder uncompressed: 20673 kilobytes
+mindbreaker mkcramfs: 8412 kilobytes
+mindbreaker mkjffs2: 9097 kilobytes
+mindbreaker mksquashfs: 7464 kilobytes
+mindbreaker uncompressed: 20922 kilobytes
+minesweep mkcramfs: 8448 kilobytes
+minesweep mkjffs2: 9136 kilobytes
+minesweep mksquashfs: 7476 kilobytes
+minesweep uncompressed: 20998 kilobytes
+notes mkcramfs: 8400 kilobytes
+notes mkjffs2: 9080 kilobytes
+notes mksquashfs: 7440 kilobytes
+notes uncompressed: 20802 kilobytes
+parashoot mkcramfs: 8344 kilobytes
+parashoot mkjffs2: 9023 kilobytes
+parashoot mksquashfs: 7396 kilobytes
+parashoot uncompressed: 20713 kilobytes
+photo mkcramfs: 8412 kilobytes
+photo mkjffs2: 9094 kilobytes
+photo mksquashfs: 7456 kilobytes
+photo uncompressed: 20814 kilobytes
+pkim mkcramfs: 8348 kilobytes
+pkim mkjffs2: 9026 kilobytes
+pkim mksquashfs: 7408 kilobytes
+pkim uncompressed: 20681 kilobytes
+qasteroids mkcramfs: 8288 kilobytes
+qasteroids mkjffs2: 8961 kilobytes
+qasteroids mksquashfs: 7344 kilobytes
+qasteroids uncompressed: 20338 kilobytes
+qtmail mkcramfs: 8060 kilobytes
+qtmail mkjffs2: 8710 kilobytes
+qtmail mksquashfs: 7152 kilobytes
+qtmail uncompressed: 19888 kilobytes
+rotation mkcramfs: 8424 kilobytes
+rotation mkjffs2: 9109 kilobytes
+rotation mksquashfs: 7480 kilobytes
+rotation uncompressed: 20906 kilobytes
+snake mkcramfs: 8404 kilobytes
+snake mkjffs2: 9087 kilobytes
+snake mksquashfs: 7452 kilobytes
+snake uncompressed: 20846 kilobytes
+solitaire mkcramfs: 8372 kilobytes
+solitaire mkjffs2: 9050 kilobytes
+solitaire mksquashfs: 7428 kilobytes
+solitaire uncompressed: 20734 kilobytes
+sound mkcramfs: 8432 kilobytes
+sound mkjffs2: 9115 kilobytes
+sound mksquashfs: 7472 kilobytes
+sound uncompressed: 20966 kilobytes
+today mkcramfs: 8392 kilobytes
+today mkjffs2: 9072 kilobytes
+today mksquashfs: 7432 kilobytes
+today uncompressed: 20793 kilobytes
+todo mkcramfs: 8412 kilobytes
+todo mkjffs2: 9092 kilobytes
+todo mksquashfs: 7436 kilobytes
+todo uncompressed: 20878 kilobytes
+uniselect mkcramfs: 8444 kilobytes
+uniselect mkjffs2: 9128 kilobytes
+uniselect mksquashfs: 7460 kilobytes
+uniselect uncompressed: 20986 kilobytes
+worldtime mkcramfs: 8424 kilobytes
+worldtime mkjffs2: 9108 kilobytes
+worldtime mksquashfs: 7464 kilobytes
+worldtime uncompressed: 20882 kilobytes
+Edition: pda
+Build: static
+du -k output:
+8417	image/opt/Qtopia/bin
+16	image/opt/Qtopia/etc/im/pkim
+16	image/opt/Qtopia/etc/im
+16	image/opt/Qtopia/etc/calculator
+12	image/opt/Qtopia/etc/beam/targets
+12	image/opt/Qtopia/etc/beam
+448	image/opt/Qtopia/etc/dict
+24	image/opt/Qtopia/etc/default
+32	image/opt/Qtopia/etc/colors
+12	image/opt/Qtopia/etc/network
+64	image/opt/Qtopia/etc/qimpen
+632	image/opt/Qtopia/etc
+378	image/opt/Qtopia/lib/fonts
+378	image/opt/Qtopia/lib
+32	image/opt/Qtopia/apps/Games
+65	image/opt/Qtopia/apps/Applications
+69	image/opt/Qtopia/apps/Settings
+165	image/opt/Qtopia/apps
+4	image/opt/Qtopia/i18n/en_US
+4	image/opt/Qtopia/i18n
+1010	image/opt/Qtopia/help/html
+1010	image/opt/Qtopia/help
+16	image/opt/Qtopia/pics/qpe/pda
+201	image/opt/Qtopia/pics/qpe
+8	image/opt/Qtopia/pics/calculator
+16	image/opt/Qtopia/pics/fshw
+20	image/opt/Qtopia/pics/help
+97	image/opt/Qtopia/pics/pkim
+16	image/opt/Qtopia/pics/Button
+4	image/opt/Qtopia/pics/datebook/icons/14x14
+4	image/opt/Qtopia/pics/datebook/icons
+24	image/opt/Qtopia/pics/datebook
+256	image/opt/Qtopia/pics/wallpaper
+65	image/opt/Qtopia/pics/qasteroids/bits
+129	image/opt/Qtopia/pics/qasteroids/ship
+129	image/opt/Qtopia/pics/qasteroids/rock2
+129	image/opt/Qtopia/pics/qasteroids/rock3
+4	image/opt/Qtopia/pics/qasteroids/missile
+4	image/opt/Qtopia/pics/qasteroids/exhaust
+20	image/opt/Qtopia/pics/qasteroids/powerups
+28	image/opt/Qtopia/pics/qasteroids/shield
+516	image/opt/Qtopia/pics/qasteroids
+32	image/opt/Qtopia/pics/cards/small
+52	image/opt/Qtopia/pics/cards
+48	image/opt/Qtopia/pics/clock
+435	image/opt/Qtopia/pics/icons/14x14
+435	image/opt/Qtopia/pics/icons
+8	image/opt/Qtopia/pics/music
+16	image/opt/Qtopia/pics/snake
+4	image/opt/Qtopia/pics/sound
+4	image/opt/Qtopia/pics/today
+20	image/opt/Qtopia/pics/words/icons/14x14
+20	image/opt/Qtopia/pics/words/icons
+28	image/opt/Qtopia/pics/words
+4	image/opt/Qtopia/pics/solitaire
+4	image/opt/Qtopia/pics/light-and-power
+4	image/opt/Qtopia/pics/appservices
+20	image/opt/Qtopia/pics/minesweep
+8	image/opt/Qtopia/pics/systemtime
+20	image/opt/Qtopia/pics/worldtime
+4	image/opt/Qtopia/pics/fifteen
+12	image/opt/Qtopia/pics/hwsettings
+4	image/opt/Qtopia/pics/textedit
+8	image/opt/Qtopia/pics/camera
+32	image/opt/Qtopia/pics/mindbreaker
+4	image/opt/Qtopia/pics/buttoneditor
+4	image/opt/Qtopia/pics/launchersettings
+12	image/opt/Qtopia/pics/sysinfo
+4	image/opt/Qtopia/pics/mountmon
+4	image/opt/Qtopia/pics/security
+8	image/opt/Qtopia/pics/backuprestore
+8	image/opt/Qtopia/pics/netmon
+4	image/opt/Qtopia/pics/calibrate
+20	image/opt/Qtopia/pics/todolist
+4	image/opt/Qtopia/pics/rotation
+20	image/opt/Qtopia/pics/mediaplayer/icons/14x14
+20	image/opt/Qtopia/pics/mediaplayer/icons
+193	image/opt/Qtopia/pics/mediaplayer/skins/default
+265	image/opt/Qtopia/pics/mediaplayer/skins/techno
+457	image/opt/Qtopia/pics/mediaplayer/skins
+477	image/opt/Qtopia/pics/mediaplayer
+69	image/opt/Qtopia/pics/addressbook/icons/14x14
+69	image/opt/Qtopia/pics/addressbook/icons
+137	image/opt/Qtopia/pics/addressbook
+8	image/opt/Qtopia/pics/appearance/icons/14x14
+8	image/opt/Qtopia/pics/appearance/icons
+12	image/opt/Qtopia/pics/appearance
+48	image/opt/Qtopia/pics/qtmail/icons/14x14
+48	image/opt/Qtopia/pics/qtmail/icons
+61	image/opt/Qtopia/pics/qtmail/smiley
+165	image/opt/Qtopia/pics/qtmail
+4	image/opt/Qtopia/pics/netsetup
+4	image/opt/Qtopia/pics/videos
+8	image/opt/Qtopia/pics/language
+12	image/opt/Qtopia/pics/Network
+12	image/opt/Qtopia/pics/photoedit
+4	image/opt/Qtopia/pics/cardmon
+185	image/opt/Qtopia/pics/parashoot
+4	image/opt/Qtopia/pics/helpbrowser
+3022	image/opt/Qtopia/pics
+56	image/opt/Qtopia/sounds/qasteroids
+80	image/opt/Qtopia/sounds
+12	image/opt/Qtopia/services/qdl
+4	image/opt/Qtopia/services/Date
+4	image/opt/Qtopia/services/Time
+4	image/opt/Qtopia/services/Alarm
+4	image/opt/Qtopia/services/Email
+4	image/opt/Qtopia/services/TimeMonitor
+4	image/opt/Qtopia/services/Calendar
+4	image/opt/Qtopia/services/Tasks
+8	image/opt/Qtopia/services/GetValue/image
+8	image/opt/Qtopia/services/GetValue
+4	image/opt/Qtopia/services/Contacts
+4	image/opt/Qtopia/services/shutdown
+4	image/opt/Qtopia/services/Receive/text/x-vCard
+4	image/opt/Qtopia/services/Receive/text/x-vCalendar-Events
+4	image/opt/Qtopia/services/Receive/text/x-vCalendar-Tasks
+12	image/opt/Qtopia/services/Receive/text
+12	image/opt/Qtopia/services/Receive
+4	image/opt/Qtopia/services/SetValue/v-card
+4	image/opt/Qtopia/services/SetValue
+4	image/opt/Qtopia/services/PhotoEdit
+4	image/opt/Qtopia/services/calibrate
+4	image/opt/Qtopia/services/CleanupWizard
+153	image/opt/Qtopia/services
+4	image/opt/Qtopia/plugins/calculator
+4	image/opt/Qtopia/plugins/obex
+4	image/opt/Qtopia/plugins/textcodecs
+16	image/opt/Qtopia/plugins/today
+4	image/opt/Qtopia/plugins/imagecodecs
+4	image/opt/Qtopia/plugins/decorations
+4	image/opt/Qtopia/plugins/codecs
+4	image/opt/Qtopia/plugins/network
+4	image/opt/Qtopia/plugins/styles
+40	image/opt/Qtopia/plugins/applets
+16	image/opt/Qtopia/plugins/inputmethods
+4	image/opt/Qtopia/plugins/fontfactories
+108	image/opt/Qtopia/plugins
+13968	image/opt/Qtopia
+all mkcramfs: 5864 kilobytes
+all mkjffs2: 6275 kilobytes
+all mksquashfs: 4976 kilobytes
+all uncompressed: 13968 kilobytes
+minimal mkcramfs: 3252 kilobytes
+minimal mkjffs2: 3482 kilobytes
+minimal mksquashfs: 2764 kilobytes
+minimal uncompressed: 7652 kilobytes
+addressbook mkcramfs: 5732 kilobytes
+addressbook mkjffs2: 6129 kilobytes
+addressbook mksquashfs: 4884 kilobytes
+addressbook uncompressed: 13534 kilobytes
+appearance mkcramfs: 5828 kilobytes
+appearance mkjffs2: 6233 kilobytes
+appearance mksquashfs: 4952 kilobytes
+appearance uncompressed: 13860 kilobytes
+buttons mkcramfs: 5844 kilobytes
+buttons mkjffs2: 6252 kilobytes
+buttons mksquashfs: 4968 kilobytes
+buttons uncompressed: 13928 kilobytes
+camera mkcramfs: 5836 kilobytes
+camera mkjffs2: 6244 kilobytes
+camera mksquashfs: 4948 kilobytes
+camera uncompressed: 13892 kilobytes
+clock mkcramfs: 5800 kilobytes
+clock mkjffs2: 6206 kilobytes
+clock mksquashfs: 4912 kilobytes
+clock uncompressed: 13852 kilobytes
+datebook mkcramfs: 5728 kilobytes
+datebook mkjffs2: 6123 kilobytes
+datebook mksquashfs: 4876 kilobytes
+datebook uncompressed: 13567 kilobytes
+fifteen mkcramfs: 5848 kilobytes
+fifteen mkjffs2: 6255 kilobytes
+fifteen mksquashfs: 4980 kilobytes
+fifteen uncompressed: 13944 kilobytes
+games mkcramfs: 5496 kilobytes
+games mkjffs2: 5879 kilobytes
+games mksquashfs: 4652 kilobytes
+games uncompressed: 12819 kilobytes
+handwriting mkcramfs: 5760 kilobytes
+handwriting mkjffs2: 6160 kilobytes
+handwriting mksquashfs: 4888 kilobytes
+handwriting uncompressed: 13652 kilobytes
+handwriting_fsim mkcramfs: 5852 kilobytes
+handwriting_fsim mkjffs2: 6257 kilobytes
+handwriting_fsim mksquashfs: 4972 kilobytes
+handwriting_fsim uncompressed: 13900 kilobytes
+handwriting_popup mkcramfs: 5840 kilobytes
+handwriting_popup mkjffs2: 6247 kilobytes
+handwriting_popup mksquashfs: 4948 kilobytes
+handwriting_popup uncompressed: 13880 kilobytes
+keyboard mkcramfs: 5840 kilobytes
+keyboard mkjffs2: 6249 kilobytes
+keyboard mksquashfs: 4956 kilobytes
+keyboard uncompressed: 13904 kilobytes
+keypebble mkcramfs: 5864 kilobytes
+keypebble mkjffs2: 6275 kilobytes
+keypebble mksquashfs: 4976 kilobytes
+keypebble uncompressed: 13968 kilobytes
+konsole mkcramfs: 5864 kilobytes
+konsole mkjffs2: 6275 kilobytes
+konsole mksquashfs: 4976 kilobytes
+konsole uncompressed: 13968 kilobytes
+language mkcramfs: 5860 kilobytes
+language mkjffs2: 6267 kilobytes
+language mksquashfs: 4976 kilobytes
+language uncompressed: 13952 kilobytes
+launchersettings mkcramfs: 5836 kilobytes
+launchersettings mkjffs2: 6243 kilobytes
+launchersettings mksquashfs: 4964 kilobytes
+launchersettings uncompressed: 13904 kilobytes
+mediaplayer mkcramfs: 4732 kilobytes
+mediaplayer mkjffs2: 5086 kilobytes
+mediaplayer mksquashfs: 3988 kilobytes
+mediaplayer uncompressed: 11977 kilobytes
+mediarecorder mkcramfs: 5864 kilobytes
+mediarecorder mkjffs2: 6275 kilobytes
+mediarecorder mksquashfs: 4976 kilobytes
+mediarecorder uncompressed: 13968 kilobytes
+mindbreaker mkcramfs: 5828 kilobytes
+mindbreaker mkjffs2: 6237 kilobytes
+mindbreaker mksquashfs: 4952 kilobytes
+mindbreaker uncompressed: 13908 kilobytes
+minesweep mkcramfs: 5848 kilobytes
+minesweep mkjffs2: 6256 kilobytes
+minesweep mksquashfs: 4976 kilobytes
+minesweep uncompressed: 13920 kilobytes
+notes mkcramfs: 5852 kilobytes
+notes mkjffs2: 6259 kilobytes
+notes mksquashfs: 4976 kilobytes
+notes uncompressed: 13904 kilobytes
+parashoot mkcramfs: 5784 kilobytes
+parashoot mkjffs2: 6186 kilobytes
+parashoot mksquashfs: 4908 kilobytes
+parashoot uncompressed: 13755 kilobytes
+photo mkcramfs: 5832 kilobytes
+photo mkjffs2: 6237 kilobytes
+photo mksquashfs: 4948 kilobytes
+photo uncompressed: 13840 kilobytes
+pkim mkcramfs: 5828 kilobytes
+pkim mkjffs2: 6232 kilobytes
+pkim mksquashfs: 4944 kilobytes
+pkim uncompressed: 13803 kilobytes
+qasteroids mkcramfs: 5708 kilobytes
+qasteroids mkjffs2: 6102 kilobytes
+qasteroids mksquashfs: 4840 kilobytes
+qasteroids uncompressed: 13348 kilobytes
+qtmail mkcramfs: 5560 kilobytes
+qtmail mkjffs2: 5945 kilobytes
+qtmail mksquashfs: 4732 kilobytes
+qtmail uncompressed: 13162 kilobytes
+rotation mkcramfs: 5852 kilobytes
+rotation mkjffs2: 6262 kilobytes
+rotation mksquashfs: 4976 kilobytes
+rotation uncompressed: 13948 kilobytes
+snake mkcramfs: 5844 kilobytes
+snake mkjffs2: 6253 kilobytes
+snake mksquashfs: 4972 kilobytes
+snake uncompressed: 13928 kilobytes
+solitaire mkcramfs: 5816 kilobytes
+solitaire mkjffs2: 6223 kilobytes
+solitaire mksquashfs: 4940 kilobytes
+solitaire uncompressed: 13828 kilobytes
+sound mkcramfs: 5860 kilobytes
+sound mkjffs2: 6268 kilobytes
+sound mksquashfs: 4980 kilobytes
+sound uncompressed: 13952 kilobytes
+today mkcramfs: 5824 kilobytes
+today mkjffs2: 6228 kilobytes
+today mksquashfs: 4956 kilobytes
+today uncompressed: 13848 kilobytes
+todo mkcramfs: 5808 kilobytes
+todo mkjffs2: 6211 kilobytes
+todo mksquashfs: 4932 kilobytes
+todo uncompressed: 13796 kilobytes
+uniselect mkcramfs: 5860 kilobytes
+uniselect mkjffs2: 6269 kilobytes
+uniselect mksquashfs: 4976 kilobytes
+uniselect uncompressed: 13956 kilobytes
+worldtime mkcramfs: 5832 kilobytes
+worldtime mkjffs2: 6240 kilobytes
+worldtime mksquashfs: 4956 kilobytes
+worldtime uncompressed: 13892 kilobytes

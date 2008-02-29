@@ -1,0 +1,109 @@
+'\" t
+.TH QWSInputMethod 3qt "27 October 2005" "Trolltech AS" \" -*- nroff -*-
+.\" Copyright 1992-2001 Trolltech AS.  All rights reserved.  See the
+.\" license file included in the distribution for a complete license
+.\" statement.
+.\"
+.ad l
+.nh
+.SH NAME
+QWSInputMethod \- International input methods for Qt/Embedded
+.br
+.PP
+\fC#include <qwindowsystem_qws.h>\fR
+.PP
+Inherits QObject.
+.PP
+.SS "Public Members"
+.in +1c
+.ti -1c
+.BI "\fBQWSInputMethod\fR () "
+.br
+.ti -1c
+.BI "virtual \fB~QWSInputMethod\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBfilter\fR ( int " "unicode" ", int " "keycode" ", int " "modifiers" ", bool " "isPress" ", bool autoRepeat ) "
+.br
+.ti -1c
+.BI "virtual void \fBreset\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBsetMicroFocus\fR ( int " "x" ", int y ) "
+.br
+.ti -1c
+.BI "virtual void \fBmouseHandler\fR ( int, int ) "
+.br
+.ti -1c
+.BI "QFont \fBfont\fR () const"
+.br
+.ti -1c
+.BI "QRect \fBinputRect\fR () const"
+.br
+.in -1c
+.SS "Protected Members"
+.in +1c
+.ti -1c
+.BI "void \fBsendIMEvent\fR ( QWSServer::IMState " "state" ", const QString & " "txt" ", int " "cpos" ", int " "selLen" " = 0 ) "
+.br
+.in -1c
+.SH DESCRIPTION
+The QWSInputMethod class provides international input methods for Qt/Embedded.
+.PP
+Subclass this to implement your own input method
+.PP
+An input methods consists of a keyboard filter and optionally a graphical interface. The keyboard filter intercepts key events from physical or virtual keyboards by implementing the filter() function.
+.PP
+Use sendIMEvent() to send composition events. Composition starts with the input method sending the first \fCIMCompose\fR event. This can be followed by a number of \fCIMCompose\fR events and ending with an \fCIMEnd\fR event.
+.PP
+The function setMicroFocus() is called when the focus widget changes its cursor position.
+.PP
+The functions font() and inputRect() provide more information about the state of the focus widget.
+.PP
+Use QWSServer::setCurrentInputMethod() to install an input method.
+.SH MEMBER FUNCTION DOCUMENTATION
+.SH "QWSInputMethod::QWSInputMethod ()"
+Constructs a new input method.
+.SH "QWSInputMethod::~QWSInputMethod () \fC[virtual]\fR"
+Destructs the input method uninstalling it if it is currently installed.
+.SH "bool QWSInputMethod::filter ( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat ) \fC[virtual]\fR"
+Must be implemented in subclasses to handle key input from physical or virtual keyboards. Returning TRUE will block the event from further processing.
+.PP
+All normal key events should be blocked while in compose mode (between \fCIMCompose\fR and \fCIMEnd).\fR
+.SH "QFont QWSInputMethod::font () const"
+Returns the font of the current input widget.
+.SH "QRect QWSInputMethod::inputRect () const"
+Returns the input rectangle of the current input widget. The input rectangle covers the width of the input widget, and may extend below it. This can be used to determine the geometry of an input widget for over-the-spot input methods.
+.SH "void QWSInputMethod::mouseHandler ( int x, int state ) \fC[virtual]\fR"
+Implemented in subclasses to handle mouse presses/releases within the on-the-spot text. The parameter \fIx\fR is the offset within the string that was sent with the IMCompose event. \fIstate\fR is either \fCQWSServer::MousePress\fR or \fCQWSServer::MouseRelease\fR
+.SH "void QWSInputMethod::reset () \fC[virtual]\fR"
+Implemented in subclasses to reset the state of the input method.
+.SH "void QWSInputMethod::sendIMEvent ( QWSServer::IMState state, const QString & txt, int cpos, int selLen = 0 ) \fC[protected]\fR"
+Causes a QIMEvent to be sent to the focus widget. \fIstate\fR may be either \fCQWSServer::IMCompose\fR or \fCQWSServer::IMEnd.\fR
+.PP
+\fItxt\fR is the text being composed (or the finished text if state is \fCIMEnd).\fR \fIcpos\fR is the current cursor position.
+.PP
+If state is \fCIMCompose,\fR \fIselLen\fR is the number of characters in the composition string ( starting at \fIcpos\fR ) that should be marked as selected by the input widget receiving the event.
+.SH "void QWSInputMethod::setMicroFocus ( int x, int y ) \fC[virtual]\fR"
+Implemented in subclasses to handle microFocusHint changes in the
+focus widget. \fIx\fR and \fIy\fR are the global coordinates of the 
+cursor position.
+.SH "SEE ALSO"
+.BR http://doc.trolltech.com/qwsinputmethod.html
+.BR http://www.trolltech.com/faq/tech.html
+.SH COPYRIGHT
+Copyright 1992-2001 Trolltech AS, http://www.trolltech.com.  See the
+license file included in the distribution for a complete license
+statement.
+.SH AUTHOR
+Generated automatically from the source code.
+.SH BUGS
+If you find a bug in Qt, please report it as described in
+.BR http://doc.trolltech.com/bughowto.html .
+Good bug reports make our job much simpler. Thank you.
+.P
+In case of content or formattting problems with this manual page, please
+report them to
+.BR qt-bugs@trolltech.com .
+Please include the name of the manual page (qwsinputmethod.3qt) and the Qt
+version (2.3.12).

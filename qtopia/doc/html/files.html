@@ -1,0 +1,191 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/files.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Filesystem standards</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Filesystem standards</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Definitions
+</a>
+<li><a href="#3"> Standards
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia software is installed in the <tt>/opt/Qtopia</tt> directory of the
+target system. Within this directory, applications must follow the
+file placement standards described in this document.
+<p> <h2> Definitions
+</h2>
+<a name="2"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Term <th valign="top">Definition
+<tr bgcolor="#f0f0f0">
+<td valign="top"><b>appname</b>
+<td valign="top">this is the application's executable filename. It should be globally
+unique. Since this name is almost never seen or entered by the
+end-user, long and complex names such as "abc-textedit-3" can be used.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><b>language</b>
+<td valign="top">this is the ISO639 language code (e.g. "de" for German).
+</table></center>
+<p> <a name="desktop"></a>
+<p> <h2> Standards
+</h2>
+<a name="3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File Type <th valign="top">Placement <th valign="top">Explanation
+<tr bgcolor="#f0f0f0">
+<td valign="top">Executable
+<td valign="top"><tt>/opt/Qtopia/bin/appname</tt>
+<td valign="top">This is the executable program. Note that it is
+<em>not</em> appropriate to use the same executable with arguments to
+modify it's behaviour, since only one instance of each application
+will be run (additional attempts to run the application will merely raise
+the previous instance).
+<tr bgcolor="#d0d0d0">
+<td valign="top">Image
+<td valign="top"><tt>/opt/Qtopia/pics/appname/...</tt>
+<td valign="top">Any image files the application needs to use should either be standard
+built-in images, or be files in this application-specific directory.
+See the <a href="resource.html">Resource</a> class for an explanation of how to access these
+files.
+<tr bgcolor="#f0f0f0">
+<td valign="top">.desktop
+<td valign="top"><tt>/opt/Qtopia/apps/category/appname.desktop</tt>
+<td valign="top">The .desktop file specifies an entry in the launcher and the start
+menu. <em>Category</em> must be one of the following and should
+reflect the launcher Category in which you want the application to appear.:
+<ul>
+<li> <b>Settings:</b> if the software configures functionality that
+has an ongoing effect on the user's environment. Such software
+never creates Documents.
+<li> <b>Games:</b> if the software is solely for amusement purposes.
+<li> <b>Applications:</b> for all other software.
+</ul>
+<p> These categories have been chosen and defined in this way because it is easy for the average user
+to differentiate between them.
+<p> To install software in other categories would create confusion and should be avoided. For example,
+you should <em>not</em> attempt to categorize your software as a "Utility",
+since it is difficult to differentiate this category from
+the Settings and Applications categories (it falls somewhere in between).
+<p> The file format is similar to the file format used by the Unix desktops KDE and Gnome. The format is as follows (lines beginning with
+a '#' are ignored as comments):
+<pre>
+[Desktop Entry]
+# the line above is mandatory at the beginning of the file
+# Exec specifies the name of the executable that should be in /opt/Qtopia/bin
+Exec=executablename
+# This should always be Application for links to applications.
+Type=Application
+# Specifies the icon to be found in /opt/Qtopia/pics. Endings are autodetected.
+# The icons should be at least 32x32 and should smooth-scale well
+# from 14x14 to at least 48x48
+Icon=Iconfile
+# The mimetype entry specifies a comma separated list of mimetypes this application can handle.
+<a href="mimetype.html">MimeType</a>=audio/mp3
+# the next lines specify the name of the application as it should appear in the launcher
+# and start menu
+Name=My fancy application
+# and if you want to support different languages:
+Name[de]=Meine Anwendung
+</pre><p> The whole file has to be encoded in utf8.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Sound
+<td valign="top"><tt>/opt/Qtopia/sounds/appname/...</tt>
+<td valign="top">Any sound files the application needs to use should either be standard
+built-in sounds, or be files in this application-specific directory.
+See the <a href="resource.html">Resource</a> class for an explanation of how to access these
+files.
+<tr bgcolor="#f0f0f0">
+<td valign="top">Internationalization
+<td valign="top"><tt>/opt/Qtopia/i18n/language/appname.qm</tt>
+<td valign="top">These files are translations of the software (see <a href="i18n-qtopia.html">Internationalization</a>).
+<tr bgcolor="#d0d0d0">
+<td valign="top">English online documentation
+<td valign="top"><tt>/opt/Qtopia/help/html/appname-suffixes.html</tt>
+<td valign="top">These files provide the English online documentation of the software (the
+<em>-suffixes</em> is optional). Note that on-line documentation can
+refer to images under the <tt>/opt/Qtopia/pics</tt> directory, so you can
+refer to icons and other images explicitly without duplicating the
+files.
+<tr bgcolor="#f0f0f0">
+<td valign="top">Online documentation
+<td valign="top"><tt>/opt/Qtopia/help/language/html/appname-suffixes.html</tt>
+<td valign="top">These files are the online documentation of the software (the
+<em>-suffixes</em> is optional), in the language specified.
+The suffixes are the choice of the application developer,
+but Qtopia will automatically connect the Help button in the
+window decorations to <em>appname-widgetname.html</em>
+if such a file exists, thereby allowing different application
+windows to have different associated help pages.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Taskbar applets
+<td valign="top"><tt>/opt/Qtopia/plugins/applets</tt>
+<td valign="top">Taskbar applets are placed in this directory.
+<tr bgcolor="#f0f0f0">
+<td valign="top">Media player codecs
+<td valign="top"><tt>/opt/Qtopia/plugins/codecs</tt>
+<td valign="top">Mediaplayer codecs are placed in this directory.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Font
+<td valign="top"><tt>/opt/Qtopia/plugins/fontfactories</tt>
+<td valign="top">Font factory extensions are placed in this directory.
+<tr bgcolor="#f0f0f0">
+<td valign="top">Input method plug-ins
+<td valign="top"><tt>/opt/Qtopia/plugins/inputmethods</tt>
+<td valign="top">Input Method plug-ins are placed in this directory.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Network setup
+<td valign="top"><tt>/opt/Qtopia/plugins/network</tt>
+<td valign="top">Network setup modules are placed in this directory.
+<tr bgcolor="#f0f0f0">
+<td valign="top">Configuration
+<td valign="top"><tt>/opt/Qtopia/etc/default</tt>
+<td valign="top">Configuration files should be stored in $HOME/Settings.  This is done
+automatically for normal usage of the <a href="config.html">Config</a> class.  However
+if default configuration files are needed, they should be installed
+in the above directory as read only.  When modified, they should be
+saved to $HOME/Settings.
+</table></center>
+<p> Applications may put files in the <tt>/opt/Qtopia/lib/appname/...</tt> directory as required.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

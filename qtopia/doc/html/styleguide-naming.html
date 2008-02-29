@@ -1,0 +1,139 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/styleguide.doc:287 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Style Guide: Naming</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Style Guide: Naming</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Application Naming
+</a>
+<li><a href="#2"> Naming Conventions <!-- index Naming conventions --><a name="Naming-conventions"></a>
+</a>
+<ul>
+<li><a href="#2-1"> Class Names
+</a>
+<li><a href="#2-2"> Abbreviations
+</a>
+<li><a href="#2-3"> Acronyms
+</a>
+<li><a href="#2-4"> Using the "..." Label
+</a>
+<ul>
+<li><a href="#2-4-1"> Examples of When to Use "..."
+</a>
+<li><a href="#2-4-2"> Examples Of When Not To Use "..."
+</a>
+</ul>
+<li><a href="#2-5"> Currently Used Label Names
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Application Naming
+</h2>
+<a name="1"></a><p> Application names should be based on established application names used in the current phone market. They should be nouns and obvious to a user from any background.
+<p> <b>Note:</b> An application's title should be the same as its launcher name.
+<p> <h2> Naming Conventions <!-- index Naming conventions --><a name="Naming-conventions"></a>
+</h2>
+<a name="2"></a><p> All words should start with a capital letter with the exception of words that
+are usually excluded from acronyms such as "of", "and", or "to". These extremely common words are referred to as stop words.
+<p> Once a certain name is used for a specific item it should be re-used in each
+and every application. For example: if Contacts and <a href="calendar.html">Calendar</a> both have a
+"company" info field they should use the same label. This means both applications use either "Company", "Cmpny", or "Comp.". Please see the <a href="#label-names">used label names</a> table for reference.
+<p> <h3> Class Names
+</h3>
+<a name="2-1"></a><p> Class names start with capital letters, variables start with lower case letters.
+When a variable has multiple words, the following words start with capitals,
+<p> eg:
+<p> int myExampleVariable;
+<p> MyExampleClass exampleObject;
+<p> <h3> Abbreviations
+</h3>
+<a name="2-2"></a><p> The rules listed below should be followed when using abbreviations:
+<ul>
+<li> Abbreviations are meant to be self explanatory.
+<li> An abbreviation point should occur at the end of a word.
+For example: etc.
+<li> Abbreviations consisting of initial letters are written as un-spaced and undivided sequences with abbreviation points after each letter. For example: e.g.
+<li> Abbreviations should not consist of any characters except a-z A-Z.
+</ul>
+<!-- http://www.education.bham.ac.uk/onlinelearning/braille/rulebook/part2/section4.htm -->
+<p> <em>NOTE</em>: No abbreviation point is required if the last letter of the word is displayed such as "cmpny".
+<p> <h3> Acronyms
+</h3>
+<a name="2-3"></a><p> Acronyms basically follow the same set of rules as those found in the abbreviations section. Always check existing acronyms before creating a new one.
+<p> <a name="usingdotdotdot">
+<h3> Using the "..." Label
+</h3>
+<a name="2-4"></a><p> The following rules define the use of the ... in association with menu items.
+<p> <ul>
+<li> if the command has to be refined before a user can initiate an action then yes, use ...
+<li> if the command does not need to be refined before a user can initiate an action then do not use ...
+<li> if in doubt, do not apply ... to the menu
+</ul>
+<p> <h4> Examples of When to Use "..."
+</h4>
+<a name="2-4-1"></a><p> Use ... only when the menu is followed by another dialog that is a direct and integral continuation of the command.
+<p> <ul>
+<li> Send All...
+is appropriate since the next dialog requires the user to select one of Email/Infrared/SMS before anything is sent.
+<li> View Category...
+is appropriate since the next dialog requires the user to select which category they want to view.
+</ul>
+<p> <h4> Examples Of When Not To Use "..."
+</h4>
+<a name="2-4-2"></a><p> Do not use "..." when the menu is followed by another dialog that is related to but not a continuation of the command.
+<ul>
+<li> Edit (without ...)
+is appropriate if the user is immediately shown the entire record and is free to edit any aspect of it.
+<li> Delete (without ...)
+is appropriate since the user does not have to refine the delete command in order for it to work. A please confirm dialog does not specify additional parameters; it is associated with the command but does not refine its functionality.
+<li> Settings (without ...)
+should be used when a user is immediately given access to all the features that can be set, such as in the <a href="calendar.html">Calendar</a> application.
+</ul>
+<!-- index label-names --><a name="label-names"></a><h3> Currently Used Label Names
+</h3>
+<a name="2-5"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">PDA Label <th valign="top">Phone Label
+<tr bgcolor="#f0f0f0"> <td valign="top">Categories <td valign="top">Category
+<tr bgcolor="#d0d0d0"> <td valign="top">Time zone <td valign="top">T.Z.
+<tr bgcolor="#f0f0f0"> <td valign="top">Anniversary <td valign="top">Anniv.
+</table></center>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

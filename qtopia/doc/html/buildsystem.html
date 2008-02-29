@@ -1,0 +1,427 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/buildsystem.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Build System</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Build System</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Naming Conventions
+</a>
+<li><a href="#3"> Acceptable Directory Characters
+</a>
+<li><a href="#4"> Requirements
+</a>
+<li><a href="#5"> Project Lists
+</a>
+<ul>
+<li><a href="#5-1"> Project List Files
+</a>
+<li><a href="#5-2"> Modifying Project Lists
+</a>
+<li><a href="#5-3"> Core libraries
+</a>
+</ul>
+<li><a href="#6"> Internal Build System Files
+</a>
+<li><a href="#7"> Automatic Include Process Details
+</a>
+<li><a href="#8"> Makefiles
+</a>
+<ul>
+<li><a href="#8-1"> Qtopia extensions
+</a>
+</ul>
+<li><a href="#9"> Simplifying Qtopia Desktop Support with .pri Files
+</a>
+<li><a href="#10"> Configuration Variables
+</a>
+<ul>
+<li><a href="#10-1"> CONFIG
+</a>
+<li><a href="#10-2"> Other Variables
+</a>
+<li><a href="#10-3"> QTOPIA_COMPAT_VER
+</a>
+<li><a href="#10-4"> Translatable Files
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the qmake-based build system used by Qtopia.
+More information about qmake and its syntax can be found in the qmake Manual.
+Information about the system used to configure and build the single-package Qtopia releases for Qtopia 2.2 and above can be found in the <a href="buildsystem-sp.html">Single Package System</a> page.
+<p> <h2> Naming Conventions
+</h2>
+<a name="2"></a><p> <ul>
+<li> .pro files are used directly to generate <tt>Makefile</tt> files.
+<li> .pri files are intended for inclusion by <tt>.pri</tt> or <tt>.pro</tt> files.
+</ul>
+<p> <h2> Acceptable Directory Characters
+</h2>
+<a name="3"></a><p> There are some limitations to the acceptable characters in directories, please refer to the
+<a href="environment-setup-build.html#acceptable_directory_characters">Acceptable Directory Characters</a>
+section of the Build Environment document.
+<p> <h2> Requirements
+</h2>
+<a name="4"></a><p> The following are the basic system requirements for building Qtopia:
+<ul>
+<li> Computer: X86, 256MB RAM and 300MB disk space
+<li> Compiler: Cross-compiler based on gcc 2.95 or later
+<li> Linux distribution: SuSE 8.2 or later, RedHat 9
+</ul>
+<p> Other architectures/platforms and operating systems can be used, however, they have not been tested and are not formally supported.
+<p> <h2> Project Lists
+</h2>
+<a name="5"></a><p> Project lists define the library components for a particular project or application. The lists are processed in order, such that all library components are built before application components. The four project lists in the Qtopia Build system are shown in the following table: 
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Project List  <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top">LIBRARY_PROJECTS <td valign="top">Lists library components that are used by both applications and plug-ins.
+<tr bgcolor="#d0d0d0"> <td valign="top">APP_PROJECTS     <td valign="top">Lists application components.
+<tr bgcolor="#f0f0f0"> <td valign="top">PLUGIN_PROJECTS  <td valign="top">Lists plug-in and applet components.
+<tr bgcolor="#d0d0d0"> <td valign="top">THEME_PROJECTS   <td valign="top">Lists theme components.
+</table></center>
+<p> <h3> Project List Files
+</h3>
+<a name="5-1"></a><p> Project list files identify the components that should be built.
+The project list files are located in <tt>$QPEDIR/src</tt> and include the following:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>general.pri</tt>
+<td valign="top">Lists build components included in all Qtopia source packages.
+This includes all core Qtopia functionality along with those components
+that are released both under the GPL and commercial licences.
+<tr bgcolor="#d0d0d0"> <td valign="top"><tt>commercial.pri</tt>
+<td valign="top">Lists build components that are included in the commercial Qtopia
+source packages but not the GPL source packages.
+This file is not included in the GPL Qtopia source packages.
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>custom.pri</tt>
+<td valign="top">Lists custom configuration components. The <tt>custom.pri</tt> file included
+with the Qtopia source packages can be extended to add components specific
+to a device, organisation or group. The <tt>custom.pri</tt> file provided in Qtopia
+source packages is an example only and does not include any active build
+information. See <a href="#mod_proj_lists">Modifying Project Lists</a> below for more information.
+<tr bgcolor="#d0d0d0"> <td valign="top"><tt>local.pri</tt>
+<td valign="top">Lists local configuration components. The <tt>local.pri</tt> file is not
+shipped with any Qtopia package, and Qtopia will build without the file
+present. If the file is provided Qtopia will read it after
+<tt>custom.pri</tt>. The <tt>local.pri</tt> file enables individuals in a group to have
+different component lists while still sharing components specified using
+<tt>custom.pri</tt>.
+</table></center>
+<p> <a name="mod_proj_lists"></a>
+<h3> Modifying Project Lists
+</h3>
+<a name="5-2"></a><p> The custom and local project list files are provided for modifying the
+Project Lists. 
+<p> To add a component to a project list use:
+<pre>
+    &lt;PROJECT_LIST&gt; += &lt;component&gt; 
+</pre>
+ 
+<p> To remove a component from a project use:
+<pre>
+    &lt;PROJECT_LIST&gt; -= &lt;component&gt;
+</pre>
+ 
+<p> To specify more than one component pass them as a space separated list.
+The &#92; character is used to continue the list on the following line, for example:
+<p> <pre>
+    APP_PROJECTS += applications/addressbook applications/calculator \
+        applications/clock applications/datebook
+</pre>
+ 
+<p> It is not recommended to have a project listed more than once as it will build multiple times and will result in warnings from \make.
+To check if a project is already added use:
+<pre>
+    &lt;PROJECT_LIST&gt; *= &lt;component&gt; 
+</pre>
+ 
+<p> <h3> Core libraries
+</h3>
+<a name="5-3"></a><p> When  adding a core library (ie. a library that other Qtopia libraries depend on), additional steps are required as follows:
+<ol type=1>
+<li> Ensure that a library is inserted into the list before any libaries that depend on it.  Libraries are processed in the order that they appear in the LIBRARY_PROJECTS variable.  Some important Qtopia libraries are listed in a separate CORE_LIBRARY_PROJECTS variable to allow them to be easily prepended to the list of libraries by <tt>projects.pri</tt>.
+<p> For example: 
+<pre>
+    # add my phone extension lib before qtopiaphone
+    CORE_LIBRARY_PROJECTS~=s,(libraries/qtopiaphone),libraries/myphonebase \1,
+    # add my media extension lib after mediaplayer
+    LIBRARY_PROJECTS~=s,(libraries/mediaplayer),\1 libraries/mymediaext,
+</pre>
+ 
+<p> <li> Ensure the library is added to <tt>src/order.cfg</tt> so that configure
+can process it in the correct order.  This file is used as configure cannot read the build system files but is still required to process <tt>.pro</tt> files in a suitable order.
+<p> </ol>
+<p> <h2> Internal Build System Files
+</h2>
+<a name="6"></a><p> The internal build system files are described in the following table:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File Name <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top">$QPEDIR/src/config.pri
+<td valign="top">This file is generated by the configure script and converts specified options
+into <tt>qmake</tt> variables. It is processed before every project file and its values can be overwritten.
+<tr bgcolor="#d0d0d0"> <td valign="top">src/global.pri
+<td valign="top">This file is processed after every .pro files and contains all the code that makes the Qtopia Build System work.
+It handles many tasks including:
+<ul>
+<li> how to make an ipkg
+<li> how to link against common libraries
+</ul>
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>src/ipk_groups.pri</tt>
+<td valign="top">This file specifies how to build a package that contains more than one project. 
+<p> In most cases:  one project = one ipkg. 
+<tr bgcolor="#d0d0d0"> <td valign="top"><tt>projects.pri</tt>
+<td valign="top">This file collates the list of projects from:
+<ul>
+<li>  <tt>general.pri</tt>
+<li>  <tt>commercial.pri</tt>
+<li>  <tt>custom.pri</tt>
+<li>  <tt>local.pri</tt>
+</ul>
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>src.pro</tt>
+<td valign="top">This file organises projects that need to be built in a specific order. It is also used to create the top-level <tt>Makefile</tt> and to build <tt>ipkgs</tt> that do not have a <tt>.pro</tt> file.
+<tr bgcolor="#d0d0d0"> <td valign="top"><tt>src-components.pro</tt>
+<td valign="top">This file organises projects that do not need to be built in a specific order. It is called from <tt>src.pro</tt>.
+</table></center>
+<p> <h2> Automatic Include Process Details
+</h2>
+<a name="7"></a><p> An automatic include is used to reduce the amount of code required in a
+<tt>.pro</tt> file and to keep the syntax compatible with Qtopia 1.x and below.
+<p> This process is required as <tt>configure</tt> creates the file <tt>$QPEDIR/src/.qmake.cache</tt> that causes projects inside the Qtopia source tree to
+read <tt>$QPEDIR/src/config.pri</tt> which is not useful for projects that are outside the Qtopia source tree, such as third-party applications. 
+<p> For all <tt>qws/*</tt> <tt>qmake</tt> specification files such as, <tt>QMAKESPEC=qws/linux-generic-g++</tt>,
+there is an explicit include of <tt>$QPEDIR/src/config.pri</tt> if it exists. If you create your own <tt>qws/*</tt> specification
+file, you must add the same directive to your file or third party applications will not be able to build against your
+Qtopia tree.
+<p> To ensure that <tt>config.pri</tt> is not processed more than once, it has an <em>include guard</em> similar to how C headers
+use <tt>#ifndef FOO, #define FOO, ..., #endif</tt>.
+<p> <h2> Makefiles
+</h2>
+<a name="8"></a><p> Qtopia is based on <tt>qmake</tt> but not exclusively. Projects that configure processes are given two <tt>Makefiles</tt>:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File <th valign="top">Purpose
+<tr bgcolor="#f0f0f0">    <td valign="top">Makefile.target <td valign="top">This file is generated by qmake.
+<tr bgcolor="#d0d0d0">    <td valign="top">Makefile        <td valign="top">This file holds the Qtopia extensions.
+</table></center>
+<p> All of the targets available in <tt>Makefile.target</tt> are available in <tt>Makefile</tt>. In the case where <tt>Makefile.target</tt>
+has not yet been created, only the common targets are available.
+<p> It is not safe to manually create or update a <tt>Makefile</tt> with <tt>qmake</tt>. The command <tt>make qmake</tt> can be used to
+update both the <tt>Makefile</tt> and <tt>Makefile.target</tt>, alternatively, configure can be run again and it will re-create both files.
+<p> <b>Note:</b> Third party applications may only use a qmake-generated <tt>Makefile</tt> and Qtopia extensions are not available in this case.
+<p> <h3> Qtopia extensions
+</h3>
+<a name="8-1"></a><p> Qtopia makefiles contain a number of Qtopia extensions which facilitate the following behavior: 
+<p> <ol type=1>
+<li> <tt>make install</tt> installs a number of files to a particular location. Howerver in some circumstances the location may need to be overridden at install time. 
+To override the <tt>-prefix</tt> and <tt>-dprefix</tt> values passed to <tt>configure</tt> run the following command:
+<pre>
+    make install PREFIX=/path/to/image DPREFIX=/path/to/dimage
+</pre>
+    
+<p> <tt>Makefile</tt> passes the appropriate values to <tt>Makefile.target</tt> as <tt>INSTALL_ROOT</tt>. Third-party applications using a single makefile should pass the location of the image with this variable:
+<pre>
+    make install INSTALL_ROOT=/path/to/image
+</pre>
+ 
+<p> <li> Running the command
+<pre>
+    make qmake
+</pre>
+ 
+from a sub-directory target causes all sub-projects to be re-processed, however this can be avoided by running
+<pre>
+    make regenerate
+</pre>
+ 
+<p> <li> Qtopia supports <em>shadow</em> building which is a build where the generated files are located in a build tree that is separate from
+the source files. One disadvantage of this system is that you must have two terminals open, one for editing files
+and one for building.
+<p> <tt>Makefile</tt> has a check that allows you to run make from the source tree and have the project
+built in the build tree. This feature is known as <em>depot hopping</em>. To take advantage of this
+feature it is necessary to setup shadow building:
+<ul>
+<li> set <tt>QPEDIR</tt> to a location other than where Qtopia sources are
+<li> create Makefiles in the source tree by running:
+<pre>
+    cd /path/to/qtopia/sources
+    QPEDIR=$PWD ./configure -setupdepothop
+</pre>
+ 
+</ul>
+</ol>
+<p> <h2> Simplifying Qtopia Desktop Support with .pri Files
+</h2>
+<a name="9"></a><p> A typical project that builds under Qtopia and Qtopia Desktop might have several project files.
+For example the Qtopia PIM project comprises: 
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>src/libraries/qtopiapim/qtopiapim.pri</tt> <td valign="top">Lists all the files that are common between Qtopia and Qtopia Desktop.
+<tr bgcolor="#d0d0d0"> <td valign="top"><tt>src/libraries/qtopiapim/qtopiapim.pro</tt> <td valign="top">Includes <tt>qtopiapim.pri</tt> and adds Qtopia-specific configuration information.
+<tr bgcolor="#f0f0f0"> <td valign="top"><tt>src/qtopiadesktop/libraries/qtopiapim.pro</tt> <td valign="top">Includes <tt>qtopiapim.pri</tt> and adds Qtopia Desktop-specific configuration information.
+</table></center>
+<p> <h2> Configuration Variables
+</h2>
+<a name="10"></a><p> Configuration variables are used to modify the way that a project is built.
+Some of the effects of changing configuration variables include:
+<ul>
+<li> determining which libraries and includes are used
+<li> identifying the types of Qtopia projects that can be built
+<li> altering the behavior of the build system
+<li> defining the Qtopia release that is to be targeted
+</ul>
+<p> The following sections provide examples of configuration variables and the affect that they have. 
+<p> <h3> CONFIG
+</h3>
+<a name="10-1"></a><p> The following table provides examples of <tt>CONFIG</tt> variable values that determine the libraries and includes used in a Qtopia build:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Value <th valign="top">Result
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopia <td valign="top">Add <tt>qtopialib</tt> and <tt>qtopiainc</tt> to CONFIG
+<tr bgcolor="#f0f0f0"> <td valign="top">qtopialib <td valign="top">Include the Qtopia libraries (See also <a href="#QTOPIA_COMPAT_VER">QTOPIA_COMPAT_VER</a>)
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopiainc <td valign="top">Include the Qtopia includes
+<tr bgcolor="#f0f0f0"> <td valign="top">pimlib <td valign="top">Include the Qtopia PIM libraries (See also <a href="#QTOPIA_COMPAT_VER">QTOPIA_COMPAT_VER</a>)
+</table></center>
+<p> The following table provides examples of CONFIG variables to identify the type of Qtopia project to build:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Value <th valign="top">Result
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopiaapp <td valign="top">Qtopia application
+<tr bgcolor="#f0f0f0"> <td valign="top">qtopiaplugin <td valign="top">Qtopia plug-in
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopiadesktop plugin <td valign="top">Qtopia Desktop plug-in
+</table></center>
+Other project types are available, however they are outside the scope of this document.
+<p> <h3> Other Variables
+</h3>
+<a name="10-2"></a><p> The following table provides examples of variables that alter the behavior of the build system:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Project Type <th valign="top">Command <th valign="top">Result
+<tr bgcolor="#f0f0f0"> <td valign="top">All Projects <td valign="top">TRANSLATIONS= <td valign="top">Disable use of translations for this project. 
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopiaapp <td valign="top">CONFIG-=buildQuicklaunch <td valign="top">Disable quicklaunch for this project.
+<tr bgcolor="#f0f0f0"> <td valign="top">qtopiaplugin <td valign="top">QTOPIA_PROJECT_TYPE=foo <td valign="top">Override the default plug-in type for this project.
+This is typically required for plug-ins that do not reside in the depot as the default
+is derived from the directory name.
+</table></center>
+<p> <a name="QTOPIA_COMPAT_VER"></a>
+<h3> QTOPIA_COMPAT_VER
+</h3>
+<a name="10-3"></a><p> The QTOPIA_COMPAT_VER variable is set to the target release of Qtopia, which in turn affects the libraries that the project links against.
+<p> The following table shows the effect of QTOPIA_COMPAT_VER when CONFIG contains <tt>qtopialib</tt>.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">QTOPIA_COMPAT_VER <th valign="top">Libraries
+<tr bgcolor="#d0d0d0"> <td valign="top">1.5 <td valign="top">libqpe
+<tr bgcolor="#f0f0f0"> <td valign="top">1.7 <td valign="top">libqpe and libqtopia
+<tr bgcolor="#d0d0d0"> <td valign="top">2 <td valign="top">libqpe, libqtopia and libqtopia2
+</table></center>
+<p> The following table shows the effect of QTOPIA_COMPAT_VER when CONFIG contains <tt>pimlib</tt>.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">QTOPIA_COMPAT_VER <th valign="top">libraries
+<tr bgcolor="#f0f0f0"> <td valign="top">1.7 <td valign="top">libqpepim
+<tr bgcolor="#d0d0d0"> <td valign="top">2 <td valign="top">libqpepim and libqpepim1
+</table></center>
+<p> Leave QTOPIA_COMPAT_VER blank to use the most recent version available.
+<p> <b>Note:</b> While this does not prevent the use of methods introduced in a later release being used in an earlier release, caution
+is required. If classes or methods from a new release are required for an earlier target device, it is advised to install <tt>libqtopia</tt> and/or <tt>libqtopia2</tt> on the device to obtain the additional functionality.
+<p> <h3> Translatable Files
+</h3>
+<a name="10-4"></a><p> The TRANSLATABLES variable holds the list of files that are to be translated. To ease maintenance, it is
+suggested to include files from all  editions into the same <tt>.ts</tt> files. If conditional directives are
+added to the <tt>.pro</tt> file, for example, <tt>QTOPIA_PHONE</tt> for phone specific files, ensure that the
+<tt>TRANSLATABLES</tt> variable continues to contain sources from ALL builds.
+<p> It is easiest to create globally-scoped variables to contain all the files as follows: 
+<p> <pre>
+    SOURCES=main.cpp
+    HEADERS=main.h
+    PHONE_SOURCES=main_ph.cpp
+    PHONE_HEADERS=main_ph.h
+    QTOPIA_PHONE {
+        SOURCES+=$$PHONE_SOURCES
+        HEADERS+=$$PHONE_HEADERS
+    }
+    TRANSLATABLES+=$$PHONE_SOURCES $$PHONE_HEADERS # Add this now so we don't forget later
+
+    ...
+
+    TRANSLATABLES*=$$HEADERS $$SOURCES # The * avoids duplicates
+</pre>
+ 
+<p> <a name="non_code_translatables"></a>
+<p> As well as the code translatables there may also be non-code translatables. For
+internal projects located in <tt>$QPEDIR/src</tt>, these files may be handled automatically but be located in standard locations.
+<p> This table lists files that are automatically handled for each directory.
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">directory <th valign="top">files
+<tr bgcolor="#f0f0f0"> <td valign="top">apps <td valign="top">.directory *.desktop
+<tr bgcolor="#d0d0d0"> <td valign="top">plugins <td valign="top">.directory *.desktop
+<tr bgcolor="#f0f0f0"> <td valign="top">i18n <td valign="top">.directory *.desktop
+<tr bgcolor="#d0d0d0"> <td valign="top">etc <td valign="top">*.conf *.scheme *.desktop
+<tr bgcolor="#f0f0f0"> <td valign="top">pics <td valign="top">config
+<tr bgcolor="#d0d0d0"> <td valign="top">services <td valign="top">*
+</table></center>
+<p> The reason these things are combined is that the calls to <tt>lupdate</tt> must include all the
+files used to generate the <tt>.ts</tt> file. Translations for these files are stored in a few global
+files to help minimise storage and memory requirements.
+<p> Internal projects are free to have other non-code translatables. These should be handled
+in the same way that external projects handle non-code translatables. For example, <tt>libqtopia1</tt> does this with time zone data.
+<p> External projects require unique names for non-code translatables. For example,
+the example application uses <tt>example-nct.qm</tt> for it's non-code translatables. This file must be
+mentioned in each file. For example, the following code is in <tt>example.desktop</tt>:
+<p> <pre>
+[Translation]
+File=example-nct
+Context=Example
+</pre>
+ 
+<p> The <tt>.pro</tt> file must then tell the build system which non-code files are translatables. This is
+done with the <tt>NON_CODE_TRANSLATABLES</tt> variable. For example, the following registers the <tt>example.desktop</tt> file as a non-code translatable:
+<p> <pre>
+NON_CODE_TRANSLATABLES=example.desktop
+</pre>
+ 
+<p> There is one more step that must be done. The build system must know what <tt>.qm</tt> files your non-code
+translatables use. You set the <tt>NON_CODE_TRTARGETS</tt> variable to indicate this. For example, the following indicates to the build system that <tt>example-nct.qm</tt> should be created from <tt>example-nct-lang.ts</tt>:
+<p> <pre>
+NON_CODE_TRTARGETS=example-nct
+
+</pre>
+ 
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

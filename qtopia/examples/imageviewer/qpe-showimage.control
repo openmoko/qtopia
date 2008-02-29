@@ -1,0 +1,11 @@
+Files: bin/showimage apps/Applications/showimage.desktop pics/Showimage.png pics/showimage/fileopen.png  pics/showimage/fullscreen.png  pics/showimage/repeat.png  pics/showimage/rotate90.png
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Image Viewer example
+ The image viewer for the Qtopia environment example application. Supports
+ Whichever formats are compiled into Qt/Embedded (eg. PNG).

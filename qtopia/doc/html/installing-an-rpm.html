@@ -1,0 +1,141 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/installing-an-rpm.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Installing an RPM</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Installing an RPM</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Installing an RPM Package
+</a>
+<ul>
+<li><a href="#1-1"> RPM File Names
+</a>
+<li><a href="#1-2"> Installation Steps
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Installing an RPM Package
+</h2>
+<a name="1"></a><p> An RPM package is a package that has a filename that ends with <em>.rpm</em>. Qtopia RPM packages contain documentation, pre-built binaries, and source files where appropriate. RPM packages are specifically built for a particular Linux distribution, but will install and run on other compatible distributions in most circumstances. The distribution (and version) for the package is reflected in the package file name, for example, <em>-suse82</em> or  <em>-redhat9</em>. RPM packages are installed using the <tt>rpm</tt> (Redhat Package Manager) installation tool that is available with most Linux distributions.
+<p> <h3> RPM File Names
+</h3>
+<a name="1-1"></a><p> The file name for RPM packages can have one of the following file extensions:
+<ul>
+<li> suse80.i386.rpm  -  i386 compatible host systems running SuSE-8.0 or SuSE-8.1 
+<li> suse82.i386.rpm  -  i386 compatible host systems running SuSE-8.2 and higher
+<li> redhat9.i386.rpm -  i386 compatible host systems running Redhat 9 and higher
+</ul>
+<p> Please select the file name extension that best describes your specific host system.
+<p> <h3> Installation Steps
+</h3>
+<a name="1-2"></a><p> To install a RPM package follow these steps:
+<ol type=1>
+<li> download the required RPM 
+<li> download the <tt>qt-license-*</tt> file
+<li> copy the <tt>qt-license</tt> file to your home directory and rename it to  <tt>.qt-license</tt> 
+<li> log in as root:
+<pre> 
+     su root
+ </pre>
+ 
+<li> install the package:
+<pre>
+     tar -ivh &lt;package&gt;
+</pre>
+ 
+where <em>package</em> is the full path and filename of the downloaded package.
+</ol>
+<p> <b>Note:</b> Old versions of Qtopia must be removed before installation of the new version. 
+<p> To check if an older version is installed:
+<ol type=1>
+<li> log in as root:
+<pre>
+     su root
+</pre>
+ 
+<li> query the RPM database:
+<pre>
+     rpm -qa | grep qtopia
+</pre>
+ 
+</ol>
+The query will return a list of all installed Qtopia products, for example:
+<pre>
+        qtopia-developer-2.1.2
+        qtopia-tools-1.0.0
+        qtopia-desktop-2.1.2
+</pre>
+ 
+<p> <b>Note:</b>
+<ol type=1>
+<li>  qtopia-developer and qtopia-tools are explicitly mentioned in the above listing because these packages are likely to be installed on a current system. The new packages will have names such as <tt>qtopia-phone-sdk-x.y.z</tt> and i<tt>qtopia-pda-sdk-x.y.z</tt> and the <tt>qtopia-tools</tt> package is now integrated into the SDK.
+<p> <li> The <tt>qtopia-tools</tt> package does not need to be removed as it will not be used by the new SDK package.
+</ol>
+<p> To remove an RPM package please take the following steps:
+<ol type=1>
+<li> log in as root:
+<pre>
+     su root 
+</pre>
+ 
+<li> remove the package
+<pre>
+     rpm -e &lt;packagename&gt; 
+</pre>
+ 
+where packagename is the name of the package as listed by the command:
+<pre>
+    rpm -qa
+</pre>
+ 
+</ol>
+<p> After the RPM is installed the binaries are located in:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Package <th valign="top">Location
+<tr bgcolor="#f0f0f0">
+<td valign="top">Qtopia SDK (Professional/Light)
+<td valign="top">/opt/Qtopia/bin
+<tr bgcolor="#d0d0d0">
+<td valign="top">qtopia-desktop
+<td valign="top">/opt/QtopiaDesktop/bin
+</table></center>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

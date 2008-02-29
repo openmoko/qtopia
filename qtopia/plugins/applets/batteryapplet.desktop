@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Battery
+Comment[]=Monitor the battery level.
+X-QPE-Library=libbatteryapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

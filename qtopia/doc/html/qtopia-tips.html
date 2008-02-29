@@ -1,0 +1,214 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qtopia-tips.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Tips</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Tips</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> License Operations
+</a>
+<ul>
+<li><a href="#2-1"> What is the LICENSE File?
+</a>
+<li><a href="#2-2"> What is the ~/.qt-license File?
+</a>
+</ul>
+<li><a href="#3"> Package Operations
+</a>
+<ul>
+<li><a href="#3-1"> Checking a RPM is Installed
+</a>
+<li><a href="#3-2"> Installing an RPM
+</a>
+<li><a href="#3-3"> Removing a RPM
+</a>
+<li><a href="#3-4"> Extract Directory for a .tar.gz File
+</a>
+<li><a href="#3-5"> Extracting the .tar.bz2 File
+</a>
+<li><a href="#3-6"> Extracting the .tar.gz File
+</a>
+<li><a href="#3-7"> Integrity Check of Downloaded Ppackages
+</a>
+</ul>
+<li><a href="#4"> File Operations
+</a>
+<ul>
+<li><a href="#4-1"> Checking What a File Contains
+</a>
+<li><a href="#4-2"> Checking Binary File Dependencies
+</a>
+</ul>
+<li><a href="#5"> Qtopia Device User Help
+</a>
+<ul>
+<li><a href="#5-1"> Getting Help with a Device Pre-installed with Qtopia
+</a>
+</ul>
+<li><a href="#6"> Related Topics
+</a>
+<ul>
+<li><a href="#6-1"> FAQs
+</a>
+<li><a href="#6-2"> Getting Started
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This page discusses the tasks that may need to be performed when using/building Qtopia.  
+<p> <h2> License Operations
+</h2>
+<a name="2"></a><p> <h3> What is the LICENSE File?
+</h3>
+<a name="2-1"></a><p> A source package will contain a file named <em>LICENSE</em> which outlines the conditions under which the package can be used.
+<p> <h3> What is the ~/.qt-license File?
+</h3>
+<a name="2-2"></a><p> A <em>~/.qt-license</em> file is required when building commercial packages. For instruction on creating the ~/.qt-license file see the <em>Licenses</em> section of the web-page provided your Qtopia download account. Contact 
+<a href="mailto:sales@trolltech.com">sales@trolltech.com</a>
+for discussion about the license that you have purchased. 
+<p> <h2> Package Operations
+</h2>
+<a name="3"></a><p> <a name="check-rpm-install"></a>
+<h3> Checking a RPM is Installed
+</h3>
+<a name="3-1"></a><p> To check if an RPM &lt;NAME&gt; was installed  run:
+<pre>
+        rpm -q &lt;NAME&gt;
+</pre>
+ 
+Alternatively run:
+<pre>
+        rpm -qa  |  grep -i &lt;NAME&gt;
+</pre>
+ 
+<p> <a name="install-rpm"></a>
+<h3> Installing an RPM
+</h3>
+<a name="3-2"></a><p> To install a RPM called &lt;PACKAGE&gt; run:
+<pre>
+    su -c "rpm -ivh &lt;PACKAGE&gt;"
+</pre>
+ 
+<p> <a name="remove-rpm"></a>
+<h3> Removing a RPM
+</h3>
+<a name="3-3"></a><p> To remove the RPM &lt;NAME&gt; run:
+<pre>
+    su -c "rpm -e &lt;NAME&gt;"
+</pre>
+ 
+<p> <a name="choosing-tar-dir"></a>
+<h3> Extract Directory for a .tar.gz File
+</h3>
+<a name="3-4"></a><p> There are some limits to the acceptable characters in directories. The details
+are in <a href="environment-setup-build.html#acceptable_directory_characters">Acceptable Directory Characters</a>.
+<p> <a name="extract-tarbz2"></a>
+<h3> Extracting the .tar.bz2 File
+</h3>
+<a name="3-5"></a><p> To extract a .tar.bz2 file called &lt;PACKAGE&gt; run:
+<pre>
+    tar -xjvf &lt;PACKAGE&gt;
+</pre>
+ 
+<p> <a name="extract-targz"></a>
+<h3> Extracting the .tar.gz File
+</h3>
+<a name="3-6"></a><p> To extract a .tar.gz file called &lt;PACKAGE&gt; run:
+<pre>
+    tar -xzvf &lt;PACKAGE&gt;
+</pre>
+ 
+<p> <a name="check-md5sums"></a>
+<h3> Integrity Check of Downloaded Ppackages
+</h3>
+<a name="3-7"></a><p> When downloading files from a Trolltech  server there  will often be a file named  <em>md5sum.txt</em> . The <em>md5sum.txt</em>  file  contains checksums
+for all the available files and it is strongly recommended that you download
+this file along with the others. When you have downloaded the required files, including
+md5sum.txt simply run:
+<pre>
+    md5sum -c md5sum.txt
+</pre>
+    
+<p> To determine what files need to be downloaded for your usage of Qtopia see <a href="getting-started.html">Getting started</a>
+<p> <h2> File Operations
+</h2>
+<a name="4"></a><p> <a name="check-file-content"></a>
+<h3> Checking What a File Contains
+</h3>
+<a name="4-1"></a><p> Under a Unia/Linux system you can use the "file" command. This is handy when you are not sure what CPU architecture binary file suits, for example run:
+<pre>
+    file /opt/Qtopia/bin/qpe
+</pre>
+ 
+<p> <a name="check-binary-depends"></a>
+<h3> Checking Binary File Dependencies
+</h3>
+<a name="4-2"></a><p> Under a Unix/Linux system you can use the "ldd" command. This is handy when you need to check
+what shared libraries a binary uses, for example run:
+<pre>
+    ldd /opt/Qtopia/bin/qpe
+</pre>
+ 
+<p> <h2> Qtopia Device User Help
+</h2>
+<a name="5"></a><p> <a name="enduser-help"></a>
+<h3> Getting Help with a Device Pre-installed with Qtopia
+</h3>
+<a name="5-1"></a><p> For information about using a device upon which Qtopia has already be pre-installed then see :
+<ul>
+<li> <a href="http://qtopia.net/modules/xoopsfaq/index.php?cat_id=3">Qtopia User FAQ</a>
+<li> The documentation provided with the device .
+<li> The help documentation provided within the QtopiaDesktop that came with your device.
+</ul>
+<p> <h2> Related Topics
+</h2>
+<a name="6"></a><p> <h3> FAQs
+</h3>
+<a name="6-1"></a><p> See the <em>FAQs</em> section in the 
+<a href="index.html">Qtopia index page</a>
+<p> <h3> Getting Started
+</h3>
+<a name="6-2"></a><p> To determine what steps  are needed to get started with Qtopia see: 
+<a href="getting-started.html">Getting started</a>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

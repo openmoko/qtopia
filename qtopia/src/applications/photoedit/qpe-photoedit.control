@@ -1,0 +1,9 @@
+Files: bin/photoedit apps/Applications/photoedit.desktop
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+ An image manager for the Qtopia Environment.

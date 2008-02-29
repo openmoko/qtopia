@@ -1,0 +1,278 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/task.cpp:54 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>PimTask Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>PimTask Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The PimTask class holds the data of a todo entry.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="task-h.html">qtopia/pim/task.h</a>&gt;</tt>
+<p>Inherits <a href="pimrecord.html">PimRecord</a>.
+<p><a href="pimtask-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>enum <a href="#TaskStatus-enum"><b>TaskStatus</b></a> { NotStarted = 0, InProgress, Completed, Waiting, Deferred }</li>
+<li class=fn>enum <a href="#PriorityValue-enum"><b>PriorityValue</b></a> { VeryHigh = 1, High, Normal, Low, VeryLow }</li>
+<li class=fn><a href="#PimTask"><b>PimTask</b></a> ()</li>
+<li class=fn>virtual <a href="#~PimTask"><b>~PimTask</b></a> ()</li>
+<li class=fn>void <a href="#setPriority"><b>setPriority</b></a> ( PriorityValue&nbsp;priority )</li>
+<li class=fn>PriorityValue <a href="#priority"><b>priority</b></a> () const</li>
+<li class=fn>void <a href="#setDescription"><b>setDescription</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;description )</li>
+<li class=fn>QString <a href="#description"><b>description</b></a> () const</li>
+<li class=fn>void <a href="#setDueDate"><b>setDueDate</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )</li>
+<li class=fn>void <a href="#clearDueDate"><b>clearDueDate</b></a> ()</li>
+<li class=fn>const QDate &amp; <a href="#dueDate"><b>dueDate</b></a> () const</li>
+<li class=fn>bool <a href="#hasDueDate"><b>hasDueDate</b></a> () const</li>
+<li class=fn>const QDate &amp; <a href="#startedDate"><b>startedDate</b></a> () const</li>
+<li class=fn>void <a href="#setStartedDate"><b>setStartedDate</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )</li>
+<li class=fn>bool <a href="#hasStartedDate"><b>hasStartedDate</b></a> () const</li>
+<li class=fn>const QDate &amp; <a href="#completedDate"><b>completedDate</b></a> () const</li>
+<li class=fn>void <a href="#setCompletedDate"><b>setCompletedDate</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )</li>
+<li class=fn>TaskStatus <a href="#status"><b>status</b></a> () const</li>
+<li class=fn>void <a href="#setStatus"><b>setStatus</b></a> ( TaskStatus&nbsp;s )</li>
+<li class=fn>bool <a href="#isCompleted"><b>isCompleted</b></a> () const</li>
+<li class=fn>void <a href="#setCompleted"><b>setCompleted</b></a> ( bool&nbsp;b )</li>
+<li class=fn>uint <a href="#percentCompleted"><b>percentCompleted</b></a> () const</li>
+<li class=fn>void <a href="#setPercentCompleted"><b>setPercentCompleted</b></a> ( uint&nbsp;percent )</li>
+<li class=fn>QString <a href="#notes"><b>notes</b></a> () const</li>
+<li class=fn>void <a href="#setNotes"><b>setNotes</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>bool <a href="#match"><b>match</b></a> ( const&nbsp;QRegExp&nbsp;&amp;&nbsp;r ) const</li>
+<li class=fn>QString <a href="#toRichText"><b>toRichText</b></a> () const</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#writeVCalendar"><b>writeVCalendar</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;QValueList&lt;PimTask&gt;&nbsp;&amp;&nbsp;tasks )</li>
+<li class=fn>void <a href="#writeVCalendar-2"><b>writeVCalendar</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</li>
+<li class=fn>QValueList&lt;PimTask&gt; <a href="#readVCalendar"><b>readVCalendar</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+
+
+The PimTask class holds the data of a todo entry.
+<p> This data includes the priority of the task, a description, an optional due
+date, and whether the task is completed or not.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="PriorityValue-enum"></a>PimTask::PriorityValue</h3>
+
+<p> These enums describe the current <a href="#priority">priority</a>() of the Task.
+<p> The values are:
+<ul>
+<li><tt>PimTask::VeryHigh</tt>
+<li><tt>PimTask::High</tt>
+<li><tt>PimTask::Normal</tt>
+<li><tt>PimTask::Low</tt>
+<li><tt>PimTask::VeryLow</tt>
+</ul>
+<h3 class=fn><a name="TaskStatus-enum"></a>PimTask::TaskStatus</h3>
+
+<p> These enums describe the current <a href="#status">status</a>() of the Task.
+<p> The values are:
+<ul>
+<li><tt>PimTask::NotStarted</tt>
+<li><tt>PimTask::InProgress</tt>
+<li><tt>PimTask::Completed</tt>
+<li><tt>PimTask::Waiting</tt>
+<li><tt>PimTask::Deferred</tt>
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="PimTask"></a>PimTask::PimTask ()
+</h3>
+Creates a new, empty task.
+
+<h3 class=fn><a name="~PimTask"></a>PimTask::~PimTask ()<tt> [virtual]</tt>
+</h3>
+Destroys the task
+
+<h3 class=fn>void <a name="clearDueDate"></a>PimTask::clearDueDate ()
+</h3>
+
+<p> Clears the due date of the task.
+<p> <p>See also <a href="#setDueDate">setDueDate</a>().
+
+<h3 class=fn>const QDate &amp; <a name="completedDate"></a>PimTask::completedDate () const
+</h3>
+
+<p> Returns the date the task was completed.  If the task is not completed, the returned
+date is undefined.
+<p> <p>See also <a href="#isCompleted">isCompleted</a>() and <a href="#setCompletedDate">setCompletedDate</a>().
+
+<h3 class=fn>QString <a name="description"></a>PimTask::description () const
+</h3>
+
+<p> Returns the description of the task.
+<p> <p>See also <a href="#setDescription">setDescription</a>().
+
+<h3 class=fn>const QDate &amp; <a name="dueDate"></a>PimTask::dueDate () const
+</h3>
+
+<p> Returns the due date of the task.
+<p> <p>See also <a href="#setDueDate">setDueDate</a>() and <a href="#clearDueDate">clearDueDate</a>().
+
+<h3 class=fn>bool <a name="hasDueDate"></a>PimTask::hasDueDate () const
+</h3>
+
+<p> Returns TRUE if there is a due date set for the task.  Otherwise returns
+FALSE.
+<p> <p>See also <a href="#dueDate">dueDate</a>(), <a href="#setDueDate">setDueDate</a>(), and <a href="#clearDueDate">clearDueDate</a>().
+
+<h3 class=fn>bool <a name="hasStartedDate"></a>PimTask::hasStartedDate () const
+</h3>
+Returns TRUE if the task has a started date.
+<p> <p>See also <a href="#startedDate">startedDate</a>() and <a href="#setStartedDate">setStartedDate</a>().
+
+<h3 class=fn>bool <a name="isCompleted"></a>PimTask::isCompleted () const
+</h3>
+
+<p> Returns TRUE if the task is completed.  Otherwise returns FALSE.
+<p> <p>See also <a href="#setCompleted">setCompleted</a>().
+
+<h3 class=fn>bool <a name="match"></a>PimTask::match ( const&nbsp;QRegExp&nbsp;&amp;&nbsp;r ) const
+</h3>
+Returns TRUE if the part of task matches <em>r</em>. Otherwise returns FALSE.
+
+<h3 class=fn>QString <a name="notes"></a>PimTask::notes () const
+</h3>
+
+<p> Returns any notes for the task.
+<p> <p>See also <a href="#setNotes">setNotes</a>().
+
+<h3 class=fn>uint <a name="percentCompleted"></a>PimTask::percentCompleted () const
+</h3>
+Returns an int indicating the percent completed of the task.
+For completed tasks, this function will always return 100.
+<p> <p>See also <a href="#setPercentCompleted">setPercentCompleted</a>() and <a href="#status">status</a>().
+
+<h3 class=fn><a href="pimtask.html#PriorityValue-enum">PriorityValue</a> <a name="priority"></a>PimTask::priority () const
+</h3>
+
+<p> Returns the priority of the task.
+<p> <p>See also <a href="#setPriority">setPriority</a>().
+
+<h3 class=fn>QValueList&lt;PimTask&gt; <a name="readVCalendar"></a>PimTask::readVCalendar ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )<tt> [static]</tt>
+</h3>
+Reads the file specified by <em>filename</em> as a list of vCalendar objects
+and returns the list of near equivalent tasks.
+<p> <p>See also <a href="#writeVCalendar">writeVCalendar</a>().
+
+<h3 class=fn>void <a name="setCompleted"></a>PimTask::setCompleted ( bool&nbsp;b )
+</h3>
+
+<p> If <em>b</em> is TRUE marks the task as completed.  Otherwise marks the task as
+uncompleted.
+<p> <p>See also <a href="#isCompleted">isCompleted</a>().
+
+<h3 class=fn>void <a name="setCompletedDate"></a>PimTask::setCompletedDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )
+</h3>
+
+<p> Sets the tasks completed date to <em>date</em>.
+<p> <p>See also <a href="#isCompleted">isCompleted</a>() and <a href="#completedDate">completedDate</a>().
+
+<h3 class=fn>void <a name="setDescription"></a>PimTask::setDescription ( const&nbsp;QString&nbsp;&amp;&nbsp;description )
+</h3>
+
+<p> Sets the description of the task to <em>description</em>.
+<p> <p>See also <a href="#description">description</a>().
+
+<h3 class=fn>void <a name="setDueDate"></a>PimTask::setDueDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )
+</h3>
+
+<p> Sets the due date of the task to <em>date</em>.
+<p> <p>See also <a href="#clearDueDate">clearDueDate</a>() and <a href="#dueDate">dueDate</a>().
+
+<h3 class=fn>void <a name="setNotes"></a>PimTask::setNotes ( const&nbsp;QString&nbsp;&amp;&nbsp;s )
+</h3>
+
+<p> Sets the notes of the task to <em>s</em>.
+<p> <p>See also <a href="#notes">notes</a>().
+
+<h3 class=fn>void <a name="setPercentCompleted"></a>PimTask::setPercentCompleted ( uint&nbsp;percent )
+</h3>
+Sets the tasks percent completed field to <em>percent</em>.
+if <em>percent</em> is greater than 99 this function will also
+set the status to Completed.
+<p> <p>See also <a href="#percentCompleted">percentCompleted</a>() and <a href="#status">status</a>().
+
+<h3 class=fn>void <a name="setPriority"></a>PimTask::setPriority ( <a href="pimtask.html#PriorityValue-enum">PriorityValue</a>&nbsp;priority )
+</h3>
+
+<p> Sets the priority of the task to <em>priority</em>.
+<p> <p>See also <a href="#priority">priority</a>().
+
+<h3 class=fn>void <a name="setStartedDate"></a>PimTask::setStartedDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )
+</h3>
+
+<p> Sets the tasks to have started on <em>date</em>.
+<p> <p>See also <a href="#hasStartedDate">hasStartedDate</a>() and <a href="#startedDate">startedDate</a>().
+
+<h3 class=fn>void <a name="setStatus"></a>PimTask::setStatus ( <a href="pimtask.html#TaskStatus-enum">TaskStatus</a>&nbsp;s )
+</h3>
+Sets the <a href="#TaskStatus-enum">TaskStatus</a> of the task to <em>s</em>.
+<p> <p>See also <a href="#status">status</a>().
+
+<h3 class=fn>const QDate &amp; <a name="startedDate"></a>PimTask::startedDate () const
+</h3>
+
+<p> Returns the date the task was started.  If the task has not yet been started, the returned
+date is undefined.
+<p> <p>See also <a href="#hasStartedDate">hasStartedDate</a>() and <a href="#setStartedDate">setStartedDate</a>().
+
+<h3 class=fn><a href="pimtask.html#TaskStatus-enum">TaskStatus</a> <a name="status"></a>PimTask::status () const
+</h3>
+Returns the <a href="#TaskStatus-enum">TaskStatus</a> of the task.
+<p> <p>See also <a href="#setStatus">setStatus</a>().
+
+<h3 class=fn>QString <a name="toRichText"></a>PimTask::toRichText () const
+</h3>
+Returns a rich text formatted QString of the PimTask.
+
+<h3 class=fn>void <a name="writeVCalendar"></a>PimTask::writeVCalendar ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;QValueList&lt;PimTask&gt;&nbsp;&amp;&nbsp;tasks )<tt> [static]</tt>
+</h3>
+Write the list of <em>tasks</em> as vCalendar objects to the file
+specified by <em>filename</em>.
+<p> <p>See also <a href="#readVCalendar">readVCalendar</a>().
+
+<h3 class=fn>void <a name="writeVCalendar-2"></a>PimTask::writeVCalendar ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )<tt> [static]</tt>
+</h3>
+Write the <em>task</em> as a vCalendar to the file specified by <em>filename</em>.
+<p> <p>See also <a href="#readVCalendar">readVCalendar</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

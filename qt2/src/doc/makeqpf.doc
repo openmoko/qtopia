@@ -1,0 +1,113 @@
+/****************************************************************************
+** $Id: qt/doc/makeqpf.doc   2.3.12   edited 2005-10-27 $
+**
+** Documentation for QPF fonts
+**
+** Copyright (C) 2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qt GUI Toolkit.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** Licensees holding valid Qt Enterprise Edition or Qt Professional Edition
+** licenses may use this file in accordance with the Qt Commercial License
+** Agreement provided with the Software.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
+**   information about Qt Commercial License Agreements.
+** See http://www.trolltech.com/qpl/ for QPL licensing information.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+/*!
+
+\page makeqpf.html
+
+\title makeqpf
+
+Due to performance or size constraints on the device there may be a need to convert the installed Qt/Embedded fonts into Qt Pre-rendered Font (QPF) font files. The makeqpf tool can be used to convert a True-type Font (TTF) or Bitmap Distribution Format (BDF) font into a QPF font taking into account:
+<ul>
+<li>display transformation(rotation)</li>
+<li>the symbol ranges required</li>
+</ul>
+
+To build makeqpf:
+
+<code>
+./configure -qconfig makeqpf [extra options] <br>
+make <br>
+make -C tools/makeqf<br>
+</code>
+
+If Qt/Embedded is configured with "-qconfig makeqpf" the file $QTDIR/src/tools/qconfig-makeqpf.h defines all required macros.
+As a result:
+<ul>
+<li> QT_NO_QWS_TRANSFORMED and QT_NO_QWS_SAVEFONTS are not defined </li>
+<li> QT_TRANSFORM_VFB is defined to enable transformed QVFb support</li>
+<li> QT_NO_BDF is defined so that BDF font files can be converted.</li>
+<li> QT_NO_FREETYPE is defined so that TTF font files  can be converted.</li>
+</ul>
+
+Warning: If TTF support is allowed then the freetype development headers libraries need to be available.
+
+<h2> QWS fonts <h2>
+
+  Makeqpf, like any other Qt/Embedded application, relies on $QTDIR/lib/fonts/fontdir to correctly list the available fonts. 
+For more information see \link fonts-qws.html QWS Fonts \endlink
+
+<h2> Usage</h2>
+<code>
+makeqpf [-A] [-f spec-file] [font ...]
+</code>
+<ul>
+<li>-A - Render and save all fonts in fontdir</li>
+<li>-f - File of lines: fontname character-ranges e.g. "smoothtimes 0-ff,20a0-20af"</li>
+<li>font - Font to render and save</li>
+</ul>
+
+To make a "fixed" font with the currency symbols
+<ul>
+<li>create a file \e fontlist with the line eg:
+    <code><br>
+        cd $QTDIR/tools/makeqpf<br>
+        echo "fixed 0-ff,20a0-20af" > \e fontlist</code></li>
+<li>Specify in $QWS_DISPLAY a transformed driver eg:
+    <code><br>
+        export QWS_DISPLAY=Transformed</code></li>
+<li>If you need to generate fonts for all rotations then you can make use of the script makeall eg:
+    <code><br>
+        ./makeall -f \e fontlist</code><br>
+<li>If only the current rotation is being used then run:
+    <code><br>
+        ./makeqpf -f \e fontlist</code>
+        </li>
+</ul>
+
+As a second example, to convert all symbols in the "fixed" font into a QPF font, for all rotations then run :
+    <code><br>
+        ./makeall  fixed</code><br>
+OR for current rotation run:
+    <code><br>
+        ./makeqpf fixed</code>
+
+
+See also <code>./makeqpf --help</code>
+
+Hint:Press &lt;CTRL&gt;-Q should you wish to quit makeqpf.
+
+
+*/

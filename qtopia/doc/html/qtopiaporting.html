@@ -1,0 +1,88 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/porting.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Porting issues</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Porting issues</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Qtopia - Porting from 1.x to 2.0
+</a>
+<li><a href="#3"> Pro file handling
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the issues that have to be dealt with when porting Qtopia 1.x applications to Qtopia 2.0.
+<p> <h2> Qtopia - Porting from 1.x to 2.0
+</h2>
+<a name="2"></a><p> - FileSelector::selected() is removed; use <a href="fileselector.html#selectedDocument">FileSelector::selectedDocument</a>()
+<p> - Use:
+<p> <pre>
+    int result = QPEApplication::<a href="qpeapplication.html#execDialog">execDialog</a>(dlg);
+</pre>
+ 
+<p> rather than:
+<p> <pre>
+    dlg-&gt;showMaximized();
+    int result = dlg-&gt;exec();
+</pre>
+ 
+<p> (and similar)
+<p> <h2> Pro file handling
+</h2>
+<a name="3"></a><p> Qtopia 1.7 and earlier used tmake to create Makefiles from .pro files. Qtopia 2.0 and above
+use qmake to do this. qmake attempts to be backwards compatible with the tmake syntax but there
+may be problems you will need to address. The <a href="qmake-manual.html">qmake User Guide</a>
+contains information about qmake syntax.
+<p> Qtopia 2.0 defines all projects that live inside $QPEDIR/src as "depot" projects. These projects
+are subject to some extra checks that third party projects are not subjected to. Most importantly,
+a "depot" project must be listed in one of the project lists (see the <a href="buildsystem.html">build system documentation</a> for more information about these lists and how to modify them).
+It is therefore recommended that third party projects reside outside the Qtopia source tree.
+<p> Additionally, the way Makefile is used has changed slightly with Qtopia 2.0. For more information
+about how Makefiles are used please see the <a href="buildsystem.html">build system documentation</a>.
+<p> One thing that can cause confusion is the automatic processing of various .pri files. Mostly, this
+will be unnoticed and serves to help compatibility with Qtopia 1.7. Details about the process can
+be found in the <a href="buildsystem.html">build system documentation</a>. Specifically, global.pri
+changes various rules based on the values in CONFIG.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

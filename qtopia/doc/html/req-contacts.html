@@ -1,0 +1,234 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/contacts.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Contacts Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Contacts Specification</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Data
+</a>
+<li><a href="#2"> Application Views
+</a>
+<ul>
+<li><a href="#2-1"> Sorted List
+</a>
+<li><a href="#2-2"> Detailed View
+</a>
+<li><a href="#2-3"> Edit View
+</a>
+</ul>
+<li><a href="#3"> Features
+</a>
+<ul>
+<li><a href="#3-1"> Add Contact
+</a>
+<li><a href="#3-2"> Delete Contact
+</a>
+<li><a href="#3-3"> Edit Contact
+</a>
+<li><a href="#3-4"> Call Contact
+</a>
+<li><a href="#3-5"> SMS Contact
+</a>
+<li><a href="#3-6"> Email Contact
+</a>
+<li><a href="#3-7"> Beaming
+</a>
+<li><a href="#3-8"> Transferring via SMS
+</a>
+<li><a href="#3-9"> Transferring via Email
+</a>
+<li><a href="#3-10"> QDL Support
+</a>
+</ul>
+<li><a href="#4"> Files
+</a>
+<li><a href="#5"> Configuration
+</a>
+<li><a href="#6"> Services
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Contacts</b> application allows the user to create contacts
+for storing information such as name, phone numbers, addresses
+and other personal information.
+<p> <h2> Data
+</h2>
+<a name="1"></a><p> A contact consists of the following data:
+<ul>
+<li> First name
+<li> Middle name
+<li> Last name
+<li> Pronunciation
+<li> Nickname
+<li> Suffix
+<li> Job title
+<li> Company
+<li> Department
+<li> Business phone
+<li> Business fax
+<li> Business street
+<li> Business city
+<li> Business zip code
+<li> Business country
+<li> Business pager
+<li> Business web page
+<li> Office
+<li> Profession
+<li> Assistant
+<li> Manager
+<li> Home phone
+<li> Home street
+<li> Home city
+<li> Home state
+<li> Home zip
+<li> Home country
+<li> Home web page
+<li> Spouse
+<li> Birthday
+<li> Gender
+<li> Anniversary
+<li> Children
+<li> <a href="categories.html">Categories</a>
+<li> Photo
+<li> Ring-tone
+<li> Notes
+</ul>
+<p> <h2> Application Views
+</h2>
+<a name="2"></a><p> It is possible to view contacts in the following three ways:
+<p> <ul>
+<li> As a sorted list of contacts.
+<li> A detailed view of a single contact.
+<li> A contact opened for editing.
+</ul>
+<p> <h3> Sorted List
+</h3>
+<a name="2-1"></a><p> The primary display of the application shows a sorted list of contacts.
+<p> From the sorted list view the user is able to:
+<ul>
+<li> Create a new contact.
+<li> View the details for the contact.
+<li> Filter the list of contacts shown by a specified category.
+<li> Beam all contacts.
+<li> Change settings for how contact names are displayed.
+</ul>
+<p> <h3> Detailed View
+</h3>
+<a name="2-2"></a><p> The detailed view of a contact shows data for a single contact. This is shown as
+rich text. All the information for the task is shown formatted for optimum readability.
+<p> From the detailed list view the user is able to:
+<ul>
+<li> Edit the current contact.
+<li> Delete the current contact.
+<li> Beam the current contact via IR.
+<li> Set the current contact as the owner's business card.
+</ul>
+<p> <h3> Edit View
+</h3>
+<a name="2-3"></a><p> The edit view of a contact allows the user to specify the data for a new contact
+or modify that of an existing contact. Once the user has finished they may either accept or discard the changes.
+<p> <h2> Features
+</h2>
+<a name="3"></a><p> <h3> Add Contact
+</h3>
+<a name="3-1"></a><p> It is possible to add a contact. The user is able to specify as little as the name of the contact in order to create a new record.
+<p> <h3> Delete Contact
+</h3>
+<a name="3-2"></a><p> It is possible to delete a contact. The user is prompted to verify the deletion
+of any contact.
+<p> <h3> Edit Contact
+</h3>
+<a name="3-3"></a><p> It is possible to modify a contact an unlimited number of times.
+<p> <h3> Call Contact
+</h3>
+<a name="3-4"></a><p> It is possible to call a contact with an associated phone number by selecting the contact's phone number when viewing their details.
+<p> <h3> SMS Contact
+</h3>
+<a name="3-5"></a><p> It is possible to SMS a contact with an associated mobile phone number by selecting the contact's SMS mobile phone number.
+<p> <h3> Email Contact
+</h3>
+<a name="3-6"></a><p> It is possible to email a contact with a valid email address by
+launching the <b>Messages</b> application with the contact's
+name and email address in the To field.
+<p> <h3> Beaming
+</h3>
+<a name="3-7"></a><p> It is possible to beam all or a single contact to or from another device using IR.
+<p> <h3> Transferring via SMS
+</h3>
+<a name="3-8"></a><p> It is possible to SMS all or a single contact to or from another device using
+the SMS protocol.
+<p> <h3> Transferring via Email
+</h3>
+<a name="3-9"></a><p> It is possible to email all or a single contact to or from another device as an
+email attachment.
+<p> <h3> <a href="qdl.html">QDL</a> Support
+</h3>
+<a name="3-10"></a><p> It is possible to access contacts via other applications via the QDL service interface.
+When activated the <b>Contacts</b> application runs and shows the contact.
+<p> QDL links can be embedded into the notes of a contact. When in the detailed view,
+clicking on a QDL link activates the link's application.
+<p> <h2> Files
+</h2>
+<a name="4"></a><p> <b>Contacts</b> uses data files:
+<p> <ul>
+<li> <pre>$HOME&#92;Applications&#92;addressbook&#92;addressbook.xml</pre>- main list of contacts data.
+<li> <pre>$HOME&#92;.abjournal</pre>- journal of changes to list of contacts since application started.
+</ul>
+<p> Both files are in an xml-like format. <pre>addressbook.xml</pre>is the main list of contacts, and is the file
+sent to Qtopia Desktop on syncing. <pre>.abjournal</pre>is a list of adds, edits and deletes made to the list of contacts since the <b>Contacts</b> application started.
+<p> <h2> Configuration
+</h2>
+<a name="5"></a><p> <b>Contacts</b> stores settings in <pre>$HOME/Settings/Contacts.conf</pre>.
+<p> <ul>
+<li> [formatting]
+<ul>
+<li> NameFormat - Format of contact names for filing.
+</ul>
+</ul>
+<p> <h2> Services
+</h2>
+<a name="6"></a><p> <ul>
+<li> IR Receive text/x-vCard
+<li> <b>Contacts</b> - allows editing of contacts via PIM Library interface and beaming of a business card.
+<li> PhoneContacts - allows a business card to be sent via sms. 
+<li> <a href="qdl.html">QDL</a>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

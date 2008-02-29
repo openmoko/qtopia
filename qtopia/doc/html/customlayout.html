@@ -1,0 +1,246 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/layout.doc:225 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Writing your own layout manager</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Writing your own layout manager</h1>
+
+  
+<p> Here we go through an example in detail. The class <tt>CardLayout</tt> is inspired by the Java layout manager of the same name. It
+lays out the items (widgets or nested layouts)
+on top of each other, each item offset by
+spacing().
+<p> To write your own layout class, you must define the following:
+<ul>
+<li>A data structure to store the items
+handle by the layout.
+Each item is a QLayoutItem.
+We will just use a QList in this example.
+<li>addItem(), how to add items
+to the layout.
+<li>setGeometry(), how to do the
+layout.
+<li>sizeHint(), the preferred size of the
+layout.
+<li>iterator(), how to iterate over the
+layout.
+</ul>
+<p> In most cases, you will also implement minimumSize().
+<p> <h3> card.h </h3>
+<p> <pre>
+#ifndef CARD_H
+#define CARD_H
+
+#include &lt;qlayout.h&gt;
+#include &lt;qlist.h&gt;
+
+class CardLayout : public QLayout
+{
+public:
+    CardLayout( QWidget *parent, int dist )
+        : QLayout( parent, 0, dist ) {}
+    CardLayout( QLayout* parent, int dist)
+        : QLayout( parent, dist ) {}
+    CardLayout( int dist )
+        : QLayout( dist ) {}
+    ~CardLayout();
+
+    void addItem(QLayoutItem *item);
+    QSize sizeHint() const;
+    QSize minimumSize() const;
+    QLayoutIterator iterator();
+    void setGeometry(const QRect &amp;rect);
+
+private:
+    QList&lt;QLayoutItem&gt; list;
+};
+
+#endif
+</pre>
+ 
+<p> <h3> card.cpp </h3>
+<pre>
+#include "card.h"
+</pre>
+ 
+<p> We first define an iterator over the layout. Layout iterators are
+used internally by the layout system to handle deletion of
+widgets. They are also available for application programmers.
+<p> There are two different classes involved: QLayoutIterator is the class
+that is visible to application programmers, it is explicitly
+shared. The QLayoutIterator contains a QGLayoutIterator that does all
+the work. We must create a subclass of QGLayoutIterator that knows how
+to iterate over our layout class.
+<p> In this case, we choose a simple implementation: we store an integer
+index into the list and a pointer to the list. Every QGLayoutIterator
+subclass must implement current(),
+next() and
+takeCurrent(), as well as
+a constructor. In our example we do not need a destructor.
+<p> <pre>
+class CardLayoutIterator :public QGLayoutIterator
+{
+public:
+  CardLayoutIterator(QList&lt;QLayoutItem&gt; *l)
+    : idx(0), list(l)  {}
+
+  QLayoutItem *current()
+  { return idx &lt; int(list-&gt;count()) ? list-&gt;at(idx) : 0;  }
+
+  QLayoutItem *next()
+  { idx++; return current(); }
+
+  QLayoutItem *takeCurrent()
+  { return list-&gt;take( idx ); }
+
+private:
+  int idx;
+  QList&lt;QLayoutItem&gt; *list;
+};
+</pre>
+ 
+<p> We must implement QLayout:iterator() to return a QLayoutIterator over
+this layout.
+<p> <pre>
+QLayoutIterator CardLayout::iterator()
+{       
+    return QLayoutIterator( new CardLayoutIterator(&amp;list) );
+}
+</pre>
+ 
+<p> addItem() implements the default placement strategy for layout items. It
+must be implemented. It is used by QLayout::add(), by the QLayout
+constructor that takes a layout as parent, and it is used to implement
+the auto-add feature. If your layout
+has advanced placement options that require parameters, you will have to
+provide extra access functions like eg. QGridLayout::addMultiCell().
+<p> <pre>
+void CardLayout::addItem( QLayoutItem *item )
+{
+    list.append(item);
+}
+</pre>
+ 
+<p> The layout takes over responsibility of the items added. Since
+QLayoutItem does not inherit QObject, we must delete the items
+manually. The function deleteAllItems()
+uses the iterator we defined above to delete all items in the layout.
+<p> <pre>
+CardLayout::~CardLayout()
+{
+    deleteAllItems();
+}
+</pre>
+ 
+<p> The setGeometry() function actually performs the layout. The rectangle
+supplied as an argument does not include margin(). If relevant, use
+spacing() as the distance between items.
+<p> <pre>
+void CardLayout::setGeometry(const QRect &amp;rect)
+{
+    QLayout::setGeometry(rect);
+
+    QListIterator&lt;QLayoutItem&gt; it(list);
+    if (it.count() == 0)
+        return;
+
+    QLayoutItem *o;
+
+    int i = 0;
+
+    int w = rect.width() - (list.count() - 1) * spacing();
+    int h = rect.height() - (list.count() - 1) * spacing();
+
+    while ((o=it.current()) != 0)
+        {
+            ++it;
+            QRect geom(rect.x() + i * spacing(), rect.y() + i * spacing(),
+                       w, h );
+            o-&gt;setGeometry( geom );
+            ++i;
+        }       
+}
+</pre>
+ 
+<p> sizeHint() and minimumSize() are normally very similar in
+implementation.  The sizes returned by both functions should include
+spacing(), but not margin().
+<p> <pre>
+QSize CardLayout::sizeHint() const
+{
+    QSize s(0,0);
+    int n = list.count();
+    if ( n &gt; 0 )
+        s = QSize(100,70); //start with a nice default size
+    QListIterator&lt;QLayoutItem&gt; it(list);
+    QLayoutItem *o;
+    while ( (o=it.current()) != 0 ) {
+        ++it;
+        s = s.expandedTo( o-&gt;minimumSize() );
+    }
+    return s + n*QSize(spacing(),spacing());
+}
+
+QSize CardLayout::minimumSize() const
+{
+    QSize s(0,0);
+    int n = list.count();
+    QListIterator&lt;QLayoutItem&gt; it(list);
+    QLayoutItem *o;
+    while ( (o=it.current()) != 0 ) {
+        ++it;
+        s = s.expandedTo( o-&gt;minimumSize() );
+    }
+    return s + n*QSize(spacing(),spacing());
+}
+</pre>
+ 
+<p> <h2>Further comments</h2>
+<p> This layout does not implement heightForWidth().
+<p> We ignore QLayoutItem::isEmpty(), this means that the layout will treat
+hidden widgets as visible.
+<p> For complex layouts, speed can be greatly increased by caching calculated
+values and/or data structures. In that case, implement invalidate() to mark the cached
+data as dirty.
+<p> Calling QLayoutItem::sizeHint(), etc. may be expensive, so you should
+store the value in a local variable if you need it again later in the
+same function.
+<p> You should not call QLayoutItem::setGeometry() twice on the same item
+in the same function. That can be very expensive if the item has
+several child widgets, because it will have to do a complete layout
+every time. Instead, calculate the geometry and then set it. (This
+does not only apply to layouts, you should do the same if you
+implement your own resizeEvent()).
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

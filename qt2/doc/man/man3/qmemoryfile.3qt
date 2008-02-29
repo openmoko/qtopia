@@ -1,0 +1,116 @@
+'\" t
+.TH QMemoryFile 3qt "27 October 2005" "Trolltech AS" \" -*- nroff -*-
+.\" Copyright 1992-2001 Trolltech AS.  All rights reserved.  See the
+.\" license file included in the distribution for a complete license
+.\" statement.
+.\"
+.ad l
+.nh
+.SH NAME
+QMemoryFile \- Provide means to map a file info memory or refere to a block or memory by name
+.br
+.PP
+\fC#include <qmemoryfile_p.h>\fR
+.PP
+.SS "Public Members"
+.in +1c
+.ti -1c
+.BI "enum \fBFlags\fR { Write = 0x00000001, Shared = 0x00000002, Create = 0x00000004, }"
+.br
+.ti -1c
+.BI "\fBQMemoryFile\fR ( const QString & " "fileName" ", int " "flags" "=-1, uint " "size" "=0 ) "
+.br
+.ti -1c
+.BI "\fB~QMemoryFile\fR () "
+.br
+.ti -1c
+.BI "bool \fBisShared\fR () "
+.br
+.ti -1c
+.BI "bool \fBisWritable\fR () "
+.br
+.ti -1c
+.BI "uint \fBsize\fR () "
+.br
+.ti -1c
+.BI "char* \fBdata\fR () "
+.br
+.in -1c
+.SH DESCRIPTION
+The QMemoryFile class provide means to map a file info memory or refere to a block or memory by name.
+.PP
+Warning: This class is not part of the Qt APi and subject to change. This file file may change from version to version without notice, or even be removed.
+.PP
+Currently this class supports read only access on all platforms; and read plus write accces provided on unix and windows based plaforms. The size of mapped file can not be changed.
+.SH MEMBER FUNCTION DOCUMENTATION
+.SH "QMemoryFile::QMemoryFile ( const QString & fileName, int flags=-1, uint size=0 )"
+Construct a memory mapped to an actual file or named memory block. If \fIfileName\fR is not preceeded by an \\\\ then it is treated as a real file name. Otherwise the characters after the \\\\ are used as the name for the memory block required. nb: You will need to escape the \\'s so it you need to use \\\\\\\\ within a literal string A value for \fIsize\fR should always be provided, though if the size is not provided it will be determined if possible.
+.PP
+If a file is being mapped to be written to, then the \fIflags\fR of subsequent QMemoryFiles mapped to the same file should include QMemoryFile::Write.
+.PP
+Example:
+.PP
+.nf
+.br
+ // Open a maping to file text.dat
+.br
+ QMemoryFile memoryFile("text.dat", QMemoryFile:Read, 20);
+.br
+ char *data = memoryFile.data();
+.br
+ int sum = 0;
+.br
+ for (int i = 0; i < 20; i++){
+.br
+   sum = sum + data[i];
+.br
+ }
+.br
+ qDebug("Sum =%d", sum);
+.fi
+.PP
+Example for creating named memory block:
+.PP
+.nf
+.br
+ QMemoryFile block1("\\\\\\\\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
+.br
+ char *dataBlock = block.data();
+.br
+ for (int i = 0; i < 19; i++){
+.br
+   dataBlock[i] = i +'a';
+.br
+ }
+.br
+ dataBlock[20] = '\\0';
+.br
+ qDebug("Data block is %s", dataBlock);
+.fi
+.SH "QMemoryFile::~QMemoryFile ()"
+Destructs the memory mapped file.
+.SH "char* QMemoryFile::data ()"
+Returns a pointer to memory that this QMemoryFile is associated with.
+.SH "bool QMemoryFile::isShared ()"
+Returns true if memory is shared.
+.SH "bool QMemoryFile::isWritable ()"
+Returns true if memory is writable.
+.SH "SEE ALSO"
+.BR http://doc.trolltech.com/qmemoryfile.html
+.BR http://www.trolltech.com/faq/tech.html
+.SH COPYRIGHT
+Copyright 1992-2001 Trolltech AS, http://www.trolltech.com.  See the
+license file included in the distribution for a complete license
+statement.
+.SH AUTHOR
+Generated automatically from the source code.
+.SH BUGS
+If you find a bug in Qt, please report it as described in
+.BR http://doc.trolltech.com/bughowto.html .
+Good bug reports make our job much simpler. Thank you.
+.P
+In case of content or formattting problems with this manual page, please
+report them to
+.BR qt-bugs@trolltech.com .
+Please include the name of the manual page (qmemoryfile.3qt) and the Qt
+version (2.3.12).

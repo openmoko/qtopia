@@ -1,0 +1,147 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/mediaplayer/mediaplayerstate.cpp:49 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaPlayerState Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaPlayerState Class Reference</h1>
+
+<p>This class is specific to the mediaplayer apps.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediaplayerstate-h.html">mediaplayerstate.h</a>&gt;</tt>
+<p><a href="mediaplayerstate-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><b>MediaPlayerState</b> ( QObject&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name )</li>
+<li class=fn><b>~MediaPlayerState</b> ()</li>
+<li class=fn>void <b>loadPlugins</b> ()</li>
+<li class=fn>void <b>unloadPlugins</b> ()</li>
+<li class=fn>bool <b>fullscreen</b> ()</li>
+<li class=fn>bool <b>scaled</b> ()</li>
+<li class=fn>bool <b>looping</b> ()</li>
+<li class=fn>bool <b>shuffled</b> ()</li>
+<li class=fn>bool <b>paused</b> ()</li>
+<li class=fn>bool <b>playing</b> ()</li>
+<li class=fn>bool <b>seeking</b> ()</li>
+<li class=fn>bool <b>seekable</b> ()</li>
+<li class=fn>long <b>position</b> ()</li>
+<li class=fn>long <b>length</b> ()</li>
+<li class=fn>bool <b>hasLength</b> ()</li>
+<li class=fn>View <b>view</b> ()</li>
+<li class=fn>QString <b>skin</b> ()</li>
+<li class=fn>void <b>closeView</b> ()</li>
+<li class=fn>MediaPlayerDecoder * <b>decoder</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;file = QString::null )</li>
+<li class=fn>MediaPlayerDecoder * <b>streamingDecoder</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype )</li>
+<li class=fn>DecoderVersion <b>decoderVersion</b> ()</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <b>setFullscreen</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setScaled</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setLooping</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setShuffled</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setPaused</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setPlaying</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setSeeking</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setSeekable</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setPosition</b> ( long&nbsp;p )</li>
+<li class=fn>void <b>updatePosition</b> ( long&nbsp;p )</li>
+<li class=fn>void <b>setLength</b> ( long&nbsp;l )</li>
+<li class=fn>void <b>setView</b> ( View&nbsp;v )</li>
+<li class=fn>void <b>setSkin</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>void <b>setPrev</b> ()</li>
+<li class=fn>void <b>setNext</b> ()</li>
+<li class=fn>void <b>setList</b> ()</li>
+<li class=fn>void <b>setVideo</b> ()</li>
+<li class=fn>void <b>setAudio</b> ()</li>
+<li class=fn>void <b>setPlaying</b> ()</li>
+<li class=fn>void <b>setSeeking</b> ()</li>
+<li class=fn>void <b>setSeekable</b> ()</li>
+<li class=fn>void <b>setPrevTab</b> ()</li>
+<li class=fn>void <b>setNextTab</b> ()</li>
+<li class=fn>void <b>toggleFullscreen</b> ()</li>
+<li class=fn>void <b>toggleScaled</b> ()</li>
+<li class=fn>void <b>toggleLooping</b> ()</li>
+<li class=fn>void <b>toggleShuffled</b> ()</li>
+<li class=fn>void <b>togglePaused</b> ()</li>
+<li class=fn>void <b>togglePlaying</b> ()</li>
+<li class=fn>void <b>toggleSeeking</b> ()</li>
+<li class=fn>void <b>toggleSeekable</b> ()</li>
+<li class=fn>void <b>startTemporaryMute</b> ()</li>
+<li class=fn>void <b>stopTemporaryMute</b> ()</li>
+<li class=fn>void <b>stopTemporaryMute</b> ( int&nbsp;delay )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <b>decreaseVolume</b> ()</li>
+<li class=fn>void <b>increaseVolume</b> ()</li>
+<li class=fn>void <b>endDecreaseVolume</b> ()</li>
+<li class=fn>void <b>endIncreaseVolume</b> ()</li>
+<li class=fn>void <b>scanBackward</b> ()</li>
+<li class=fn>void <b>scanForward</b> ()</li>
+<li class=fn>void <b>endScanBackward</b> ()</li>
+<li class=fn>void <b>endScanForward</b> ()</li>
+<li class=fn>void <b>fullscreenToggled</b> ( bool )</li>
+<li class=fn>void <b>scaledToggled</b> ( bool )</li>
+<li class=fn>void <b>loopingToggled</b> ( bool )</li>
+<li class=fn>void <b>shuffledToggled</b> ( bool )</li>
+<li class=fn>void <b>playlistToggled</b> ( bool )</li>
+<li class=fn>void <b>pausedToggled</b> ( bool )</li>
+<li class=fn>void <b>playingToggled</b> ( bool )</li>
+<li class=fn>void <b>seekingToggled</b> ( bool )</li>
+<li class=fn>void <b>seekableToggled</b> ( bool )</li>
+<li class=fn>void <b>positionChanged</b> ( long )</li>
+<li class=fn>void <b>positionUpdated</b> ( long )</li>
+<li class=fn>void <b>lengthChanged</b> ( long )</li>
+<li class=fn>void <b>viewChanged</b> ( View )</li>
+<li class=fn>void <b>viewClosed</b> ()</li>
+<li class=fn>void <b>skinChanged</b> ( const QString &amp; )</li>
+<li class=fn>void <b>prev</b> ()</li>
+<li class=fn>void <b>next</b> ()</li>
+<li class=fn>void <b>prevTab</b> ()</li>
+<li class=fn>void <b>nextTab</b> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+This class is specific to the mediaplayer apps.
+<p> It is currently private to those apps, and its API,
+and therefore binary compatibilty may change in later
+versions.
+<p> This class stores and notifies about changes in various
+states and options associated with the mediaplayer apps.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

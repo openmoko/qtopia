@@ -1,0 +1,10 @@
+Files: bin/datebook apps/Applications/datebook.desktop services/Calendar/datebook services/TimeMonitor/datebook services/Receive/text/x-vCalendar-Events/datebook
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia qpe-pim qpe-service-Calendar
+Description: A datebook/appointment manager
+ A datebook/appointment manager for the Qtopia environment.

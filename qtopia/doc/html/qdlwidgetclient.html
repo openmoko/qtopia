@@ -1,0 +1,126 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia2/qdl.cpp:1082 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QDLWidgetClient Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QDLWidgetClient Class Reference</h1>
+
+<p>The QDLWidgetClient class is a QDLClient that interfaces with a widget.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qdl-h.html">qtopia/qdl.h</a>&gt;</tt>
+<p>Inherits <a href="qdlclient.html">QDLClient</a>.
+<p><a href="qdlwidgetclient-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QDLWidgetClient"><b>QDLWidgetClient</b></a> ( QWidget&nbsp;*&nbsp;w, const&nbsp;char&nbsp;*&nbsp;name )</li>
+<li class=fn>virtual void <a href="#addLink"><b>addLink</b></a> ( const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</li>
+<li class=fn>virtual void <a href="#setLink"><b>setLink</b></a> ( uint&nbsp;lid, const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</li>
+<li class=fn>virtual void <a href="#removeLink"><b>removeLink</b></a> ( uint&nbsp;lid )</li>
+<li class=fn>QString <a href="#hint"><b>hint</b></a> () const</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#requestLink"><b>requestLink</b></a> ()</li>
+<li class=fn>virtual void <a href="#verifyLinks"><b>verifyLinks</b></a> ()</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>virtual QString <a href="#text"><b>text</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QDLWidgetClient class is a <a href="qdlclient.html">QDLClient</a> that interfaces with a widget.
+<p> A QDLWidgetClient has all the capabilities of a QDLClient, but also
+depends on a widget and interfaces with its text.
+<p> A QDLWidgetClient can currently interface with the following widgets.
+<ul>
+<li>QLineEdit
+<li>QMultiLineEdit
+</ul>
+Other widgets may be supported in later releases of Qtopia.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QDLWidgetClient"></a>QDLWidgetClient::QDLWidgetClient ( QWidget&nbsp;*&nbsp;w, const&nbsp;char&nbsp;*&nbsp;name )
+</h3>
+Constructs a QDLWidgetClient with <em>w</em> as the parent and
+the monitored widget. <em>name</em> is passed on to QObject.
+
+<h3 class=fn>void <a name="addLink"></a>QDLWidgetClient::addLink ( const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
+</h3>
+Adds <em>newLink</em> to the client. A new link identifier is generated.
+The link is also added into the widget's text.
+
+<p>Reimplemented from <a href="qdlclient.html#addLink">QDLClient</a>.
+<h3 class=fn>QString <a name="hint"></a>QDLWidgetClient::hint () const
+</h3>
+Returns the request hint for this widget.
+If a hint has not been explicitly set with <a href="qdlclient.html#setHint">QDLClient::setHint</a>(),
+then this function tries to dynamically determine the hint from 
+the text of the client's widget, otherwise it just returns <a href="qdlclient.html#hint">QDLClient::hint</a>() 
+
+<h3 class=fn>void <a name="removeLink"></a>QDLWidgetClient::removeLink ( uint&nbsp;lid )<tt> [virtual]</tt>
+</h3>
+Removes the link specified by the link identifier <em>lid</em>.
+It is removed from <a href="qdlclient.html">QDLClient</a> and in the widget's text.
+
+<p>Reimplemented from <a href="qdlclient.html#removeLink">QDLClient</a>.
+<h3 class=fn>void <a name="requestLink"></a>QDLWidgetClient::requestLink ()<tt> [slot]</tt>
+</h3>
+Convenience function. Simply calls <a href="qdlclient.html#requestLink">QDLClient::requestLink</a>() with
+the client's widget as parent.
+
+<h3 class=fn>void <a name="setLink"></a>QDLWidgetClient::setLink ( uint&nbsp;lid, const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
+</h3>
+Sets the link specified by the link identifier <em>lid</em> to <em>newLink</em> both in <a href="qdlclient.html">QDLClient</a>
+and in the widget's text. If no link for <em>lid</em> currently exists, it is created
+and added to the widget's text.
+
+<p>Reimplemented from <a href="qdlclient.html#setLink">QDLClient</a>.
+<h3 class=fn>QString <a name="text"></a>QDLWidgetClient::text () const<tt> [virtual protected]</tt>
+</h3>
+Returns the text of the client's widget.
+
+<h3 class=fn>void <a name="verifyLinks"></a>QDLWidgetClient::verifyLinks ()<tt> [virtual slot]</tt>
+</h3>
+Verifies that all internal links of <a href="qdlclient.html">QDLClient</a> exist in the widget's text.
+Any internal link that doesn't exist in the widget's text is removed.
+
+<p>Reimplemented from <a href="qdlclient.html#verifyLinks">QDLClient</a>.
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

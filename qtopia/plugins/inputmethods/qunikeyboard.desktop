@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Input Methods
+[Desktop Entry]
+Name[]=Unicode
+Comment[]=Unicode character selector.
+X-QPE-Library=libqunikeyboard.so

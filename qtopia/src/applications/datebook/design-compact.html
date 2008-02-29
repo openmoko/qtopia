@@ -1,0 +1,31 @@
+<html>
+<h1>Design for more compact Calendar</h1>
+<p>
+An identified problem is that while it is very desirable
+that contacts support a diverse range of fields, our
+presentation of these fields sucks.
+
+<p>
+By improving the order of the fields, we can reduce the
+time it takes to input a typical event. The order of
+importance is:
+
+<ol>
+ <li>Description
+ <li>AllDay? (affects Start, End and Alarm so must preceed them)
+ <li>Start
+ <li>End
+ <li>Alarm
+ <li>Repeat (dialog includes EndDate)
+ <li>Category
+</ol>
+
+The Location of the event should be either parsed out
+of the Description or otherwise set via the context menu
+(see the Multi-field widget
+described in the <a href=../addressbook/design-compact.html>
+Contacts compaction design</a>).
+
+<p>
+The AllDay flag should probably default to TRUE when a default time is
+not known (wg. the day is picked from the Month view).

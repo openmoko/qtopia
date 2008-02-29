@@ -1,0 +1,115 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/single_exec.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Single Exec</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Single Exec</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Benefits
+</a>
+<li><a href="#3"> Explanation
+</a>
+<li><a href="#4"> How it works
+</a>
+<li><a href="#5"> Issues 
+</a>
+<li><a href="#6"> Building single-exec
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia can be compiled in a number of ways. The two most common ways are:
+<ol type=1>
+<li> standard compile - which is a fully dynamic
+build where each application is a separate binary run as a separate process.
+<li> single-exec compile - <tt>qpe</tt> and all the applications are linked
+together in to a single large binary, however applications are still run as
+separate processes.
+</ol>
+<p> <h2> Benefits
+</h2>
+<a name="2"></a><p> There are a number of benefits to single-exec as follows:
+<ul>
+<li> single large binary, is smaller in size than many separate application binaries
+<li> launch times are faster when the libraries are all statically linked together with the applications.
+</ul>
+<p> <h2> Explanation
+</h2>
+<a name="3"></a><p> The main idea behind single-exec is to make it possible to statically link the
+libraries to the programs. Normally if you did this, the size would be massive,
+each application having a copy of all the libraries. But by compiling all the application
+code in to a single binary, this is not a problem. Normally if one did this, you
+might just have one process, and in that process create new top level widgets of
+the different applications within that process, but this is not a very stable
+model, a single application fault brings down the whole system. Therefore it
+is necessary to run the applications as separate processes.
+<p> <h2> How it works
+</h2>
+<a name="4"></a><p> When an application is started in single-exec, we fork the server process, and execute the same
+binary again, but with an <tt>argv</tt> list that will inform the newly created process
+what application it should be. This model is very similar to that used by
+a UNIX tool called <em>busybox</em> which morphs in to different programs based on <tt>argv[0]</tt>.
+<p> The size benefit of single-exec comes from static linking. When the linker
+combines together the code, it performs various size optimizations such as:
+<ul>
+<li> removing inline functions that are always included inline 
+<li> removing redundant or dead code that is not used by any of the application 
+<li> not including symbol tables usually needed for dynamic linking.
+<li> no requirement for the code to be  position independent code (PIC) which provides additional size and speed advantages.
+</ul>
+<p> <h2> Issues 
+</h2>
+<a name="5"></a><p> One important thing to be aware of when building single-exec with additional
+3rd party components is that the symbols must not clash with those from other
+applications, use of C++ namespaces would be a very good idea to avoid
+potential problems caused by this.
+<p> <h2> Building single-exec
+</h2>
+<a name="6"></a><p> To build Qtopia as a single-exec binary:
+<ul>
+<li>  configure and build Qtopia adding <tt>-singleexec</tt> to the options passed to the Qtopia <tt>configure</tt> script.
+</ul>
+The result is that no application binaries or plug-ins will be generated. Instead, the <tt>qpe</tt> binary will be larger but will contain all the code that would have
+been in the other binaries.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

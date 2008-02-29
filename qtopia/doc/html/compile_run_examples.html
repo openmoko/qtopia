@@ -1,0 +1,127 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/compile_run_examples.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Compile and Run Example Application</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Compile and Run Example Application</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Compile and Build the Example
+</a>
+<li><a href="#2"> Install and Run the Example
+</a>
+<li><a href="#3"> Uninstall the Example
+</a>
+<li><a href="#4"> Using the Example Program to Make an Application
+</a>
+<li><a href="#5"> Targeting Older Qtopia devices
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Compile and Build the Example
+</h2>
+<a name="1"></a><p> Prior to compiling the example application, it is necessary to <a href="environment-variables.html">setup the environment</a>.
+<p> To compile and build the example, follow these steps:
+<p> <ol type=1>
+<li> Create a copy of the example:
+<pre>
+   cd somewhere
+   cp -r $QPEDIR/examples/application .
+   chmod +w application/*
+   cd application
+</pre>
+ 
+<p> <li> Generate a Makefile:
+<pre>
+   qmake -spec $QPEDIR/mkspecs/qws/linux-generic-g++ application.pro
+</pre>
+ 
+<p> <li> Build the Example:
+<pre>
+   make
+</pre>
+ 
+<p> </ol>
+<p> <h2> Install and Run the Example
+</h2>
+<a name="2"></a><p> Installing onto an SDK requires root privileges which are obtained using a utility such as <tt>su</tt>, <tt>sudo</tt>. <tt>$QPEDIR</tt> must be used for /path/to/image.
+<p> Install the Example using:
+<pre>
+   make install INSTALL_ROOT=/path/to/image
+</pre>
+ 
+<p> To run the example:
+<pre>
+   run the 'startdemo' script from the qtopia/bin directory.
+</pre>
+ 
+<p> The example application should now be available in the <em>Applications</em> tab which is visible
+inside the Qt Virtual Framebuffer window.
+<p> <h2> Uninstall the Example
+</h2>
+<a name="3"></a><p> To unistall the example requires root privileges which are obtained using a utility such as <tt>su</tt>, <tt>sudo</tt>. <tt>$QPEDIR</tt> must be used for /path/to/image.
+<p> The following command is used to uninstall the example:
+<pre>
+   make uninstall INSTALL_ROOT=/path/to/image
+</pre>
+ 
+<p> <h2> Using the Example Program to Make an Application
+</h2>
+<a name="4"></a><p> To <tt>make</tt> an application using the example program as a model:
+<ul>
+<li> ensure that files added to the project are also added to the project file, <tt>application.pro</tt>
+<li> run the <tt>qmake</tt> command to update the <tt>Makefile</tt> whenever the <tt>.pro</tt> file is updated
+</ul>
+<p> <b>Note: </b> The <tt>qmake</tt> step is not always required as <tt>qmake</tt> will re-build the <tt>Makefile</tt> when the 
+<tt>.pro</tt> file has changed.
+<p> To make a package suitable for installing on a device ensure the compiler targets the correct CPU family then use the following command:
+<p> <pre>
+   make packages
+</pre>
+ 
+<p> The resulting package <tt>ipkg/example-1.0.0.ipk</tt> can be installed on a Qtopia device
+using <em>Qtopia Desktop</em> or the <em>Software Packages</em> application.
+<p> <h2> Targeting Older Qtopia devices
+</h2>
+<a name="5"></a><p> If an older Qtopia device is targeted, the <tt>QTOPIA_COMPAT_VER</tt> variable must be set to the version
+of Qtopia to be used. This variable accepts the values 1.5, 1.7 and 2 and prevents linking
+against libraries not found in these Qtopia releases. More information can be found in the
+<a href="buildsystem.html">build system</a> documentation.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,212 @@
+'\" t
+.TH QScreen 3qt "27 October 2005" "Trolltech AS" \" -*- nroff -*-
+.\" Copyright 1992-2001 Trolltech AS.  All rights reserved.  See the
+.\" license file included in the distribution for a complete license
+.\" statement.
+.\"
+.ad l
+.nh
+.SH NAME
+QScreen \- Abstracts the interface to the framebuffer
+.br
+.PP
+\fC#include <qgfx_qws.h>\fR
+.PP
+.SS "Public Members"
+.in +1c
+.ti -1c
+.BI "\fBQScreen\fR ( int display_id ) "
+.br
+.ti -1c
+.BI "virtual \fB~QScreen\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBinitDevice\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBconnect\fR ( const QString & displaySpec ) "
+.br
+.ti -1c
+.BI "virtual void \fBdisconnect\fR () "
+.br
+.ti -1c
+.BI "virtual int \fBinitCursor\fR ( void *, bool=FALSE ) "
+.br
+.ti -1c
+.BI "virtual void \fBshutdownDevice\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBsetMode\fR ( int, int, int ) "
+.br
+.ti -1c
+.BI "virtual bool \fBsupportsDepth\fR ( int ) const"
+.br
+.ti -1c
+.BI "virtual QGfx* \fBcreateGfx\fR ( unsigned char *, int, int, int, int ) "
+.br
+.ti -1c
+.BI "virtual QGfx* \fBscreenGfx\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBsave\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBrestore\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBblank\fR ( bool on ) "
+.br
+.ti -1c
+.BI "virtual int \fBpixmapOffsetAlignment\fR () "
+.br
+.ti -1c
+.BI "virtual int \fBpixmapLinestepAlignment\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBonCard\fR ( unsigned char * ) const"
+.br
+.ti -1c
+.BI "virtual bool \fBonCard\fR ( unsigned char *, ulong & out_offset ) const"
+.br
+.ti -1c
+.BI "virtual void \fBset\fR ( unsigned " "int" ", unsigned " "int" ", unsigned " "int" ", unsigned int ) "
+.br
+.ti -1c
+.BI "virtual int \fBalloc\fR ( unsigned " "int" ", unsigned " "int" ", unsigned int ) "
+.br
+.ti -1c
+.BI "int \fBwidth\fR () const"
+.br
+.ti -1c
+.BI "int \fBheight\fR () const"
+.br
+.ti -1c
+.BI "int \fBdepth\fR () const"
+.br
+.ti -1c
+.BI "virtual int \fBpixmapDepth\fR () const"
+.br
+.ti -1c
+.BI "int \fBpixelType\fR () const"
+.br
+.ti -1c
+.BI "int \fBlinestep\fR () const"
+.br
+.ti -1c
+.BI "int \fBdeviceWidth\fR () const"
+.br
+.ti -1c
+.BI "int \fBdeviceHeight\fR () const"
+.br
+.ti -1c
+.BI "uchar* \fBbase\fR () const"
+.br
+.ti -1c
+.BI "virtual uchar* \fBcache\fR ( int, int ) "
+.br
+.ti -1c
+.BI "virtual void \fBuncache\fR ( uchar * ) "
+.br
+.ti -1c
+.BI "int \fBscreenSize\fR () const"
+.br
+.ti -1c
+.BI "int \fBtotalSize\fR () const"
+.br
+.ti -1c
+.BI "QRgb* \fBclut\fR () "
+.br
+.ti -1c
+.BI "int \fBnumCols\fR () "
+.br
+.ti -1c
+.BI "virtual QSize \fBmapToDevice\fR ( const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QSize \fBmapFromDevice\fR ( const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QPoint \fBmapToDevice\fR ( const QPoint &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QPoint \fBmapFromDevice\fR ( const QPoint &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QRect \fBmapToDevice\fR ( const QRect &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QRect \fBmapFromDevice\fR ( const QRect &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QImage \fBmapToDevice\fR ( const QImage & ) const"
+.br
+.ti -1c
+.BI "virtual QImage \fBmapFromDevice\fR ( const QImage & ) const"
+.br
+.ti -1c
+.BI "virtual QRegion \fBmapToDevice\fR ( const QRegion &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual QRegion \fBmapFromDevice\fR ( const QRegion &, const QSize & ) const"
+.br
+.ti -1c
+.BI "virtual int \fBtransformOrientation\fR () const"
+.br
+.ti -1c
+.BI "virtual bool \fBisTransformed\fR () const"
+.br
+.ti -1c
+.BI "virtual bool \fBisInterlaced\fR () const"
+.br
+.in -1c
+.SH DESCRIPTION
+The QScreen class abstracts the interface to the framebuffer.
+.PP
+Descendants of QScreen manage the framebuffer and palette and act as factories for the screen cursor and QGfx's. QLinuxFbScreen manages a Linux framebuffer; accelerated drivers subclass QLinuxFbScreen. There can only be one screen in a Qt/Embedded application.
+.SH MEMBER FUNCTION DOCUMENTATION
+.SH "QScreen::QScreen ( int display_id )"
+Create a screen; the display_id is the number of the Qt/Embedded server to connect to.
+.SH "QScreen::~QScreen () \fC[virtual]\fR"
+Destroys a QScreen.
+.SH "int QScreen::alloc ( unsigned int r,unsigned int g,unsigned int b ) \fC[virtual]\fR"
+Given an RGB value, return an index which is the closest match to it in the screen's palette. Used in paletted modes only.
+.SH "int QScreen::initCursor ( void * end_of_location, bool init=FALSE ) \fC[virtual]\fR"
+This is used to initialise the software cursor - end_of_location points to the address after the area where the cursor image can be stored. init is true for the first application this method is called from (the Qt/Embedded server), false otherwise.
+.SH "bool QScreen::onCard ( unsigned char * p ) const \fC[virtual]\fR"
+Returns true if the buffer pointed to by p is within graphics card memory, false if it's in main RAM.
+.SH "bool QScreen::onCard ( unsigned char * p, ulong & offset ) const \fC[virtual]\fR"
+This checks whether the buffer specified by p is on the card (as per the other version of onCard) and returns an offset in bytes from the start of graphics card memory in offset if it is.
+.SH "int QScreen::pixelType () const"
+Returns an integer (taking the same values as QGfx::PixelType) that specifies the pixel storage format of the screen.
+.SH "void QScreen::restore () \fC[virtual]\fR"
+Restore the state of the graphics card from a previous save().
+.SH "void QScreen::save () \fC[virtual]\fR"
+Saves the state of the graphics card - used so that, for instance, the palette can be restored when switching between linux virtual consoles. Hardware QScreen descendants should save register state here if necessary if switching between virtual consoles (for example to/from X) is to be permitted.
+.SH "QGfx * QScreen::screenGfx () \fC[virtual]\fR"
+Returns a QGfx (normally a QGfxRaster) initialised to point to the screen, with an origin at 0,0 and a clip region covering the whole screen.
+.SH "void QScreen::set ( unsigned int, unsigned int, unsigned int, unsigned int ) \fC[virtual]\fR"
+Set an entry in the colour palette. A noop in this class, implemented in QLinuxFbScreen.
+.SH "void QScreen::shutdownDevice () \fC[virtual]\fR"
+Called by the Qt/Embedded server on shutdown; never called by a Qt/Embedded client. This is intended to support graphics card specific shutdown; the unaccelerated implementation simply hides the mouse cursor.
+.SH "bool QScreen::supportsDepth ( int d ) const \fC[virtual]\fR"
+Returns true if the screen supports a particular color depth.
+Possible values are 1,4,8,16 and 32.
+.SH "SEE ALSO"
+.BR http://doc.trolltech.com/qscreen.html
+.BR http://www.trolltech.com/faq/tech.html
+.SH COPYRIGHT
+Copyright 1992-2001 Trolltech AS, http://www.trolltech.com.  See the
+license file included in the distribution for a complete license
+statement.
+.SH AUTHOR
+Generated automatically from the source code.
+.SH BUGS
+If you find a bug in Qt, please report it as described in
+.BR http://doc.trolltech.com/bughowto.html .
+Good bug reports make our job much simpler. Thank you.
+.P
+In case of content or formattting problems with this manual page, please
+report them to
+.BR qt-bugs@trolltech.com .
+Please include the name of the manual page (qscreen.3qt) and the Qt
+version (2.3.12).

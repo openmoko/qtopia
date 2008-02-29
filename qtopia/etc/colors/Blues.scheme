@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Blues
+[Colors]
+Background=#E4F1FF
+Button=#C9DFFF
+Highlight=#2861FF
+AlternateBase=#DAE9FF

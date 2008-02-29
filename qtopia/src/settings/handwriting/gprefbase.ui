@@ -1,0 +1,164 @@
+<!DOCTYPE UI><UI>
+<class>GeneralPrefBase</class>
+<widget>
+    <class>QWidget</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>GeneralPrefBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>232</width>
+            <height>272</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Pen Input</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>6</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>6</number>
+        </property>
+        <widget>
+            <class>QLabel</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>TextLabel1</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>Multi-stroke timeout:</string>
+            </property>
+        </widget>
+        <widget>
+            <class>QSlider</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>multiStrokeSlider</cstring>
+            </property>
+            <property stdset="1">
+                <name>minValue</name>
+                <number>250</number>
+            </property>
+            <property stdset="1">
+                <name>maxValue</name>
+                <number>1000</number>
+            </property>
+            <property stdset="1">
+                <name>lineStep</name>
+                <number>10</number>
+            </property>
+            <property stdset="1">
+                <name>pageStep</name>
+                <number>50</number>
+            </property>
+            <property stdset="1">
+                <name>value</name>
+                <number>500</number>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Horizontal</enum>
+            </property>
+            <property stdset="1">
+                <name>tickmarks</name>
+                <enum>Right</enum>
+            </property>
+        </widget>
+        <widget>
+            <class>QLabel</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>ignoreStrokeLabel</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>Ignore stroke timeout:</string>
+            </property>
+        </widget>
+        <widget>
+            <class>QSlider</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>ignoreStrokeSlider</cstring>
+            </property>
+            <property stdset="1">
+                <name>minValue</name>
+                <number>100</number>
+            </property>
+            <property stdset="1">
+                <name>maxValue</name>
+                <number>1000</number>
+            </property>
+            <property stdset="1">
+                <name>lineStep</name>
+                <number>10</number>
+            </property>
+            <property stdset="1">
+                <name>pageStep</name>
+                <number>50</number>
+            </property>
+            <property stdset="1">
+                <name>value</name>
+                <number>500</number>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Horizontal</enum>
+            </property>
+            <property stdset="1">
+                <name>tickmarks</name>
+                <enum>Right</enum>
+            </property>
+        </widget>
+        <widget>
+            <class>QCheckBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>inputStyle</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>Show upper case area</string>
+            </property>
+            <property>
+                <name>toolTip</name>
+                <string>Check to display an input area dedicated to upper case characters.  If unchecked the lower case area can be toggled to input upper case characters</string>
+            </property>
+        </widget>
+        <spacer>
+            <property>
+                <name>name</name>
+                <cstring>Spacer3</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Vertical</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+    </vbox>
+</widget>
+</UI>

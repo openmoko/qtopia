@@ -1,0 +1,88 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/fontdatabase.cpp:90 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>FontDatabase Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FontDatabase Class Reference</h1>
+
+<p>The FontDatabase class provides information about available fonts.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="fontdatabase-h.html">qtopia/fontdatabase.h</a>&gt;</tt>
+<p><a href="fontdatabase-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#FontDatabase"><b>FontDatabase</b></a> ()</li>
+<li class=fn>QStringList <a href="#families"><b>families</b></a> () const</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#loadRenderers"><b>loadRenderers</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The FontDatabase class provides information about available fonts.
+<p> Most often you will simply want to query the database for the
+available font <a href="#families">families</a>().
+<p> Use FontDatabase rather than QFontDatabase when you may need access
+to fonts that are not normally available. For example, if the
+freetype library and the Qtopia freetype plugin are installed,
+TrueType fonts will be available to your application. Font renderer
+plugins have greater resource requirements than system fonts so they
+should be used only when necessary. You can force the loading of
+font renderer plugins with <a href="#loadRenderers">loadRenderers</a>().
+<p> Note that on the SHARP SL5500, some fonts return pointSizes() that
+are 10 times too large. A heuristic for detecting this case is that
+the first size in the list is more than 70.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="FontDatabase"></a>FontDatabase::FontDatabase ()
+</h3>
+Constructs a FontDatabase object.
+
+<h3 class=fn>QStringList <a name="families"></a>FontDatabase::families () const
+</h3>
+Returns a list of names of all the available font families.
+
+<h3 class=fn>void <a name="loadRenderers"></a>FontDatabase::loadRenderers ()<tt> [static]</tt>
+</h3>
+Load any font renderer plugins that are available and make the fonts
+that the plugins can read available.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

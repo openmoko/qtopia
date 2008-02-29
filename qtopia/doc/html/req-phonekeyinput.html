@@ -1,0 +1,113 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/pkim.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Phone Key Input Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Phone Key Input Specification</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Smart Activation
+</a>
+<li><a href="#1-2"> Input Hinting
+</a>
+<li><a href="#1-3"> Word Recognition
+</a>
+<li><a href="#1-4"> Word Selection
+</a>
+<li><a href="#1-5"> Next Word
+</a>
+<li><a href="#1-6"> Dictionary Selection
+</a>
+<li><a href="#1-7"> Direct Character Input
+</a>
+<li><a href="#1-8"> Symbol Input
+</a>
+</ul>
+<li><a href="#2"> Dependencies
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Phone Key Input</b> plugin allows the user to input text using the
+0-9, # and * keys of a phone.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Smart Activation
+</h3>
+<a name="1-1"></a><p> <b>Phone Key Input</b> is only active when an element that accepts text
+input has focus.
+<p> <h3> Input Hinting
+</h3>
+<a name="1-2"></a><p> <b>Phone Key Input</b> is able to take input hints from text input elements
+and use the appropriate word look-ups and key to character set mappings.
+<p> <h3> Word Recognition
+</h3>
+<a name="1-3"></a><p> <b>Phone Key Input</b> looks-up words based on the combination of
+characters for the keys entered.  If more than one possible word matches
+the set of characters the plugin selects the one the user marked as
+preferred, then the one more common in the language selected and finally
+any remaining matched words.
+<p> <h3> Word Selection
+</h3>
+<a name="1-4"></a><p> The user is able to open a pop-up of all possible word matches to
+the set of characters for the keys they have pressed.
+<p> <h3> Next Word
+</h3>
+<a name="1-5"></a><p> The user is able change the recognized word to the next most likely
+word.
+<p> <h3> Dictionary Selection
+</h3>
+<a name="1-6"></a><p> The user is able to specify an alternate language to be used for
+word recognition.
+<p> <h3> Direct Character Input
+</h3>
+<a name="1-7"></a><p> The user is able to spell-out words that are not included in the set
+of recognized words for the selected language.  Words entered this way
+consisting of more than two characters are added to the list of
+recognized words.
+<p> <h3> Symbol Input
+</h3>
+<a name="1-8"></a><p> The user is able to open a pop-up of additional symbols.
+<p> <h2> Dependencies
+</h2>
+<a name="2"></a><p> This application is dependent on the device being equipped with a
+keypad with the keys 0-9, # and *.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,27 @@
+SUBDIRS=po dissipate2 gsm ilbc kphone
+SUBS	:=$(foreach sub,$(SUBDIRS), $(sub)/$(sub).a)
+
+all dep:
+	@for T in $(SUBDIRS); do make -C $$T $@; done
+
+install:	all
+	make -C po install
+	make -C icons install
+	make -C kphone install
+
+uninstall:
+	make -C po uninstall
+	make -C icons uninstall
+	make -C kphone uninstall
+
+clean:
+	@for T in $(SUBDIRS); do make -C $$T $@; done
+
+distclean:	clean
+	rm -f config.cache config.log config.status
+	rm -f Makefile
+	rm -f config.h
+	@for T in $(SUBDIRS); do make -C $$T $@; done
+	rm -f po/Makefile
+	rm -f icons/Makefile
+

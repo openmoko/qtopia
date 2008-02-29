@@ -1,0 +1,18 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+- Fix: Avoid a crash if an XML array has less than 5 characters
+- Fix: fixed a compilation error for medium size builds
+- Fix: QGlyphTree::readNode now prints warning instead crashing on bad data
+- Fix: prevent potential crash with tty app. 
+- Fix: use of Key_F34 and Key_F35 may cause wakeup code to me missed.
+- Fix: Fixed mng support in qvfb.
+- Improved management of direct communication with audio device.
+- Improved performance by decreasing application startup time by saving/loading the global pixmap cache to/from file. 
+- Improved handling of global brush offset when losing focus.
+- Improved background painting by using a brush instead of a color.
+- Improved mouse handling by making sure the specified mouse device is used.
+- Added support for pseudo transparency.
+- Added mpeg support to qvfb.
+- Added a new function that allows setting of the system volume.  

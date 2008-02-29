@@ -1,0 +1,133 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/fshandwriting.doc:3 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Fullscreen Handwriting Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Fullscreen Handwriting Specification</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Smart Activation
+</a>
+<li><a href="#1-2"> Input Hinting
+</a>
+<li><a href="#1-3"> Input Mode
+</a>
+<li><a href="#1-4"> Word Recognition
+</a>
+<li><a href="#1-5"> Word Selection
+</a>
+<li><a href="#1-6"> Next Word
+</a>
+<li><a href="#1-7"> Dictionary Selection
+</a>
+<li><a href="#1-8"> Symbol Input
+</a>
+</ul>
+<li><a href="#2"> Dependencies
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Fullscreen Handwriting Input</b> plugin allows the user to draw
+characters for text input over the top of dialogs. In addition the plugin also
+allows the user to customize it to their requirements.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Smart Activation
+</h3>
+<a name="1-1"></a><p> <b>Fullscreen Handwriting</b> is only active when an element that accepts
+text input has focus. When it is active it:
+<p> <ul>
+<li> Passes screen taps through to the underlying application unless they are
+made immediately following a previous stroke.
+<li> Passes screen strokes through to the underlying application if they are
+preceeded by a pausing movement of the stylus for a short period of time.
+</ul>
+<p> <b>Fullscreen Handwriting</b> always ignores strokes that are started
+within the area designated for a scrollbar on the right side of the screen.
+<p> <h3> Input Hinting
+</h3>
+<a name="1-2"></a><p> <b>Fullscreen Handwriting</b> is able to take input hints from text input
+elements in applications and use the input hint information to improve
+accuracy in recognizing characters for that text input.
+<p> <h3> Input Mode
+</h3>
+<a name="1-3"></a><p> The user is able to specify the type of input apart from that
+suggested by the text element, and hence modify how the plugin recognizes
+drawn characters.
+<p> <h3> Word Recognition
+</h3>
+<a name="1-4"></a><p> <b>Fullscreen Handwriting</b> prioritizes the recognition of characters as part
+of its attempts to find a matching word. If a drawn character closely matches two or more characters,
+then the plugin biases towards characters that make up complete words.
+For this reason a set of digits is also considered to be a word.
+<p> If no word is matched, then the plugin uses the most closely matched
+characters as they are drawn.
+<p> For example, a character drawn on the screen might be either an 'n' or an 'h'
+and even though it might most closely resembly a 'h' the word recognition
+feature waits to determine the character until the second character
+is entered. If the second character is an 'o' then the application
+assumes that the first character was an 'n'. However if a third character
+is added such as 'w' then since the first character more closely resembled
+a 'h' then the recognition feature should suggest 'how' and provide 'now' as
+a secondary option.
+<p> If characters are added until no word in the dictionary matches, then the
+application reverts to spelling the word with 'h' since it was the most likely letter.
+<p> <h3> Word Selection
+</h3>
+<a name="1-5"></a><p> The user is able to open a pop-up of all possible matches to
+the set of characters they have drawn.
+<p> <h3> Next Word
+</h3>
+<a name="1-6"></a><p> The user is able change the recognized word to the next most likely
+word.
+<p> <h3> Dictionary Selection
+</h3>
+<a name="1-7"></a><p> The user is able to specify an alternate language to be used for
+word recognition.
+<p> <h3> Symbol Input
+</h3>
+<a name="1-8"></a><p> The user is able to open a pop-up of additional symbols.
+<p> <h2> Dependencies
+</h2>
+<a name="2"></a><p> This application is dependent on the device being equipped with a
+touchscreen.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

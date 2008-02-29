@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Network
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Exec=netsetup
+Icon=PPPConnect
+Type=Application
+Name[]=In­ter­net
+CanFastload=0

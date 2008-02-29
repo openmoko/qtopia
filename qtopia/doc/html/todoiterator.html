@@ -1,0 +1,124 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/todoaccess.cpp:172 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TodoIterator Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>TodoIterator Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The TodoIterator class provides iterators of TodoAccess.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="todoaccess-h.html">qtopia/pim/todoaccess.h</a>&gt;</tt>
+<p><a href="todoiterator-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#TodoIterator-3"><b>TodoIterator</b></a> ( const&nbsp;TodoAccess&nbsp;&amp;&nbsp;taskaccess )</li>
+<li class=fn><a href="#TodoIterator-4"><b>TodoIterator</b></a> ( const&nbsp;TodoIterator&nbsp;&amp;&nbsp;it )</li>
+<li class=fn>TodoIterator &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;TodoIterator&nbsp;&amp;&nbsp;other )</li>
+<li class=fn><a href="#~TodoIterator"><b>~TodoIterator</b></a> ()</li>
+<li class=fn>bool <a href="#atFirst"><b>atFirst</b></a> () const</li>
+<li class=fn>bool <a href="#atLast"><b>atLast</b></a> () const</li>
+<li class=fn>const PimTask * <a href="#toFirst"><b>toFirst</b></a> ()</li>
+<li class=fn>const PimTask * <a href="#toLast"><b>toLast</b></a> ()</li>
+<li class=fn>const PimTask * <a href="#operator++"><b>operator++</b></a> ()</li>
+<li class=fn>const PimTask * <a href="#operator*"><b>operator*</b></a> () const</li>
+<li class=fn>const PimTask * <a href="#current"><b>current</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The TodoIterator class provides iterators of <a href="todoaccess.html">TodoAccess</a>.
+<p> The only way to traverse the data of an TodoAccess is with an
+TodoIterator.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="TodoIterator-3"></a>TodoIterator::TodoIterator ( const&nbsp;<a href="todoaccess.html">TodoAccess</a>&nbsp;&amp;&nbsp;taskaccess )
+</h3>
+Constructs a new TodoIterator pointing to the start of the data in <em>taskaccess</em>.
+
+<h3 class=fn><a name="TodoIterator-4"></a>TodoIterator::TodoIterator ( const&nbsp;<a href="todoiterator.html">TodoIterator</a>&nbsp;&amp;&nbsp;it )
+</h3>
+Constructs a copy of the iterator <em>it</em>.
+
+<h3 class=fn><a name="~TodoIterator"></a>TodoIterator::~TodoIterator ()
+</h3>
+Destroys the iterator
+
+<h3 class=fn>bool <a name="atFirst"></a>TodoIterator::atFirst () const
+</h3>
+Returns TRUE if the iterator is at the first item of the data.
+Otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="atLast"></a>TodoIterator::atLast () const
+</h3>
+Returns TRUE if the iterator is at the last item of the data.
+Otherwise returns FALSE.
+
+<h3 class=fn>const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;* <a name="current"></a>TodoIterator::current () const
+</h3>
+If the iterator is at a valid <a href="pimtask.html">PimTask</a> returns a const pointer to
+the current PimTask.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;* <a name="operator*"></a>TodoIterator::operator* () const
+</h3>
+If the iterator is at a valid <a href="pimtask.html">PimTask</a> returns a const pointer to
+the current PimTask.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;* <a name="operator++"></a>TodoIterator::operator++ ()
+</h3>
+Sets the iterator to the next item of the data.
+If the iterator is moved pass the end of the list returns 0.
+Otherwise returns a const pointer to the current <a href="pimtask.html">PimTask</a>.
+
+<h3 class=fn><a href="todoiterator.html">TodoIterator</a>&nbsp;&amp; <a name="operator-eq"></a>TodoIterator::operator= ( const&nbsp;<a href="todoiterator.html">TodoIterator</a>&nbsp;&amp;&nbsp;other )
+</h3>
+Sets the iterator to be a copy of <em>other</em>.
+
+<h3 class=fn>const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;* <a name="toFirst"></a>TodoIterator::toFirst ()
+</h3>
+Sets the iterator to the first item of the data.
+If a <a href="pimtask.html">PimTask</a> exists in the data will return a const pointer to the
+PimTask.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;* <a name="toLast"></a>TodoIterator::toLast ()
+</h3>
+Sets the iterator to the last item of the data.
+If a <a href="pimtask.html">PimTask</a> exists in the data will return a const pointer to the
+PimTask.  Otherwise returns 0.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

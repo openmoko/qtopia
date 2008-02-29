@@ -1,0 +1,234 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/writing-plugins.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Writing Qtopia Plug-ins</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Writing Qtopia Plug-ins</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Writing the functionality
+</a>
+<li><a href="#3"> Subclassing the interface
+</a>
+<li><a href="#4"> Implementing the interface
+</a>
+<li><a href="#5"> Creating an instance
+</a>
+<li><a href="#6"> Loading Plug-ins
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Plug-ins are implemented in Qtopia via a COM-like layer.  The basic steps
+to writing any Qtopia plug-in are:
+<ul>
+<li> Write the functionality that the plug-in will provide.
+<li> Subclass the interface for the plug-in you wish to write.
+<li> Provide implemetations for the interface methods.
+<li> Create an instance of the plug-in.
+</ul>
+<p> There are also some basic rules to follow when writing a plug-in:
+<ul>
+<li> Due to the implementation details of moc, it is important that any QObject
+subclasses in your plug-in have unique names to prevent clashes between
+two plug-ins.  As a rule, use a unique prefix for all classes including
+internal classes.  For example, if a plug-in "foo" has an internal helper
+class that is a QObject subclass, it should be named FooHelper
+rather than Helper.
+<li> Plug-ins should not leak memory.  Since a plug-in may be unloaded at any
+time it is important to cleanup all used memory when your plug-in interface
+is destructed.
+</ul>
+<p> <h2> Writing the functionality
+</h2>
+<a name="2"></a><p> Consider the following fictitious plug-in interface:
+<p> <pre>
+// {05E0A4AB-DDC5-4449-85A9-828100DE00A9} 
+#ifndef IID_WidgetPlugin
+#define IID_WidgetPlugin QUuid( 0x05e0a4ab, 0xddc5, 0x4449, 0x85, 0xa9, 0x82, 0x81, 0x00, 0xde, 0x00, 0xa9)
+#endif
+
+struct WidgetPluginInterface : public QUnknownInterface
+{
+    virtual QWidget *widget( QWidget *parent ) = 0;
+    virtual QString name() const = 0;
+};
+</pre>
+ 
+<p> This is a simple interface that provides a plug-in name and a widget that
+is created with the supplied parent.
+<p> IID_WidgetPlugin defines a unique ID for this interface.
+<p> The plug-in that we are writing provides a widget that draws an ellipse in
+its center.  The code below implements the functionality that this plug-in
+provides.
+<p> <pre>
+class EllipseWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    EllipseWidget( QWidget *parent=0 ) : QWidget( parent, "Ellipse" )
+    {
+    }
+
+protected:
+    void paintEvent( QPaintEvent * )
+    {
+        QPainter p( this );
+        p.drawEllipse( rect() );
+    }
+};
+</pre>
+ 
+<p> <h2> Subclassing the interface
+</h2>
+<a name="3"></a><p> Now you can subclass the WidgetPluginInterface:
+<p> <pre>
+struct CirclePlugin : public WidgetPluginInterface
+{
+public:
+    virtual QWidget *widget( QWidget *parent );
+    virtual QString name() const;
+
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
+    Q_REFCOUNT
+
+protected:
+    CircleWidget *w;
+    ulong ref;
+};
+</pre>
+ 
+<p> There are two things to note in the CirclePlugin struct:
+<ul>
+<li> the queryInterface() function allows the plug-in loader to query
+what interfaces the plug-in implements.
+<li> Q_REFCOUNT is a macro to simplify the reference counting.
+This macro expects the ulog ref variable to be present.
+</ul>
+<p> <h2> Implementing the interface
+</h2>
+<a name="4"></a><p> The constructor an destructor are straight-forward.  The most important
+point is that ref must be initialised with 0.
+<pre>
+CirclePlugin::CirclePlugin()
+    : w(0), ref(0)
+{
+}
+
+CirclePlugin::~CirclePlugin()
+{
+    delete w;
+}
+</pre>
+ 
+<p> The queryInterface() function can be implemented using the
+following boilerplate code:
+<p> <pre>
+QRESULT CirclePlugin::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
+{
+    *iface = 0;
+    if ( uuid == IID_QUnknown )
+        *iface = this;
+    else if ( uuid == IID_WidgetPlugin )
+        *iface = this;
+    else
+        return QS_FALSE;
+
+    (*iface)-&gt;addRef();
+    return QS_OK;
+}
+</pre>
+ 
+<p> A plug-in can provide several interfaces.  At the very least QUnknownInterface
+is provided by all plug-ins.
+<p> The widget() function returns the widget.
+<p> <pre>
+QWidget *CirclePlugin::widget( QWidget *parent )
+{
+    if ( !w )
+        w = new CircleWidget( parent );
+    return w;
+}
+</pre>
+ 
+<p> The name() function returns the name of the plug-in.
+<p> <pre>
+QString CirclePlugin::name()
+{
+    return qApp-&gt;translate( "WidgetPlugin", "Circle" );
+}
+</pre>
+ 
+<p> <h2> Creating an instance
+</h2>
+<a name="5"></a><p> You must also create an instance of the widget plug-in using the
+following boilerplate code:
+<p> <pre>
+Q_EXPORT_INTERFACE()
+{
+    Q_CREATE_INSTANCE( CirclePlugin )
+}
+</pre>
+ 
+<p> <h2> Loading Plug-ins
+</h2>
+<a name="6"></a><p> The recommended method for loading plug-ins is to use the <a href="pluginloader.html">PluginLoader</a> class.
+The PluginLoader class provides simplified enumeration and loading of
+plug-ins and provides safety in cases where the system has been booted in
+Safe Mode.
+<p> <pre>
+PluginLoader pluginLoader( "Widgets" );
+QStringList list = pluginLoader.list();
+QStringList::Iterator it;
+QValueList&lt;WidgetPluginInterface*&gt; widgetsList;
+for ( it = list.begin(); it != list.end(); ++it ) {
+    WidgetPluginInterface *iface = 0;
+    if ( pluginLoader.queryInterface( *it, IID_WidgetPlugin, (QUnknownInterface**)&amp;iface ) == QS_OK &amp;&amp; iface ) {
+        widgetsList.append( iface );
+    }
+}
+</pre>
+ 
+<p> The PluginLoader class expects the plug-ins to be installed in the
+$QPEDIR/plugins/<em>type</em> directory.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

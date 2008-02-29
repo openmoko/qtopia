@@ -1,0 +1,19 @@
+[Translation]
+File=QtopiaServices
+Context=Todo List
+[Service]
+Actions = newTask();addTask(PimTask);removeTask(PimTask);updateTask(PimTask);showTask(QUuid)
+Icon = task
+Name[]=Todo List
+[newTask()]
+Icon = task
+Name[]=New task in todo list
+[addTask(PimTask)]
+Icon = task
+Name[]=Add task to todo list
+[removeTask(PimTask)]
+Icon = task
+Name[]=Remove task from todo list
+[updateTask(PimTask)]
+Icon = task
+Name[]=Update task in todo list

@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Input Methods
+[Desktop Entry]
+Name[]=Keyboard
+Comment[]=QWERTY keyboard input method.
+X-QPE-Library=libqkeyboard.so

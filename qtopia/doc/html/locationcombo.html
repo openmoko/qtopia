@@ -1,0 +1,124 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/locationcombo.cpp:72 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>LocationCombo Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>LocationCombo Class Reference</h1>
+
+<p>The LocationCombo class displays a list of available storage
+locations.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="locationcombo-h.html">qtopia/locationcombo.h</a>&gt;</tt>
+<p><a href="locationcombo-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#LocationCombo"><b>LocationCombo</b></a> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#LocationCombo-2"><b>LocationCombo</b></a> ( const&nbsp;AppLnk&nbsp;*&nbsp;lnk, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#~LocationCombo"><b>~LocationCombo</b></a> ()</li>
+<li class=fn>void <a href="#setLocation"><b>setLocation</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;path )</li>
+<li class=fn>void <a href="#setLocation-2"><b>setLocation</b></a> ( const&nbsp;AppLnk&nbsp;*&nbsp;lnk )</li>
+<li class=fn>QString <a href="#installationPath"><b>installationPath</b></a> () const</li>
+<li class=fn>QString <a href="#documentPath"><b>documentPath</b></a> () const</li>
+<li class=fn>const FileSystem * <a href="#fileSystem"><b>fileSystem</b></a> () const</li>
+<li class=fn>bool <a href="#isChanged"><b>isChanged</b></a> () const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#newPath"><b>newPath</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The LocationCombo class displays a list of available storage
+locations.
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="docpropertiesdialog.html">DocPropertiesDialog</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="LocationCombo"></a>LocationCombo::LocationCombo ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a LocationCombo with parent <em>parent</em> and name <em>name</em>.
+
+<h3 class=fn><a name="LocationCombo-2"></a>LocationCombo::LocationCombo ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a LocationCombo with parent <em>parent</em> and name <em>name</em>.
+<em>lnk</em> is pointer to an existing <a href="applnk.html">AppLnk</a>.
+
+<h3 class=fn><a name="~LocationCombo"></a>LocationCombo::~LocationCombo ()
+</h3>
+Destroys the widget.
+
+<h3 class=fn>QString <a name="documentPath"></a>LocationCombo::documentPath () const
+</h3>
+Returns the document path associated with this LocationCombo.  This
+will be "&lt;path&gt;/Documents".
+
+<h3 class=fn>const&nbsp;<a href="filesystem.html">FileSystem</a>&nbsp;* <a name="fileSystem"></a>LocationCombo::fileSystem () const
+</h3>
+Returns a pointer to <a href="filesystem.html">FileSystem</a> object, associated with the current
+selection of the LocationCombo.
+
+<h3 class=fn>QString <a name="installationPath"></a>LocationCombo::installationPath () const
+</h3>
+Returns the default (home) location for the file associated with this
+LocationCombo.
+
+<h3 class=fn>bool <a name="isChanged"></a>LocationCombo::isChanged () const
+</h3>
+Returns TRUE to indicate that the user has changed the location displayed
+by the LocationCombo.  Most useful when the LocationCombo is part of a
+dialog; when the dialog is accept()ed, <a href="#isChanged">LocationCombo::isChanged</a>() can be
+examined to check for a change of location.
+
+<h3 class=fn>void <a name="newPath"></a>LocationCombo::newPath ()<tt> [signal]</tt>
+</h3>
+
+Emitted when the LocationCombo changes to a new location.
+
+<h3 class=fn>void <a name="setLocation"></a>LocationCombo::setLocation ( const&nbsp;QString&nbsp;&amp;&nbsp;path )
+</h3>
+Sets the display of the LocationCombo to the location containing
+<em>path</em>.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="setLocation-2"></a>LocationCombo::setLocation ( const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;lnk )
+</h3>
+Sets the display of the LocationCombo to the location associated with the
+<a href="applnk.html">AppLnk</a> <em>lnk</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

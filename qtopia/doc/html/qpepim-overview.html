@@ -1,0 +1,168 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qpepim.doc:49 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia PIM Library Overview</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia PIM Library Overview</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Overview of Classes
+</a>
+<ul>
+<li><a href="#2-1"> Value classes
+</a>
+<li><a href="#2-2"> Access classes
+</a>
+<li><a href="#2-3"> Iterator classes
+</a>
+</ul>
+<li><a href="#3"> Using the Qtopia PIM Library
+</a>
+<li><a href="#4"> PIM Change signals
+</a>
+<li><a href="#5"> Data Refresh
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Qtopia PIM library provides a set of safe APIs for accessing
+Qtopia PIM data and provides a smooth transition to the next major
+revision of Qtopia.  Specifically, classes are provided to retrieve,
+edit, and save Contacts, Tasks, and Events.  The access classes
+attempt to keep themselves in sync with Qtopia's AddressBook, Todo, 
+and Datebook applications, and any other applications.
+<p> <h2> Overview of Classes
+</h2>
+<a name="2"></a><p> There are three types of data represented in the PIM library, contacts,
+events and tasks.  For each data type there is three different types of
+classes to access that data.  A Value class, an Access class and an
+Iterator class.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Value class <th valign="top">Access class <th valign="top">Iterator class
+<tr bgcolor="#f0f0f0"> <td valign="top"><a href="pimcontact.html">PimContact</a> <td valign="top"><a href="addressbookaccess.html">AddressBookAccess</a> <td valign="top"><a href="addressbookiterator.html">AddressBookIterator</a>
+<tr bgcolor="#d0d0d0"> <td valign="top"><a href="pimevent.html">PimEvent</a> <td valign="top"><a href="datebookaccess.html">DateBookAccess</a> <td valign="top"><a href="datebookiterator.html">DateBookIterator</a>
+<tr bgcolor="#f0f0f0"> <td valign="top"><a href="pimtask.html">PimTask</a> <td valign="top"><a href="todoaccess.html">TodoAccess</a> <td valign="top"><a href="todoiterator.html">TodoIterator</a>
+</table></center>
+<p> <h3> Value classes
+</h3>
+<a name="2-1"></a><p> The Value class is the class used to pass around data for the particular
+kind of PIM data.  For example the <a href="pimevent.html">PimEvent</a> class is used to get the
+description of an event, and determine when the event will next occur. 
+It is also this class that you would use to pass the data between
+applications.
+<p> <h3> Access classes
+</h3>
+<a name="2-2"></a><p> The Access class is used to access the database or table for a particular
+kind of PIM data.  To get the list of contacts first you need to create
+an instance of <a href="addressbookaccess.html">AddressBookAccess</a>.  This is also the class used to add
+or update records.
+<p> <h3> Iterator classes
+</h3>
+<a name="2-3"></a><p> The Iterator class is for traversing the stored list of data for a
+particular kind of PIM data.  To determine what <a href="pimtask.html">PimTask</a>s remain open
+an application would create a <a href="todoiterator.html">TodoIterator</a> using a <a href="todoaccess.html">TodoAccess</a>
+instance, and then use the <a href="todoiterator.html">TodoIterator</a> to traverse over each
+<a href="pimtask.html">PimTask</a>.  It is recommend that an instance of an Iterator class is
+kept only as long as needed.  The PIM library hides the type of storage
+used for the PIM data, and due to performance reasons keeping an Iterator
+class while not needed may affect notifications of updates to the PIM data.
+<p> <h2> Using the Qtopia PIM Library
+</h2>
+<a name="3"></a><p> This example reads a list of open tasks and then displays a label detailing
+the tasks. First a <a href="todoaccess.html">TodoAccess</a> instance is created to load the data
+for Tasks.  Then a <a href="todoiterator.html">TodoIterator</a> is initialized from the <a href="todoaccess.html">TodoAccess</a> 
+to traverse the data.  For each item a <a href="pimtask.html">PimTask</a> is created to get the
+completion status of the task and the description of the task.
+<p> <pre>
+#include &lt;qtextbrowser.h&gt;
+#include &lt;qtopia/qpeapplication.h&gt;
+#include &lt;qtopia/todoaccess.h&gt;
+
+class TaskList : public QTextBrowser
+{
+public:
+    TaskList(QWidget *parent)
+        : QTextBrowser(parent)
+    {
+        QString text;
+        <a href="todoaccess.html">TodoAccess</a> a;
+        <a href="todoiterator.html">TodoIterator</a> it(a);
+        for(;it.<a href="todoiterator.html#current">current</a>(); ++it) {
+            <a href="pimtask.html">PimTask</a> t(*it);
+            if (!t.<a href="pimtask.html#isCompleted">isCompleted</a>()) {
+                text += "ITEM: " + t.<a href="pimtask.html#description">description</a>() + "&lt;BR&gt;";
+            }
+        }
+        setText(text);
+    }
+};
+
+int main(int argc, char **argv)
+{
+    <a href="qpeapplication.html">QPEApplication</a> qpe(argc, argv);
+
+    TaskList *tl = new TaskList(0);
+    qpe.showMainWindow(tl);
+    return qpe.exec();
+}
+
+</pre>
+ 
+<p> <h2> PIM Change signals
+</h2>
+<a name="4"></a><p> The access class listen for various QCop calls to keep in sync with 
+the main pim applications.  When an access class detects an update it 
+will emit a signal indicating it has been udpated.
+<p> <h2> Data Refresh
+</h2>
+<a name="5"></a><p> The Qtopia PIM Library will always try to return the most current data to the user.
+This is done by monitoring the time stamp on the actual data file as
+well as listening for QPE/PIM messages that are relavent to the data
+files used by the specific accessor.  If a QPE/PIM message is
+received that indicates the data has been updated the accessor will
+emit a signal indicating the event and during the next data query the
+Qtopia PIM Library will refresh its internal caches.  Note that since Qtopia PIM Library
+does not employ a polling mechanism simply touching the data file
+will not trigger the event to be emitted, however it will be
+detected the next time data is requested.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

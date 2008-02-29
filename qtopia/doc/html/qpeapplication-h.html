@@ -1,0 +1,332 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/qtopia/qpeapplication.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>qpeapplication.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>qpeapplication.h</h1>
+
+<p>This is the verbatim text of the qpeapplication.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
+**
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
+**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef __QPE_APPLICATION_H__
+#define __QPE_APPLICATION_H__
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qapplication.h&gt;
+#include &lt;qdialog.h&gt;
+#include &lt;qtopia/timestring.h&gt;
+
+#ifdef QTOPIA_TEST
+# include "qpetestslave.h"
+#endif
+
+class QCopChannel;
+class QPEApplicationData;
+struct QWSEvent;
+struct QWSKeyEvent;
+class PluginLibraryManager;
+
+class QTOPIA_EXPORT QPEApplication : public QApplication
+{
+    Q_OBJECT
+public:
+    QPEApplication( int&amp; argc, char **argv, Type=GuiClient );
+    ~QPEApplication();
+
+    static QString qpeDir();
+    static QString documentDir();
+    void applyStyle();
+    static int defaultRotation();
+    static void setDefaultRotation(int r);
+    static void grabKeyboard();
+    static void ungrabKeyboard();
+
+
+    enum StylusMode {
+	LeftOnly,
+	RightOnHold
+	// RightOnHoldLeftDelayed, etc.
+    };
+    static void setStylusOperation( QWidget*, StylusMode );
+    static StylusMode stylusOperation( QWidget* );
+
+    enum InputMethodHint {
+	Normal,
+	AlwaysOff,
+	AlwaysOn
+	,
+	Number,
+	PhoneNumber,
+	Words,
+	Text,
+	Named,
+    };
+
+    enum screenSaverHint {
+	Disable = 0,
+	DisableLightOff = 1,
+	DisableSuspend = 2,
+	Enable = 100
+    };
+
+    static void setInputMethodHint( QWidget *, InputMethodHint, const QString&amp; param=QString::null );
+    static void setInputMethodHint( QWidget *, const QString&amp; named );
+    static InputMethodHint inputMethodHint( QWidget * );
+    static QString inputMethodHintParam( QWidget * );
+
+    void showMainWidget( QWidget*, bool nomax=FALSE );
+    void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
+    static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
+    static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
+    static void setMenuLike( QDialog *, bool ); // libqtopia2
+    static bool isMenuLike( const QDialog* ); // libqtopia2
+    static void setTempScreenSaverMode(screenSaverHint);    // libqtopia
+
+    static void setKeepRunning();
+    static void setHideWindow(); // internal
+    
+    bool keepRunning() const;
+
+    bool keyboardGrabbed() const;
+
+    int exec();
+
+#ifdef QTOPIA_INTERNAL_LOADTRANSLATIONS
+    static void loadTranslations(const QStringList&amp;);
+#endif
+#ifdef QTOPIA_INTERNAL_INITAPP
+    void initApp( int argc, char **argv );
+#endif
+
+signals:
+    void clientMoused();
+    void timeChanged();
+    void categoriesChanged();
+    void clockChanged( bool pm );
+    void volumeChanged( bool muted );
+    void appMessage( const QCString&amp; msg, const QByteArray&amp; data);
+    void weekChanged( bool startOnMonday );
+    void dateFormatChanged( DateFormat );
+    void flush();
+    void reload();
+    void linkChanged( const QString &amp;linkFile );
+    
+private slots:
+    void systemMessage( const QCString &amp;msg, const QByteArray &amp;data );
+    void pidMessage( const QCString &amp;msg, const QByteArray &amp;data );
+    void removeSenderFromStylusDict();
+    void removeSenderFromIMDict();
+    void hideOrQuit();
+    void pluginLibraryManager(PluginLibraryManager**);
+    void lineEditTextChange(const QString &amp;);
+    void multiLineEditTextChange();
+
+    void removeFromWidgetFlags();
+    
+
+protected:
+#if defined(QTOPIA_PHONE) || defined(QTOPIA_TEST)  // since not binary compatible
+    bool notify(QObject*,QEvent*);
+#endif
+    bool qwsEventFilter( QWSEvent * );
+    void internalSetStyle( const QString &amp;style );
+    void prepareForTermination(bool willrestart);
+    virtual void restart();
+    virtual void shutdown();
+    bool eventFilter( QObject *, QEvent * );
+    void timerEvent( QTimerEvent * );
+    bool raiseAppropriateWindow();
+    virtual void tryQuit();
+
+private:
+    void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
+    void processQCopFile();
+
+#if defined(QTOPIA_INTERNAL_SENDINPUTHINT)
+    static void sendInputHintFor(QWidget*,QEvent::Type);
+#endif
+
+#if defined(Q_WS_QWS) &amp;&amp; !defined(QT_NO_COP)
+    QCopChannel *sysChannel;
+    QCopChannel *pidChannel;
+#endif
+    QPEApplicationData *d;
+
+    bool reserved_sh;
+
+#if defined QTOPIA_TEST
+public:
+    QString appName();
+    void stopCycleCount() { hasPerfMonitor = FALSE; };
+    void startCycleCount() { hasPerfMonitor = TRUE; };
+    QPETestSlave app_slave;
+private:
+    bool hasPerfMonitor;
+#endif
+};
+
+#ifdef Q_OS_WIN32
+#include &lt;stdlib.h&gt;
+QTOPIA_EXPORT int setenv(const char* name, const char* value, int overwrite);
+QTOPIA_EXPORT void unsetenv(const char *name);
+#endif
+#endif
+
+// Application main/plugin macro magic
+
+#include &lt;qmap.h&gt;
+#include &lt;qtopia/applicationinterface.h&gt;
+#include &lt;qmetaobject.h&gt;
+
+typedef QWidget* (*qpeAppCreateFunc)(QWidget*,const char *,Qt::WFlags);
+typedef QMap&lt;QString,qpeAppCreateFunc&gt; QPEAppMap;
+
+#define QTOPIA_ADD_APPLICATION(NAME,IMPLEMENTATION) \
+    static QWidget *create_ ## IMPLEMENTATION( QWidget *p, const char *n, Qt::WFlags f ) { \
+	return new IMPLEMENTATION(p,n,f); } \
+    QPEAppMap *qpeAppMap(); \
+    static QPEAppMap::Iterator dummy_ ## IMPLEMENTATION = qpeAppMap()-&gt;insert(NAME,create_ ## IMPLEMENTATION);
+
+#ifdef QTOPIA_NO_MAIN
+#define QTOPIA_MAIN
+
+#else
+
+#ifdef QTOPIA_APP_INTERFACE
+
+# define QTOPIA_MAIN \
+    struct ApplicationImpl : public ApplicationInterface { \
+	ApplicationImpl() : ref(0) {} \
+	QRESULT queryInterface( const QUuid &amp;uuid, QUnknownInterface **iface ) { \
+	    *iface = 0; \
+	    if ( uuid == IID_QUnknown ) *iface = this; \
+	    else if ( uuid == IID_QtopiaApplication ) *iface = this; \
+	    else return QS_FALSE; \
+	    (*iface)-&gt;addRef(); \
+	    return QS_OK; \
+	} \
+	virtual QWidget *createMainWindow( const QString &amp;appName, QWidget *parent, const char *name, Qt::WFlags f ) { \
+	    if ( qpeAppMap()-&gt;contains(appName) ) \
+		return (*qpeAppMap())[appName](parent, name, f); \
+	    return 0; \
+	} \
+	virtual QStringList applications() const { \
+	    QStringList list; \
+	    for ( QPEAppMap::Iterator it=qpeAppMap()-&gt;begin(); it!=qpeAppMap()-&gt;end(); ++it ) \
+		list += it.key(); \
+	    return list; \
+	} \
+	Q_REFCOUNT \
+	private: \
+	    ulong ref; \
+    }; \
+    QPEAppMap *qpeAppMap() { \
+	static QPEAppMap *am = 0; \
+	if ( !am ) am = new QPEAppMap(); \
+	return am; \
+    } \
+    Q_EXPORT_INTERFACE() { Q_CREATE_INSTANCE( ApplicationImpl ) }
+
+#else
+
+# define QTOPIA_MAIN \
+    QPEAppMap *qpeAppMap(); \
+    int main( int argc, char ** argv ) { \
+	QPEApplication a( argc, argv ); \
+	QWidget *mw = 0; \
+\
+    QString executableName(argv[0]); \
+    executableName = executableName.right(executableName.length() \
+	    - executableName.findRev('/') - 1); \
+\
+	if ( qpeAppMap()-&gt;contains(executableName) ) \
+	    mw = (*qpeAppMap())[executableName](0,0,0); \
+	else if ( qpeAppMap()-&gt;count() ) \
+	    mw = qpeAppMap()-&gt;begin().data()(0,0,0); \
+	if ( mw ) { \
+	    if ( mw-&gt;metaObject()-&gt;slotNames(true).contains("setDocument(const QString&amp;)") ) \
+		a.showMainDocumentWidget( mw ); \
+	    else \
+		a.showMainWidget( mw ); \
+	    int rv = a.exec(); \
+	    delete mw; \
+	    return rv; \
+	} else { \
+	    return -1; \
+	} \
+    } \
+    QPEAppMap *qpeAppMap() { \
+	static QPEAppMap *am = 0; \
+	if ( !am ) am = new QPEAppMap(); \
+	return am; \
+    } \
+
+#endif
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

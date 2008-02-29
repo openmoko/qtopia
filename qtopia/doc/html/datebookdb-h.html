@@ -1,0 +1,145 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/qtopia/datebookdb.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>datebookdb.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>datebookdb.h</h1>
+
+<p>This is the verbatim text of the datebookdb.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
+**
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
+**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+#ifndef DATEBOOKDB_H
+#define DATEBOOKDB_H
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qdatetime.h&gt;
+#include &lt;qfile.h&gt;
+#include &lt;qvaluelist.h&gt;
+
+// journal actions...
+enum journal_action { ACTION_ADD, ACTION_REMOVE, ACTION_REPLACE };
+
+class DateBookDBPrivate;
+class QTOPIA_EXPORT DateBookDB
+{
+public:
+    DateBookDB();
+    ~DateBookDB();
+
+    // very depreciated now!!!
+    QValueList&lt;Event&gt; getEvents( const QDate &amp;from, const QDate &amp;to );
+    QValueList&lt;Event&gt; getEvents( const QDateTime &amp;start );
+
+    // USE THESE!!!
+    QValueList&lt;EffectiveEvent&gt; getEffectiveEvents( const QDate &amp;from,
+						   const QDate &amp;to );
+    QValueList&lt;EffectiveEvent&gt; getEffectiveEvents( const QDateTime &amp;start );
+
+    QValueList&lt;Event&gt; getRawRepeats() const;
+    QValueList&lt;Event&gt; getNonRepeatingEvents( const QDate &amp;from,
+					     const QDate &amp;to ) const;
+
+    // Use these when dealing with adding removing events...
+    void addEvent( const Event &amp;ev, bool doalarm=TRUE );
+    void removeEvent( const Event &amp;ev );
+    void editEvent( const Event &amp;old, Event &amp;ev );
+    // add/remove event without journaling ( these ended up in public by accident, never
+    // use them unless you know what you are doing...),
+    // please put them in private if we ever can change the class...
+    void addJFEvent( const Event &amp;ev, bool doalarm=TRUE );
+    void removeJFEvent( const Event &amp;ev );
+
+    bool save();
+    void reload();
+private:
+    //find the real repeat...
+    bool origRepeat( const Event &amp;ev, Event &amp;orig ) const;
+    bool removeRepeat( const Event &amp;ev );
+    void init();
+    void loadFile( const QString &amp;strFile );
+    // depreciated...
+    void saveJournalEntry( const Event &amp;ev, journal_action action );
+    // new version, uncomment the "= -1" when we remove the above
+    // function..
+    bool saveJournalEntry( const Event &amp;ev, journal_action action,
+			   int key/* = -1*/, bool origHadRepeat = false );
+
+    QValueList&lt;Event&gt; eventList; // non-repeating events...
+    QValueList&lt;Event&gt; repeatEvents; // the repeating events...
+    DateBookDBPrivate *d;
+    QFile journalFile;
+
+    int	recordIdMax;  // ADDITION
+};
+
+/* helper functions, also useful to other apps. */
+QTOPIA_EXPORT bool nextOccurance( const Event &amp;e, const QDate &amp;from, QDateTime &amp;next);
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

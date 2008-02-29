@@ -1,0 +1,134 @@
+<html>
+<h1>Design for more compact Contacts</h1>
+<p>
+An identified problem is that while it is very desirable (customer
+requests) that contacts support a diverse range of fields, our
+presentation of these fields sucks.
+
+<p>
+The principles of an ideal interface for contacts are:
+
+<ul>
+ <li>Single page view of relevant information.
+  <ul>
+    <li>Use case: You're driving to see the contact,
+	    where do they live? Work?
+    <li>Use case: You want to communicate with the contact,
+	    need to know what options are
+	    available, decide which is appropriate at
+	    the current time/situation (talk, email,
+	    SMS, etc.).
+    <li>Use case: If the device has the facilities to
+	    make the connection, the details of the
+	    connection are not very important.
+    <li>Use case: The first few lines of the Notes
+	    could be a critical warning like
+	    "Never call on Sunday morning".
+  </ul>
+ <li>Single page editing of data entered on-the-go.
+  <ul>
+    <li>Use case: Person gives you there phone number in a meeting,
+	you must record it very quickly to avoid disrupting the meeting.
+  </ul>
+ <li>Details of all attributes.
+  <ul>
+    <li>Use case: In preparation for a meeting, you review the
+	personal details you have recorded, including full notes.
+  </ul>
+</ul>
+
+<p>
+The main problem with the current design is that when entering details,
+large amounts of data is presented as individual fields rather than
+using forms more familiar to humans.
+
+<h2>Multi-field Widget</h2>
+
+<p>
+Implement a widget that combines the input of multiple fields into a QLineEdit
+or QMultiLineEdit, parsing them into the separate fields, but
+providing a way to edit and/or view the parsed result as individual
+fields. Support a wide range of input possibilities, including a
+very unambiguous form.
+<p>For names:
+<ul>
+ <li> name = [known-prefix] given-name [nick]
+		{middle-name} family-name [known-suffix] [pron]
+ <li> name = known-prefix family-name [known-suffix] [pron]
+ <li> name = given-name [known-suffix] [pron]
+ <li> name = family-name ',' [known-prefix] given-name [nick] {middle-name} [pron]
+ <li> name = locale-dependent-form
+ <li> pron = '"' same-number-of-words-except-affixes '"'
+ <li> nick = '(' nickname ')'
+</ul>
+<p>For addresses (linebreaks count; postal-code contains digits, state does not):
+<ul>
+ <li> street-line<br>{street-line}<br>[ city ',' [state] [postal-code] ]<br>known-country
+ <li> street-line<br>{street-line}<br>[ city ',' [state] [postal-code] ]
+ <li> locale-dependent-form
+</ul>
+
+<p>
+The user doesn't need to know this syntax: it usually "does what I mean", and when it
+doesn't, they are shown how to type entries such that it does. For example, someone
+who uses nicknames a lot will soon learn to enter "Robert (Bob) Dylan" (in reality
+they'll only bother doing this on a nice keyboard such as with Qtopia Desktop).
+
+<p>
+Rather than a "..." button, the lineedit should have a "Details..." option in its
+context menu, which brings up a small dialog allowing each field to be explicitly
+edited.
+
+<p>
+Note that the FileAs field is not even presented in the non-detail view,
+since only a tiny fraction of people need an additional identifying
+mark in their FileAs. The user chooses the FileAs form they like, and
+all but a few should automatically be set. The exceptions can be set
+in the Details dialog.
+
+<h2>Compact phone fields</h2>
+
+A contact can have very many possible phone contacts, and Qtopia currently
+supports 7 (if you include faxes and business pager); all of these are conceivable
+first-contact details and therefore belong on the first page, however in reality
+you usually only receive one or two phone details for a given person, especially
+in an on-the-go scenario. Therefore, there need only be one or two phone fields,
+but some way to say what sort of field they are: a combo box is the simply way.
+In some countries, it is possible to get a hint about the type of number from
+the leading digits.
+
+<h2>Use menu for Emails</h2>
+
+The "..." button should be removed from the Emails and instead put in the
+context menu. This saves having to tab over the rarely-used option.
+
+<h2>Use a "business" hint</h2>
+
+There are different needs when entering a business contact has different needs
+to a personal contact. For a business contact, you will often only have a
+single phone contact, but you will likely want to record their company name
+and job title. For a personal contact, you will often want to enter as many
+phone contacts as possible, but their company and jobtitle can be left on
+the ancillary pages.
+
+<h2>Move key fields to first page</h2>
+
+Once the name field (currently 9 fields) is compacted to a Multi-field widget,
+there is plenty of room on the first page for the key fields from other tabs.
+The first page becomes:
+
+<ul>
+ <li>Name - multi-field, parsed as above.
+ <li>Business - checkbox membership in Business category.
+ <li>Phone - default default is country-code of owner.
+ <li>PhoneType - default to Work if Business checked.
+ <li>AddAnother - button to add another Phone+PhoneType.
+ <li>Emails - context menu to add multiple, or use commas.
+ <li>CompanyName - only if Business checked.
+ <li>JobTitle - only if Business checked.
+</ul>
+
+Note that all the details except name and Emails are probably
+duplicated on the relevant Business and Home pages. Certainly the
+CompanyName and JobTitle must be if they are made invisible by the Business
+checkbox!

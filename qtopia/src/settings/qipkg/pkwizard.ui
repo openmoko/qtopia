@@ -1,0 +1,688 @@
+<!DOCTYPE UI><UI>
+<class>PackageWizardBase</class>
+<widget>
+    <class>QWizard</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>qipkg</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>282</width>
+            <height>342</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Software Packages</string>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_mode</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>What do you want to do?</string>
+        </attribute>
+        <vbox>
+            <property stdset="1">
+                <name>margin</name>
+                <number>0</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>6</number>
+            </property>
+            <widget>
+                <class>QButtonGroup</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>mode_choice</cstring>
+                </property>
+                <property stdset="1">
+                    <name>frameShape</name>
+                    <enum>NoFrame</enum>
+                </property>
+                <property stdset="1">
+                    <name>frameShadow</name>
+                    <enum>Sunken</enum>
+                </property>
+                <property stdset="1">
+                    <name>title</name>
+                    <string></string>
+                </property>
+                <property>
+                    <name>layoutMargin</name>
+                </property>
+                <property>
+                    <name>layoutSpacing</name>
+                </property>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>0</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>4</number>
+                    </property>
+                    <widget row="0"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>mode_doc</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Install from Documents</string>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>mode_net</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Install from Network</string>
+                        </property>
+                    </widget>
+                    <widget row="2"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>mode_rm</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Uninstall software packages</string>
+                        </property>
+                    </widget>
+                    <widget row="3"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>mode_share</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Share software packages</string>
+                        </property>
+                    </widget>
+                    <spacer row="0"  column="1"  rowspan="4"  colspan="1" >
+                        <property>
+                            <name>name</name>
+                            <cstring>Spacer1</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Horizontal</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>sizeType</name>
+                            <enum>Expanding</enum>
+                        </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
+                    </spacer>
+                </grid>
+            </widget>
+        </vbox>
+    </widget>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_servers</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>Choose servers...</string>
+        </attribute>
+        <grid>
+            <property stdset="1">
+                <name>margin</name>
+                <number>0</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>6</number>
+            </property>
+            <widget row="2"  column="1" >
+                <class>QPushButton</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>removeserver</cstring>
+                </property>
+                <property stdset="1">
+                    <name>text</name>
+                    <string>Remove</string>
+                </property>
+                <property stdset="1">
+                    <name>autoDefault</name>
+                    <bool>false</bool>
+                </property>
+            </widget>
+            <widget row="3"  column="0"  rowspan="1"  colspan="2" >
+                <class>QLayoutWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>Layout4</cstring>
+                </property>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>0</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>6</number>
+                    </property>
+                    <widget row="0"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>servername</cstring>
+                        </property>
+                    </widget>
+                    <widget row="0"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel1_3</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Name:</string>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="1" >
+                        <class>QLineEdit</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>serverurl</cstring>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel2_3</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>URL:</string>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
+            <widget row="1"  column="0"  rowspan="1"  colspan="2" >
+                <class>QListView</class>
+                <column>
+                    <property>
+                        <name>text</name>
+                        <string>Name</string>
+                    </property>
+                    <property>
+                        <name>clickable</name>
+                        <bool>true</bool>
+                    </property>
+                    <property>
+                        <name>resizeable</name>
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property>
+                        <name>text</name>
+                        <string>URL</string>
+                    </property>
+                    <property>
+                        <name>clickable</name>
+                        <bool>true</bool>
+                    </property>
+                    <property>
+                        <name>resizeable</name>
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>servers</cstring>
+                </property>
+                <property stdset="1">
+                    <name>minimumSize</name>
+                    <size>
+                        <width>0</width>
+                        <height>1</height>
+                    </size>
+                </property>
+            </widget>
+            <widget row="2"  column="0" >
+                <class>QPushButton</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>newserver</cstring>
+                </property>
+                <property stdset="1">
+                    <name>text</name>
+                    <string>New</string>
+                </property>
+                <property stdset="1">
+                    <name>autoDefault</name>
+                    <bool>false</bool>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_packages</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>Choose packages...</string>
+        </attribute>
+        <vbox>
+            <property stdset="1">
+                <name>margin</name>
+                <number>0</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>0</number>
+            </property>
+            <widget>
+                <class>QListView</class>
+                <column>
+                    <property>
+                        <name>text</name>
+                        <string>Name</string>
+                    </property>
+                    <property>
+                        <name>clickable</name>
+                        <bool>true</bool>
+                    </property>
+                    <property>
+                        <name>resizeable</name>
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property>
+                        <name>text</name>
+                        <string>Description</string>
+                    </property>
+                    <property>
+                        <name>clickable</name>
+                        <bool>true</bool>
+                    </property>
+                    <property>
+                        <name>resizeable</name>
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property>
+                        <name>text</name>
+                        <string>Size</string>
+                    </property>
+                    <property>
+                        <name>clickable</name>
+                        <bool>true</bool>
+                    </property>
+                    <property>
+                        <name>resizeable</name>
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>packagelist</cstring>
+                </property>
+            </widget>
+            <widget>
+                <class>QFrame</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>feedbackframe</cstring>
+                </property>
+                <property stdset="1">
+                    <name>frameShape</name>
+                    <enum>NoFrame</enum>
+                </property>
+                <property stdset="1">
+                    <name>frameShadow</name>
+                    <enum>Raised</enum>
+                </property>
+                <property>
+                    <name>layoutSpacing</name>
+                </property>
+                <vbox>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>0</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>3</number>
+                    </property>
+                    <widget>
+                        <class>QLayoutWidget</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>Layout3</cstring>
+                        </property>
+                        <hbox>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>6</number>
+                            </property>
+                            <widget>
+                                <class>QProgressBar</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>progress_net</cstring>
+                                </property>
+                            </widget>
+                            <widget>
+                                <class>QPushButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>details</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Show Details...</string>
+                                </property>
+                            </widget>
+                        </hbox>
+                    </widget>
+                </vbox>
+            </widget>
+        </vbox>
+    </widget>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_share</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>Share Packages</string>
+        </attribute>
+        <vbox>
+            <property stdset="1">
+                <name>margin</name>
+                <number>0</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>0</number>
+            </property>
+            <widget>
+                <class>QButtonGroup</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>share_choice</cstring>
+                </property>
+                <property stdset="1">
+                    <name>frameShape</name>
+                    <enum>NoFrame</enum>
+                </property>
+                <property stdset="1">
+                    <name>title</name>
+                    <string></string>
+                </property>
+                <property>
+                    <name>layoutSpacing</name>
+                </property>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>0</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>4</number>
+                    </property>
+                    <widget row="0"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>share_beam</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Beam via IR</string>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>share_email</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Send via Email</string>
+                        </property>
+                    </widget>
+                    <widget row="2"  column="0" >
+                        <class>QRadioButton</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>share_doc</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Store as Document</string>
+                        </property>
+                    </widget>
+                    <spacer row="0"  column="1"  rowspan="3"  colspan="1" >
+                        <property>
+                            <name>name</name>
+                            <cstring>Spacer2</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Horizontal</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>sizeType</name>
+                            <enum>Expanding</enum>
+                        </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
+                    </spacer>
+                </grid>
+            </widget>
+        </vbox>
+    </widget>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_location</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>Choose destination...</string>
+        </attribute>
+        <vbox>
+            <property stdset="1">
+                <name>margin</name>
+                <number>11</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>6</number>
+            </property>
+            <widget>
+                <class>LocationCombo</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>location</cstring>
+                </property>
+            </widget>
+        </vbox>
+    </widget>
+    <widget>
+        <class>QWidget</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>page_confirmation</cstring>
+        </property>
+        <attribute>
+            <name>title</name>
+            <string>Confirm operation...</string>
+        </attribute>
+        <vbox>
+            <property stdset="1">
+                <name>margin</name>
+                <number>6</number>
+            </property>
+            <property stdset="1">
+                <name>spacing</name>
+                <number>6</number>
+            </property>
+            <widget>
+                <class>QLabel</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>confirmation</cstring>
+                </property>
+                <property stdset="1">
+                    <name>text</name>
+                    <string>[confirm]</string>
+                </property>
+                <property stdset="1">
+                    <name>alignment</name>
+                    <set>AlignTop|AlignLeft</set>
+                </property>
+                <property>
+                    <name>vAlign</name>
+		</property>
+            </widget>
+            <widget>
+                <class>QProgressBar</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>progress_confirm</cstring>
+                </property>
+            </widget>
+        </vbox>
+    </widget>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>LocationCombo</class>
+        <header location="global">qtopia/locationcombo.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+    </customwidget>
+</customwidgets>
+<images>
+    <image>
+        <name>image0</name>
+        <data format="XPM.GZ" length="646">789c6dd2c10ac2300c00d07bbf2234b7229d1be245fc04c5a3201e4615f430059d0711ff5ddb2e6bb236ec90eed134cb5a19d8ef36602af5ecdbfeeac05dda0798d3abebde87e3faa374d3807fa0d633a52d38d8de6f679fe33fc776e196f53cd010188256a3600a292882096246517815ca99884606e18044a3a40d91824820924265a7923a2e8bcd05f33db1173e002913175f2a6be6d3294871a2d95fa00e8a94ee017b69d339d90df1e77c57ea072ede6758</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>servers</sender>
+        <signal>selectionChanged()</signal>
+        <receiver>qipkg</receiver>
+        <slot>updateServerSelection()</slot>
+    </connection>
+    <connection>
+        <sender>share_choice</sender>
+        <signal>clicked(int)</signal>
+        <receiver>qipkg</receiver>
+        <slot>setAppropriates()</slot>
+    </connection>
+    <connection>
+        <sender>mode_choice</sender>
+        <signal>clicked(int)</signal>
+        <receiver>qipkg</receiver>
+        <slot>setAppropriates()</slot>
+    </connection>
+    <connection>
+        <sender>mode_choice</sender>
+        <signal>clicked(int)</signal>
+        <receiver>qipkg</receiver>
+        <slot>setAppropriates()</slot>
+    </connection>
+    <connection>
+        <sender>details</sender>
+        <signal>clicked()</signal>
+        <receiver>qipkg</receiver>
+        <slot>showDetails()</slot>
+    </connection>
+    <connection>
+        <sender>packagelist</sender>
+        <signal>currentChanged(QListViewItem*)</signal>
+        <receiver>qipkg</receiver>
+        <slot>updatePackageNext()</slot>
+    </connection>
+    <connection>
+        <sender>packagelist</sender>
+        <signal>selectionChanged()</signal>
+        <receiver>qipkg</receiver>
+        <slot>updatePackageNext()</slot>
+    </connection>
+    <slot access="public">showDetails()</slot>
+    <slot access="protected">setAppropriates()</slot>
+    <slot access="protected">updatePackageNext()</slot>
+    <slot access="protected">updateServerSelection()</slot>
+</connections>
+<tabstops>
+    <tabstop>mode_doc</tabstop>
+    <tabstop>mode_net</tabstop>
+    <tabstop>mode_rm</tabstop>
+    <tabstop>mode_share</tabstop>
+    <tabstop>removeserver</tabstop>
+    <tabstop>servername</tabstop>
+    <tabstop>serverurl</tabstop>
+    <tabstop>servers</tabstop>
+    <tabstop>newserver</tabstop>
+    <tabstop>packagelist</tabstop>
+    <tabstop>share_beam</tabstop>
+    <tabstop>share_email</tabstop>
+    <tabstop>share_doc</tabstop>
+</tabstops>
+</UI>

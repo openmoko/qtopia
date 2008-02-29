@@ -1,0 +1,110 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/translation-add.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Add a Qtopia Translation</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Add a Qtopia Translation</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> What to do
+</a>
+<ul>
+<li><a href="#2-1"> Install Qt 3
+</a>
+<li><a href="#2-2"> Getting Started Translating
+</a>
+<li><a href="#2-3"> Translating Qtopia
+</a>
+<li><a href="#2-4"> Language description
+</a>
+<li><a href="#2-5"> Finishing up
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Adding a translation for Qtopia is easy. There are a few steps you will need to take in order to successfully translate Qtopia into your chosen language.
+<p> <ol type=1>
+<li> <a href=#install>Install Qt 3.x, which includes linguist, lupdate and lrelease.</a>
+<li> <a href=#linguist>Run lupdate and lrelease, and start using Trolltech's linguist<a/>
+<li> <a href=#translate>Translate the strings using the Linguist tool</a>
+<li> <a href=#description>Add language description</a>
+<li> <a href=#upload>Create an ipkg</a>
+</ol>
+<p> <a name=install></a>
+<p> <h2> What to do
+</h2>
+<a name="2"></a><p> <h3> Install Qt 3
+</h3>
+<a name="2-1"></a><p> You can either install Qt 3 for X11, from your linux distribution, or download the <a href="ftp://ftp.trolltech.com/qt/source/qt-embedded-free-3.2.3.tar.bz2">Qt 3 source</a>, and compile it yourself. Once installed, you should have linguist, lupdate and lrelease tools available for you to use.
+<p> <a name=linguist></a>
+<p> <h3> Getting Started Translating
+</h3>
+<a name="2-2"></a><p> The first step is to run the commands <code>make lupdate</code>, and <code>make lrelease</code> in the Qtopia source ( $QPEDIR/src ) directory.
+This makes sure all the files necessary for translation are up to date.<br>
+You should not need to do this if you are using the Qtopia source tarball, and have not done any customizing.
+<p> <a name=translate></a>
+<p> <h3> Translating Qtopia
+</h3>
+<a name="2-3"></a><p> <a href=http://doc.trolltech.com/3.3/linguist-manual.html>Linguist Manual</a>
+<p> The next step is to run linguist tool. Anyone can participate in this part of translating Qtopia. Linguist makes it easy to help with translations.
+<p> <a name=description></a>
+<h3> Language description
+</h3>
+<a name="2-4"></a><p> Running the command <code>make lupdate</code> will create the directory $QPEDIR/i18n/<code>&lt;new lang&gt;</code> and server specific translation files (e.g. QtopiaApplications.ts which contains the translated names for Qtopia applications). In addition to these automatically generated files every language needs a <tt>.directory</tt> file. For example, the German <tt>.directory</tt> in $QPEDIR/i18n/de begins with:
+<p> <pre>
+[Translation]
+File=QtopiaI18N
+Context=German
+[Desktop Entry]
+Name[]=German
+</pre>
+ 
+<p> This file has to be added manually after <code>make lupdate</code> has been issued for the first time.
+<p> <a name=upload></a>
+<p> <h3> Finishing up
+</h3>
+<a name="2-5"></a><p> Once you are finished translating all the strings, you can create an ipkg.
+<p> Note: For some languages (e.g Chinese or Japanese) it may be necessary to install additional font files in $QPEDIR/lib/fonts
+in order to present the translated strings. 
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

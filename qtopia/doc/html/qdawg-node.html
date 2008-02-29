@@ -1,0 +1,111 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qdawg-node.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QDawgNode Class Reference</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QDawgNode Class Reference</h1>
+
+
+
+<a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Public Members
+</a>
+<li><a href="#3"> Detailed Description
+</a>
+<li><a href="#4"> Member Function Documentation
+</a>
+<ul>
+<li><a href="#4-1"> QChar QDawg::Node::letter() const
+</a>
+<li><a href="#4-2"> bool QDawg::Node::isWord() const
+</a>
+<li><a href="#4-3"> bool QDawg::Node::isLast() const
+</a>
+<li><a href="#4-4"> const Node* QDawg::Node::next() const
+</a>
+<li><a href="#4-5"> const Node* QDawg::Node::jump() const
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The QDawg::Node class represents one node of a <a href="qdawg.html">QDawg</a>.
+<p> <tt>#include &lt;qdawg.h&gt;</tt>
+<p> <h2> Public Members
+</h2>
+<a name="2"></a><p> <ul>
+<li> QChar <a href="#letter">QDawg::Node::letter()</a> const
+<li> bool <a href="#isword">QDawg::Node::isWord()</a> const
+<li> bool <a href="#islast">QDawg::Node::isLast()</a> const
+<li> const <a href="node.html">Node</a>* <a href="#next">QDawg::Node::next()</a> const
+<li> const Node* <a href="#jump">QDawg::Node::jump()</a> const
+</ul>
+<p> <hr>
+<p> <h2> Detailed Description
+</h2>
+<a name="3"></a><p> The QDawg::Node class represents one node of a <a href="qdawg.html">QDawg</a>.
+<p> See the <a href="qdawg.html">QDawg</a> documentation for further information.
+<p> <hr>
+<p> <h2> Member Function Documentation
+</h2>
+<a name="4"></a><p> <a name="letter"></a>
+<h3> QChar QDawg::Node::letter() const
+</h3>
+<a name="4-1"></a><p> Returns this Node's letter.
+<p> <a name="isword"></a>
+<h3> bool QDawg::Node::isWord() const
+</h3>
+<a name="4-2"></a><p> Returns TRUE if this Node is the end of a word; otherwise returns
+FALSE.
+<p> <a name="islast"></a>
+<h3> bool QDawg::Node::isLast() const
+</h3>
+<a name="4-3"></a><p> Returns TRUE if this Node is the last in the child list; otherwise
+returns FALSE.
+<p> <a name="next"></a>
+<h3> const Node* QDawg::Node::next() const
+</h3>
+<a name="4-4"></a><p> Returns the next child <a href="node.html">Node</a> in the child list.
+<p> <a name="jump"></a>
+<h3> const Node* QDawg::Node::jump() const
+</h3>
+<a name="4-5"></a><p> Returns the node connected to this Node.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

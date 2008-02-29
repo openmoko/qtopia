@@ -1,0 +1,52 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+- Significant 8 and 16bpp solid rectangle fills and alpha blending speed ups.
+
+- Various other drawing speedups.
+
+- Top level window geometry brought in-line with other platforms as
+  specified here: http://doc.trolltech.com/2.3/geometry.html
+
+- Support for International input methods.
+
+- Added USB mouse support.
+
+- Using the Transformed driver, the display can be rotated on-the-fly.
+
+- Many fixes for accelerated graphics drivers.
+
+- Support raster ops in BitBlt.
+
+- Fix cursor enter/leave race conditions (always get the events now).
+
+- Fix cursor shape changing when a widget appears/disappears under the
+  cursor.
+
+- Fix drawing with QPaintUnclipped flag.
+
+- Pass the correct keyboard device spec to keyboard handler.
+
+- Honour masks set on 16bpp pixmaps when converting to images.
+
+- Create a 1bpp QPixmap when converting from a 1bpp QImage.
+
+- Support the idea that some mouse handlers need pointers,
+  while other's don't.
+
+- Instead of killing the server when a client tries to open too many
+  windows, disconnect the client.
+
+- Check that QWS_SIZE, if set, is correct format.
+
+- Some BMPs have bi.biSizeImage == 0 which throws out padding
+  calculation.  Attempt to catch this case.
+
+- Paint on the correct device for redirected QPainterDevices.
+
+- When a window decoration or palette changes make sure the decoration
+  is updated.
+
+- Fix showFullScreen.  When having hidden then showing the window again
+  it is nolonger sized properly.

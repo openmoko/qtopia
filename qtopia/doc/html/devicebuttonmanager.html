@@ -1,0 +1,99 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/devicebuttonmanager.cpp:53 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DeviceButtonManager Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>DeviceButtonManager Class Reference</h1>
+
+<p>The DeviceButtonManager class manages device button mappings.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="devicebuttonmanager-h.html">qtopia/devicebuttonmanager.h</a>&gt;</tt>
+<p><a href="devicebuttonmanager-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>const QValueList&lt;DeviceButton&gt; &amp; <a href="#buttons"><b>buttons</b></a> () const</li>
+<li class=fn>const DeviceButton * <a href="#buttonForKeycode"><b>buttonForKeycode</b></a> ( ushort&nbsp;keyCode )</li>
+<li class=fn>void <a href="#remapPressedAction"><b>remapPressedAction</b></a> ( int&nbsp;button_index, const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;action )</li>
+<li class=fn>void <a href="#remapHeldAction"><b>remapHeldAction</b></a> ( int&nbsp;button_index, const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;action )</li>
+<li class=fn>void <a href="#factoryResetButtons"><b>factoryResetButtons</b></a> ()</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>DeviceButtonManager &amp; <a href="#instance"><b>instance</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The DeviceButtonManager class manages device button mappings.
+<p> The function buttons on a device may generate key presses and also
+activate services.  DeviceButtonManager allows the role of the function
+buttons to be accessed or modified.
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>const&nbsp;<a href="devicebutton.html">DeviceButton</a>&nbsp;* <a name="buttonForKeycode"></a>DeviceButtonManager::buttonForKeycode ( ushort&nbsp;keyCode )
+</h3>
+Returns the <a href="devicebutton.html">DeviceButton</a> for the <em>keyCode</em>.  If <em>keyCode</em> is not found, it
+returns 0L
+
+<h3 class=fn>const QValueList&lt;DeviceButton&gt; &amp; <a name="buttons"></a>DeviceButtonManager::buttons () const
+</h3>
+Returns the available buttons on this device.  The number and location
+of buttons will vary depending on the device.  Button numbers will be assigned
+by the device manufacturer and will be from most preferred button to least preffered
+button.  Note that this list only contains "user mapable" buttons.
+
+<h3 class=fn>void <a name="factoryResetButtons"></a>DeviceButtonManager::factoryResetButtons ()
+</h3>
+Reset the buttons back to the factory default settings.
+
+<h3 class=fn><a href="devicebuttonmanager.html">DeviceButtonManager</a>&nbsp;&amp; <a name="instance"></a>DeviceButtonManager::instance ()<tt> [static]</tt>
+</h3>
+Returns an instance of the DeviceButtonManager.  DeviceButtonManager
+should never be constructed explicitly.
+
+<h3 class=fn>void <a name="remapHeldAction"></a>DeviceButtonManager::remapHeldAction ( int&nbsp;button_index, const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;action )
+</h3>
+Reassigns the held action for <em>button_index</em> to <em>action</em>. 
+
+<h3 class=fn>void <a name="remapPressedAction"></a>DeviceButtonManager::remapPressedAction ( int&nbsp;button_index, const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;action )
+</h3>
+Reassigns the pressed action for <em>button_index</em> to <em>action</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,215 @@
+
+KPhone 4.1.1: Changes from 4.1.0
+================================
+
+  - iLBC 20ms implementation added
+  - Some new translations
+  - Alsa support updated
+  - Some qt3 fixes
+  - Saved password support added
+  - DTMF support updated
+  - Command line call support added
+
+
+KPhone 4.1: Changes from 4.0.5
+================================
+
+  - Configure updated
+  - Alsa support added
+  - Jack support added (uncomplete) 
+  - Some errors fixed
+  
+  
+KPhone 4.0.5: Changes from 4.0.4
+================================
+
+  - Fixed bug in localization 
+ 
+
+KPhone 4.0.4: Changes from 4.0.3
+================================
+
+  - Memory leak fixed
+  - Localization added, thanks to Mario Scheel
+  - Tray icon support added, thanks to Thomas Zell 
+  - Some errors fixed
+ 
+
+KPhone 4.0.3: Changes from 4.0.2
+================================
+
+  - Refer support added
+  - Some errors fixed
+ 
+  
+>>>>>>> 1.2.2.3
+KPhone 4.0.2: Changes from 4.0.1
+================================
+
+  - Security vulnerability fixed
+  - Uninstall option added
+  - Codec negotiate fixed
+  - Thread uses updated
+  
+  
+KPhone 4.0.1: Changes from 4.0
+==============================
+
+  - Some updates with audio
+  - Several minor errors fixed
+
+
+KPhone 4.0: Changes from 3.14
+==============================
+
+  - KDE base code removed
+  - Add support for DTMF
+  - Audio updated
+  - A lot of code cleanup
+
+
+KPhone 3.14: Changes from 3.13
+==============================
+
+  - Fixed problem with symmetric media
+
+
+KPhone 3.13: Changes from 3.12
+==============================
+
+  - Fixed some problems with presence
+
+  Jan Janak:
+  - Add support for symmetric SIP signalling
+  - Add support for symmetric media
+  - Add the capability to specify port range for media
+
+
+KPhone 3.12: Changes from 3.11
+==============================
+
+  - TCP implementation updated
+  - Memory leaks fixed
+  - Parameters handling fixed
+
+
+KPhone 3.11: Changes from 3.1
+=============================
+
+  - Fixed some problems with route
+  - Several minor errors fixed
+
+
+KPhone 3.1: Changes from 3.0
+============================
+
+  - Added support for draft-ietf-midcom-stun-05.txt
+  - q-value added to registration
+  - Fixed several problems found at the 12th SIPit event
+
+
+KPhone 3.0: Changes from 2.11
+=============================
+
+  - Video call with VIC (Videoconferencing Tool) added
+  - Module libgsm renamed to libkphonegsm
+
+
+KPhone 2.11: Changes from 2.1
+=============================
+
+  - Fixed some timeout problems regarding Presence
+    and Instant Messaging with GPRS
+  - Added '-l' and '-s' startup options for loose
+    and strict routing
+
+
+KPhone 2.1: Changes from 2.0
+============================
+
+  - GSM and iLBC codecs added
+  - QuickNet removed
+
+
+KPhone 2.0: Changes from 1.0.2
+==============================
+
+  - Presence / Instant Messaging
+  - -u startup parameter for new identities
+  - A lot of code cleanup
+  - A lot of tune-up in all
+  - Enhanced user interface
+
+
+KPhone 1.0.2: Changes from 1.0.1
+================================
+
+  - Added support for NAPTR/SRV
+  - Added SSL check to configure script
+  - Some enhancements to TCP signalling
+ 
+
+KPhone 1.0.1: Changes from 1.0
+==============================
+
+  - Updated tags in INVITE
+  - Fixed a couple of soundcard issues
+  - Added ACK fix to 487 messages
+
+
+KPhone 1.0: Changes from 0.9.6-2
+================================
+
+  - Added STUN (Simple Traversal of UDP through NAT) functionality 
+  - Added a phone book and call history functions
+  - Added primitive ringing-tone for incoming call (Audio Preferences)
+    ** You have to enable system bell first **
+    ** KDE: Control Centre -> Sound -> System Bell **
+  - Fixed a number of REGISTER bugs
+  - UI enhancements (SIP Preferences, Identity settings)
+  - Fixed a couple of issues with KDE3/Qt3
+  - Added preliminary functions for TCP signalling  
+
+
+KPhone 0.9.6-2: Changes from 0.9.6-1
+====================================
+
+  - Fixed a very nasty bug concerning point-to-point calls
+
+
+KPhone 0.9.6-1: Changes from 0.9.6
+==================================
+
+  - Fixed unregister in 401
+  - Fixed URI in Proxy-Authorization (INVITE)
+  - Fixed expire time in re-register
+  - Modified to ensure functionality with Windows Messenger 4.6:
+      - text/plain removed from Accept header
+      - removed sending of Accept header in BYE
+
+
+KPhone 0.9.6: Changes from 0.9.5
+================================
+
+  - Fixed problems with TRYING message in registration
+  - REGISTER retry with 2 second interval
+  - Improved error message handling
+  - Fixed ACK problems in INVITE messages
+  - A few UI enhancements
+
+
+KPhone 0.9.5: Changes to Billy's original KPhone
+================================================
+
+  - Digest-MD5 authentication support
+  - audiobuffer fragment size tweak
+  - RTP message payload size
+  - TOS field 
+  - numerous functionality tweaks in the UI
+  - some bugfixes to the source
+  - minor G.711 codec fixes
+  - auto-register with proxy
+  - interface selection at startup
+  - use of kphonerc to save user-given settings
+  - call history with proper re-dial
+

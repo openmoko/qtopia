@@ -1,0 +1,197 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/internal/qsettings.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>qsettings.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>qsettings.h</h1>
+
+<p>This is the verbatim text of the qsettings.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
+**
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
+**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+#ifndef QSETTINGS_H
+#define QSETTINGS_H
+
+#ifndef QT_H
+#include "qdatetime.h"
+#include "qstringlist.h"
+#endif // QT_H
+
+#ifndef QT_NO_SETTINGS
+
+class QSettingsPrivate;
+
+
+class Q_EXPORT QSettings
+{
+public:
+    enum Format {
+	Native = 0,
+	Ini
+    };
+    enum System {
+	Unix = 0,
+	Windows,
+	Mac
+    };
+    enum Scope {
+	User,
+	Global
+    };
+
+    QSettings();
+    QSettings( Format format );
+
+    ~QSettings();
+
+#if !defined(Q_NO_BOOL_TYPE)
+    bool	writeEntry( const QString &amp;, bool );
+#endif
+    bool	writeEntry( const QString &amp;, double );
+    bool	writeEntry( const QString &amp;, int );
+    bool	writeEntry( const QString &amp;, const char * );
+    bool	writeEntry( const QString &amp;, const QString &amp; );
+    bool	writeEntry( const QString &amp;, const QStringList &amp; );
+    bool	writeEntry( const QString &amp;, const QStringList &amp;, const QChar&amp; sep );
+
+    QStringList entryList(const QString &amp;) const;
+    QStringList subkeyList(const QString &amp;) const;
+
+    //### remove non const versions in 4.0
+    QStringList readListEntry( const QString &amp;, bool * = 0 );
+    QStringList readListEntry( const QString &amp;, const QChar&amp; sep, bool * = 0 );
+    QString	readEntry( const QString &amp;, const QString &amp;def = QString::null, bool * = 0 );
+    int		readNumEntry( const QString &amp;, int def = 0, bool * = 0 );
+    double	readDoubleEntry( const QString &amp;, double def = 0, bool * = 0 );
+    bool	readBoolEntry( const QString &amp;, bool def = FALSE, bool * = 0 );
+
+    //### make those non-inlined in 4.0
+    QStringList readListEntry( const QString &amp;key, bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readListEntry( key, ok );
+    }
+    QStringList readListEntry( const QString &amp;key, const QChar&amp; sep, bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readListEntry( key, sep, ok );
+    }
+    QString	readEntry( const QString &amp;key, const QString &amp;def = QString::null,
+			   bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readEntry( key, def, ok );
+    }
+    int		readNumEntry( const QString &amp;key, int def = 0, bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readNumEntry( key, def, ok );
+    }
+
+    double	readDoubleEntry( const QString &amp;key, double def = 0, bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readDoubleEntry( key, def, ok );
+    }
+    bool	readBoolEntry( const QString &amp;key, bool def = FALSE, bool *ok = 0 ) const
+    {
+	QSettings *that = (QSettings*)this;
+	return that-&gt;readBoolEntry( key, def, ok );
+    }
+
+    bool	removeEntry( const QString &amp; );
+
+    void insertSearchPath( System, const QString &amp; );
+    void removeSearchPath( System, const QString &amp; );
+
+    void setPath( const QString &amp;domain, const QString &amp;product, Scope = Global );
+
+    void beginGroup( const QString &amp;group );
+    void endGroup();
+    void resetGroup();
+    QString group() const;
+
+    bool sync();
+
+private:
+    QSettingsPrivate *d;
+
+#if defined(Q_DISABLE_COPY)
+    QSettings(const QSettings &amp;);
+    QSettings &amp;operator=(const QSettings &amp;);
+#endif
+
+    QDateTime lastModificationTime( const QString &amp; );
+
+    friend class QApplication;
+};
+
+#endif // QT_NO_SETTINGS
+#endif // QSETTINGS_H
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE UI><UI>
+<class>AppServicesBase</class>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>appservicesbase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>334</width>
+            <height>341</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Application Services</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>6</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>4</number>
+        </property>
+        <widget>
+            <class>QListView</class>
+            <column>
+                <property>
+                    <name>text</name>
+                    <string>Service / Application</string>
+                </property>
+                <property>
+                    <name>clickable</name>
+                    <bool>true</bool>
+                </property>
+                <property>
+                    <name>resizeable</name>
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>lv</cstring>
+            </property>
+        </widget>
+        <widget>
+            <class>QButtonGroup</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>choices</cstring>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>Show services which have...</string>
+            </property>
+            <property>
+                <name>layoutMargin</name>
+            </property>
+            <property>
+                <name>layoutSpacing</name>
+            </property>
+            <vbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>6</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>2</number>
+                </property>
+                <widget>
+                    <class>QRadioButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>showmulti</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>many applications available</string>
+                        <comment>appended to "Show services which have..."</comment>
+                    </property>
+                    <property stdset="1">
+                        <name>checked</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QRadioButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>show1</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>one application available</string>
+                        <comment>appended to "Show services which have..."</comment>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QRadioButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>show0</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>no applications available</string>
+                        <comment>appended to "Show services which have..."</comment>
+                    </property>
+                </widget>
+            </vbox>
+        </widget>
+    </vbox>
+</widget>
+<connections>
+    <connection>
+        <sender>choices</sender>
+        <signal>clicked(int)</signal>
+        <receiver>appservicesbase</receiver>
+        <slot>loadState()</slot>
+    </connection>
+    <slot access="protected">loadState()</slot>
+</connections>
+</UI>

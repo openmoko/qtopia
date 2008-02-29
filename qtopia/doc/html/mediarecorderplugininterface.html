@@ -1,0 +1,68 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/mediarecorderplugininterface.cpp:258 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaRecorderPluginInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaRecorderPluginInterface Class Reference</h1>
+
+<p>The MediaRecorderPluginInterface class provides a method of obtaining a multimedia encoder.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediarecorderplugininterface-h.html">qtopia/mediarecorderplugininterface.h</a>&gt;</tt>
+<p><a href="mediarecorderplugininterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual MediaRecorderEncoder * <a href="#encoder"><b>encoder</b></a> () = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The MediaRecorderPluginInterface class provides a method of obtaining a multimedia encoder.
+<p> 
+<p> The abstract MediaRecorderPluginInterface class allows applications
+to obtain an encoder to record multimedia data to a file or other
+output device.
+<p> <p>See also <a href="mediarecorderencoder.html">MediaRecorderEncoder</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a href="mediarecorderencoder.html">MediaRecorderEncoder</a>&nbsp;* <a name="encoder"></a>MediaRecorderPluginInterface::encoder ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Creates and returns a new plugin encoder instance.  It is the
+responsibility of the caller to delete the instance before unloading
+the plugin interface library.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

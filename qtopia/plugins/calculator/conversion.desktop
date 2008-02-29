@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Conversion
+Comment[]=Convert between different metrics
+X-QPE-Library=libconversion.so
+[Translation]
+File=QtopiaPlugins
+Context=Calculator

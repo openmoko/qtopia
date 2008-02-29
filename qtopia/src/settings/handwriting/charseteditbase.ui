@@ -1,0 +1,263 @@
+<!DOCTYPE UI><UI>
+<class>CharSetEditBase</class>
+<include location="global">qtopia/resource.h</include>
+<pixmapfunction>Resource::loadPixmap</pixmapfunction>
+<widget>
+    <class>QWidget</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>CharSetEditBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>173</width>
+            <height>131</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Handwriting Setup</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <grid>
+        <property stdset="1">
+            <name>margin</name>
+            <number>2</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>2</number>
+        </property>
+        <widget row="0"  column="0"  rowspan="3"  colspan="2" >
+            <class>QListBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>charList</cstring>
+            </property>
+        </widget>
+        <widget row="0"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>newCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"new_character"</pixmap>
+            </property>
+        </widget>
+        <widget row="1"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>delCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"trash"</pixmap>
+            </property>
+        </widget>
+        <spacer row="2"  column="2" >
+            <property>
+                <name>name</name>
+                <cstring>Spacer1</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Vertical</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+        <widget row="3"  column="1" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>prevBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"arrowup"</pixmap>
+            </property>
+        </widget>
+        <widget row="6"  column="1" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>nextBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"arrowdown"</pixmap>
+            </property>
+        </widget>
+        <widget row="3"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>addBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"add_character"</pixmap>
+            </property>
+        </widget>
+        <widget row="4"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>removeBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"trash"</pixmap>
+            </property>
+        </widget>
+        <widget row="6"  column="2" >
+            <class>QToolButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>resetCharBtn</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string></string>
+            </property>
+            <property stdset="1">
+                <name>pixmap</name>
+                <pixmap>"reset_character"</pixmap>
+            </property>
+        </widget>
+        <widget row="4"  column="1"  rowspan="2"  colspan="1" >
+            <class>QLabel</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>itemDisplay</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>1/3</string>
+            </property>
+            <property stdset="1">
+                <name>alignment</name>
+                <set>AlignCenter</set>
+            </property>
+            <property>
+                <name>hAlign</name>
+            </property>
+        </widget>
+        <widget row="3"  column="0"  rowspan="4"  colspan="1" >
+            <class>QIMPenSettingsWidget</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>pw</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>3</hsizetype>
+                    <vsizetype>5</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>75</height>
+                </size>
+            </property>
+            <property stdset="1">
+                <name>maximumSize</name>
+                <size>
+                    <width>32767</width>
+                    <height>75</height>
+                </size>
+            </property>
+        </widget>
+        <spacer row="5"  column="2" >
+            <property>
+                <name>name</name>
+                <cstring>Spacer2</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Vertical</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+    </grid>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>QIMPenSettingsWidget</class>
+        <header location="local">pensettingswidget.h</header>
+        <sizehint>
+            <width>40</width>
+            <height>40</height>
+        </sizehint>
+        <container>1</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+        </sizepolicy>
+        <pixmap>image6</pixmap>
+        <signal>changeCharSet(int)</signal>
+        <signal>beginStroke()</signal>
+        <signal>stroke(QIMPenStroke *)</signal>
+        <signal>changeCharSet( QIMPenCharSet *)</signal>
+        <slot access="public">removeStroke()</slot>
+        <slot access="public">timeout()</slot>
+    </customwidget>
+</customwidgets>
+</UI>

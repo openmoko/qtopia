@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+
+use strict;
+package main;
+
+use File::stat;
+use File::Glob;
+use File::Copy;
+use File::Basename;
+use File::Path;
+
+use constant DEBUG => 0;
+
+my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+
+# Dummy variables (used in common.pm)
+my $opt_verbose = 0;
+my $shadow = 0;
+my $outpath = $ENV{QPEDIR};
+
+# Find the depot path
+my $depotpath = undef;
+open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
+while ( defined($_ = <IN>) ) {
+    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
+	$depotpath = $1;
+        if ( $depotpath eq '$$(QPEDIR)' ) {
+            $depotpath = $outpath;
+        }
+	last;
+    }
+}
+close IN;
+if ( !defined($depotpath) ) {
+    die "Can't find the depot path in $outpath/src/config.pri\n";
+}
+
+# Load some subs
+open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: ".$@?$@:$!."\n";
+close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
+
+if ( scalar(@ARGV) != 6 ) {
+    usage();
+}
+
+my $trtarget = shift;
+DEBUG and print "TRTARGET = $trtarget\n";
+my @translations = split(/\s+/, shift);
+DEBUG and print "TRANSLATIONS = ".join(" ", @translations)."\n";
+my @pdatargets = split(/\s+/, shift);
+DEBUG and print "PDATARGETS = ".join(" ", @pdatargets)."\n";
+my $dqtdir = shift;
+DEBUG and print "DQTDIR = $dqtdir\n";
+my $optqtopia = shift;
+DEBUG and print "OPTQTOPIA = $optqtopia\n";
+my $srcdir = shift;
+DEBUG and print "SRCDIR = $srcdir\n";
+
+
+chdir $srcdir;
+for my $lang ( @translations ) {
+    my @tsfiles;
+    for my $target ( $trtarget, @pdatargets ) {
+        DEBUG and print "$target-$lang.ts\n";
+        if ( -f "$target-$lang.ts" ) {
+            push(@tsfiles, "$target-$lang.ts");
+        }
+    }
+    if ( @tsfiles ) {
+        my $destfile = "$optqtopia/i18n/$lang/$trtarget.qm";
+        if ( ! -d dirname($destfile) ) {
+            mkpath(dirname($destfile));
+        }
+        my $copy = 0;
+        for my $tsfile ( @tsfiles ) {
+            if ( needCopy($tsfile, $destfile) ) {
+                $copy = 1;
+                last;
+            }
+        }
+        if ( $copy ) {
+            my $cmd = "$dqtdir/bin/lrelease ".join(" ", @tsfiles)." -qm $destfile";
+            print "$cmd\n";
+            system($cmd);
+        }
+    } else {
+        print "No .ts files found to suit language \"$lang\". Please run make lupdate in $srcdir.\n";
+        exit 1;
+    }
+}
+
+exit 0;
+
+sub usage
+{
+    print "Usage:  ".script_name($0)." trtarget \"translations\" \"pdatargets\" dqtdir optqtopia srcdir\n";
+    exit 2;
+}
+

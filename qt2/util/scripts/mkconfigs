@@ -1,0 +1,114 @@
+#!/bin/bash
+
+VERBOSE=
+LIST=
+SUBARGS=
+while [ -n "$2" ]
+do
+    case "$1" in
+       -v) VERBOSE=1
+       ;;
+       -p) LIST=1
+	    SUBARGS="$SUBARGS $1"
+       ;;
+    esac
+    shift
+done
+
+PLATFORM=$1
+
+# Only used with Qt/Embedded currently
+if [ "$PLATFORM" != "qws" ]
+then
+    PLATFORM=
+fi
+
+export TMAKEPATH=$TMAKEDIR/lib/linux-g++ # Any should do
+
+if [ ! -d $QTDIR/configs ]
+then
+    mkdir $QTDIR/configs
+fi
+
+if [ -z "$TMAKEDIR" ]
+then
+    if [ -d $HOME/tmake/lib ]
+    then
+	# Guess
+	TMAKEDIR=$HOME/tmake
+    else
+	echo '$TMAKEDIR not set properly - eg. ~/tmake'
+	exit 1
+    fi
+fi
+
+function mk {
+    platform=$1
+    config=$2
+    sysconf=configs/${platform#$PLATFORM/}-$config
+    run=yes
+    # If this variable is set, only update the file if the tmake stuff is newer
+    if [ "$UPDATE_CONFIGS" = yes -a -e $sysconf ]; then
+        run=no
+        for file in $TMAKEDIR/lib/$platform/*; do
+            if [ $file -nt $sysconf ]; then
+                run=yes
+                break
+            fi
+        done
+    fi
+    if [ $run = yes ]; then
+        TMAKEPATH=$QTDIR/tmake:$TMAKEDIR/lib/$platform:$TMAKEPATH \
+            tmake -t $config /dev/null >$sysconf
+    fi
+    if [ -s $sysconf  ]
+    then
+	if [ -n "$LIST" ] ; then echo $sysconf ; fi
+    else
+	rm $sysconf
+    fi
+}
+
+function hasconf {
+    grep -q '^[	 ]*'$2'[	 ]*=[	 ]*[^	 ]' $1
+}
+
+cd $QTDIR
+
+for platform in `(cd $TMAKEDIR/lib; /bin/ls -d ${PLATFORM:+$PLATFORM/}*-*)`
+do
+  case "$platform" in
+   win32*)
+      true;
+  ;; *)
+      tmconf=$TMAKEDIR/lib/$platform/tmake.conf
+      if [ -f $tmconf ]
+      then
+	# Everything can link statically
+	mk $platform static
+
+	# Static, with debugging?
+	if hasconf $tmconf 'TMAKE_[CL]FLAGS_DEBUG'
+	then
+	    mk $platform static-debug
+	else
+	    echo >&2 "$platform cannot do static-debug"
+	fi
+
+	# Dynamic linking?
+	if hasconf $tmconf 'TMAKE_LINK_SHLIB'
+	then
+	    mk $platform shared
+	    # Dynamic, with debugging?
+	    if hasconf $tmconf 'TMAKE_[CL]FLAGS_DEBUG'
+	    then
+		mk $platform shared-debug
+	    else
+		echo >&2 "$platform cannot do shared-debug"
+	    fi
+	else
+	    echo >&2 "$platform cannot do shared (or shared-debug)"
+	fi
+      fi
+  esac
+done

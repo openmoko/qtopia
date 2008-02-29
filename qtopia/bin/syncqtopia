@@ -1,0 +1,221 @@
+#!/usr/bin/perl
+############################################################################
+#
+# Synchronizes Qtopia header files - internal Trolltech tool.
+#   - Creates symlinks on Unix.
+#   - Copies files on Windows.
+#
+# Copyright (C) 1997-2002 by Trolltech AS.  All rights reserved.
+#
+############################################################################
+
+use strict;
+package main;
+
+use English;
+use File::stat;
+use File::Basename;
+use File::Copy;
+use File::Glob;
+
+if ( !$ENV{"QPEDIR"} ) {
+    die "syncqtopia: QPEDIR not defined";
+}
+my $fast = 0;
+my $force_relative = 0;
+my $shadow = 1;
+my $showonly = 0;
+my $showonlypriv = 0;
+my $opt_verbose = 0;
+
+my $outpath = $ENV{"QPEDIR"};
+my $QTDIR = $ENV{"QTDIR"};
+ 
+my $includedir = $outpath."/include/qtopia";
+
+my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+
+# Find the depot path
+my $depotpath = undef;
+open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
+while ( defined($_ = <IN>) ) {
+    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
+	$depotpath = $1;
+        if ( $depotpath eq '$$(QPEDIR)' ) {
+            $depotpath = $outpath;
+        }
+	last;
+    }
+}
+close IN;
+if ( !defined($depotpath) ) {
+    die "Can't find the depot path in $outpath/src/config.pri\n";
+}
+
+# Load some subs
+open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: ".$@?$@:$!."\n";
+close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
+
+if ( -d "/System/Library/Frameworks" ) {
+    $force_relative = 1;
+}
+
+while ( $#ARGV >= 0 ) {
+    if ( $ARGV[0] eq "-fast" ) {
+	$fast = 1;
+    } elsif ( $ARGV[0] eq "-inc" ) {
+	shift;
+	$includedir = $ARGV[0];
+	if ( $includedir !~ /^\// ) {
+	    $includedir = `pwd`;
+	    chomp $includedir;
+	    $includedir .= "/". $includedir;
+	}
+    } elsif ( $ARGV[0] eq "-show" ) {
+	$showonly = 1;
+    } elsif ( $ARGV[0] eq "-showpriv" ) {
+	$showonlypriv = 1;
+    } elsif ( $ARGV[0] eq "-windows" ) {
+	$isWindows = 1;
+    } elsif ( $ARGV[0] eq "-relative" ) {
+	$force_relative = 1;
+	$shadow = 0;
+    } elsif ( $ARGV[0] eq "-verbose" ) {
+	print "verbose\n";
+	$opt_verbose = 1;
+	debugMsg("test");
+    }
+    shift;
+}
+    
+undef $INPUT_RECORD_SEPARATOR;
+
+debugMsg( "making " . $outpath . "/include" );
+mkdir($outpath . "/include", 0777);
+mkdir($outpath . "/include/qtopia", 0777);
+mkdir($outpath . "/src", 0777);
+mkdir($outpath . "/src/qtopiadesktop", 0777);
+mkdir($outpath . "/src/qtopiadesktop/include", 0777);
+chdir($outpath);
+# a map of where headers can be found to where headers are to be put
+my %includeDirs = ( "libraries/qtopia" => "/include/qtopia", "libraries/qtopia1" => "/include/qtopia", "libraries/qtopia2" => "/include/qtopia",
+		"libraries/qtopiapim" => "/include/qtopia/pim", 
+		"libraries/qtopiadb" => "/include/qtopia/db", "libraries/qtopiacalc" => "/include/qtopia/calc", 
+		"libraries/qtopiamail" => "/include/qtopia/mail", "libraries/qtopiasql" => "/include/qtopia/sql",
+		"libraries/qtopiaphone" => "/include/qtopia/phone",
+		"libraries/qtopiawap" => "/include/qtopia/wap",
+		"libraries/qtopiasmil" => "/include/qtopia/smil",
+		"libraries/handwriting" => "/include/qtopia/mstroke",
+		"libraries/qtopiaphonestatus" => "/include/qtopia/phone",
+		"libraries/qcopbridge" => "/include/qtopia/qcopbridge",
+		"qtopiadesktop/common" => "/src/qtopiadesktop/include/common",
+		"qtopiadesktop/libraries/qdbase" => "/src/qtopiadesktop/include");
+
+#make these extra links 
+my @files;
+my @pfiles;
+my $destDir;
+my $f;
+my $key;
+my $file;
+my $cmdLine;
+
+for $key (keys %includeDirs){
+    $destDir = $includeDirs{$key};
+    @files = find_files( "$depotpath/src/". $key, "^[-a-z0-9]*(?:_[^p].*)?\\.h\$", 0);
+    @pfiles = find_files( "$depotpath/src/". $key, "[-z0-9]*[__][p]\\.h\$" , 0 );
+        
+    if ( $showonly ) {
+	foreach ( @files ) {
+	    print "$_\n";
+	}
+    }else{
+	debugMsg( "mkdir " . $outpath . $destDir );
+	mkdir($outpath . $destDir, 0777);
+	foreach $file (@files){
+	    $f = basename($file, ""); 
+	    symlink_file($file, $outpath . $destDir."/".$f);
+	}
+    }
+    
+    if ( $showonlypriv ) {
+	foreach ( @pfiles ) {
+	    print "$_\n";
+	}
+    }else{
+	debugMsg( "mkdir " . $outpath . $destDir . "/private" );
+        mkdir($outpath . $destDir . "/private" , 0777);
+	foreach $file (@pfiles){
+	    $f = basename($file, "");
+	    symlink_file($file, $outpath . $destDir . "/private/" . $f);
+	}
+    }
+}
+@files = find_files("$depotpath/src/libraries/qtopia/backend", ".*\\.h", 0);
+if ( $showonly ) {
+    foreach (@files){
+	print "$_\n";
+    }
+}else{
+    foreach $file (@files){
+	$f = basename($file, "");
+	symlink_file($file, $outpath . "/include/qtopia/private/" . $f);
+    }
+}
+
+symlink_file($outpath . "/include/qtopia/qwizard.h", $outpath . "/include/qwizard.h");
+
+if ($isWindows){        
+    # include/qpe is not being made anymore, is the next line still needed?
+    if ( -d $outpath."/include/qpe" ) {
+	system("rmdir /Q /S $outpath\\include\\qpe\\");
+    }
+    print `"xcopy /Q /E /Y /S $outpath\\include\\qtopia\\*.* $outpath\\include\\qpe\\"`;
+}else{
+    symlink_file($outpath. "/include/qtopia", $outpath. "/include/qpe");
+}
+
+exit 0;
+
+
+###################################################################
+
+# Helper functions
+
+# Finds files
+#
+# Examples:
+#   find_files("/usr","\.cpp$",1)   - finds .cpp files in /usr and below
+#   find_files("/tmp","^#",0)	    - finds #* files in /tmp
+sub find_files {
+    my($dir,$match,$descend) = @_;
+    my($file,$p,@files);
+    local(*D);
+    $dir =~ s=\\=/=g;
+    ($dir eq "") && ($dir = ".");
+    if ( opendir(D,$dir) ) {
+	if ( $dir eq "." ) {
+	    $dir = "";
+	} else {
+	    ($dir =~ /\/$/) || ($dir .= "/");
+	}
+	foreach $file ( readdir(D) ) {
+	    next if ( $file  =~ /^\.\.?$/ );
+	    $p = $dir . $file;
+	    ($file =~ /$match/) && (push @files, $p);
+	    if ( $descend && -d $p && ! -l $p ) {
+		push @files, &find_files($p,$match,$descend);
+	    }
+	}
+	closedir(D);
+    }
+    return @files;
+}
+

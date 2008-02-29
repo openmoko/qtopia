@@ -1,0 +1,105 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/ir.cpp:45 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Ir Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Ir Class Reference</h1>
+
+<p>The Ir class implements basic support for sending objects over an
+infrared communication link.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="ir-h.html">qtopia/ir.h</a>&gt;</tt>
+<p><a href="ir-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#Ir"><b>Ir</b></a> ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn>void <a href="#send"><b>send</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;fn, const&nbsp;QString&nbsp;&amp;&nbsp;description, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype = QString::null )</li>
+<li class=fn>void <a href="#send-2"><b>send</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;doc, const&nbsp;QString&nbsp;&amp;&nbsp;description )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#done"><b>done</b></a> ( Ir&nbsp;*&nbsp;ir )</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>bool <a href="#supported"><b>supported</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Ir class implements basic support for sending objects over an
+infrared communication link.
+<p> Both <a href="doclnk.html">DocLnk</a> objects and files can be
+sent to another device via the infrared link using the <a href="#send">send</a>()
+function. When the send has completed the <a href="#done">done</a>() signal is
+emitted.
+<p> The <a href="#supported">supported</a>() function returns whether the device supports
+infrared communication or not.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Ir"></a>Ir::Ir ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs an Ir object. The <em>parent</em> and <em>name</em> classes are the
+standard QObject parameters.
+
+<h3 class=fn>void <a name="done"></a>Ir::done ( <a href="ir.html">Ir</a>&nbsp;*&nbsp;ir )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted by <em>ir</em>, when the send comand has been processed.
+
+<h3 class=fn>void <a name="send"></a>Ir::send ( const&nbsp;QString&nbsp;&amp;&nbsp;fn, const&nbsp;QString&nbsp;&amp;&nbsp;description, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype = QString::null )
+</h3>
+Sends the object in file <em>fn</em> over the infrared link. The <em>description</em> is used in the text shown to the user while sending
+is in progress. The optional <em>mimetype</em> parameter specifies the
+mimetype of the object. If this parameter is not set, it is
+determined by the the filename's suffix.
+<p> <p>See also <a href="#done">done</a>().
+
+<h3 class=fn>void <a name="send-2"></a>Ir::send ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;doc, const&nbsp;QString&nbsp;&amp;&nbsp;description )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Uses the <a href="applnk.html#file">DocLnk::file</a>() and <a href="applnk.html#type">DocLnk::type</a>() of <em>doc</em>.
+<p> <p>See also <a href="#done">done</a>().
+
+<h3 class=fn>bool <a name="supported"></a>Ir::supported ()<tt> [static]</tt>
+</h3>
+Returns TRUE if the system supports infrared communication;
+otherwise returns FALSE.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Qt Toolkit -  Installing Qt/Embedded</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style></head><body bgcolor="#ffffff">
+<p>
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+<h1 align="center"> Installing Qt/Embedded</h1><br clear="all">
+This installation procedure is written for Linux. It may need
+to be modified for other platforms.
+<p>
+<h2>Required packages</h2>
+<p>
+To install and build Qt/Embedded you need several packages. These packages are: 
+<pre> <a href="qt.html">Qt</a>/Embedded 2.3.12 (or higher, but always a 2.3 version) Qt 2.3.2 for X11 (for emulated desktop development)
+tmake 1.13 (or higher)
+</pre>
+<p>
+Packages for the United States have a different license file. These packages have a "-us" somewhere in the filename, so please use that file instead if it is appropriate to your circumstances. Once installed the package will be in exactly the same place as the "rest of the world" package, it is only the LICENSE file that is different.
+<p>
+In this document we will assume that you have downloaded all packages into ~/dev and are using that as the base directory for the installation and build processes.
+<p>
+<h2>Install the packages</h2>
+<p>
+In this step the required packages are extracted onto your computer and the several enviroment variables are initialized.
+<p>
+<h3>Install TMake</h3>
+<p>
+TMake is used for building Qt/Embedded
+<p>
+<pre>cd ~/dev
+tar -xzf tmake-1.13.tar.gz
+export TMAKEDIR=$PWD/tmake-1.13
+</pre>
+<p>
+<h3>Install Qt 2.3.2</h3>
+<p>
+Qt 2.3.2 is required to build tools such as qvfb that are used to simulate an embedded device on your desktop machine. This library is NOT used on the embedded device.
+<p>
+<pre>cd ~/dev
+tar -xzf qt-x11-2.3.2-commercial.tar.gz
+export QT2DIR=$PWD/qt-2.3.2
+</pre>
+<p>
+<h3>Install Qt/Embedded</h3>
+<p>
+We assume you have the commercial Qt/Embedded package. If you use the free package 
+you should adjust the filenames accordingly.
+<p>
+<pre>cd ~/dev
+tar -xzf qt-embedded-2.3.12-commercial.tar.gz
+export QTEDIR=$PWD/qt-2.3.12
+</pre>
+<p>
+You should now have installed all required packages. As long as you have set the environment variables for the other packages correctly you need not worry about them.
+<p>
+IMPORTANT: After you have installed all packages you should have a set of environment
+variables that point to each and every package that you installed. These environment 
+variables are crucial for building Qt/Embedded, so please verify that they are all correct. 
+You should have the following environment variables set:
+<p>
+<pre>TMAKEDIR : points to the Tmake tool used for building Qt-Embedded 
+QT2DIR : points to the Qt-X11 2.3.2 directory 
+QTEDIR : points to the Qt-Embedded 2.3.12 directory
+</pre>
+<p>
+After you have installed all packages you no longer need the tar files. These files 
+can be deleted or kept them somewhere safe just in case you decide to reinstall everything from scratch. 
+<p>
+<h2>Compiling Qt/Embedded</h2>
+<p>
+<h3>Build Qt 2.3.2</h3>
+<p>
+To build Qt 2.3.2 you must do the following:
+<p>
+<pre>cd $QT2DIR
+export TMAKEPATH=$TMAKEDIR/lib/linux-g++
+export QTDIR=$QT2DIR
+export PATH=$QTDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+./configure -no-xft
+make
+mkdir $QTEDIR/bin
+cp bin/uic $QTEDIR/bin/
+</pre>
+<p>
+<h3>Build QVfb</h3>
+<p>
+In this step we build and link the qvfb sources from Qt/Embedded 2.3.12 against the static Qt library from Qt 2.3.2.
+<p>
+<pre>export TMAKEPATH=$TMAKEDIR/lib/linux-g++
+export QTDIR=$QT2DIR
+export PATH=$QTDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+cd $QTEDIR/tools/qvfb
+tmake -o Makefile qvfb.pro
+make
+mv qvfb $QTEDIR/bin/
+</pre>
+<p>
+<h3>Build Qt/Embedded</h3>
+<p>
+To build Qt/Embedded you must do the following:
+<p>
+<pre>cd $QTEDIR
+export TMAKEPATH=$TMAKEDIR/lib/qws/linux-x86-g++
+export QTDIR=$QTEDIR
+export PATH=$QTDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+./configure -no-xft -qvfb -depths 4,8,16,32 [extra options: see below]
+make
+</pre>
+<p>
+Extra options:
+<p>
+You may also want to use the configure options <i>-system-jpeg</i> and <i>-gif</i> for jpeg and gif support.
+<p>
+The configuration system is designed to allow platform-specific options to be added, but in general all Linux system which have framebuffer support can use the "linux-generic-g++" platform.
+<p>
+For help on the additional configure options run <em>./configure</em> with <em>--help</em> .
+<p>
+<h3>Enable Linux framebuffer support</h3>
+<p>
+For application development, we recommend that you use the <a href="qvfb-qws.html">Qt/Embedded virtual framebuffer</a>. But to actually put Qt/Embedded on a device running Linux, you need to ensure that the Linux kernel has framebuffer support.
+<p>
+You may need to recompile your kernel to enable the framebuffer.
+<p>
+Handheld devices running Linux, such as the SL-5000D and the iPAQ, and most other embedded Linux systems that have a graphical display will already have a framebuffer.
+<p>
+This document does not describe how to do this; the <a href=HOWTO-framebuffer.html>HOWTO-Framebuffer page</a> contains a short description. (You should see a penguin logo at boot time when the frame buffer is enabled.)
+<ul>
+<li>For Matrox G100/G200/G400, use the matrox frame buffer driver.</li>
+<li>For NVidia TNT cards, use the nvidia frame buffer driver.</li>
+<li>For SciTech Snap cards, use the snap frame buffer driver. For Snap product details see <a href="http://www.scitechsoft.com/">http://www.scitechsoft.com/</a></li>
+<li>For using a transformed frame buffer, use the transformed frame buffer driver.</li>
+<li>For Mach64 and most other cards, use the vesafb driver.</li>
+<li>For Mach64 and most other cards, use the vesafb driver.</li>
+<li>For VGA-compatible cards that are not VESA 2.0 compliant, use the VGA16 driver.</li>
+</ul>
+<p>
+The frame buffer may also need a boot parameter to be enabled. See <tt>/usr/src/linux/Documentation/fb</tt> for details.
+<p>
+The <tt>fbset</tt> program, which is included in most Linux/x86 distributions, may be used to switch video modes without rebooting the system. The video mode active when the server is started will be used. Note: <tt>fbset</tt> does not work with the vesafb driver.
+<p>
+<h3>Runing the launcher demo</h3>
+<p>
+To run the laucher demo in a real framebuffer:
+<p>
+<pre>cd $QTEDIR/examples/launcher
+./start_demo
+</pre>
+<p>
+To run the launcher demo in a virtual framebuffer :
+<p>
+<pre>cd $QTEDIR/examples/launcher
+export QTDIR=$QTEDIR
+export PATH=$QTEDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QTEDIR/lib:$QT2DIR/lib:$LD_LIBRARY_PATH
+qvfb -width 640 -height 480 &amp;
+sleep 10
+./launcher -qws
+</pre>
+<p>
+<h3>Creating support for a new device</h3>
+<p>
+It is recommended that a new configration be created for new a target device. It is through configuration files
+that compilation tools to use and compilation directives are specified.
+Typically this involves: 
+<ul>
+<li>Identifying the existing suported platform that closest matches your device</li>
+<li>Copying the existing configuration files to a new platform name</li>
+<li>Customizing the newly created configuation files</li>
+</ul>
+<p>
+For example to create a <em>linux-myarm-g++</em> configuration that uses shared libraries firstly:
+<p>
+<pre>cp -r $TMAKEDIR/lib/qws/linux-arm-g++ $TMAKEDIR/lib/qws/linux-myarm-g++
+cp -r $QTEDIR/configs/linux-arm-g++-shared $QTEDIR/configs/linux-myarm-g++-shared
+</pre>
+<p>
+Then edit <em>$TMAKEDIR/lib/qws/linux-myarm-g++</em> and <em>$QTEDIR/configs/linux-myarm-g++-shared</em> choosing the compiler,
+linker and changing the compilation directives as needed.
+<p>
+<h3>Building Qt/Embedded for the device</h3>
+<p>
+To build Qt/Embedded for a device, for example <em>linux-myarm-g++</em> , you must do the following:
+<p>
+<pre>cd $QTEDIR
+export TMAKEPATH=$TMAKEDIR/lib/qws/linux-myarm-g++
+export QTDIR=$QTEDIR
+export PATH=$QTDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+./configure -xplatform linux-myarm-g++ -no-xft -no-qvfb -depths 4,8,16,32 [extra options: see below]
+make
+</pre>
+<p>
+Extra options:
+<p>
+You may also want to use the configure options <em>-system-jpeg</em> and <em>-gif</em> for jpeg and gif support.
+<p>
+For help on the additional configure options run <em>./configure</em> with <em>--help</em>
+<p>
+<h3>Troubleshooting</h3>
+<p>
+<ul>
+<li> Compilation errors refering to freetype/freetype.h:
+<p>
+The most likely cause is that the feature configuration type selected has freetype enabled.
+Reconfigure Qt/Embeddeed selecting a smaller feature configration type, for example "large". 
+<li>If launcher application does not appear inside QVfb then try removing the old Qt/E temporary data. eg:
+<p>
+<pre>killall qvfb
+rm -rf "/tmp/qtembedded-$LOGNAME/"
+rm -rf /tmp/qtembedded-0/
+</pre>
+<p>
+</li>
+<li>Unable to connect to mouse:
+<p>
+To kill gpm, run the following command as root: <pre> gpm -k
+</pre>
+</li>
+<li>Applications do not run on real framebuffer:
+<p>
+In some cases, if the server does not work, it will work when run as root. If this happens, there are permissions problems with your filesystem (eg. /dev/fb0 is not writeable by you).
+<p>
+Show processes using the framebuffer: <pre> fuser -v /dev/fb0
+</pre>
+<p>
+Kill such processes: <pre> fuser -vk /dev/fb0
+</pre>
+<p>
+or harsher: <pre> fuser -k -KILL /dev/fb0
+</pre>
+</li>
+<li>Show existing semaphores: <pre> ipcs
+</pre>
+<p>
+Remove semaphores: <pre> ipcrm
+</pre>
+<p>
+The communication between client and QWS server for QWS ID, eg 0, is done through the socket <tt>/tmp/qtembedded-0/.QtEmbedded-0</tt>; sometimes it may need to be deleted. (eg. if you run Qt/Embedded as root then later as an unprivileged user).</li>
+<p>
+</ul>
+<p>
+<h3>Change permissions</h3>
+<p>
+To run Qt/Embedded, you need write access to the framebuffer device <tt>/dev/fb0</tt>.
+<p>
+You also need read access to the mouse device. (Note that <tt>/dev/mouse</tt> is normally a symbolic link; the actual mouse device must be readable.)
+<p>
+<h3>Customization</h3>
+<p>
+The Qt/Embedded library can be reduced in size by <a href=features.html>removing unneeded features</a>.
+
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

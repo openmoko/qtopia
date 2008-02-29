@@ -1,0 +1,118 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/todoaccess.cpp:52 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TodoAccess Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>TodoAccess Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The TodoAccess class provides a safe API for accessing PimTasks.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="todoaccess-h.html">qtopia/pim/todoaccess.h</a>&gt;</tt>
+<p><a href="todoaccess-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#TodoAccess"><b>TodoAccess</b></a> ()</li>
+<li class=fn><a href="#~TodoAccess"><b>~TodoAccess</b></a> ()</li>
+<li class=fn>bool <a href="#editSupported"><b>editSupported</b></a> () const</li>
+<li class=fn>void <a href="#updateTask"><b>updateTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</li>
+<li class=fn>void <a href="#removeTask"><b>removeTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</li>
+<li class=fn>void <a href="#addTask"><b>addTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</li>
+<li class=fn>PimTask <a href="#taskForId"><b>taskForId</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#todoListUpdated"><b>todoListUpdated</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The TodoAccess class provides a safe API for accessing PimTasks.
+<p> TodoAccess provides a safe API for accessing PimTasks stored by
+Qtopia's Todo application.  TodoAccess tries to keep the Todo
+application in sync with modifications, and alerts the user of
+the library when modifications have been made by other applications.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="TodoAccess"></a>TodoAccess::TodoAccess ()
+</h3>
+Constructor.
+
+<h3 class=fn><a name="~TodoAccess"></a>TodoAccess::~TodoAccess ()
+</h3>
+Cleans up the the Addressbook access.
+
+<h3 class=fn>void <a name="addTask"></a>TodoAccess::addTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
+</h3>
+If supported will assign a new unique ID to <em>task</em> and add the task to the
+pim data.
+<p> Adding tasks requires the Tasks service to be available.
+<p> If the task is added correctly, an addedTask(int,PimTask) message will be 
+sent to the QPE/PIM channel.  The task in this message can be used to determine
+the assigned ID.
+
+<h3 class=fn>bool <a name="editSupported"></a>TodoAccess::editSupported () const
+</h3>
+Returns TRUE if it is possible to add, remove and update tasks in
+the pim data.  Otherwise returns FALSE.
+<p> Adding, removing and tasks contacts requires the Tasks service to be
+available
+
+<h3 class=fn>void <a name="removeTask"></a>TodoAccess::removeTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
+</h3>
+If supported will remove <em>task</em> from the pim data;
+<p> Removing tasks requires the Tasks service to be available.
+
+<h3 class=fn><a href="pimtask.html">PimTask</a> <a name="taskForId"></a>TodoAccess::taskForId ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const
+</h3>
+If there exists an task with the uid <em>u</em>, return 
+that task.  Returns a null task if otherwise.
+<p> If <em>ok</em> is non-null, *ok is set to TRUE if the task is
+found, and FALSE if the task is not found.
+
+<h3 class=fn>void <a name="todoListUpdated"></a>TodoAccess::todoListUpdated ()<tt> [signal]</tt>
+</h3>
+
+Emitted whenever the todo list is updated.
+
+<h3 class=fn>void <a name="updateTask"></a>TodoAccess::updateTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
+</h3>
+If supported will update <em>task</em> in the pim data.
+<p> Updating tasks requires the Tasks service to be available.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

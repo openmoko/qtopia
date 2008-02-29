@@ -1,0 +1,158 @@
+#!/usr/bin/perl
+
+use strict;
+
+# External perl modules
+use File::Basename;
+
+use constant DEBUG => 0;
+
+# Usage: nct_lupdate [ -depot path ] "lang1 lang2 ... langn" files
+
+my $global = 0;
+my $depot;
+my $warn_on = 1;
+if ( $ARGV[0] eq "-nowarn" ) {
+    shift(@ARGV);
+    $warn_on = 0;
+}
+if ( $ARGV[0] eq "-depot" ) {
+    shift(@ARGV);
+    $global = 1;
+    $depot = shift(@ARGV);
+}
+my @LANGS = split(/\s+/,shift(@ARGV));
+my %contextinfo;
+
+for my $file ( @ARGV ) {
+    open CONFIG, "$file" or die "Cannot read $file\n";
+    my @contents = <CONFIG>;
+
+    DEBUG and print "FL $file\n";
+    my $context;
+    my $tsfile;
+    my %v;
+    my %trcomments;
+    
+    # There are various formats this script can read...
+    if ( basename($file) eq "zone.tab" ) {
+	# Read a zone.tab file
+	$context = "TimeZone";
+	$tsfile = "timezone";
+	#cat zone.tab | awk '/^[^#]/{print $3}' | sed 's/\//\n/g' | sort -u | sed 's/_/ /g'
+	CONFIG: for ( @contents ) {
+	    next if ( /^\s*#/ );
+	    my @bits = split;
+	    my $citystring = $bits[2];
+	    for ( split(/\//, $citystring) ) {
+		s/_/ /g;
+		$v{$_} = $_;
+	    }
+	}
+    } else {
+	# Read a Config-format file
+	my $group = "";
+	for ( my $repeat = 1; $repeat; ) {
+	    $repeat = 0;
+	    CONFIG: for ( @contents ) {
+		if ( /^\[(.*)\]$/ ) {
+		    $group = $1;
+		} else {
+		    my ( $key, $value ) = ( /([^=]*?)\s*=\s*(.*)/ );
+		    DEBUG and print "KV $key = $value\n";
+		    if ( $key =~ /(.*)\[(.*)\]$/ ) {
+			if ( $group eq "Translation") {
+			    if ($2 && $1 eq "Comment") {
+				$trcomments{"$2"} = $value;
+			    }
+			} else {
+			    if ( $2 ) {
+				warn "WARNING: Old-style translation for $1 in $file\n";
+			    }
+			    $v{"$group/$1"} = $value;
+			}
+		    }
+		    if ( $group eq "Translation" ) {
+			if ( $key eq "Context" ) {
+			    $context = $value;
+			} elsif ( $key eq "File" ) {
+			    if ( ! $tsfile ) {
+				# Start from the top because some files have the File= line after foo[]= entries
+				$tsfile = $value;
+				$repeat = 1;
+				last CONFIG;
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    if ( $tsfile && $context ) {
+	#file => context => list
+	my %info;
+        my $comment;
+        my $value;
+	if ( $contextinfo{$tsfile} ) {
+	    my $tmp = $contextinfo{$tsfile};
+	    %info = %$tmp;
+	}
+	my %list;
+	if ( $info{$context} ) {
+	    my $tmp = $info{$context};
+	    %list = %$tmp;
+	}
+        for my $key ( keys %v ) {
+            $value = $v{$key};
+            if (exists $trcomments{$key}) {
+                $comment = $trcomments{$key};
+            } else {
+                $comment = "";
+            }
+            $list{$value} = $comment;
+        }
+	$info{$context} = \%list;
+	$contextinfo{$tsfile} = \%info;
+    } elsif ( $warn_on ) {
+	warn "Missing translation info for file $file\n";
+    }
+
+    close CONFIG;
+}
+
+DEBUG and print "\n\n\n\n";
+
+my $tmp = "tr$$.cpp";
+for my $tsfile ( keys %contextinfo ) {
+    DEBUG and print "File $tsfile\n";
+    my $info = $contextinfo{$tsfile};
+    open CPP, ">$tmp" or die "Cannot write $tmp\n";
+	for my $context ( keys %$info ) {
+	    DEBUG and print "Context $context\n";
+	    my $list = $$info{$context};
+	    for my $value ( keys %$list ) {
+		DEBUG and print "Message $value\n";
+		print CPP "translate(\"$context\",\"$value\", \"$$list{$value}\", UTF8);\n"
+	    }
+	}
+    close CPP;
+    for my $lang ( @LANGS ) {
+	my $filename;
+	if ( $global ) {
+	    $filename = $depot."/i18n/".$lang;
+            if ( ! -e $filename ) {
+                mkdir ($filename, 0755) || print "Failed to create $filename";
+            }
+	    $filename = $filename."/".$tsfile.".ts";
+	} else {
+	    $filename = $tsfile."-".$lang.".ts";
+	}
+	my @command = ("lupdate", "$tmp", "-ts", $filename);
+	DEBUG and print join(" ", @command)."\n";
+	system(@command);
+    }
+    unlink $tmp;
+}
+exit 0;
+

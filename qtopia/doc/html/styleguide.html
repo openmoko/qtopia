@@ -1,0 +1,308 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/styleguide.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Style Guide: General</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Style Guide: General</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Qtopia Phone Keys
+</a>
+<li><a href="#3"> Standard Icons and Usage
+</a>
+<li><a href="#4"> Help File Content 
+</a>
+<ul>
+<li><a href="#4-1"> Valid HTML Tags
+</a>
+<li><a href="#4-2"> Device-specific Help 
+</a>
+<li><a href="#4-3"> Using Images Optimized for the Device
+</a>
+<li><a href="#4-4"> Specifying the Help to Install
+</a>
+<li><a href="#4-5"> Context Sensitive Help
+</a>
+</ul>
+<li><a href="#5"> Interprocess Actions
+</a>
+<li><a href="#6"> Qtopia Desktop
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the rules to be followed when designing a Qtopia application. The focus is on consistency, think very carefully before departing from the preferred style.
+<p> For ease of use the Qtopia Style Guide has been divided into several files:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Chapter
+<th valign="top">Content
+<tr bgcolor="#f0f0f0">
+<td valign="top">General (this document)
+<td valign="top">Key binding, icons and their usage, Qtopia Desktop and formatting online help.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><a href="styleguide-app-design.html">Application Design</a>
+<td valign="top">Outlines the styles that should be followed when creating a new Qtopia application including navigational flow, lists, and viewing items.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><a href="styleguide-naming.html">Naming Conventions</a>
+<td valign="top">Outlines the conventions for the use of capitals, abbreviations, acronyms and the formatting of labels. See Also <a href="styleguide-widgets.html">styleguide-widgets.html</a>
+<tr bgcolor="#d0d0d0">
+<td valign="top"><a href="styleguide-widgets.html">Widgets</a>
+<td valign="top">Outlines the styles that should be followed when creating or modifying widgets. See Also <a href="styleguide-naming.html">styleguide-naming.html</a>
+<tr bgcolor="#f0f0f0">
+<td valign="top"><a href="styleguide-online-help.html">Online Help</a>
+<td valign="top">Outlines the styles that should be followed when creating or modifying online help files.
+</table></center>
+<p> <h2> Qtopia Phone Keys
+</h2>
+<a name="2"></a><p> Qtopia requires the following keys:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Name
+<th valign="top">Alternative representations
+<th valign="top">Usual binding
+<tr bgcolor="#d0d0d0"> <td valign="top">Previous
+<td valign="top">Left, Up, or Down Arrow*
+<td valign="top">Previous item or value.
+<tr bgcolor="#f0f0f0"> <td valign="top">Next
+<td valign="top">Right, Down, or Up Arrow*
+<td valign="top">Next item or value.
+<tr bgcolor="#d0d0d0"> <td valign="top">Select
+<td valign="top">Yes, OK
+<td valign="top">Activate item or confirm changes.
+<tr bgcolor="#f0f0f0"> <td valign="top">Back
+<td valign="top">No, Cancel
+<td valign="top">Delete text or close window.
+<tr bgcolor="#d0d0d0"> <td valign="top">1
+<td valign="top">
+<td valign="top">1 or space
+<tr bgcolor="#f0f0f0"> <td valign="top">2..9
+<td valign="top">
+<td valign="top">Digits with phone key lettering.
+<tr bgcolor="#d0d0d0"> <td valign="top">0
+<td valign="top">
+<td valign="top">0 or Function 1
+<tr bgcolor="#f0f0f0"> <td valign="top">*
+<td valign="top">
+<td valign="top">* or Function 2
+<tr bgcolor="#d0d0d0"> <td valign="top">#
+<td valign="top">
+<td valign="top"># or Function 3
+</table></center>
+<p> Qtopia supports the following additional keys:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Name
+<th valign="top">Alternative representations
+<th valign="top">Usual binding
+<tr bgcolor="#f0f0f0"> <td valign="top">Menu
+<td valign="top">
+<td valign="top">Invoke context menu.
+<tr bgcolor="#d0d0d0"> <td valign="top">Up
+<td valign="top">Up Arrow
+<td valign="top">Item physically above
+<tr bgcolor="#f0f0f0"> <td valign="top">Down
+<td valign="top">Down Arrow
+<td valign="top">Item physically below.
+<tr bgcolor="#d0d0d0"> <td valign="top">Left
+<td valign="top">Left Arrow
+<td valign="top">Item physically to the left.
+<tr bgcolor="#f0f0f0"> <td valign="top">Right
+<td valign="top">Right Arrow
+<td valign="top">Item physically to the right.
+<tr bgcolor="#d0d0d0"> <td valign="top">Delete
+<td valign="top">Cancel, Clear
+<td valign="top">Delete item.
+<tr bgcolor="#f0f0f0"> <td valign="top">Jog
+<td valign="top">Wheel up/down
+<td valign="top">Scroll view or values.
+<tr bgcolor="#d0d0d0"> <td valign="top">F\ex
+<td valign="top">Function keys
+<td valign="top">Invoke global operation.
+</table></center>
+<p> * on some phones, two keys represent both vertical and horizontal directions of suggested motion. Sometimes these are a Left/Up button and a Right/Down button, at other times they are a Left/Down button and a Right/Up button.
+<p> <h2> Standard Icons and Usage
+</h2>
+<a name="3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511">
+<th valign="top">Icon
+<th valign="top">Component
+<th valign="top">Filename
+<th valign="top">Description of Use
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/back.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">back.png
+<td valign="top">Done: Finished using the current screen and wish to return to previous window.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/backspace.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">backspace.png
+<td valign="top">Delete text: Deletes (backspace) 1 character.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/cancel.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">cancel.png
+<td valign="top">Cancel: Removes all changes performed on the current item (transaction).
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/ok.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">ok.png
+<td valign="top">Accept: Accepts and disengages the current information/data in the currently selected widget.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/options.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">options.png
+<td valign="top">Open/Close Menu: Displays the current window's context menu.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/select.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">select.png
+<td valign="top">Engage/Select: Selects the current item, widget or grouping.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/view.png" width="16" height="16"></center> <td valign="top">Context Bar
+<td valign="top">view.png
+<td valign="top">More Information: Selects and displays information about the currently focused item.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/beam.png" width="14" height="14"></center> <td valign="top">Context Menu
+<td valign="top">beam.png
+<td valign="top">Beam: Sends the currently viewed item via IR.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/edit.png" width="14" height="14"></center> <td valign="top">Context Menu
+<td valign="top">edit.png
+<td valign="top">Edit: Edits the currently viewed item.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/find.png" width="14" height="14"></center> <td valign="top">Context Menu
+<td valign="top">find.png
+<td valign="top">Find/Search: Locates an item.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/help_icon.png" width="16" height="16"></center> <td valign="top">Context Menu
+<td valign="top">help_icon.png
+<td valign="top">Help: Displays the help documentation for the current window.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><center><img src="../pics/new.png" width="14" height="14"></center> <td valign="top">Context Menu
+<td valign="top">new.png
+<td valign="top">New: Creates a new item.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><center><img src="../pics/trash.png" width="16" height="16"></center> <td valign="top">Context Menu
+<td valign="top">trash.png
+<td valign="top">Delete item: Deletes the currently viewed item.
+</table></center>
+<p> <!-- index HelpFile --><a name="HelpFile"></a>
+<p> <h2> Help File Content 
+</h2>
+<a name="4"></a><p> An application can have one or more help pages that can be viewed by either: 
+<ul>
+<li> selecting the <tt>Help</tt> menu entry in Qtopia Phone
+<li> clicking the <tt>Help</tt> button in Qtopia PDA
+<li> starting the <tt>HelpBrowser</tt> and following the links to the application page(s).
+</ul>
+<p> The help files are found in the current help path as specified by: Global::helpPath(). 
+<p> Each help file is encoded in UTF-8 and translation files are provided if required.(See also: <a href="i18n-qtopia.html">Qtopia Internationalization</a>).
+<p> The format of a help file can be modified by the user to present device-specific help content using: 
+<ul>
+<li> HTML tags for content layout and presentation
+<li> image(s) for selection depending on the device type.
+</ul>
+<p> <h3> Valid HTML Tags
+</h3>
+<a name="4-1"></a><p> For a list of the tags used to format help content see the <em>Structuring tags</em>
+section in the QStyleSheet class documentation.
+<p> <h3> Device-specific Help 
+</h3>
+<a name="4-2"></a><p> Device-specific help content is delineated via special tags that are supported by the <a href="help-preprocessor.html">Help Browser Preprocessor</a>.
+<p> <h3> Using Images Optimized for the Device
+</h3>
+<a name="4-3"></a><p> Like all Qtopia applications the <tt>HelpBrowser</tt> uses of the <a href="resource.html">Resource</a> class to determine the best image or icon to use at runtime.
+<p> For example: The following code in <tt>$QPEDIR/examples/application/help/html/example.html</tt> displays:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Code <th valign="top">Image Displayed
+<tr bgcolor="#d0d0d0">
+<td valign="top"><pre>
+&lt;img width=12 height=12 src=Example&gt; 
+</pre>
+ 
+<td valign="top"><tt>$QPEDIR/pics/Example.png</tt> <center><img src="Example.png" width="32" height="32"></center> </table></center>
+<p> For example: The following code in <tt>$QPEDIR/help/html/qtmail-write-mail.html</tt> displays on a PDA device:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Code <th valign="top">Image Displayed
+<tr bgcolor="#f0f0f0">
+<td valign="top"><pre>
+&lt;img src="qtmail/reply"&gt;
+</pre>
+ 
+<td valign="top"><tt>$QPEDIR/pics/qtmail/icons/14x14/reply.png</tt> <center><img src="../pics/qtmail/icons/14x14/reply.png"></center> </table></center>
+<p> <h3> Specifying the Help to Install
+</h3>
+<a name="4-4"></a><p> The application <tt>.pro</tt> file has a help project that defines which help file to install. For example in <tt>$QPEDIR/example/application/application.pro</tt>:
+<pre>
+     help.files=example.html
+     help.path=/help/html
+     INSTALLS+=help
+</pre>
+ 
+<p> <b>Note:</b> The name of the help file must be prefixed by the executable name of the application.
+<p> <h3> Context Sensitive Help
+</h3>
+<a name="4-5"></a><p> Context sensitive help is help associated with a specific widget. Creating context sensitive help for a widget requires the following:
+<ol type=1> 
+<li> create a help file with a name comprising both the application name and the widget name as follows: 
+<pre>
+        &lt;application exec name&gt;-&lt;widget name&gt;.html
+    </pre>
+ 
+<li> set the name of the widget using <tt>QObject::setName()</tt>
+</ol>
+<p> For example the <tt>addressbook</tt> application has the 
+<tt>AbEditor</tt> class which has in its constructor  
+<pre>
+    setName("edit");
+</pre>
+ 
+So for the <tt>edit</tt> widget of <tt>addressbook</tt>, the help file is named: 
+<pre>
+    $QPEDIR/help/html/addressbook-edit.html
+</pre>
+ 
+<p> <h2> Interprocess Actions
+</h2>
+<a name="5"></a><p> When an application is activated via a <tt>QCop</tt> message in order to view a document, pressing <tt>Back</tt> or <tt>Done</tt> must close the application. For example viewing a picture from the <tt>Documents</tt> launcher will open the picture in the <tt>Pictures</tt> application, Closing the image viewed in the application will close the application and return to the <tt>Documents</tt> launcher.
+<p> <h2> Qtopia Desktop
+</h2>
+<a name="6"></a><p> Qtopia desktop should follow the same standards adhered to in Qtopia and should also follow close to the standards established by desktop user-interfaces.
+<p> <ul>
+<li> Labels can be expanded to use their full name instead of an acronym or abbreviation.
+</ul>
+<p> <b>Note:</b> Creation of events, tasks and contacts should follow the creation rules specified in Qtopia, that is, if the user does not enter sufficient information the item is not created.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

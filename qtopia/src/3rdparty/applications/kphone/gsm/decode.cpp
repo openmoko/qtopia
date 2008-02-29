@@ -1,0 +1,84 @@
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+/*
+ * Copyright 1992 by Jutta Degener and Carsten Bormann, Technische
+ * Universitaet Berlin.  See the accompanying file "COPYRIGHT" for
+ * details.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
+ */
+
+/* $Header: /usr/local/qtopiaroot/Source/qtopia-phone-2.1.1/src/3rdparty/applications/kphone/gsm/decode.cpp,v 1.1 2005/09/05 10:57:00 pankaj Exp $ */
+
+#include <stdio.h>
+
+#include	"private.h"
+#include	"gsm.h"
+#include	"proto.h"
+
+/*
+ *  4.3 FIXED POINT IMPLEMENTATION OF THE RPE-LTP DECODER
+ */
+
+static void Postprocessing P2((S,s),
+	struct gsm_state	* S,
+	register word 		* s)
+{
+	register int		k;
+	register word		msr = S->msr;
+	register longword	ltmp;	/* for GSM_ADD */
+	register word		tmp;
+
+	for (k = 160; k--; s++) {
+		tmp = GSM_MULT_R( msr, 28180 );
+		msr = GSM_ADD(*s, tmp);  	   /* Deemphasis 	     */
+		*s  = GSM_ADD(msr, msr) & 0xFFF8;  /* Truncation & Upscaling */
+	}
+	S->msr = msr;
+}
+
+void Gsm_Decoder P8((S,LARcr, Ncr,bcr,Mcr,xmaxcr,xMcr,s),
+	struct gsm_state	* S,
+
+	word		* LARcr,	/* [0..7]		IN	*/
+
+	word		* Ncr,		/* [0..3] 		IN 	*/
+	word		* bcr,		/* [0..3]		IN	*/
+	word		* Mcr,		/* [0..3] 		IN 	*/
+	word		* xmaxcr,	/* [0..3]		IN 	*/
+	word		* xMcr,		/* [0..13*4]		IN	*/
+
+	word		* s)		/* [0..159]		OUT 	*/
+{
+	int		j, k;
+	word		erp[40], wt[160];
+	word		* drp = S->dp0 + 120;
+
+	for (j=0; j <= 3; j++, xmaxcr++, bcr++, Ncr++, Mcr++, xMcr += 13) {
+
+		Gsm_RPE_Decoding( S, *xmaxcr, *Mcr, xMcr, erp );
+		Gsm_Long_Term_Synthesis_Filtering( S, *Ncr, *bcr, erp, drp );
+
+		for (k = 0; k <= 39; k++) wt[ j * 40 + k ] =  drp[ k ];
+	}
+
+	Gsm_Short_Term_Synthesis_Filter( S, LARcr, wt, s );
+	Postprocessing(S, s);
+}

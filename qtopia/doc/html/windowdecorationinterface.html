@@ -1,0 +1,149 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/windowdecorationinterface.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>WindowDecorationInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>WindowDecorationInterface Class Reference</h1>
+
+<p>The WindowDecorationInterface class provides an interface for Qtopia
+window decoration styles.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="windowdecorationinterface-h.html">qtopia/windowdecorationinterface.h</a>&gt;</tt>
+<p><a href="windowdecorationinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual <a href="#~WindowDecorationInterface"><b>~WindowDecorationInterface</b></a> ()</li>
+<li class=fn>class <b>WindowData</b> { }</li>
+<li class=fn>enum <a href="#Metric-enum"><b>Metric</b></a> { TitleHeight, LeftBorder, RightBorder, TopBorder, BottomBorder, OKWidth, CloseWidth, HelpWidth, MaximizeWidth, CornerGrabSize }</li>
+<li class=fn>virtual int <a href="#metric"><b>metric</b></a> ( Metric&nbsp;m, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const</li>
+<li class=fn>enum <a href="#Area-enum"><b>Area</b></a> { Border, Title, TitleText }</li>
+<li class=fn>virtual void <a href="#drawArea"><b>drawArea</b></a> ( Area&nbsp;area, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const</li>
+<li class=fn>enum <a href="#Button-enum"><b>Button</b></a> { OK, Close, Help, Maximize }</li>
+<li class=fn>virtual void <a href="#drawButton"><b>drawButton</b></a> ( Button&nbsp;b, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd, int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h, QWSButton::State&nbsp;state ) const</li>
+<li class=fn>virtual QRegion <a href="#mask"><b>mask</b></a> ( const&nbsp;WindowData&nbsp;*&nbsp;wd ) const</li>
+<li class=fn>virtual QString <a href="#name"><b>name</b></a> () const = 0</li>
+<li class=fn>virtual QPixmap <a href="#icon"><b>icon</b></a> () const = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The WindowDecorationInterface class provides an interface for Qtopia
+window decoration styles.
+<p> Window decoration styles may be added to Qtopia via plug-ins. In order to
+write a style plug-in you must create an interface to your QStyle derived
+class by deriving from the WindowDecorationInterface class and implementing
+the pure virtual functions.
+<p> The window being decorated is defined by the
+WindowDecorationInterface::WindowData struct:
+<pre>
+struct WindowData {
+    QRect rect;
+    QPalette palette;
+    QString caption;
+    enum Flags { Maximized=0x01, Dialog=0x02, Active=0x04 };
+    Q_UINT32 flags;
+    Q_UINT32 reserved;
+};
+</pre>
+ 
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="Area-enum"></a>WindowDecorationInterface::Area</h3> 
+<ul>
+<li><tt>WindowDecorationInterface::Border</tt> - defines the entire decoration area, excluding the title bar.
+<li><tt>WindowDecorationInterface::Title</tt> - defines the area at the top of the window that contains the
+buttons and captions.  It must extend the full width of the window.
+<li><tt>WindowDecorationInterface::TitleText</tt> - defines the window caption.
+</ul>
+<h3 class=fn><a name="Button-enum"></a>WindowDecorationInterface::Button</h3> 
+<ul>
+<li><tt>WindowDecorationInterface::OK</tt> - the OK button.
+<li><tt>WindowDecorationInterface::Close</tt> - the close button.
+<li><tt>WindowDecorationInterface::Help</tt> - the help button.
+<li><tt>WindowDecorationInterface::Maximize</tt> - the maximize/restore button.
+</ul>
+<h3 class=fn><a name="Metric-enum"></a>WindowDecorationInterface::Metric</h3> 
+<ul>
+<li><tt>WindowDecorationInterface::TitleHeight</tt> - the height of the title.
+<li><tt>WindowDecorationInterface::LeftBorder</tt> - the width of the border on the left of the window.
+<li><tt>WindowDecorationInterface::RightBorder</tt> - the width of the border on the right of the window.
+<li><tt>WindowDecorationInterface::TopBorder</tt> - the width of the border on the top of the window, above
+the title bar.
+<li><tt>WindowDecorationInterface::BottomBorder</tt> - the width of the border on the bottom of the window.
+<li><tt>WindowDecorationInterface::OKWidth</tt> - the width of the OK button.
+<li><tt>WindowDecorationInterface::CloseWidth</tt> - the width of the Close (X) button.
+<li><tt>WindowDecorationInterface::HelpWidth</tt> - the width of the Help (?) button.
+<li><tt>WindowDecorationInterface::MaximizeWidth</tt> - the width of the maximize/restore button.
+<li><tt>WindowDecorationInterface::CornerGrabSize</tt> - the size of the area allowing diagonal resize at
+each corner of the window.
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="~WindowDecorationInterface"></a>WindowDecorationInterface::~WindowDecorationInterface ()<tt> [virtual]</tt>
+</h3> 
+<p> Deconstructor.
+
+<h3 class=fn>void <a name="drawArea"></a>WindowDecorationInterface::drawArea ( <a href="windowdecorationinterface.html#Area-enum">Area</a>&nbsp;area, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
+</h3> 
+<p> Draw the specified <em>area</em> using QPainter <em>p</em> for window <em>wd</em>.
+
+<h3 class=fn>void <a name="drawButton"></a>WindowDecorationInterface::drawButton ( <a href="windowdecorationinterface.html#Button-enum">Button</a>&nbsp;b, QPainter&nbsp;*&nbsp;p, const&nbsp;WindowData&nbsp;*&nbsp;wd, int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h, QWSButton::State&nbsp;state ) const<tt> [virtual]</tt>
+</h3> 
+<p> Draw button <em>b</em> with QPainter <em>p</em> for window <em>wd</em> within the bounds
+supplied by <em>x</em>, <em>y</em>, <em>w</em>, <em>h</em> in the state specified by <em>state</em>.
+
+<h3 class=fn>QPixmap <a name="icon"></a>WindowDecorationInterface::icon () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#icon">icon</a>() function returns the icon of the decoration. This may
+be displayed in the appearance settings dialog.
+
+<h3 class=fn>QRegion <a name="mask"></a>WindowDecorationInterface::mask ( const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
+</h3> 
+<p> Returns the mask of the decoration including all borders and the title
+for window <em>wd</em> as a QRegion.  The window decorations do not necessarily
+need to be rectangular, however the title bar  must be rectangular and
+must be the width of the window.  This ensures the title is drawn correctly
+for maximized windows.
+
+<h3 class=fn>int <a name="metric"></a>WindowDecorationInterface::metric ( <a href="windowdecorationinterface.html#Metric-enum">Metric</a>&nbsp;m, const&nbsp;WindowData&nbsp;*&nbsp;wd ) const<tt> [virtual]</tt>
+</h3> 
+<p> returns the metric <em>m</em> for the window <em>wd</em>.
+
+<h3 class=fn>QString <a name="name"></a>WindowDecorationInterface::name () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#name">name</a>() function returns the name of the decoration. This will
+be displayed in the appearance settings dialog.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Email
+Comment[]=Displays the number of new and unsent emails.
+X-QPE-Library=libemailplugin.so
+[Translation]
+File=QtopiaPlugins
+Context=Today

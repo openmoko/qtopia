@@ -1,0 +1,10 @@
+Files: bin/textedit apps/Applications/textedit.desktop services/Open/text/plain/textedit services/View/text/plain/textedit
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Text Editor
+ The text editor for the Qtopia environment.

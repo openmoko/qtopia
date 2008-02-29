@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Input Methods
+[Desktop Entry]
+Name[]=Handwriting
+Comment[]=Natural handwriting input.
+X-QPE-Library=libqhandwriting.so

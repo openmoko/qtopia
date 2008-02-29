@@ -1,0 +1,256 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/calendar.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Calendar Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Calendar Specification</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Data
+</a>
+<ul>
+<li><a href="#1-1"> Recurrence Patterns
+</a>
+<ul>
+<li><a href="#1-1-1"> Daily
+</a>
+<li><a href="#1-1-2"> Weekly
+</a>
+<li><a href="#1-1-3"> Monthly
+</a>
+<li><a href="#1-1-4"> Yearly
+</a>
+</ul>
+</ul>
+<li><a href="#2"> Application Views
+</a>
+<ul>
+<li><a href="#2-1"> Day View
+</a>
+<li><a href="#2-2"> Month View
+</a>
+<li><a href="#2-3"> Detailed View
+</a>
+<li><a href="#2-4"> Edit View
+</a>
+</ul>
+<li><a href="#3"> Features
+</a>
+<ul>
+<li><a href="#3-1"> Add Event
+</a>
+<li><a href="#3-2"> Delete Event
+</a>
+<li><a href="#3-3"> Edit Event
+</a>
+<li><a href="#3-4"> Repeat Event
+</a>
+<li><a href="#3-5"> All Day Events
+</a>
+<li><a href="#3-6"> Navigation
+</a>
+<li><a href="#3-7"> Alarms
+</a>
+<li><a href="#3-8"> Configure Day View
+</a>
+<li><a href="#3-9"> Beaming
+</a>
+<li><a href="#3-10"> QDL Support
+</a>
+</ul>
+<li><a href="#4"> Files
+</a>
+<li><a href="#5"> Configuration
+</a>
+<li><a href="#6"> Services
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Calendar</b> application allows a user to plan their schedule. This includes the scheduling of timed events such as meetings,
+day events such as birthdays, and multi-day events such as workshops. The application also provides the facility to set alarms for events and to specify a pattern of recurrence for events.
+<p> <h2> Data
+</h2>
+<a name="1"></a><p> An event consists of the following:
+<ul>
+<li> single line text description
+<li> single line text location
+<li> multi-line text note
+<li> start date and time
+<li> end date and time
+<li> time zone for start and end times (for events associated with a time zone)
+<li> recurrence pattern 
+<li> alarm   (including activation time prior to an event)
+<li> One or more categories (default: <i>unfiled</i>).
+</ul>
+<p> <h3> Recurrence Patterns
+</h3>
+<a name="1-1"></a><p> The user is able to set an event to recur: daily, weekly, monthly, yearly or other. These are standard patterns of recurrence and the user is able to create a more complex pattern using the advanced options.
+<p> <h4> Daily
+</h4>
+<a name="1-1-1"></a><p> These events happen once each day. In the advanced options the user is able to specify the number of days between each occurrence of the event.
+<p> <h4> Weekly
+</h4>
+<a name="1-1-2"></a><p> These events happen once each week. In the advanced options the user is able to specify how many weeks apart each repeating event should be, as well as specifying that an event occurs on multiple days of a week. The date
+of the starting day for an event is always the first day the event will
+occur in a week. Therefore an event occurring every four weeks on Wednesday,
+Friday, and Monday occurs on the Wednesday, then the Friday of that week and the immediately following Monday, and then does not re-occur until the forth Wednesday following that.
+<p> This is not guaranteed to be maintained when synchronizing to non-Qtopia devices or software.
+<p> <h4> Monthly
+</h4>
+<a name="1-1-3"></a><p> These events happen once each month on the same day of month as the start event.
+In the advanced options the user is able to specify how many months apart each repeating event will occur.
+<p> It is also possible to specify that the event occurs:
+<ul>
+<li> on a specific day of the month, for example, every 2 months on the 18th of the month
+<li> a specified number of weeks from the start of the month, for example, every 2 months on the 2nd Sunday of the month
+<li> a specified number of weeks from the end of the month, for example, every 2 months on the last Thursday of the month.
+</ul>
+<p> If a repeated event falls on a day not included in a particular month, the event is skipped for that month.
+<p> <h4> Yearly
+</h4>
+<a name="1-1-4"></a><p> This event happens once each year. In the advanced options the user is able to specify how many years apart each repeating event will occur.
+<p> <h2> Application Views
+</h2>
+<a name="2"></a><p> It is possible to view  events in the following three ways:
+<ul>
+<li> events for a single day
+<li> events for a single month
+<li> detailed view of a single event
+<li> event opened for editing.
+</ul>
+<p> <h3> Day View
+</h3>
+<a name="2-1"></a><p> This shows the events that occur for a particular date. Repeating events are shown in pale blue and non-repeating events are shown in pale red. All day events are shown at the top of the view.
+The view also adjusts the height of hours through the
+day to show as much detail of the events for that day as possible.
+<p> The user is able to navigate to other days. The 1 and 3 keys are used to change back and forth by week, the 4 and 6 keys change by month, and the 7 and 9 keys by year.  The 5 key can then be used to navigate to the current day.
+<p> The user is able to edit the general settings such as the default alarm preset and the default day start time.
+<p> The user is able to change to the month view, a detailed view of the current event or add a new event.
+<p> <h3> Month View
+</h3>
+<a name="2-2"></a><p> This shows the events that occur for a particular month. Repeating events are shown in blue, non-repeating events in red.
+<p> Each event is represented as a bar giving an approximate indication of when during the day the event occurs. For
+multiple events on a single day the bars for those events are merged. All day events are shown by shading the
+day pale red for non-repeating events, pale blue for repeating events or a combination of the two colors if both occur on a particular day.
+<p> The user is able to navigate to other days. The 1 and 3 keys are used to change back and forth by week, the 4 and 6 keys change by month, and the 7 and 9 keys by year. The 5 key can then be used to navigate to the current day.
+<p> The user is able to edit the general settings such as the default alarm preset and the default day start time.
+<p> The user is also able to show the details for a particular day or add a new event.
+<p> <h3> Detailed View
+</h3>
+<a name="2-3"></a><p> The detailed view of an event displays the data for a single event. This is shown as rich text. All the information for the event is shown formatted for optimum readability.
+<p> From the detailed list view the user is able to:
+<ul>
+<li> edit the current event, using the Edit view of the event.
+<li> delete the current event
+<li> beam the current event via infrared. 
+</ul>
+<p> <h3> Edit View
+</h3>
+<a name="2-4"></a><p> The edit view of an event allows the user to specify the data for a new event
+or modify that of an existing event.
+<p> Non-applicable values are disabled. For example, the start time entry are disabled if the event is marked as an all day event.
+<p> When the editing has been completed the user is able to either accept or cancel the changes they have made.
+<p> <h2> Features
+</h2>
+<a name="3"></a><p> <h3> Add Event
+</h3>
+<a name="3-1"></a><p> It is possible to add events to the <b>Calendar</b>.
+<p> <h3> Delete Event
+</h3>
+<a name="3-2"></a><p> It is possible to delete events. The user is prompted to verify the deletion of an event.
+If an occurrence of a repeating event is deleted then the user is asked if they mean to delete just that occurrence, all of the following events for that sequence, or the entire sequence.
+<p> <h3> Edit Event
+</h3>
+<a name="3-3"></a><p> It is possible to modify events.
+If an occurrence of a repeating event is modified, the user is prompted to indicate if they mean to modify just that occurrence, all of the following events for that sequence, or the entire sequence.
+<p> <h3> Repeat Event
+</h3>
+<a name="3-4"></a><p> It is possible to set an event to repeat over a specified period of time.
+<p> <h3> All Day Events
+</h3>
+<a name="3-5"></a><p> It is possible to specify events as taking all day. These
+events are not affected by time zone changes.
+<p> <h3> Navigation
+</h3>
+<a name="3-6"></a><p> Navigation between dates and events is easy and clear and the date is visible at all times.
+<p> <h3> Alarms
+</h3>
+<a name="3-7"></a><p> Alarmed events sound or display an alarm at the
+specified time. The <b>Calendar</b> application does not need to be running in order for the alarm to sound.
+<p> <h3> Configure Day View
+</h3>
+<a name="3-8"></a><p> It is possible to configure the day view to display
+events starting from a particular time.
+<p> <h3> Beaming
+</h3>
+<a name="3-9"></a><p> It is possible to beam events to or from another device using IR.
+<p> <h3> <a href="qdl.html">QDL</a> Support
+</h3>
+<a name="3-10"></a><p> It is possible to access occurrences of events from other applications using the QDL service interface. When activated the <b>Calendar</b> application runs and displays the occurrence of the event.
+<p> QDL links are embedded into the notes of an event. When in the Detailed View,
+clicking on a QDL link activates the link's application.
+<p> <h2> Files
+</h2>
+<a name="4"></a><p> The <a href="calendar.html">Calendar</a> application has two data files.
+<p> <ul>
+<li> <pre>$HOME&#92;Applications&#92;datebook&#92;datebook.xml</pre>- main list of tasks data.
+<li> <pre>$HOME&#92;.caljournal</pre>- journal of changes to list of tasks since application started.
+</ul>
+<p> Both files are in an xml-like format. <pre>datebook.xml</pre>contains the main list of events, and is the file sent to <b>Qtopia Desktop</b> on syncing. <pre>.caljournal</pre>contains a list of adds,
+edits and deletes made to the list of events since the <b>Calendar</b> application started.
+<p> <h2> Configuration
+</h2>
+<a name="5"></a><p> The settings for <b>Calendar</b> are stored in <pre>$HOME/Settings/DateBook.conf</pre>.
+<ul>
+<li> [Main]
+<ul>
+<li> startviewtime - preferred start hour for the day in Day View.
+<li> alarmpreset - true if an alarm is set by default when creating a new event.
+<li> presettime - if alarmpreset is true, the number of minutes the alarm preset is by default when creating a new event.
+</ul>
+</ul>
+<p> <h2> Services
+</h2>
+<a name="6"></a><p> <ul>
+<li> IR Receive text/x-vCalendar-Events
+<li> <a href="calendar.html">Calendar</a> - allows editing of events via PIM Library interface.
+<li> TimeMonitor - accepts notifications of time modification (time zone, time setting, time format)
+<li> <a href="qdl.html">QDL</a>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

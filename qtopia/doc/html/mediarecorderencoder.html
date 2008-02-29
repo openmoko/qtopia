@@ -1,0 +1,248 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/mediarecorderplugininterface.cpp:36 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaRecorderEncoder Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaRecorderEncoder Class Reference</h1>
+
+<p>The MediaRecorderEncoder class provides an abstract base class for
+Qtopia MediaRecorder encoder plugins.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediarecorderplugininterface-h.html">qtopia/mediarecorderplugininterface.h</a>&gt;</tt>
+<p><a href="mediarecorderencoder-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual <a href="#~MediaRecorderEncoder"><b>~MediaRecorderEncoder</b></a> ()</li>
+<li class=fn>virtual int <a href="#pluginNumFormats"><b>pluginNumFormats</b></a> () const = 0</li>
+<li class=fn>virtual QString <a href="#pluginFormatName"><b>pluginFormatName</b></a> ( int&nbsp;format ) const = 0</li>
+<li class=fn>virtual QString <a href="#pluginFormatTag"><b>pluginFormatTag</b></a> ( int&nbsp;format ) const = 0</li>
+<li class=fn>virtual QString <a href="#pluginComment"><b>pluginComment</b></a> () const = 0</li>
+<li class=fn>virtual double <a href="#pluginVersion"><b>pluginVersion</b></a> () const = 0</li>
+<li class=fn>virtual QString <a href="#pluginMimeType"><b>pluginMimeType</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#begin"><b>begin</b></a> ( QIODevice&nbsp;*&nbsp;device, const&nbsp;QString&nbsp;&amp;&nbsp;formatTag ) = 0</li>
+<li class=fn>virtual bool <a href="#end"><b>end</b></a> () = 0</li>
+<li class=fn>virtual bool <a href="#isActive"><b>isActive</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#setAudioChannels"><b>setAudioChannels</b></a> ( int&nbsp;channels ) = 0</li>
+<li class=fn>virtual bool <a href="#setAudioFrequency"><b>setAudioFrequency</b></a> ( int&nbsp;frequency ) = 0</li>
+<li class=fn>virtual bool <a href="#writeAudioSamples"><b>writeAudioSamples</b></a> ( const&nbsp;short&nbsp;*&nbsp;samples, long&nbsp;numSamples ) = 0</li>
+<li class=fn>virtual bool <a href="#addComment"><b>addComment</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;tag, const&nbsp;QString&nbsp;&amp;&nbsp;contents ) = 0</li>
+<li class=fn>virtual long <a href="#estimateAudioBps"><b>estimateAudioBps</b></a> ( int&nbsp;frequency, int&nbsp;channels, const&nbsp;QString&nbsp;&amp;&nbsp;formatTag ) = 0</li>
+<li class=fn>virtual bool <a href="#supportsAudio"><b>supportsAudio</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#supportsVideo"><b>supportsVideo</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#supportsComments"><b>supportsComments</b></a> () const = 0</li>
+<li class=fn>virtual bool <a href="#requiresDirectAccess"><b>requiresDirectAccess</b></a> () const = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The MediaRecorderEncoder class provides an abstract base class for
+Qtopia MediaRecorder encoder plugins.
+<p> Writing an encoder plugin is achieved by subclassing this base class,
+reimplementing the pure virtual functions and exporting the class with
+the <tt>Q_EXPORT_PLUGIN</tt> macro. See the <a href="http://doc.trolltech.com/qtopia2.1/html/qtopia-plugins.html">http://doc.trolltech.com/qtopia2.1/html/qtopia-plugins.html</a> Qtopia Plugins documentation for details.
+<p> The functions in this class are typically used in the following order
+when recording audio:
+<p> <pre>
+  <a href="#begin">begin</a>(device, tag);
+  <a href="#addComment">addComment</a>("name", "value");
+  ...
+  <a href="#addComment">addComment</a>("name", "value");
+  <a href="#setAudioChannels">setAudioChannels</a>(2);
+  <a href="#setAudioFrequency">setAudioFrequency</a>(44100);
+  <a href="#writeAudioSamples">writeAudioSamples</a>(samples, numSamples);
+  ...
+  <a href="#writeAudioSamples">writeAudioSamples</a>(samples, numSamples);
+  <a href="#end">end</a>();
+  </pre>
+ 
+<p> <p>See also QIODevice, <a href="mediarecorderplugininterface.html">MediaRecorderPluginInterface</a>, <a href="#begin">begin</a>(), and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<p> 
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="~MediaRecorderEncoder"></a>MediaRecorderEncoder::~MediaRecorderEncoder ()<tt> [virtual]</tt>
+</h3>
+
+<p> Destructs a MediaRecorderEncoder.
+
+<h3 class=fn>bool <a name="addComment"></a>MediaRecorderEncoder::addComment ( const&nbsp;QString&nbsp;&amp;&nbsp;tag, const&nbsp;QString&nbsp;&amp;&nbsp;contents )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Adds a comment string <em>contents</em> tagged as <em>tag</em> to the recorded output.  The plugin may
+ignore tags that it doesn't understand.
+<p> Returns TRUE if the comment was successfully added (or ignored).
+Returns FALSE if not recording or the data header has already been
+written.
+<p> The data header is considered written upon the first call to
+writeAudioSamples() write audio samples .  This is true
+even if plugin's data format places comments at the end of the stream,
+rather than the front.  The plugin should cache the comments until
+it is ready to output them.
+<p> This should only be called if supportsComments() comments are supported by the plugin.
+<p> <p>See also <a href="#begin">begin</a>(), <a href="#writeAudioSamples">writeAudioSamples</a>(), and <a href="#supportsComments">supportsComments</a>().
+
+<h3 class=fn>bool <a name="begin"></a>MediaRecorderEncoder::begin ( QIODevice&nbsp;*&nbsp;device, const&nbsp;QString&nbsp;&amp;&nbsp;formatTag )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Begin recording on the specified output <em>device</em>, which must be
+capable of direct access (seeking) if
+<a href="#requiresDirectAccess">MediaRecorderEncoder::requiresDirectAccess</a>() returns
+TRUE. <em>formatTag</em> selects which format to use.
+<p> Returns TRUE if recording has begun.  Returns FALSE if recording
+is already in progress or if <em>device</em> is not capable of seeking.
+<p> This call will typically be followed by calls to set the
+setAudioChannels() channels ,
+setAudioFrequency() frequency ,
+and addComment() file comments .
+<p> <p>See also <a href="#setAudioChannels">setAudioChannels</a>(), <a href="#setAudioFrequency">setAudioFrequency</a>(), <a href="#addComment">addComment</a>(), <a href="#writeAudioSamples">writeAudioSamples</a>(), and <a href="#requiresDirectAccess">requiresDirectAccess</a>().
+
+<h3 class=fn>bool <a name="end"></a>MediaRecorderEncoder::end ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> End recording on the current output device.  This function may
+back-patch earlier bytes in the output.  Once it has finished
+outputting the data, it will leave the device positioned after
+all bytes that were written.
+<p> Returns TRUE if recording was successfully terminated.
+Returns FALSE if not currently recording, or there was an
+error writing to the device.
+
+<h3 class=fn>long <a name="estimateAudioBps"></a>MediaRecorderEncoder::estimateAudioBps ( int&nbsp;frequency, int&nbsp;channels, const&nbsp;QString&nbsp;&amp;&nbsp;formatTag )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Estimate the number of bytes per second that are needed to record
+audio in the <em>formatTag</em> format at a given <em>frequency</em> with the
+specified number of <em>channels</em>.
+
+<h3 class=fn>bool <a name="isActive"></a>MediaRecorderEncoder::isActive () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns TRUE if the recorder is currently active; FALSE otherwise.
+
+<h3 class=fn>QString <a name="pluginComment"></a>MediaRecorderEncoder::pluginComment () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns a comment that describes the purpose of the plugin.
+
+<h3 class=fn>QString <a name="pluginFormatName"></a>MediaRecorderEncoder::pluginFormatName ( int&nbsp;format ) const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the name of one of a plugin's data format, e.g. "Wav Format".
+The data format is selected using <em>format</em> as an index.  The name may be displayed 
+to the user in a list of supported recording formats.
+
+<h3 class=fn>QString <a name="pluginFormatTag"></a>MediaRecorderEncoder::pluginFormatTag ( int&nbsp;format ) const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the tag name of a plugin's data format.  For example, "pcm".
+The data format is selected using <em>format</em> as an index.  This value is used with MediaRecorderEncoder::begin .
+
+<h3 class=fn>QString <a name="pluginMimeType"></a>MediaRecorderEncoder::pluginMimeType () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the MIME type for the plugin's recommended file extension, e.g.
+<tt>audio/x-wav</tt>
+
+<h3 class=fn>int <a name="pluginNumFormats"></a>MediaRecorderEncoder::pluginNumFormats () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the number of formats that are supported by this plugin.
+
+<h3 class=fn>double <a name="pluginVersion"></a>MediaRecorderEncoder::pluginVersion () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the version of the plugin.  Normally 1.0.
+
+<h3 class=fn>bool <a name="requiresDirectAccess"></a>MediaRecorderEncoder::requiresDirectAccess () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns TRUE if this plugin must be supplied a direct access (seekable)
+output device.
+<p> <p>See also <a href="#begin">begin</a>().
+
+<h3 class=fn>bool <a name="setAudioChannels"></a>MediaRecorderEncoder::setAudioChannels ( int&nbsp;channels )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Sets the number of audio channels in the recorded data to either 1 or 2.
+<p> Returns TRUE if the channel count was set successfully.  Returns FALSE
+if not recording, the data header has already been written, or if
+<em>channels</em> is neither 1 nor 2.
+<p> The data header is considered written upon the first call to
+writeAudioSamples() write audio samples .
+<p> <p>See also <a href="#begin">begin</a>(), <a href="#setAudioFrequency">setAudioFrequency</a>(), and <a href="#writeAudioSamples">writeAudioSamples</a>().
+
+<h3 class=fn>bool <a name="setAudioFrequency"></a>MediaRecorderEncoder::setAudioFrequency ( int&nbsp;frequency )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Sets the audio sample frequency in the recorded data.
+<p> Returns TRUE if the frequency was set successfuly.  Returns FALSE
+if not recording, the data header has already been written, or if
+<em>frequency</em> is less than or equal to zero.
+<p> The data header is considered written upon the first call to
+writeAudioSamples() write audio samples .
+<p> <p>See also <a href="#begin">begin</a>(), <a href="#setAudioChannels">setAudioChannels</a>(), and <a href="#writeAudioSamples">writeAudioSamples</a>().
+
+<h3 class=fn>bool <a name="supportsAudio"></a>MediaRecorderEncoder::supportsAudio () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns TRUE if this plugin supports audio; FALSE otherwise.
+
+<h3 class=fn>bool <a name="supportsComments"></a>MediaRecorderEncoder::supportsComments () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns TRUE if this plugin supports comments; FALSE otherwise.
+<p> <p>See also <a href="#addComment">addComment</a>().
+
+<h3 class=fn>bool <a name="supportsVideo"></a>MediaRecorderEncoder::supportsVideo () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns TRUE if this plugin supports video; FALSE otherwise.
+
+<h3 class=fn>bool <a name="writeAudioSamples"></a>MediaRecorderEncoder::writeAudioSamples ( const&nbsp;short&nbsp;*&nbsp;samples, long&nbsp;numSamples )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Writes a buffer of audio samples to the recorded output.
+<p> Samples are assumed to always be 16-bit and in host byte order.
+It is the responsibility of the caller to rescale other sample sizes.
+<p> The <em>numSamples</em> value is the number of 16-bit quantities in the
+<em>samples</em> buffer.  This will be a multiple of two for stereo data,
+with alternating channel samples.
+<p> Returns TRUE if the samples were successfully written.  Returns FALSE
+if not recording or there was an error writing to the output device.
+<p> <p>See also <a href="#begin">begin</a>(), <a href="#setAudioChannels">setAudioChannels</a>(), and <a href="#setAudioFrequency">setAudioFrequency</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

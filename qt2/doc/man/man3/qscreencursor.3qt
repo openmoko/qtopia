@@ -1,0 +1,93 @@
+'\" t
+.TH QScreenCursor 3qt "27 October 2005" "Trolltech AS" \" -*- nroff -*-
+.\" Copyright 1992-2001 Trolltech AS.  All rights reserved.  See the
+.\" license file included in the distribution for a complete license
+.\" statement.
+.\"
+.ad l
+.nh
+.SH NAME
+QScreenCursor \- Manages the onscreen mouse cursor in Qt/Embedded. It provides an implementation of a software mouse cursor and can be subclassed by hardware drivers which support a hardware mouse cursor. There may only be one QScreenCursor at a time; it is constructed by
+.br
+.PP
+\fC#include <qgfx_qws.h>\fR
+.PP
+.SS "Public Members"
+.in +1c
+.ti -1c
+.BI "\fBQScreenCursor\fR () "
+.br
+.ti -1c
+.BI "virtual \fB~QScreenCursor\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBinit\fR ( SWCursorData * " "da" ", bool " "init" " = FALSE ) "
+.br
+.ti -1c
+.BI "virtual void \fBset\fR ( const QImage & " "image" ", int " "hotx" ", int hoty ) "
+.br
+.ti -1c
+.BI "virtual void \fBmove\fR ( int " "x" ", int y ) "
+.br
+.ti -1c
+.BI "virtual void \fBshow\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBhide\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBrestoreUnder\fR ( const QRect & " "r" ", QGfxRasterBase * " "g" " = 0 ) "
+.br
+.ti -1c
+.BI "virtual void \fBsaveUnder\fR () "
+.br
+.ti -1c
+.BI "virtual void \fBdrawCursor\fR () "
+.br
+.ti -1c
+.BI "void \fBdraw\fR () "
+.br
+.ti -1c
+.BI "virtual bool \fBsupportsAlphaCursor\fR () "
+.br
+.in -1c
+.SS "Static Public Members"
+.in +1c
+.ti -1c
+.BI "bool \fBenabled\fR () "
+.br
+.in -1c
+.SH DESCRIPTION
+The QScreenCursor class manages the onscreen mouse cursor in Qt/Embedded. It provides an implementation of a software mouse cursor and can be subclassed by hardware drivers which support a hardware mouse cursor. There may only be one QScreenCursor at a time; it is constructed by QScreen or one of its descendants.
+.PP
+This class is non-portable. It is available \fIonly\fR in Qt/Embedded. It is also internal - this documentation is intended for those subclassing it in hardware drivers, not for application developers.
+.SH MEMBER FUNCTION DOCUMENTATION
+.SH "QScreenCursor::QScreenCursor ()"
+Constructs a screen cursor.
+.SH "QScreenCursor::~QScreenCursor () \fC[virtual]\fR"
+Destructs a screen cursor, deleting its gfxes, cursor image and under-cursor storage.
+.SH "void QScreenCursor::move ( int x, int y ) \fC[virtual]\fR"
+Move the mouse cursor to point x,y on the screen. This should be done in such a way that the hotspot of the cursor is at x,y - e.g. if the hotspot is at 5,5 within the image then the top left of the image should be at x-5,y-5.
+.SH "bool QScreenCursor::restoreUnder ( const QRect & r, QGfxRasterBase * g = 0 ) \fC[virtual]\fR"
+This is relevant to only the software mouse cursor and should be
+reimplemented as a null method in hardware cursor drivers. It redraws
+what was under the mouse cursor when the cursor is moved.
+.SH "SEE ALSO"
+.BR http://doc.trolltech.com/qscreencursor.html
+.BR http://www.trolltech.com/faq/tech.html
+.SH COPYRIGHT
+Copyright 1992-2001 Trolltech AS, http://www.trolltech.com.  See the
+license file included in the distribution for a complete license
+statement.
+.SH AUTHOR
+Generated automatically from the source code.
+.SH BUGS
+If you find a bug in Qt, please report it as described in
+.BR http://doc.trolltech.com/bughowto.html .
+Good bug reports make our job much simpler. Thank you.
+.P
+In case of content or formattting problems with this manual page, please
+report them to
+.BR qt-bugs@trolltech.com .
+Please include the name of the manual page (qscreencursor.3qt) and the Qt
+version (2.3.12).

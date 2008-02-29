@@ -1,0 +1,11 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Bright
+[Colors]
+Background=#F7F7F7
+Button=#F0F0F0
+Highlight=#0000FF
+AlternateBase=#EFEFFF
+HighlightedText=#FFFFFF

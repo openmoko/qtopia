@@ -1,0 +1,132 @@
+File format documentation for the database
+------------------------------------------
+
+* GENERAL INFORMATION.
+
+The data in the indexes represents an ordered lists of offsets into the 
+database.  The order is defined by functions subclassed by the application 
+that owns the records in the database file.
+
+The data in the header represents the end of the db file, along with the
+attributes the database, and the free lists.  There are 4 free lists, in 
+size order of 32, 64, 128 and 256 bytes.  The size of a free list indicates the
+largest element contained within that free list.  For instance a gap of 54 
+bytes would be inserted into the free list with size 64.  The structure is
+a singly linked list.  Each element contains a 32 bit unsigned int indicating
+the offset o the next element in the free list.
+
+Both the index file and the header file can be generated from reading the 
+entire database file.
+
+The database file represents primarily two types of data, records and free list
+elements.  Each type of data is identfied by a type, followed by a size 
+(see above).  Data integrity is ensured by first writing and flushing the
+type of the data (changing data is marked invalid if the size for that data 
+has not yet been written, unknown otherwise), then writing and flushing the 
+data, then again writing and flushing the new type (record or free if 
+successful).
+
+As a size of a block is never changed once written, if a record in the middle
+of the file fails to write it will still be possible to determine how to
+skip that element.  Hence a failed write will not prevent accessing existing
+data.  The invalid type is only used when adding a new block (size not written
+yet).  This is why any data base a block starting with the invalid type is
+indeterminate.
+
+The trade-off for keeping data integrity is that it is there is no guaruntee
+that space usage will be optimal.  It is expected however that when the
+user syncs their portable device, that the desktop machine (with more resources
+can then optimize the space usage of the database file.
+
+
+
+* INDEX FILE
+
+bytes	type			represents
+4 	32 bit unsigned int	0x0, if the index is ok, 0xffffffff if the index is dirty
+				and should be regenerated from the database
+4	32 bit unsigned int.	number of elements n in the index
+n*4	32 bit unsigned ints.	Each uint represents an offset into
+				the database file.  The uints are
+				in sorted order of this index.
+
+
+* HEADER FILE
+
+bytes	type			represents
+0..3	32 bit unsigned int.	The dirt count.  See 0..3 of database file.
+4..5	32 bit unsigned int.	The total size of known data in the database
+				file.  Data beyond this offset is indeterminate.
+6..9	32 bit unsigned int.	Number of attributes.
+* Attribute * num attributes.
+0       8 bit unsigned char	Attribute index.
+1..n	utf8 encoded string	Attribute name.
+* Free List * 4
+0..3	32 bit unsigned int	Offset into dbfile to the first element of the
+				Free list.
+4..5	32 bit unsigned int	Number of element in the free list.
+
+
+
+* DATABASE FILE
+
+bytes	type			represents
+4	32 bit unsigned int	The dirt count.  incremented every time the
+				database is changed.  Can be used by
+				external classes to determine quickly if they
+				are up to date with the database file.
+* Record * number of records.
+1	type byte.		Indicates the status of the proceeding data.
+				0xFF indicates invalid.  The remaining data
+				is inderteminate.
+				0xFE indicates unknown.  This record is
+				inderterminate, but the size of it isn't (see
+				below).  Hence it is possible to read data
+				beyound this record.
+				0x02 indicates a free list element.
+				0x01 indicates a record.
+4	32 bit unsigned int	If record is not of type invalid, then this
+				represents the remaining size of the record,
+				in bytes (8bit).
+...	...			Data of the record. See below for details
+
+
+* Record details
+
+16	16 byte Uid		Unique id to identify the record
+4	32 bit unsigned int	Number of categories this record belongs to (nc)
+4	32 bit unsigned int	Number of fields this record contains (nf)
+4*nc	32 bit unsigned ints	List of categories the record belongs to
+8*nf	FieldList		List of Fields in the record
+...	additional data		additional data referenced by the fields. Currently only
+				string data
+
+* FieldList details
+
+2	16 bit unsigned int	Id of the field
+2 	16 bit unsigned int	Type of field
+4	32 bit unsigned int	offsetOrData. Contains the data in case the type fits
+				into 4 bytes, otherwise a offset into the additional
+				data, pointing to the actual data.
+
+
+The field id is application specific and can be assigned at will by
+the application.  The type id specifies the type of the data stored,
+allowing other applications to easily read out the data without even
+knowing what the Ids mean. It also provides an additional consistency
+check for the data in the file.
+
+Currently the following data types are supported:
+
+UndefinedType		non defined type
+BoolType 		represents a bool
+IntType 		an Integer
+DateType		a Date, stored in seconds since 1.1.1970 UTC
+DateTimeType		a Date and time stored in seconds since 1.1.1970 UTC
+StringType		a String. The offsetOrData variable gives an offset into the
+			data region to where the string is stored. The string itself
+			is stored by having 4 bytes for the length of the string, 
+			then the string in UCS2.
+
+
+

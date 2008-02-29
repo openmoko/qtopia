@@ -1,0 +1,122 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/addressbookaccess.cpp:54 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>AddressBookAccess Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AddressBookAccess Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The AddressBookAccess class provides a safe API for accessing address book data.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="addressbookaccess-h.html">qtopia/pim/addressbookaccess.h</a>&gt;</tt>
+<p><a href="addressbookaccess-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#AddressBookAccess"><b>AddressBookAccess</b></a> ()</li>
+<li class=fn><a href="#~AddressBookAccess"><b>~AddressBookAccess</b></a> ()</li>
+<li class=fn>bool <a href="#editSupported"><b>editSupported</b></a> () const</li>
+<li class=fn>void <a href="#updateContact"><b>updateContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</li>
+<li class=fn>void <a href="#removeContact"><b>removeContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</li>
+<li class=fn>void <a href="#addContact"><b>addContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</li>
+<li class=fn>PimContact <a href="#personalDetails"><b>personalDetails</b></a> () const</li>
+<li class=fn>PimContact <a href="#contactForId"><b>contactForId</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#addressBookUpdated"><b>addressBookUpdated</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The AddressBookAccess class provides a safe API for accessing address book data.
+<p> AddressBookAccess provides a safe API for accessing PimContacts stored by
+Qtopia's contacts application.  AddressBookAccess tries to keep in sync with
+modifications, and alerts the user of the library when modifications have been made
+to the data.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="AddressBookAccess"></a>AddressBookAccess::AddressBookAccess ()
+</h3>
+Constructs a new AddressBookAccess.
+
+<h3 class=fn><a name="~AddressBookAccess"></a>AddressBookAccess::~AddressBookAccess ()
+</h3>
+Cleans up the the Addressbook access.
+
+<h3 class=fn>void <a name="addContact"></a>AddressBookAccess::addContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
+</h3>
+If supported will assign a new unique ID to <em>contact</em> and add the contact
+to the pim data.
+<p> Adding contacts requires the Contacts service to be available.
+<p> If the contact is added correctly, an addedContact(int,PimContact) message will be 
+sent to the QPE/PIM channel.  The contact in this message can be used to determine
+the assigned ID.
+
+<h3 class=fn>void <a name="addressBookUpdated"></a>AddressBookAccess::addressBookUpdated ()<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when a contact in the address book is added, removed or modified.
+
+<h3 class=fn><a href="pimcontact.html">PimContact</a> <a name="contactForId"></a>AddressBookAccess::contactForId ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const
+</h3>
+If there exists an contact with the uid <em>u</em>, return 
+that contact.  Returns a null contact if otherwise.
+<p> If <em>ok</em> is non-null, *ok is set to TRUE if the contact is
+found, and FALSE if the contact is not found.
+
+<h3 class=fn>bool <a name="editSupported"></a>AddressBookAccess::editSupported () const
+</h3>
+Returns TRUE if it is possible to add, remove and update contacts in
+the pim data.  Otherwise returns FALSE.
+<p> Adding, removing and updating contacts requires the Contacts service to be
+available
+
+<h3 class=fn><a href="pimcontact.html">PimContact</a> <a name="personalDetails"></a>AddressBookAccess::personalDetails () const
+</h3>
+Returns the <a href="pimcontact.html">PimContact</a> marked as Personal Details.
+
+<h3 class=fn>void <a name="removeContact"></a>AddressBookAccess::removeContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
+</h3>
+If supported will remove <em>contact</em> from pim data.
+<p> Removing contacts requires the Contacts service to be available.
+
+<h3 class=fn>void <a name="updateContact"></a>AddressBookAccess::updateContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
+</h3>
+If supported will update <em>contact</em> in pim data.
+<p> Updating contacts requires the Contacts service to be available.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

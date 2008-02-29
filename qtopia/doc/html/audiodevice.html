@@ -1,0 +1,170 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/mediaplayer/audiodevice_qss.cpp:57 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>AudioDevice Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AudioDevice Class Reference</h1>
+
+<p>The AudioDevice class abstracts accessing the audio hardware.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="audiodevice-h.html">audiodevice.h</a>&gt;</tt>
+<p><a href="audiodevice-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#AudioDevice"><b>AudioDevice</b></a> ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#~AudioDevice"><b>~AudioDevice</b></a> ()</li>
+<li class=fn>void <a href="#open"><b>open</b></a> ( unsigned&nbsp;int&nbsp;f = 44000, unsigned&nbsp;int&nbsp;chs = 2, unsigned&nbsp;int&nbsp;bps = 2, bool&nbsp;needCompletedSignal = true )</li>
+<li class=fn>void <b>close</b> ()</li>
+<li class=fn>unsigned int <a href="#canWrite"><b>canWrite</b></a> () const</li>
+<li class=fn>bool <a href="#write"><b>write</b></a> ( char&nbsp;*&nbsp;buffer, unsigned&nbsp;int&nbsp;length )</li>
+<li class=fn>int <a href="#bytesWritten"><b>bytesWritten</b></a> ()</li>
+<li class=fn>unsigned int <a href="#channels"><b>channels</b></a> () const</li>
+<li class=fn>unsigned int <a href="#frequency"><b>frequency</b></a> () const</li>
+<li class=fn>unsigned int <a href="#bytesPerSample"><b>bytesPerSample</b></a> () const</li>
+<li class=fn>unsigned int <a href="#bufferSize"><b>bufferSize</b></a> () const</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#volumeChanged"><b>volumeChanged</b></a> ( bool&nbsp;muted )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <b>completedIO</b> ()</li>
+<li class=fn>void <b>deviceReady</b> ()</li>
+<li class=fn>void <b>deviceOpenError</b> ()</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#volume"><b>volume</b></a> ( int&nbsp;&amp;&nbsp;left, int&nbsp;&amp;&nbsp;right )</li>
+<li class=fn>void <a href="#setVolume"><b>setVolume</b></a> ( int&nbsp;left, int&nbsp;right )</li>
+<li class=fn>bool <a href="#muted"><b>muted</b></a> ()</li>
+<li class=fn>void <a href="#setMuted"><b>setMuted</b></a> ( bool&nbsp;m )</li>
+<li class=fn>void <b>increaseVolume</b> ()</li>
+<li class=fn>void <b>decreaseVolume</b> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The AudioDevice class abstracts accessing the audio hardware.
+<p> This class is now a loose wrapper around QWSSoundClient which is
+the more direct and recommended way to access the audio hardware
+in Qtopia.
+<p> This class is currently private to the music and videos applications,
+its API may change and binary compatibilty may change in later
+versions.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="AudioDevice"></a>AudioDevice::AudioDevice ( QObject&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs an AudioDevice with <em>parent</em> and <em>name</em>.
+<p> <p>See also <a href="#write">write</a>() and <a href="#open">open</a>().
+
+<h3 class=fn><a name="~AudioDevice"></a>AudioDevice::~AudioDevice ()
+</h3>
+Destroys the AudioDevice.
+Volume settings are saved for the mediaplayer.
+
+<h3 class=fn>unsigned int <a name="bufferSize"></a>AudioDevice::bufferSize () const
+</h3>
+Retruns a value which is reasonable to write at a time.
+<p> <p>See also <a href="#write">write</a>().
+
+<h3 class=fn>unsigned int <a name="bytesPerSample"></a>AudioDevice::bytesPerSample () const
+</h3>
+Returns the bytes per sample data is to be formatted in, as set in the constructor.
+<p> <p>See also <a href="#AudioDevice">AudioDevice</a>() and <a href="#write">write</a>().
+
+<h3 class=fn>int <a name="bytesWritten"></a>AudioDevice::bytesWritten ()
+</h3>
+Some implementations might be able to tell how much of the written data has been processed.
+
+<h3 class=fn>unsigned int <a name="canWrite"></a>AudioDevice::canWrite () const
+</h3>
+Some implementations might be able to tell when it is okay to write more.
+
+<h3 class=fn>unsigned int <a name="channels"></a>AudioDevice::channels () const
+</h3>
+Returns the number of channels data is to be formatted in, as set in the constructor.
+<p> <p>See also <a href="#AudioDevice">AudioDevice</a>() and <a href="#write">write</a>().
+
+<h3 class=fn>unsigned int <a name="frequency"></a>AudioDevice::frequency () const
+</h3>
+Returns the frequency data is to be formatted in, as set in the constructor.
+<p> <p>See also <a href="#AudioDevice">AudioDevice</a>() and <a href="#write">write</a>().
+
+<h3 class=fn>bool <a name="muted"></a>AudioDevice::muted ()<tt> [static]</tt>
+</h3>
+Returns if muting is enabled.
+<p> <p>See also <a href="#setMuted">setMuted</a>().
+
+<h3 class=fn>void <a name="open"></a>AudioDevice::open ( unsigned&nbsp;int&nbsp;f = 44000, unsigned&nbsp;int&nbsp;chs = 2, unsigned&nbsp;int&nbsp;bps = 2, bool&nbsp;needCompletedSignal = true )
+</h3>
+Opens the AudioDevice using <em>f</em> as the frequency, <em>chs</em> as the channels,
+and <em>bps</em> as the number of bytes per sample of data written.
+If <em>needCompletedSignal</em> then the completedIO() signal will be emitted 
+when the AudioDevice is ready for more data.    
+Volume for the mediaplayer is read in from its configuration file.
+
+<h3 class=fn>void <a name="setMuted"></a>AudioDevice::setMuted ( bool&nbsp;m )<tt> [static]</tt>
+</h3>
+Sets device to be muted if <em>m</em>  is true.
+<p> <p>See also <a href="#muted">muted</a>().
+
+<h3 class=fn>void <a name="setVolume"></a>AudioDevice::setVolume ( int&nbsp;left, int&nbsp;right )<tt> [static]</tt>
+</h3>
+Sets the volume for the <em>left</em> and <em>right</em> channels. Volume ranges for setting are from 0 to 65536.
+<p> <p>See also <a href="#volume">volume</a>().
+
+<h3 class=fn>void <a name="volume"></a>AudioDevice::volume ( int&nbsp;&amp;&nbsp;left, int&nbsp;&amp;&nbsp;right )<tt> [static]</tt>
+</h3>
+Retrieves the volume for the <em>left</em> and <em>right</em> channels.
+<p> <p>See also <a href="#setVolume">setVolume</a>().
+
+<h3 class=fn>void <a name="volumeChanged"></a>AudioDevice::volumeChanged ( bool&nbsp;muted )<tt> [slot]</tt>
+</h3>
+Slot to notify AudioDevice of change in global mute setting. 
+Device is muted if <em>muted</em> is true.
+
+<h3 class=fn>bool <a name="write"></a>AudioDevice::write ( char&nbsp;*&nbsp;buffer, unsigned&nbsp;int&nbsp;length )
+</h3>
+Sends <em>length</em> bytes from <em>buffer</em> to the audio device. The data is
+to be formatted with the set frequency, channels and bytes per sample.
+The latency depends on implementation, currently QWSSoundClient has
+approximately a latency of 100ms.
+<p> <p>See also <a href="#AudioDevice">AudioDevice</a>(), <a href="#channels">channels</a>(), <a href="#frequency">frequency</a>(), and <a href="#bytesPerSample">bytesPerSample</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

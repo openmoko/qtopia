@@ -1,0 +1,180 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/networkinterface.cpp:41 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>NetworkInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>NetworkInterface Class Reference</h1>
+
+<p>The NetworkInterface class allows plugin network services.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="networkinterface-h.html">qtopia/networkinterface.h</a>&gt;</tt>
+<p><a href="networkinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual bool <a href="#doProperties"><b>doProperties</b></a> ( QWidget&nbsp;*&nbsp;parent, Config&nbsp;&amp;&nbsp;cfg ) = 0</li>
+<li class=fn>virtual bool <a href="#create"><b>create</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) = 0</li>
+<li class=fn>virtual bool <a href="#remove"><b>remove</b></a> ( Config &amp; ) = 0</li>
+<li class=fn>virtual QString <a href="#device"><b>device</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) const</li>
+<li class=fn>virtual QString <a href="#cardType"><b>cardType</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) const</li>
+<li class=fn>virtual bool <a href="#isActive"><b>isActive</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) const</li>
+<li class=fn>virtual bool <a href="#isAvailable"><b>isAvailable</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) const</li>
+<li class=fn>virtual bool <a href="#start"><b>start</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) = 0</li>
+<li class=fn>virtual bool <a href="#start-2"><b>start</b></a> ( Config&nbsp;&amp;&nbsp;cfg, const&nbsp;QString&nbsp;&amp;&nbsp;password )</li>
+<li class=fn>virtual bool <a href="#stop"><b>stop</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) = 0</li>
+<li class=fn>virtual bool <a href="#needPassword"><b>needPassword</b></a> ( Config&nbsp;&amp;&nbsp;cfg ) const</li>
+<li class=fn>virtual QWidget * <a href="#addStateWidget"><b>addStateWidget</b></a> ( QWidget&nbsp;*&nbsp;parent, Config&nbsp;&amp;&nbsp;cfg ) const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The NetworkInterface class allows plugin network services.
+<p> The Qtopia Network facilities are defined by the configurations
+in the Qtopia etc/network/ directory. For example, the generic
+DialUp.conf configuration looks like this (the actual file is
+encoded in UTF-8):
+<p> <pre>
+[Info]
+Name = Dial-up - PPP
+Type = dialup
+Layer = TCP/IP
+[Help]
+Help = For dial-up connections through a modem and plain telephone line.
+Help[de] = Für Wählverbindungen mit Modem und Telefon.
+[Properties]
+Auto = 0
+Device = ppp
+CardType = serial
+</pre><p> To add a network service that is merely a specific dialup service,
+you need only provide another configuration files, for example:
+<p> <pre>
+[Info]
+Name = SuperNet ISP
+Type = dialup
+Layer = TCP/IP
+[Help]
+Help = Connect to your local SuperNet(tm) point-of-presence.
+[Properties]
+Auto = 0
+Device = ppp
+CardType = serial
+password = secret
+phone = 555555555
+speed = 115200
+username = customer
+</pre><p> However, to add a service beyond the scope of the existing
+services, you can define your own network service Type,
+by creating a NetworkInterface plugin.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QWidget * <a name="addStateWidget"></a>NetworkInterface::addStateWidget ( QWidget&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+
+Returns a widget, with <em>parent</em> as its parent, that shows
+the state of the network service defined by <em>cfg</em>.
+<p> By default, 0 is returned (no state widget).
+
+<h3 class=fn>QString <a name="cardType"></a>NetworkInterface::cardType ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+Returns the pcmcia card type associated with this service.
+<p> By default, the Properties.CardType value in <em>cfg</em> is returned.
+
+<h3 class=fn>bool <a name="create"></a>NetworkInterface::create ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Performs any system state changes required for
+the network service defined by <em>cfg</em>. This is
+called only when the service is first added by
+the user.
+
+<h3 class=fn>QString <a name="device"></a>NetworkInterface::device ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+Returns the network device which is used for the connection.
+<p> By default, the Properties.Device value in <em>cfg</em> is returned.
+
+<h3 class=fn>bool <a name="doProperties"></a>NetworkInterface::doProperties ( QWidget&nbsp;*&nbsp;parent, <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Prompts the user to manipulate the properties of the
+network service defined by <em>cfg</em>, using a modal dialog
+which has the given <em>parent</em>. Returns TRUE on success,
+of FALSE if the user cancels the interaction.
+
+<h3 class=fn>bool <a name="isActive"></a>NetworkInterface::isActive ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+Returns TRUE if the service defined by <em>cfg</em> is active.
+<p> By default, the <a href="#device">device</a>() is searched for in /proc/net/dev.
+
+<h3 class=fn>bool <a name="isAvailable"></a>NetworkInterface::isAvailable ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+Returns TRUE is the network service defined by <em>cfg</em>
+is available to be started.
+<p> By default, the <a href="#cardType">cardType</a>() is searched for in the
+system pcmcia tables.
+
+<h3 class=fn>bool <a name="needPassword"></a>NetworkInterface::needPassword ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg ) const<tt> [virtual]</tt>
+</h3>
+
+Returns TRUE if the network service defined by <em>cfg</em> requires
+a password.
+
+<h3 class=fn>bool <a name="remove"></a>NetworkInterface::remove ( <a href="config.html">Config</a>&nbsp;&amp; )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Reverts any system state changes made in <a href="#create">create</a>().
+
+<h3 class=fn>bool <a name="start"></a>NetworkInterface::start ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Starts the network service defined by <em>cfg</em>,
+returning TRUE on success.
+<p> There is no default implementation.
+
+<h3 class=fn>bool <a name="start-2"></a>NetworkInterface::start ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg, const&nbsp;QString&nbsp;&amp;&nbsp;password )<tt> [virtual]</tt>
+</h3>
+
+<p> Starts the network service defined by <em>cfg</em>, using the given
+<em>password</em>, returning TRUE on success.
+<p> By default, the <a href="#start">start</a>() method without a password is called.
+
+<h3 class=fn>bool <a name="stop"></a>NetworkInterface::stop ( <a href="config.html">Config</a>&nbsp;&amp;&nbsp;cfg )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Stops the network service defined by <em>cfg</em>,
+returning TRUE on success.
+<p> There is no default implementation.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

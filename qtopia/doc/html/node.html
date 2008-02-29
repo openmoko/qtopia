@@ -1,0 +1,143 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/xmlreader.cpp:37 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Node Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Node Class Reference</h1>
+
+<p>The Node class is a single element in an XML structure defined by XmlHandler.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="xmlreader-h.html">qtopia/xmlreader.h</a>&gt;</tt>
+<p><a href="node-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#Node"><b>Node</b></a> ()</li>
+<li class=fn><a href="#~Node"><b>~Node</b></a> ()</li>
+<li class=fn>void <a href="#addChild"><b>addChild</b></a> ( Node&nbsp;*&nbsp;child )</li>
+<li class=fn>void <a href="#setAttributes"><b>setAttributes</b></a> ( const&nbsp;QXmlAttributes&nbsp;&amp;&nbsp;a )</li>
+<li class=fn>QMap&lt;QString, QString&gt; <a href="#attributeMap"><b>attributeMap</b></a> ()</li>
+<li class=fn>QString <a href="#attribute"><b>attribute</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn>Node * <a href="#nextNode"><b>nextNode</b></a> () const</li>
+<li class=fn>Node * <a href="#prevNode"><b>prevNode</b></a> () const</li>
+<li class=fn>Node * <a href="#parentNode"><b>parentNode</b></a> () const</li>
+<li class=fn>Node * <a href="#lastChild"><b>lastChild</b></a> () const</li>
+<li class=fn>Node * <a href="#firstChild"><b>firstChild</b></a> () const</li>
+<li class=fn>void <a href="#setTagName"><b>setTagName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>QString <a href="#tagName"><b>tagName</b></a> () const</li>
+<li class=fn>void <a href="#setData"><b>setData</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>QString <a href="#data"><b>data</b></a> () const</li>
+<li class=fn>QString <a href="#subData"><b>subData</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;tag ) const</li>
+<li class=fn>void <a href="#appendData"><b>appendData</b></a> ( const&nbsp;QString&nbsp;s )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The Node class is a single element in an XML structure defined by <a href="xmlhandler.html">XmlHandler</a>.
+<p> 
+<p>See also <a href="xmlhandler.html">XmlHandler</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Node"></a>Node::Node ()
+</h3>
+Creates an invalid Node
+
+<h3 class=fn><a name="~Node"></a>Node::~Node ()
+</h3>
+Destructs a Node, and deletes its children.
+
+<h3 class=fn>void <a name="addChild"></a>Node::addChild ( <a href="node.html">Node</a>&nbsp;*&nbsp;child )
+</h3>
+Safely sets Node <em>child</em> to be a child of this Node.
+
+<h3 class=fn>void <a name="appendData"></a>Node::appendData ( const&nbsp;QString&nbsp;s )
+</h3> 
+Appends <em>s</em> to the current tag's data.
+
+<h3 class=fn>QString <a name="attribute"></a>Node::attribute ( const&nbsp;QString&nbsp;&amp;&nbsp;name )
+</h3>
+Returns the value of the attribute tagged as <em>name</em>.
+
+<h3 class=fn>QMap&lt;QString, QString&gt; <a name="attributeMap"></a>Node::attributeMap ()
+</h3>
+Returns all of the Node's attributes.
+
+<h3 class=fn>QString <a name="data"></a>Node::data () const
+</h3> 
+Returns the current tag's data.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="firstChild"></a>Node::firstChild () const
+</h3> 
+Returns the Node's first child.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="lastChild"></a>Node::lastChild () const
+</h3> 
+Returns the Node's last child.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="nextNode"></a>Node::nextNode () const
+</h3> 
+Returns the Node's next sibling.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="parentNode"></a>Node::parentNode () const
+</h3> 
+Returns the Node's parent.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="prevNode"></a>Node::prevNode () const
+</h3> 
+Returns the Node's previous sibling.
+
+<h3 class=fn>void <a name="setAttributes"></a>Node::setAttributes ( const&nbsp;QXmlAttributes&nbsp;&amp;&nbsp;a )
+</h3>
+Adds the attributes in <em>a</em> to the Node's current attributes,
+overwriting any conflicts with existing attributes.
+
+<h3 class=fn>void <a name="setData"></a>Node::setData ( const&nbsp;QString&nbsp;&amp;&nbsp;s )
+</h3> 
+Sets the current tag's data to <em>s</em>.
+
+<h3 class=fn>void <a name="setTagName"></a>Node::setTagName ( const&nbsp;QString&nbsp;&amp;&nbsp;s )
+</h3> 
+Sets the current tag's name to <em>s</em>.
+
+<h3 class=fn>QString <a name="subData"></a>Node::subData ( const&nbsp;QString&nbsp;&amp;&nbsp;tag ) const
+</h3>
+Returns the value of the first attribute named <em>tag</em> from any
+of the Node's children.
+
+<h3 class=fn>QString <a name="tagName"></a>Node::tagName () const
+</h3> 
+Returns the current tag's name.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

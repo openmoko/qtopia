@@ -1,0 +1,295 @@
+#!/bin/sh
+
+# This script is provided as a convenient starting point for executing Qtopia on a desktop machine using a Qvfb (virtual framebuffer).
+# The script can be used for both source and sdk packages and supports all Qtopia editions.
+
+usage() {
+    echo ""
+    echo "Usage: startdemo [-skin skin] [-home home] [-sound sound]"
+    echo ""
+    echo " Runs Qtopia in a Qt Virtual FrameBuffer (QVFB) on the desktop machine."
+    echo " The script will further attempt to run a phone simulator for Phone enabled"
+    echo " editions and it will switch on/off sound support where appropriate."
+    echo ""
+    echo " Options:"
+    echo "  -skin .... A skin may be specified which will be used to control the look"
+    echo "             and feel of the QVFB. For example:"
+    echo ""
+    echo "                 startdemo -skin SmartPhone"
+    echo ""
+    echo "             If no skin is specified the script will look for the environment"
+    echo "             variable QVFB_SKIN to be set and it will use that as the skin."
+    echo "             If QVFB_SKIN is undefined it will ask for a selection, or"
+    echo "             will pick the skin that is most appropriate for the edition." 
+    echo " -home ..... Overrides the HOME path setting that is used by Qtopia."
+    echo "             If no -home option is specified the script looks for the"
+    echo "             QPEHOME environment variable and if set it will use that to"
+    echo "             define HOME."
+    echo "             Finally, if QPEHOME is not defined all SDK packages will set"
+    echo "             HOME to '/opt/Qtopia/demohome' and src packages will leave $HOME"
+    echo "             unchanged."
+    echo " -sound .... Manually specify the sound daemon support."
+    echo "             If no -sound option is specified, the script will probe to"
+    echo "             detect if a sound daemon is running and use the appropriate"
+    echo "             DSP driver.  This is recommended."
+    echo "             If this is suboptimal, please try these options:"
+    echo "                raw - qpe expects direct sound device access"
+    echo "                artsdsp - qpe called by artsdsp for sound"
+    echo "                esddsp - qpe called by esddsp for sound"
+    echo "                system - use system sound daemon as is"
+
+    echo ""
+    echo " Supported environment variables:"
+    echo " QPEHOME .............. When set this value will be used as HOME when running"
+    echo "                        Qtopia (unless-home is specified)."
+    echo " QVFB_SKIN ............ When set this value will be used for the Qvfb skin"
+    echo "                        (unless -skin is specified)." 
+    echo " QTOPIA_PHONE_DEVICE .. Can be used to specify the phone modem device that"
+    echo "                        Qtopia Phone needs to connect to to enable phone"
+    echo "                        services. If 'sim:localhost' is specified a phone"
+    echo "                        simulator will be started and used to simulate a modem."
+    echo " SOUND_DAEMON ......... When set this value will be used to select the sound"
+    echo "                        daemon (unless -sound is specified)."
+    echo ""
+}
+
+SOUND_TYPE="";
+
+# Parse the arguments
+while [ -n "$1" ]; do
+    case $1 in
+    -help)
+        usage
+        exit 0;
+        ;;
+    -skin)
+        shift
+        QVFB_SKIN="$1"
+        ;;
+    -home)
+        shift
+        QPEHOME="$1"
+        ;;
+    -sound)
+        shift
+        SOUND_TYPE="$1"
+        ;;
+    *)
+        echo ""
+        echo "Unknown option $1"
+        usage
+        exit 1
+    ;;
+    esac
+    shift
+done
+
+cur_dir="$(/bin/pwd)"
+
+# first let's establish what sort of package this is: SDK or source package...
+relpath="$(dirname $0)"
+relpath="$(cd "$relpath"; /bin/pwd)"
+if [ "$relpath" = "/opt/Qtopia/bin" ]; then
+    QTOPIA_SDK=1
+    PHONESIM_XML=/opt/Qtopia/etc/troll.xml
+    export QTDIR=/opt/Qtopia
+    export QPEDIR=/opt/Qtopia
+    QPE_PREFIX=/opt/Qtopia
+    edition="$(grep phone $QPEDIR/.configureoptions)"
+    if [ -z "$edition" ]; then
+        edition="$(grep pda $QPEDIR/.configureoptions)"
+        if [ -z "$edition" ]; then
+            edition="$(grep core $QPEDIR/.configureoptions)"
+            if [ -n "$edition" ]; then
+                edition="core"
+            fi    
+        else
+            edition="pda"
+        fi    
+    else
+        edition="phone"
+    fi
+else
+    QTOPIA_SDK=0
+    cd "$relpath/.."
+    if [ -f LICENSE.TROLL ]; then
+        
+        if [ -z "$QPE_ROOT" ]; then
+            echo "Please set QPE_ROOT to point to the root of the single package."
+            cd $cur_dir
+            exit 1
+        fi
+        cd $QPE_ROOT
+    else
+        cd ".."
+        if [ ! -f "configure" ]; then
+            echo "Couldn't find configure in '$PWD'. Please set QPE_ROOT to point to the root of the Qtopia package."
+            cd $cur_dir
+            exit 1
+        fi
+    fi
+    
+    if [ -f setQpeEnv ]; then
+        . setQpeEnv
+        
+        grep 'phone' config.cache >/dev/null 2>&1 && phone=yes || phone=no
+        grep 'pda'   config.cache >/dev/null 2>&1 && pda=yes || pda=no
+        if [ $phone = yes ]; then
+            edition=phone
+        elif [ $pda = yes ]; then
+            edition=pda
+        else
+            edition=core
+        fi
+        
+        if [ -z $edition ]; then
+            echo "Couldn't determine the Qtopia edition from the config cache. Did you configure Qtopia?"
+            cd $cur_dir
+            exit 1
+        fi
+        PHONESIM_XML=$QTOPIA_DEPOT_PATH/src/tools/phonesim/troll.xml
+        
+        if [ -e $QTOPIA_DEPOT_PATH/src/Makefile ]; then
+            QPE_PREFIX=`awk -F= '/^PREFIX/{print $2}' $QTOPIA_DEPOT_PATH/src/Makefile`
+        fi
+    else
+        echo "Couldn't set environment variables; Please configure Qtopia first"
+        cd $cur_dir
+        exit 1
+    fi
+fi
+
+echo ""
+echo "Detected Qtopia edition '$edition' in $QPEDIR"
+echo ""
+
+if [ ! -e "$QPE_PREFIX/bin/qpe" ]; then
+    echo ""
+    echo "Problem: Couldn't locate qpe in '$QPE_PREFIX/bin'."
+    if [ "$QTOPIA_SDK" = 0 ]; then
+        echo "  Did you run 'make' & 'make install' before running this script?"
+    fi    
+    echo ""
+    exit 1
+fi
+
+if [ -z "$QVFB_SKIN" ]; then
+    if [ "$edition" = "phone" ]; then
+        echo "Please select a phone demo mode:"
+        echo
+        echo "  1. Touchscreen Phone"
+        echo "  2. Keypad Phone"
+        echo
+        echo "Your choice (default 1): "
+        read RUN_MODE
+        if [ -z "$RUN_MODE" ]
+        then
+            RUN_MODE=1
+        fi
+    else
+        RUN_MODE=0
+    fi
+  
+    if [ "$RUN_MODE" = 1 ]; then
+        QVFB_SKIN=TouchscreenPhone
+    else
+        if [ "$RUN_MODE" = 2 ]; then
+            QVFB_SKIN=SmartPhone
+        else
+            QVFB_SKIN=QtopiaPDA
+        fi    
+    fi
+fi
+
+if [ -z "$QTOPIA_PHONE_DEVICE" ]; then
+    export QTOPIA_PHONE_DEVICE="sim:localhost"
+fi
+
+findproc() {
+        /bin/ps -e | /bin/sed -n -e '/\<'$1'\>/ s/^ *\([0-9][0-9]*\).*/\1/p'
+}
+
+killproc() {
+        pid=`findproc $1`
+        [ "$pid" != "" ] && kill $pid
+}
+
+killall quicklauncher > /dev/null 2>&1
+killall qpe > /dev/null 2>&1
+killall qss > /dev/null 2>&1
+killall qvfb > /dev/null  2>&1
+[ -x /sbin/fuser ] && ( /sbin/fuser -kn tcp 4242 || /sbin/fuser -kn tcp 4243 )
+[ -x /bin/fuser ] && ( /bin/fuser -kn tcp 4242 || /bin/fuser -kn tcp 4243 )
+
+if [ -z $SOUND_TYPE ] && [ -z $SOUND_DAEMON ]; then
+    artsd_pid=`findproc artsd`
+    esd_pid=`findproc esd`
+    if [ "$artsd_pid" != "" ]; then 
+        SOUND_DAEMON="artsdsp";
+    fi
+    if [ "$esd_pid" != "" ]; then 
+        SOUND_DAEMON="esddsp"; 
+    fi
+else
+    SOUND_DAEMON=$SOUND_TYPE
+fi
+echo "Using '$SOUND_DAEMON' sound daemon"
+
+echo "Starting qvfb ..."
+$QPEDIR/scripts/runqvfb $QVFB_SKIN 
+
+if [ "$edition" = "phone" ]; then
+    if [ "$QTOPIA_PHONE_DEVICE" = "localhost:sim" ]; then
+        export QTOPIA_PHONE_DEVICE="sim:localhost"
+    fi
+    if [ "$QTOPIA_PHONE_DEVICE" = "sim:localhost" ]; then
+        killproc phonesim  > /dev/null 2>&1
+        echo "Starting phone simulator ..."
+        $QPEDIR/bin/phonesim $PHONESIM_XML &
+    fi
+fi
+
+# wait a little to allow qvfb and phonesim to start up properly
+sleep 5s
+
+if [ "$QTOPIA_SDK" = 1 ]; then
+    if [ -z $QPEHOME ]; then
+        export HOME=/opt/Qtopia/demohome 
+    else
+        export HOME=$QPEHOME
+    fi    
+else
+    export QPEDIR=$QPE_PREFIX
+    export QTDIR=$QPE_PREFIX
+    if [ ! -z $QPEHOME ]; then
+        export HOME=$QPEHOME
+    fi     
+fi
+export PATH=$QPEDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+
+echo "Starting Qtopia $edition ..."
+if [ -z $SOUND_DAEMON ] || [ "$SOUND_DAEMON" = "raw" ] ; then
+    # run qpe without any sound server running (which should activate 'raw' mode) 
+    killall artsd  # just to be sure
+    killall esd    # just to be sure
+    $QPE_PREFIX/bin/qpe
+else
+    if [ "$SOUND_DAEMON" = "system" ] ; then
+        # run qpe without doing anything magical to the sound daemon
+        $QPE_PREFIX/bin/qpe
+    else
+        # run qpe through the specified sound daemon
+        $SOUND_DAEMON $QPE_PREFIX/bin/qpe
+    fi
+fi
+
+echo "Stopping qvfb..."
+killall qvfb > /dev/null 2>&1
+
+if [ "$edition" = "phone" ]; then
+    if [ $QTOPIA_PHONE_DEVICE = "sim:localhost" ]; then
+        echo "Stopping phone simulator..."
+        killproc phonesim  > /dev/null 2>&1
+    fi
+fi

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=SD Card Monitor
+Comment[]=Monitors the SD card slot.
+X-QPE-Library=libmountmonapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

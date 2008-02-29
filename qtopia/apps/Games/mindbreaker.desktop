@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaGames
+Context=Mindbreaker
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Comment[]=A Code Breaking Game
+Exec=mindbreaker
+Icon=Mindbreaker
+Type=Application
+Name[]=Mind­break­er

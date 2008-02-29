@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# This script is typically invoked by pppd after the link has been terminated
+#  See $QPEDIR/src/plugins/network/dialup/dialup.cpp and the pppd man page 
+
+export LD_LIBRARY_PATH=$QPEDIR/lib
+# Request that dialup network plugin stop pppd 
+$QPEDIR/bin/qcop QPE/pppd 'stop()'
+exit 0

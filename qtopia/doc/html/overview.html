@@ -1,0 +1,210 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/overview.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Overview</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Overview</h1>
+
+
+
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Software Stack
+</a>
+<li><a href="#3"> Qtopia's Qt/Embedded Configuration
+</a>
+<li><a href="#4"> Qtopia, Qt Versions and Binary Compatibility
+</a>
+<li><a href="#5"> Qtopia Platform
+</a>
+<ul>
+<li><a href="#5-1"> Qtopia PIM Access Library
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia is a platform for embedded Linux devices that provides the
+end-user with a set of core applications such as PIM applications (Address Book, <a href="calendar.html">Calendar</a> and Todo) and a Media Player.
+<p> Qtopia provides the developer with a clean object-oriented API to
+write applications for an embedded device. Most of the API presented
+to the developer is the same API offered by Trolltech for
+cross-platform development between Windows, Mac and the UNIX/Linux. The
+same code can be shared and reused on all of these desktop platforms
+and now Qtopia is just another platform to run Qt applications.
+<p> The Qtopia platform encompasses both the software that runs on an
+embedded device and the software that runs on a end-user desktop. The
+software that runs on the desktop, called Qtopia Desktop, allows the
+user to synchronize their data between the embedded device and the
+desktop. Qtopia Desktop has built-in versions of the PIM application
+found in Qtopia. Qtopia Desktop allows developers to write plug-ins to
+synchronize their information. Please refer to the
+<a href="qtopiadesktop-overview.html">Qtopia Desktop documentation</a> for
+more information.
+<p> For the most up to date documentation and product information for
+Qtopia, please visit <a
+href="http://www.trolltech.com/products/qtopia/index.html"> Trolltech's
+website</a>.
+<p> <h2> Software Stack
+</h2>
+<a name="2"></a><p> The Qtopia software stack on the embedded device has four main layers
+as shown in the following image.
+<p> <center><img src="../pics/stack.png" width="254" height="291"></center> Insignia's Java is written on top of Qt/Embedded (and a Qt/AWT
+implementation). Other applications such as Opera's Web Browser and
+Handcom Office Suite is written on top of Qt/Embedded and Qtopia.
+<p> <h2> Qtopia's Qt/Embedded Configuration
+</h2>
+<a name="3"></a><p> Trolltech's flagship product, Qt, is an API for cross-platform C++
+development. Qt/Embedded allows applications written for the Qt/API to
+be recompiled and run for an embedded architecture without a
+underlying windowing system such as X11.
+<p> It is intended that an application that is written for an embedded
+device can use the same code that is used on the desktop. This allows the
+developer to have a single source tree for the entire application
+suite offering.
+<p> In fact, the developer will not see a different API for Qt/Embedded in
+the Qt documenation. However, Qtopia uses a subset of Qt/Embedded tuned for
+smaller footprint (displays, memory, speed, etc). 
+<p> The modules removed from Qt due to their large size, speed or because
+they do not belong or are not necessary on an embedded device. For
+some of the modules, a description is provided if it is not obvious
+why this was left out of the Qt/Embedded offering for Qtopia.
+<p> <ul>
+<li> Core Qt -  Each of these is too large and too slow to use
+<ul>
+<li>  Properties 
+<li>  Transformations
+<li>  QPrinter
+<li>  XML module
+</ul>
+<p> <li> UI -  Each of these is replaced by Qtopia-style plug-ins 
+<ul>
+<li>  QTextCodec modules
+<li>  Drag and Drop
+<li>  Free type fonts
+<li>  Extra desktop styles (i.e. Motif)
+</ul>
+<p> <li> Images - No PPM images for:
+<ul>
+<li>  QImageIO
+<li>  QPicture
+</ul>
+<li> QWidgets:
+<ul>
+<li> QSplitter
+<li> QDial
+<li> QWorkspace
+</ul>
+<p> <li> QDialogs: 
+<ul>
+<li>  QFileDialog - the document view system is used instead of exposing the file system to the user
+<li>  QColorDialog
+<li>  QProgressDialog
+<li>  QPrintDialog
+<li>  QInputDialog
+</ul>
+</ul>
+<p> If a developer attempts to use a component that has been removed from the Qt/Embedded for Qtopia offering, the developer will see a compiler error.
+<p> <h2> Qtopia, Qt Versions and Binary Compatibility
+</h2>
+<a name="4"></a><p> Qtopia has shipped on the Sharp Zaurus 5500 and other embedded
+devices. Qtopia embedded requires Qt/Embedded 2.3. Qtopia Desktop
+requires Qt (either X11, Windows or Mac) version 3.2.x.
+<p> When a developer compiles an application, it must be compiled and
+linked against a binary compatible version of Qtopia and Qt/Embedded
+for that platform on the device. It is highly recommended for
+application authors to compile and link their applications using the
+latest SDKs provided by Trolltech to ensure binary
+compatibility. Please visit <a
+href="http://www.trolltech.com/developer/download/qtopia.html">
+Trolltech's Qtopia developer download page</a> for links to the latest
+commercial and GPL SDKs.
+<p> A library is binary compatible, if a program linked dynamically to a
+former version of the library continues running with newer versions of
+the library without the need to recompile. So applications compiled
+and linked for libqpe 1.5.0 should still link with libqpe 1.5.2 and
+vice-versa. If binary compatibility is broken, the application will
+not run on the target devices. To ensure binary compatibility, <b>do
+not change any Qtopia API</b>. 
+<p> Functionality that is added to Qtopia 1.x will mainly be added through
+add-on libraries. These add on libraries can be installed on top of
+Qtopia 1.x. This will allow Qtopia 2 applications to run on a
+Qtopia 1.x device, as long as the Qtopia 2 applications depend on
+these 1.x libraries in the .ipk control files. These libraries should
+then be automatically installed due the dependency.
+<p> <h2> Qtopia Platform
+</h2>
+<a name="5"></a><p> Qtopia platform comprises:
+<ul>
+<li> Qtopia libraries (Qt/E, libqpe, libqtopia1, qtopiapim) 
+<li> Qtopia server/launcher.
+</ul>
+<p> Application developers should use these libraries when writing applications for a
+Qtopia device. The Qtopia launcher/server is the main process that
+controls the windowing system, interprocess communication, launching
+all applications and other central tasks. 
+<p> Please refer to
+the <a href="index.html">Qtopia Developer Reference Manual</a> for
+more documentation about what is provided in the Qtopia library.  This
+library links agains Qt/Embedded 2.3.
+<p> Note that the Qtopia API has been broken up into two seperate
+libraries. One library is called libqpe and the other library is
+libqtopia1. libqpe 1.5.2 is binary compatible with the existing libqpe
+1.5.0 and libqpe 1.5.1 libraries. libqtopia1 contains the source code
+for the additional methods and classes added to Qtopia for the
+Qtopia 1.7.0 release. Qtopia 1.7 applications depend on both of
+these libraries. Qtopia 1.5 devices will be able to install Qtopia 1.7
+applications by installing libqtopia1 and any other libraries they
+need.
+<p> When you create a package, you must state all library
+dependencies so the package installer knows what it needs to install
+before your application can run. Please read the <a
+href="distrib.html">distribution packaging</a> for more information
+regarding packaging and dependencies.
+<p> <h3> Qtopia PIM Access Library
+</h3>
+<a name="5-1"></a><p> A separate library is provided for the embedded device to access the
+Qtopia PIM information. An application can depend on this ipkg for use
+of their application, and it will automatically be installed by the
+Application Installer software on Qtopia Desktop and Add/Remove
+Software Application. Please refer to <a href="qpepim.html">QPEPIM Library
+documentation</a> for more information. This library also depends
+on libqpe and libqtopia1 and Qt/Embedded 2.3.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,118 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/settings/light-and-power.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>&lt;b&gt;Power Management&lt;/b&gt; Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center><b>Power Management</b> Specification</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Automatic Behaviour When phone is Not in Use
+</a>
+<ul>
+<li><a href="#1-1-1"> Set Display Lighting to Automatically Change
+</a>
+<li><a href="#1-1-2"> Set Display to Automatically Return to the Home Screen 
+</a>
+</ul>
+<li><a href="#1-2"> Display brightness
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <b>Power Management</b> is a settings application. It allows the user to
+set up the device's display and change settings to regulate power use.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> The features of the <b>Power Management</b> settings application
+allow the user to configure the device to behave differently under
+different usage conditions and to suit individual tastes. The configuration
+extends only to the display screen.
+<p> <h3> Automatic Behaviour When phone is Not in Use
+</h3>
+<a name="1-1"></a><p> The user is able to configure a number of settings to take
+effect when the device is not in use.
+<p> <h4> Set Display Lighting to Automatically Change
+</h4>
+<a name="1-1-1"></a><p> The user may enable features to dim or turn off the
+display lighting when the device has not been used for a time.
+If enabled each feature is further configurable by changing a
+timer that controls the delay before activation. The timer is
+specified in increments of 15 seconds from 10 seconds up to 3600
+seconds (an hour) by using the up and down arrows or by typing in
+an exact figure in seconds.
+<p> The timers commence counting as soon as the user ceases interacting
+with the device (by pressing keys or using the stylus). There is no
+visible feedback that the timers are running. Any interaction
+with the device restarts the timer. 
+<p> Automatic display lighting features are:
+<ul>
+<li> <b>Dimming of the display lighting:</b> after a user specified amount of time.
+<li> <b>Turning display lighting off:</b> after a user specified amount of time.
+<li> It is possible for the user to enable / disable the above.
+</ul>
+<p> <h4> Set Display to Automatically Return to the Home Screen 
+</h4>
+<a name="1-1-2"></a><p> With this feature the device is configured to quit applications and
+display the home screen when the device is not in use. The home
+screen is the blank desktop display of the device that appears when
+the device is powered on. The feature is controlled by a timer in
+a similar fashion to the display lighting in the previous section.
+<p> If an application such as <b>Notes</b> is left open, editing a note, the
+user is not prompted to save the note: the note application
+simply quits. For this reason care needs to be used with
+this setting to avoid data loss if the device is to be used for
+creating documents.
+<p> The feature allows the user to:
+<p> <ul>
+<li> Set the amount of time to wait before returning to the home screen.
+<li> Turn this feature off or on.
+</ul>
+<p> <h3> Display brightness
+</h3>
+<a name="1-2"></a><p> The user is able to control the display backlighting to suit the
+brightness of their surroundings and their individual tastes.
+Higher settings will use more power.
+<p> The feature allows the user to:
+<p> <ul>
+<li> Adjust the brightness of the display.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

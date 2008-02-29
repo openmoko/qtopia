@@ -1,0 +1,10 @@
+Files: bin/language apps/Settings/Language.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Language settings dialog
+ For the Qtopia environment.

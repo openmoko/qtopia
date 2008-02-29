@@ -1,0 +1,158 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/videos.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Videos Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Videos Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Supported Formats
+</a>
+<li><a href="#1-2"> Scanning for Video Documents
+</a>
+</ul>
+<li><a href="#2"> Video Documents List
+</a>
+<ul>
+<li><a href="#2-1"> Playing Video Files
+</a>
+<li><a href="#2-2"> Playback Options
+</a>
+<li><a href="#2-3"> Playback Keypad Support
+</a>
+<li><a href="#2-4"> Playback Status
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Video</b> application manages and plays various types of video files.
+The available files are listed using the Qtopia document model.
+The videos are categorized and information about the files is displayed.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Supported Formats
+</h3>
+<a name="1-1"></a><p> <b>Videos</b> supports a range of video formats including:
+<ul>
+<li> MPEG-1
+<li> MPEG-2
+<li> MPEG-4
+</ul>
+<p> <h3> Scanning for Video Documents
+</h3>
+<a name="1-2"></a><p> Video files are searched for in the following locations:
+<ul>
+<li> Directories returned by <a href="qpeapplication.html#documentDir">QPEApplication::documentDir</a>()
+<li> All mounted file systems returned by Storage::fileSystems() where the
+file system is for a removable media device (for example SD cards, CF cards)
+</ul>
+<p> As files are found, they can be filtered and listed according to
+the user's selection of a category.
+<p> Re-scanning takes place when the program is notified of document changes.
+Events that cause an update of the listed files are:
+<ul>
+<li> Another application or process changes a property of an existing document.
+<li> A document is added or removed.
+<li> A removable storage card is inserted or removed and the corresponding
+filesystem is mounted or unmounted.
+</ul>
+<p> <h2> Video Documents List
+</h2>
+<a name="2"></a><p> <ul>
+<li> Sort - the list of video files can be alphabetically sorted.
+<li> Up/Down - the displayed list can be re-ordered by the user.
+<li> Category - files in the list can be added to a Category.
+<li> Add to Category - categories can be used to sort videos
+into different collections in order to create virtual playlists.
+<li> Users can therefore add files to a category as well as switch to
+different category views.
+<li> Properties - individual video properties can be displayed and edited, including:
+<ul>
+<li> The document name
+<li> Category associations
+</ul>
+<li> The media codec information, including codec, bitrate and so on, can be displayed.
+</ul>
+<p> <h3> Playing Video Files
+</h3>
+<a name="2-1"></a><p> When a video file is selected from the list for playing,
+the appropriate decoder plugin is found and initialized with the file to be played. The
+application then displays the user interface in order to provide user control of the file's playback.
+<p> Different decoder plugins can be installed in the system and detected by the player.
+Video files are also played when selected
+from the documents list of the <b>Qtopia Launcher</b>. When launched from the documents
+list the player user interface is immediately displayed and the scanning for documents is avoided.
+<p> <h3> Playback Options
+</h3>
+<a name="2-2"></a><p> When a video file is selected and played the user is able to perform the following
+operations:
+<ul>
+<li> Pause - halt the playback at the current position.
+<li> Resume - continue playback from the current position.
+<li> Fast forward / Rewind - move the slider or press the forward or backward buttons
+to move the position in the file to a position earlier or later in the video.
+<li> Previous / Next video - to skip to a previous or later video allowing movement
+forwards and backwards through the video list.
+<li> Looping - allows the same video to be played once or repeatedly (until stopped).
+<li> Fullscreen - the video can be displayed in fullscreen mode either by tapping
+or clicking on the video pane, or as an option in a menu.
+<li> Volume - the volume can be adjusted while the video is playing.
+</ul>
+<p> <h3> Playback Keypad Support
+</h3>
+<a name="2-3"></a><p> For keypad phones hardware keys are mapped to player actions. During playback of a video the following mappings are used:
+<ul>
+<li> Key-Up - increases the volume of the video.
+<li> Key-Down - decreases the volume of the video.
+<li> Key-Select - Pause/Resume play of the video.
+<li> Key-Left - if held for greater that a few hundred milliseconds, the player seeks forward
+through the video, otherwise it plays the next video.
+<li> Key-Right - if held for greater that a few hundred milliseconds, the player seeks backwards through the video, else it plays the previous video.
+</ul>
+<p> <h3> Playback Status
+</h3>
+<a name="2-4"></a><p> When a video file is played the following information, if available, is displayed:
+<ul>
+<li> Video duration
+<li> Current position in the video
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

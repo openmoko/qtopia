@@ -1,0 +1,508 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qtopia-startup.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Boot Stages</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Boot Stages</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Boot Stages
+</a>
+<li><a href="#3"> Description of Boot Steps
+</a>
+<ul>
+<li><a href="#3-1"> Synchronous steps
+</a>
+<ul>
+<li><a href="#3-1-1"> Initialize Environment
+</a>
+<li><a href="#3-1-2"> Cleanup QCop Directory
+</a>
+<li><a href="#3-1-3"> ServerApplication
+<a name="ServerApplication"></a>
+</a>
+<li><a href="#3-1-4"> Time Zone Information
+</a>
+<li><a href="#3-1-5"> Keyboard Initialization
+</a>
+<li><a href="#3-1-6"> SplashScreen
+</a>
+<li><a href="#3-1-7"> Server
+</a>
+<li><a href="#3-1-8"> Server Login
+</a>
+<li><a href="#3-1-9"> SysFileMonitor
+</a>
+<li><a href="#3-1-10"> AlarmServer
+</a>
+</ul>
+<li><a href="#3-2"> Steps Executed by Event Loop
+</a>
+<ul>
+<li><a href="#3-2-1"> DocumentList
+</a>
+<li><a href="#3-2-2"> PhoneLauncher
+</a>
+</ul>
+</ul>
+<li><a href="#4"> Boot-up Time Improvements
+</a>
+<ul>
+<li><a href="#4-1"> Image Scaling
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia loads a variety of components and objects during its startup process. This document identifies and describes these stages and gives a rough estimation of the amount of time that is used up by these boot stages. This part of the documentation is specific to the Qtopia's Phone edition.
+<p> <h2> Boot Stages
+</h2>
+<a name="2"></a><p> The boot stages in the following table can be found in <tt>$QPEDIR/src/server/main.cpp:initApplication()</tt>.
+</p>
+<table cellpadding=2 cellspacing=1 border=1 bgcolor=#e5e5e5>
+<tr>
+<th bgcolor=#a2c511>Boot stage</th>
+<th bgcolor=#a2c511>Subcomponent</th>
+<th bgcolor=#a2c511>Subcomponent detail</th>
+<th bgcolor=#a2c511>Proportion of boot time in %</th>
+</tr>
+<tr>
+<td valign=top>initialize environment <a href="#InitEnv">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center>1.1</td>
+</tr>
+<tr>
+<td valign=top>cleanup QCop directories <a href="#QCOPCleanup">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top>ServerApplication <a href="#ServerApplication">(*)</a></td>
+<td valign=top>QApplication constructor</td>
+<td valign=top></td>
+<td valign=top align=center>2.8</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>QPEApplication constructor</td>
+<td valign=top>setup Qtopia data directory</td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>install of <tt>qMsgHandler()</tt></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>Keypad or Touchscreen mode</td>
+<td valign=top align=center>0.4</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>QPEApplicationData()</td>
+<td valign=top align=center>0.4</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>load TextCodecs</td>
+<td valign=top align=center>1.5</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>load ImageCodecs</td>
+<td valign=top align=center>1.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>setup default fonts</td>
+<td valign=top align=center>0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>initialize application (<tt>initApp()</tt>)</td>
+<td valign=top align=center>0.5</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>load font renderer</td>
+<td valign=top align=center>2.8</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>load translations</td>
+<td valign=top align=center>2.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>install Qtopia's screensaver</td>
+<td valign=top align=center>2.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>QPEMenuToolFocusManager()</td>
+<td valign=top align=center>0.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>install storage monitor</td>
+<td valign=top></td>
+<td valign=top align=center>0.2</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>obtain current PowerStatus</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>create power alerter</td>
+<td valign=top></td>
+<td valign=top align=center>1.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>apply light settings</td>
+<td valign=top></td>
+<td valign=top align=center>0.2</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>setup KeyFilter</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top>refresh Time zone information <a href="#Timezone">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center>2.9</td>
+</tr>
+<tr>
+<td valign=top>initialize keyboard <a href="#Keyboard">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top>load and show SplashScreen<a href="#SplashScreen">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center>8.6</td>
+</tr>
+<tr>
+<td valign=top>create Server <a href="#Server">(*)</a></td>
+<td valign=top>create Phone GUI (PhoneLauncher)</td>
+<td valign=top>load translations</td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create PhoneHeader <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>6.0</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create ContextLabel <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create HomeScreen<a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>3.5</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create launcher menu <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>6.2</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create BatteryMonitor <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>show HomeScreen <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create LoadingWidget <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>1.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>start PhoneServer <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>4.2</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>create PhoneSignal & PhoneAccessories</td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top>load theme <a href="#ServerGUI">(*)</a></td>
+<td valign=top align=center>26.5</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>create DocumentList <a href="#DocumentList">(*)</a></td>
+<td valign=top></td>
+<td valign=top align=center>1.4</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>start AppLauncher</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>setup <a href="storageinfo.html">StorageInfo</a></td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>start TransferServer</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>start IrServer</td>
+<td valign=top></td>
+<td valign=top align=center>7.3</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>start PackageHandler</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>preload applications</td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top>Login to qpe server <a href="#ServerLogin">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center>0.2</td>
+</tr>
+<tr>
+<td valign=top>start SysFileMonitor <a href="#SysFileMonitor">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+<tr>
+<td valign=top>initialize <a href="alarmserver.html">AlarmServer</a> <a href="#AlarmServer">(*)</a></td>
+<td valign=top></td>
+<td valign=top></td>
+<td valign=top align=center><&nbsp;0.1</td>
+</tr>
+</table>
+<p> </p>
+The following steps are performed once the server has entered its event loop.
+<table cellpadding=2 cellspacing=1 border=1 bgcolor=#e5e5e5>
+<tr>
+<th bgcolor=#a2c511>Boot stage</th>
+<th bgcolor=#a2c511>Subcomponent</th>
+<th bgcolor=#a2c511>Proportion of boot time in %</th>
+</tr>
+<tr>
+<td valign=top>DocumentList</td>
+<td valign=top>load application links <a href="#DocumentList">(*)</a></td>
+<td valign=top align=center>1.1</td>
+</tr>
+<tr>
+<td valign=top></td>
+<td valign=top>load document links <a href="#DocumentList">(*)</a></td>
+<td valign=top align=center>0.1</td>
+</tr>
+<tr>
+<td valign=top>Phonelauncher</td>
+<td valign=top>update background <a href="#PhoneLauncher">(*)</a></td>
+<td valign=top align=center>0.8</td>
+</tr>
+</table>
+<p> <h2> Description of Boot Steps
+</h2>
+<a name="3"></a><p> <h3> Synchronous steps
+</h3>
+<a name="3-1"></a><p> <h4> Initialize Environment
+</h4>
+<a name="3-1-1"></a><p> <a name="InitEnv"></a>
+This step initializes essential environment variables such as <tt>TZ</tt> and <tt>LANG</tt>. Furthermore it determines the rotation and QWS display (specified as cmd line arguments and/or environment variables) that is used by Qtopia.
+<p> <h4> Cleanup QCop Directory
+</h4>
+<a name="3-1-2"></a><p> <a name="QCOPCleanup"></a>
+<p> This step will delete all qcop files in Qtopia's data directory.
+<p> <h4> ServerApplication
+<a name="ServerApplication"></a>
+</h4>
+<a name="3-1-3"></a><p> ServerApplication is the servers <a href="qpeapplication.html">QPEApplication</a> object.
+<p> <ul>
+<li> <b>QApplication</b> constructor
+<li> <b>QPEApplication</b> constructor
+<ul>
+<li> <b>setup Qtopia data directory</b> - The Qtopia data directory is used to store temporary files such as qcop-msg files
+<li> <b>qMsgHandler()</b> - Installs Qtopia's message handler.
+<li> <b>Keypad vs Touchscreen</b> - This step determines whether Qtopia will run in Touchscreen or Keypad mode. The mode is determined by <tt>defaultbuttons.conf</tt>.
+<li> <b>QPEApplicationData()</b> - Initializes the private application data for this QPEApplication object.
+<li> <b>load TextCodecs</b> - By default Qtopia will load two text codecs (simple and jp)
+<li> <b>load ImageCodecs</b> - By default Qtopia will load three image codecs (notepad, OTA and WAP Bitmap(WBmp))
+<li> <b>setup default font</b> - This step loads the helvetica family. Depending on the current screen size the font size will vary between 8 and 12.
+<li> <b>initApp()</b> - This function releoads application data which change if an application is quicklaunched. As soon as Quicklauncher is executing another application the <a href="qpeapplication.html">QPEApplication</a> object needs to be updated in order to reflect the new applications properties (e.g. translation files, new QCopChannel etc.).
+<li> <b>load font renderer</b>
+<li> <b>load translations</b>
+<li> <b>install Qtopia's screensaver</b> - Qtopia has its own ScreenSaver. The screensaver determines the actions which will be taken in order to conserve energy.
+<li> <b>QPEMenuToolFocusManager</b>
+</ul>
+<li> <b>install storage monitor</b> - The StorageMonitor monitors the free space on the device. If it is likely that the device is running out of space, the monitor will notify the user. The notification provides a link to the <a href="qtopia-services.html">CleanupWizard service</a>.
+<li> <b>obtain current PowerStatus</b> - The power status is needed in order to setup the correct light settings for the server.
+<li> <b>power alerter</b> - The power alerter keeps track of the device's power status and informs the user when the internal battery power level is low.
+<li> <b>light settings</b> - This stage loads Qtopia's light and screensaver configuration.
+<li> <b>setup KeyFilter</b> - This is the main keyfilter for the qpe server.
+</ul>
+<p> <h4> Time Zone Information
+</h4>
+<a name="3-1-4"></a><p> <a name="Timezone"></a>
+<p> Qtopia maintains a list of default time zones. These time zones are considered to be the most frequently used zones in Qtopia. If the list of default time zones is empty it will be initialized with six standard time zones (New York, Los Angeles, Oslo, Tokyo, Hong Kong and Brisbane).
+<p> <h4> Keyboard Initialization
+</h4>
+<a name="3-1-5"></a><p> <a name="Keyboard"></a>
+<p> This stage will setup the keyboard layout used by Qt/E.
+<p> <h4> SplashScreen
+</h4>
+<a name="3-1-6"></a><p> <a name="SplashScreen"></a>
+<p> During Qtopia's startup phase Qtopia presents a SplashScreen. This step will load and start the SplashScreen(-animation).
+<p> <h4> Server
+</h4>
+<a name="3-1-7"></a><p> <a name="Server"></a>
+<p> The server is the main widget of the qpe server.
+<p> <ul>
+<li> <b>create Phone UI</b> <a name="ServerGUI"></a>
+<ul>
+<li> <b>load translations</b>
+<li> <b>PhoneHeader</b> - The PhoneHeader presents the status of the phone. Depending on the theme it can show the signal strength, the battery status and the current time.
+<li> <b>ContextLabel</b> - The context label is the bottom widget of Qtopia Phone.
+<li> <b>HomeScreen</b> - The Homescreen is the main widget that is visible after the start of Qtopia.
+<li> <b>create launcher menu</b> - This step determines the appearance of the launcher view. 
+<li> <b>BatteryMonitor</b> - This monitor object keeps track of the batterylevel by either using PowerStatus or the modem. 
+<li> <b>show HomeScreen</b> - The HomeScreen is the first widget that will be shown once Qtopia has been started.
+<li> <b>create LoadingWidget</b>
+<li> PhoneServer
+<li> PhoneSignal
+<li> <b>load theme</b> - This step loads the theme config files and changes the appearance server widget such as the HomeScreen, the PhoneHeader and the ContextLabel.
+</ul>
+<li> <b>create DocumentList</b>
+<li> <b>Applauncher</b> - The Applauncher class connects Qtopia's user interface and applications. It handles the start of applications and makes use of Quicklauncher
+<li> <b>StorageInfo</b> - The server uses a <a href="storageinfo.html">StorageInfo</a> object in order to keep track of mounting activity.
+<li> <b>TransferServer</b> - The TransferServer is responsible for file transfer with Qtopia Desktop and uses the FTP protocol.
+<li> <b>IrServer</b> - The IrServer is loaded via a plug-in. It uses the Object Exchange Protocol (OBEX). <a href="qobex.html">QObex</a> plug-in is used by Qtopia for infra-red communication and links with OpenOBEX.
+<li> <b>PackageHandler</b> - The PackageHandler allows the (de-)installation of Qtopia packages. It relies on <tt>ipkg</tt> to do this task.
+<li> <b>preloading of Applications</b>
+</ul>
+<p> <h4> Server Login
+</h4>
+<a name="3-1-8"></a><p> <a name="ServerLogin"></a>
+<p> This stage will perform the pin authentication if required. Qtopia Phone will not unlock the keys without a valid authentication.
+<p> <h4> SysFileMonitor
+</h4>
+<a name="3-1-9"></a><p> <a name="SysFileMonitor"></a>
+<p> The SysFileMonitor (see <a href="system-customization.html#DeviceSpecific"><tt>QPE_SYSTEM_SYSFILEMONITOR</tt></a>) polls <tt>/etc/mtab</tt> and various other status files in order to keep track of new Storage Cards added to the system. If the HotPlug system is Qtopia-aware this monitor is not necessary. Qtopia's <a href="storageinfo.html">StorageInfo</a> class propagates these changes throughout Qtopia.
+<p> <h4> <a href="alarmserver.html">AlarmServer</a>
+</h4>
+<a name="3-1-10"></a><p> <a name="AlarmServer"></a>
+<p> <h3> Steps Executed by Event Loop
+</h3>
+<a name="3-2"></a><p> <h4> DocumentList
+</h4>
+<a name="3-2-1"></a><p> The DocumentList class is a main helper class for the launcher view.
+<p> <a name="DocumentList"></a>
+<ul>
+<li> <b>load application links</b> - Finds all applications, loads their icons and adds each application (if all requirements are met) to the launcher view.
+<li> <b>load document links</b> - Searches for all documents on the device and adds them to the document list in the launcher view.
+</ul>
+<p> <h4> PhoneLauncher
+</h4>
+<a name="3-2-2"></a><p> <a name="PhoneLauncher"></a>
+<ul>
+<li> <b>update background</b> - Finds and loads the background pixmap (specified by the current theme) for the Phone Launcher.
+</ul>
+<p> <h2> Boot-up Time Improvements
+</h2>
+<a name="4"></a><p> <h3> Image Scaling
+</h3>
+<a name="4-1"></a><p> A large proportion of Qtopia's startup time is spent on theme loading. This means a lot of pictures have to be loaded and potentially scaled. The actual size of these images depends on the screen size and the size attributes specified by a particular  theme. If a pictures doesn't have the correct size it will be scaled before the first use. The scaling process can last up to 15% of Qtopia's boot up time. Therefore it is recommended to provide these pictures with the correct size. Qtopia's default themes are optimized for a screen size of 176x208 pixels and should not require any resizing during loading. In order to assist in the process of identifying these scaling operations Qtopia 2.1.2 or later will print a debug statement when the theming framework is scaling an image. 
+
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

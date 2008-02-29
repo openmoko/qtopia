@@ -1,0 +1,121 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/internal/kvnc.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>kvnc.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>kvnc.h</h1>
+
+<p>This is the verbatim text of the kvnc.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS and its licensors.
+** All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** See below for additional copyright and license information
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+// -*- c++ -*-
+
+#ifndef KVNC_H
+#define KVNC_H
+
+#include &lt;qmainwindow.h&gt;
+#include &lt;qurl.h&gt;
+
+class QAction;
+class KRFBCanvas;
+class QPushButton;
+class QToolBar;
+
+/**
+ * Top level window for Keystone.
+ *
+ * @author Richard Moore, rich@kde.org
+ * @version $Id: kvnc.h,v 1.1 2001/09/07 02:15:52 martinj Exp $
+ */
+class KVNC : public QMainWindow
+{
+  Q_OBJECT
+public:
+  KVNC( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );  
+  ~KVNC();
+
+public slots:
+  void toggleFullScreen(bool);
+  void openURL( const QUrl &amp; );
+  void connectToServer();
+  void showOptions();
+
+protected:
+  void setupActions();
+
+protected slots:
+  void showMenu();
+  void connected();
+  void loggedIn();
+  void disconnected();
+  void statusMessage( const QString &amp; );
+  void error( const QString &amp; );
+  void zoom( bool );
+
+private:
+  bool fullscreen;
+  bool isConnected;
+  KRFBCanvas *canvas;
+  QPopupMenu *cornerMenu;
+  QPushButton *cornerButton;
+  QAction *fullScreenAction;
+  QAction *optionsAction;
+  QAction *connectAction;
+  QAction *zoomAction;
+};
+
+#endif // KVNC_H
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,565 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/networkservices.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Network Services</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Network Services</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> How it Works
+</a>
+<ul>
+<li><a href="#2-1"> The Dial-up Plug-in
+</a>
+<ul>
+<li><a href="#2-1-1"> GPRS AT dial string
+</a>
+</ul>
+<li><a href="#2-2"> The LAN Plug-in
+</a>
+<li><a href="#2-3"> The Proxies page
+</a>
+</ul>
+<li><a href="#3"> GPRS
+</a>
+<ul>
+<li><a href="#3-1"> Introduction
+</a>
+<li><a href="#3-2"> GPRS startup procedure
+</a>
+</ul>
+<li><a href="#4"> Troubleshooting
+</a>
+<ul>
+<li><a href="#4-1"> Example connect,disconnect scripts
+</a>
+<li><a href="#4-2"> Enabling AT Command Debugging
+</a>
+<li><a href="#4-3"> Changing the GPRS Packet Size to Compensate for Poor Signal Quality
+</a>
+<li><a href="#4-4"> Configuration file elements to check/update
+</a>
+<li><a href="#4-5"> Dialing with the example GPRS Dial script
+</a>
+<li><a href="#4-6"> Network testing
+</a>
+<li><a href="#4-7"> Requesting Support
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia Network Services are defined by files that
+allow the configuration of Linux system networking services. Once the Network <a href="service.html">Service</a> is 
+defined the user customizes and starts the Network Service they require via using the <tt>Internet Settings</tt> application.
+<p> <h2> How it Works
+</h2>
+<a name="2"></a><p> Network Service Files are standard Qtopia configuration files. They have three
+groups, with the following keys:
+<p> <ul>
+<li> [Info]
+<ul>
+<li> Name - the name presented to the user.
+<li> Type - the plug-in which this <a href="config.html">Config</a> parameterizes (see below).
+<li> UserSelectable - 0 to hide the option when adding new service.
+<li> Layer - only "TCP/IP" currently.
+</ul>
+<li> [Help]
+<ul>
+<li> Help - long description of the service.
+</ul>
+<li> [Properties]
+<ul>
+<li> Device - the network interface type (ppp, eth, etc.)
+<li> CardType - the pcmcia card type (network, serial, etc.)
+<li> ReadOnly - space-separated list of properties fields that
+should not be editable. The fields depend on the plug-in.
+<li> Hide - same as ReadOnly, for for fields that should not be visible at all.
+</ul>
+</ul>
+<p> The <a href="networkinterface.html">NetworkInterface</a> class defines the interface for plug-ins. Two
+plug-ins are provided with Qtopia: "Dial-up" and "LAN", which configure
+<tt>pppd</tt> and <tt>ethernet</tt> respectively.
+<p> <h3> The Dial-up Plug-in
+</h3>
+<a name="2-1"></a><p> The Dial-up plug-in: 
+<ul>
+<li> configures PPPD peer files in <tt>/etc/ppp/peers/</tt>
+<li> starts the pppd process
+<li> may start pppd with demand dialing enabled
+<li> is implemented in <tt>$QPEDIR/src/plugins/network/dialup/</tt>
+</ul>
+<p> The Dial-up plug-in makes use of keys in the Network <a href="service.html">Service</a> configuration file. For further information refer to <a href="http://www.tldp.org/HOWTO/PPP-HOWTO/">pppd</a> documentation or the <tt>pppd</tt> <tt>man</tt> page.
+<p> <ul>
+<li> [Properties]
+<ul>
+<li> Device - must be "ppp".
+<li> CardType - must be "serial".
+<li> SerialDevice - optional, the device, eg. "/dev/ttyU0"
+<li> GPRS - 1 = the service uses a GPRS modem.
+<li> username
+<li> password
+<li> phone - phone number to dial (non-GPRS only)
+<li> apn - Access Point Name (GPRS only)
+<li> atdial - dial string prefix, default is "ATDT".
+<li> gateway
+<li> dns1
+<li> dns2
+<li> speed
+<li> script - optional, program to make connection (otherwise, uses pppd).
+<li> connectdelay
+<li> crtscts - (0 or 1)
+<li> defaultroute - (0 or 1)
+<li> dialmode - (0 = Manual, 1 = Auto-off, 2 = Auto on/off)
+<li> idletime
+<li> usepeerdns - (0 or 1)
+</ul>
+</ul>
+<p> The field names supported by the Hide and ReadOnly keys are below. Note
+that entire tabs can be hidden by adding the tab name to Hide.
+<p> <ul>
+<li> account - the entire tab including:
+<ul>
+<li> acname
+<li> username
+<li> password
+<li> apn
+<li> phone
+</ul>
+<li> modem - the entire tab including:
+<ul>
+<li> atdial
+<li> speed
+<li> connectdelay
+<li> crtscts
+</ul>
+<li> dialing - the entire tab including:
+<ul>
+<li> dial_manual
+<li> dial_demand
+<li> dial_idle
+<li> idletime
+</ul>
+<li> network - the entire tab including:
+<ul>
+<li> usepeerdns
+<li> defaultroute
+<li> dns
+<li> dns_1
+<li> dns_2
+</ul>
+<li> proxies - the entire tab including:
+<ul>
+<li> type
+<li> autoconfig
+<li> http
+<li> ftp
+<li> noproxies
+</ul>
+</ul>
+<p> <h4> GPRS AT dial string
+</h4>
+<a name="2-1-1"></a><p> By default the Dial-up plug-in uses the following minimal dial string for GPRS connections:
+<p> <pre>
+        dialstring = "AT+CGDCONT=1,\"IP\",\"" + &lt;provider APN&gt; + "\"" + " OK "
+               "AT+CGATT=1 OK "
+               "OK ATD*99***1#";
+</pre>
+ 
+<p> This string is not necessarily suitable for all modems. If a GPRS data connection cannot be started this string has to be adjusted to the requirements of the particular modem. It may be necessary that for you to contact the modem manufacturer to determine the dial string to use in  
+<p> <tt>DialupImpl::dialString(Config&amp;)</tt> in <tt>$QPEDIR/src/plugins/network/dialup/dialup.cpp</tt>
+<p> <h3> The LAN Plug-in
+</h3>
+<a name="2-2"></a><p> The LAN plug-in: 
+<ul>
+<li> configures the PCMCIA networking files : <tt>network.opts, wlan-ng.opts and wireless.opts</tt>
+<li> is implemented in <tt>$QPEDIR/src/plugins/network/lan/</tt>
+<li> may be customized to support non-PCMCIA network cards : see  <tt>Lan::writeBuiltinNetworkOpts(Config &amp;, QString)</tt> in <tt>$QPEDIR/src/plugins/network/lan/lan.cpp</tt>
+</ul>
+<p> The LAN plug-in makes use of the keys in the Network <n>Service</n> configuration file. For further information refer to: <a href="http://www.tldp.org/HOWTO/PCMCIA-HOWTO.html">PCMCIA</a> documentation.
+<p> <ul>
+<li> AuthType
+<li> BASICRATES
+<li> BCNINT
+<li> BOOTP
+<li> BROADCAST
+<li> CHANNEL
+<li> DHCP
+<li> DHCP_HOSTNAME
+<li> DNS_1
+<li> DNS_2
+<li> DNS_3
+<li> DOMAIN
+<li> FRAG
+<li> FREQ
+<li> GATEWAY
+<li> IF_PORT
+<li> IPADDR
+<li> IS_ADHOC
+<li> IWCONFIG
+<li> IWPRIV
+<li> IWSPY
+<li> MOUNTS
+<li> MTU
+<li> NETMASK
+<li> NETWORK
+<li> NO_CHECK
+<li> NO_FUSER
+<li> NWID
+<li> OPRATES
+<li> PRIV_GENERATOR
+<li> PRIV_GENSTR
+<li> PRIV_KEY128
+<li> RATE
+<li> RTS
+<li> SEARCH
+<li> SENS
+<li> SSID
+<li> USER_MIBS
+<li> WEP - (NO = None, PP = Passphrase, K0 = Key 0, K1 = Key 1, K2 = Key 2, K3 = Key 3)
+<li> WLAN_ENABLE
+<li> dot11ExcludeUnencrypted
+<li> dot11PrivacyInvoked
+<li> dot11WEPDefaultKey
+<li> dot11WEPDefaultKey0
+<li> dot11WEPDefaultKey1
+<li> dot11WEPDefaultKey2
+<li> dot11WEPDefaultKey3
+<li> dot11WEPDefaultKeyID
+<li> start_fn
+<li> stop_fn
+</ul>
+<p> The Hide and ReadOnly keys are not supported at this time.
+<p> Some Linux distributions ship <tt>network.opts</tt>, i<tt>wlan-ng.opts</tt>, and <tt>wireless.opts</tt> with many partial configurations.
+These will override all settings created by Qtopia, which
+inserts its configurations before the final "*,*,*,*)" catch-all
+configuration.
+<p> <h3> The Proxies page
+</h3>
+<a name="2-3"></a><p> The Dial-up and LAN plug-ins share a proxies page. The settings
+for this page are defined in the configuration as:
+<p> <ul>
+<li> [Proxy]
+<ul>
+<li> type - 0 = No proxies, 1 = Automatic, 2 = Manual.
+<li> autoconfig
+<li> httphost
+<li> httpport
+<li> ftphost
+<li> ftpport
+<li> noproxies
+</ul>
+</ul>
+<p> <!-- index GRPSOverview --><a name="GRPSOverview"></a><h2> GPRS
+</h2>
+<a name="3"></a><p> <h3> Introduction
+</h3>
+<a name="3-1"></a><p> General Packet Radio <n>Service</n> (GPRS) is a <n>GSM</n> data transmission technique that transmits and recieves data in packets rather than via a continuous
+channel. 
+<p> Qtopia uses the Dial-up network plug-in to establishing a connection see : $QPEDIR/src/plugins/networking/dialup/
+<p> In the ideal case
+<ol type=1>
+<li> The user runs the Internet application and configures a GPRS connection
+<li> The user selects the newly created GPRS connection and it starts dialing
+<li> GPRS is established and Internet traffic can occur
+</ol>
+<p> <h3> GPRS startup procedure
+</h3>
+<a name="3-2"></a><p> An outline of the mechanism to establish a GPRS connection is provided in the following section. It is assumed that the application <tt>Setting-&gt;Internet</tt> has been used to create a GPRS <n>Service</n> that has at least value for the APN field and optionaly a user name/password.
+<p> <ol type=1>
+<li> Create Network Server
+<p> Add the following code to function <tt>initApplication(...)</tt> located in <tt>$QPEDIR/src/server/main.cpp</tt>: 
+<pre>
+   Network::createServer(s);
+</pre>
+ 
+<p> <li>  Create object NetworkServer.
+<p> Add the following code to function <tt>Network::createServer(...)</tt>:
+<pre>
+  void Network::createServer(QObject* parent)
+  {
+  ns = new NetworkServer(parent);
+  }
+</pre>
+ 
+File location:  <tt>$QPEDIR/src/libraries/qtopia/network.cpp</tt>.
+<p> <li> Create QCopChannel <tt>QPE/Network</tt> and start a timer
+using <tt>NetworkServer(QObject* parent)</tt> and <tt>timerEvent()</tt>. 
+File location: $QPEDIR/src/libraries/qtopia/network.cpp
+<p> <li>  Start the network
+<pre> examineNetworks()
+ Network::start(*it);
+</pre>
+ 
+<p> <li> Send QCop message to Channel QPE/Network
+<pre> Network::start(...) 
+ start(QString,QString)
+ 
+</pre>
+ 
+<p> <li> <tt>NetworkServer</tt> will receive this QCop msg and calls:
+<pre>
+  void receive(...)
+</pre>
+ 
+<p> <li> Function <tt>receive(...)</tt> then calls 
+<pre> start(file,password) </pre>
+ 
+<p> <li> Load plug-in using:
+<pre> NetworkInterface* plugin = Network::loadPlugin(type);
+ plugin-&gt;start(cfg,password);
+</pre>
+ 
+<p> <li> Prepare for the full dial control string:
+<pre> DialupImpl::start(...) 
+ PhoneLine line;
+ ...
+ line.startData(number, init, args, demand);
+</pre>
+ 
+File location: $QPEDIR/src/plugins/network/dial-up/dial-up.cpp
+<p> <li> Send QCop message to <tt>phoneServer</tt> 
+<pre> Statement line.startData(...) </pre>
+ 
+<p> <li>  <tt>phoneServer</tt> calls 
+<pre> PhoneLineAt::startData(...) </pre>
+ 
+<p> <li>  PhoneLineAt::startData(...) calls
+<pre> mux-&gt;startProtocolModule(...) </pre>
+  
+to start the <tt>pppd</tt> daemon.
+File location: <tt>$QPEDIR/src/libraries/qtopiaphone/phoneat.cpp</tt>.
+<p> <li> <tt>fork</tt> and <tt>exec</tt> a new process and <tt>pppd</tt> using:
+<pre> mux-&gt;startProtocolModule(... ) </pre>
+ 
+File location:  <tt>$QPEDIR/src/libraries/qtopiaphone/muxdevice.cpp</tt>.
+<p> <li> <tt>pppd</tt> starts with connect script <tt>qtopia-dial-internal()</tt>.
+<p> This connect script sends the QCop message <tt>dial()</tt> to <tt>QPE/pppd</tt> and waits
+for <tt>dialResult(boot)</tt> from <tt>QPE/pppd</tt>.
+<p> <li> When the dial() QCop message is received:
+<pre> PhoneLineAt::pppdListen() </pre>
+ 
+sends the QCop message <tt>dialResult(...)</tt> to <tt>QPE/pppd</tt>.
+<p> <li> The connect script successfully returns when the message
+<tt>dialResult(...)</tt> is received, and pppd will begin to IP configuration.
+<p> </ol>
+For detailed description of <tt>pppd</tt>, please refer to <tt>man pppd</tt>.
+<p> For further GPRS information please refer to: Qtopia GPRS Networking
+<p> <h2> Troubleshooting
+</h2>
+<a name="4"></a><p> <h3> Example connect,disconnect scripts
+</h3>
+<a name="4-1"></a><p> Scripts can be provided on request and may be customized to suit your device and GPRS provider. For example:
+<ul>
+<li> Connect chat (connect-chat)
+<pre>
+      ABORT "NO CARRIER"
+      ABORT "NO DIALTONE"
+      ABORT BUSY
+      # Change the word internet to the name of your providers APN
+      "" "AT+CGDCONT=1,\"IP\",\"internet\""
+      OK "AT+CGATT=1"
+      OK "ATDT*99***1#"
+  </pre>
+ 
+<li> Disconnect Chat (disconnect-chat)
+<pre>
+      \d+++\d\c OK 
+      ATH0 OK
+  </pre>
+ 
+<li> GPRS Dial (startpppd.sh)
+<pre>
+     #!/bin/sh
+     #
+     # Start a pppd session via GPRS
+     #
+     # Usage:
+     #       startpppd.sh [PPP peer to call]
+     # 
+
+     # The following notes apply to the pppd options used. See the pppd man page for more details 
+     #  ttyS0 : change to the device that modem is connected to
+     #  115200 : lower modem speed if required
+     #  noipdefault: pppd must not propose any IP address to the peer!
+     #  ipcp-accept-local : Accept peers idea of our local address
+     #  modem : use modem control lines; change modem to local if required
+     #  novj : Disable all compression
+     #  record /tmp/ppp-all-text.log : record all traffic to file shown
+     
+     set -x
+     
+     if [ -z "$1" ]; then
+     
+     /usr/sbin/pppd \
+         ttyS0 \
+         115200 \
+         connect 'chat -s -v -f connect-chat' \
+         disconnect 'chat -s -v -- -f disconnect-chat' \
+         crtscts \
+         defaultroute \
+         replacedefaultroute \
+         noipdefault \
+         ipcp-accept-local \
+         modem \
+         usepeerdns \
+         demand \
+         connect-delay 5000 \
+         idle 120 \
+         nodetach \
+         lcp-echo-failure 0 \
+         lcp-echo-interval 0 \
+         novj \
+         nobsdcomp \
+         novjccomp \
+         nopcomp \
+         noaccomp \
+         debug
+     else
+     # call the specified peer 
+     /usr/sbin/pppd call $1 \
+         connect 'chat -s -v -f connect-chat' \
+         disconnect 'chat -s -v -- -f disconnect-chat' \
+         record /tmp/ppp-all-text.log \
+         debug
+     fi
+  </pre>
+ 
+</ul>
+<p> <h3> Enabling AT Command Debugging
+</h3>
+<a name="4-2"></a><p> A debug build of Qtopia will cause all AT commands being used to be printed to standard output. If required re-build Qtopia with debugging enabled via running :
+<pre>
+    cd $QPEDIR
+    make distclean
+    ./configure  -debug &lt;extra options&gt;
+    make
+    make cleaninstall
+</pre>
+ 
+<p> <h3> Changing the GPRS Packet Size to Compensate for Poor Signal Quality
+</h3>
+<a name="4-3"></a><p> By default a packet size of 1500 will be used by pppd for GPRS traffic. In cases of poor signal quality it may 
+be necessary to decrease the "mru" and "mtu" packet size being used by pppd, to for 512. See the 
+pppd man page for details on setting mru and mtu values.
+<p> <h3> Configuration file elements to check/update
+</h3>
+<a name="4-4"></a><p> <ol type=1>
+<li> check that /etc/ppp/options does not have papcrypt enabled
+<li> check the password that may be specified : see  <tt>/etc/ppp/chap-secrets</tt> and <tt>/etc/ppp/pap-secrets</tt>
+<li> check the contents of <tt>$HOME/Applications/Network/modules/DialUpGPRS*.conf</tt>
+<li> check the contents of <tt>/etc/ppp/peers/*GPRS*</tt> 
+<li> check that Dial-upImpl::dialString in <tt>$QPEDIR/src/plugins/networking/dial-up/dial-up.cpp</tt> suits your modem.  For example you may need to use either
+<ol type=1>
+<li> AT+CGDCONT=1,&#92;"IP&#92;" ...
+<li> AT+CGDCONT=1,&#92;"PPP&#92;" ... 
+</ol>
+<li> update the /etc/ppp/options file to enable debugging and record ALL traffic. eg add
+<pre>
+    debug 
+    record /tmp/ppp-all-text.log </pre>
+ 
+<p> <li> modify the connect-chat, disconnect-chat and startpppd.sh to suit your modem and internet provider : at least
+<ul>
+<li> in connect-chat change internet to the name of your providers APN
+<li> in connect-chat change the GPRS init/dial string as required
+</ul>
+</ol>
+<p> <h3> Dialing with the example GPRS Dial script
+</h3>
+<a name="4-5"></a><p> <ol type=1>
+<li> Ensure that Qtopia and pppd are not running
+<li> Start pppd via running startpppd.sh
+<li> Ping an non-local address : eg  
+<pre> ping 216.239.39.99 </pre>
+ 
+<li> Confirm that pppd attempts to start the link and review the content
+of /tmp/ppp-all-text.log
+<li> If needed send the recorded traffic as setup in step 2 in a tar.gz to support
+</ol>
+<p> <h3> Network testing
+</h3>
+<a name="4-6"></a><p> The following can help to isolate any GPRS issues.
+<p> Run the following commands to ping local and non-local resources:
+<pre>
+      ping &lt;some IP address on your local network&gt;
+
+      ping 66.102.7.99
+
+      ping &lt;some host on your local network&gt;
+
+      ping www.google.com
+</pre>
+ 
+<p> It might be necessary to specify the network interface that the ping command should use.
+If you have more than one network interface and suspect routing issues use:
+<p> <pre>
+      ping -I &lt;iface-name&gt; &lt;host&gt; 
+</pre>
+ 
+<p> If one or less of the above tests fail then provide the output of the following commands :
+<pre>
+      /sbin/ifconfig -a
+
+      /sbin/ifstatus eth0
+
+      /sbin/route
+
+      cat /etc/resolv.conf
+</pre>
+ 
+<p> If you have a firewall in use, check that the route uses the correct gateway address and 
+that the firewall is not blocking IP traffic from the device. Lastly
+it may helpful to compare the results of running the above commands with results given by 
+running the same commands on a development machine.
+<p> <h3> Requesting Support
+</h3>
+<a name="4-7"></a><p> If support is needed please ensure that your support request contains the following items:
+<p> <ol type=1>
+<li> the peer file ( see <tt>/etc/ppp/peers</tt> )
+<li> the network configuration file ( <tt>$HOME/Applications/Network/modules/DialUpGPRS*.conf</tt> )
+<li> the pppd log file
+<li> the connect chat 
+<li> all parameters passed to pppd
+</ol>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,159 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/services.cpp:60 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Service Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Service Class Reference</h1>
+
+<p>The Service class allows applications to provide services for other
+applications to use.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="services-h.html">qtopia/services.h</a>&gt;</tt>
+<p><a href="service-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QStringList <a href="#list"><b>list</b></a> ()</li>
+<li class=fn>QString <a href="#binding"><b>binding</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service )</li>
+<li class=fn>QStringList <a href="#apps"><b>apps</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, bool&nbsp;automatics = TRUE )</li>
+<li class=fn>QString <a href="#app"><b>app</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )</li>
+<li class=fn>QString <a href="#appConfig"><b>appConfig</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )</li>
+<li class=fn>QString <a href="#config"><b>config</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service )</li>
+<li class=fn>QStrList <a href="#channels"><b>channels</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, bool&nbsp;automatics = TRUE )</li>
+<li class=fn>QCString <a href="#channel"><b>channel</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )</li>
+<li class=fn>AppLnk <a href="#appLnk"><b>appLnk</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The Service class allows applications to provide services for other
+applications to use.
+<p> 
+<p> A Service is a named collection of features that an application
+may choose to provide. For example, web browsers might each provide
+the feature of displaying a web page given a URL.
+<p> Services allow the providers of a service (eg. a web browser) from the
+consumers of the service (eg. a mail reader that wanted the user to
+view a URL).
+<p> First availability: Qtopia 1.6
+<p> <p>See also <a href="servicerequest.html">ServiceRequest</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QString <a name="app"></a>Service::app ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns the application that provides the <em>service</em>, or
+a null string if there is no such service.
+<p> If <em>appname</em> is provided, a specific binding to that application may
+be used rather than the global binding.
+<p> If <em>automatics</em> is TRUE (the default), and the service is not otherwise
+defined, the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for a service provider. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn>QString <a name="appConfig"></a>Service::appConfig ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns the <a href="config.html">Config</a> file defining the facilities provided by application that
+provides the <em>service</em>, or
+a null string if there is no such service.
+<p> The Config can be used to extract more detailed application-specific
+information about the application providing the service.
+<p> Note that the application always provides at least the services defined
+in the config() file - the information in the <a href="#appConfig">appConfig</a>()
+is application-specific.
+<p> If <em>appname</em> is provided, a specific binding to that application may
+be used rather than the global binding.
+<p> If <em>automatics</em> is TRUE (the default), and the service is not otherwise
+defined, the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for a service provider. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn><a href="applnk.html">AppLnk</a> <a name="appLnk"></a>Service::appLnk ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns an <a href="applnk.html">AppLnk</a> to an application providing the <em>service</em>.
+If <em>appname</em> is provided, a specific binding to that application may
+be used rather than the global binding.
+<p> If <em>automatics</em> is TRUE (the default),
+the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for service providers. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn>QStringList <a name="apps"></a>Service::apps ( const&nbsp;QString&nbsp;&amp;&nbsp;service, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns all applications that offer the <em>service</em>, or
+a null string if there is no such service offered.
+<p> If <em>automatics</em> is TRUE (the default),
+the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for service providers. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn>QString <a name="binding"></a>Service::binding ( const&nbsp;QString&nbsp;&amp;&nbsp;service )<tt> [static]</tt>
+</h3>
+Returns the name of the <a href="config.html">Config</a> file defining the bindings which the
+user has selected for the <em>service</em>.
+
+<h3 class=fn>QCString <a name="channel"></a>Service::channel ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns the QCop channel for the given <em>service</em>, or
+a null string if there is no such service.
+<p> If <em>appname</em> is provided, a specific binding to that application may
+be used rather than the global binding.
+<p> If <em>automatics</em> is TRUE (the default), and the service is not otherwise
+defined, the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for a service provider. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn>QStrList <a name="channels"></a>Service::channels ( const&nbsp;QString&nbsp;&amp;&nbsp;service, bool&nbsp;automatics = TRUE )<tt> [static]</tt>
+</h3>
+Returns the QCop channels for all applications that offer
+<em>service</em>.
+<p> If <em>automatics</em> is TRUE (the default), and the service is not otherwise
+defined, the <a href="mimetype.html">MimeType</a> database and application executables are also
+searched for a service provider. The search of application executables is solely
+for backward compatibility.
+
+<h3 class=fn>QString <a name="config"></a>Service::config ( const&nbsp;QString&nbsp;&amp;&nbsp;service )<tt> [static]</tt>
+</h3>
+Returns the name of the <a href="config.html">Config</a> file defining the facilities that are provided by
+all applications that provide the <em>service</em>, or
+a null string if there is no such service.
+<p> Applications providing the service may have additional configuration
+defined in the <a href="#appConfig">appConfig</a>()) file.
+
+<h3 class=fn>QStringList <a name="list"></a>Service::list ()<tt> [static]</tt>
+</h3>
+Returns a list of available services.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

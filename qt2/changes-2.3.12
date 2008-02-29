@@ -1,0 +1,22 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+Improvements:
+- Improved support for mouse devices that are passed via QWS_MOUSE_PROTO
+- Expose setSystemVolume call through sound server class as well as sound client class.
+- Improved support for multiple clients using the sound device.
+- Improved volume control from dev mixer.
+- Added compile support for 64bit machines.
+- Improved support in QTable for Embedded devices with small screens.
+- Upgraded to Freetype 2.1.9 
+
+Bug fixes:
+- Gracefully handle missing .skin files in Qvfb
+- Fixed a redraw problem in QFrame and QTableView
+- Avoid buffer underruns with the sound device.
+- Ensure that a QTestStream buffer isn't underrun.
+- When focus window changes, reset any gesture based input methods just as key based input methods are reset.
+- Fixed a crash when /etc/pointercal is a file or linked to a file that exists but has 0 length
+- Avoid over reading memory buffer in QString::contains
+- Preserve a QPixmap's mask when converting to a QImage using the alpha channel.

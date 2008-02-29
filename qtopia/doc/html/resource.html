@@ -1,0 +1,135 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/resource.cpp:58 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Resource Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Resource Class Reference</h1>
+
+<p>The Resource class provides access to named resources.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="resource-h.html">qtopia/resource.h</a>&gt;</tt>
+<p><a href="resource-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>enum <a href="#ResourceType-enum"><b>ResourceType</b></a> { PixResource, SoundResource, AllResources }</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QImage <a href="#loadImage"><b>loadImage</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn>QPixmap <a href="#loadPixmap"><b>loadPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</li>
+<li class=fn>QBitmap <a href="#loadBitmap"><b>loadBitmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</li>
+<li class=fn>QString <a href="#findPixmap"><b>findPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</li>
+<li class=fn>QIconSet <a href="#loadIconSet"><b>loadIconSet</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</li>
+<li class=fn>QString <a href="#findSound"><b>findSound</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn>QStringList <a href="#allSounds"><b>allSounds</b></a> ()</li>
+<li class=fn>void <a href="#setExtraPaths"><b>setExtraPaths</b></a> ( ResourceType&nbsp;t, const&nbsp;QStringList&nbsp;&amp;&nbsp;extras )</li>
+<li class=fn>const QStringList &amp; <a href="#extraPaths"><b>extraPaths</b></a> ( ResourceType&nbsp;t )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Resource class provides access to named resources.
+<p> The resources may be provided from files or other sources.
+<p> The <a href="#allSounds">allSounds</a>() function returns a list of all the sounds available.
+A particular sound can be searched for using <a href="#findSound">findSound</a>().
+<p> Images can be loaded with <a href="#loadImage">loadImage</a>(), <a href="#loadPixmap">loadPixmap</a>(), <a href="#loadBitmap">loadBitmap</a>()
+and <a href="#loadIconSet">loadIconSet</a>() and will be put into Qt's
+<a href=http://doc.trolltech.com/2.3/qpixmapcache.html>Pixmap Cache</a>.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="ResourceType-enum"></a>Resource::ResourceType</h3>
+
+<ul>
+<li><tt>Resource::PixResource</tt>
+<li><tt>Resource::SoundResource</tt>
+<li><tt>Resource::AllResources</tt>
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QStringList <a name="allSounds"></a>Resource::allSounds ()<tt> [static]</tt>
+</h3>
+Returns a list of all sound names.
+
+<h3 class=fn>const QStringList &amp; <a name="extraPaths"></a>Resource::extraPaths ( <a href="resource.html#ResourceType-enum">ResourceType</a>&nbsp;t )<tt> [static]</tt>
+</h3>
+Returns a list of extra paths for given resource as absolute paths
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>QString <a name="findPixmap"></a>Resource::findPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the filename of a pixmap called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+<p> Normally you will use <a href="#loadPixmap">loadPixmap</a>() rather than this function.
+
+<h3 class=fn>QString <a name="findSound"></a>Resource::findSound ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
+</h3>
+Returns a sound file for a sound called <em>name</em>.
+<p> You should avoid including any filename type extension (e.g. .wav),
+as the system will search for only those fileformats which are supported
+by the library.
+<p> Currently, only WAV files are supported.
+
+<h3 class=fn>QBitmap <a name="loadBitmap"></a>Resource::loadBitmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the QBitmap called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+
+<h3 class=fn>QIconSet <a name="loadIconSet"></a>Resource::loadIconSet ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns a QIconSet for the pixmap named <em>pix</em>.
+You should avoid including any filename type extension (eg. .png, .xpm).
+The icon size is determined by the Qtopia font setting.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QImage <a name="loadImage"></a>Resource::loadImage ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
+</h3>
+Returns the QImage called <em>name</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+
+<h3 class=fn>QPixmap <a name="loadPixmap"></a>Resource::loadPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the QPixmap called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+
+<h3 class=fn>void <a name="setExtraPaths"></a>Resource::setExtraPaths ( <a href="resource.html#ResourceType-enum">ResourceType</a>&nbsp;t, const&nbsp;QStringList&nbsp;&amp;&nbsp;extras )<tt> [static]</tt>
+</h3>
+For a given resource type <em>t</em> append the paths contained in <em>extras</em> to resource search path. A given path choice may be either relative to $QPEDIR 
+or an absolute path
+<p> First availability: Qtopia 2.0
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

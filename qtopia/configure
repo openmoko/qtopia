@@ -1,0 +1,2165 @@
+#!/usr/bin/perl -w
+#
+# Configure to build the Qtopia Environment / Qtopia Desktop / Qtopia SDKs
+#
+# Copyright 2003 Trolltech AS.  All rights reserved.
+#
+
+# Force a somewhat better coding style...
+use strict;
+package main;
+
+# External perl modules
+use File::stat;
+use File::Basename;
+use File::Find;
+use File::Copy;
+use File::Path;
+use File::Glob;
+use Getopt::Long;
+use Cwd;
+
+# Global vars
+my $dqtVersionStr = "0.0.0";
+my $dqtMajorVersion = 0;
+my $dqtMinorVersion = 0;
+my $dqtRevVersion = 0;
+
+my $qteVersionStr = "0.0.0";
+my $qteMajorVersion = 0;
+my $qteMinorVersion = 0;
+my $qteRevVersion = 0;
+
+# Permanent settings
+my $minqteVersion = "2.3.9";
+my $mindqtVersion = "3.3.5";
+my $QPEDIR = $ENV{'QPEDIR'};
+if ( !defined($QPEDIR) || $QPEDIR eq "" ) {
+    die "ERROR: QPEDIR must be set.\n";
+}
+my $QTDIR = $ENV{'QTDIR'};
+if ( !defined($QTDIR) || $QTDIR eq "" ) {
+    die "ERROR: QTDIR must be set.\n";
+}
+my $itemSeparator = ":";
+
+# Defaults
+my $shadow = 0;
+my $binType = "shared";
+my $releaseType = "release";
+my $release_config = "CONFIG-=debug\nCONFIG+=release\n";
+
+# opt variables
+my $opt_platform = "";
+my $opt_quicklaunch;
+my $opt_qtopia;
+my $opt_compat = 1;
+my $opt_libffmpeg;
+my $opt_libamr;
+my $opt_qdl;
+my $opt_libfreetype = 1;
+my $opt_prefix = "$QPEDIR/image/opt/Qtopia";
+my $opt_dprefix = "$QPEDIR/dimage/opt/Qtopia";
+my $opt_qtest = 0;
+my $opt_no_atchat_debug = 0;
+my $opt_save_options = 1;
+my $opt_iconsizes = "14 16 22";
+my $opt_displayrot = "0 90 180 270";
+my $opt_languages;
+my $def_languages;
+my @opt_extraBuildPaths = ();
+my $opt_all_pro_files = 0;
+my $opt_setupdepothop = 0;
+my $opt_makemakefile = 0;
+my $opt_qvfb = "prompt";
+
+my $opt_qtopiadesktop;
+my $opt_static;
+my $opt_shared;
+my $opt_thread;
+my $opt_release;
+my $opt_debug;
+my $opt_verbose;
+my $opt_help;
+my $opt_xplatform;
+my $opt_arch;
+my $opt_singleexec;
+my $opt_make;
+my $opt_sql = 0;
+my $opt_sqlite = 0;
+my $opt_mysql = 0;
+my $opt_ssl = 0;
+my $opt_voip;
+my @opt_extraLibPaths;
+my @opt_extraIncPaths;
+my @opt_extraLibs;
+my @opt_extraRPaths;
+my $opt_dqt;
+my $opt_dsp;
+my $opt_kde;
+my $opt_qconfig;
+my $opt_libmad;
+my $opt_displaysize;
+my $opt_config2;
+my @opt_config;
+my $opt_edition;
+my $opt_synconly;
+my $opt_fontsizes;
+my $opt_fontfamilies;
+my $opt_fontstyles;
+
+# More variable declerations
+my $defaultbuttons;
+my %dispsz = ( "phone" => "160-240", "pda" => "240-320", "core" => "160-800" );
+my %fontsz = ( "phone" => "80 100 120 140 180",
+               "pda" => "all",
+               "core" => "all" );
+my %fontfm = ( "phone" => "helvetica fixed",
+               "pda" => "helvetica fixed micro smallsmooth smoothtimes",
+               "core" => "helvetica fixed micro smallsmooth smoothtimes" );
+my $fontst = "50 50i 75 75i";
+my %autodetect;
+my @optl;
+my @available_editions;
+my $defaultedition;
+my @available_modules;
+my $qte_is_keypad;
+
+# build variables
+my $build_desktop = 1;
+my $build_pda = 1;
+my $build_phone = 1;
+my $build_core = 1;
+my $build_sql = 0;
+my $build_incremental = 0;
+
+# Host-specific defaults
+my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+if ( $isWindows ) {
+    $itemSeparator = ";";
+}
+if ( $^O eq "darwin" ) {
+    $build_incremental = 1;
+}
+
+my $cwd = getcwd();
+my $outpath = $ENV{'QPEDIR'};
+my $depotpath = dirname($0);
+my $compiled_code = (index(basename($0), ".exe") != -1);
+if ( $isWindows && $compiled_code ) {
+    $depotpath = dirname($depotpath);
+}
+# depotpath might be relative. make sure we have an absolute path
+chdir $depotpath;
+$depotpath = getcwd();
+# outpath might be stupid. make sure it's sane
+my $prevoutpath = $outpath;
+chdir $outpath;
+$outpath = getcwd();
+# Fix up the slashes
+if ( $isWindows ) {
+    for ( $depotpath, $outpath, $prevoutpath ) {
+	s,/,\\,g;
+	$_ = lc;
+    }
+}
+
+# Load some subs
+open IN, "$depotpath/bin/common.pm" or die "Can't open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: ".$@?$@:$!."\n";
+close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, $depotpath, $ARGV[0]);
+}
+
+# Check that QPEDIR is set correctly
+if ( $prevoutpath ne $outpath ) {
+    die "ERROR: You must set QPEDIR=$outpath\n";
+}
+
+# Turn off things that aren't relevant
+if ( !configopt("desktop") ) {
+    $build_desktop = 0;
+}
+if ( !configopt("core") ) {
+    $build_core = 0;
+}
+if ( !configopt("pda") ) {
+    $build_pda = 0;
+}
+if ( !configopt("phone") ) {
+    $build_phone = 0;
+}
+if ( $isWindows || $^O eq "darwin" ) {
+    $build_core = 0;
+    $build_pda = 0;
+    $build_phone = 0;
+}
+
+# Setup edition-specific defaults
+if ( $build_core || $build_pda || $build_phone ) {
+    $opt_quicklaunch = 1;
+    $opt_qtopia = 1;
+    $opt_qdl = 1;
+}
+if ( $build_pda || $build_phone ) {
+    $opt_libffmpeg = 1;
+    $opt_libamr = 1;
+}
+# If we are the depot or we are a desktop-only package, turn on Qtopia Desktop
+if ( configopt("depot") || ($build_desktop && !$build_core && !$build_pda && !$build_phone) ) {
+    $opt_qtopiadesktop = 1;
+}
+
+# Setup available editions and the default edition
+if ( $build_core ) {
+    push(@available_editions, "core");
+    $defaultedition = "core";
+}
+if ( $build_pda ) {
+    push(@available_editions, "pda");
+    $defaultedition = "pda";
+}
+if ( $build_phone ) {
+    push(@available_editions, "phone");
+    $defaultedition = "phone";
+}
+
+# Is this a P4 checkout or a source package
+if ( configopt("depot") )  {
+    $def_languages = "en_US en_GB de ja zh_CN";
+} else {
+    # Figure out what languages exist
+    my $langglob = "$depotpath/i18n/*";
+    for my $lang ( glob($langglob) ) {
+        if ( -f "$lang/.directory" ) {
+            $lang =~ s/.*\/(.*)/$1/;
+            if ( defined($def_languages) ) {
+                $lang = " $lang";
+            }
+            $def_languages .= $lang;
+        }
+    }
+    if ( !$def_languages ) {
+        warn "WARNING: Could not detect any langauges... Assuming that en_US is available.\n";
+        $def_languages = "en_US";
+    }
+}
+
+# Japanese people will want japanese installed
+if ( index($def_languages, "ja") != -1 ) {
+    $fontfm{"phone"} .= " japanese";
+    $fontsz{"phone"} .= " 230";
+    $fontfm{"pda"} .= " japanese";
+    $fontfm{"core"} .= " japanese";
+}
+
+# Japanese and Chinese people will want unifont installed
+if ( index($def_languages, "ja") != -1 ||
+     index($def_languages, "zh_CN") != -1 ) {
+    $fontfm{"phone"} .= " unifont";
+    $fontsz{"phone"} .= " 160";
+    $fontfm{"pda"} .= " unifont";
+    $fontfm{"core"} .= " unifont";
+}
+
+# VOIP support defaults to on if we're a depot phone package
+# VOIP support defaults to off in all other situations
+# If the user doesn't actually build phone, voip will be silently turned off later
+if ( $build_phone && configopt("depot") ) {
+    $opt_voip = 1;
+}
+
+# non-user-visible switches
+push(@optl,
+	"qtest" => \$opt_qtest,
+	"no-atchat-debug" => \$opt_no_atchat_debug,
+	"save-options" => \$opt_save_options,
+	"no-save-options" => sub { $opt_save_options = 0 },
+	"all-pro-files" => \$opt_all_pro_files,
+	"setupdepothop" => \$opt_setupdepothop,
+	"makemakefile" => \$opt_makemakefile,
+	"config2=s" => \$opt_config2,
+	"config=s" => \@opt_config,
+	"make=s" => \$opt_make,
+	"syncqtopia" => \$opt_synconly,
+);
+
+# Options that are available in ALL editions
+push(@optl,
+	"verbose" => \$opt_verbose,
+	"help" => \$opt_help,
+
+	"debug" => \$opt_debug,
+	"release" => \$opt_release,
+
+	"thread" => \$opt_thread,
+
+	"platform=s" => \$opt_platform,
+
+	"compat" => \$opt_compat,
+	"no-compat" => sub { $opt_compat = 0 },
+	"I=s" => \@opt_extraIncPaths,
+	"L=s" => \@opt_extraLibPaths,
+	"l=s" => \@opt_extraLibs,
+	"R=s" => \@opt_extraRPaths,
+	"iconsizes=s" => \$opt_iconsizes,
+	"languages=s" => \$opt_languages,
+	"build=s" => \@opt_extraBuildPaths,
+
+	"dqt=s" => \$opt_dqt,
+	# This is here for backwards compatibility
+	"qtx11=s" => sub { $opt_dqt = $_[1];
+			   warn <<'END';
+WARNING: The -qtx11 parameter is deprecated and will be removed in a future
+         version. Please use -dqt instead.
+END
+			 },
+	"no-qtopia" => sub { $opt_qtopia = 0 }, 
+	"no-qtopiadesktop" => sub { $opt_qtopiadesktop = 0 },
+);
+
+# Options that are available when Qtopia is buildable
+if ( $build_core || $build_pda || $build_phone ) {
+    push(@optl,
+	"xplatform=s" => \$opt_xplatform,
+	"arch=s" => \$opt_arch,
+	"singleexec" => \$opt_singleexec,
+	"quicklaunch" => \$opt_quicklaunch,
+	"no-quicklaunch" => sub { $opt_quicklaunch = 0 },
+	"defaultbuttons=s" => \$defaultbuttons,
+	"prefix=s" => \$opt_prefix,
+	"edition=s" => \$opt_edition,
+	"qdl" => \$opt_qdl,
+	"no-qdl" => sub { $opt_qdl = 0 },
+	"displaysize=s" => \$opt_displaysize,
+	"displayrot=s" => \$opt_displayrot,
+	"fontsizes=s" => \$opt_fontsizes,
+	"fontfamilies=s" => \$opt_fontfamilies,
+        "fontstyles=s" => \$opt_fontstyles,
+	"qvfb" => sub { $opt_qvfb = "y" },
+	"no-qvfb" => sub { $opt_qvfb = "n" },
+	"qconfig=s" => \$opt_qconfig,
+	"qtopia" => \$opt_qtopia, 
+	"with-libfreetype" => \$opt_libfreetype,
+	"without-libfreetype" => sub { $opt_libfreetype = 0 },
+    );
+    push(@available_modules, qw(freetype));
+}
+
+# Options that are available when PDA or PHONE are buildable
+if ( $build_pda || $build_phone ) {
+    push(@optl,
+	"with-libmad" => \$opt_libmad,
+	"without-libmad" => sub { $opt_libmad = 0 },
+	"with-libffmpeg" => \$opt_libffmpeg,
+	"without-libffmpeg" => sub { $opt_libffmpeg = 0 },
+	"with-libamr" => \$opt_libamr,
+	"without-libamr" => sub { $opt_libamr = 0 },
+	"enable-ssl" => \$opt_ssl,
+	"disable-ssl" => sub { $opt_ssl = 0 },
+    );
+    push(@available_modules, qw(libmad libffmpeg libamr));
+}
+
+# Options that are available only when PHONE is buildable
+if ( $build_phone ) {
+    push(@optl,
+	"enable-voip" => \$opt_voip,
+	"disable-voip" => sub { $opt_voip = 0 },
+    );
+}
+
+# Options that are available when Qtopia Desktop is buildable
+if ( $build_desktop ) {
+    push(@optl,
+	"dprefix=s" => \$opt_dprefix,
+	"qtopiadesktop" => \$opt_qtopiadesktop,
+    );
+}
+
+# SQL Stuff
+if ( $build_sql ) {
+    push(@optl,
+	"with-sql" => \$opt_sql,
+	"without-sql" => sub { $opt_sql = 0 },
+	"with-sqlite" => \$opt_sqlite,
+	"without-sqlite" => sub { $opt_sqlite = 0 },
+	"with-mysql" => \$opt_mysql,
+	"without-mysql" => sub { $opt_mysql = 0 },
+    );
+    push(@available_modules, qw(sql sqlite mysql));
+}
+
+# win32 options
+if ( $isWindows ) {
+    push(@optl,
+	"dsp" => \$opt_dsp,
+    );
+}
+
+# linux options
+if ( !$isWindows && $^O ne "darwin" && $build_desktop ) {
+    push(@optl,
+	"enable-kde" => \$opt_kde,
+	"disable-kde" => sub { $opt_kde = 0 },
+    );
+}
+
+# Save command line options before we destroy them
+my $command_line;
+if ( $isWindows ) {
+    $command_line = "configure";
+    if ( scalar(@ARGV) ) {
+	$command_line .= " \"".join("\" \"", grep(!/save-options$/, @ARGV))."\"";
+    }
+} else {
+    $command_line = "    ".$depotpath."/configure";
+    if ( scalar(@ARGV) ) {
+	$command_line .= " '".join("' '", grep(!/save-options$/, @ARGV))."'";
+    }
+}
+
+Getopt::Long::Configure("bundling_override");
+if (!GetOptions @optl or $opt_help) {
+    # IMPORTANT: help doc should fit 80 char wide screen.
+    print "Usage:  ".script_name($0)." [-verbose] [-help] [-debug|-release]
+                [-thread] [-platform <host>] [-compat|-no-compat]
+
+                [-I <dir>] [-L <dir>] [-l <lib>] [-R <dir>]
+                [-iconsizes \"<sizes>\"] [-languages \"<langs>\"]
+		[-build <dir>] [-dqt <dir>]
+";
+    if ( $build_core || $build_pda || $build_phone ) {
+	print"
+		[-xplatform <target>] [-arch <architecture>] [-singleexec]
+                [-quicklaunch|-no-quicklaunch] [-defaultbuttons <type>]
+                [-prefix <dir>] [-edition <edition>] [-qdl|-no-qdl]
+                [-displaysize <lo-hi> | -displaysize <width>x<height>]
+                [-fontsizes \"<sizes>\"] [-fontfamilies \"<families>\"]
+                [-fontstyles \"<styles>\"]
+                [-displayrot \"<rots>\"] [-build <dir>] 
+		[-qvfb|-no-qvfb] [-qconfig <config>] [-qtopia|-no-qtopia]
+";
+    }
+    if ( $build_phone || $build_pda ) {
+	print "
+		[-enable-ssl|-disable-ssl]
+";
+    }
+    if ( $build_phone ) {
+	print "
+		[-enable-voip|-disable-voip]
+";
+    }
+    if ( $build_desktop ) {
+	print "
+		[-dprefix <dir>] [-qtopiadesktop|-no-qtopiadesktop]
+";
+    }
+    if ( $isWindows ) {
+	print "
+                [-dsp]
+";
+    }
+    if ( !$isWindows && $^O ne "darwin" && $build_desktop ) {
+	print "
+                [-enable-kde|-disable-kde]
+";
+    }
+    if ( @available_modules ) {
+	print "
+                [-with-<module>] [-without-<module>]
+";
+    }
+
+    # Detailed help requires -verbose
+    if ( $opt_verbose ) {
+	print "
+
+Configure options:
+
+The options marked (*) are the default
+
+Here is a short explanation of each option:
+
+    -verbose ............. Be verbose used to debugging this script and your
+                           settings.
+    -help ................ Prints help and usage information.
+
+    -debug ............... Build a debug version of product.
+  * -release ............. Build a release version of product.
+
+    -thread .............. Build with threading support.
+
+    -platform type ....... Host platform that you are compiling on
+                           If not specified, will autodetect the host.
+
+  * -compat .............. Maintain binary compatibility with previous
+                           versions of Qtopia.
+    -no-compat ........... Do not maintain binary compatibility with previous
+                           versions of Qtopia.
+
+    -I dir ............... Add an explicit include path.
+    -L dir ............... Add an explicit library path.
+    -l lib ............... Add an explicit library.
+    -R dir ............... Add an explicit dynamic library runtime search path.
+
+    -iconsizes sizes ..... Install or generate icons of given sizes.
+                           Sizes can be single integer (square sizes) or WxH.
+                           Default: \"$opt_iconsizes\".
+
+    -languages langs ..... Update and/or install resources (translations, dictionary
+                           files, icons) for given languages.
+                           Default: \"$def_languages\".
+
+    -build dir ........... Add dir to the Qtopia build system.
+
+    -dqt path ............ Specify Qt for building Qtopia Desktop and
+                           other desktop-side software (eg. phonesim).
+";
+
+	if ( $build_core || $build_pda || $build_phone ) {
+	    print"
+    -xplatform type ...... Target platform when cross-compiling.
+    -arch type ........... Target architecture for configuration.
+
+    -singleexec .......... Bundled applications are statically linked into the
+                           server, and run via forking.
+  * -quicklaunch ......... Use the quicklaunch method of speeding up application
+                           loading. Quicklaunchable applications are built as
+                           plugins.
+    -no-quicklaunch ...... Don't use the quicklaunch method of application
+                           loading.
+
+    -prefix dir .......... Install Qtopia to <dir>
+";
+	    print "
+  ".astIf($defaultedition eq "phone")." -edition phone ....... Build phone edition."
+		if grep /phone/, @available_editions;
+	    print "
+  ".astIf($defaultedition eq "pda"  )." -edition pda ......... Build pda edition."
+		if grep /pda/, @available_editions;
+	    print "
+  ".astIf($defaultedition eq "core" )." -edition core ........ Build core edition."
+		if grep /core/, @available_editions;
+	    print"
+
+
+  * -qdl ................. Enable Qtopia Data Linking.
+    -no-qdl .............. Disable Qtopia Data Linking.
+
+    -displaysize lo-hi ... Install resources (icons, images) appropriate
+    -displaysize WxH ..... for display sizes from 'lo' to 'hi', or for precisely
+                           W by H pixels.
+                           Default: \"$dispsz{$defaultedition}\".
+
+    -displayrot rots ..... Install resources (fonts) appropriate for given display
+                           orientations.
+                           Default: \"$opt_displayrot\".
+
+    -fontsizes sizes ..... Install fonts that match the selected sizes.
+                           eg. 180 = 18 point.
+                           Default: \"$fontsz{$defaultedition}\".
+
+    -fontfamilies families Install fonts that match the selected families.
+                           Default: \"$fontfm{$defaultedition}\".
+
+    -fontstyles styles ... Install fonts that match the selected styles.
+                           50 = normal, 75 = bold, i = italic
+                           Default: \"$fontst\".
+
+        Note: Fonts must be in .qpf format and are found in \$QTDIR/lib/fonts.
+              One file is installed for each combination of family, size, style
+              and rotation.
+
+    -qvfb ................ Qt was built with the X11-based Qt Virtual Frame Buffer.
+    -no-qvfb ............. Qt was not built with the X11-based Qt Virtual Frame Buffer.
+
+    -qconfig config ...... Specify a different qconfig header file, qpe is
+                           the default, use 'full' for system qconfig.h
+
+  * -qtopia .............. Build the device part of Qtopia.
+    -no-qtopia ........... Don't build the device part of Qtopia.
+";
+	}
+
+	if ( $build_phone || $build_pda ) {
+	    print"
+    -enable-ssl .......... Enable support for SMTP authentication and SSL in Messages.
+  * -disable-ssl ......... Disable support for SMTP authentication and SSL in Messages.
+";
+        }
+
+	if ( $build_phone ) {
+	    print"
+    -enable-voip ......... Enable support for 'Voice Over IP' (Phone Edition only).
+  * -disable-voip ........ Disable support for 'Voice Over IP'.
+";
+        }
+
+	if ( $build_desktop ) {
+	    print"
+    -dprefix dir ......... Install Qtopia Desktop to <dir>
+
+  * -qtopiadesktop ....... Build QtopiaDesktop (if a suitable Qt is available).
+    -no-qtopiadesktop .... Don't build QtopiaDesktop.
+";
+	}
+
+	if ( $isWindows ) {
+	    print "
+    -dsp ................. Under windows create dsp files.
+";
+	}
+
+	if ( !$isWindows && $^O ne "darwin" && $build_desktop ) {
+	    print "
+    -enable-kde .......... Enable KDE 3.x integration. This requires
+			   KDE 3.x headers and libraries to be installed.
+  * -disable-kde ......... Don't enable KDE 3.x integration.
+";
+	}
+
+	if ( @available_modules ) {
+	    print "
+    -with-<module> ....... Build module into Qtopia.
+    -without-<module> .... Don't build module into Qtopia.
+";
+	}
+    }
+    if ( @available_modules ) {
+	print "
+        Modules are: ".join(" ", @available_modules)."
+";
+    }
+    if ( !$opt_verbose ) {
+	# disguise this to prevent errors from Windows (don't ask) 
+	print "
+        U"."se -verbose for more detailed help.
+";
+    }
+    print "\n";
+    exit 0;
+}
+
+# makemakefile
+if ( $opt_makemakefile ) {
+    makeMakefile( @ARGV );
+    exit 0;
+}
+
+# Save the commandline for config.cache
+my $config_cache = join("\n", split(/' '/, $command_line));
+$config_cache =~ s/^.*'//;
+$config_cache =~ s/'$//;
+
+# Write config.status
+if ( $opt_save_options ) {
+    if ( $isWindows ) {
+	my $reconf = $outpath."/config.status.bat";
+	if ( -f $reconf ) {
+	    unlink $reconf or die $!;
+	}
+	open RECONF, ">".$reconf or die $!;
+	print RECONF "\@echo off\n";
+	print RECONF $command_line." -no-save-options %1 %2 %3 %4 %5 %6 %7 %8 %9\n";
+	close RECONF or die $!;
+    } else {
+	my $reconf = $outpath."/config.status";
+	if ( -f $reconf ) {
+	    unlink $reconf or die $!;
+	}
+	open RECONF, ">".$reconf or die $!;
+	print RECONF '#!/bin/sh'."\n".
+	             'if [ "`cd $QPEDIR; /bin/pwd`" != "`cd '.$outpath.'; /bin/pwd`" ]; then'."\n".
+		     '    exec "$QPEDIR/config.status" "$@"'."\n".
+		     'fi'."\n".
+		     'if [ "$#" -gt 0 ]; then'."\n".
+		     '    '.$command_line.' -no-save-options "$@"'."\n".
+		     'else'."\n".
+		     '    '.$command_line."\n".
+		     'fi'."\n";
+	close RECONF or die $!;
+	chmod 0755, $reconf;
+    }
+}
+
+# Host detection
+if ( $opt_platform eq "" ) {
+    $autodetect{"platform"} = '$opt_platform';
+    if ( defined($ENV{"QMAKESPEC"}) && $ENV{"QMAKESPEC"} ne "" ) {
+	$opt_platform = $ENV{"QMAKESPEC"};
+	$opt_platform =~ s,.*/(.*),$1,;
+	if ( $opt_platform ne $ENV{"QMAKESPEC"} ) {
+	    print "Using ".$opt_platform." instead of QMAKESPEC (".$ENV{"QMAKESPEC"}.").\n";
+	}
+	if ( ! -d $depotpath."/mkspecs/".$opt_platform ) {
+	    warn "WARNING: Spec ".$opt_platform." could not be found. Attempting autodetection.\n";
+	    $opt_platform = "";
+	}
+    }
+    if ( $opt_platform eq "" ) {
+	debugMsg("Autodetecting host");
+	if ( $isWindows ) {
+	    $opt_platform = "win32-msvc";
+	} elsif ( $^O eq "linux" ) {
+	    $opt_platform = "linux-g++";
+	} elsif ( $^O eq "darwin" ) {
+	    $opt_platform = "macx-g++";
+	} else { 
+	    die <<END;
+ERROR: Can't autodetect the host platform. Host = $^O.
+Please explicitly set a -platform paramater.
+END
+	}
+    }
+} else {
+    # Re-set this variable based on the -platform parameter
+    $isWindows = ( index($opt_platform, "win32") != -1 );
+}
+
+# Fail if trying to shadow build on win32
+if ( $depotpath ne $outpath ) {
+    print "QPEDIR = $outpath\n";
+    print "DEPOT  = $depotpath\n";
+    if ($isWindows) {
+	die "ERROR: Shadow builds are not supported on win32\n";
+    }
+    if ( index( $outpath, $depotpath."/" ) != -1 ) {
+	die "ERROR: You cannot shadow build from inside the depot\n";
+    }
+    $shadow = 1;
+
+    ### temporary code that should be removed after the next release
+    if ( -l "$outpath/bin/qmake" ) {
+	unlink( "$outpath/bin/qmake" );
+    }
+    if ( -l "$outpath/etc/themes" ) {
+	unlink "$outpath/etc/themes";
+    }
+    # This is a "stale" qmake dir
+    if ( -d "$outpath/qmake" && ! -l "$outpath/qmake" && -f "$outpath/qmake/Makefile.unix" ) {
+	rmrf("$outpath/qmake");
+    }
+    if ( -l "$outpath/qmake" ) {
+	unlink("$outpath/qmake");
+    }
+    if ( -l "$outpath/util" ) {
+	unlink("$outpath/util");
+    }
+}
+
+if ( $opt_setupdepothop ) {
+    $opt_qtopia = 0;
+    $opt_qtopiadesktop = 0;
+    $opt_all_pro_files = 1;
+}
+
+# Check Qt/Embedded version
+if ( $opt_qtopia ) {
+    debugMsg("Validating Qt/Embedded version");
+    my $qglobalFile = "$QTDIR/include/qglobal.h";
+    if (!open( QTVERSIONFILE, "<$qglobalFile" )) {
+        die <<END;
+ERROR: Your QTDIR environment variable does not seem to point to a valid
+Qt/Embedded.
+END
+    } else {
+        while ( defined($_ = <QTVERSIONFILE>) ) {
+            if ( /QT_VERSION\s+(\d)(\d)(\d+)/ ){
+                $qteMajorVersion=$1;
+                $qteMinorVersion=$2;
+                $qteRevVersion=$3;
+                $qteVersionStr="$qteMajorVersion.$qteMinorVersion.$qteRevVersion";
+                last;
+            }
+        }
+        close( QTVERSIONFILE );
+        $minqteVersion =~ /(\d+)\.(\d+)\.(\d+)/;
+        my $minqteMajorVersion=$1;
+        my $minqteMinorVersion=$2;
+        my $minqteRevVersion=$3;
+        my $ok = 0;
+        if ( $qteMajorVersion > $minqteMajorVersion ||
+             ( $qteMajorVersion == $minqteMajorVersion &&
+               ( $qteMinorVersion > $minqteMinorVersion ||
+                 ( $qteMinorVersion == $minqteMinorVersion &&
+                   $qteRevVersion >= $minqteRevVersion ) ) ) ) {
+            $ok = 1;
+        }
+        if ( !$ok ) {
+            die <<END;
+ERROR: Expecting Qt/Embedded to be at least version $minqteVersion,
+found only version $qteVersionStr.
+END
+        }
+    }
+
+    debugMsg("Validating Qt/Embedded config");
+    my $buildoptsFile = "$QPEDIR/.buildopts";
+    if ( -f "$QTDIR/configure" ) {
+        open(BUILDOPTS, "<$buildoptsFile") or die <<END;
+ERROR: Can't open build options file ($buildoptsFile).
+Did you configure Qt/Embedded?
+END
+        my @buildopts = <BUILDOPTS>;
+        close(BUILDOPTS);
+        if ( grep( /QT_NO_IMAGEIO_JPEG/, @buildopts ) ) {
+            die <<END;
+ERROR: Qtopia requires JPEG support but Qt/Embedded is not configured with
+JPEG support. Please reconfigure Qt/Embedded.
+END
+        }
+        if ( grep( /QT_NO_QWS_VFB/, @buildopts ) ) {
+            $opt_qvfb = "n";
+        }
+        if ( !grep( { /OBJECTS_table/ || /OBJECTS_xml/ } @buildopts ) ) {
+            die <<END;
+ERROR: Qtopia requires an "Enterprise" Qt/Embedded but you only seem to have
+a "Professional" build. Please contact Trolltech to upgrade your Qt license
+and rebuild Qt/Embedded.
+END
+        }
+        if ( grep /QT_KEYPAD_MODE/, @buildopts ) {
+            $qte_is_keypad = 1;
+        } else {
+            $qte_is_keypad = 0;
+        }
+    }
+}
+
+if ( $shadow ) {
+    symlink_file($depotpath."/apps",$outpath."/apps");
+    mkpath("$outpath/etc");
+    my @etcfiles = glob($depotpath."/etc/*");
+    foreach ( @etcfiles ) {
+	my $filename = basename($_, "");
+	if ( $filename eq "defaultbuttons.conf" ||
+	     $filename eq "themes" ) {
+	    next;
+	}
+	symlink_file($_, "$outpath/etc/".$filename);
+    }
+    mkpath("$outpath/etc/themes");
+    symlink_file($depotpath."/etc/themes/stub.pri",$outpath."/etc/themes/stub.pri");
+    symlink_file($depotpath."/pics",$outpath."/pics");
+    symlink_file($depotpath."/services",$outpath."/services");
+    symlink_file($depotpath."/sounds",$outpath."/sounds");
+    symlink_file($depotpath."/help",$outpath."/help");
+    symlink_file($depotpath."/i18n",$outpath."/i18n");
+    symlink_file($depotpath."/misc",$outpath."/misc");
+    symlink_file($depotpath."/mkspecs",$outpath."/mkspecs");
+    symlink_file($depotpath."/scripts",$outpath."/scripts");
+    mkpath($outpath."/bin");
+    symlink_file($depotpath."/bin/syncqtopia",$outpath."/bin/syncqtopia");
+    symlink_file($depotpath."/bin/ipkg",$outpath."/bin/ipkg");
+    if ( $opt_qtopiadesktop ) {
+	mkpath($outpath."/src/qtopiadesktop/include");
+	symlink_file($depotpath."/src/qtopiadesktop/include/interfaces",$outpath."/src/qtopiadesktop/include/interfaces");
+	symlink_file($depotpath."/src/qtopiadesktop/doc",$outpath."/src/qtopiadesktop/doc");
+    }
+}
+if ( !$opt_languages ) {
+    $opt_languages = $def_languages;
+    $autodetect{"languages"} = '$opt_languages';
+}
+
+# Apply defaults
+if ( $opt_qtopia ) {
+    if ( ! $opt_qconfig ) {
+	$opt_qconfig = "qpe";
+    }
+    $opt_qconfig = "-".$opt_qconfig;
+    if ( $opt_qconfig eq "-full" ) {
+	$opt_qconfig = "";
+    }
+    if (!$opt_xplatform) {
+	$autodetect{"xplatform"} = '$opt_xplatform';
+	if ( $opt_platform =~ /^([^-]+)-([^-]+)$/ ) {
+	    $opt_xplatform = $1."-generic-".$2;
+	} else {
+	    $opt_xplatform = $opt_platform;
+	}
+    }
+    # Allow architecture short-hands
+    if ( index($opt_xplatform, "-") == -1 ) {
+	$autodetect{"xplatform"} = '$opt_xplatform';
+	$opt_xplatform = "linux-$opt_xplatform-g++";
+    }
+    if ( !$opt_arch ) {
+	$autodetect{"arch"} = '$opt_arch';
+	($opt_arch) = $opt_xplatform =~ /-(.*?)-/;
+    }
+    if ( $opt_qtopia && $opt_qvfb eq "prompt" ) {
+	# Check to see if it's disabled in the qconfig file
+	open QCONF, "$QTDIR/include/qconfig$opt_qconfig.h"
+	    or die "Can't open $QTDIR/include/qconfig$opt_qconfig.h\n";
+	while ( defined($_ = <QCONF>) ) { 
+	    if ( /^#define\s+QT_NO_QWS_VFB/ ) {
+		$opt_qvfb = "n";
+		$autodetect{"no-qvfb"} = '';
+	    }
+	}
+	if ( $opt_qvfb eq "prompt" ) {
+	    $opt_qvfb = "y";
+	    $autodetect{"qvfb"} = '';
+	}
+    }
+    if ( !$opt_edition && $opt_qtopia ) {
+	$opt_edition = $defaultedition;
+	$autodetect{"edition"} = '$opt_edition';
+    }
+}
+
+# Validate options
+debugMsg("Validating options");
+
+if ( ! -e "$depotpath/mkspecs/$opt_platform" ) {
+    die "ERROR: $depotpath/mkspecs/$opt_platform does not exist, check -platform parameter is correct.\n";
+}
+if ( $opt_qtopia ) {
+    if ( !grep { $_ eq $opt_edition } @available_editions ) {
+	die "ERROR: Edition '$opt_edition' not supported by this package.\n".
+            "Supported editions: ".join(", ",@available_editions).".\n";
+    }
+    if ( ! -e "$QTDIR/include/qconfig$opt_qconfig.h" ) {
+	die "ERROR: qconfig$opt_qconfig.h does not exist, check -qconfig parameter is correct.\n";
+    }
+    if ( ! -e "$depotpath/mkspecs/qws/$opt_xplatform" ) {
+	die "ERROR: $depotpath/mkspecs/qws/$opt_xplatform does not exist, check -xplatform parameter is correct.\n";
+    }
+    if ($opt_singleexec) { 
+        # Must be static with no quicklaunch
+        $opt_shared = 0;
+        $opt_static = 1;
+        $opt_quicklaunch = 0;
+    }
+    if ( $isWindows && $opt_quicklaunch) {
+	warn "Disabling quicklaunch as it is not supported for Win32 targets.\n";
+        $opt_quicklaunch = 0;
+    }
+    if ($opt_mysql || $opt_sqlite) {
+	$opt_sql = 1;
+    }
+    if (!$opt_mysql && !$opt_sqlite && $opt_sql) {
+	$autodetect{"with-sqlite"} = "";
+	$opt_sqlite = 1;
+    }
+    if ($opt_mysql && $opt_sqlite) {
+	die "ERROR: Choose either mysql or sqlite as the database.\n";
+    }
+    if ( defined($qte_is_keypad) ) {
+        if ( $opt_edition eq "phone" && $qte_is_keypad == 0 ) {
+            die <<END;
+ERROR: You must configure Qt/Embedded with -keypad-mode if you wish to build
+       Qtopia Phone Edition.
+END
+        } elsif ( $opt_edition ne "phone" && $qte_is_keypad == 1 ) {
+            die <<END;
+ERROR: You must configure Qt/Embedded without -keypad-mode unless you are
+       building Qtopia Phone Edition.
+END
+        }
+    } else {
+        warn <<END;
+WARNING: configure was not able to check for the use of -keypad-mode while
+         configuring Qt/Embedded. Please note that Qtopia Phone Edition
+         requires Qt/Embedded to be configured with this argument but all
+         other Qtopia Editions require Qt/Embedded to be configured without
+         this argument.
+END
+    }
+    if ( $opt_voip ) {
+        if ( $opt_edition ne "phone" ) {
+            # It only works in phone edition
+            if ( !configopt("depot") ) {
+                warn "WARNING: VOIP is only applicable when passing -edition phone\n";
+            }
+            $opt_voip = 0;
+        }
+    }
+}
+if ( !$opt_dqt ) {
+    if ( defined($ENV{"DQTDIR"}) ) {
+	$opt_dqt = $ENV{"DQTDIR"};
+    } elsif ( defined($ENV{"QT3DIR"}) ) {
+	$opt_dqt = $ENV{"QT3DIR"};
+	warn <<'END';
+WARNING: The QT3DIR environment variable is deprecated and will be removed in a
+         future version. Please use DQTDIR instead.
+END
+    } elsif ( $opt_qtopiadesktop && !$opt_qtopia ) {
+	$opt_dqt = $QTDIR;
+    }
+}
+if ( $opt_dqt ) {
+    debugMsg("Validating Desktop Qt version");
+    my $qglobalFile = "$opt_dqt/include/qglobal.h";
+    if (!open( QTVERSIONFILE, "<$qglobalFile" )) {
+	die "ERROR: Missing file $qglobalFile\nDid you pass a valid location to -dqt?\n";
+    } else {
+	while (<QTVERSIONFILE>) {
+	    if ( /QT_VERSION_STR\s+"(\d+)\.(\d+)\.(\d+)/ ) {
+		$dqtMajorVersion=$1;
+		$dqtMinorVersion=$2;
+		$dqtRevVersion=$3;
+		$dqtVersionStr="$dqtMajorVersion.$dqtMinorVersion.$dqtRevVersion";
+		last;
+	    }
+	}
+	close( QTVERSIONFILE );
+	$mindqtVersion =~ /(\d+)\.(\d+)\.(\d+)/;
+	my $mindqtMajorVersion=$1;
+	my $mindqtMinorVersion=$2;
+	my $mindqtRevVersion=$3;
+	my $ok = 0;
+        if ( $dqtMajorVersion > $mindqtMajorVersion ||
+             ( $dqtMajorVersion == $mindqtMajorVersion &&
+               ( $dqtMinorVersion > $mindqtMinorVersion ||
+                 ( $dqtMinorVersion == $mindqtMinorVersion &&
+                   $dqtRevVersion >= $mindqtRevVersion ) ) ) ) {
+            $ok = 1;
+        }
+	if ( !$ok ) {
+	    die <<END;
+ERROR: Expecting Qt to be at least version $mindqtVersion,
+found only version $dqtVersionStr.
+END
+	}
+    }
+}
+
+if ( $opt_qtopiadesktop ) {
+    if ( !$opt_dqt ) {
+	if ( $opt_qtopia ) {
+	    warn "WARNING: No Desktop Qt found, please pass -dqt if you want to build Qtopia\n".
+		 "         Desktop or -no-qtopiadesktop if you do not.\n";
+	    $opt_qtopiadesktop = 0;
+	}
+    } else {
+	if ( $opt_platform =~ /^macx/ ) {
+	    if ( !defined($ENV{'BUILDING_FROM_SCRIPT'}) ) {
+		warn "********** WARNING **********\n" .
+		"Building Qtopia Desktop on a Mac should be done by running the script\n" .
+		"$outpath/scripts/mkmacosx-qtopiadesktop\n" .
+		"Building normally will result in a product that won't run properly.\n" .
+		"*****************************\n";
+	    }
+	}
+    }
+}
+if ($opt_debug && $opt_release) { 
+    die "ERROR: Choose either debug or release option but not both.\n";
+}
+if ( $opt_kde ) {
+    if ( $isWindows ) { 
+        warn "Disabling KDE integration as it is not supported for Win32 hosts.\n";
+        $opt_kde = 0;
+    } else {
+	if ( !defined($ENV{'KDEDIR'}) ) {
+	    die "ERROR: Please set KDEDIR to the location of your KDE installation.\n";
+	}
+    }
+}
+
+# Apply options
+if ($opt_debug) {
+    $releaseType = "debug";
+    $release_config = "CONFIG+=debug\nCONFIG-=release\n";
+}
+if ($opt_static) {
+    $binType = "buildStaticlib";
+}
+
+if ($opt_qtopia && !$opt_displaysize) {
+    $opt_displaysize = $dispsz{$opt_edition};
+    $autodetect{"displaysize"} = '$opt_displaysize';
+}
+my ($displaysizecodes, $displaywidth, $displayheight) = ("","","");
+if ( $opt_qtopia ) {
+    my ($szlo,$szhi);
+    my ($szw,$szh);
+    if ( ($szw,$szh) = $opt_displaysize =~ m{(\d+)[xX](\d+)} ) {
+	$szhi=$szlo=$szw;
+	$displaysizecodes.=" X";
+	$displaywidth.=$szw;
+	$displayheight.=$szh;
+    } elsif ( ($szlo,$szhi) = $opt_displaysize =~ m{(\d*)(?:-(\d*))?} ) {
+	$szhi=$szlo if !$szhi;
+    } else {
+	exit 1;
+    }
+    $displaysizecodes.=" C" if $szlo <= 176;
+    $displaysizecodes.=" P" if $szlo <= 240 && 240 <= $szhi;
+    $displaysizecodes.=" W" if $szlo <= 640 && 640 <= $szhi;
+    $displaysizecodes.=" T" if                 800 <= $szhi;
+}
+
+# Font size/family selection
+if ($opt_qtopia && !$opt_fontsizes) {
+    $opt_fontsizes = $fontsz{$opt_edition};
+    $autodetect{"fontsizes"} = '$opt_fontsizes';
+}
+if ($opt_qtopia && !$opt_fontfamilies) {
+    $opt_fontfamilies = $fontfm{$opt_edition};
+    $autodetect{"fontfamilies"} = '$opt_fontfamilies';
+}
+if ($opt_qtopia && !$opt_fontstyles) {
+    $opt_fontstyles = $fontst;
+    $autodetect{"fontstyles"} = '$opt_fontstyles';
+}
+
+# Get Qtopia version from version.h
+my $QPE_VERSION;
+open(IN,"$depotpath/src/libraries/qtopia/version.h");
+while(defined($_ = <IN>)) {
+    if (/QPE_VERSION "(.*)"/) {
+	$QPE_VERSION=$1;
+	last;
+    }
+}
+close(IN);
+if (!defined($QPE_VERSION)) {
+    die "ERROR: Could not read version from src/libraries/qtopia/version.h\n";
+}
+
+open(IS_FILE, ">$outpath/etc/default/IconSizes.conf") or die "Can't open $outpath/etc/default/IconSizes.conf\n";
+print IS_FILE "[IconSizes]\nAvailable = $opt_iconsizes\n";
+close IS_FILE;
+
+# We must be building *something*
+if ( !$opt_qtopia && !$opt_qtopiadesktop && !$opt_setupdepothop ) {
+    die "ERROR: No targets to build (check for -no-qtopia, -no-qtopiadesktop, missing -dqt)\n";
+}
+
+# Print out the autodetect messages
+if ( keys(%autodetect) ) {
+    print "The following configuration values have been guessed or autodetected:\n";
+    for my $key ( sort(keys(%autodetect)) ) {
+        $config_cache .= "\n-$key";
+	my $out = "    -".$key." ";
+	if ( $autodetect{$key} ne "" ) {
+            $config_cache .= "\n".eval("$autodetect{$key}");
+	    $out .= eval("$autodetect{$key}")." ";
+	}
+	print $out."\n";
+    }
+    print "\n";
+}
+
+# Write config.cache
+my $config_cache_file = $outpath."/config.cache";
+if ( -f $config_cache_file ) {
+    unlink $config_cache_file or die $!;
+}
+open CACHE, ">".$config_cache_file or die $!;
+print CACHE $config_cache;
+close CACHE or die $!;
+
+# Platform specific configs and directories to use
+mkpath ($outpath."/src");
+open CACHE_FILE, ">$outpath/src/.qmake.cache" or die "Can't open $outpath/src/.qmake.cache\n";
+print CACHE_FILE 'CONFIG+=depotProject', "\n", 'include ($$(QPEDIR)/src/config.pri)', "\n";
+close CACHE_FILE;
+
+open CONFIG_PRI,">$outpath/src/config.pri" or die "Can't open $outpath/src/config.pri\n";
+print CONFIG_PRI "!contains( PROCESSED_PRI, config.pri ) {\nPROCESSED_PRI += config.pri\n\n";
+
+# Stuff for config.pri goes here
+print CONFIG_PRI "QTOPIA_DEPOT_PATH=$depotpath\n";
+print CONFIG_PRI "QTOPIA_ICON_SIZES=$opt_iconsizes\n";
+print CONFIG_PRI "QTOPIA_DISP_SIZES=$displaysizecodes\n";
+print CONFIG_PRI "QTOPIA_DISP_WIDTH=$displaywidth\n";
+print CONFIG_PRI "QTOPIA_DISP_HEIGHT=$displayheight\n";
+print CONFIG_PRI "QTOPIA_DISP_ROTS=$opt_displayrot\n";
+print CONFIG_PRI "CONFIG+=warn_on\n";
+print CONFIG_PRI "$release_config";
+print CONFIG_PRI "CONFIG+=$binType\n";
+print CONFIG_PRI "MOC_DIR=.moc/$releaseType-$binType\n";
+print CONFIG_PRI "OBJECTS_DIR=.obj/$releaseType-$binType\n";
+print CONFIG_PRI "UI_SOURCES_DIR=.ui/$releaseType-$binType\n";
+print CONFIG_PRI "UI_HEADERS_DIR=.ui/$releaseType-$binType\n";
+print CONFIG_PRI "QMAKE_POST_INCLUDE_FILES=\$\${QTOPIA_DEPOT_PATH}/src/global.pri\n";
+print CONFIG_PRI "LANGUAGES=$opt_languages\n";
+print CONFIG_PRI "TRANSLATIONS=\$\$LANGUAGES\n";
+print CONFIG_PRI "TRANSLATIONS-=en\n";
+print CONFIG_PRI "TRANSLATIONS-=en_US\n";
+print CONFIG_PRI "COMMAND_HEADER=\@\n";
+if ( configopt("free") ) {
+    print CONFIG_PRI "CONFIG+=free_package\n";
+}
+
+if ( $opt_qtest ) {
+    print CONFIG_PRI "CONFIG+=qtest\n";
+    print CONFIG_PRI "DEFINES+=QTOPIA_TEST\n";
+}
+
+if ( $opt_no_atchat_debug ) {
+    print CONFIG_PRI "DEFINES+=NO_ATCHAT_DEBUG\n";
+}
+
+if ( $opt_thread ) {
+    warn <<END;
+WARNING: Trolltech does not support building Qtopia against a multi-threaded Qt.
+         While it should work, Trolltech can make no guarantees about the ability
+         of Qtopia to operate correctly when Qt is multi-threaded. If you wish to
+         use threads in your own apps, you should consider using pthreads directly.
+
+END
+
+    print CONFIG_PRI "CONFIG+=thread\n";
+}
+
+# Don't use a relative prefix!
+foreach my $prefix ( $opt_prefix, $opt_dprefix ) {
+    if ( $isWindows ) {
+	$prefix =~ s,/,\\,g;
+    }
+    if ( !$isWindows && index($prefix, "/") != 0 ) {
+	my $old_prefix = $prefix;
+        $prefix = $cwd."/".$prefix;
+	warn "WARNING: prefix cannot be a relative path.\n".
+	     "Using $prefix instead of $old_prefix.\n";
+    }
+}
+
+# Compiler options
+if ( @opt_extraIncPaths ) {
+    print CONFIG_PRI "INCLUDEPATH+=";
+    for my $nextIncPath (@opt_extraIncPaths) {
+	print CONFIG_PRI "$nextIncPath ";
+    }
+    print CONFIG_PRI "\n";
+}
+if ( @opt_extraLibPaths || @opt_extraLibs || @opt_extraRPaths ) {
+    print CONFIG_PRI "LIBS+=";
+    for my $nextLibPath (@opt_extraLibPaths) {
+	print CONFIG_PRI "-L$nextLibPath ";
+    }
+    for my $nextLib (@opt_extraLibs) {
+	print CONFIG_PRI "-l$nextLib ";
+    }
+    for my $nextRPath (@opt_extraRPaths) {
+	print CONFIG_PRI "\$\${QMAKE_RPATH}$nextRPath ";
+    }
+    print CONFIG_PRI "\n";
+}
+# Disable RPATH generation if we didn't specify any rpaths
+if ( !@opt_extraRPaths ) {
+    print CONFIG_PRI "QMAKE_RPATH=\n";
+}
+
+print CONFIG_PRI "QPE_VERSION=$QPE_VERSION\n";
+
+# Qtopia configs
+if ($opt_qtopia) {
+    print CONFIG_PRI "\n";
+    print CONFIG_PRI "CONFIG+=buildQtopia\n";
+    if ( !defined($defaultbuttons) ) {
+	if ( $opt_edition eq "phone" && grep(/$opt_arch/,("x86", "generic")) ) {
+	    $defaultbuttons = "phone";
+	} elsif ( $opt_edition eq "phone" && grep(/$opt_arch/,("ipaq")) ) {
+	    $defaultbuttons = "ipaq-phone";
+	} else {
+	    $defaultbuttons = $opt_arch;
+	}
+    }
+    if ( ! -f $outpath."/etc/defaultbuttons-".$defaultbuttons.".conf" ) {
+	warn "WARNING: defaultbuttons-".$defaultbuttons.".conf does not exist.\n";
+	$defaultbuttons = undef;
+    }
+    if ( $defaultbuttons ) {
+	print CONFIG_PRI "CONFIG+=defaultbuttons\n";
+    }
+
+    if (grep /$opt_arch/, ("x86", "generic")) {
+	print CONFIG_PRI "QTOPIA_ARCHITECTURE=x86\n";
+	print CONFIG_PRI "QTOPIA_ARCH=x86\n";
+    } else {
+	if (grep /$opt_arch/, ("arm", "ipaq", "sharp")) {
+	    print CONFIG_PRI "QTOPIA_ARCHITECTURE=arm\n";
+	} else {
+	    print CONFIG_PRI "QTOPIA_ARCHITECTURE=unknown\n";
+	}
+	print CONFIG_PRI "QTOPIA_ARCH=$opt_arch\n";
+	print CONFIG_PRI "QMAKE_ARCH+=\$\$QTOPIA_ARCH\n";
+    }
+
+    print CONFIG_PRI "\n";
+    if ( defined $opt_qconfig ) {
+	print CONFIG_PRI "QCONFIGDEFINE=QCONFIG=\\\"qconfig$opt_qconfig.h\\\"\n"
+    }
+    print CONFIG_PRI "QTEDIR=$QTDIR\n";
+    if ( -f "$QTDIR/LICENSE.TROLL" ) {
+	print CONFIG_PRI "CONFIG+=qte_depot\n";
+    }
+    if ( configopt("depot") ) {
+	print CONFIG_PRI "CONFIG+=qtopia_depot\n";
+    }
+    print CONFIG_PRI "QTE_VERSION=$qteVersionStr\n";
+    print CONFIG_PRI "QTE_MAJOR_VERSION=$qteMajorVersion\n";
+    print CONFIG_PRI "QTE_MINOR_VERSION=$qteMinorVersion\n";
+    print CONFIG_PRI "QTE_REVISION_VERSION=$qteRevVersion\n";
+    print CONFIG_PRI "CONFIG+=qte$qteMajorVersion\n";
+    print CONFIG_PRI "XPLATFORM=$opt_xplatform\n";
+
+#   FIXME always build pointer apps because touchscreen or keypad phone is 
+#   determined at runtime. could tell by reading PrimaryInput value from 
+#   defaultbuttons ?
+    print CONFIG_PRI "CONFIG+=buildPointerApps\n";
+
+    if ($opt_singleexec) {
+	print CONFIG_PRI "CONFIG+=buildSingleexec\n";
+    }
+    if ($opt_quicklaunch) {
+	print CONFIG_PRI "CONFIG+=buildQuicklaunch\n";
+    }
+    print CONFIG_PRI "CONFIG+=QTOPIA_\U$opt_edition\n";
+    if ($opt_qdl) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_DATA_LINKING\n";
+    }
+    if ($opt_sql) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_SQL\n";
+    }
+    if ($opt_mysql) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_MYSQL\n";
+    }
+    if ($opt_sqlite) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_SQLITE\n";
+    }
+    if ($opt_libmad) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_LIBMAD\n";
+    }
+    if ($opt_libffmpeg) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_LIBFFMPEG\n";
+    }
+    if ($opt_libamr) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_LIBAMR\n";
+    }
+    if ($opt_libfreetype) {
+	print CONFIG_PRI "CONFIG+=BUILD_LIBFREETYPE\n";
+    }
+    if ($opt_ssl) {
+	print CONFIG_PRI "CONFIG+=QTOPIA_SSL\n";
+    }
+    if ($opt_voip) {
+        print CONFIG_PRI "CONFIG+=QTOPIA_VOIP\n";
+    }
+    # JPEG library for IPaq
+    if ( $opt_xplatform eq "linux-ipaq-g++" ) {
+	print CONFIG_PRI "LIBS+=-ljpeg\n";
+    }
+    if ( !$opt_compat ) {
+	print CONFIG_PRI "CONFIG+=nocompat\n";
+    }
+    if ( $opt_qvfb eq "n" ) {
+	print CONFIG_PRI "DEFINES+=QT_NO_QWS_VFB\n";
+    }
+    # convert to the format used by shell expansion
+    $opt_fontstyles = "{".join(",", split(/\s+/, $opt_fontstyles))."}";
+    # convert to the format used by shell expansion
+    if ( $opt_fontsizes eq "all" ) {
+        $opt_fontsizes = "*";
+    } else {
+        $opt_fontsizes = "{".join(",", split(/\s+/, $opt_fontsizes))."}";
+    }
+    print CONFIG_PRI "QTOPIA_FONT_STYLES=$opt_fontstyles\n";
+    print CONFIG_PRI "QTOPIA_FONT_SIZES=$opt_fontsizes\n";
+    print CONFIG_PRI "QTOPIA_FONT_FAMILIES=$opt_fontfamilies\n";
+}
+
+# Qtopia desktop software configs
+if ( $opt_dqt ) {
+    print CONFIG_PRI "\n";
+    print CONFIG_PRI "DQTDIR=$opt_dqt\n";
+    print CONFIG_PRI "DQT_VERSION=$dqtVersionStr\n";
+    print CONFIG_PRI "DQT_MAJOR_VERSION=$dqtMajorVersion\n";
+    print CONFIG_PRI "DQT_MINOR_VERSION=$dqtMinorVersion\n";
+    print CONFIG_PRI "DQT_REVISION_VERSION=$dqtRevVersion\n";
+    print CONFIG_PRI "CONFIG+=qt$dqtMajorVersion\n";
+}
+
+# QtopiaDesktop configs
+if ( $opt_qtopiadesktop ) {
+    print CONFIG_PRI "\n";
+    print CONFIG_PRI "CONFIG+=buildQtopiadesktop\n";
+    # KDE configs for Qtopia desktop
+    if ( $opt_kde ) {
+	print CONFIG_PRI "\n";
+	print CONFIG_PRI "CONFIG+=kde\n";
+    }
+}
+
+if ( $build_incremental ) {
+    print CONFIG_PRI "QMAKE_INCREMENTAL = 1\n";
+}
+
+# Windows configs
+if ( $isWindows ) {
+    print CONFIG_PRI "\n";
+    if ( $opt_dsp ) {
+	print CONFIG_PRI "QMAKE_FLAGS+=-tp vc\n";
+    }
+    if ($opt_static) {
+	print CONFIG_PRI "DEFINES+=QT_NODLL\n";
+    } else {
+	print CONFIG_PRI "DEFINES+=QT_DLL\n";
+    }
+}
+
+print CONFIG_PRI "include(\$\${QTOPIA_DEPOT_PATH}/src/projects.pri)\n";
+
+if ( @opt_extraBuildPaths ) {
+    for my $path ( @opt_extraBuildPaths ) {
+	if ( !$isWindows && index($path, "/") != 0 ) {
+	    my $old_path = $path;
+	    $path = "$cwd/$path";
+	    warn "WARNING: Using $path instead of $old_path.\n";
+	}
+        chdir $path or die "Can't enter $path\n";
+        $path = getcwd();
+    }
+    print CONFIG_PRI "EXTRA_SUBDIRS=".join(" ", @opt_extraBuildPaths)."\n";
+}
+
+# Stuff for config.pri goes ABOVE THIS LINE!
+
+# Extra "config.pri"-time variables can be defined in a file
+if ( $opt_config2 ) {
+    if ( $isWindows ) {
+	$opt_config2 =~ s,/,\\,g;
+    }
+    if ( !$isWindows && index($opt_config2, "/") != 0 ) {
+	my $old_config2 = $opt_config2;
+	$opt_config2 = $cwd."/".$opt_config2;
+	warn "WARNING: Using $opt_config2 instead of $old_config2.\n";
+    }
+    unshift(@opt_config, "include($opt_config2)");
+}
+
+# Extra "config.pri"-time variables can be defined on the commandline
+if ( @opt_config ) {
+    print CONFIG_PRI "\n# START User-specified directives\n";
+    for ( @opt_config ) {
+	chomp;
+	print CONFIG_PRI "$_\n";
+    }
+    print CONFIG_PRI "# END User-specified directives\n";
+}
+print CONFIG_PRI "\n} # include guard\n";
+close CONFIG_PRI;
+
+# Symlink headers, custom.h and apps,etc,pics directories
+mkpath($outpath."/src/libraries/qtopia");
+mkpath($outpath."/src/server");
+if ( !$opt_setupdepothop ) {
+    my $syncqtopiascript=$depotpath."/bin/syncqtopia";
+    print "Symlinking header files to include directory\n";
+    if ($isWindows || $shadow) {
+	system($syncqtopiascript);
+    } else {
+	system($syncqtopiascript,"-relative");
+    }
+}
+
+if ( $opt_qtopia ) {
+    # strip -qtest from the xplatform spec
+    my $tmp_xplatform = $opt_xplatform;
+    $tmp_xplatform =~ s/-qtest$//;
+
+    symlink_file($depotpath."/src/libraries/qtopia/custom-$tmp_xplatform.h",$outpath."/include/qtopia/custom-qtopia.h");
+    symlink_file($depotpath."/src/libraries/qtopia/custom-$tmp_xplatform.cpp",$outpath."/src/libraries/qtopia/custom-qtopia.cpp");
+    if ( $defaultbuttons ) {
+	symlink_file($outpath."/etc/defaultbuttons-".$defaultbuttons.".conf",$outpath."/etc/defaultbuttons.conf");
+    }
+}
+
+# Special case
+if ( $opt_synconly ) {
+    exit 0;
+}
+
+# Simon says...
+if ( !$opt_setupdepothop ) {
+    makeQmake();
+    makePngscale();
+}
+
+# Get ready to generate Makefiles
+my $whichpros = ".*\\\.pro\$";
+$whichpros = "/$opt_make/$whichpros" if defined $opt_make;
+my @proFiles = findFiles($whichpros, "$depotpath/src");
+# Some themes are installable
+push(@proFiles, findFiles($whichpros, "$depotpath/etc/themes"));
+my @desktopFiles = (-d "$depotpath/src/qtopiadesktop")?findFiles($whichpros,"$depotpath/src/qtopiadesktop"):();
+
+# Don't process .pro files with -qtest in the name
+@proFiles = grep(!/-qtest/, @proFiles);
+
+# Don't process Qtopia Desktop files if we're not building Qtopia Desktop.
+if ( !$opt_qtopiadesktop && !$opt_all_pro_files ) {
+    @proFiles = grep {
+	my $found = 0;
+	foreach my $file ( @desktopFiles ) {
+	    if ( $_ eq $file ) {
+		$found = 1;
+		last;
+	    }
+	}
+	!$found;
+    } @proFiles;
+}
+
+# Don't process Qtopia files if we're not building Qtopia.
+# caveat in this case is src/src.pro, which needs to be processed in order
+# to allow building from the toplevel folder
+if ( !$opt_qtopia && !$opt_all_pro_files ) {
+    @proFiles = grep {
+	my $found = 0;
+	foreach my $file ( @desktopFiles ) {
+	    if ( $_ eq $file ) {
+		$found = 1;
+		last;
+	    }
+	}
+	$found or /\/src\/src\.pro/;
+    } @proFiles;
+}
+
+# We need to process everything in the "right" order so that library version numbers are used
+# this is currently Windows-only (since that's the only place that seems to have a problem)
+#
+# This is a bad implementation... ideally configure would read info from the .pro files themselves
+# and determine an "optimal" order to process them in. Of course if info is going into the .pro
+# files, it only seems right that qmake's capabilities are available too (so I can say that
+# qtopiadesktop plgins require common in global.pri). That means changes to qmake or a
+# reimplementation of qmake in perl.
+#
+# Instead of being able to process global.pri, "dummy" targets could be created
+# (eg. qtopiadesktopplugin) and they could have their own dependencies.
+#
+# If we try to read the .pro file syntax there are problems with formatting. A redundant comment
+# might be better since we can strictly define it's syntax.
+#
+if ( $isWindows ) {
+    # fixup the paths for Windows
+    foreach ( @proFiles ) {
+	s,\\,/,g;
+    }
+}
+
+# Qtopia Desktop
+if ( $opt_qtopiadesktop ) {
+    open IN, "<".$depotpath."/src/qtopiadesktop/order.cfg"
+	or die "Can't open ".$depotpath."/src/qtopiadesktop/order.cfg\n";
+    my @earlyProFiles = ();
+    while ( defined($_ = <IN>) ) {
+	chomp;
+	my $proFile = "qtopiadesktop/".$_."/".basename($_).".pro";
+	my @tmp = grep(/\Q$proFile\E/, @proFiles);
+	if ( scalar(@tmp) ) {
+	    $proFile = $tmp[0];
+	    @proFiles = grep(!/\Q$proFile\E/, @proFiles);
+	    push(@earlyProFiles, $proFile);
+	}
+    }
+    unshift(@proFiles, @earlyProFiles);
+    close IN;
+}
+
+# Qtopia
+if ( $opt_qtopia ) {
+    open IN, "<".$depotpath."/src/order.cfg"
+	or die "Can't open ".$depotpath."/src/order.cfg\n";
+    my @earlyProFiles = ();
+    while ( defined($_ = <IN>) ) {
+	chomp;
+	my $proFile = $_."/".basename($_).".pro";
+	my @tmp = grep(/\Q$proFile\E/, @proFiles);
+	if ( scalar(@tmp) ) {
+	    $proFile = $tmp[0];
+	    @proFiles = grep(!/\Q$proFile\E/, @proFiles);
+	    push(@earlyProFiles, $proFile);
+	}
+    }
+    unshift(@proFiles, @earlyProFiles);
+    close IN;
+}
+
+# Process the .pro files
+print "Generating makefiles";
+debugMsg("");
+for my $aProFile (@proFiles) {
+    processProFile($aProFile);
+}
+if ( @opt_extraBuildPaths ) {
+    debugMsg("");
+    @proFiles = ();
+    for my $path ( @opt_extraBuildPaths ) {
+	push(@proFiles, findFiles($whichpros, $path));
+    }
+    my $tmp_shadow = $shadow;
+    $shadow = 0;
+    for my $aProFile (@proFiles) {
+	processProFile($aProFile);
+    }
+    $shadow = $tmp_shadow;
+}
+print "\n";
+
+exit 0;
+
+
+###################################################################
+
+# Helper functions
+
+
+# Find file in a given directory matching that match the given pattern
+#
+# Parameters :
+#	$re  - file name regex to search on
+#	$dir - directory to search and its subdirs to look for files in
+#
+# Returns array of matching files
+sub findFiles
+{
+    my ( $re, $dir ) = @_;
+    my @found = ();
+    find(
+	sub {
+	    my $file = $File::Find::name;
+	    if ( $file =~ $re ) {
+		push( @found, $file );
+	    }
+	}, $dir );
+    return @found;
+}
+
+# Build qmake
+# $shadow implies !$isWindows (already checked)
+sub makeQmake
+{
+    print "Creating qmake...";
+
+    my $targetDir = "$outpath/qmake";
+
+    if ( $shadow ) {
+	mkpath($targetDir);
+	for my $source ( glob("$depotpath/qmake/*.cpp"), glob("$depotpath/qmake/*.h"), "$depotpath/qmake/generators" ) {
+	    my $dest = $source;
+	    $dest =~ s,$depotpath,$outpath,;
+	    symlink_file("$source", "$dest");
+	}
+    }
+
+    chdir $targetDir;
+    $ENV{'PWD'} = $targetDir;
+
+    my $in_mkfile="$depotpath/qmake/Makefile" . (($isWindows) ? ".win32" : ".unix");
+    my $quiet_mkfile = "$outpath/qmake/Makefile.quiet";
+    my $verbose_mkfile = "$outpath/qmake/Makefile";
+    my $make_clean = 0;
+
+    for my $out_mkfile ( $quiet_mkfile, $verbose_mkfile ) {
+        my $OUT_MAKEFILE = "";
+
+	$OUT_MAKEFILE .= "########################################################################\n";
+	$OUT_MAKEFILE .= "## This file was autogenerated by configure, all changes will be lost ##\n";
+	$OUT_MAKEFILE .= "########################################################################\n";
+
+	open ( SPECFILE, "<$depotpath/mkspecs/$opt_platform/qmake.conf" );
+	while (<SPECFILE>) {
+            # Set CC and CXX
+	    if ( /^QMAKE_CC[^_A-Z0-9]/ || /^QMAKE_CXX[^_A-Z0-9]/ ) {
+                s/^QMAKE_//;
+                $OUT_MAKEFILE .= "$_";
+            }
+	    # Get QMAKE_[CL]FLAGS[_RELEASE]
+            if ( /^QMAKE_[CL]FLAGS([^_A-Z0-9]|_RELEASE)/ ) {
+                # Don't do optimisation on Mac OS X because it's really slow
+                if ( $^O ne "darwin" || index($_, "_RELEASE") == -1 ) {
+                    $OUT_MAKEFILE .= "$_";
+                }
+	    }
+	}
+	close SPECFILE;
+
+	my $EXTRA_CFLAGS = "\$(QMAKE_CFLAGS) \$(QMAKE_CFLAGS_RELEASE) -I$depotpath/qmake/qt/src/tools -I$depotpath/qmake/qt/src/kernel";
+	my $EXTRA_LFLAGS = "\$(QMAKE_LFLAGS) \$(QMAKE_LFLAGS_RELEASE)";
+	my $EXTRA_SOURCES = "";
+
+	if ( $isWindows ) {
+            $EXTRA_CFLAGS = "\$(QMAKE_CFLAGS) \$(QMAKE_CFLAGS_RELEASE)";
+	    $EXTRA_SOURCES = "qsettings_win.obj qunicodetables.obj";
+	}
+
+	if ( $opt_platform =~ /^macx/ ) {
+	    $OUT_MAKEFILE .= 'CARBON_LFLAGS +=-framework CoreServices' . "\n";
+	    $EXTRA_LFLAGS .= " \$(CARBON_LFLAGS)";
+	    $EXTRA_CFLAGS .= " \$(CARBON_CFLAGS)";
+	    $EXTRA_SOURCES = "qsettings_mac.o";
+	}
+
+	# These variables are for Windows (which has a different path separator)
+	my $tmp_depotpath = $depotpath;
+	my $tmp_outpath = $outpath;
+	my $tmp_specpath = "$depotpath/mkspecs/$opt_platform";
+	my $tmp_sourcepath = "$depotpath/qmake/qt";
+	my $tmp_buildpath = "$outpath/qmake/qt";
+	if ( $isWindows ) {
+	    for ( $tmp_depotpath, $tmp_outpath, $tmp_specpath, $tmp_sourcepath, $tmp_buildpath ) {
+		s,/,\\,g;
+	    }
+	}
+
+	open (IN_MAKEFILE, "<$in_mkfile") or die "Could not open $in_mkfile for reading\n";
+	while (<IN_MAKEFILE>) {
+	    s,\@SOURCE_PATH\@,$tmp_sourcepath,g;
+	    s,\@BUILD_PATH\@,$tmp_buildpath,g;
+	    s,\@QMAKE_CFLAGS\@,$EXTRA_CFLAGS,g;
+	    s,\@QMAKE_LFLAGS\@,$EXTRA_LFLAGS,g;
+	    s,\@QMAKE_QTOBJS\@,$EXTRA_SOURCES,g;
+	    s,\@DESTDIR\@,$tmp_outpath,g;
+	    s,\@QMAKESPEC\@,$tmp_specpath,g;
+	    if ( $out_mkfile eq $verbose_mkfile ) {
+		s,^(\s+)\@,$1,;
+		if ( ! $isWindows ) {
+		    s,^.*echo -n \..*$,,;
+		    s,>/dev/null 2>&1$,,;
+		}
+	    }
+	    $OUT_MAKEFILE .= "$_";
+	}
+	close IN_MAKEFILE;
+
+        # if out != tmp we need to make clean
+        if ( -e $out_mkfile ) {
+            open (IN_MAKEFILE, "<$out_mkfile") or die "Could not open $out_mkfile for reading\n";
+            my $IN_MAKEFILE;
+            while ( defined($_ = <IN_MAKEFILE>) ) {
+                $IN_MAKEFILE .= $_;
+                if ( /^# DO NOT DELETE THIS LINE -- make depend depends on it$/ ) {
+                    last;
+                }
+            }
+            close IN_MAKEFILE;
+            if ( !defined($IN_MAKEFILE) || !defined($OUT_MAKEFILE) || $IN_MAKEFILE ne $OUT_MAKEFILE ) {
+                $make_clean = 1;
+            }
+        }
+
+        open( OUT_MAKEFILE, ">$out_mkfile" ) or die "Could not open $out_mkfile for writing\n";
+        print OUT_MAKEFILE $OUT_MAKEFILE;
+        close OUT_MAKEFILE;
+    }
+
+    if ( ! -e "$outpath/qmake/qt/src/tools" ) {
+	mkpath("$outpath/qmake/qt/src/tools");
+    }
+    open (QCONFIGCPP, ">$outpath/qmake/qt/src/tools/qconfig.cpp") or die "Could not open $outpath/qmake/qt/src/tools/qconfig.cpp for writing\n";
+    my $tmp_outpath = $outpath;
+    if ( $isWindows ) {
+	$tmp_outpath =~ s,/,\\,g;
+	$tmp_outpath =~ s,\\,\\\\,g;
+    }
+    print QCONFIGCPP "const char *qInstallPath() { return \"$tmp_outpath\"; }\n";
+    print QCONFIGCPP "const char *qInstallPathData() { return qInstallPath(); }\n";
+    print QCONFIGCPP "const char *qInstallPathSysconf() { return qInstallPath() ; }\n";
+    close QCONFIGCPP;
+
+    chdir "$outpath/qmake";
+
+    if ( $isWindows ) {
+	my $makecommand = "nmake";
+	if ( ! $opt_verbose ) {
+	    $makecommand .= " /f Makefile.quiet";
+	}
+	if ( $make_clean ) {
+            system($makecommand." clean") == 0 or die "Failed to make qmake\n";
+        }
+	system($makecommand) == 0 or die "Failed to make qmake\n";
+    } else {
+	if (system("which makedepend >/dev/null 2>&1") == 0) {
+	    system("make depend >/dev/null 2>&1") == 0 or die "Failed to make depend\n";
+	} else {
+	    warn "No makedepend available\n";
+	}
+	my $makecommand = "make";
+	my $makecheck = "-q";
+	if ( ! $opt_verbose ) {
+	    $makecommand .= " -f Makefile.quiet";
+	}
+	if ( $make_clean ) {
+            system($makecommand." clean") == 0 or die "Failed to make qmake\n";
+        }
+	system("$makecommand $makecheck || $makecommand") == 0 or die "Failed to make qmake\n";
+    }
+    print "\n";
+}
+
+# Build the pngscale utility for pixmap installation.
+# $shadow implies !$isWindows (already checked)
+sub makePngscale
+{
+    print "Creating pngscale...";
+
+    my $targetDir = "$outpath/util/pngscale";
+    if ( ! -e $targetDir ) {
+	mkpath($targetDir);
+    }
+    chdir $targetDir;
+    $ENV{'PWD'} = $targetDir;
+
+    my $qmake_cmd = "$outpath/bin/qmake -o Makefile.target -spec $depotpath/mkspecs/$opt_platform $depotpath/util/pngscale/pngscale.pro";
+    if ( $isWindows ) {
+	$qmake_cmd =~ s,/,\\,g;
+    }
+    debugMsg( "$qmake_cmd" );
+    system($qmake_cmd) == 0 or die "Error while running qmake on pngscale.pro\n";
+
+    my $in_mkfile="Makefile.target";
+    my $out_mkfile = "Makefile.quiet";
+    open (IN_MAKEFILE, "<$in_mkfile") or die "Could not open $in_mkfile for reading\n";
+    open( OUT_MAKEFILE, ">$out_mkfile" ) or die "Could not open $out_mkfile for writing\n";
+    while (<IN_MAKEFILE>) {
+	if ( ( s,^(\s+)(\$\(CC\)),$1\@$2, ||
+	       s,^(\s+)(\$\(CXX\)),$1\@$2, ||
+	       s,^(\s+)(\$\(LINK\)),$1\@$2, ||
+	       s,^(\s+)(test -d),$1\@$2, ) && !$isWindows ) {
+	    chomp;
+	    $_ .= " >/dev/null 2>&1\n\t\@echo -n .\n";
+	}
+	print OUT_MAKEFILE "$_";
+    }
+    close IN_MAKEFILE;
+    close OUT_MAKEFILE;
+
+    makeMakefile("$targetDir/Makefile", "$targetDir/Makefile.target", 0, $qmake_cmd);
+
+    if ( $isWindows ) {
+	unlink("$outpath/bin/pngscale.exe");
+	my $makecommand = "nmake";
+	if ( ! $opt_verbose ) {
+	    $makecommand .= " /f Makefile.quiet";
+	}
+	system($makecommand);
+	if ( ! -f "$outpath/bin/pngscale.exe" ) {
+	    die "Can't build pngscale\n";
+	}
+    } else {
+	my $makecommand = "make";
+	my $makecheck = "-q";
+	if ( ! $opt_verbose ) {
+	    $makecommand .= " -f Makefile.quiet";
+	}
+	system("$makecommand $makecheck || $makecommand") == 0 or die "Failed to make pngscale\n";
+    }
+    print "\n";
+}
+
+# Process a .pro file.
+sub processProFile
+{
+    my ( $aProFile ) = @_;
+
+    # Fix srcDir
+    my $srcDir = dirname($aProFile);
+    chdir $srcDir;
+
+    # Read profile config (for tweaking below)
+    my %aProConfig;
+    open PRO, "$aProFile";
+    while (<PRO>) {
+	if ( /CONFIG\s*\+?=\s*(.*)/ ) {
+	    map { $aProConfig{$_}++ } split(/\s+/,$1);
+	}
+    }
+    close PRO;
+
+    # Fix, create and go to targetDir
+    my $targetDir = $srcDir;
+    if ( $shadow ) {
+	$targetDir =~ s/^$depotpath/$outpath/;
+    }
+    if (! -e $targetDir) {
+	mkpath($targetDir);
+    }
+
+    my $QMAKE_QTOPIA_EXTRA_ARGS = "";
+
+    # Get target Makefile's name
+    my $makefile = "Makefile.target";
+    if ( $aProFile =~ m{([^/]*-components).pro} ) {
+	# Secondary "component" pro file
+	$makefile = "Makefile.$1";
+    }
+    $QMAKE_QTOPIA_EXTRA_ARGS .= " -o $makefile";
+
+    # Check if we are building QtopiaDesktop (plus a special case for when not building Qtopia)
+    if ( !$opt_qtopia or $aProConfig{qtopiadesktop} or $aProConfig{desktop} ) {
+	$QMAKE_QTOPIA_EXTRA_ARGS .= " -spec $depotpath/mkspecs/$opt_platform";
+    } else {
+	$QMAKE_QTOPIA_EXTRA_ARGS .= " -spec $depotpath/mkspecs/qws/$opt_xplatform";
+    }
+
+    # Run qmake
+    chdir $targetDir;
+    $ENV{'PWD'} = $targetDir;
+    if ( -f $makefile ) {
+	unlink $makefile;
+    }
+    my $qmake_cmd = "$outpath/bin/qmake $QMAKE_QTOPIA_EXTRA_ARGS $aProFile";
+    if ( $isWindows ) {
+	$qmake_cmd =~ s,/,\\,g;
+    }
+    debugMsg( "$qmake_cmd" );
+    if ( !$opt_setupdepothop ) {
+	system($qmake_cmd) == 0 or die "Error while running qmake on $aProFile\n";
+    }
+
+    # Create Makefile
+    makeMakefile("$targetDir/Makefile", "$targetDir/$makefile", $aProConfig{qtopiadesktop}, $qmake_cmd);
+
+    if (!$opt_verbose) {
+	print ".";
+    }
+}
+
+# Write out the "redirect" Makefile.
+# Use the targets from Makefile.target so that we don't break qmake so much
+sub makeMakefile
+{
+    my ( $redmake, $tmake, $qd, $qmake_cmd ) = @_;
+    my $qmake_cmd_debug = $qmake_cmd;
+    $qmake_cmd_debug =~ s/^([^ ]+)qmake\s+/$1qmake -d /;
+
+    my $prefixname;
+    my $prefix;
+    if ( $qd ) {
+	$prefixname = "DPREFIX";
+	$prefix = $opt_dprefix;
+	$qd = 1;
+    } else {
+	$prefixname = "PREFIX";
+	$prefix = $opt_prefix;
+	$qd = 0;
+    }
+
+    if ( -f $redmake ) {
+	unlink $redmake or die "I can't unlink $redmake: $!\n";
+    }
+
+    # We want a minimal set of targets defined even if the Makefile.target doesn't contain them
+    # Because when the Makefile.target is built correctly it will include them and it's better
+    # not to require re-configuring just because a Makefile.target was rebuilt.
+    my @targets = qw( all distclean clean install install_target uninstall packages lupdate sdk devsdk
+                      remove_target relink );
+    if ( open TMAKE, "<".$tmake ) {
+	while ( defined($_ = <TMAKE>) ) {
+	    chomp;
+	    # There can be multiple targets in a line
+	    if ( /^([\w ]+):/ ) {
+		foreach my $t ( split(/\s+/, $1) ) {
+		    # Ignore Windows drive letters in targets
+		    next if ( length($t) == 1 );
+		    # the qmake rule is special, handle it later
+		    next if ( $t eq "qmake" );
+		    # If this rule already exists, don't do anything with it
+		    my @tmp = grep { my $tmp = ($_ eq $t); !$tmp; } @targets;
+		    if ( scalar(@tmp) == scalar(@targets) ) {
+			push(@targets, $t);
+		    }
+		}
+	    }
+	}
+	close TMAKE;
+    }
+
+    my $contents = "";
+    if ( $isWindows ) {
+	$contents .= "!ifndef $prefixname\n".
+                     "$prefixname=$prefix\n".
+                     "!endif\n\n";
+	for my $target ( @targets ) {
+	    $contents .= "$target:\n".
+			 "\t\@\$(MAKE) /nologo /f Makefile.target \$\@ INSTALL_ROOT=\$($prefixname)\n";
+	}
+	$contents .= "qmake:\n".
+	             "\t\@\$(MAKE) /nologo /f Makefile.target /n \$\@ INSTALL_ROOT=\$($prefixname) >nul 2>&1 || \$(MAKE) regenerate\n".
+		     "\t\@\$(MAKE) /nologo /f Makefile.target \$\@ INSTALL_ROOT=\$($prefixname)\n\n";
+	$contents .= "qmake-debug:\n\t$qmake_cmd_debug\n\n";
+	$contents .= "regenerate:\n\t$qmake_cmd\n".
+		     "\techo Re-creating $redmake\n".
+		     "\t\@$depotpath/".basename($0)." --makemakefile '$redmake' '$tmake' '$qd' '$qmake_cmd'\n\n";
+    } else {
+	$contents .= "$prefixname?=$prefix\n\n";
+
+	# This lets you type make in the depot with QPEDIR set to a shadow build and
+	# have the shadow build Makefile used instead of the depot one.
+	#
+	# Also, this can be used to run make from $QPEDIR/src/applications/foo and have
+	# $QPEDIR/src/qtopiadesktop/foo/Makefile used instead of the PDA one.
+	# This only works if you are building Qtopia Desktop and NOT building Qtopia.
+	# You must also export QTOPIADESKTOP=1
+	for ( ["BUILD",       "\$(MAKE) -f Makefile.target \$\@ INSTALL_ROOT=\$($prefixname)"],
+	      ["QMAKE_BUILD", "\$(MAKE) -f Makefile.target -n \$\@ INSTALL_ROOT=\$($prefixname) >/dev/null 2>&1 ".
+	                      "|| exec \$(MAKE) regenerate; ".
+			      "\$(MAKE) -f Makefile.target \$\@ INSTALL_ROOT=\$($prefixname)"] ) {
+	    my ( $rule, $command ) = @$_;
+	    my $shadow_command = $command;
+	    $shadow_command =~ s,Makefile\.target,Makefile,g;
+	    $contents .= <<END;
+define $rule
+\@+QPEDIR=`cd \$(QPEDIR); /bin/pwd`;\\
+outpath=`cd $outpath; /bin/pwd`;\\
+if [ "\$\$QTOPIADESKTOP" = 1 ]; then\\
+    grep 'CONFIG.*buildQtopia\\b' \$\$QPEDIR/src/config.pri >/dev/null 2>&1 && QTOPIADESKTOP=0;\\
+fi;\\
+if [ "\$\$QTOPIADESKTOP" = 1 ]; then\\
+    grep 'CONFIG.*buildQtopiadesktop\\b' \$\$QPEDIR/src/config.pri >/dev/null 2>&1 || QTOPIADESKTOP=0;\\
+fi;\\
+if [ "\$\$QTOPIADESKTOP" = 1 ]; then\\
+    shadowdir=`echo \$\$PWD | perl -ne 's,'\$\$QPEDIR'/src/applications,'\$\$QPEDIR'/src/qtopiadesktop,;\\
+					s,'\$\$QPEDIR'/src/libraries/([^\\d]+)\\d?,'\$\$QPEDIR'/src/qtopiadesktop/libraries/\$\$1,;\\
+					print'`;\\
+    if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\
+	cd "\$\$shadowdir";\\
+	\$(MAKE) \$\@;\\
+    else\\
+	shadowdir=`echo \$\$PWD | perl -ne 's,'\$\$outpath'/src/applications,'\$\$QPEDIR'/src/qtopiadesktop,;\\
+					    s,'\$\$outpath'/src/libraries/([^\\d]+)\\d?,'\$\$QPEDIR'/src/qtopiadesktop/libraries/\$\$1,;\\
+					    print'`;\\
+	if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\
+	    cd "\$\$shadowdir";\\
+	    \$(MAKE) \$\@;\\
+	else\\
+	    QTOPIADESKTOP=0;\\
+	fi;\\
+    fi;\\
+fi;\\
+if [ "\$\$QTOPIADESKTOP" != 1 ]; then\\
+    if [ "\$\$QPEDIR" = "\$\$outpath" ]; then\\
+	$command;\\
+    else \\
+	shadowdir=`echo \$\$PWD | perl -ne 's,'\$\$outpath','\$\$QPEDIR',;print'`;\\
+	if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\
+	    cd "\$\$shadowdir";\\
+	    $shadow_command;\\
+	else\\
+	    echo "ERROR: Trying to shadow hop but PWD is outside the Qtopia source tree.";\\
+	    echo "       OUTPATH='\$\$outpath'";\\
+	    echo "       QPEDIR='\$\$QPEDIR'";\\
+	    echo "       PWD='\$\$PWD'";\\
+	    exit 1;\\
+	fi;\\
+    fi;\\
+fi
+endef
+
+END
+	}
+	for my $target ( @targets ) {
+	    $contents .= "$target:\n\t\$(BUILD)\n";
+	}
+	$contents .= "qmake:\n\t\$(QMAKE_BUILD)\n\n";
+	$contents .= "qmake-debug:\n\t$qmake_cmd_debug\n\n";
+	$contents .= "regenerate:\n\t$qmake_cmd\n".
+		     "\techo Re-creating $redmake\n".
+		     "\t\@$0 --makemakefile \"$redmake\" \"$tmake\" \"$qd\" \"$qmake_cmd\"\n\n";
+	$contents .= ".PHONY: ".join(" ", @targets, "qmake-debug", "regenerate")."\n";
+    }
+
+    open REDMAKE, ">".$redmake or die "Unable to write to $redmake: $!\n";
+    print REDMAKE $contents;
+    close REDMAKE;
+
+    my $tmp_redmake = $redmake;
+    my $tmp_srcmake = "$outpath/src/Makefile";
+    if ( $isWindows ) {
+	for ( $tmp_redmake, $tmp_srcmake ) {
+	    s,\\,/,g;
+	}
+    }
+    if ( $tmp_redmake eq $tmp_srcmake ) {
+	# Write out the toplevel Makefile (copy the rules from src/Makefile)
+	my $topmake = $outpath."/Makefile";
+	if ( -f $topmake ) {
+	    unlink $topmake or die "I can't unlink $topmake: $!\n";
+	}
+
+	push( @targets, "qmake", "regenerate" );
+	$contents = "";
+
+	if ( $isWindows ) {
+	    for my $target ( @targets ) {
+		$contents .= "$target:\n".
+			     "\t\@cd src\n".
+			     "\t\@\$(MAKE) /nologo \$\@\n".
+			     "\t\@cd ..\n";
+	    }
+	} else {
+	    # This lets you type make in the depot with QPEDIR set to a shadow build and
+	    # have the shadow build Makefile used instead of the depot one.
+	    for ( ["BUILD",       "\$(MAKE) -C src \$\@"],
+		  ["CLEANINST",   " if [ -e \"\$(QPEDIR)/src/Makefile\" ]; then\\
+				    prefix=`awk -F= '/^PREFIX/{print \$\$2}' \$(QPEDIR)/src/Makefile`;\\
+					if [ -d \"\$\$prefix\" ]; then\\
+					    rm -rf \"\$\$prefix\";\\
+					fi;\\
+				    fi;\\
+				    if [ -e \"\$(QPEDIR)/src/qtopiadesktop/src/Makefile\" ]; then\\
+					prefix=`awk -F= '/^DPREFIX/{print \$\$2}' \$(QPEDIR)/src/qtopiadesktop/src/Makefile`;\\
+					if [ -d \"\$\$prefix\" ]; then\\
+					    rm -rf \"\$\$prefix\";\\
+					fi;\\
+				    fi;\\
+				    \$(MAKE) install"] ) {
+		my ( $rule, $command ) = @$_;
+		my $shadow_command = $command;
+		$shadow_command =~ s,Makefile\.target,Makefile,g;
+		$contents .= <<END;
+define $rule
+\@+QPEDIR=`cd \$(QPEDIR); /bin/pwd`;\\
+outpath=`cd $outpath; /bin/pwd`;\\
+if [ "\$\$QPEDIR" = "\$\$outpath" ]; then\\
+    $command;\\
+else \\
+    shadowdir=`echo \$\$PWD | perl -ne 's,'\$\$outpath','\$\$QPEDIR',;print'`;\\
+    if [ "\$\$shadowdir" != "\$\$PWD" ]; then\\
+	cd "\$\$shadowdir";\\
+	$shadow_command;\\
+    else\\
+	echo "ERROR: Trying to shadow hop but PWD is outside the Qtopia source tree.";\\
+	echo "       OUTPATH='\$\$outpath'";\\
+	echo "       QPEDIR='\$\$QPEDIR'";\\
+	echo "       PWD='\$\$PWD'";\\
+	exit 1;\\
+    fi;\\
+fi
+endef
+
+END
+	    }
+
+	    for my $target ( @targets ) {
+		$contents .= "$target:\n\t\$(BUILD)\n";
+	    }
+	    $contents .= "cleaninstall:\n\t\$(CLEANINST)\n";
+	    $contents .= ".PHONY: ".join(" ", @targets, "cleaninstall" )."\n\n";
+	}
+
+	open TOPMAKE, ">" . $topmake or die "Unable to write to $topmake : $!\n";
+	print TOPMAKE $contents;
+	close TOPMAKE;
+    }
+}
+
+sub astIf
+{
+    return $_[0] ? "*" : " ";
+}
+

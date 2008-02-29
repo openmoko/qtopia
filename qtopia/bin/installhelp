@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+
+use strict;
+package main;
+
+use File::stat;
+use File::Glob;
+use File::Copy;
+use File::Basename;
+use File::Path;
+use Cwd;
+
+use constant OUTPUT => 1;
+use constant DEBUG => 0;
+
+my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+
+# Dummy variables (used in common.pm)
+my $opt_verbose = 0;
+my $shadow = 0;
+my $outpath = $ENV{QPEDIR};
+
+# Find the depot path
+my $depotpath = undef;
+open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
+while ( defined($_ = <IN>) ) {
+    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
+	$depotpath = $1;
+        if ( $depotpath eq '$$(QPEDIR)' ) {
+            $depotpath = $outpath;
+        }
+	last;
+    }
+}
+close IN;
+if ( !defined($depotpath) ) {
+    die "Can't find the depot path in $outpath/src/config.pri\n";
+}
+
+# Load some subs
+open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
+eval join("", <IN>) or die "Error while evaluating common.pm: ".$@?$@:$!."\n";
+close IN;
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
+
+# Turn "en_US ja" into a hash map with each language as a key (easy lookup later)
+my %translations = ();
+$_ = shift(@ARGV);
+s/^\s+//;
+s/\s+$//;
+map { $translations{$_}++ } split;
+# Handle non-underscored languages to (eg. 'en')
+for my $lang ( keys %translations ) {
+    if ( $lang =~ s/_.*// ) {
+        $translations{$lang}++;
+    }
+}
+
+my $helpSource = shift(@ARGV) || usage();
+my $helpDest = shift(@ARGV) || usage();
+$helpDest =~ s,\\,/,g;
+
+if ( ! @ARGV ) {
+    usage();
+}
+
+processFiles( @ARGV );
+
+exit 0;
+
+
+sub usage
+{
+    print "Usage:  ".script_name($0)." \"translations\" <help source> <help dest> <help files>\n";
+    exit 2;
+}
+
+sub processFiles
+{
+    my @files = @_;
+    # We should get just 1 argument with everything in it (the shell shouldn't be allowed to expand anything).
+    for ( @files ) {
+        # Split on whitespace
+        for my $file ( split ) {
+            $file =~ s,\\,/,g;
+            # Note: This code assumes a flat structure for help files
+            for my $lang ( undef, keys %translations ) {
+                my @sources = glob("$helpSource/".($lang?"$lang/":"")."html/".basename($file));
+                for my $source ( @sources ) {
+                    next if ( ! -f $source );
+                    my $destdir = "$helpDest/".($lang?"$lang/":"")."html";
+                    my $dest = "$destdir/".basename($source);
+                    system("mkdir -p $destdir");
+                    print "install -c $source $dest\n";
+                    system("install -c $source $dest");
+                }
+            }
+        }
+    }
+}
+

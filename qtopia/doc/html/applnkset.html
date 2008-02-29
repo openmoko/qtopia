@@ -1,0 +1,150 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/applnk.cpp:1112 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>AppLnkSet Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AppLnkSet Class Reference</h1>
+
+<p>The AppLnkSet class is a set of AppLnk objects.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="applnk-h.html">qtopia/applnk.h</a>&gt;</tt>
+<p>Inherited by <a href="doclnkset.html">DocLnkSet</a>.
+<p><a href="applnkset-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#AppLnkSet"><b>AppLnkSet</b></a> ()</li>
+<li class=fn><a href="#AppLnkSet-2"><b>AppLnkSet</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;directory )</li>
+<li class=fn><a href="#~AppLnkSet"><b>~AppLnkSet</b></a> ()</li>
+<li class=fn>const AppLnk * <a href="#find"><b>find</b></a> ( int&nbsp;id ) const</li>
+<li class=fn>const AppLnk * <a href="#findExec"><b>findExec</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;exec ) const</li>
+<li class=fn>QStringList <a href="#types"><b>types</b></a> () const</li>
+<li class=fn>QString <a href="#typeName"><b>typeName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const</li>
+<li class=fn>QPixmap <a href="#typePixmap"><b>typePixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const</li>
+<li class=fn>QPixmap <a href="#typeBigPixmap"><b>typeBigPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const</li>
+<li class=fn>void <a href="#add"><b>add</b></a> ( AppLnk&nbsp;*&nbsp;f )</li>
+<li class=fn>bool <a href="#remove"><b>remove</b></a> ( AppLnk&nbsp;*&nbsp;f )</li>
+<li class=fn>void <a href="#clear"><b>clear</b></a> ()</li>
+<li class=fn>const QList&lt;AppLnk&gt; &amp; <a href="#children"><b>children</b></a> () const</li>
+<li class=fn>void <a href="#detachChildren"><b>detachChildren</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The AppLnkSet class is a set of <a href="applnk.html">AppLnk</a> objects.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="AppLnkSet"></a>AppLnkSet::AppLnkSet ()
+</h3>
+Constructs an empty AppLnkSet.
+
+<h3 class=fn><a name="AppLnkSet-2"></a>AppLnkSet::AppLnkSet ( const&nbsp;QString&nbsp;&amp;&nbsp;directory )
+</h3>
+Constructs an AppLnkSet that contains <a href="applnk.html">AppLnk</a> objects representing
+all the files in the given <em>directory</em> (and any subdirectories
+recursively).
+<p> 
+
+<h3 class=fn><a name="~AppLnkSet"></a>AppLnkSet::~AppLnkSet ()
+</h3>
+Destroys the set, deleting all the <a href="applnk.html">AppLnk</a> objects it contains.
+<p> <p>See also <a href="#detachChildren">detachChildren</a>().
+
+<h3 class=fn>void <a name="add"></a>AppLnkSet::add ( <a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;f )
+</h3>
+Adds <a href="applnk.html">AppLnk</a> <em>f</em> to the set. The set takes responsibility for
+deleting <em>f</em>.
+<p> <p>See also <a href="#remove">remove</a>().
+
+<h3 class=fn>const QList&lt;AppLnk&gt; &amp; <a name="children"></a>AppLnkSet::children () const
+</h3>
+
+<p> Returns the members of the set.
+
+<h3 class=fn>void <a name="clear"></a>AppLnkSet::clear ()
+</h3>
+
+<p> Deletes all AppLnks in the set.
+
+<h3 class=fn>void <a name="detachChildren"></a>AppLnkSet::detachChildren ()
+</h3>
+Detaches all <a href="applnk.html">AppLnk</a> objects from the set. The set become empty and
+the caller becomes responsible for deleting the AppLnk objects.
+
+<h3 class=fn>const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;* <a name="find"></a>AppLnkSet::find ( int&nbsp;id ) const
+</h3>
+Returns the <a href="applnk.html">AppLnk</a> with the given <em>id</em>.
+
+<h3 class=fn>const&nbsp;<a href="applnk.html">AppLnk</a>&nbsp;* <a name="findExec"></a>AppLnkSet::findExec ( const&nbsp;QString&nbsp;&amp;&nbsp;exec ) const
+</h3>
+Returns the <a href="applnk.html">AppLnk</a> with the given <em>exec</em> attribute.
+
+<h3 class=fn>bool <a name="remove"></a>AppLnkSet::remove ( <a href="applnk.html">AppLnk</a>&nbsp;*&nbsp;f )
+</h3>
+Removes <a href="applnk.html">AppLnk</a> <em>f</em> to the set. The caller becomes responsible for
+deleting <em>f</em>. Returns TRUE if <em>f</em> was in the set; otherwise
+returns FALSE.
+<p> <p>See also <a href="#add">add</a>().
+
+<h3 class=fn>QPixmap <a name="typeBigPixmap"></a>AppLnkSet::typeBigPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const
+</h3>
+Returns the large pixmap associated with type <em>t</em>.
+<p> For applications, games and settings the type is <tt>Application</tt>;
+for documents the type is the document's MIME type.
+
+<h3 class=fn>QString <a name="typeName"></a>AppLnkSet::typeName ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const
+</h3>
+Returns the localized name for type <em>t</em>.
+<p> For applications, games and settings the type is <tt>Application</tt>;
+for documents the type is the document's MIME type.
+
+<h3 class=fn>QPixmap <a name="typePixmap"></a>AppLnkSet::typePixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;t ) const
+</h3>
+Returns the small pixmap associated with type <em>t</em>.
+<p> For applications, games and settings the type is <tt>Application</tt>;
+for documents the type is the document's MIME type.
+
+<h3 class=fn>QStringList <a name="types"></a>AppLnkSet::types () const
+</h3>
+
+<p> Returns the list of <a href="applnk.html#Types">types</a> in the set.
+<p> For applications, games and settings the type is <tt>Application</tt>;
+for documents the type is the document's MIME type.
+<p> <p>See also <a href="applnk.html#type">AppLnk::type</a>(), <a href="#typeName">typeName</a>(), <a href="#typePixmap">typePixmap</a>(), and <a href="#typeBigPixmap">typeBigPixmap</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

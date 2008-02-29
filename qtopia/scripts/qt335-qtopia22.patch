@@ -1,0 +1,90 @@
+--- //depot/qt/3/configure	Wed Sep 21 05:23:54 2005
++++ //depot/qt/3/configure	Wed Sep 21 05:23:54 2005
+@@ -74,9 +74,14 @@
+ # check commercial license
+ #-------------------------------------------------------------------------------
+ 
++# Qtopia Edition.
++if [ -f $relpath/LICENSE.Qtopia ]; then
++    Edition="qtopia"
++    Licensee="Qtopia"
++    Products="qt-enterprise"
+ # Open Source Edition - may only be used under the terms of the QPL or GPL.
+ # Qt/X11, Qt/Embedded
+-if [ -f $relpath/LICENSE.QPL -o -f $relpath/LICENSE.GPL ]; then
++elif [ -f $relpath/LICENSE.QPL -o -f $relpath/LICENSE.GPL ]; then
+     [ "$PLATFORM_MAC" = "maybe" ] && PLATFORM_MAC=yes
+     [ "$PLATFORM_QWS" = "maybe" ] && PLATFORM_QWS=yes
+     Edition="free"
+@@ -2309,7 +2314,47 @@
+ # -----------------------------------------------------------------------------
+ 
+ # check for license confirmation
+-if [ "$Edition" = "free" ]; then
++if [ "$Edition" = "qtopia" ]; then
++    if [ "$PLATFORM_X11" = "yes" ]; then
++	Platform="Qt/X11"
++    else
++	echo
++	echo "Internal error: unknown platform."
++	echo
++	exit 2
++    fi
++    TheLicense=`head -n 1 $relpath/LICENSE.Qtopia`
++    while true; do
++        echo
++        echo "This is the $Platform Qtopia Edition."
++        echo
++        echo "You are licensed to use this software under the terms of"
++        echo "the $TheLicense."
++        echo
++        echo "Type '?' to view the $TheLicense."
++        echo "Type 'yes' to accept this license offer."
++        echo "Type 'no' to decline this license offer."
++        echo
++        if echo '\c' | grep '\c' >/dev/null; then
++            echo -n "Do you accept the terms of the $TheLicense? "
++        else
++            echo "Do you accept the terms of the $TheLicense? \c"
++        fi
++        read acceptance
++        echo
++	if [ "$acceptance" = yes ]; then
++	    break
++	else
++	    if [ "$acceptance" = no ]; then
++		echo "You are not licensed to use this software."
++		echo
++		exit 0
++	    elif [ "$acceptance" = "?" ]; then
++		more $relpath/LICENSE.Qtopia
++	    fi
++	fi
++    done
++elif [ "$Edition" = "free" ]; then
+     while true; do
+ 	if [ "$PLATFORM_QWS" = "yes" ]; then
+ 	    echo
+--- //depot/qt/3/src/network/qftp.cpp	Wed Sep 21 22:43:50 2005
++++ //depot/qt/3/src/network/qftp.cpp	Wed Sep 21 22:43:50 2005
+@@ -962,7 +962,7 @@
+     state = Waiting;
+ #ifndef QT_NO_TEXTCODEC
+     if ( qt_ftp_filename_codec ) {
+-	int len;
++	int len = 0;
+ 	QCString enc = qt_ftp_filename_codec->fromUnicode(currentCmd,len);
+ 	commandSocket.writeBlock( enc.data(), len );
+     } else
+--- //depot/qt/3/include/qglobal.h	Wed Sep 21 22:53:22 2005
++++ //depot/qt/3/include/qglobal.h	Wed Sep 21 22:53:22 2005
+@@ -607,6 +607,9 @@
+ 
+ #define Q_DISABLE_COPY
+ 
++// This signifies that the ftp filename codec functionality has been fixed with a patch
++#define QT_FTP_FILENAME_CODEC_PATCH_2_APPLIED
++
+ #if defined(__cplusplus)
+ 
+ 

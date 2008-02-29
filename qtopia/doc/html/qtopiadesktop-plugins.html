@@ -1,0 +1,135 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qtopiadesktop-plugins.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Desktop Plug-ins</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Desktop Plug-ins</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Architecture and Plug-ins
+</a>
+<li><a href="#2"> Implementing a Plug-in
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Architecture and Plug-ins
+</h2>
+<a name="1"></a><p> Qtopia Desktop has modular and flexible design allowing end-users to easily
+install plug-ins to integrate Qtopia into their local environment.
+<p> Developers access this architecture by creating a <em>plugin</em>
+for Qtopia Desktop which is written by implementing interfaces the
+defined by Qtopia Desktop.
+<p> The following table describes available interfaces: 
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Interface <th valign="top">Description
+<tr bgcolor="#f0f0f0"> <td valign="top">PlugInterface <td valign="top">Visual plug-ins for entering information or transfering documents
+<tr bgcolor="#d0d0d0"> <td valign="top">SyncAppInterface, MergeInterface <td valign="top">Synchronize data and files 
+<tr bgcolor="#f0f0f0">  <td valign="top">ImportInterface <td valign="top">Import external data to Qtopia 
+<tr bgcolor="#d0d0d0">  <td valign="top">ExportInterface <td valign="top">Export data from Qtopia (not yet supported)
+</table></center>
+<p> Qtopia Desktop provides each plug-in with access to the <tt>CenterInterface</tt> 
+class which allows a plug-in to use the functionality provided by Qtopia Desktop.
+<p> On startup Qtopia Desktop:
+<ul>
+<li> scans for plug-ins and registers any
+<li> registers any plug-ins that support the interfaces
+<li> searches the sub-dirctory <tt>lib</tt> for plug-in shared object libraries.
+</ul>
+<p> <h2> Implementing a Plug-in
+</h2>
+<a name="2"></a><p> Each plug-in implementation needs to define some pure virtual methods defined
+in the plug-in hierarchy. Each plug-in must define the following methods:
+<pre>
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
+    Q_REFCOUNT
+
+    QString name() const;
+    QString description() const;
+    QString version() const;
+    QString author() const;
+</pre>
+ 
+<p> The <tt>name()</tt> method and <tt>queryInterface()</tt> are the most important while
+<tt>description()</tt>, <tt>version()</tt> and <tt>author()</tt> methods are all purely
+informational and not currently displayed by Qtopia Desktop.
+<p> The <tt>PluginInterface::name()</tt> method defines the display name shown in
+the plug-in selection area on the left hand side of the screen. The
+<tt>name()</tt> method is purely descriptive for all other interfaces.
+<p> The implementation of <tt>queryInterface()</tt> allows Qtopia
+Desktop determine what type of interface a plug-in implements when
+it registers the plug-in at startup.
+<p> In the .cpp file for the interface, the following code must be present
+<pre>
+Q_EXPORT_INTERFACE()
+{
+    Q_CREATE_INSTANCE( AddressBook )
+}
+
+  QRESULT AddressBook::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid,
+    QUnknownInterface** iface )
+{
+    *iface = 0;
+    if ( uuid == IID_QUnknown )
+        *iface = (QUnknownInterface*) (PluginInterface*) this;
+    else if ( uuid == IID_QComponentInformation )
+        *iface = (QComponentInformationInterface*)(PluginInterface *) this;
+    else if ( uuid == IID_PalmtopCenterPlugin )
+        *iface = (PluginInterface*)this;
+    else if ( uuid == IID_SyncAppInterface )
+        *iface = (SyncAppInterface*)this;
+    else if ( uuid == IID_MergeInterface )
+        *iface = (MergeInterface*)this;
+    else
+        return QE_NOINTERFACE;
+
+    (*iface)-&gt;addRef();
+    return QS_OK;
+}
+</pre>
+ 
+<p> The implementation of the <tt>queryInterface()</tt> method depends on
+the interfaces a plug-in is implementing. Each plug-in should
+have only one implementation of <tt>queryInterface()</tt>. However, each plug-in may
+implement more than one interface as shown above and multiple
+interfaces may be implemented by the same class.
+All interfaces other than <tt>SyncAppInterface</tt> implement both
+<tt>QUnknownInterface</tt> and <tt>QComponentInformationInterface</tt> and should
+return as such.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

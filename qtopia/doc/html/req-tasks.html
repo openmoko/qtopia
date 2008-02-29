@@ -1,0 +1,220 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/tasks.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Tasks Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Tasks Specification</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Data
+</a>
+<li><a href="#2"> Application Views
+</a>
+<ul>
+<li><a href="#2-1"> Sorted List
+</a>
+<li><a href="#2-2"> Detailed View
+</a>
+<li><a href="#2-3"> Edit View
+</a>
+</ul>
+<li><a href="#3"> Features
+</a>
+<ul>
+<li><a href="#3-1"> Add Task
+</a>
+<li><a href="#3-2"> Delete Task
+</a>
+<li><a href="#3-3"> Edit Task 
+It is possible to modify tasks. This includes changing the status and adding notes.
+</a>
+<li><a href="#3-4"> Beaming
+</a>
+<li><a href="#3-5"> Priorities
+</a>
+<li><a href="#3-6"> Categories
+</a>
+<li><a href="#3-7"> Filtering
+</a>
+<li><a href="#3-8"> Maximum Number of Tasks
+</a>
+<li><a href="#3-9"> Storage
+</a>
+<li><a href="#3-10"> Memory
+</a>
+<li><a href="#3-11"> QDL Support
+</a>
+</ul>
+<li><a href="#4"> Files
+</a>
+<li><a href="#5"> Configuration
+</a>
+<li><a href="#6"> Services
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Tasks</b> application allows the user to prioritize tasks,
+manage due dates and, when appropriate, mark tasks as completed.
+<p> <h2> Data
+</h2>
+<a name="1"></a><p> A task consists of the following data:
+<p> <ul>
+<li> A single line text description.
+<li> A priority ranging from 1 as the highest priority to 5 as the lowest priority.
+<li> Multi-lined text notes.
+<li> A status consisting of:
+<ul>
+<li> Not started
+<li> In Progress
+<li> Completed
+<li> Waiting
+<li> Deferred
+</ul>
+<li> A percentage completed. Not applicable if a task status is Not Started or Completed.
+<li> The date the task is due for completion. This is optional.
+<li> The date the task was started. Not applicable if the task status is
+Not Started.
+<li> The date the task was completed. Only applicable if the task status is
+Completed.
+<li> One or more categories. If the task is not assigned any category it is
+marked as <i>unfiled</i>.
+</ul>
+<p> <h2> Application Views
+</h2>
+<a name="2"></a><p> It is possible to view tasks in the following three ways:
+<p> <ul>
+<li> As a sorted list of tasks.
+<li> A detailed view of a single task.
+<li> A task opened for editing.
+</ul>
+<p> <h3> Sorted List
+</h3>
+<a name="2-1"></a><p> The primary display of the application shows a sorted list of tasks. In this
+list a user is able to change the priority of a task, mark a task Completed
+or view additional details of the task.
+<p> The sorting order of the tasks is:
+<ul>
+<li> Completed: incomplete tasks are shown first.
+<li> Priority: tasks with a priority closer to 1 are shown first.
+<li> Description: tasks are shown in alphabetic order.
+</ul>
+<p> From the sorted list view the user is able to:
+<ul>
+<li> Create a new task through the Edit View of the task.
+<li> View the details for the task through the Detailed View of the task.
+<li> Mark tasks as completed.
+<li> Change the priority of a task
+<li> Filter the list of tasks shown according to a specified category.
+</ul>
+<p> <h3> Detailed View
+</h3>
+<a name="2-2"></a><p> The detailed view of a task shows data for a single task.  This is shown as
+rich text.  All the information for the task is formatted for optimum readability.
+<p> From the sorted list view the user is able to:
+<ul>
+<li> Edit the current task through the Edit View of the task.
+<li> Delete the current task.
+<li> Beam the current task using IR.
+</ul>
+<p> <h3> Edit View
+</h3>
+<a name="2-3"></a><p> The edit view of a task allows the user to specify the data for a new task
+or modify that of an old task.
+<p> Non-applicable values are disabled. For example, the start date field is disabled if the the task status is marked as Not Started.
+<p> When the editing has been completed the user is able to either accept or cancel the changes they have made.
+<p> <h2> Features
+</h2>
+<a name="3"></a><p> <h3> Add Task
+</h3>
+<a name="3-1"></a><p> It is possible to add tasks. The application does not add a task without a description.
+<p> <h3> Delete Task
+</h3>
+<a name="3-2"></a><p> It is possible to delete tasks. The application prompts the user to confirm the deletion of a task.
+<p> <h3> Edit Task 
+It is possible to modify tasks. This includes changing the status and adding notes.
+</h3>
+<a name="3-3"></a><p> <h3> Beaming
+</h3>
+<a name="3-4"></a><p> It is possible to beam a single task to or from another device using IR.
+<p> <h3> Priorities
+</h3>
+<a name="3-5"></a><p> It is possible to prioritize tasks using the scale of 1 as the highest and 5 as the lowest.
+<p> <h3> <a href="categories.html">Categories</a>
+</h3>
+<a name="3-6"></a><p> It is possible to categorize tasks.
+<p> <h3> Filtering
+</h3>
+<a name="3-7"></a><p> It is possible to filter the view of tasks by category.
+<p> <h3> Maximum Number of Tasks
+</h3>
+<a name="3-8"></a><p> The maximum number of tasks is determined by the available device memory. Once this limit is reached it is only possible to delete tasks; they cannot be edited nor can any new tasks be added.
+<p> <h3> Storage
+</h3>
+<a name="3-9"></a><p> Each event requires approximately 100 bytes of storage plus UTF-8 string
+storage for the description, plus approximately 16 bytes per category membership, plus approximately 50 bytes if a due date is specified.
+<p> <h3> Memory
+</h3>
+<a name="3-10"></a><p> While running, each event requires approximately 300 bytes of storage,
+plus UTF-16 string storage for the description, plus approximately 80 bytes per category membership.
+<p> <h3> <a href="qdl.html">QDL</a> Support
+</h3>
+<a name="3-11"></a><p> It is possible to access tasks from other applications via the QDL service interface.
+When activated the <b>Tasks</b> application runs and shows linked tasks.
+<p> QDL links are embedded into the notes of a task.  When in the Detailed View,
+clicking on a QDL link activates the link's application.
+<p> <h2> Files
+</h2>
+<a name="4"></a><p> The <b>Tasks</b> application has two data files.
+<p> <ul>
+<li> <pre>$HOME&#92;Applications&#92;todolist&#92;todolist.xml</pre>- main list of task data.
+<li> <pre>$HOME&#92;.todojournal</pre>- journal of changes to list of tasks since application started.
+</ul>
+<p> Both files are in an xml-like format. <pre>todolist.xml</pre>is the main list
+of events and is the file sent to Qtopia Desktop on syncing. <pre>.todojournal</pre><p> is a list of adds, edits and deletes made to the list of events since the <b>Tasks</b> application was started.
+<p> <h2> Configuration
+</h2>
+<a name="5"></a><p> The Phone Edition's <b>Task</b> application does not store any configuration-related data.
+<p> <h2> Services
+</h2>
+<a name="6"></a><p> <ul>
+<li> IR Receive text/x-vCalendar-Tasks
+<li> Tasks - allows editing of tasks via PIM Library interface.
+<li> <a href="qdl.html">QDL</a>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

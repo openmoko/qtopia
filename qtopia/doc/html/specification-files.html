@@ -1,0 +1,112 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/spec-files.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Specification Files</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Specification Files</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Makefiles and Cross-compiling
+</a>
+<li><a href="#2"> Creating Custom Spec Files
+</a>
+<ul>
+<li><a href="#2-1"> Qt/Embedded
+</a>
+<li><a href="#2-2"> tmake
+</a>
+<li><a href="#2-3"> qmake
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Makefiles and Cross-compiling
+</h2>
+<a name="1"></a><p> Cross-compiling is the process of executing a compile on one machine and producing object/executable
+code for a different machine or device. To build the Qtopia source code a compiler requires a makefile.
+This makefile defines the source files to be compiled and the compile options required. Makefiles are not
+platform-independent and require configuration depending on the operating system and/or micro-processor architecture.
+Manually writing makefiles is arduous and Trolltech provides tools and configuration files to assist the process.
+<p> To port Qt or Qtopia to a new platform the first step is to create a new set of specification files.
+In most cases a simple modification of one or two of the compiler options is all that it takes to enable
+Qtopia on a new device. The procedure is discussed in detail <a href="#create_custom_spec_files">below</a> .
+<p> <a name="create_custom_spec_files"></a>
+<h2> Creating Custom Spec Files
+</h2>
+<a name="2"></a><p> Building a complete Qtopia system requires three separate configuration systems as follows:
+<ul>
+<li> Qt/Embedded configuration system (based on tmake, built at package creation time).
+<li> tmake - used to build Qtopia 1.x, Qt 2.x and some third-party software. 
+<li> qmake - used to build Qt 3.x and Qtopia 2.
+</ul>
+<p> Prior to building Qtopia the configuration files must be setup.
+<p> The following is an example to create a "myarm" configuration:
+<p> <pre>
+cp -r $TMAKEDIR/lib/qws/linux-arm-g++ $TMAKEDIR/lib/qws/linux-myarm-g++
+cp -r $QPEDIR/mkspecs/qws/linux-arm-g++ $QPEDIR/mkspecs/qws/linux-myarm-g++
+</pre>
+ 
+<p> <h3> Qt/Embedded
+</h3>
+<a name="2-1"></a><p> The <tt>$QTEDIR/configs</tt> directory contains files that Qt generates at configure time. You are free to modify
+the files here but you should instead modify files in TMAKEDIR since any changes to those files cause the
+related configs files to be re-created.
+<p> <h3> tmake
+</h3>
+<a name="2-2"></a><p> Open <tt>$TMAKEDIR/lib/qws/linux-myarm-g++/tmake.conf</tt> and ensure that the utilities and flags
+are suitable for the system. For example:
+<ul>
+<li> TMAKE_CC, TMAKE_CXX and TMAKE_LINK might need to be changed to run the correct compiler.
+<li> The option -DMYARM may be added to the compiler flags to place device-specific code inside an <tt>#ifdef MYARM</tt>
+</ul>
+<p> <h3> qmake
+</h3>
+<a name="2-3"></a><p> Open <tt>$QPEDIR/mkspecs/qws/linux-myarm-g++/qmake.conf</tt> and ensure that the utilities and flags
+are suitable for the system. For example:
+<ul>
+<li> QMAKE_CC, QMAKE_CXX and QMAKE_LINK may need to be changed to run the correct compiler.
+<li> The option -DMYARM may be added to the compiler flags to place device-specific code inside an <tt>#ifdef MYARM</tt>
+</ul>
+<p> <b>Note:</b> The <tt>qmake.conf</tt> file must have the following code at the bottom of the file:
+<pre>
+exists($$(QPEDIR)/src/config.pri):include($$(QPEDIR)/src/config.pri)
+</pre>
+ 
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

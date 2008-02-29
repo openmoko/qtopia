@@ -1,0 +1,78 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/qpestyle.cpp:51 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QPEStyle Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QPEStyle Class Reference</h1>
+
+<p>The QPEStyle class implements the default Qtopia widget style.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qpestyle-h.html">qtopia/qpestyle.h</a>&gt;</tt>
+<p><a href="qpestyle-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QPEStyle"><b>QPEStyle</b></a> ()</li>
+<li class=fn>virtual <a href="#~QPEStyle"><b>~QPEStyle</b></a> ()</li>
+<li class=fn>virtual void <a href="#drawPrimitive"><b>drawPrimitive</b></a> ( PrimitiveElement&nbsp;pe, QPainter&nbsp;*&nbsp;p, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;flags = Style_Default, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const</li>
+<li class=fn>virtual void <a href="#drawControl"><b>drawControl</b></a> ( ControlElement&nbsp;ce, QPainter&nbsp;*&nbsp;p, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;how = Style_Default, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const</li>
+<li class=fn>virtual void <a href="#drawComplexControl"><b>drawComplexControl</b></a> ( ComplexControl&nbsp;control, QPainter&nbsp;*&nbsp;p, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;how = Style_Default, SCFlags&nbsp;sub = SC_All, SCFlags&nbsp;subActive = SC_None, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const</li>
+<li class=fn>virtual int <a href="#pixelMetric"><b>pixelMetric</b></a> ( PixelMetric&nbsp;metric, const&nbsp;QWidget&nbsp;*&nbsp;widget = 0 ) const</li>
+<li class=fn>virtual QSize <a href="#sizeFromContents"><b>sizeFromContents</b></a> ( ContentsType&nbsp;contents, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QSize&nbsp;&amp;&nbsp;contentsSize, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QPEStyle class implements the default Qtopia widget style.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QPEStyle"></a>QPEStyle::QPEStyle ()
+</h3> 
+<h3 class=fn><a name="~QPEStyle"></a>QPEStyle::~QPEStyle ()<tt> [virtual]</tt>
+</h3> 
+<h3 class=fn>void <a name="drawComplexControl"></a>QPEStyle::drawComplexControl ( ComplexControl&nbsp;control, QPainter&nbsp;*&nbsp;p, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;how = Style_Default, SCFlags&nbsp;sub = SC_All, SCFlags&nbsp;subActive = SC_None, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const<tt> [virtual]</tt>
+</h3> <em>control</em> <em>p</em> <em>widget</em> <em>r</em> <em>cg</em> <em>how</em> <em>sub</em> <em>subActive</em> <em>data</em> 
+<h3 class=fn>void <a name="drawControl"></a>QPEStyle::drawControl ( ControlElement&nbsp;ce, QPainter&nbsp;*&nbsp;p, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;how = Style_Default, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const<tt> [virtual]</tt>
+</h3> <em>ce</em> <em>p</em> <em>widget</em> <em>r</em> <em>cg</em> <em>how</em> <em>data</em> 
+<h3 class=fn>void <a name="drawPrimitive"></a>QPEStyle::drawPrimitive ( PrimitiveElement&nbsp;pe, QPainter&nbsp;*&nbsp;p, const&nbsp;QRect&nbsp;&amp;&nbsp;r, const&nbsp;QColorGroup&nbsp;&amp;&nbsp;cg, SFlags&nbsp;flags = Style_Default, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const<tt> [virtual]</tt>
+</h3> <em>pe</em> <em>p</em> <em>r</em> <em>cg</em> <em>flags</em> <em>data</em> 
+<h3 class=fn>int <a name="pixelMetric"></a>QPEStyle::pixelMetric ( PixelMetric&nbsp;metric, const&nbsp;QWidget&nbsp;*&nbsp;widget = 0 ) const<tt> [virtual]</tt>
+</h3> <em>metric</em> <em>widget</em> 
+<h3 class=fn>QSize <a name="sizeFromContents"></a>QPEStyle::sizeFromContents ( ContentsType&nbsp;contents, const&nbsp;QWidget&nbsp;*&nbsp;widget, const&nbsp;QSize&nbsp;&amp;&nbsp;contentsSize, const&nbsp;QStyleOption&nbsp;&amp;&nbsp;data = QStyleOption::Default ) const<tt> [virtual]</tt>
+</h3> <em>contents</em> <em>widget</em> <em>contentsSize</em> <em>data</em> 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

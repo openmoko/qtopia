@@ -1,0 +1,123 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/inputmethodinterface.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>InputMethodInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>InputMethodInterface Class Reference</h1>
+
+<p>The InputMethodInterface class provides an interface for Qtopia
+Pop-up Input Methods.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="inputmethodinterface-h.html">qtopia/inputmethodinterface.h</a>&gt;</tt>
+<p><a href="inputmethodinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual QWidget * <a href="#inputMethod"><b>inputMethod</b></a> ( QWidget&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f ) = 0</li>
+<li class=fn>virtual void <a href="#resetState"><b>resetState</b></a> () = 0</li>
+<li class=fn>virtual QPixmap * <a href="#icon"><b>icon</b></a> () = 0</li>
+<li class=fn>virtual QString <a href="#name"><b>name</b></a> () = 0</li>
+<li class=fn>virtual void <a href="#onKeyPress"><b>onKeyPress</b></a> ( QObject&nbsp;*&nbsp;receiver, const&nbsp;char&nbsp;*&nbsp;slot ) = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The InputMethodInterface class provides an interface for Qtopia
+Pop-up Input Methods.
+<p> Pop-up Input Methods must supply a QWidget that will be shown on the screen
+and emit a signal when a key is pressed:
+<p> Pop-up Input Methods may be added to Qtopia via plug-ins. In order to write an
+input method plug-in you must create an interface to your input method by
+deriving from the InputMethodInterface class and implementing the pure
+virtual functions.
+<p> See also: <a href="inputmethods.html">Input Method Tutorial</a>
+<p> 
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QPixmap * <a name="icon"></a>InputMethodInterface::icon ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#icon">icon</a>() function returns the icon for the input method. This will
+be displayed in the taskbar when the input method is selected.
+
+<h3 class=fn>QWidget * <a name="inputMethod"></a>InputMethodInterface::inputMethod ( QWidget&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f )<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#inputMethod">inputMethod</a>() function creates the input method widget (if not
+already created) and returns the input method widget.
+<p> <em>parent</em> is the parent of the input method widget.
+<em>f</em> contains the flags to pass to the input method widget.
+<p> This widget will be display when the user needs to input
+text. You should always return the same widget if this function is called
+multiple times.
+
+<h3 class=fn>QString <a name="name"></a>InputMethodInterface::name ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#name">name</a>() function returns the name of the input method. This will
+be displayed in the pop-up list of available input methods.
+
+<h3 class=fn>void <a name="onKeyPress"></a>InputMethodInterface::onKeyPress ( QObject&nbsp;*&nbsp;receiver, const&nbsp;char&nbsp;*&nbsp;slot )<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#onKeyPress">onKeyPress</a>() function must connect the supplied slot to the signal
+that is emitted when a key press is generated.
+<p> <em>receiver</em> and <em>slot</em> specify the slot to connect to.
+<p> The signal/slot should have a signiture of:
+<pre>
+  void keyPress( ushort unicode, ushort keycode, ushort modifiers, bool press, bool repeat )
+  </pre>
+ 
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Parameter <th valign="top">Notes
+<tr bgcolor="#f0f0f0"> 
+<td valign="top">unicode
+<td valign="top">The unicode value of the character, or 0xFFFF if it is a non-printing key.
+<tr bgcolor="#d0d0d0"> 
+<td valign="top">keycode
+<td valign="top">The key code as specified in <tt>qnamespace.h</tt>
+<tr bgcolor="#f0f0f0"> 
+<td valign="top">modifiers
+<td valign="top">A combination of zero or more of the following OR'ed together:
+Qt::ShiftButton, Qt::ControlButton and Qt::AltButton 
+<tr bgcolor="#d0d0d0"> 
+<td valign="top">press
+<td valign="top">TRUE for a key press, FALSE for a key release.
+<tr bgcolor="#f0f0f0"> 
+<td valign="top">repeat
+<td valign="top">TRUE if this is a repeating keypress.
+</table></center>
+
+<h3 class=fn>void <a name="resetState"></a>InputMethodInterface::resetState ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#resetState">resetState</a>() function should return the input method to its default
+state.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

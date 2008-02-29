@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaServices
+Context=Media Recorder
+[Standard]
+Version=100
+Actions=getAudio(QCString,QString,QString,QString,int,int)
+[getAudio(QCString,QString,QString,QString,int,int)]
+Name[]=Record Audio
+Icon=SoundPlayer

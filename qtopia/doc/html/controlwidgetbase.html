@@ -1,0 +1,126 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/mediaplayer/controlwidgetbase.cpp:61 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ControlWidgetBase Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ControlWidgetBase Class Reference</h1>
+
+<p>This class is specific to the mediaplayer apps.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="controlwidgetbase-h.html">controlwidgetbase.h</a>&gt;</tt>
+<p><a href="controlwidgetbase-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><b>ControlWidgetBase</b> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;QString&nbsp;&amp;&nbsp;skin, const&nbsp;QString&nbsp;&amp;&nbsp;audio, const&nbsp;char&nbsp;*&nbsp;name )</li>
+<li class=fn><b>~ControlWidgetBase</b> ()</li>
+<li class=fn>virtual void <b>setTickerText</b> ( const QString &amp; )</li>
+<li class=fn>virtual void <b>updateVolume</b> ()</li>
+<li class=fn>virtual void <b>makeVisible</b> ()</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <b>sliderPressed</b> ()</li>
+<li class=fn>void <b>sliderReleased</b> ()</li>
+<li class=fn>void <b>setPosition</b> ( long )</li>
+<li class=fn>void <b>setLength</b> ( long )</li>
+<li class=fn>void <b>setPaused</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setSeekable</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setLooping</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setPlaying</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setFullscreen</b> ( bool&nbsp;b )</li>
+<li class=fn>void <b>setSkin</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;skin )</li>
+<li class=fn>void <b>loadImages</b> ()</li>
+<li class=fn>void <b>scaleImages</b> ()</li>
+<li class=fn>void <b>hideVolumeOverlay</b> ()</li>
+<li class=fn>void <b>stop</b> ()</li>
+<li class=fn>void <b>play</b> ()</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <b>sliderMoved</b> ( long )</li>
+<li class=fn>void <b>moreClicked</b> ()</li>
+<li class=fn>void <b>lessClicked</b> ()</li>
+<li class=fn>void <b>moreReleased</b> ()</li>
+<li class=fn>void <b>lessReleased</b> ()</li>
+<li class=fn>void <b>forwardClicked</b> ()</li>
+<li class=fn>void <b>backwardClicked</b> ()</li>
+<li class=fn>void <b>forwardReleased</b> ()</li>
+<li class=fn>void <b>backwardReleased</b> ()</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QString <b>toTimeString</b> ( long )</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>virtual void <b>virtualResize</b> () = 0</li>
+<li class=fn>virtual void <b>virtualPaint</b> ( QPaintEvent&nbsp;*&nbsp;event ) = 0</li>
+<li class=fn>virtual void <b>virtualUpdateSlider</b> () = 0</li>
+<li class=fn>virtual void <b>paintButton</b> ( QPainter&nbsp;&amp;&nbsp;p, int&nbsp;i )</li>
+<li class=fn>virtual void <b>drawOverlays</b> ()</li>
+<li class=fn>QString <b>timeAsString</b> ( long )</li>
+<li class=fn>void <b>keyPressEvent</b> ( QKeyEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>keyReleaseEvent</b> ( QKeyEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>mouseMoveEvent</b> ( QMouseEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>mousePressEvent</b> ( QMouseEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>mouseReleaseEvent</b> ( QMouseEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>closeEvent</b> ( QCloseEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>resizeEvent</b> ( QResizeEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>paintEvent</b> ( QPaintEvent&nbsp;*&nbsp;event )</li>
+<li class=fn>void <b>resetButtons</b> ()</li>
+<li class=fn>void <b>updateSlider</b> ()</li>
+<li class=fn>void <b>setButtonData</b> ( MediaButton&nbsp;*&nbsp;mediaButtons, int&nbsp;count )</li>
+<li class=fn>void <b>resizeObjects</b> ( int&nbsp;w, int&nbsp;h, int&nbsp;scaleW, int&nbsp;scaleH, int&nbsp;cornerWidgetWidth = 0 )</li>
+<li class=fn>void <b>setToggleButton</b> ( MediaButtonType, bool )</li>
+<li class=fn>void <b>toggleButton</b> ( int )</li>
+<li class=fn>void <b>paintAllButtons</b> ( QPainter&nbsp;&amp;&nbsp;p )</li>
+<li class=fn>void <b>getButtonPix</b> ( bool&nbsp;down )</li>
+<li class=fn>void <b>getButtonMask</b> ( int&nbsp;i )</li>
+<li class=fn>bool <b>videoGeometry</b> ( QRect &amp; )</li>
+<li class=fn>void <b>drawVolumeOverlay</b> ( bool&nbsp;inPaintEvent = true )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+This class is specific to the mediaplayer apps.
+<p> It is currently private to those apps, and its API,
+and therefore binary compatibilty may change in later
+versions.
+<p> It is the base class used to make the skinned audio and video
+views.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

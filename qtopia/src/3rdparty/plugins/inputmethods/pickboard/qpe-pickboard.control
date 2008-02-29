@@ -1,0 +1,10 @@
+Files: plugins/inputmethods/libqpickboard.so*
+Priority: optional
+Section: qpe/inputmethods
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: Pickboard input method
+ Pickboard dictionary-based input method for the Qtopia environment.

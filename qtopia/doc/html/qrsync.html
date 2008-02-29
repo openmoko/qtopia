@@ -1,0 +1,74 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/3rdparty/libraries/rsync/qrsync.cpp:31 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QRsync Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QRsync Class Reference</h1>
+
+<p>The QRsync class provides an interface to librsync.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qrsync-h.html">qrsync.h</a>&gt;</tt>
+<p><a href="qrsync-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#generateSignature"><b>generateSignature</b></a> ( QString&nbsp;baseFile, QString&nbsp;sigFile )</li>
+<li class=fn>void <b>generateDiff</b> ( QString&nbsp;baseFile, QString&nbsp;sigFile, QString&nbsp;diffFile )</li>
+<li class=fn>void <a href="#applyDiff"><b>applyDiff</b></a> ( QString&nbsp;baseFile, QString&nbsp;deltaFile )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The QRsync class provides an interface to librsync.
+<p> 
+QRsync links with librsync, which provides fast incremental file
+transfer in the style of rsync. Qtopia and QtopiaDesktop use QRsync
+for PIM data synchronization.
+<p> Librsync is distributed under the terms of the
+GNU Lesser General Public License. The primary copyright holder and
+and author is <a href="mailto:mbp@samba.org">Martin Pool</a>. The primary copyright
+holder and author for rsync is <a href="mailto:tridge@samba.org">Andrew Tridgell</a>.
+More information about librsync can be found at <a       href="http://librsync.sourceforge.net">http://librsync.sourceforge.net</a>
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="applyDiff"></a>QRsync::applyDiff ( QString&nbsp;baseFile, QString&nbsp;deltaFile )<tt> [static]</tt>
+</h3>
+Applys the diff in <em>deltaFile</em> to <em>baseFile</em>.
+
+<h3 class=fn>void <a name="generateSignature"></a>QRsync::generateSignature ( QString&nbsp;baseFile, QString&nbsp;sigFile )<tt> [static]</tt>
+</h3>
+Takes <em>baseFile</em> and generates a signature for it in <em>sigFile</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

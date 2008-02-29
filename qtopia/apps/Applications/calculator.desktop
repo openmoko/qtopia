@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaApplications
+Context=Calculator
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Comment[]=A Calculator Program
+Exec=calculator
+Icon=Calculator
+Type=Application
+Name[]=Cal­cu­la­tor

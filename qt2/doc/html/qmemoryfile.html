@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt Toolkit - QMemoryFile Class</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style>
+</head><body bgcolor="#ffffff">
+
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+
+<h1 align=center>QMemoryFile Class Reference</h1><br clear="all">
+<p>
+The QMemoryFile class provide means to map a file info memory or refere to a block or memory by name.
+<a href="#details">More...</a>
+<p>
+<code>#include &lt;<a href="qmemoryfile_p-h.html">qmemoryfile_p.h</a>&gt;</code>
+<p><a href="qmemoryfile-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class="fn">enum <b>Flags</b> { Write = 0x00000001, Shared = 0x00000002, Create = 0x00000004, }</div>
+<li><div class="fn"><a href="#57adfd"><b>QMemoryFile</b></a> ( const QString &amp; fileName, int flags=-1, uint size=0 ) </div>
+<li><div class="fn"><a href="#cce2cb"><b>~QMemoryFile</b></a> () </div>
+<li><div class="fn">bool <a href="#c2e6b8"><b>isShared</b></a> () </div>
+<li><div class="fn">bool <a href="#6112ae"><b>isWritable</b></a> () </div>
+<li><div class="fn">uint <b>size</b> () </div>
+<li><div class="fn">char* <a href="#f7f60d"><b>data</b></a> () </div>
+</ul>
+<hr><h2><a name="details"></a>Detailed Description</h2>
+The QMemoryFile class provide means to map a file info memory or refere to a block or memory by name.
+<p>
+Warning: This class is not part of the Qt APi and subject to change.
+This file file may change from version to version without
+notice, or even be removed.
+<p>Currently this
+class supports read only access on all platforms; and read plus write
+accces provided on unix and windows based plaforms.
+The size of mapped file can not be changed.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="57adfd"></a>QMemoryFile::QMemoryFile ( const <a href="qstring.html">QString</a> &amp; fileName, int flags=-1, uint size=0 )</h3>
+<p>Construct a memory mapped to an actual file or named memory block.
+If <em>fileName</em> is not preceeded by an \\ then it is treated as a real
+file name.
+Otherwise the characters after the \\ are used as the name for the memory block required.
+nb: You will need to escape the \'s so it you need to use \\\\ within a literal string 
+A value for <em>size</em> should always be provided, though if the size is not provided it will be determined if possible.
+<p>If a file is being mapped to be written to, then the <em>flags</em> of subsequent QMemoryFiles mapped to the same file should include QMemoryFile::Write.
+<p>Example:
+<pre> // Open a maping to file text.dat
+ <a href="qmemoryfile.html">QMemoryFile</a> memoryFile("text.dat", QMemoryFile:Read, 20);
+ char *data = memoryFile.<a href="#f7f60d">data</a>();
+ int sum = 0;
+ for (int i = 0; i &lt; 20; i++){
+   sum = sum + data[i];
+ }
+ <a href="qapplication.html#72e78c">qDebug</a>("Sum =%d", sum);
+</pre>
+<p>Example for creating named memory block:
+<pre> <a href="qmemoryfile.html">QMemoryFile</a> block1("\\\\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
+ char *dataBlock = block.data();
+ for (int i = 0; i &lt; 19; i++){
+   dataBlock[i] = i +'a';
+ }
+ dataBlock[20] = '\0';
+ <a href="qapplication.html#72e78c">qDebug</a>("Data block is %s", dataBlock);
+</pre>
+<h3 class="fn"><a name="cce2cb"></a>QMemoryFile::~QMemoryFile ()</h3>
+<p>Destructs the memory mapped file.
+<h3 class="fn">char* <a name="f7f60d"></a>QMemoryFile::data ()</h3>
+<p>Returns a pointer to memory that this QMemoryFile is associated with.
+<h3 class="fn">bool <a name="c2e6b8"></a>QMemoryFile::isShared ()</h3>
+<p>Returns true if memory is shared.
+<h3 class="fn">bool <a name="6112ae"></a>QMemoryFile::isWritable ()</h3>
+<p>Returns true if memory is writable.
+<hr><p>
+Search the documentation, FAQ, qt-interest archive and more (uses
+<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
+<form method=post action="http://www.trolltech.com/search.cgi">
+<input type=hidden name="version" value="2.3.12"><nobr>
+<input size="50" name="search"><input type=submit value="Search">
+</nobr></form><hr><p>
+This file is part of the <a href="index.html">Qt toolkit</a>,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

@@ -1,0 +1,14 @@
+Files: plugins/textcodecs/libsimple8.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: A collection of 8-bit text codecs.
+    Includes KOI8-R, KOI8-U, ISO 8859-2 -3 -4 -5 -6-I -7
+    -8-I -9 -10 -11 -13 -14 -15, PT 154, code pages CP 874,
+    1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257, and 1258.
+    Note that this does not include fonts, just conversions
+    between these formats and Unicode.

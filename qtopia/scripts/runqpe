@@ -1,0 +1,34 @@
+#!/bin/sh
+
+if [ "$QPEDIR" = "" ]; then
+    export QPEDIR="$(pwd)"
+fi
+
+VER=1.7
+
+if [ -e $QPEDIR/src/Makefile ]; then
+    prefix=`awk -F= '/^PREFIX/{print $2}' $QPEDIR/src/Makefile`
+    if [ ! -z "$prefix" ]; then
+	VER=2.0
+	export QPEDIR=$prefix
+	export QTDIR=$QPEDIR
+        if [ -z "$QPEHOME" ]; then
+            export QPEHOME=$QPEDIR
+        fi
+    fi
+fi
+
+# make sure libraries can be found
+export PATH=$QPEDIR/bin:$PATH
+export LD_LIBRARY_PATH=$QPEDIR/lib:$QTDIR/lib:$LD_LIBRARY_PATH
+if [ ! -z "$QPEHOME" ]; then
+    export HOME=$QPEHOME
+fi
+
+if [ "$1" = "-exec" ]; then
+    shift
+    echo exec $@
+    exec $@
+else
+    exec qpe "$@"
+fi

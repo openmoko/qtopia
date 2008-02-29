@@ -1,0 +1,151 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/calendar.cpp:42 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Calendar Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Calendar Class Reference</h1>
+
+<p>The Calendar class provides programmers with an easy to calculate
+and get information about dates, months and years.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="calendar-h.html">qtopia/calendar.h</a>&gt;</tt>
+<p><a href="calendar-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>class <b>Day</b> { }</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QValueList&lt;Day&gt; daysOfMonth ( int&nbsp;year, int&nbsp;month, bool&nbsp;startWithMonday = FALSE ) &nbsp;<em>(obsolete)</em></li>
+<li class=fn>QString <a href="#nameOfMonth"><b>nameOfMonth</b></a> ( int&nbsp;m )</li>
+<li class=fn>QString <a href="#nameOfDay"><b>nameOfDay</b></a> ( int&nbsp;d )</li>
+<li class=fn>QValueList&lt;QDate&gt; <a href="#datesOfMonth"><b>datesOfMonth</b></a> ( int&nbsp;year, int&nbsp;month, bool&nbsp;startWithMonday = FALSE )</li>
+<li class=fn>QDate <a href="#dateAtIndex"><b>dateAtIndex</b></a> ( int&nbsp;year, int&nbsp;month, int&nbsp;index, bool&nbsp;startWithMonday = FALSE )</li>
+<li class=fn>QDate <a href="#dateAtCoord"><b>dateAtCoord</b></a> ( int&nbsp;year, int&nbsp;month, int&nbsp;row, int&nbsp;col, bool&nbsp;startWithMonday = FALSE )</li>
+<li class=fn>void <a href="#coordForDate"><b>coordForDate</b></a> ( int&nbsp;year, int&nbsp;month, const&nbsp;QDate&nbsp;&amp;&nbsp;date, int&nbsp;&amp;&nbsp;row, int&nbsp;&amp;&nbsp;col, bool&nbsp;startWithMonday = FALSE )</li>
+<li class=fn>int <a href="#indexForDate"><b>indexForDate</b></a> ( int&nbsp;year, int&nbsp;month, const&nbsp;QDate&nbsp;&amp;&nbsp;date, bool&nbsp;startWithMonday = FALSE )</li>
+<li class=fn>int <a href="#weekInMonth"><b>weekInMonth</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;dt )</li>
+<li class=fn>QDate <a href="#addMonths"><b>addMonths</b></a> ( int&nbsp;nmonths, const&nbsp;QDate&nbsp;&amp;&nbsp;orig )</li>
+<li class=fn>QDate <a href="#addYears"><b>addYears</b></a> ( int&nbsp;nyears, const&nbsp;QDate&nbsp;&amp;&nbsp;orig )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+<p> The Calendar class provides programmers with an easy to calculate
+and get information about dates, months and years.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QDate <a name="addMonths"></a>Calendar::addMonths ( int&nbsp;nmonths, const&nbsp;QDate&nbsp;&amp;&nbsp;orig )<tt> [static]</tt>
+</h3>
+Returns a date <em>nmonths</em> later than the date <em>orig</em> (or earlier if <em>nmonths</em> is negative).
+<p> Rounds to the last day of month if the day of the calculated date would be
+invalid.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QDate <a name="addYears"></a>Calendar::addYears ( int&nbsp;nyears, const&nbsp;QDate&nbsp;&amp;&nbsp;orig )<tt> [static]</tt>
+</h3>
+Returns a date <em>nyears</em> later than the date <em>orig</em> (or earlier if <em>nyears</em> is negative).
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="coordForDate"></a>Calendar::coordForDate ( int&nbsp;year, int&nbsp;month, const&nbsp;QDate&nbsp;&amp;&nbsp;date, int&nbsp;&amp;&nbsp;row, int&nbsp;&amp;&nbsp;col, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3>
+Sets the <em>row</em> and <em>col</em> to the position for
+<em>date</em> on the calendar page given by <a href="#datesOfMonth">datesOfMonth</a>()
+for the given <em>year</em> and <em>month</em>.
+<p> The page starts on the Monday on or before the 1st of the month if 
+<em>startWithMonday</em> is TRUE, otherwise the page starts on the Sunday on 
+or before the 1st of the month.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QDate <a name="dateAtCoord"></a>Calendar::dateAtCoord ( int&nbsp;year, int&nbsp;month, int&nbsp;row, int&nbsp;col, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3>
+Using the calender page given by <a href="#datesOfMonth">datesOfMonth</a>() will return the 
+date at the position <em>row</em>, <em>col</em>, for the given <em>month</em> and <em>year</em>.
+<p> The page starts on the Monday on or before the 1st of the month if 
+<em>startWithMonday</em> is TRUE, otherwise the page starts on the Sunday on 
+or before the 1st of the month.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QDate <a name="dateAtIndex"></a>Calendar::dateAtIndex ( int&nbsp;year, int&nbsp;month, int&nbsp;index, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3>
+Using the calender page given by <a href="#datesOfMonth">datesOfMonth</a>() will return the 
+date at the position <em>index</em> for the given <em>month</em> and <em>year</em>.
+<p> The page starts on the Monday on or before the 1st of the month if 
+<em>startWithMonday</em> is TRUE, otherwise the page starts on the Sunday on 
+or before the 1st of the month.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QValueList&lt;QDate&gt; <a name="datesOfMonth"></a>Calendar::datesOfMonth ( int&nbsp;year, int&nbsp;month, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3>
+Returns a list of 42 dates (6 weeks) that cover the given <em>month</em> and
+<em>year</em>.
+<p> The list starts on the Monday on or before the 1st of the month if 
+<em>startWithMonday</em> is TRUE, otherwise the list starts on the Sunday on 
+or before the 1st of the month.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QValueList&lt;Day&gt; <a name="daysOfMonth"></a>Calendar::daysOfMonth ( int&nbsp;year, int&nbsp;month, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn>int <a name="indexForDate"></a>Calendar::indexForDate ( int&nbsp;year, int&nbsp;month, const&nbsp;QDate&nbsp;&amp;&nbsp;date, bool&nbsp;startWithMonday = FALSE )<tt> [static]</tt>
+</h3>
+Returns the index for <em>date</em> on the calendar page given by <a href="#datesOfMonth">datesOfMonth</a>()
+for the given <em>year</em> and <em>month</em>.
+<p> The page starts on the Monday on or before the 1st of the month if 
+<em>startWithMonday</em> is TRUE, otherwise the page starts on the Sunday on 
+or before the 1st of the month.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QString <a name="nameOfDay"></a>Calendar::nameOfDay ( int&nbsp;d )<tt> [static]</tt>
+</h3>
+Returns the name of the day for <em>d</em>.
+Equivalent to QDate::dayName().
+
+<h3 class=fn>QString <a name="nameOfMonth"></a>Calendar::nameOfMonth ( int&nbsp;m )<tt> [static]</tt>
+</h3>
+Returns the name of the month for <em>m</em>.
+Equivalent to QDate::monthName().
+
+<h3 class=fn>int <a name="weekInMonth"></a>Calendar::weekInMonth ( const&nbsp;QDate&nbsp;&amp;&nbsp;dt )<tt> [static]</tt>
+</h3>
+Returns the week number the date <em>dt</em> is in the month for that date.
+For instance the first Wednesday of the month is in the first week the second
+Wednesday in the month is in the second week and so on.
+<p> First availability: Qtopia 1.6
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

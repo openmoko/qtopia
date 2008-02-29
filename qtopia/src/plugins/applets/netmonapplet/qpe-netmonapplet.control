@@ -1,0 +1,10 @@
+Files: plugins/applets/libnetmonapplet.so* pics/netmon/*.* plugins/applets/netmonapplet.desktop
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: NetMonitor applet
+ NetMonitor applet for the Qtopia environment taskbar.

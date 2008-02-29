@@ -1,0 +1,193 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/releasenotes.doc:737 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - 1.6.0 Release Notes</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - 1.6.0 Release Notes</h1>
+
+
+<p> 
+<p> The Qtopia 1.6 release constituted a rounding out of the Qtopia
+platform, with a number of improvements resulting from one year
+of field experience with 1.5. Completeness and stability have been
+the focus of development. Additional attention has been paid to
+usability, maintainability, and flexibility.
+<p> <h3> Completeness
+</h3>
+<a name="1"></a><p> The Qtopia device platform now includes many of the finishing
+touches one would expect from the leading GUI on embedded Linux.
+Added features are:
+<p> <ul>
+<li> 'Today' application showing interesting items for the day.
+<li> Voice Recorder with <a href="gsm.html">GSM</a> audio compression.
+<li> Simple daily alarm feature (set in the Clock application).
+<li> User-definable association of applications to services
+(for example, the user can choose which
+web browser provided the WebAccess service).
+<li> User-definable actions for device hardware buttons.
+<li> Different light and power settings when on battery or mains power.
+<li> User control over which plug-ins are loaded, and protection
+from plug-ins that cause a crash.
+</ul>
+<p> Numerous other minor improvements have added to the general
+polish of the application suite.
+<p> The Qtopia development platform has also been tuned from our
+experiences with developers. The following features have been
+added to the Qtopia SDK:
+<p> <ul>
+<li> <em>Accessory</em> - the ability to install items in the Q-Menu
+for frequently-accessed functionality that does not
+otherwise require space in the taskbar.
+<li> <em>QPEDatePicker</em> - a widget for selecting dates.
+<li> <em>DeviceButton</em> - an abstraction of device hardware buttons.
+<li> <em>DocPropertiesWidget</em> and <em>DocPropertiesDialog</em> - a
+widget for allowing the user to set document properties.
+<li> <em>LocationCombo</em> - a widget for selecting a storage location.
+<li> <em>QProcess</em> - the Qt class for running processes asynchronously.
+<li> <em>QWizard</em> - the Qt class for simple wizard dialogs.
+<li> <em>TimeZone</em> - encapsulation of the system zoneinfo database.
+<li> <em>Service</em> - the ability to refer to and provide actions
+without specifically identifying the application that
+might provide the service.
+<li> <em>DocLnk</em> - the location for the document can be easily set.
+<li> <em>Calendar</em> - a number of useful date operations are added.
+<li> <em>Config</em> - QByteArray values can be stored.
+<li> <em>Global</em> - applications can inspect the Qtopia version,
+architecture, device ID, and owner name.
+<li> <em>Global</em> - Base64 encoding and decoding functions are provided.
+<li> <em>QPEApplication</em> - functions for showing and executing dialogs
+such that they are resized, positioned, or maximized as appropriate
+for the device.
+<li> <em>Resource</em> - function to load QIconSet values, and a superior
+function for generating 'disabled' icons.
+<li> <em>TimeString</em> - functions for simply generating locale- and user-specific
+formatted dates and times.
+</ul>
+<p> A number of other minor functions have been added.
+<p> <h3> Stability and Correctness
+</h3>
+<a name="1-1"></a><p> A broad range of bugs have been found, tracked, and corrected for
+this release.
+<p> Bug reports have been collected from users, developers, and
+our internal test teams.
+<p> A number of known bugs remain, but none that cause
+difficulty for the end user. A full list of known bugs is available,
+and access to our bug tracking system is available to OEM customers.
+<p> Conformance to existing standards has been improved, especially
+the OBEX, vCalendar and vCard protocols used in beaming.
+<p> <h3> Usability
+</h3>
+<a name="1-2"></a><p> Consistency between applications has been improved to enhance
+user familiarity.
+A number of applications have been modified to
+simplify the user experience.
+<p> The software package management and backup/restore software
+have been modified to use a <em>Wizard</em>
+interface, greatly simplifying their operation.
+<p> <h3> Maintainability
+</h3>
+<a name="1-3"></a><p> A major change in Qtopia 1.6 is to utilize the cross-platform
+nature of Qt and the Qtopia applications to re-use the PDA-side
+application code directly in Qtopia Desktop on all desktop
+platforms. This ensures that the desktop and PDA remain perfectly
+consistent, which assists user comprehension and halves the
+number of possible bugs. As a bonus, the PDA-side code is now
+more able to utilize larger displays such as the 640 x 480 and
+larger displays now available on PDAs and tablet/webpad devices.
+<p> <h3> Flexibility
+</h3>
+<a name="1-4"></a><p> Field experience has demonstrated vendor and user desire to customize
+and personalize devices and to extend functionality in unplanned
+directions. Qtopia 1.6 assists this by providing for:
+<p> <ul>
+<li> Pluggable styles
+<li> Pluggable window decorations
+<li> Pluggable characterset encodings
+<li> Pluggable font engines
+<li> Pluggable image format support
+<li> Pluggable language input methods
+<li> Pluggable beaming controls
+<li> Pluggable 'Today' sections
+<li> User-selection of application/service associations
+</ul>
+<p> This is in addition to the support already in 1.5:
+<p> <ul>
+<li> Pluggable media player format support
+<li> Pluggable visual input methods
+<li> Pluggable network services
+<li> Pluggable color schemes
+<li> Pluggable language support
+</ul>
+<p> Additionally, vendor-specific device configuration allows
+for the simple control of:
+<p> <ul>
+<li> Device hardware buttons
+<li> Device calibration needs
+<li> Device power management support
+<li> Device backlight controls
+<li> Device audio support
+<li> Device hardware LED support
+</ul>
+<p> <h3> Since the last beta
+</h3>
+<a name="1-5"></a><p> For those familiar with the last Qtopia beta release, the following
+specific points of change should be considered:
+<p> <ul>
+<li><b>Device Architecture</b>
+<p> The file <tt>src/libraries/custom-*.h</tt> for each
+platform defines <tt>QPE_ARCHITECTURE</tt>, a string
+of the form <tt>"&lt;em&gt;Vendor/Brand&lt;/em&gt;"</tt>. If you have a
+custom version of this file for your device, you should
+define this string. This string is communicated to
+Qtopia Desktop to assist the user in acquiring packages
+appropriate to their device.
+<li><b>Today Auto-start</b>
+<p> The Today application can be autostarted. To enable this,
+define QPE_DEFAULT_TODAY_MODE to "Daily" (including the
+quotes in the <tt>custom-*.h</tt> file for your platform. The user
+can turn this off in the Edit Today View dialog. If the
+<tt>custom.h</tt> does not define anything, then the default
+will be to not autostart (but the user can still enable it if
+they choose). The <tt>custom.h</tt> files shipped with Qtopia
+all define the "Daily" mode.
+</ul>
+<p> Release notes for 1.6.0 beta releases:
+<ul>
+<li> <a href="release-1.6beta5.html">Beta 5</a>
+<li> <a href="release-1.6beta4.html">Beta 4</a>
+<li> <a href="release-1.6beta3.html">Beta 3</a>
+<li> <a href="release-1.6beta2.html">Beta 2</a>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Clipboard
+Comment[]=Easy access to Cut, Copy and Paste.
+X-QPE-Library=libclipboardapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

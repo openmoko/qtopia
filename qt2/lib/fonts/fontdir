@@ -1,0 +1,93 @@
+# see fonts-qws.html for mor information on this file.
+# format is
+#
+# name file renderer italic weight size [flags [sizerange]]
+#
+# set size as 0 to use sizerange.  flags are option if no sizerange
+# name is the name of the resulting font
+# file is the file to generate or render the font from
+# renderer is either FT or BDF indicating the rendering engine to use
+# italic is y for an italic font, n for not italic
+# weight is 50 for regular font, 75 for bold
+# size is 10* point size.  e.g. 120 for 12pt font.
+# flags include
+#    u = unicode font.  characters from 0-65535
+#    a = ascii font.  characters from 0-127
+#      <neither of the above is font with characters 0-255>
+#    s = smooth or blended font.
+# flags is optional if no sizerange is to be used (size is 0)
+# sizerange is optional unless size is 0.
+#    sizerange is comma separated list of font sizes to generate
+#
+fixed 5x7.bdf BDF n 50 70 u
+# Small basic demonstration font...
+japanese helvR12ja.bdf BDF n 50 230 u
+fixed 6x13.bdf BDF n 50 120 u
+micro micro.bdf BDF n 50 40 
+helvetica helvB08.bdf BDF n 75 80 u
+helvetica helvB10.bdf BDF n 75 100 u
+helvetica helvB12.bdf BDF n 75 120 u
+helvetica helvB14.bdf BDF n 75 140 u
+helvetica helvB18.bdf BDF n 75 180 u
+helvetica helvB24.bdf BDF n 75 240 u
+helvetica helvBO08.bdf BDF y 75 80 u
+helvetica helvBO10.bdf BDF y 75 100 u
+helvetica helvBO12.bdf BDF y 75 120 u
+helvetica helvBO14.bdf BDF y 75 140 u
+helvetica helvBO18.bdf BDF y 75 180 u
+helvetica helvBO24.bdf BDF y 75 240 u
+helvetica helvO08.bdf BDF y 50 80 u
+helvetica helvO10.bdf BDF y 50 100 u
+helvetica helvO12.bdf BDF y 50 120 u
+helvetica helvO14.bdf BDF y 50 140 u
+helvetica helvO18.bdf BDF y 50 180 u
+helvetica helvO24.bdf BDF y 50 240 u
+helvetica helvR08.bdf BDF n 50 80 u
+helvetica helvR10.bdf BDF n 50 100 u
+helvetica helvR12.bdf BDF n 50 120 u
+helvetica helvR14.bdf BDF n 50 140 u
+helvetica helvR18.bdf BDF n 50 180 u
+helvetica helvR24.bdf BDF n 50 240 u
+# Unifont is available in source form from http://czyborra.com/unifont/
+unifont unifont.bdf BDF n 50 160 u
+babelfish babelfish.ttf FT n 50 0 s
+smallsmooth verdana.ttf FT n 50 0 s 90
+smoothtimes times.ttf FT n 50 0 s 100,160,170,220
+smoothtimes timesbd.ttf FT n 75 0 sa 170,250,440
+smoothtimes timesi.ttf FT y 50 0 sa
+smoothtimes timesbi.ttf FT y 75 0 sa
+smoothsans Vera.ttf FT n 50 0 s 90,100,110,120,140,180,240
+smoothsans VeraBd.ttf FT n 75 0 sa 90,100,110,120,140,180,240
+smoothsans VeraIt.ttf FT y 50 0 sa 90,100,110,120,140,180,240
+smoothsans VeraBI.ttf FT y 75 0 sa 90,100,110,120,140,180,240
+smoothserif VeraSe.ttf FT n 50 0 s 90,100,110,120,140,180,240
+smoothserif VeraSeBd.ttf FT n 75 0 sa 90,100,110,120,140,180,240
+#Smooth mono fonts commented out until kerning of fixed width
+#ttf fonts is fixed.
+smoothmono VeraMono.ttf FT n 50 0 s 90,100,110,120,140,180,240
+smoothmono VeraMoBd.ttf FT n 75 0 sa 90,100,110,120,140,180,240
+smoothmono VeraMoIt.ttf FT y 50 0 sa 90,100,110,120,140,180,240
+smoothmono VeraMoBI.ttf FT y 75 0 sa 90,100,110,120,140,180,240
+utopia UTBI____.pfa FT y 75 0 s
+utopia UTB_____.pfa FT n 75 0 s
+utopia UTI_____.pfa FT y 50 0 s
+utopia UTRG____.pfa FT n 50 0 s
+courier c0419bt_.pfb FT n 50 0 s
+courier c0582bt_.pfb FT y 50 0 s
+courier c0583bt_.pfb FT n 75 0 s
+courier c0611bt_.pfb FT y 75 0 s
+charter c0632bt_.pfb FT n 75 0 s
+charter c0633bt_.pfb FT y 75 0 s
+charter c0648bt_.pfb FT n 50 0 s
+charter c0649bt_.pfb FT y 50 0 s
+courier cour.pfa FT n 50 0 s
+courier courb.pfa FT n 75 0 s
+courier courbi.pfa FT y 75 0 s
+courier couri.pfa FT y 50 0 s
+cursor cursor.pfa FT n 50 0 s
+lucidux_mono lcdxmo.pfa FT y 50 0 s
+lucidux_mono lcdxmr.pfa FT n 50 0 s
+lucidux_serif lcdxro.pfa FT y 50 0 s
+lucidux_serif lcdxrr.pfa FT n 50 0 s
+lucidux_sans lcdxso.pfa FT y 50 0 s
+lucidux_sans lcdxsr.pfa FT n 50 0 s

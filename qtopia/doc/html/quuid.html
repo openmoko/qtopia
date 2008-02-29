@@ -1,0 +1,132 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/quuid.cpp:38 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QUuid Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QUuid Class Reference</h1>
+
+<p>The QUuid class defines a Universally Unique Identifier (UUID).
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="quuid-h.html">qtopia/quuid.h</a>&gt;</tt>
+<p><a href="quuid-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QUuid"><b>QUuid</b></a> ()</li>
+<li class=fn><a href="#QUuid-2"><b>QUuid</b></a> ( uint&nbsp;l, ushort&nbsp;w1, ushort&nbsp;w2, uchar&nbsp;b1, uchar&nbsp;b2, uchar&nbsp;b3, uchar&nbsp;b4, uchar&nbsp;b5, uchar&nbsp;b6, uchar&nbsp;b7, uchar&nbsp;b8 )</li>
+<li class=fn><a href="#QUuid-3"><b>QUuid</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;orig )</li>
+<li class=fn><a href="#QUuid-4"><b>QUuid</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>QString <a href="#toString"><b>toString</b></a> () const</li>
+<li class=fn>bool <a href="#isNull"><b>isNull</b></a> () const</li>
+<li class=fn>QUuid &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;uuid )</li>
+<li class=fn>bool <a href="#operator-eq-eq"><b>operator==</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#operator!-eq"><b>operator!=</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#operator-lt"><b>operator&lt;</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#operator-gt"><b>operator&gt;</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;other ) const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QUuid class defines a Universally Unique Identifier (UUID).
+<p> This class is temporarily copied from Qt 3.0.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QUuid"></a>QUuid::QUuid ()
+</h3>
+
+<p> Creates the null UUID {00000000-0000-0000-0000-000000000000}.
+
+<h3 class=fn><a name="QUuid-2"></a>QUuid::QUuid ( uint&nbsp;l, ushort&nbsp;w1, ushort&nbsp;w2, uchar&nbsp;b1, uchar&nbsp;b2, uchar&nbsp;b3, uchar&nbsp;b4, uchar&nbsp;b5, uchar&nbsp;b6, uchar&nbsp;b7, uchar&nbsp;b8 )
+</h3>
+
+<p> Creates an UUID with the value specified by the parameters, <em>l</em>, <em>w1</em>, <em>w2</em>, <em>b1</em>, <em>b2</em>, <em>b3</em>, <em>b4</em>, <em>b5</em>, <em>b6</em>, <em>b7</em>, <em>b8</em>.
+<p> Example:
+<pre>
+  // {67C8770B-44F1-410A-AB9A-F9B5446F13EE}
+  QUuid IID_MyInterface( 0x67c8770b, 0x44f1, 0x410a, 0xab, 0x9a, 0xf9, 0xb5, 0x44, 0x6f, 0x13, 0xee )
+  </pre>
+ 
+
+<h3 class=fn><a name="QUuid-3"></a>QUuid::QUuid ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;orig )
+</h3>
+
+<p> Creates a copy of the QUuid <em>orig</em>.
+
+<h3 class=fn><a name="QUuid-4"></a>QUuid::QUuid ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
+</h3>
+Creates a QUuid object from the string <em>text</em>. Right now, the function
+can only convert the format {12345678-1234-1234-1234-123456789ABC} and
+will create the null UUID when the conversion fails.
+
+<h3 class=fn>bool <a name="isNull"></a>QUuid::isNull () const
+</h3>
+Returns TRUE if this is the null UUID {00000000-0000-0000-0000-000000000000}, otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="operator!-eq"></a>QUuid::operator!= ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+
+<p> Returns TRUE if this QUuid and the <em>other</em> QUuid are different, otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="operator-lt"></a>QUuid::operator&lt; ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;other ) const
+</h3> 
+Returns TRUE if the QUuid is smaller than
+<em>other</em>.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn><a href="quuid.html">QUuid</a>&nbsp;&amp; <a name="operator-eq"></a>QUuid::operator= ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;uuid )
+</h3>
+
+<p> Assigns the value of <em>uuid</em> to this QUuid object.
+
+<h3 class=fn>bool <a name="operator-eq-eq"></a>QUuid::operator== ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+
+<p> Returns TRUE if this QUuid and the <em>other</em> QUuid are identical, otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="operator-gt"></a>QUuid::operator&gt; ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;other ) const
+</h3> 
+Returns TRUE if the QUuid is larger than
+<em>other</em>.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QString <a name="toString"></a>QUuid::toString () const
+</h3>
+QString <a href="#toString">QUuid::toString</a>() const
+<p> Returns a string in {12345678-1234-1234-1234-123456789ABC} format.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

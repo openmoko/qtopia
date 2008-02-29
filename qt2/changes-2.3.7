@@ -1,0 +1,19 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+- VNC: Make sure lines are updated regardless of the direction they are
+  drawn.
+
+- Ensure that active QPainter objects are updated when widget geometry
+  changes.
+  
+- Make sure unprocessed expose events are translated when a top level
+  window is moved.
+
+- Moving a window, then right pressing and selecting maximize confused
+  the window manager.
+
+- Make QPixmap::grab() use a reasonable amount of memory when
+  grabbing QScrollview.
+

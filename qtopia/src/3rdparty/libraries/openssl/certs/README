@@ -1,0 +1,11 @@
+Please note, the files in this directory are a little different to what you
+would normally find. The "proper" arrangement is to have a .pem file and a .0
+file that is a symlink to the .pem file. However, it is not desirable to have
+symlinks in the Qtopia source package, the .pem files are not used directly
+by openssl and Qtopia can't assume you have the command that generates .0
+names for .pem files. For this reason, the .pem files do not exist and their
+contents have been placed directly into .0 files.
+
+This part is really important so I'll say it loud...
+IF THE CONTENTS OF THESE FILES CHANGES THEIR NAMES MUST ALSO CHANGE.
+

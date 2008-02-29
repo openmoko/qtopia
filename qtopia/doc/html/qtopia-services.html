@@ -1,0 +1,292 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/services_extra.doc:70 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Application Services</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Application Services</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Requesting Services
+</a>
+<li><a href="#3"> Responding to <n>Service</n> Requests
+</a>
+<li><a href="#4"> Adding a New <n>Service</n>
+</a>
+<li><a href="#5"> Advanced <n>Service</n> Functionality
+</a>
+<li><a href="#6"> Pre-Defined Services
+</a>
+<ul>
+<li><a href="#6-1"> Document-Oriented Services
+</a>
+<li><a href="#6-2">  WebAccess Services
+</a>
+<li><a href="#6-3"> WAP Push and Over-The-Air (OTA) Services
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Application Services are standardized APIs to functionality supplied by applications.
+They  allow applications to invoke the services of other applications,
+while allowing the specific application providing the service to be selected by
+the system integrator or  end-user.
+<p> <h2> Requesting Services
+</h2>
+<a name="2"></a><p> To request a service, the calling application executes:
+<p> <pre>
+    <a href="servicerequest.html">ServiceRequest</a> srv(servicename, action);
+    srv &lt;&lt; parameters;
+    srv.<a href="servicerequest.html#send">send</a>();
+</pre>
+ 
+<p> For example:
+<p> <pre>
+    <a href="servicerequest.html">ServiceRequest</a> srv("Email", "writeMail(QString,QString)");
+    srv &lt;&lt; QString("Johan R. User") &lt;&lt; QString("random@trolltech.com");
+    srv.<a href="servicerequest.html#send">send</a>();
+</pre>
+ 
+<p> <a href="servicerequest.html#send">ServiceRequest::send</a>() returns a bool value indicating whether the
+service is available.
+<p> <h2> Responding to <n>Service</n> Requests
+</h2>
+<a name="3"></a><p> To respond to a service request, an application should connect to the
+<a href="qpeapplication.html#appMessage">QPEApplication::appMessage</a>() signal.
+<p> Applications register as providing a service by supplying a standard Qtopia configuration file, 
+$QPEDIR/services/<servicename>/<appname> where:
+<ul>
+<li> <em>servicename</em> is both the directory name and the name of the service
+<li> <em>appname</em> is the application's executable filename.
+</ul> 
+<p> The standard keys in this file are:
+<ul>
+<li> <tt>[Standard]</tt>
+<ul>
+<li> <tt>Version</tt>
+<p> An integer. 100 should be interpreted as Version 1.00.
+Later versions of a service may support additional actions.
+</ul>
+<p> <li> <tt>[Extensions]</tt> <em>(optional section)</em>
+<ul>
+<li> <tt>Actions</tt>
+<p>
+Additional actions to those defined by the basic (standard) service.
+</ul>
+<li> <tt>[</tt><em>action</em><tt>]</tt>
+<p> For each entry in the Actions list above, there is
+a group defining properties of the action.
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+</ul>
+</ul>
+The file may contain any additional sections, keys and values as
+defined by the documentation of the service.
+<p> <h2> Adding a New <n>Service</n>
+</h2>
+<a name="4"></a><p> Each service must be carefully specified as it provides a system-
+wide API that can be invoked by other applications and the user.  A
+service should only be added if it:
+<ul>
+<li> provides new functionality not already provided by a
+<a href="qtopia-services.html#Pre-Defined-Services">pre-defined service</a>.
+<li> is useful to other applications.
+<li> is well-defined within the scope of the application type, e.g.
+<b>openURL(QString <url>)</b> for a web browser.
+<li> avoids adding unnecessary functionality which could complicate the
+user interface.
+</ul>
+<p> To add a new service provide a standard Qtopia configuration file, <tt>$QPEDIR/services/&lt;servicename&gt;.service</tt>
+The keys in this file are:
+<p> <ul>
+<li> <tt>[Service]</tt>
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+<li> <tt>Actions</tt>
+<p> This is a list of actions separated by semicolon (;). The actions
+include any formal parameters in parantheses, including the case
+of no parameters.
+<p> </ul>
+<p> <li> <tt>[</tt><em>action</em><tt>]</tt>
+<p> For each entry in the Actions list above, there is
+a group defining properties of the action.
+<p> An action with no parameters will appear in the list of available actions
+in the button settings.  There is no need to add this section if
+the action has parameters and will not be shown to the user. 
+<ul>
+<li> <tt>Name</tt>
+<li> <tt>Icon</tt>
+</ul>
+</ul>
+<p> For example:
+<p> <pre>
+[Translation]
+File=QtopiaServices
+Context=Calendar
+[Service]
+Actions = raiseToday();newEvent()
+Icon = datebook_icon
+Name[]=Calendar
+[newEvent()]
+Icon = datebook_icon
+Name[]=New event
+[raiseToday()]
+Icon=today
+Name[]=Today's calendar
+</pre>
+ 
+<p> Usually, only one application responds to a given service. The user selects
+which application handles the service using the Application
+Services settings. If the service can be provided by multiple
+applications, the service file will contain:
+<pre>
+Multiple = 1
+</pre>
+ 
+in the <tt>[Service]</tt> section.
+<p> <h2> Advanced <n>Service</n> Functionality
+</h2>
+<a name="5"></a><p> The <em>servicename</em> of a service may contain '/', indicating that the
+service is actually an hierarchy of services. For example, the
+<tt>SetValue/v-card</tt> service is used to set v-card values, but the service
+is structured such that other <tt>SetValue</tt> services follow the same
+general protocol.
+<p> <!-- index Pre-Defined Services --><a name="Pre-Defined-Services"></a>
+<p> <h2> Pre-Defined Services
+</h2>
+<a name="6"></a><p> This section defines the Trolltech basic services available on a Qtopia device:
+<p> <ul>
+<li> <a href="service-cleanupwizard.html">CleanupWizard Service</a>
+<li> <a href="service-contacts.html">Contacts Service</a>
+<li> <a href="service-playmedia.html">PlayMedia Service</a>
+<li> <a href="service-tasks.html">Tasks Service</a>
+<li> <a href="service-timemonitor.html">TimeMonitor Service</a>
+</ul>
+<p> Each of the basic services responds to the following messages:
+<ul>
+<li> <tt>raise()</tt> - move a service user-interface to the top of the window stack 
+<li> <tt>quit()</tt> - remove a service user-interface.  
+</ul>
+<b>Note:</b> Sending the <tt>quit()</tt> message when a service is not started will start the service and immediately
+terminate it.
+<p> A list of services ordered by message name is available at: <a href="service-overview.html">Service Overview</a> and the following additional services are described in the sections below:
+<ul>
+<li> Document-Oriented Services
+<li> WebAccess Services
+<li> WAP Push and Over-The-Air (OTA) Services
+</ul>
+<p> <h3> Document-Oriented Services
+</h3>
+<a name="6-1"></a><p> The following actions are defined for <a href="docwidget.html">document-
+oriented</a> services:
+<ul>
+<li> Open/Mimetype
+<ul>
+<li> setDocument(QString <em>document</em>)
+<li> openFile(QString <em>filepath</em>) Version 1.01 only
+</ul>
+<li> View/Mimetype
+<ul>
+<li> setDocument(QString <em>document</em>)
+<li> viewFile(QString <em>filepath</em> Version 1.01 only
+</ul>
+<li> Receive/Mimetype
+<ul>
+<li> receiveData(QString <em>filename</em>, QString i<em>type</em>)
+<ul>
+<li> filename = name of file containing data
+<li> type = MIME type of the data
+</ul>
+The service should delete the file after reading it.
+</ul>
+</ul>
+<p> <h3>  WebAccess Services
+</h3>
+<a name="6-2"></a><p> <ul>
+<li> openURL(QString <em>url</em>)
+<ul>
+<li> url = a fully-specified URL
+</ul>
+<p> In response to this message, the WebAccess service retrieves the
+resource specified by the URL and either displays it to the user,
+invokes further services to display the resource, or notifies the
+user that no facility exists for displaying the resource.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<p> <li> retrieveURL(QString <em>url</em>)
+<ul>
+<li> url = a fully-specified URL
+</ul>
+<p> In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource. If services exist to display the document, the
+WebAccess service gives the user the option to display the document.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<p> <li> getURL(QString <em>url</em>, QString <em>doclnk</em>)
+<ul>
+<li> url = a fully-specified URL
+<li> doclnk = the filename of a .desktop file
+</ul>
+<p> In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource using the given doclnk as the document link file. The
+document is created even if the resource could not be retrieved.
+As a result of creating the document, Qtopia sends the
+<p> <tt>QPE/System linkChanged(QString)</tt> message, with the <tt>doclnk</tt> as the
+argument.
+</ul>
+<p> <h3> WAP Push and Over-The-Air (OTA) Services
+</h3>
+<a name="6-3"></a><p> The following actions are defined for <a href="phonelibrary.html#push">WAP
+Push and Over-The-Air (OTA)</a> > Services:
+<p> <ul>
+<li> smsApplicationDatagram(SMSMessage)
+</ul>
+<p> WAP push services are registered by either MIME type or port number.
+<p> MIME type services are named <tt>Push/T</tt> where <tt>T</tt> is the MIME type.
+For example, messages of type <tt>application/vnd.wap.connectivity-wbxml</tt> are
+handled by a service called <tt>Push/application/vnd.wap.connectivity-wbxml</tt>.
+<p> Port number services are named <tt>smsapp/N</tt> where <tt>N</tt> is the port
+number in decimal.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

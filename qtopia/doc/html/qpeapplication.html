@@ -1,0 +1,412 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/qpeapplication.cpp:917 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QPEApplication Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QPEApplication Class Reference</h1>
+
+<p>The QPEApplication class implements various system services
+that are available to all Qtopia applications.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qpeapplication-h.html">qtopia/qpeapplication.h</a>&gt;</tt>
+<p><a href="qpeapplication-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QPEApplication"><b>QPEApplication</b></a> ( int&nbsp;&amp;&nbsp;argc, char&nbsp;**&nbsp;argv, Type&nbsp;t = GuiClient )</li>
+<li class=fn><a href="#~QPEApplication"><b>~QPEApplication</b></a> ()</li>
+<li class=fn>enum <a href="#StylusMode-enum"><b>StylusMode</b></a> { LeftOnly, RightOnHold }</li>
+<li class=fn>enum <a href="#InputMethodHint-enum"><b>InputMethodHint</b></a> { Normal, AlwaysOff, AlwaysOn, Number, PhoneNumber, Words, Text, Named }</li>
+<li class=fn>enum <a href="#screenSaverHint-enum"><b>screenSaverHint</b></a> { Disable = 0, DisableLightOff = 1, DisableSuspend = 2, Enable = 100 }</li>
+<li class=fn>void <a href="#showMainWidget"><b>showMainWidget</b></a> ( QWidget&nbsp;*&nbsp;mw, bool&nbsp;nomaximize = FALSE )</li>
+<li class=fn>void <a href="#showMainDocumentWidget"><b>showMainDocumentWidget</b></a> ( QWidget&nbsp;*&nbsp;mw, bool&nbsp;nomaximize = FALSE )</li>
+<li class=fn>bool <a href="#keepRunning"><b>keepRunning</b></a> () const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#timeChanged"><b>timeChanged</b></a> ()</li>
+<li class=fn>void <a href="#categoriesChanged"><b>categoriesChanged</b></a> ()</li>
+<li class=fn>void <a href="#clockChanged"><b>clockChanged</b></a> ( bool&nbsp;ampm )</li>
+<li class=fn>void <a href="#volumeChanged"><b>volumeChanged</b></a> ( bool&nbsp;muted )</li>
+<li class=fn>void <a href="#appMessage"><b>appMessage</b></a> ( const&nbsp;QCString&nbsp;&amp;&nbsp;msg, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )</li>
+<li class=fn>void <a href="#weekChanged"><b>weekChanged</b></a> ( bool&nbsp;startOnMonday )</li>
+<li class=fn>void <a href="#dateFormatChanged"><b>dateFormatChanged</b></a> ( DateFormat )</li>
+<li class=fn>void <a href="#linkChanged"><b>linkChanged</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;linkFile )</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QString <a href="#qpeDir"><b>qpeDir</b></a> ()</li>
+<li class=fn>QString <a href="#documentDir"><b>documentDir</b></a> ()</li>
+<li class=fn>void <a href="#setDefaultRotation"><b>setDefaultRotation</b></a> ( int&nbsp;r )</li>
+<li class=fn>void <a href="#grabKeyboard"><b>grabKeyboard</b></a> ()</li>
+<li class=fn>void <a href="#ungrabKeyboard"><b>ungrabKeyboard</b></a> ()</li>
+<li class=fn>void <a href="#setStylusOperation"><b>setStylusOperation</b></a> ( QWidget&nbsp;*&nbsp;w, StylusMode&nbsp;mode )</li>
+<li class=fn>StylusMode <a href="#stylusOperation"><b>stylusOperation</b></a> ( QWidget&nbsp;*&nbsp;w )</li>
+<li class=fn>void <a href="#setInputMethodHint"><b>setInputMethodHint</b></a> ( QWidget&nbsp;*&nbsp;w, InputMethodHint&nbsp;mode, const&nbsp;QString&nbsp;&amp;&nbsp;param = QString::null )</li>
+<li class=fn>void <a href="#setInputMethodHint-2"><b>setInputMethodHint</b></a> ( QWidget&nbsp;*&nbsp;w, const&nbsp;QString&nbsp;&amp;&nbsp;named )</li>
+<li class=fn>InputMethodHint <a href="#inputMethodHint"><b>inputMethodHint</b></a> ( QWidget&nbsp;*&nbsp;w )</li>
+<li class=fn>QString <a href="#inputMethodHintParam"><b>inputMethodHintParam</b></a> ( QWidget&nbsp;*&nbsp;w )</li>
+<li class=fn>void <a href="#showDialog"><b>showDialog</b></a> ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )</li>
+<li class=fn>int <a href="#execDialog"><b>execDialog</b></a> ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )</li>
+<li class=fn>void <a href="#setMenuLike"><b>setMenuLike</b></a> ( QDialog&nbsp;*&nbsp;diag, bool&nbsp;b )</li>
+<li class=fn>bool <a href="#isMenuLike"><b>isMenuLike</b></a> ( const&nbsp;QDialog&nbsp;*&nbsp;diag )</li>
+<li class=fn>void <a href="#setTempScreenSaverMode"><b>setTempScreenSaverMode</b></a> ( screenSaverHint&nbsp;hint )</li>
+<li class=fn>void <a href="#setKeepRunning"><b>setKeepRunning</b></a> ()</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>bool <a href="#qwsEventFilter"><b>qwsEventFilter</b></a> ( QWSEvent&nbsp;*&nbsp;e )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QPEApplication class implements various system services
+that are available to all Qtopia applications.
+<p> Simply by using QPEApplication instead of QApplication, a standard Qt
+application becomes a Qtopia application. It automatically follows
+style changes, quits and raises, and in the
+case of <a href="docwidget.html">document-oriented</a> applications,
+changes the currently displayed document in response to the environment.
+<p> To create a <a href="docwidget.html">document-oriented</a>
+application use <a href="#showMainDocumentWidget">showMainDocumentWidget</a>(); to create a
+non-document-oriented application use <a href="#showMainWidget">showMainWidget</a>(). The
+<a href="#keepRunning">keepRunning</a>() function indicates whether the application will
+continue running after it's processed the last <a href="qcop.html">QCop</a> message. This can be changed using <a href="#setKeepRunning">setKeepRunning</a>().
+<p> A variety of signals are emitted when certain events occur, for
+example, <a href="#timeChanged">timeChanged</a>(), <a href="#clockChanged">clockChanged</a>(), <a href="#weekChanged">weekChanged</a>(),
+<a href="#dateFormatChanged">dateFormatChanged</a>() and <a href="#volumeChanged">volumeChanged</a>(). If the application receives
+a <a href="qcop.html">QCop</a> message on the application's
+QPE/Application/<em>appname</em> channel, the <a href="#appMessage">appMessage</a>() signal is
+emitted. There are also flush() and reload() signals, which
+are emitted when synching begins and ends respectively - upon these
+signals, the application should save and reload any data
+files that are involved in synching. Most of these signals will initially
+be received and unfiltered through the appMessage() signal.
+<p> This class also provides a set of useful static functions. The
+<a href="#qpeDir">qpeDir</a>() and <a href="#documentDir">documentDir</a>() functions return the respective paths.
+The <a href="#grabKeyboard">grabKeyboard</a>() and <a href="#ungrabKeyboard">ungrabKeyboard</a>() functions are used to
+control whether the application takes control of the device's
+physical buttons (e.g. application launch keys). The stylus' mode of
+operation is set with <a href="#setStylusOperation">setStylusOperation</a>() and retrieved with
+<a href="#stylusOperation">stylusOperation</a>(). There are also <a href="#setInputMethodHint">setInputMethodHint</a>() and
+<a href="#inputMethodHint">inputMethodHint</a>() functions.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="InputMethodHint-enum"></a>QPEApplication::InputMethodHint</h3>
+
+<ul>
+<li><tt>QPEApplication::Normal</tt> - the widget sometimes needs text input.
+<li><tt>QPEApplication::AlwaysOff</tt> - the widget never needs text input.
+<li><tt>QPEApplication::AlwaysOn</tt> - the widget always needs text input.
+<li><tt>QPEApplication::Number</tt> - the widget needs numeric input.
+<li><tt>QPEApplication::PhoneNumber</tt> - the widget needs phone-style numeric input.
+<li><tt>QPEApplication::Words</tt> - the widget needs word input.
+<li><tt>QPEApplication::Text</tt> - the widget needs non-word input.
+<li><tt>QPEApplication::Named</tt> - the widget needs special input, defined by param.
+Each input method may support a different range of special
+input types, but will default to Text if they do not know the
+type.
+</ul><p> By default, QLineEdit and QMultiLineEdit have the Words hint
+unless they have a QIntValidator, in which case they have the Number hint.
+This is appropriate for most cases, including the input of names (new
+names being added to the user's dictionary).
+All other widgets default to Normal mode.
+<p> <p>See also <a href="#inputMethodHint">inputMethodHint</a>() and <a href="#setInputMethodHint">setInputMethodHint</a>().
+
+<h3 class=fn><a name="StylusMode-enum"></a>QPEApplication::StylusMode</h3>
+
+<ul>
+<li><tt>QPEApplication::LeftOnly</tt> - the stylus only generates LeftButton
+events (the default).
+<li><tt>QPEApplication::RightOnHold</tt> - the stylus generates RightButton events
+if the user uses the press-and-hold gesture.
+</ul><p> <p>See also <a href="#setStylusOperation">setStylusOperation</a>() and <a href="#stylusOperation">stylusOperation</a>().
+
+<h3 class=fn><a name="screenSaverHint-enum"></a>QPEApplication::screenSaverHint</h3>
+
+<ul>
+<li><tt>QPEApplication::Disable</tt> - the screen should never blank
+<li><tt>QPEApplication::DisableLightOff</tt> - the screen should never blank and the
+backlight should never switch off
+<li><tt>QPEApplication::DisableSuspend</tt> - the screen should blank when the device goes
+into suspend mode
+<li><tt>QPEApplication::Enable</tt> - screen blanking and switching off the backlight are
+both enabled
+</ul><p> Currently, this is only used internally.
+<p> 
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QPEApplication"></a>QPEApplication::QPEApplication ( int&nbsp;&amp;&nbsp;argc, char&nbsp;**&nbsp;argv, Type&nbsp;t = GuiClient )
+</h3>
+Constructs a QPEApplication just as you would construct
+a QApplication, passing <em>argc</em>, <em>argv</em>, and <em>t</em>.
+<p> For applications, <em>t</em> should be the default, GuiClient. Only
+the Qtopia server passes GuiServer.
+
+<h3 class=fn><a name="~QPEApplication"></a>QPEApplication::~QPEApplication ()
+</h3>
+Destroys the QPEApplication.
+
+<h3 class=fn>void <a name="appMessage"></a>QPEApplication::appMessage ( const&nbsp;QCString&nbsp;&amp;&nbsp;msg, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when a message is received on this
+application's QPE/Application/<i>appname</i> <a href="qcop.html">QCop</a> channel.
+<p> The slot to which you connect this signal uses <em>msg</em> and <em>data</em>
+in the following way:
+<p> <pre>
+    void MyWidget::receive( const QCString&amp; msg, const QByteArray&amp; data )
+    {
+        QDataStream stream( data, IO_ReadOnly );
+        if ( msg == "someMessage(int,int,int)" ) {
+            int a,b,c;
+            stream &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+            ...
+        } else if ( msg == "otherMessage(QString)" ) {
+            ...
+        }
+    }
+</pre>
+ 
+<p> Note that messages received here may be processed by qpe application
+and emitted as signals, such as flush() and reload().
+
+<h3 class=fn>void <a name="categoriesChanged"></a>QPEApplication::categoriesChanged ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted whenever a category is added, removed or edited.
+Note, on Qtopia 1.5.0, this signal is never emitted.
+
+<h3 class=fn>void <a name="clockChanged"></a>QPEApplication::clockChanged ( bool&nbsp;ampm )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the user changes the clock's style. If
+<em>ampm</em> is TRUE, the user wants a 12-hour AM/PM clock, otherwise,
+they want a 24-hour clock.
+<p> <b>Warning:</b> if you use the TimeString functions, you should use
+TimeString::connectChange() instead.
+<p> <p>See also <a href="#dateFormatChanged">dateFormatChanged</a>().
+
+<h3 class=fn>void <a name="dateFormatChanged"></a>QPEApplication::dateFormatChanged ( DateFormat )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted whenever the date format is changed.
+<p> <b>Warning:</b> if you use the TimeString functions, you should use
+TimeString::connectChange() instead.
+<p> <p>See also <a href="#clockChanged">clockChanged</a>().
+
+<h3 class=fn>QString <a name="documentDir"></a>QPEApplication::documentDir ()<tt> [static]</tt>
+</h3>
+Returns the user's current Document directory. There is a trailing "/".
+
+<h3 class=fn>int <a name="execDialog"></a>QPEApplication::execDialog ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )<tt> [static]</tt>
+</h3>
+
+<p> Shows and calls exec() on <em>dialog</em>. An heuristic approach is taken to
+determine the size and maximization of the dialog.
+<p> <em>nomax</em> forces it to not be maximized.
+
+<h3 class=fn>void <a name="grabKeyboard"></a>QPEApplication::grabKeyboard ()<tt> [static]</tt>
+</h3>
+Grabs the physical keyboard keys, e.g. the application's launching
+keys. Instead of launching applications when these keys are pressed
+the signals emitted are sent to this application instead. Some games
+programs take over the launch keys in this way to make interaction
+easier.
+<p> Under Qtopia Phone Edition this function does nothing.  It is not
+possible to grab the keyboard under Qtopia Phone Edition.
+<p> <p>See also <a href="#ungrabKeyboard">ungrabKeyboard</a>().
+
+<h3 class=fn><a href="qpeapplication.html#InputMethodHint-enum">InputMethodHint</a> <a name="inputMethodHint"></a>QPEApplication::inputMethodHint ( QWidget&nbsp;*&nbsp;w )<tt> [static]</tt>
+</h3>
+Returns the currently set hint to the system as to whether
+widget <em>w</em> has any use for text input methods.
+<p> <p>See also <a href="#setInputMethodHint">setInputMethodHint</a>() and <a href="#InputMethodHint-enum">InputMethodHint</a>.
+
+<h3 class=fn>QString <a name="inputMethodHintParam"></a>QPEApplication::inputMethodHintParam ( QWidget&nbsp;*&nbsp;w )<tt> [static]</tt>
+</h3>
+Returns the currently set hint parameter for
+widget <em>w</em>.
+<p> <p>See also <a href="#setInputMethodHint">setInputMethodHint</a>() and <a href="#InputMethodHint-enum">InputMethodHint</a>.
+
+<h3 class=fn>bool <a name="isMenuLike"></a>QPEApplication::isMenuLike ( const&nbsp;QDialog&nbsp;*&nbsp;diag )<tt> [static]</tt>
+</h3>
+Returns true if the dialog <em>diag</em> is set to have Menu Like behaviour when executed.
+Otherwise returns FALSE
+<p> <p>See also <a href="#setMenuLike">setMenuLike</a>().
+
+<h3 class=fn>bool <a name="keepRunning"></a>QPEApplication::keepRunning () const
+</h3>
+Returns TRUE if the application will quit after processing the
+current list of qcop messages; otherwise returns FALSE.
+<p> <p>See also <a href="#setKeepRunning">setKeepRunning</a>().
+
+<h3 class=fn>void <a name="linkChanged"></a>QPEApplication::linkChanged ( const&nbsp;QString&nbsp;&amp;&nbsp;linkFile )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted whenever an <a href="applnk.html">AppLnk</a> or <a href="doclnk.html">DocLnk</a> is stored, removed or edited.
+<em>linkFile</em> contains the name of the link that is being modified.
+
+<h3 class=fn>QString <a name="qpeDir"></a>QPEApplication::qpeDir ()<tt> [static]</tt>
+</h3>
+Returns <tt>$QPEDIR/</tt>.
+
+<h3 class=fn>bool <a name="qwsEventFilter"></a>QPEApplication::qwsEventFilter ( QWSEvent&nbsp;*&nbsp;e )<tt> [protected]</tt>
+</h3>
+Filters Qt event <em>e</em> to implement Qtopia-specific functionality.
+
+<h3 class=fn>void <a name="setDefaultRotation"></a>QPEApplication::setDefaultRotation ( int&nbsp;r )<tt> [static]</tt>
+</h3>
+Rotates Qtopia by <em>r</em> degrees. 
+
+<h3 class=fn>void <a name="setInputMethodHint"></a>QPEApplication::setInputMethodHint ( QWidget&nbsp;*&nbsp;w, <a href="qpeapplication.html#InputMethodHint-enum">InputMethodHint</a>&nbsp;mode, const&nbsp;QString&nbsp;&amp;&nbsp;param = QString::null )<tt> [static]</tt>
+</h3>
+Hints to the system that widget <em>w</em> has use for text input methods
+as specified by <em>mode</em>.
+<p> <p>See also <a href="#inputMethodHint">inputMethodHint</a>() and <a href="#InputMethodHint-enum">InputMethodHint</a>.
+
+<h3 class=fn>void <a name="setInputMethodHint-2"></a>QPEApplication::setInputMethodHint ( QWidget&nbsp;*&nbsp;w, const&nbsp;QString&nbsp;&amp;&nbsp;named )<tt> [static]</tt>
+</h3>
+Hints to the system that widget <em>w</em> has use for the text input method
+specified by <em>named</em>. Such methods are input-method-specific and
+are defined by the files in $QPEDIR/etc/im/ for each input method.
+<p> For example, the phone key input method includes support for the
+names input methods:
+<p> <ul>
+<li> "email"
+<li> "netmask"
+<li> "url"
+</ul>
+<p> The effect in the phone key input method is to modify the binding of
+phone keys to characters (such as making "@" easier to input), and to
+add additional "words" to the recognition word lists (such as "www").
+<p> If the current input method doesn't understand the hint, it will be
+ignored.
+<p> <p>See also <a href="#inputMethodHint">inputMethodHint</a>() and <a href="#InputMethodHint-enum">InputMethodHint</a>.
+
+<h3 class=fn>void <a name="setKeepRunning"></a>QPEApplication::setKeepRunning ()<tt> [static]</tt>
+</h3>
+If an application is started via a <a href="qcop.html">QCop</a>
+message, the application will process the <a href="qcop.html">QCop</a> message and then quit. If the application calls this
+function while processing a <a href="qcop.html">QCop</a> message,
+after processing its outstanding <a href="qcop.html">QCop</a>
+messages the application will start 'properly' and show itself.
+<p> <p>See also <a href="#keepRunning">keepRunning</a>().
+
+<h3 class=fn>void <a name="setMenuLike"></a>QPEApplication::setMenuLike ( QDialog&nbsp;*&nbsp;diag, bool&nbsp;b )<tt> [static]</tt>
+</h3>
+If <em>b</em> is true sets the dialog <em>diag</em> to have Menu Like behaviour when executed.
+Otherwise sets dialog to have default dialog behaviour.
+<p> Menu Like dialogs typically have a single list of options, and
+should accept the dialog when the select key is pressed on the appropriate item,
+and when a mouse/stylus is used to click on an item - just like menus.
+Menu Like dialogs should only have one widget accepting key focus.
+<p> By marking a dialog as Menu Like Qtopia will map the Back key to reject the dialog
+and will not map any key to accept the dialog - you must do that yourself.
+<p> The default dialog behaviour is to include a cancel menu option in the context
+menu to reject the dialog and to map the Back key to accept the dialog.
+<p> Only modal dialogs can be Menu Like.
+<p> <p>See also <a href="#isMenuLike">isMenuLike</a>().
+
+<h3 class=fn>void <a name="setStylusOperation"></a>QPEApplication::setStylusOperation ( QWidget&nbsp;*&nbsp;w, <a href="qpeapplication.html#StylusMode-enum">StylusMode</a>&nbsp;mode )<tt> [static]</tt>
+</h3>
+Causes widget <em>w</em> to receive mouse events according to the stylus
+<em>mode</em>.
+<p> <p>See also <a href="#stylusOperation">stylusOperation</a>() and <a href="#StylusMode-enum">StylusMode</a>.
+
+<h3 class=fn>void <a name="setTempScreenSaverMode"></a>QPEApplication::setTempScreenSaverMode ( <a href="qpeapplication.html#screenSaverHint-enum">screenSaverHint</a>&nbsp;hint )<tt> [static]</tt>
+</h3>
+<p> This method temporarily overrides the current global screen saver with
+the screenSaverHint <em>hint</em>, allowing applications to control screensaver
+activation during their execution.
+<p> First availability: Qtopia 1.6
+<p> <p>See also <a href="#screenSaverHint-enum">screenSaverHint</a>.
+
+<h3 class=fn>void <a name="showDialog"></a>QPEApplication::showDialog ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )<tt> [static]</tt>
+</h3>
+
+<p> Shows <em>dialog</em>. An heuristic approach is taken to
+determine the size and maximization of the dialog.
+<p> <em>nomax</em> forces it to not be maximized.
+
+<h3 class=fn>void <a name="showMainDocumentWidget"></a>QPEApplication::showMainDocumentWidget ( QWidget&nbsp;*&nbsp;mw, bool&nbsp;nomaximize = FALSE )
+</h3>
+Sets widget <em>mw</em> as the mainWidget() and shows it. For small windows,
+consider passing TRUE for <em>nomaximize</em> rather than the default FALSE.
+<p> This calls designates the application as
+a <a href="docwidget.html">document-oriented</a> application.
+<p> The <em>mw</em> widget <em>must</em> have this slot: setDocument(const QString&).
+<p> <p>See also <a href="#showMainWidget">showMainWidget</a>().
+
+<h3 class=fn>void <a name="showMainWidget"></a>QPEApplication::showMainWidget ( QWidget&nbsp;*&nbsp;mw, bool&nbsp;nomaximize = FALSE )
+</h3>
+Sets widget <em>mw</em> as the mainWidget() and shows it. For small windows,
+consider passing TRUE for <em>nomaximize</em> rather than the default FALSE.
+<p> <p>See also <a href="#showMainDocumentWidget">showMainDocumentWidget</a>().
+
+<h3 class=fn><a href="qpeapplication.html#StylusMode-enum">StylusMode</a> <a name="stylusOperation"></a>QPEApplication::stylusOperation ( QWidget&nbsp;*&nbsp;w )<tt> [static]</tt>
+</h3>
+Returns the current StylusMode for widget <em>w</em>.
+<p> <p>See also <a href="#setStylusOperation">setStylusOperation</a>() and <a href="#StylusMode-enum">StylusMode</a>.
+
+<h3 class=fn>void <a name="timeChanged"></a>QPEApplication::timeChanged ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the time changes outside the normal
+passage of time, i.e. if the time is set backwards or forwards.
+<p> If the application offers the TimeMonitor service, it will get
+the QCop message that causes this signal even if it is not running,
+thus allowing it to update any alarms or other time-related records.
+
+<h3 class=fn>void <a name="ungrabKeyboard"></a>QPEApplication::ungrabKeyboard ()<tt> [static]</tt>
+</h3>
+Reverses the effect of <a href="#grabKeyboard">grabKeyboard</a>(). This is called automatically
+on program exit.
+
+<h3 class=fn>void <a name="volumeChanged"></a>QPEApplication::volumeChanged ( bool&nbsp;muted )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted whenever the mute state is changed. If <em>muted</em> is TRUE, then sound output has been muted.
+
+<h3 class=fn>void <a name="weekChanged"></a>QPEApplication::weekChanged ( bool&nbsp;startOnMonday )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted if the week start day is changed. If <em>startOnMonday</em> is TRUE then the first day of the week is Monday; if
+<em>startOnMonday</em> is FALSE then the first day of the week is
+Sunday.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

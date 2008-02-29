@@ -1,0 +1,130 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/accessory.cpp:140 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Accessory Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Accessory Class Reference</h1>
+
+<p>The Accessory class allows applet plugins to add themselves to
+the Q menu.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="accessory-h.html">qtopia/accessory.h</a>&gt;</tt>
+<p><a href="accessory-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#Accessory"><b>Accessory</b></a> ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text, QWidget&nbsp;*&nbsp;parent )</li>
+<li class=fn><a href="#Accessory-2"><b>Accessory</b></a> ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text, QPopupMenu&nbsp;*&nbsp;submenu, QWidget&nbsp;*&nbsp;parent )</li>
+<li class=fn>virtual <a href="#~Accessory"><b>~Accessory</b></a> ()</li>
+<li class=fn>QIconSet <a href="#iconSet"><b>iconSet</b></a> () const</li>
+<li class=fn>QString <a href="#text"><b>text</b></a> () const</li>
+<li class=fn>void <a href="#setIconSet"><b>setIconSet</b></a> ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon )</li>
+<li class=fn>void <a href="#setText"><b>setText</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>QPopupMenu * <a href="#popup"><b>popup</b></a> () const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#activated"><b>activated</b></a> ()</li>
+<li class=fn>void <a href="#activated-2"><b>activated</b></a> ( int )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Accessory class allows applet plugins to add themselves to
+the Q menu.
+<p> Accessories can either add a single menu entry, or add a sub-menu.
+<p> Accessories are particularly useful when using real estate on the taskbar
+would be wasteful.
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="taskbarappletinterface.html">TaskbarAppletInterface</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Accessory"></a>Accessory::Accessory ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text, QWidget&nbsp;*&nbsp;parent )
+</h3>
+Constructs an Accessory object with parent <em>parent</em>.
+<p> This constructor places a new menu entry in the Q menu, with the name <em>text</em>
+and using the iconset <em>icon</em>.
+<p> The <a href="#activated">activated</a>() signal will be emitted when the user selects this item.
+
+<h3 class=fn><a name="Accessory-2"></a>Accessory::Accessory ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text, QPopupMenu&nbsp;*&nbsp;submenu, QWidget&nbsp;*&nbsp;parent )
+</h3>
+Constructs an Accessory object with parent <em>parent</em>.
+<p> This constructor places a new menu entry in the Q menu, with the name <em>text</em>
+and using the iconset <em>icon</em>.
+<p> The <em>submenu</em>, if non-zero, must have no parent object. The <a href="#activated">activated</a>(int) signal
+will be emitted when the user selects an item from the submenu.
+
+<h3 class=fn><a name="~Accessory"></a>Accessory::~Accessory ()<tt> [virtual]</tt>
+</h3>
+Destructs Accessory.
+
+<h3 class=fn>void <a name="activated"></a>Accessory::activated ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the menu item is activated.
+
+<h3 class=fn>void <a name="activated-2"></a>Accessory::activated ( int )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when a menu item in the submenu is activated.
+
+<h3 class=fn>QIconSet <a name="iconSet"></a>Accessory::iconSet () const
+</h3>
+Returns the QIconSet displayed in the menu.
+<p> <p>See also <a href="#setIconSet">setIconSet</a>().
+
+<h3 class=fn>QPopupMenu * <a name="popup"></a>Accessory::popup () const
+</h3>
+Returns a pointer to the sub-menu, or 0 if a sub-menu does not
+exist.
+
+<h3 class=fn>void <a name="setIconSet"></a>Accessory::setIconSet ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon )
+</h3>
+Sets <em>icon</em> as the icon shown in the menu.
+<p> <p>See also <a href="#iconSet">iconSet</a>().
+
+<h3 class=fn>void <a name="setText"></a>Accessory::setText ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
+</h3>
+Sets <em>text</em> as the text shown in the menu.
+<p> <p>See also <a href="#text">text</a>().
+
+<h3 class=fn>QString <a name="text"></a>Accessory::text () const
+</h3>
+Returns the text displayed in the menu.
+<p> <p>See also <a href="#setText">setText</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

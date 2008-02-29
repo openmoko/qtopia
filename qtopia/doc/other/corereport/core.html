@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>Qtopia component sizes</title>
+
+<STYLE type="text/css">
+BODY { background:#FFFFFF; color:#000000; }
+TABLE { border:solid; border-spacing:0; }
+TD { padding:5; margin:0; border:solid; border-width:1; text-align:right; }
+TD.onep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#EEEEFF }
+TD.twop { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#DDDDFF }
+TD.fivep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#CCCCFF }
+TD.tenp { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#BBBBFF }
+
+TH { background:#E0E0E0; color: #000000; padding:5; margin:0; border:solid; border-width:1; }
+</STYLE>
+
+</head>
+<body>
+<h1>Qtopia component sizes</title>
+<h2>core: dynamic</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>11327 kb</td><td>5009 kb</td><td>4640 kb</td><td>4088 kb</td></tr>
+<tr><th>Minimal build</th><td>10081 kb</td><td>4543 kb</td><td>4216 kb</td><td>3700 kb</td></tr>
+</table>
+<p><img src="core-dynamic.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>appearance</th><td class=onep>160 kb</td><td class=onep>56 kb</td><td class=onep>52 kb</td><td class=onep>48 kb</td></tr>
+<tr><th>handwriting</th><td class=twop>457 kb</td><td class=twop>174 kb</td><td class=twop>156 kb</td><td class=twop>140 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>84 kb</td><td>27 kb</td><td>24 kb</td><td>20 kb</td></tr>
+<tr><th>handwriting_popup</th><td>108 kb</td><td>42 kb</td><td>36 kb</td><td>32 kb</td></tr>
+<tr><th>language</th><td>40 kb</td><td>23 kb</td><td>24 kb</td><td>20 kb</td></tr>
+<tr><th>pkim</th><td class=twop>276 kb</td><td class=onep>95 kb</td><td class=onep>88 kb</td><td class=onep>72 kb</td></tr>
+<tr><th>uniselect</th><td>40 kb</td><td>19 kb</td><td>20 kb</td><td>16 kb</td></tr>
+<tr><th>worldtime</th><td class=onep>128 kb</td><td>49 kb</td><td>44 kb</td><td>40 kb</td></tr>
+</table>
+<h2>core: static</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>7505 kb</td><td>3364 kb</td><td>3140 kb</td><td>2692 kb</td></tr>
+<tr><th>Minimal build</th><td>6695 kb</td><td>3079 kb</td><td>2880 kb</td><td>2472 kb</td></tr>
+</table>
+<p><img src="core-static.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>appearance</th><td class=onep>109 kb</td><td class=onep>34 kb</td><td class=onep>32 kb</td><td class=onep>28 kb</td></tr>
+<tr><th>handwriting</th><td class=twop>317 kb</td><td class=twop>109 kb</td><td class=twop>96 kb</td><td class=twop>88 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>68 kb</td><td>20 kb</td><td>16 kb</td><td>16 kb</td></tr>
+<tr><th>handwriting_popup</th><td class=onep>88 kb</td><td>30 kb</td><td>28 kb</td><td class=onep>28 kb</td></tr>
+<tr><th>keyboard</th><td>64 kb</td><td>28 kb</td><td>28 kb</td><td>24 kb</td></tr>
+<tr><th>language</th><td>16 kb</td><td>4 kb</td><td>4 kb</td><td>4 kb</td></tr>
+<tr><th>pkim</th><td class=twop>209 kb</td><td class=onep>65 kb</td><td class=onep>60 kb</td><td class=twop>56 kb</td></tr>
+<tr><th>uniselect</th><td>12 kb</td><td>5 kb</td><td>4 kb</td><td>8 kb</td></tr>
+<tr><th>worldtime</th><td class=onep>77 kb</td><td>28 kb</td><td>24 kb</td><td class=onep>32 kb</td></tr>
+</table>
+</body>
+</html>

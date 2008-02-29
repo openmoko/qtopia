@@ -1,0 +1,215 @@
+Edition: core
+Build: dynamic
+du -k output:
+1073	image/opt/Qtopia/bin
+12	image/opt/Qtopia/etc/im/pkim
+12	image/opt/Qtopia/etc/im
+12	image/opt/Qtopia/etc/beam/targets
+12	image/opt/Qtopia/etc/beam
+448	image/opt/Qtopia/etc/dict
+24	image/opt/Qtopia/etc/default
+32	image/opt/Qtopia/etc/colors
+12	image/opt/Qtopia/etc/network
+64	image/opt/Qtopia/etc/qimpen
+612	image/opt/Qtopia/etc
+378	image/opt/Qtopia/lib/fonts
+6683	image/opt/Qtopia/lib
+4	image/opt/Qtopia/apps/Games
+12	image/opt/Qtopia/apps/Applications
+40	image/opt/Qtopia/apps/Settings
+56	image/opt/Qtopia/apps
+4	image/opt/Qtopia/i18n/en_US
+4	image/opt/Qtopia/i18n
+469	image/opt/Qtopia/help/html
+469	image/opt/Qtopia/help
+16	image/opt/Qtopia/pics/qpe/pda
+201	image/opt/Qtopia/pics/qpe
+16	image/opt/Qtopia/pics/fshw
+20	image/opt/Qtopia/pics/help
+97	image/opt/Qtopia/pics/pkim
+256	image/opt/Qtopia/pics/wallpaper
+435	image/opt/Qtopia/pics/icons/14x14
+435	image/opt/Qtopia/pics/icons
+4	image/opt/Qtopia/pics/light-and-power
+8	image/opt/Qtopia/pics/systemtime
+20	image/opt/Qtopia/pics/worldtime
+12	image/opt/Qtopia/pics/hwsettings
+4	image/opt/Qtopia/pics/security
+4	image/opt/Qtopia/pics/calibrate
+8	image/opt/Qtopia/pics/appearance/icons/14x14
+8	image/opt/Qtopia/pics/appearance/icons
+12	image/opt/Qtopia/pics/appearance
+4	image/opt/Qtopia/pics/netsetup
+8	image/opt/Qtopia/pics/language
+12	image/opt/Qtopia/pics/Network
+4	image/opt/Qtopia/pics/helpbrowser
+1173	image/opt/Qtopia/pics
+24	image/opt/Qtopia/sounds
+4	image/opt/Qtopia/services/Date
+4	image/opt/Qtopia/services/Time
+4	image/opt/Qtopia/services/shutdown
+4	image/opt/Qtopia/services/calibrate
+85	image/opt/Qtopia/services
+112	image/opt/Qtopia/plugins/obex
+200	image/opt/Qtopia/plugins/textcodecs
+29	image/opt/Qtopia/plugins/imagecodecs
+60	image/opt/Qtopia/plugins/application
+20	image/opt/Qtopia/plugins/decorations
+232	image/opt/Qtopia/plugins/network
+4	image/opt/Qtopia/plugins/styles
+4	image/opt/Qtopia/plugins/applets
+473	image/opt/Qtopia/plugins/inputmethods
+16	image/opt/Qtopia/plugins/fontfactories
+1149	image/opt/Qtopia/plugins
+11327	image/opt/Qtopia
+all mkcramfs: 4640 kilobytes
+all mkjffs2: 5009 kilobytes
+all mksquashfs: 4088 kilobytes
+all uncompressed: 11327 kilobytes
+minimal mkcramfs: 4216 kilobytes
+minimal mkjffs2: 4543 kilobytes
+minimal mksquashfs: 3700 kilobytes
+minimal uncompressed: 10081 kilobytes
+appearance mkcramfs: 4588 kilobytes
+appearance mkjffs2: 4953 kilobytes
+appearance mksquashfs: 4040 kilobytes
+appearance uncompressed: 11167 kilobytes
+handwriting mkcramfs: 4484 kilobytes
+handwriting mkjffs2: 4835 kilobytes
+handwriting mksquashfs: 3948 kilobytes
+handwriting uncompressed: 10870 kilobytes
+handwriting_fsim mkcramfs: 4616 kilobytes
+handwriting_fsim mkjffs2: 4982 kilobytes
+handwriting_fsim mksquashfs: 4068 kilobytes
+handwriting_fsim uncompressed: 11243 kilobytes
+handwriting_popup mkcramfs: 4604 kilobytes
+handwriting_popup mkjffs2: 4967 kilobytes
+handwriting_popup mksquashfs: 4056 kilobytes
+handwriting_popup uncompressed: 11219 kilobytes
+keyboard mkcramfs: 4600 kilobytes
+keyboard mkjffs2:  kilobytes
+keyboard mksquashfs: 4048 kilobytes
+keyboard uncompressed: 11227 kilobytes
+language mkcramfs: 4616 kilobytes
+language mkjffs2: 4986 kilobytes
+language mksquashfs: 4068 kilobytes
+language uncompressed: 11287 kilobytes
+pkim mkcramfs: 4552 kilobytes
+pkim mkjffs2: 4914 kilobytes
+pkim mksquashfs: 4016 kilobytes
+pkim uncompressed: 11051 kilobytes
+uniselect mkcramfs: 4620 kilobytes
+uniselect mkjffs2: 4990 kilobytes
+uniselect mksquashfs: 4072 kilobytes
+uniselect uncompressed: 11287 kilobytes
+worldtime mkcramfs: 4596 kilobytes
+worldtime mkjffs2: 4960 kilobytes
+worldtime mksquashfs: 4048 kilobytes
+worldtime uncompressed: 11199 kilobytes
+Edition: core
+Build: static
+du -k output:
+4657	image/opt/Qtopia/bin
+12	image/opt/Qtopia/etc/im/pkim
+12	image/opt/Qtopia/etc/im
+12	image/opt/Qtopia/etc/beam/targets
+12	image/opt/Qtopia/etc/beam
+448	image/opt/Qtopia/etc/dict
+24	image/opt/Qtopia/etc/default
+32	image/opt/Qtopia/etc/colors
+12	image/opt/Qtopia/etc/network
+64	image/opt/Qtopia/etc/qimpen
+612	image/opt/Qtopia/etc
+378	image/opt/Qtopia/lib/fonts
+378	image/opt/Qtopia/lib
+4	image/opt/Qtopia/apps/Games
+12	image/opt/Qtopia/apps/Applications
+40	image/opt/Qtopia/apps/Settings
+56	image/opt/Qtopia/apps
+4	image/opt/Qtopia/i18n/en_US
+4	image/opt/Qtopia/i18n
+469	image/opt/Qtopia/help/html
+469	image/opt/Qtopia/help
+16	image/opt/Qtopia/pics/qpe/pda
+201	image/opt/Qtopia/pics/qpe
+16	image/opt/Qtopia/pics/fshw
+20	image/opt/Qtopia/pics/help
+97	image/opt/Qtopia/pics/pkim
+256	image/opt/Qtopia/pics/wallpaper
+435	image/opt/Qtopia/pics/icons/14x14
+435	image/opt/Qtopia/pics/icons
+4	image/opt/Qtopia/pics/light-and-power
+8	image/opt/Qtopia/pics/systemtime
+20	image/opt/Qtopia/pics/worldtime
+12	image/opt/Qtopia/pics/hwsettings
+4	image/opt/Qtopia/pics/security
+4	image/opt/Qtopia/pics/calibrate
+8	image/opt/Qtopia/pics/appearance/icons/14x14
+8	image/opt/Qtopia/pics/appearance/icons
+12	image/opt/Qtopia/pics/appearance
+4	image/opt/Qtopia/pics/netsetup
+8	image/opt/Qtopia/pics/language
+12	image/opt/Qtopia/pics/Network
+4	image/opt/Qtopia/pics/helpbrowser
+1173	image/opt/Qtopia/pics
+24	image/opt/Qtopia/sounds
+4	image/opt/Qtopia/services/Date
+4	image/opt/Qtopia/services/Time
+4	image/opt/Qtopia/services/shutdown
+4	image/opt/Qtopia/services/calibrate
+85	image/opt/Qtopia/services
+4	image/opt/Qtopia/plugins/obex
+4	image/opt/Qtopia/plugins/textcodecs
+4	image/opt/Qtopia/plugins/imagecodecs
+4	image/opt/Qtopia/plugins/decorations
+4	image/opt/Qtopia/plugins/network
+4	image/opt/Qtopia/plugins/styles
+4	image/opt/Qtopia/plugins/applets
+16	image/opt/Qtopia/plugins/inputmethods
+4	image/opt/Qtopia/plugins/fontfactories
+48	image/opt/Qtopia/plugins
+7505	image/opt/Qtopia
+all mkcramfs: 3140 kilobytes
+all mkjffs2: 3364 kilobytes
+all mksquashfs: 2692 kilobytes
+all uncompressed: 7505 kilobytes
+minimal mkcramfs: 2880 kilobytes
+minimal mkjffs2: 3079 kilobytes
+minimal mksquashfs: 2472 kilobytes
+minimal uncompressed: 6695 kilobytes
+appearance mkcramfs: 3108 kilobytes
+appearance mkjffs2: 3330 kilobytes
+appearance mksquashfs: 2664 kilobytes
+appearance uncompressed: 7396 kilobytes
+handwriting mkcramfs: 3044 kilobytes
+handwriting mkjffs2: 3255 kilobytes
+handwriting mksquashfs: 2604 kilobytes
+handwriting uncompressed: 7188 kilobytes
+handwriting_fsim mkcramfs: 3124 kilobytes
+handwriting_fsim mkjffs2: 3344 kilobytes
+handwriting_fsim mksquashfs: 2676 kilobytes
+handwriting_fsim uncompressed: 7437 kilobytes
+handwriting_popup mkcramfs: 3112 kilobytes
+handwriting_popup mkjffs2: 3334 kilobytes
+handwriting_popup mksquashfs: 2664 kilobytes
+handwriting_popup uncompressed: 7417 kilobytes
+keyboard mkcramfs: 3112 kilobytes
+keyboard mkjffs2: 3336 kilobytes
+keyboard mksquashfs: 2668 kilobytes
+keyboard uncompressed: 7441 kilobytes
+language mkcramfs: 3136 kilobytes
+language mkjffs2: 3360 kilobytes
+language mksquashfs: 2688 kilobytes
+language uncompressed: 7489 kilobytes
+pkim mkcramfs: 3080 kilobytes
+pkim mkjffs2: 3299 kilobytes
+pkim mksquashfs: 2636 kilobytes
+pkim uncompressed: 7296 kilobytes
+uniselect mkcramfs: 3136 kilobytes
+uniselect mkjffs2: 3359 kilobytes
+uniselect mksquashfs: 2684 kilobytes
+uniselect uncompressed: 7493 kilobytes
+worldtime mkcramfs: 3116 kilobytes
+worldtime mkjffs2: 3336 kilobytes
+worldtime mksquashfs: 2660 kilobytes
+worldtime uncompressed: 7428 kilobytes

@@ -1,0 +1,107 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/datebookdb.cpp:59 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DateBookDB Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>DateBookDB Class Reference<br><small>[obsolete]</small></h1>
+
+<p>The DateBookDB class is used to access event information in the
+Qtopia database.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="datebookdb-h.html">qtopia/datebookdb.h</a>&gt;</tt>
+<p><a href="datebookdb-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#DateBookDB"><b>DateBookDB</b></a> ()</li>
+<li class=fn><a href="#~DateBookDB"><b>~DateBookDB</b></a> ()</li>
+<li class=fn>QValueList&lt;Event&gt; <a href="#getEvents"><b>getEvents</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to )</li>
+<li class=fn>QValueList&lt;Event&gt; <a href="#getEvents-2"><b>getEvents</b></a> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;start )</li>
+<li class=fn>QValueList&lt;EffectiveEvent&gt; <a href="#getEffectiveEvents"><b>getEffectiveEvents</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to )</li>
+<li class=fn>QValueList&lt;EffectiveEvent&gt; <a href="#getEffectiveEvents-2"><b>getEffectiveEvents</b></a> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;dt )</li>
+<li class=fn>QValueList&lt;Event&gt; <a href="#getRawRepeats"><b>getRawRepeats</b></a> () const</li>
+<li class=fn>QValueList&lt;Event&gt; <a href="#getNonRepeatingEvents"><b>getNonRepeatingEvents</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to ) const</li>
+<li class=fn>void <a href="#addEvent"><b>addEvent</b></a> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )</li>
+<li class=fn>void <a href="#removeEvent"><b>removeEvent</b></a> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )</li>
+<li class=fn>void <a href="#editEvent"><b>editEvent</b></a> ( const&nbsp;Event&nbsp;&amp;&nbsp;old, Event&nbsp;&amp;&nbsp;editedEv )</li>
+<li class=fn>void <a href="#addJFEvent"><b>addJFEvent</b></a> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )</li>
+<li class=fn>void <a href="#removeJFEvent"><b>removeJFEvent</b></a> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )</li>
+<li class=fn>bool <a href="#save"><b>save</b></a> ()</li>
+<li class=fn>void <a href="#reload"><b>reload</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The DateBookDB class is used to access event information in the
+Qtopia database.
+<p> This class is now obsolete, the class <a href="datebookaccess.html">DateBookAccess</a> in the Qtopia PIM library
+should be used instead.
+<p> 
+<p> <b>This class is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+<p> <p>See also <a href="datebookiterator.html">DateBookIterator</a>, <a href="datebookaccess.html">DateBookAccess</a>, and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="DateBookDB"></a>DateBookDB::DateBookDB ()
+</h3> 
+<h3 class=fn><a name="~DateBookDB"></a>DateBookDB::~DateBookDB ()
+</h3> 
+<h3 class=fn>void <a name="addEvent"></a>DateBookDB::addEvent ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )
+</h3> <em>ev</em> <em>doalarm</em> 
+<h3 class=fn>void <a name="addJFEvent"></a>DateBookDB::addJFEvent ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )
+</h3> <em>ev</em> <em>doalarm</em> 
+<h3 class=fn>void <a name="editEvent"></a>DateBookDB::editEvent ( const&nbsp;Event&nbsp;&amp;&nbsp;old, Event&nbsp;&amp;&nbsp;editedEv )
+</h3> <em>old</em> <em>editedEv</em> 
+<h3 class=fn>QValueList&lt;EffectiveEvent&gt; <a name="getEffectiveEvents"></a>DateBookDB::getEffectiveEvents ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to )
+</h3> <em>from</em> <em>to</em> 
+<h3 class=fn>QValueList&lt;EffectiveEvent&gt; <a name="getEffectiveEvents-2"></a>DateBookDB::getEffectiveEvents ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;dt )
+</h3> <em>dt</em> 
+<h3 class=fn>QValueList&lt;Event&gt; <a name="getEvents"></a>DateBookDB::getEvents ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to )
+</h3> obsolete <em>from</em> <em>to</em> 
+<h3 class=fn>QValueList&lt;Event&gt; <a name="getEvents-2"></a>DateBookDB::getEvents ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;start )
+</h3> <em>start</em> 
+<h3 class=fn>QValueList&lt;Event&gt; <a name="getNonRepeatingEvents"></a>DateBookDB::getNonRepeatingEvents ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to ) const
+</h3> <em>from</em> <em>to</em> 
+<h3 class=fn>QValueList&lt;Event&gt; <a name="getRawRepeats"></a>DateBookDB::getRawRepeats () const
+</h3> 
+<h3 class=fn>void <a name="reload"></a>DateBookDB::reload ()
+</h3> 
+<h3 class=fn>void <a name="removeEvent"></a>DateBookDB::removeEvent ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )
+</h3> <em>ev</em> 
+<h3 class=fn>void <a name="removeJFEvent"></a>DateBookDB::removeJFEvent ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )
+</h3> <em>ev</em> 
+<h3 class=fn>bool <a name="save"></a>DateBookDB::save ()
+</h3> 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

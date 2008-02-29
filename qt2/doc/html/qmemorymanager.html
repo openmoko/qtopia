@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt Toolkit - QMemoryManager Class</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style>
+</head><body bgcolor="#ffffff">
+
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+
+<h1 align=center>QMemoryManager Class Reference</h1><br clear="all">
+<p>
+The QMemoryManager class provides the allocation and tracking of memory used by pixmaps and font glyphs.
+<a href="#details">More...</a>
+<p>
+<code>#include &lt;<a href="qmemorymanager_qws-h.html">qmemorymanager_qws.h</a>&gt;</code>
+<p><a href="qmemorymanager-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class="fn"><b>QMemoryManager</b> () </div>
+<li><div class="fn">enum <b>PixmapType</b> { Normal, VRAM, Invalid, Shared }</div>
+<li><div class="fn">PixmapID <b>newPixmap</b> ( int w, int h, int d, int optim ) </div>
+<li><div class="fn">void <b>deletePixmap</b> ( PixmapID ) </div>
+<li><div class="fn">uchar* <b>pixmapData</b> ( PixmapID id ) </div>
+<li><div class="fn">PixmapID <b>mapPixmapData</b> ( uchar * data, PixmapType type = Shared ) </div>
+<li><div class="fn">FontID <b>refFont</b> ( const QFontDef &amp; ) </div>
+<li><div class="fn">void <b>derefFont</b> ( FontID ) </div>
+<li><div class="fn">QRenderedFont* <b>fontRenderer</b> ( FontID ) </div>
+<li><div class="fn">bool <b>inFont</b> ( FontID, const QChar &amp; ) const</div>
+<li><div class="fn">QGlyph <b>lockGlyph</b> ( FontID, const QChar &amp; ) </div>
+<li><div class="fn">QGlyphMetrics* <b>lockGlyphMetrics</b> ( FontID, const QChar &amp; ) </div>
+<li><div class="fn">void <b>unlockGlyph</b> ( FontID, const QChar &amp; ) </div>
+<li><div class="fn">void <b>savePrerenderedFont</b> ( const QFontDef &amp;, bool all=TRUE ) </div>
+<li><div class="fn">void <b>savePrerenderedFont</b> ( FontID id, bool all=TRUE ) </div>
+<li><div class="fn">bool <b>fontSmooth</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontAscent</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontDescent</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontMinLeftBearing</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontMinRightBearing</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontLeading</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontMaxWidth</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontUnderlinePos</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontLineWidth</b> ( FontID id ) const</div>
+<li><div class="fn">int <b>fontLineSpacing</b> ( FontID id ) const</div>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class="fn">int <b>pixmapLinestep</b> ( PixmapID id, int width, int depth ) </div>
+<li><div class="fn">PixmapType <b>pixmapType</b> ( PixmapID id ) </div>
+</ul>
+<hr><h2><a name="details"></a>Detailed Description</h2>
+The QMemoryManager class provides the allocation and tracking of memory used by pixmaps and font glyphs.
+<p>
+The QMemoryManager class allocates pixmaps from video ram, main
+memory, or now if enabled, shared memory which allows pixmap data
+to be shared between Qt/Embedded processes. The shared memory is
+managed by the QSharedMemoryManager class which is able to track
+allocated and freed memory from it between processes. It works
+similar to malloc and free in how it maintains that memory, however
+it is implemented in a way to allow this to work from different
+processes which may have this memory mapped to different virtual
+addresses as well as needing locking during allocation and deallocation.
+<p>To make shared memory useful between processes, there needs to be
+a common way for different processes to identify and reference the share
+items stored in the memory. Therefore items stored are looked up based
+on a key, the key also needs to be in the shared memory, and if present
+can then be used to map an item in the memory based on the key, much in
+the way the pixmap cache already works but in a shared manner that
+works across processes. The key searching is implemented using an array
+with bsearch for efficency. When the items are added, qsort is used to
+keep the item pointers ordered by key so the bsearch works. The choice to
+use an array and bsearch was one of efficency, however this means that
+the number of items able to be added to the cache is limited by the size
+chosen for the array at compile time, however a future improvement could
+be to use a dynamic array allocated from shared memory to make it possible
+to grow this array as needed. But in most cases it should be possible to
+determine the average size of items in the shared memory, which means a
+reasonable value for the size of this array should be able to be determined.
+A reasonable guess maybe that items will be 1Kb in size on average, some
+debug to profile the size of items as they are added to the cache should
+make it possible to be more exact for a given environment.
+<p>The font glyph caching is very much the same as pixmap caching if
+it is possible to generate a key that identifies the glyph or set of glyphs.
+Storage of the key is an overhead in font glyph caching, therefore this
+cost is reduced if multiple glyphs are cached at a time with the
+one key. A value of 16 glyphs at a time was chosen based on testing
+of memory usage and the trade off of key overhead caching different
+number of glyphs at a time. Originally a row of 256 glyphs were
+cached at a time, but trial and error showed that in a test of
+text with Japanese text, that typically the characters used spanned
+too many of the rows that it very quickly filled the cache and that
+the majority of the glyphs cached did not get used. The glyphs used
+tended to be from all over the range of unicode characters, and
+16 glyphs at a time was reasonable with out filling the test cache
+of 1 Mb. Caching multiple glyphs requires that an array in the cached
+item indexes the offset to the glyph in the set within the chunk of
+shared memory.
+<p>When the cache gets full, both the font and pixmap caching
+code falls back to their original implementations of allocating and
+searching from local memory to that process. Another factor taken
+in to account is screen rotation, the key associated with an item
+in the shared memory has appended something that identifys the
+rotation of the process which added it. This ensures that after
+the rotation is changed or an app with a different rotation is
+run, it will not find from the cache an incorrectly rotated image
+than what it requires.
+<p>As with pixmap caching previously, an item
+in the cache will remain there while there are still references
+to the data. This requires reference counting so that it is
+possible to determine when it is safe to reuse the data used by
+a cached item. To avoid delays during allocation when memory is
+required from the cache, a timer event periodically removes a few
+items at a time from the cache which have been identified as
+no longer referenced. This provides something similar to
+incremental garbage collection. It is possible that after a
+dereference and an an item is identified as needing to be removed
+it may be referenced again before the timer event, therefore the
+timer event must check again the item still has no references.
+<p>For extra robustness, some extra locking maybe required in a few
+places. Another consideration that requires some additions to the
+current code is the abnormal termination of a process which contains
+references to items in the cache. To handle this signal handlers will be
+required to ensure items get correctly dereferenced in these cases.
+This is similar to the same problem with pixmaps allocated from
+video ram by a process which ends abnormally.
+
+<hr><p>
+Search the documentation, FAQ, qt-interest archive and more (uses
+<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
+<form method=post action="http://www.trolltech.com/search.cgi">
+<input type=hidden name="version" value="2.3.12"><nobr>
+<input size="50" name="search"><input type=submit value="Search">
+</nobr></form><hr><p>
+This file is part of the <a href="index.html">Qt toolkit</a>,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

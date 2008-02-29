@@ -1,0 +1,187 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/datalinking.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Data Linking (QDL)</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Data Linking (QDL)</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> How it Works
+</a>
+<ul>
+<li><a href="#2-1"> Enabling Linking in a Text Field
+</a>
+<li><a href="#2-2"> Loading and Saving Links
+</a>
+<li><a href="#2-3"> Displaying and Activating Links
+</a>
+<li><a href="#2-4"> Enabling an Application to be a QDL Source
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia Data Linking (<a href="qdl.html">QDL</a>) provides an API to associate or "link" data items across applications.
+A <a href="qdllink.html">QDLLink</a> is conceptually the same as an ordinary anchor on a webpage. A QDLLink has information which uniquely references an object somewhere in the same application, or another Qtopia application. When the user clicks the link the referenced object is accessed. 
+For example, using QDL a user can create a meeting event in <a href="calendar.html">Calendar</a> and a link to each person attending the meeting from Contacts. When the event is viewed, hypertext links appear for each linked Contact. Activating a link sends a message to the Contacts application to display that contact.
+<p> <h2> How it Works
+</h2>
+<a name="2"></a><p> The linking process begins when the user edits a QDL enabled text field such as a <tt>QLineEdit</tt> or <tt>QMultiLineEdit</tt>. These text fields are called the <em>client</em> in QDL and interface through an associated <a href="qdlwidgetclient.html">QDLWidgetClient</a> object for <a href="qdl.html">QDL</a> operations. 
+<p> The user selects an <em>Insert Link</em> context menu option in the text field which is connected to the <a href="qdlclient.html#requestLink">QDLClient::requestLink</a>() slot. This displays a dialog listing all applications providing a QDL service. These are called QDL sources.
+The user selects an application which cotains the data they wish to link to.
+<p> <a href="qdlclient.html#requestLink">QDLClient::requestLink</a>() then sends a request for links over QCop to the selected source. Typically, the source application will present
+the user with a list of items available for linking and the user then
+selects the desired items from the list. However, the source may carry out any specific processing required to determine the set of links.
+<p> Once a source has determined the items to be linked it creates links for all of the items and sends them back to the client. The client receives the links and inserts them into the text.
+<p> The inserted links are displayed in editing mode as superscript numbers to the right of the description for the link.
+These numbers called link identifiers (LIDs) act as markers to inform the user that the text to the left is internally marked as a link and is treated specially.
+<p> When the user views text containing links the link identifier markers are replaced with hypertext anchors.
+The links work like links on a standard webpage - clicking them accesses the object they refer to. 
+<p> <h3> Enabling Linking in a Text Field
+</h3>
+<a name="2-1"></a><p> To enable linking from a text field, create a <a href="qdlwidgetclient.html">QDLWidgetClient</a> with the text field as its parent, for example:
+<pre>
+    QLineEdit *notesLE = new QLineEdit( parent );
+    <a href="qdlwidgetclient.html">QDLWidgetClient</a> *notesWC = new <a href="qdlwidgetclient.html">QDLWidgetClient</a>( notesLE );
+#ifdef QTOPIA_PHONE
+    //setup a standard context menu item on phone
+    notesWC-&gt;setupStandardContextMenu();
+#endif
+</pre>
+ 
+<p> <tt>QDLWidgetClient::setupStandardContextMenu()</tt> automatically creates an <em>Insert Link</em> menu item and connects it to <a href="qdlwidgetclient.html#requestLink">QDLWidgetClient::requestLink</a>().
+<p> <h3> Loading and Saving Links
+</h3>
+<a name="2-2"></a><p> Links in <a href="qdl.html">QDL</a> are commonly stored in <a href="pimrecord.html">PimRecord</a> custom fields. However,
+overloaded <tt>QDataStream</tt> insertion and extraction operators are provided for a <tt>QList</tt> of <tt>QDLClients</tt> to permit links to be stored in a user-defined location.
+<p> For example: the following loads all links from a <a href="pimrecord.html">PimRecord</a> <em>rec</em> into all QDL clients that are children of <em>parent</em>.
+<pre>
+    QDL::<a href="qdl.html#loadLinks">loadLinks</a>( rec.customField( QDL::DATA_KEY ), QDL::clients( parent ) );
+</pre>
+ 
+<p> Saving links is exactly the same, except <a href="qdl.html#saveLinks">QDL::saveLinks</a>() is called.
+<p> For more information about the convenient loading and saving functions, see <a href="qdl-h.html">General QDL Usage</a> .
+<p> <h3> Displaying and Activating Links
+</h3>
+<a name="2-3"></a><p> The following describes the method used to display and activate links. 
+<ol type=1>
+<li> Convert the superscript link identifiers in <em>txt</em> based on the links stored in the PimRecord <em>rec</em>.
+<p> <pre>
+       <a href="qdlclient.html">QDLClient</a> *client = new <a href="qdlclient.html">QDLClient</a>( 0, "qdlNotes" );
+       QDL::<a href="qdl.html#loadLinks">loadLinks</a>( rec.customField( QDL::DATA_KEY ), client );
+       txt = QDL::<a href="qdl.html#lidsToAnchors">lidsToAnchors</a>( txt, client );
+       delete client;
+   </pre>
+ 
+<p> <b>Note:</b> The base class <a href="qdlclient.html">QDLClient</a> is used instead of the subclass <a href="qdlwidgetclient.html">QDLWidgetClient</a>. Unlike <a href="qdlwidgetclient.html">QDLWidgetClient</a>, <a href="qdlclient.html">QDLClient</a> is a stand-alone object for handling links.
+<p> <li> Activate a link.
+<ul>
+<li> Retrieve the <tt>href</tt> text for the link (for example, the argument from <tt>QTextBrowser::setSource()</tt> ) and any <a href="qdlclient.html">QDLClient</a> object that could potentially own the available link.
+<li> Pass the href text and the QDLClient objects to <a href="qdl.html#activateLink">QDL::activateLink</a>() .
+<pre>
+MyTextBrowser::setSource( const QString &amp;ahref )
+{
+    QDL::<a href="qdl.html#activateLink">activateLink</a>( ahref, QDL::clients( this ) );
+}
+</pre>
+ 
+</ul>
+</ol>
+<p> <h3> Enabling an Application to be a <a href="qdl.html">QDL</a> Source
+</h3>
+<a name="2-4"></a><p> A source is a Qtopia application that provides the QDL <a href="service.html">Service</a> and responds to particular QCop messages. The two messages a source must respond to are:
+<p> <ul>
+<li> <tt>QDLActivateLink(QByteArray)</tt>
+<li> <tt>QDLRequestLink(QString,QString)</tt>
+</ul>
+<p> When enabling an application as a QDL source, the application must exist as part of the QDL Qtopia Service. See <a href="qtopia-services.html">Qtopia Services</a> for more information.
+<p> For <tt>QDLActivateLink</tt> the only argument is the data reference to activate.
+For <tt>QDLRequestLink(QString,QString)</tt> the first argument is a unique ID used when responding to the client's request, and the second argument is a hint for which links the user might be interested in (eg. the start of a person's name). The source responds to the client with the QCop message <tt>QDLProvideLink(QString,int,...)</tt> where the first <tt>QString</tt> argument is the ID sent in the request, the second <tt>int</tt> argument is the number of QDLLinks being sent, and the third variable length parameter is a series of <a href="qdllink.html">QDLLink</a> objects. Responses to a client are sent on the QCop channel specified by QDL::CLIENT_CHANNEL .
+<p> These messages should be handled in response to the <a href="qpeapplication.html#appMessage">QPEApplication::appMessage</a>() signal. The following is an example of the typical handling of these messages:
+<p> <pre>
+void MyApplication::appMessage( const QCString &amp;msg, const QByteArray &amp;data )
+{
+    QDataStream stream( data );
+    if( msg == "QDLRequestLink(QString,QString)" )
+    {
+        QCString clientID;
+        QString hint;
+        stream &gt;&gt; clientID &gt;&gt; hint;
+
+        <a href="qdlheartbeat.html">QDLHeartBeat</a> hb( clientID ); //sends keep alive messages to the client
+
+        MyDataSelector *selDlg = new MyDataSelector( (isVisible() ? this : 0 ) );
+        selDlg-&gt;setFilter( hint );
+        if( QPEApplication::<a href="qpeapplication.html#execDialog">execDialog</a>( selDlg ) )
+        {
+            //User selected items to link to. Create the link data from 
+            //them and send it all back to the client.
+            <a href="qcopenvelope.html">QCopEnvelope</a> e( QDL::CLIENT_CHANNEL, "QDLProvideLink(QString,int,...)" );
+            QValueList&lt;MyData&gt; selectedItems = selDlg-&gt;selected();
+            e &lt;&lt; selectedItems.count(); //how many links we have
+            QValueList&lt;MyData&gt;::Iterator it;
+            for( it = selectedItems.begin() ; it != selectedItems().end() ; ++it )
+            {
+                QByteArray dataRef;
+                QDataStream refStream( dataRef, IO_WriteOnly );
+                refStream &lt;&lt; (*it).uid().toString();
+                <a href="qdllink.html">QDLLink</a> newLink("myapplication", dataRef, (*it).name(), "MyAppIcon");
+                e &lt;&lt; newLink;
+            }
+        }
+        delete selDlg;
+    }
+    else if( msg == "QDLActivateLink(QByteArray)" )
+    {
+        QByteArray dataRef;
+        stream &gt;&gt; dataRef;
+        QDataStream refStream( dataRef, IO_ReadOnly );
+        QString dataRefStr;
+        refStream &gt;&gt; dataRefStr;
+        displayItem( dataRefStr );//display the item specified by the dataRef
+    }
+</pre>
+ 
+<p> <p>See also <a href="qdl.html">QDL</a>, <a href="qdllink.html">QDLLink</a>, <a href="qdlclient.html">QDLClient</a>, <a href="qdlheartbeat.html">QDLHeartBeat</a>, and <a href="service.html">Service</a>.
+
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

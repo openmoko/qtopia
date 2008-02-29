@@ -1,0 +1,46 @@
+QPEDIR=
+QTOPIA_DEPOT_PATH=
+QTEDIR=
+QT2DIR=
+DQTDIR=
+
+qtopia: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia
+
+tools: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopiaTools
+
+qpe: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qpe
+
+install: $(QPEDIR)/Makefile
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qpe install
+
+cleaninstall: $(QPEDIR)/Makefile
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qpe cleaninstall
+
+$(QPEDIR)/Makefile:
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qpe
+
+qte: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qte
+
+qt2: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopiaTools -build qt2
+
+dqt: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopiaTools -build dqt
+
+clean: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qte clean
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopia -build qpe clean
+
+cleantools: FORCE
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopiaTools -build qt2 clean
+	$(QTOPIA_DEPOT_PATH)/scripts/buildQtopiaTools -build dqt clean
+	-rm $(QT2DIR)/bin/uic
+	-rm $(DQTDIR)/bin/lrelease
+	-rm -r ~/.qtopia_220_cache
+
+FORCE:
+

@@ -1,0 +1,100 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/storage.cpp:87 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>StorageInfo Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>StorageInfo Class Reference</h1>
+
+<p>The StorageInfo class describes the disks mounted on the file system.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="storage-h.html">qtopia/storage.h</a>&gt;</tt>
+<p><a href="storageinfo-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#StorageInfo"><b>StorageInfo</b></a> ( QObject&nbsp;*&nbsp;parent = 0 )</li>
+<li class=fn>const QList&lt;FileSystem&gt; &amp; <a href="#fileSystems"><b>fileSystems</b></a> () const</li>
+<li class=fn>const FileSystem * <a href="#fileSystemOf"><b>fileSystemOf</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</li>
+<li class=fn>QStringList <a href="#fileSystemNames"><b>fileSystemNames</b></a> () const</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#update"><b>update</b></a> ()</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#disksChanged"><b>disksChanged</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The StorageInfo class describes the disks mounted on the file system.
+<p> This class provides access to the mount information for the Linux
+filesystem. Each mount point is represented by the <a href="filesystem.html">FileSystem</a> class.
+To ensure this class has the most up to date size information, call
+the <a href="#update">update</a>() method. Note that this will automatically be signaled
+by the operating system when a disk has been mounted or unmounted.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="StorageInfo"></a>StorageInfo::StorageInfo ( QObject&nbsp;*&nbsp;parent = 0 )
+</h3> Constructor that determines the current mount points of the filesystem.
+The standard <em>parent</em> parameters is passed on to QObject.
+
+<h3 class=fn>void <a name="disksChanged"></a>StorageInfo::disksChanged ()<tt> [signal]</tt>
+</h3> 
+Gets emitted when a disk has been mounted or unmounted, such as when
+a CF card has been inserted.
+
+<h3 class=fn>QStringList <a name="fileSystemNames"></a>StorageInfo::fileSystemNames () const
+</h3> 
+Returns a list of filesystem names.
+
+<h3 class=fn>const&nbsp;<a href="filesystem.html">FileSystem</a>&nbsp;* <a name="fileSystemOf"></a>StorageInfo::fileSystemOf ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
+</h3> Returns the longest matching <a href="filesystem.html">FileSystem</a> that starts with the
+same prefix as <em>filename</em> as its mount point.
+
+<h3 class=fn>const QList&lt;FileSystem&gt; &amp; <a name="fileSystems"></a>StorageInfo::fileSystems () const
+</h3> 
+Returns a list of all available mounted file systems.
+<p> <b>Warning:</b> This may change in Qtopia 3.x to return only relevant Qtopia file systems (and ignore mount points such as /tmp)
+
+<h3 class=fn>void <a name="update"></a>StorageInfo::update ()<tt> [slot]</tt>
+</h3> Updates the mount and free space available information for each mount
+point. This method is automatically called when a disk is mounted or
+unmounted.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

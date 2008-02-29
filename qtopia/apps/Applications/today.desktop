@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaApplications
+Context=Today
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Exec=today
+Icon=TodayApp
+Type=Application
+Name[]=To­day
+CanFastload=0

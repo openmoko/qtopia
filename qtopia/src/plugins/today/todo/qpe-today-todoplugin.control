@@ -1,0 +1,11 @@
+Files: plugins/today/libtodoplugin* plugins/today/todoplugin.desktop
+Priority: optional
+Section: qpe/plugins
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia qpe-today qpe-pim
+Description: Todo plugin for Today
+ An plugin providing information on todays tasks
+

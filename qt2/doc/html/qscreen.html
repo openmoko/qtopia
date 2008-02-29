@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt Toolkit - QScreen Class</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style>
+</head><body bgcolor="#ffffff">
+
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+
+<h1 align=center>QScreen Class Reference</h1><br clear="all">
+<p>
+The QScreen class abstracts the interface to the framebuffer.
+<a href="#details">More...</a>
+<p>
+<code>#include &lt;<a href="qgfx_qws-h.html">qgfx_qws.h</a>&gt;</code>
+<p><a href="qscreen-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class="fn"><a href="#0e5796"><b>QScreen</b></a> ( int display_id ) </div>
+<li><div class="fn">virtual <a href="#7c92b7"><b>~QScreen</b></a> () </div>
+<li><div class="fn">virtual bool <b>initDevice</b> () </div>
+<li><div class="fn">virtual bool <b>connect</b> ( const QString &amp; displaySpec ) </div>
+<li><div class="fn">virtual void <b>disconnect</b> () </div>
+<li><div class="fn">virtual int <a href="#db1a48"><b>initCursor</b></a> ( void *, bool=FALSE ) </div>
+<li><div class="fn">virtual void <a href="#05d152"><b>shutdownDevice</b></a> () </div>
+<li><div class="fn">virtual void <b>setMode</b> ( int, int, int ) </div>
+<li><div class="fn">virtual bool <a href="#d70523"><b>supportsDepth</b></a> ( int ) const</div>
+<li><div class="fn">virtual QGfx* <b>createGfx</b> ( unsigned char *, int, int, int, int ) </div>
+<li><div class="fn">virtual QGfx* <a href="#2aa3a5"><b>screenGfx</b></a> () </div>
+<li><div class="fn">virtual void <a href="#d10e41"><b>save</b></a> () </div>
+<li><div class="fn">virtual void <a href="#3bc3ee"><b>restore</b></a> () </div>
+<li><div class="fn">virtual void <b>blank</b> ( bool on ) </div>
+<li><div class="fn">virtual int <b>pixmapOffsetAlignment</b> () </div>
+<li><div class="fn">virtual int <b>pixmapLinestepAlignment</b> () </div>
+<li><div class="fn">virtual bool <a href="#e1c182"><b>onCard</b></a> ( unsigned char * ) const</div>
+<li><div class="fn">virtual bool <a href="#edbab3"><b>onCard</b></a> ( unsigned char *, ulong &amp; out_offset ) const</div>
+<li><div class="fn">virtual void <a href="#5cf977"><b>set</b></a> ( unsigned int, unsigned int, unsigned int, unsigned int ) </div>
+<li><div class="fn">virtual int <a href="#d81663"><b>alloc</b></a> ( unsigned int, unsigned int, unsigned int ) </div>
+<li><div class="fn">int <b>width</b> () const</div>
+<li><div class="fn">int <b>height</b> () const</div>
+<li><div class="fn">int <b>depth</b> () const</div>
+<li><div class="fn">virtual int <b>pixmapDepth</b> () const</div>
+<li><div class="fn">int <a href="#141d7b"><b>pixelType</b></a> () const</div>
+<li><div class="fn">int <b>linestep</b> () const</div>
+<li><div class="fn">int <b>deviceWidth</b> () const</div>
+<li><div class="fn">int <b>deviceHeight</b> () const</div>
+<li><div class="fn">uchar* <b>base</b> () const</div>
+<li><div class="fn">virtual uchar* <b>cache</b> ( int, int ) </div>
+<li><div class="fn">virtual void <b>uncache</b> ( uchar * ) </div>
+<li><div class="fn">int <b>screenSize</b> () const</div>
+<li><div class="fn">int <b>totalSize</b> () const</div>
+<li><div class="fn">QRgb* <b>clut</b> () </div>
+<li><div class="fn">int <b>numCols</b> () </div>
+<li><div class="fn">virtual QSize <b>mapToDevice</b> ( const QSize &amp; ) const</div>
+<li><div class="fn">virtual QSize <b>mapFromDevice</b> ( const QSize &amp; ) const</div>
+<li><div class="fn">virtual QPoint <b>mapToDevice</b> ( const QPoint &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual QPoint <b>mapFromDevice</b> ( const QPoint &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual QRect <b>mapToDevice</b> ( const QRect &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual QRect <b>mapFromDevice</b> ( const QRect &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual QImage <b>mapToDevice</b> ( const QImage &amp; ) const</div>
+<li><div class="fn">virtual QImage <b>mapFromDevice</b> ( const QImage &amp; ) const</div>
+<li><div class="fn">virtual QRegion <b>mapToDevice</b> ( const QRegion &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual QRegion <b>mapFromDevice</b> ( const QRegion &amp;, const QSize &amp; ) const</div>
+<li><div class="fn">virtual int <b>transformOrientation</b> () const</div>
+<li><div class="fn">virtual bool <b>isTransformed</b> () const</div>
+<li><div class="fn">virtual bool <b>isInterlaced</b> () const</div>
+</ul>
+<hr><h2><a name="details"></a>Detailed Description</h2>
+The QScreen class abstracts the interface to the framebuffer.
+<p>
+Descendants of QScreen manage the framebuffer and palette and act as
+factories for the screen cursor and QGfx's. QLinuxFbScreen manages
+a Linux framebuffer; accelerated drivers subclass QLinuxFbScreen.
+There can only be one screen in a Qt/Embedded application.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="0e5796"></a>QScreen::QScreen ( int display_id )</h3>
+<p>Create a screen; the display_id is the number of the Qt/Embedded server
+to connect to.
+<h3 class="fn"><a name="7c92b7"></a>QScreen::~QScreen () <code>[virtual]</code></h3>
+<p>Destroys a QScreen.
+<h3 class="fn">int <a name="d81663"></a>QScreen::alloc ( unsigned int r,unsigned int g,unsigned int b ) <code>[virtual]</code></h3>
+<p>Given an RGB value, return an index which is the closest match to it in
+the screen's palette. Used in paletted modes only.
+<h3 class="fn">int <a name="db1a48"></a>QScreen::initCursor ( void * end_of_location, bool init=FALSE ) <code>[virtual]</code></h3>
+<p>This is used to initialise the software cursor - end_of_location
+points to the address after the area where the cursor image can be stored.
+init is true for the first application this method is called from
+(the Qt/Embedded server), false otherwise.
+<h3 class="fn">bool <a name="e1c182"></a>QScreen::onCard ( unsigned char * p ) const <code>[virtual]</code></h3>
+<p>Returns true if the buffer pointed to by p is within graphics card
+memory, false if it's in main RAM.
+<h3 class="fn">bool <a name="edbab3"></a>QScreen::onCard ( unsigned char * p, ulong &amp; offset ) const <code>[virtual]</code></h3>
+<p>This checks whether the buffer specified by p is on the card
+(as per the other version of onCard) and returns an offset in bytes
+from the start of graphics card memory in offset if it is.
+<h3 class="fn">int <a name="141d7b"></a>QScreen::pixelType () const</h3>
+<p>Returns an integer (taking the same values as QGfx::PixelType)
+that specifies the pixel storage format of the screen.
+<h3 class="fn">void <a name="3bc3ee"></a>QScreen::restore () <code>[virtual]</code></h3>
+<p>Restore the state of the graphics card from a previous <a href="#d10e41">save</a>().
+<h3 class="fn">void <a name="d10e41"></a>QScreen::save () <code>[virtual]</code></h3>
+<p>Saves the state of the graphics card - used so that, for instance,
+the palette can be restored when switching between linux virtual consoles.
+Hardware QScreen descendants should save register state here if necessary
+if switching between virtual consoles (for example to/from X) is to be
+permitted.
+<h3 class="fn">QGfx * <a name="2aa3a5"></a>QScreen::screenGfx () <code>[virtual]</code></h3>
+<p>Returns a QGfx (normally a QGfxRaster) initialised to point to the screen,
+with an origin at 0,0 and a clip region covering the whole screen.
+<h3 class="fn">void <a name="5cf977"></a>QScreen::set ( unsigned int, unsigned int, unsigned int, unsigned int ) <code>[virtual]</code></h3>
+<p>Set an entry in the colour palette. A noop in this class, implemented
+in QLinuxFbScreen.
+<h3 class="fn">void <a name="05d152"></a>QScreen::shutdownDevice () <code>[virtual]</code></h3>
+<p>Called by the Qt/Embedded server on shutdown; never called by
+a Qt/Embedded client. This is intended to support graphics card specific
+shutdown; the unaccelerated implementation simply hides the mouse cursor.
+<h3 class="fn">bool <a name="d70523"></a>QScreen::supportsDepth ( int d ) const <code>[virtual]</code></h3>
+<p>Returns true if the screen supports a particular color depth.
+Possible values are 1,4,8,16 and 32.
+<hr><p>
+Search the documentation, FAQ, qt-interest archive and more (uses
+<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
+<form method=post action="http://www.trolltech.com/search.cgi">
+<input type=hidden name="version" value="2.3.12"><nobr>
+<input size="50" name="search"><input type=submit value="Search">
+</nobr></form><hr><p>
+This file is part of the <a href="index.html">Qt toolkit</a>,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

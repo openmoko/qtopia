@@ -1,0 +1,245 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/styleguide.doc:390 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Style Guide: Application Design</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Style Guide: Application Design</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Two Basic Styles
+</a>
+<ul>
+<li><a href="#1-1"> Document based applications
+</a>
+<ul>
+<li><a href="#1-1-1"> List of Lists
+</a>
+<li><a href="#1-1-2"> List of Items
+</a>
+<li><a href="#1-1-3"> Viewing a single item
+</a>
+<li><a href="#1-1-4"> Editing a single item
+</a>
+<li><a href="#1-1-5"> Deleting a single item
+</a>
+<li><a href="#1-1-6"> Navigational flow
+</a>
+<li><a href="#1-1-7"> Form layout
+</a>
+</ul>
+<li><a href="#1-2"> Task based applications
+</a>
+</ul>
+<li><a href="#2"> D-Pointers
+</a>
+<li><a href="#3"> Code Formatting
+</a>
+<ul>
+<li><a href="#3-1"> Do's and Don'ts
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Two Basic Styles
+</h2>
+<a name="1"></a><p> There are two basic styles of application:
+<ul>
+<li> Document based -
+Document based applications are used to view and possibly edit a specific document type. Applications such as the "Contacts" or "Tasks" are considered to be document based applications.
+<p> <li> Task based -
+A task based application allows a specific task to be performed such as view the time in the case of the <em>Clock</em> application.
+</ul>
+<p> <h3> Document based applications
+</h3>
+<a name="1-1"></a><p> The main window of a document based application will present a list of items, or in some cases a list of sub-lists.
+<p> <b>Note:</b> The <em>documents</em> are not necessarily individual files. The entries in an address book for example, may be considered documents.
+<p> Document based applications should follow a standard navigational flow:
+<ul>
+<li> List of Lists (if necessary).
+<li> List of Items.
+<li> View of a Single Item.
+<li> Edit Single Item.
+<li> Deleting a Single Item.
+</ul>
+<p> <h4> List of Lists
+</h4>
+<a name="1-1-1"></a><p> This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qtopia Messaging application. This application shows folders that have specific functions. The Outbox, Trash, Inbox, etc. all have particular properties that preclude grouping their items into one list.
+<p> The context menu must contain entries that act on all of the lists, and optionally a <em>New</em> entry.
+<p> Highlighting a list and pressing <em>Select</em> displays the List of Items. Pressing <em>Back</em> or <em>Done</em> must close the application.
+<p> <h4> List of Items
+</h4>
+<a name="1-1-2"></a><p> This is the screen most applications will display when started via the launcher. It lists the documents that the application may view and/or edit. It is recommended that the menu contains a <em>View Category...</em> option to display only the items in the selected category.
+<p> The context menu should contain entries that act on all of the items, and optionally a <em>New</em> entry.
+<p> Highlighting an item and pressing <em>Select</em> should display a more detailed view of the highlighted item. Pressing <em>Back</em> or <em>Done</em> must return to the previous list of items or lists (if present), otherwise close the application.
+<p> When an item in the list is used to group or store information; selecting that list item should present the information about that item.
+<p> <h4> Viewing a single item
+</h4>
+<a name="1-1-3"></a><p> This screen displays a single item, and may allow navigation and activation of data within the view.
+<p> The context menu must contain entries that act only on the viewed item. If the application can edit the document, it should contain an <em>Edit</em> menu entry.
+<p> If the view contains elements that can be activated, then the <em>Select</em> key must activate the highlighted element. Pressing <em>Back</em> or <em>Done</em> must return to the list of items.
+<p> <h4> Editing a single item
+</h4>
+<a name="1-1-4"></a><p> This screen allows a single item to be modified. Edit screens must be able to be canceled via the <em>Cancel</em> option found in the context menu.
+<p> <b>Note:</b> When a user selects the <em>Done</em> or <em>Back</em> option and nothing has been altered the button acts as the <em>Cancel</em> option otherwise the item will be stored. More information on this can be found in the ... section.
+<p> When creating or editing an item, the first tab must be displayed with the first input widget focused.
+<p> The context menu must be limited to those entries that act on the item being edited. Phones that do not offer a <em>No</em> button may automatically have a <em>Cancel</em> entry added to the end of the menu.
+<p> Pressing <em>Back</em> or <em>Done</em> must accept the changes and return to the view. Pressing <em>Cancel</em> must discard the changes and return to the view.
+<p> <h4> Deleting a single item
+</h4>
+<a name="1-1-5"></a><p> An application that can create or edit an item should provide the ability to remove an item of the same type.
+<p> Items are only able to be deleted when viewing there details hence only one at a time.
+<p> <h4> Navigational flow
+</h4>
+<a name="1-1-6"></a><p> In order to maintain a consistent navigational flow, the following rules must be adhered to:
+<ul>
+<li> When moving <em>forward</em> (e.g. by pressing <em>Select</em> or selecting <em>Edit</em> from the menu), the displayed screen must be in its <em>initial state</em>. For example, in a list of items the top-most item must be highlighted.
+<li> When moving <em>back</em> (e.g. by pressing <em>Back</em> or <em>Done</em>), the previously viewed screen must be displayed in the same state that it was in when left. For example, if item <em>D</em> was highlighted then viewed, pressing <em>Back</em> in the view must return to the list with item <em>D</em> still highlighted.
+<li> The <em>left</em> and <em>right</em> buttons are used for moving between tabs in a tabbed dialog although in some cases they may be used to select widgets that are horizontally aligned.
+<li> The <em>up</em> and <em>down</em> buttons are used for moving between fields in a dialog.
+<li> To edit a field you first have to focus it using the <em>up/down</em> buttons then select it by pressing <em>select</em>.
+<li> The <em>select</em> button is also used to move through tabs when the tab has focus.
+</ul>
+<p> <b>Note:</b> In case there is no tabbed dialog it is very tempting to give the <em>left</em> and <em>right</em> buttons the same functionality as <em>up</em> and <em>down</em>. We have explicitly chosen NOT to do so in order to keep the user interface as consistent as possible, i.e. maintaining one way of doing things.
+<p> <h4> Form layout
+</h4>
+<a name="1-1-7"></a><p> An input form should provide a simple and familiar way for the user to input data. The basic layout of an input form is a 2 columned table: the first column provides a label for the field found in the same row; the second is the input field.
+<p> The basic layout of an input form should remain consistent between all applications. It is also recommended that the same input form is used when creating and editing an item.
+<p> <b>Note:</b> Make sure that input forms provide sufficient sizing for large and small font sizes.
+<p> <h3> Task based applications
+</h3>
+<a name="1-2"></a><p> These applications allow a specific task to be performed. They do not operate on documents, though they may generate documents.
+Examples of task based applications are <em>Clock</em> and <em>Calculator</em>.
+<p> <h2> D-Pointers
+</h2>
+<a name="2"></a><p> Always give an exported Class a d-pointer. For example:
+<p> <pre>
+--- exampleclass.h ---
+
+#ifndef EXAMPLE_CLASS_H
+
+#define EXAMPLE_CLASS_H
+
+class ExampleClassPrivate;
+
+class ExampleClass {
+
+    public:
+
+ // Some member functions
+
+    private:
+
+ ExampleClassPrivate *d; // The d-pointer.
+
+};
+
+#endif
+
+------------------------
+
+--- exampleclass.cpp ---
+
+class ExampleClassPrivate {
+
+    public:
+
+ int variable;
+
+ int anotherVariable;
+
+};
+
+ExampleClass::ExampleClass()
+
+{
+
+    d = new ExampleClassPrivate;
+
+}
+
+ExampleClass::~ExampleClass()
+
+{
+
+    delete d;
+
+}
+
+------------------------
+</pre>
+ 
+<p> <h2> Code Formatting
+</h2>
+<a name="3"></a><p> <em>Indenting</em>: is always 4 characters with tab spaces set to 8 characters.
+<p> Other prefered code formatting is as follows:
+<p> <pre>
+class MyExampleClass {
+
+};
+
+void MyExampleFunction()
+
+{
+
+    int someVariable;
+
+    if (TRUE) {
+
+ // Something
+
+    } else {
+
+ // Something else
+
+    }
+
+}
+</pre>
+ 
+<p> <h3> Do's and Don'ts
+</h3>
+<a name="3-1"></a><p> <ul>
+<li> Do not use goto.
+<li> Do not use callback functions.
+<li> Avoid passing pointers, try to use reference passing instead.
+<li> Avoid using the preprocessor in application code, instead find a way for Qt/Qtopia to abstract the platform/compiler differences.
+<li> For screen resizing also avoid the preprocessor, dynamically resize based on the widget's size.
+<li> Use const where applicable for member functions and argument passing.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

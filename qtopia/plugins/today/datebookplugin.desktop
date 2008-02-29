@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Calendar
+Comment[]=Displays today's events.
+X-QPE-Library=libdatebookplugin.so
+[Translation]
+File=QtopiaPlugins
+Context=Today

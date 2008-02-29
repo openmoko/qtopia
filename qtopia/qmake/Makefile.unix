@@ -1,0 +1,251 @@
+#qmake code
+OBJS=project.o property.o main.o makefile.o unixmake2.o unixmake.o msvc_nmake.o \
+     borland_bmake.o mingw_make.o msvc_dsp.o msvc_vcproj.o option.o \
+     winmakefile.o projectgenerator.o metrowerks_xml.o  pbuilder_pbx.o \
+     msvc_objectmodel.o meta.o
+
+#qt code
+QOBJS=qstring.o qtextstream.o qiodevice.o qglobal.o qgdict.o qcstring.o \
+      qdatastream.o qgarray.o qbuffer.o qglist.o qptrcollection.o qfile.o \
+      qfile_unix.o qregexp.o qgvector.o qgcache.o qbitarray.o qdir.o quuid.o \
+      qfileinfo_unix.o qdir_unix.o qfileinfo.o qdatetime.o qstringlist.o qmap.o \
+      qconfig.o qunicodetables.o qsettings.o @QMAKE_QTOBJS@
+
+#all sources, used for the depend target
+DEPEND_SRC=project.cpp property.cpp meta.cpp main.cpp generators/makefile.cpp generators/unix/unixmake2.cpp \
+           generators/unix/unixmake.cpp generators/win32/msvc_nmake.cpp generators/win32/borland_bmake.cpp \
+	   generators/win32/winmakefile.cpp generators/projectgenerator.cpp generators/mac/metrowerks_xml.cpp \
+	   generators/mac/pbuilder_pbx.cpp generators/win32/msvc_objectmodel.cpp \
+	   @SOURCE_PATH@/src/tools/qstring.cpp @SOURCE_PATH@/src/tools/qtextstream.cpp \
+	   @SOURCE_PATH@/src/tools/qiodevice.cpp @SOURCE_PATH@/src/tools/qglobal.cpp \
+	   @SOURCE_PATH@/src/tools/qgdict.cpp @SOURCE_PATH@/src/tools/qcstring.cpp \
+	   @SOURCE_PATH@/src/tools/qdatastream.cpp @SOURCE_PATH@/src/tools/qgarray.cpp \
+	   @SOURCE_PATH@/src/tools/qbuffer.cpp @SOURCE_PATH@/src/tools/qglist.cpp \
+	   @SOURCE_PATH@/src/tools/qptrcollection.cpp @SOURCE_PATH@/src/tools/qfile.cpp \
+	   @SOURCE_PATH@/src/tools/qfile_unix.cpp @SOURCE_PATH@/src/tools/qregexp.cpp \
+	   @SOURCE_PATH@/src/tools/qgvector.cpp @SOURCE_PATH@/src/tools/qgcache.cpp \
+	   @SOURCE_PATH@/src/tools/qbitarray.cpp @SOURCE_PATH@/src/tools/qdir.cpp \
+	   @SOURCE_PATH@/src/tools/quuid.cpp @SOURCE_PATH@/src/tools/qfileinfo_unix.cpp \
+	   @SOURCE_PATH@/src/tools/qdir_unix.cpp @SOURCE_PATH@/src/tools/qfileinfo.cpp \
+	   @SOURCE_PATH@/src/tools/qdatetime.cpp @SOURCE_PATH@/src/tools/qstringlist.cpp \
+	   @SOURCE_PATH@/src/tools/qmap.cpp @BUILD_PATH@/src/tools/qconfig.cpp \
+	   @SOURCE_PATH@/src/tools/qsettings.cpp @SOURCE_PATH@/src/tools/qurl.cpp \
+	   @SOURCE_PATH@/src/tools/qsettings_mac.cpp
+
+CXXFLAGS=@QMAKE_CFLAGS@ \
+	-I. -Igenerators -Igenerators/unix -Igenerators/win32 -Igenerators/mac \
+	-I@BUILD_PATH@/include/qmake -I@BUILD_PATH@/include -I@SOURCE_PATH@/include \
+	-DQT_NO_TEXTCODEC -DQT_NO_UNICODETABLES -DQT_NO_COMPONENT -DQT_NO_STL \
+	-DQT_NO_COMPRESS -I@QMAKESPEC@ -DHAVE_QCONFIG_CPP
+LFLAGS=@QMAKE_LFLAGS@
+
+@DESTDIR@/bin/qmake: $(OBJS) $(QOBJS)
+	@$(CXX) -o $@ $(OBJS) $(QOBJS) $(LFLAGS)
+
+clean::
+	@rm -f $(OBJS) $(QOBJS)
+
+distclean:: clean
+	@rm -rf @DESTDIR@/bin/qmake .deps
+
+depend:
+	@makedepend $(CXXFLAGS) -D__MAKEDEPEND__ $(DEPEND_SRC)
+
+qtextstream.o: @SOURCE_PATH@/src/tools/qtextstream.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qtextstream.cpp >/dev/null 2>&1
+	@echo -n .
+
+qiodevice.o: @SOURCE_PATH@/src/tools/qiodevice.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qiodevice.cpp >/dev/null 2>&1
+	@echo -n .
+
+qglobal.o: @SOURCE_PATH@/src/tools/qglobal.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qglobal.cpp >/dev/null 2>&1
+	@echo -n .
+
+qgdict.o: @SOURCE_PATH@/src/tools/qgdict.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qgdict.cpp >/dev/null 2>&1
+	@echo -n .
+
+qcstring.o: @SOURCE_PATH@/src/tools/qcstring.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qcstring.cpp >/dev/null 2>&1
+	@echo -n .
+
+qsettings.o: @SOURCE_PATH@/src/tools/qsettings.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qsettings.cpp >/dev/null 2>&1
+	@echo -n .
+
+qsettings_mac.o: @SOURCE_PATH@/src/tools/qsettings_mac.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qsettings_mac.cpp >/dev/null 2>&1
+	@echo -n .
+
+qurl.o: @SOURCE_PATH@/src/kernel/qurl.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/kernel/qurl.cpp >/dev/null 2>&1
+	@echo -n .
+
+qstring.o: @SOURCE_PATH@/src/tools/qstring.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qstring.cpp >/dev/null 2>&1
+	@echo -n .
+
+qdatastream.o: @SOURCE_PATH@/src/tools/qdatastream.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qdatastream.cpp >/dev/null 2>&1
+	@echo -n .
+
+qunicodetables.o: @SOURCE_PATH@/src/tools/qunicodetables.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qunicodetables.cpp >/dev/null 2>&1
+	@echo -n .
+
+qgarray.o: @SOURCE_PATH@/src/tools/qgarray.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qgarray.cpp >/dev/null 2>&1
+	@echo -n .
+
+qbuffer.o: @SOURCE_PATH@/src/tools/qbuffer.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qbuffer.cpp >/dev/null 2>&1
+	@echo -n .
+
+qglist.o: @SOURCE_PATH@/src/tools/qglist.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qglist.cpp >/dev/null 2>&1
+	@echo -n .
+
+qptrcollection.o: @SOURCE_PATH@/src/tools/qptrcollection.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qptrcollection.cpp >/dev/null 2>&1
+	@echo -n .
+
+qfile.o: @SOURCE_PATH@/src/tools/qfile.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qfile.cpp >/dev/null 2>&1
+	@echo -n .
+
+qfile_unix.o: @SOURCE_PATH@/src/tools/qfile_unix.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qfile_unix.cpp >/dev/null 2>&1
+	@echo -n .
+
+qregexp.o: @SOURCE_PATH@/src/tools/qregexp.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qregexp.cpp >/dev/null 2>&1
+	@echo -n .
+
+qgvector.o: @SOURCE_PATH@/src/tools/qgvector.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qgvector.cpp >/dev/null 2>&1
+	@echo -n .
+
+qgcache.o: @SOURCE_PATH@/src/tools/qgcache.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qgcache.cpp >/dev/null 2>&1
+	@echo -n .
+
+qbitarray.o: @SOURCE_PATH@/src/tools/qbitarray.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qbitarray.cpp >/dev/null 2>&1
+	@echo -n .
+
+qdir.o: @SOURCE_PATH@/src/tools/qdir.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qdir.cpp >/dev/null 2>&1
+	@echo -n .
+
+quuid.o: @SOURCE_PATH@/src/tools/quuid.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/quuid.cpp >/dev/null 2>&1
+	@echo -n .
+
+qfileinfo_unix.o: @SOURCE_PATH@/src/tools/qfileinfo_unix.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qfileinfo_unix.cpp >/dev/null 2>&1
+	@echo -n .
+
+qdir_unix.o: @SOURCE_PATH@/src/tools/qdir_unix.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qdir_unix.cpp >/dev/null 2>&1
+	@echo -n .
+
+qfileinfo.o: @SOURCE_PATH@/src/tools/qfileinfo.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qfileinfo.cpp >/dev/null 2>&1
+	@echo -n .
+
+qdatetime.o: @SOURCE_PATH@/src/tools/qdatetime.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qdatetime.cpp >/dev/null 2>&1
+	@echo -n .
+
+qstringlist.o: @SOURCE_PATH@/src/tools/qstringlist.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qstringlist.cpp >/dev/null 2>&1
+	@echo -n .
+
+qmap.o: @SOURCE_PATH@/src/tools/qmap.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @SOURCE_PATH@/src/tools/qmap.cpp >/dev/null 2>&1
+	@echo -n .
+
+qconfig.o: @BUILD_PATH@/src/tools/qconfig.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) @BUILD_PATH@/src/tools/qconfig.cpp >/dev/null 2>&1
+	@echo -n .
+
+winmakefile.o: generators/win32/winmakefile.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/winmakefile.cpp >/dev/null 2>&1
+	@echo -n .
+
+project.o: project.cpp project.h option.h
+	@$(CXX) -c -o $@ $(CXXFLAGS) project.cpp >/dev/null 2>&1
+	@echo -n .
+
+property.o: property.cpp project.h option.h
+	@$(CXX) -c -o $@ $(CXXFLAGS) property.cpp >/dev/null 2>&1
+	@echo -n .
+
+meta.o: meta.cpp project.h option.h
+	@$(CXX) -c -o $@ $(CXXFLAGS) meta.cpp >/dev/null 2>&1
+	@echo -n .
+
+main.o: main.cpp project.h
+	@$(CXX) -c -o $@ $(CXXFLAGS) main.cpp >/dev/null 2>&1
+	@echo -n .
+
+option.o: option.cpp option.h
+	@$(CXX) -c -o $@ $(CXXFLAGS) option.cpp >/dev/null 2>&1
+	@echo -n .
+
+makefile.o: generators/makefile.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/makefile.cpp >/dev/null 2>&1
+	@echo -n .
+
+unixmake.o: generators/unix/unixmake.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/unix/unixmake.cpp >/dev/null 2>&1
+	@echo -n .
+
+unixmake2.o: generators/unix/unixmake2.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/unix/unixmake2.cpp >/dev/null 2>&1
+	@echo -n .
+
+borland_bmake.o: generators/win32/borland_bmake.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/borland_bmake.cpp >/dev/null 2>&1
+	@echo -n .
+
+mingw_make.o: generators/win32/mingw_make.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/mingw_make.cpp >/dev/null 2>&1
+	@echo -n .
+
+msvc_objectmodel.o: generators/win32/msvc_objectmodel.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/msvc_objectmodel.cpp >/dev/null 2>&1
+	@echo -n .
+
+msvc_vcproj.o: generators/win32/msvc_vcproj.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/msvc_vcproj.cpp >/dev/null 2>&1
+	@echo -n .
+
+msvc_nmake.o: generators/win32/msvc_nmake.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/msvc_nmake.cpp >/dev/null 2>&1
+	@echo -n .
+
+metrowerks_xml.o: generators/mac/metrowerks_xml.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/mac/metrowerks_xml.cpp >/dev/null 2>&1
+	@echo -n .
+
+pbuilder_pbx.o: generators/mac/pbuilder_pbx.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/mac/pbuilder_pbx.cpp >/dev/null 2>&1
+	@echo -n .
+
+msvc_dsp.o: generators/win32/msvc_dsp.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/win32/msvc_dsp.cpp >/dev/null 2>&1
+	@echo -n .
+
+projectgenerator.o: generators/projectgenerator.cpp
+	@$(CXX) -c -o $@ $(CXXFLAGS) generators/projectgenerator.cpp >/dev/null 2>&1
+	@echo -n .
+
+#default rules
+.cpp.o:
+	@$(CXX) -c -o $@ $(CXXFLAGS) >/dev/null 2>&1
+	@echo -n .
+
+# DO NOT DELETE THIS LINE -- make depend depends on it

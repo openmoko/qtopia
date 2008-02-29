@@ -1,0 +1,18 @@
+This is a very simple example of how to write a composing input method.
+It will convert a sequence of four hex digits to one Unicode character.
+Shift+space toggles the input method on/off, and the return key accepts
+the composed text. Backspace removes the last composed character.
+
+A proper input method would implement cursor movement and a more
+sophisticated state machine, but that would make the code more
+complex and harder to understand.
+
+The input method is defined in composeim.h and composeim.cpp
+
+The plugin code is in composeimpl.h and composeimpl.cpp
+
+main.cpp is a stub that allows testing of the input method in isoloation
+from the qpe server.
+
+See inputmethods.html for a detailed explanation of creating a Composing
+Input Method.

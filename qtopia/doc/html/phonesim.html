@@ -1,0 +1,167 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/phonesim.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Phone Simulator</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Phone Simulator</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Using the Phone Simulator
+</a>
+<li><a href="#3"> Special Phone Numbers
+</a>
+<li><a href="#4"> <n>GSM</n> 07.10 Multiplexing
+</a>
+<li><a href="#5"> XML Response File Format
+</a>
+<li><a href="#6"> SIM Application Toolkit commands
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> <b>Phonesim</b> implements an AT command <em>phone simulator</em> and provides a convenient tool to aid debugging.  It accepts AT-style commands as input and returns pre-defined responses, but is not designed as a replacement for a fully functioning phone. 
+<p> <h2> Using the Phone Simulator
+</h2>
+<a name="2"></a><p> The command used to run the Phone Simulator is:
+<p> <tt>phonesim [-p port] filename</tt>
+<p> where the  default <em>port</em> number is 12345 and <em>filename</em> indicates the <a href="phonesim.html#XML-response-file">XML response file</a> to be used.
+<p> To use the Qtopia dialer with the phone simulator, the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable must be set to:
+<p> <tt>sim:hostname</tt> 
+<p> where <em>hostname</em> is the name of the host where the simulator resides. 
+For most implementations this is set to <tt>localhost</tt>.
+<p> <h2> Special Phone Numbers
+</h2>
+<a name="3"></a><p> The Phone Simulator utilizes the following special phone numbers to simulate events:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Phone Number <th valign="top">Function
+<tr bgcolor="#f0f0f0">    <td valign="top"><b>199</b> <td valign="top">Initiate a <em>Dial Back</em>, that is, the simulator will immediately hang-up and then dial the user back after a delay of a few seconds. This is used to test incoming connections in a single-user environment.
+<tr bgcolor="#d0d0d0">    <td valign="top"><b>199</b> <td valign="top">Reflect outgoing SMS messages back into the incoming message queue.
+<tr bgcolor="#f0f0f0">    <td valign="top"><b>177</b> <td valign="top">Simulate a missed call but initiating a dial back and hanging up after a number of retries. 
+<tr bgcolor="#d0d0d0">    <td valign="top"><b>166</b> <td valign="top">Simulate a bad phone number or bad connection by making and outgoing call that does not connect.
+</table></center>
+<p> <h2> <n>GSM</n> 07.10 Multiplexing
+</h2>
+<a name="4"></a><p> The Phone Simulator for the 2.x series of Qtopia Phone Editions includes support for <n>GSM</n> 07.10 multiplexing, that is, AT+CMUX. This removes the requirement for two phone simulator connections to emulate the high-priority and low-priority command channels. The channels will share the same state and state modification commands on one channel will affect the answer on the other channel, which is not the case with dual connections. 
+<p> To use multiplexing set the following environment variable:
+<p> <tt>export QTOPIA_PHONE_DEVICE=sim:localhost</tt>
+<p> The environment variable <tt>QTOPIA_PHONE_DEVICE_LOW</tt> no longer needs to be set.
+<p> <b>Note: </b>If both environment variables are set, the simulator will use separate connections rather than <n>GSM</n> 07.10 multiplexing.
+<p> <!-- index XML response file --><a name="XML-response-file"></a><h2> XML Response File Format
+</h2>
+<a name="5"></a><p> Phone Simulator responses are defined by an XML file (for example, troll.xml) with the following format:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">tag <th valign="top">description
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;simulator&gt;
+<td valign="top">Root element for the XML document.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;state name="X"&gt;
+<td valign="top">Define commands that only apply in a specific state.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;chat&gt;
+<td valign="top">(child of top-level or &lt;state&gt;) Define a chat command/response sequence.  A top-level &lt;chat&gt; applies to all states unless there is a state-specific override.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;command&gt;
+<td valign="top">(child of &lt;chat&gt;) Contains the text of the command to respond to. The wildcard character "*" at the end of the text can be used to match everything starting with a specific prefix.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;response delay="N" eol="true|false"&gt;
+<td valign="top">(child of &lt;chat&gt;) Contains the text of the response, with an optional delay prior to sending it back to the client. The delay is in milliseconds. The sequence "${X}" can be used in a response to indicate "substitute the value of script variable X". If "eol" is "true" (the default), then the response will be followed by an end-of-line sequence.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;switch name="X"/&gt;
+<td valign="top">(child of &lt;chat&gt;) Switch into the specified state after issuing the response. An unspecified state name indicates to return to the top-level state. The name "default" can be used to switch back to the default state.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;unsolicited delay="N" switch="X"&gt;
+<td valign="top">(child of top-level or &lt;state&gt;) Indicates an unsolicited response to issue to the client after "N" milliseconds after switching into the current state.  The optional "switch" tells the simulator to enter the specified state after sending the unsolicited response (e.g. an unsolicited RING may put the simulator into a different state from the default). The sequence "${X}" can be used in a response to indicate "substitute the value of script variable X".
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;set name="X" value="Y"/&gt;
+<td valign="top">(child of top-level or &lt;chat&gt;) When used at the top level, this sets the default value of a script variable called "X" to "Y".  When used within a &lt;chat&gt; element, this will set the value of the script variable "X" when the &lt;chat&gt;'s command is successfully matched.  The value "*" can be used for the "*" part of a prefix command match.  This allows parameter information to be copied from a command into a variable.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;start name="X"/&gt;
+<td valign="top">Starting state, if not the same as the top-level state.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;newcall name="VAR"/&gt;
+<td valign="top">Allocate a new call identifier and put its number into "VAR".
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;forgetcall id="ID"/&gt;
+<td valign="top">Forget a call with identifier "ID", freeing up the identifier to be allocated to a new call.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;toolkit&gt;
+<td valign="top">Define a program for the SIM Application Toolkit part of the simulator.
+</table></center>
+<p> <h2> SIM Application Toolkit commands
+</h2>
+<a name="6"></a><p> The &lt;toolkit&gt; tag is used to define a simple program to simulate an application running inside the SIM.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">tag <th valign="top">description
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;label name="NAME"/&gt;
+<td valign="top">Define a program label, that can be used as the destination for &lt;goto&gt;, &lt;gosub&gt;, and similar commands.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;goto name="NAME"/&gt;
+<td valign="top">Jump to the point in the program that is defined by the label "NAME".
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;gosub name="NAME"/&gt;
+<td valign="top">Set the return location to the current point in the program and then jump to the point in the program that is defined by the label "NAME".  Only one level of subroutine is currently supported.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;return&gt;
+<td valign="top">Return from the current subroutine.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;set name="NAME" value="VALUE"/&gt;
+<td valign="top">Set the variable called "NAME" to "VALUE".  If "VALUE" contains a term of the form "${X}", then the contents of the variable "X" will be inserted at that position.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;ifeq var="NAME" value="VALUE" goto="LABEL"/&gt;
+<td valign="top">Compare the contents of the variable "NAME" with "VALUE" and then jump to "LABEL" if they are the same.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;ifne var="NAME" value="VALUE" goto="LABEL"/&gt;
+<td valign="top">Compare the contents of the variable "NAME" with "VALUE" and then jump to "LABEL" if they are not the same.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;eval var="NAME" left="LEFT" op="OPERATOR" right="RIGHT"/&gt;
+<td valign="top">Evaluate an arithmetic expression and place the result into the variable "NAME".  "OPERATOR" may be one of "+", "-", "*", "/", "%", "&", "|", "^", "~", "<<", ">>", "&&", "||", "!", or "concat".
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;mainmenu title="TITLE"&gt;
+<td valign="top">Define the main program menu with the given "TITLE".
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;menu title="TITLE" default="ITEM" [back="LABEL"]&gt;
+<td valign="top">Define a program menu with the given "TITLE" and default "ITEM".  When the user selects "Back", the program will jump to "LABEL".
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;item id="ID" name="NAME" [help="HELPLABEL"] goto="LABEL"/&gt;
+<td valign="top">Define an item within a &lt;mainmenu&gt; or &lt;menu&gt; element.  "ID" is a numeric value that identifies the item; "NAME" is the text name to display on the user's screen; "HELPLABEL" is a label to jump to if the user selects "Help" for the item; and "LABEL" is the regular label to jump to when the user selects the item.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;displaytext [autoclear="CLEAR"] [highpriority="HIGH"&gt;TEXT&lt;/displaytext&gt;
+<td valign="top">Display "TEXT" on the user's screen.  If "CLEAR" is "true", then automatically clear the text after 3 seconds.  If "HIGH" is "true", then the text should be displayed with high priority.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;getkey type="TYPE" [help="LABEL"]/&gt;
+<td valign="top">Ask the user for a single keypress.  "TYPE" may be one of "digit", "alpha", or "ucs2".  If the user selects "Help", then the program will jump to "LABEL".
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;getinput type="TYPE" [help="LABEL"] [echo="ECHO"] [minlength="MIN"] [maxlength="MAX"]/&gt;
+<td valign="top">Ask the user for a line of input.  "TYPE" may be one of "digit", "alpha", or "ucs2".  If the user selects "Help", then the program will jump to "LABEL".  If "ECHO" is "false", then the characters will not be echoed to the screen (e.g. for passwords).  "MIN" and "MAX" define the minimum and maximum text lengths (1 and 255 by default, respectively).
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;setupcall number="NUMBER" [subAddress="SUBADDR"] [othercalls="OTHER"] [class="CLASS"]/&gt;
+<td valign="top">Ask the phone to set up a phone call to "NUMBER" (extension "SUBADDR").  "OTHER" should be one of "notbusy" (the default), "hold", or "hangup".  "notbusy" indicates that the call should only be attempted if the user is not busy on another call.  "hold" indicates that all other calls should be placed on hold.  "hangup" indicates that all other calls should be hung up first.  "CLASS" should be one of "voice" (the default), "data", or "fax".
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;play tone="TONE" [interval="INTERVAL"]/&gt;
+<td valign="top">Play the given "TONE" for "INTERVAL" milliseconds.  "TONE" should be one of "dial", "busy", "congestion", "radio ack", "dropped", "error", "call waiting", "ringing", "general beep", "positive beep", or "negative beep".  If the interval is not supplied, it defaults to 1 second.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;refresh type="TYPE"/&gt;
+<td valign="top">Inform the phone that a refresh has occurred.  "TYPE" should be one of "init and full file change", "file change", "init and file change", "initialization", or "reset".
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;sendss&gt;TEXT&lt;/sendss&gt;
+<td valign="top">Tell the user with the message "TEXT" that a supplementary service (SS) change is in progress.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;sendsms&gt;TEXT&lt;/sendsms&gt;
+<td valign="top">Tell the user with the message "TEXT" that an SMS message is being sent.
+<tr bgcolor="#d0d0d0"> <td valign="top">&lt;sendussd&gt;TEXT&lt;/sendussd&gt;
+<td valign="top">Tell the user with the message "TEXT" that Unstructured Supplementary <n>Service</n> Data (USSD) is being sent.
+<tr bgcolor="#f0f0f0"> <td valign="top">&lt;setupeventlist type="TYPE"/&gt;
+<td valign="top">Setup event reporting according to "TYPE", which should be one of "idle", "user", "idle and user", or "cancel".
+</table></center>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

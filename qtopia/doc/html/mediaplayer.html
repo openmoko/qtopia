@@ -1,0 +1,107 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/mediaplayer/mediaplayer.cpp:56 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MediaPlayer Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MediaPlayer Class Reference</h1>
+
+<p>This class is specific to the mediaplayer apps.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="mediaplayer-h.html">mediaplayer.h</a>&gt;</tt>
+<p><a href="mediaplayer-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><b>MediaPlayer</b> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, WFlags&nbsp;fl = 0 )</li>
+<li class=fn><b>~MediaPlayer</b> ()</li>
+<li class=fn>virtual ControlWidgetBase * <b>createAudioUI</b> ()</li>
+<li class=fn>virtual ControlWidgetBase * <b>createVideoUI</b> ()</li>
+<li class=fn>virtual LoopControlBase * <b>createLoopControl</b> ()</li>
+<li class=fn>virtual MediaSelectorBase * <b>createMediaSelector</b> ()</li>
+<li class=fn>virtual AudioDevice * <b>createAudioDevice</b> ()</li>
+<li class=fn>void <b>playDocLnk</b> ( const&nbsp;DocLnk&nbsp;*&nbsp;lnk )</li>
+<li class=fn>void <b>playURL</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype )</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>ControlWidgetBase * <b>audioUI</b> ()</li>
+<li class=fn>ControlWidgetBase * <b>videoUI</b> ()</li>
+<li class=fn>AudioDevice * <b>audioDevice</b> ()</li>
+<li class=fn>void <b>setView</b> ( View )</li>
+<li class=fn>void <b>createMediaPlayer</b> ()</li>
+<li class=fn>virtual void <b>setDocument</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;fileref )</li>
+<li class=fn>void <b>appMessage</b> ( const&nbsp;QCString&nbsp;&amp;&nbsp;msg, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )</li>
+<li class=fn>void <b>setPlaying</b> ( bool )</li>
+<li class=fn>void <b>pauseCheck</b> ( bool )</li>
+<li class=fn>void <b>startDecreasingVolume</b> ()</li>
+<li class=fn>void <b>startIncreasingVolume</b> ()</li>
+<li class=fn>void <b>startScanningBackward</b> ()</li>
+<li class=fn>void <b>startScanningForward</b> ()</li>
+<li class=fn>void <b>stopDecreasingVolume</b> ()</li>
+<li class=fn>void <b>stopIncreasingVolume</b> ()</li>
+<li class=fn>void <b>stopScanningBackward</b> ()</li>
+<li class=fn>void <b>stopScanningForward</b> ()</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>void <b>timerEvent</b> ( QTimerEvent&nbsp;*&nbsp;e )</li>
+<li class=fn>void <b>closeEvent</b> ( QCloseEvent&nbsp;*&nbsp;ce )</li>
+<li class=fn>bool <b>eventFilter</b> ( QObject&nbsp;*&nbsp;o, QEvent&nbsp;*&nbsp;e )</li>
+<li class=fn>void <b>setTickerText</b> ( QString&nbsp;file )</li>
+<li class=fn>void <b>error</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;error, const&nbsp;QString&nbsp;&amp;&nbsp;errorMsg )</li>
+<li class=fn>void <b>setPlaying</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;URL )</li>
+<li class=fn>void <b>playFile</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;file, const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn>void <b>play</b> ()</li>
+<li class=fn>void <b>stop</b> ( bool )</li>
+<li class=fn>enum <b>ScanDirection</b> { Left, Right }</li>
+<li class=fn>void <b>internalScan</b> ( ScanDirection&nbsp;scanDirection )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+This class is specific to the mediaplayer apps.
+<p> It is currently private to those apps, and its API,
+and therefore binary compatibilty may change in later
+versions.
+<p> This class creates all the elements of playing media files
+and ties them together. It abstracts what GUI elements are
+used with a few virtual functions: createMediaSelector(),
+createAudioUI() and createVideoUI(). This should make it
+possible to make some different frontends with the backend
+mostly the same abstracted behind an API like this. This
+API is subject to change.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

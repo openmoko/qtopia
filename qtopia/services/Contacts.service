@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaServices
+Context=Contacts
+[Service]
+Actions = editPersonal();addContact(PimContact);addAndEditContact(PimContact);removeContact(PimContact);updateContact(PimContact);showContact(QUuid);beamBusinessCard();setContactImage(QImage);addPhoneNumberToContact(QString)
+Icon = addressbook/AddressBook
+Name[]=Contacts
+[beamBusinessCard()]
+Icon=beam
+Name[]=Beam business card

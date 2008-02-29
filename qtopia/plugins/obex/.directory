@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=IR communications
+[Desktop Entry]
+Name[]=IR communications
+Comment[]=Provides support for Infrared communications.
+Apply=QPE/System restart()

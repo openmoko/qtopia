@@ -1,0 +1,140 @@
+'\" t
+.TH QMemoryManager 3qt "27 October 2005" "Trolltech AS" \" -*- nroff -*-
+.\" Copyright 1992-2001 Trolltech AS.  All rights reserved.  See the
+.\" license file included in the distribution for a complete license
+.\" statement.
+.\"
+.ad l
+.nh
+.SH NAME
+QMemoryManager \- The allocation and tracking of memory used by pixmaps and font glyphs
+.br
+.PP
+\fC#include <qmemorymanager_qws.h>\fR
+.PP
+.SS "Public Members"
+.in +1c
+.ti -1c
+.BI "\fBQMemoryManager\fR () "
+.br
+.ti -1c
+.BI "enum \fBPixmapType\fR { Normal, VRAM, Invalid, Shared }"
+.br
+.ti -1c
+.BI "PixmapID \fBnewPixmap\fR ( int " "w" ", int " "h" ", int " "d" ", int optim ) "
+.br
+.ti -1c
+.BI "void \fBdeletePixmap\fR ( PixmapID ) "
+.br
+.ti -1c
+.BI "uchar* \fBpixmapData\fR ( PixmapID id ) "
+.br
+.ti -1c
+.BI "PixmapID \fBmapPixmapData\fR ( uchar * " "data" ", PixmapType " "type" " = Shared ) "
+.br
+.ti -1c
+.BI "FontID \fBrefFont\fR ( const QFontDef & ) "
+.br
+.ti -1c
+.BI "void \fBderefFont\fR ( FontID ) "
+.br
+.ti -1c
+.BI "QRenderedFont* \fBfontRenderer\fR ( FontID ) "
+.br
+.ti -1c
+.BI "bool \fBinFont\fR ( FontID, const QChar & ) const"
+.br
+.ti -1c
+.BI "QGlyph \fBlockGlyph\fR ( FontID, const QChar & ) "
+.br
+.ti -1c
+.BI "QGlyphMetrics* \fBlockGlyphMetrics\fR ( FontID, const QChar & ) "
+.br
+.ti -1c
+.BI "void \fBunlockGlyph\fR ( FontID, const QChar & ) "
+.br
+.ti -1c
+.BI "void \fBsavePrerenderedFont\fR ( const QFontDef &, bool " "all" "=TRUE ) "
+.br
+.ti -1c
+.BI "void \fBsavePrerenderedFont\fR ( FontID " "id" ", bool " "all" "=TRUE ) "
+.br
+.ti -1c
+.BI "bool \fBfontSmooth\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontAscent\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontDescent\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontMinLeftBearing\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontMinRightBearing\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontLeading\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontMaxWidth\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontUnderlinePos\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontLineWidth\fR ( FontID id ) const"
+.br
+.ti -1c
+.BI "int \fBfontLineSpacing\fR ( FontID id ) const"
+.br
+.in -1c
+.SS "Static Public Members"
+.in +1c
+.ti -1c
+.BI "int \fBpixmapLinestep\fR ( PixmapID " "id" ", int " "width" ", int depth ) "
+.br
+.ti -1c
+.BI "PixmapType \fBpixmapType\fR ( PixmapID id ) "
+.br
+.in -1c
+.SH DESCRIPTION
+The QMemoryManager class provides the allocation and tracking of memory used by pixmaps and font glyphs.
+.PP
+The QMemoryManager class allocates pixmaps from video ram, main memory, or now if enabled, shared memory which allows pixmap data to be shared between Qt/Embedded processes. The shared memory is managed by the QSharedMemoryManager class which is able to track allocated and freed memory from it between processes. It works similar to malloc and free in how it maintains that memory, however it is implemented in a way to allow this to work from different processes which may have this memory mapped to different virtual addresses as well as needing locking during allocation and deallocation.
+.PP
+To make shared memory useful between processes, there needs to be a common way for different processes to identify and reference the share items stored in the memory. Therefore items stored are looked up based on a key, the key also needs to be in the shared memory, and if present can then be used to map an item in the memory based on the key, much in the way the pixmap cache already works but in a shared manner that works across processes. The key searching is implemented using an array with bsearch for efficency. When the items are added, qsort is used to keep the item pointers ordered by key so the bsearch works. The choice to use an array and bsearch was one of efficency, however this means that the number of items able to be added to the cache is limited by the size chosen for the array at compile time, however a future improvement could be to use a dynamic array allocated from shared memory to make it possible to grow this array as needed. But in most cases it should be possible to determine the average size of items in the shared memory, which means a reasonable value for the size of this array should be able to be determined. A reasonable guess maybe that items will be 1Kb in size on average, some debug to profile the size of items as they are added to the cache should make it possible to be more exact for a given environment.
+.PP
+The font glyph caching is very much the same as pixmap caching if it is possible to generate a key that identifies the glyph or set of glyphs. Storage of the key is an overhead in font glyph caching, therefore this cost is reduced if multiple glyphs are cached at a time with the one key. A value of 16 glyphs at a time was chosen based on testing of memory usage and the trade off of key overhead caching different number of glyphs at a time. Originally a row of 256 glyphs were cached at a time, but trial and error showed that in a test of text with Japanese text, that typically the characters used spanned too many of the rows that it very quickly filled the cache and that the majority of the glyphs cached did not get used. The glyphs used tended to be from all over the range of unicode characters, and 16 glyphs at a time was reasonable with out filling the test cache of 1 Mb. Caching multiple glyphs requires that an array in the cached item indexes the offset to the glyph in the set within the chunk of shared memory.
+.PP
+When the cache gets full, both the font and pixmap caching code falls back to their original implementations of allocating and searching from local memory to that process. Another factor taken in to account is screen rotation, the key associated with an item in the shared memory has appended something that identifys the rotation of the process which added it. This ensures that after the rotation is changed or an app with a different rotation is run, it will not find from the cache an incorrectly rotated image than what it requires.
+.PP
+As with pixmap caching previously, an item in the cache will remain there while there are still references to the data. This requires reference counting so that it is possible to determine when it is safe to reuse the data used by a cached item. To avoid delays during allocation when memory is required from the cache, a timer event periodically removes a few items at a time from the cache which have been identified as no longer referenced. This provides something similar to incremental garbage collection. It is possible that after a dereference and an an item is identified as needing to be removed it may be referenced again before the timer event, therefore the timer event must check again the item still has no references.
+.PP
+For extra robustness, some extra locking maybe required in a few
+places. Another consideration that requires some additions to the
+current code is the abnormal termination of a process which contains
+references to items in the cache. To handle this signal handlers will be
+required to ensure items get correctly dereferenced in these cases.
+This is similar to the same problem with pixmaps allocated from
+video ram by a process which ends abnormally.
+.SH "SEE ALSO"
+.BR http://doc.trolltech.com/qmemorymanager.html
+.BR http://www.trolltech.com/faq/tech.html
+.SH COPYRIGHT
+Copyright 1992-2001 Trolltech AS, http://www.trolltech.com.  See the
+license file included in the distribution for a complete license
+statement.
+.SH AUTHOR
+Generated automatically from the source code.
+.SH BUGS
+If you find a bug in Qt, please report it as described in
+.BR http://doc.trolltech.com/bughowto.html .
+Good bug reports make our job much simpler. Thank you.
+.P
+In case of content or formattting problems with this manual page, please
+report them to
+.BR qt-bugs@trolltech.com .
+Please include the name of the manual page (qmemorymanager.3qt) and the Qt
+version (2.3.12).

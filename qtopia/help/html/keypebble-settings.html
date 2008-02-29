@@ -1,0 +1,23 @@
+<qt title="Settings">
+<h3>Settings</h3>
+<ul>
+<li>Use the <b>Screen updates</b> control to set the screen update rate.</li>
+<li>Check <b>Request 8-bit session</b> to ask the server to only use 256 colors.</li>
+<li>Checking <b>Raise on bell</b> will bring the VNC viewer to the front (over any other
+applications) when it issues a <b>bell</b>.</li>
+</ul>
+<h3>Data Encoding</h3>
+<ul>
+<li><b>Encoding</b> refers to how a rectangle of pixel data will be sent
+from the server to the client. More efficient connections are possible
+by using different encodings. Note that the server must support an encoding
+in order to use it.</li>
+<li><b>Copy rectangle encoding</b> works best with a framebuffer (as used
+in <i>Qtopia</i>).</li>
+<li><b>RRE encoding</b> uses run-length encoding to compress pixel data.</li>
+<li><b>CoRRE encoding</b> is similar to RRE encoding, but optimized for
+small (255x255) rectangles.</li>
+<li><b>Hextile encoding</b> is similar to CoRRE encoding, but uses tiling
+rather than raw coordinates.</li>
+</ul>
+</qt>

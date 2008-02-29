@@ -1,0 +1,4 @@
+Text Codecs go here.
+
+Note that Qtopia TextCodecs are not the same as Qt 3 text codecs,
+although the interface is very similar so porting should be easy.

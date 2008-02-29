@@ -1,0 +1,289 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/config.cpp:320 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Config Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Config Class Reference</h1>
+
+<p>The Config class provides for saving application configuration state.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="config-h.html">qtopia/config.h</a>&gt;</tt>
+<p><a href="config-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>enum <a href="#Domain-enum"><b>Domain</b></a> { File, User }</li>
+<li class=fn><a href="#Config"><b>Config</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, Domain&nbsp;domain = User )</li>
+<li class=fn><a href="#~Config"><b>~Config</b></a> ()</li>
+<li class=fn>bool <a href="#operator-eq-eq"><b>operator==</b></a> ( const&nbsp;Config&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#operator!-eq"><b>operator!=</b></a> ( const&nbsp;Config&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#isValid"><b>isValid</b></a> () const</li>
+<li class=fn>bool <a href="#hasKey"><b>hasKey</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</li>
+<li class=fn>void <a href="#setGroup"><b>setGroup</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;gname )</li>
+<li class=fn>void <a href="#writeEntry"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;char&nbsp;*&nbsp;value )</li>
+<li class=fn>void <a href="#writeEntry-2"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )</li>
+<li class=fn>void <a href="#writeEntryCrypt"><b>writeEntryCrypt</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )</li>
+<li class=fn>void <a href="#writeEntry-3"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, int&nbsp;num )</li>
+<li class=fn>void <a href="#writeEntry-4"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QStringList&nbsp;&amp;&nbsp;lst, const&nbsp;QChar&nbsp;&amp;&nbsp;sep )</li>
+<li class=fn>void <a href="#writeEntry-5"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QStringList&nbsp;&amp;&nbsp;lst )</li>
+<li class=fn>void <a href="#writeEntry-6"><b>writeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QByteArray&nbsp;&amp;&nbsp;byteArray )</li>
+<li class=fn>void <a href="#removeEntry"><b>removeEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key )</li>
+<li class=fn>QString <a href="#readEntry"><b>readEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;deflt = QString::null ) const</li>
+<li class=fn>QString <a href="#readEntryCrypt"><b>readEntryCrypt</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;deflt = QString::null ) const</li>
+<li class=fn>int <a href="#readNumEntry"><b>readNumEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, int&nbsp;deflt = -1 ) const</li>
+<li class=fn>bool <a href="#readBoolEntry"><b>readBoolEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, bool&nbsp;deflt = FALSE ) const</li>
+<li class=fn>QStringList <a href="#readListEntry"><b>readListEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QChar&nbsp;&amp;&nbsp;sep ) const</li>
+<li class=fn>QStringList <a href="#readListEntry-2"><b>readListEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</li>
+<li class=fn>QByteArray <a href="#readByteArrayEntry"><b>readByteArrayEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</li>
+<li class=fn>QByteArray <a href="#readByteArrayEntry-2"><b>readByteArrayEntry</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QByteArray&nbsp;&amp;&nbsp;dflt ) const</li>
+<li class=fn>void <a href="#clearGroup"><b>clearGroup</b></a> ()</li>
+<li class=fn>void <a href="#removeGroup"><b>removeGroup</b></a> ()</li>
+<li class=fn>void <a href="#removeGroup-2"><b>removeGroup</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;g )</li>
+<li class=fn>QStringList <a href="#allGroups"><b>allGroups</b></a> () const</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>long <a href="#timeStamp"><b>timeStamp</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name, Domain&nbsp;domain = User )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Config class provides for saving application configuration state.
+<p> You should keep a Config in existence only while you do not want others
+to be able to change the state. There is no locking currently, but there
+may be in the future.
+<p> Note that in Qtopia before 1.6, the 'const' forms of the read functions
+where not available.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="Domain-enum"></a>Config::Domain</h3>
+
+<ul>
+<li><tt>Config::File</tt>
+<li><tt>Config::User</tt>
+</ul><p> See <a href="#Config">Config</a>() for details.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Config"></a>Config::Config ( const&nbsp;QString&nbsp;&amp;&nbsp;name, <a href="config.html#Domain-enum">Domain</a>&nbsp;domain = User )
+</h3>
+Constructs a configuration object that will load or create a
+configuration with the given <em>name</em> in the given <em>domain</em>.
+<p> After construction, call <a href="#setGroup">setGroup</a>() since almost every other
+function works in terms of the 'current group'.
+<p> In the default Domain, <em>User</em>, the configuration is user-specific,
+and the <em>name</em> should not contain "/". This name should be globally
+unique.
+<p> In the File Domain, <em>name</em> is an absolute filename.
+
+<h3 class=fn><a name="~Config"></a>Config::~Config ()
+</h3>
+Writes any changes to disk and destroys the in-memory object.
+
+<h3 class=fn>QStringList <a name="allGroups"></a>Config::allGroups () const
+</h3>
+Returns the list of all groups in the Config.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="clearGroup"></a>Config::clearGroup ()
+</h3>
+Removes all entries from the current group.
+<p> <p>See also <a href="#removeEntry">removeEntry</a>() and <a href="#removeGroup">removeGroup</a>().
+
+<h3 class=fn>bool <a name="hasKey"></a>Config::hasKey ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const
+</h3>
+Returns TRUE if the current group has an entry called <em>key</em>;
+otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="isValid"></a>Config::isValid () const
+</h3>
+Returns TRUE if the Config is in a valid state; otherwise returns
+FALSE.
+
+<h3 class=fn>bool <a name="operator!-eq"></a>Config::operator!= ( const&nbsp;<a href="config.html">Config</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+
+<p> Tests for inequality with <em>other</em>. Config objects are equal if they
+refer to the same filename.
+<p> <p>See also <a href="#operator-eq-eq">operator==</a>().
+
+<h3 class=fn>bool <a name="operator-eq-eq"></a>Config::operator== ( const&nbsp;<a href="config.html">Config</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+
+<p> Tests for equality with <em>other</em>. Config objects are equal if they
+refer to the same filename.
+<p> <p>See also <a href="#operator!-eq">operator!=</a>().
+
+<h3 class=fn>bool <a name="readBoolEntry"></a>Config::readBoolEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, bool&nbsp;deflt = FALSE ) const
+</h3>
+
+<p> Returns the boolean entry stored (as an integer) using <em>key</em>,
+defaulting to <em>deflt</em> if there is no entry for the given <em>key</em>.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>().
+
+<h3 class=fn>QByteArray <a name="readByteArrayEntry"></a>Config::readByteArrayEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const
+</h3>
+Returns the QByteArray stored using <em>key</em>.  Returns an empty array if
+no matching key is found.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QByteArray <a name="readByteArrayEntry-2"></a>Config::readByteArrayEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QByteArray&nbsp;&amp;&nbsp;dflt ) const
+</h3>
+Returns the QByteArray stored using <em>key</em>.  Returns <em>dflt</em> if
+no matching key is found.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QString <a name="readEntry"></a>Config::readEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;deflt = QString::null ) const
+</h3>
+
+<p> Returns the string entry for <em>key</em>, defaulting to <em>deflt</em> if there
+is no entry for the given <em>key</em>.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>().
+
+<h3 class=fn>QString <a name="readEntryCrypt"></a>Config::readEntryCrypt ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;deflt = QString::null ) const
+</h3>
+
+<p> Returns the unencrypted string entry for the encrypted entry stored
+using <em>key</em>, defaulting to <em>deflt</em> if there is no entry for the
+given <em>key</em>.
+<p> <p>See also <a href="#writeEntryCrypt">writeEntryCrypt</a>().
+
+<h3 class=fn>QStringList <a name="readListEntry"></a>Config::readListEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QChar&nbsp;&amp;&nbsp;sep ) const
+</h3>
+
+<p> Returns the string list entry stored using <em>key</em> and with <em>sep</em> as
+the separator.
+<p> These entries are stored as a single string, with each element
+separated by <em>sep</em>.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>().
+
+<h3 class=fn>QStringList <a name="readListEntry-2"></a>Config::readListEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const
+</h3>
+Returns the string list entry stored using <em>key</em> and with
+the escaped seperator convention described in writeListEntry().
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>int <a name="readNumEntry"></a>Config::readNumEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, int&nbsp;deflt = -1 ) const
+</h3>
+
+<p> Returns the integer entry stored using <em>key</em>, defaulting to <em>deflt</em> if there is no entry for the given <em>key</em>.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>().
+
+<h3 class=fn>void <a name="removeEntry"></a>Config::removeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key )
+</h3>
+Removes the <em>key</em> entry from the current group. Does nothing if
+there is no such entry.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>() and <a href="#clearGroup">clearGroup</a>().
+
+<h3 class=fn>void <a name="removeGroup"></a>Config::removeGroup ()
+</h3>
+Removes the current group (and all its entries).
+<p> The current group becomes unset.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="removeGroup-2"></a>Config::removeGroup ( const&nbsp;QString&nbsp;&amp;&nbsp;g )
+</h3>
+Removes the current group (and all its entries).
+<p> The current group becomes unset.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="setGroup"></a>Config::setGroup ( const&nbsp;QString&nbsp;&amp;&nbsp;gname )
+</h3>
+Sets the current group for subsequent reading and writing of entries
+to <em>gname</em>. Grouping allows the application to partition the
+namespace.
+<p> This function <em>must</em> be called prior to any reading or writing of
+entries.
+<p> The <em>gname</em> must not be empty.
+<p> <p>See also <a href="#writeEntry">writeEntry</a>(), <a href="#readEntry">readEntry</a>(), <a href="#readListEntry">readListEntry</a>(), <a href="#readNumEntry">readNumEntry</a>(), and <a href="#readBoolEntry">readBoolEntry</a>().
+
+<h3 class=fn>long <a name="timeStamp"></a>Config::timeStamp ( const&nbsp;QString&nbsp;&amp;&nbsp;name, <a href="config.html#Domain-enum">Domain</a>&nbsp;domain = User )<tt> [static]</tt>
+</h3>
+Returns the time stamp for the config identified by <em>name</em>.  The
+time stamp represents the time the config was last committed to storage.
+Returns 0 if there is no time stamp available for the config.
+<p> A <em>domain</em> can optionally be specified and defaults to User.
+See <a href="#Config">Config</a>() for details.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="writeEntry"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;char&nbsp;*&nbsp;value )
+</h3>
+Writes a (<em>key</em>, <em>value</em>) entry to the current group.
+<p> <p>See also <a href="#readEntry">readEntry</a>().
+
+<h3 class=fn>void <a name="writeEntry-2"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )
+</h3>
+Writes a (<em>key</em>, <em>value</em>) entry to the current group.
+<p> <p>See also <a href="#readEntry">readEntry</a>().
+
+<h3 class=fn>void <a name="writeEntry-3"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, int&nbsp;num )
+</h3>
+Writes a (<em>key</em>, <em>num</em>) entry to the current group.
+<p> <p>See also <a href="#readNumEntry">readNumEntry</a>() and <a href="#readBoolEntry">readBoolEntry</a>().
+
+<h3 class=fn>void <a name="writeEntry-4"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QStringList&nbsp;&amp;&nbsp;lst, const&nbsp;QChar&nbsp;&amp;&nbsp;sep )
+</h3>
+Writes a (<em>key</em>, <em>lst</em>) entry to the current group. The list is
+separated by <em>sep</em>, so the strings must not contain that character.
+<p> <p>See also <a href="#readListEntry">readListEntry</a>().
+
+<h3 class=fn>void <a name="writeEntry-5"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QStringList&nbsp;&amp;&nbsp;lst )
+</h3>
+Writes a (<em>key</em>, <em>lst</em>) entry to the current group.
+<p> The list is
+separated by the two characters "^e", and "^" withing the strings
+is replaced by "^^", such that the strings may contain any character,
+including "^".
+<p> Null strings are also allowed, and are recorded as "^0" in the string.
+<p> First availability: Qtopia 2.0
+<p> <p>See also <a href="#readListEntry">readListEntry</a>().
+
+<h3 class=fn>void <a name="writeEntry-6"></a>Config::writeEntry ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QByteArray&nbsp;&amp;&nbsp;byteArray )
+</h3>
+Writes a (<em>key</em>, <em>byteArray</em>) entry to the current group.  The byteArray is stored as
+a base64 encoded string.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="writeEntryCrypt"></a>Config::writeEntryCrypt ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )
+</h3>
+Writes a weakly encrypted (<em>key</em>, <em>value</em>) entry to the current group.
+<p> Note that the degree of protection offered by the encryption is
+only sufficient to avoid the most casual observation of the configuration
+files.
+<p> <p>See also <a href="#readEntryCrypt">readEntryCrypt</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

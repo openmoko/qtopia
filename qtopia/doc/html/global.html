@@ -1,0 +1,375 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/global.cpp:179 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Global Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Global Class Reference</h1>
+
+<p>The Global class provides application-wide global functions.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="global-h.html">qtopia/global.h</a>&gt;</tt>
+<p><a href="global-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>QUuid <a href="#generateUuid"><b>generateUuid</b></a> ()</li>
+<li class=fn>QStringList <a href="#qtopiaPaths"><b>qtopiaPaths</b></a> ()</li>
+<li class=fn>QString <a href="#defaultButtonsFile"><b>defaultButtonsFile</b></a> ()</li>
+<li class=fn>QString <a href="#homeDirPath"><b>homeDirPath</b></a> ()</li>
+<li class=fn>bool <a href="#renameFile"><b>renameFile</b></a> ( QString&nbsp;from, QString&nbsp;to )</li>
+<li class=fn>QString <a href="#tempName"><b>tempName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;fname )</li>
+<li class=fn>QString <a href="#applicationFileName"><b>applicationFileName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;filename )</li>
+<li class=fn>void <a href="#findDocuments"><b>findDocuments</b></a> ( DocLnkSet&nbsp;*&nbsp;folder, const&nbsp;QString&nbsp;&amp;&nbsp;mimefilter = QString::null )</li>
+<li class=fn>bool <a href="#isDocumentFileName"><b>isDocumentFileName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;file )</li>
+<li class=fn>bool <a href="#isAppLnkFileName"><b>isAppLnkFileName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;file )</li>
+<li class=fn>void <a href="#statusMessage"><b>statusMessage</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;message )</li>
+<li class=fn>QString <a href="#shellQuote"><b>shellQuote</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>QString <a href="#stringQuote"><b>stringQuote</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+<li class=fn>QByteArray <a href="#encodeBase64"><b>encodeBase64</b></a> ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;origData )</li>
+<li class=fn>QByteArray <a href="#decodeBase64"><b>decodeBase64</b></a> ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;encoded )</li>
+<li class=fn>bool <a href="#weekStartsOnMonday"><b>weekStartsOnMonday</b></a> ()</li>
+<li class=fn>void <a href="#setWeekStartsMonday"><b>setWeekStartsMonday</b></a> ( bool&nbsp;v )</li>
+<li class=fn>bool <a href="#mousePreferred"><b>mousePreferred</b></a> ()</li>
+<li class=fn>bool <a href="#hasKey"><b>hasKey</b></a> ( int&nbsp;key )</li>
+<li class=fn>void <a href="#sleep"><b>sleep</b></a> ( unsigned&nbsp;long&nbsp;secs )</li>
+<li class=fn>void <a href="#msleep"><b>msleep</b></a> ( unsigned&nbsp;long&nbsp;msecs )</li>
+<li class=fn>void <a href="#usleep"><b>usleep</b></a> ( unsigned&nbsp;long&nbsp;usecs )</li>
+<li class=fn>const QDawg &amp; <a href="#fixedDawg"><b>fixedDawg</b></a> ()</li>
+<li class=fn>const QDawg &amp; <a href="#addedDawg"><b>addedDawg</b></a> ()</li>
+<li class=fn>const QDawg &amp; <a href="#dawg"><b>dawg</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn>void <a href="#addWords"><b>addWords</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;wordlist )</li>
+<li class=fn>void <a href="#addWords-2"><b>addWords</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;dictname, const&nbsp;QStringList&nbsp;&amp;&nbsp;wordlist )</li>
+<li class=fn>QString <a href="#version"><b>version</b></a> ()</li>
+<li class=fn>QString <a href="#architecture"><b>architecture</b></a> ()</li>
+<li class=fn>QString <a href="#deviceId"><b>deviceId</b></a> ()</li>
+<li class=fn>QString <a href="#ownerName"><b>ownerName</b></a> ()</li>
+<li class=fn>void <a href="#execute"><b>execute</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;c, const&nbsp;QString&nbsp;&amp;&nbsp;document = QString::null )</li>
+<li class=fn>void <a href="#hideInputMethod"><b>hideInputMethod</b></a> ()</li>
+<li class=fn>void <a href="#showInputMethod"><b>showInputMethod</b></a> ()</li>
+<li class=fn>void <a href="#writeHWClock"><b>writeHWClock</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Global class provides application-wide global functions.
+<p> The Global functions are grouped as follows:
+<!-- toc -->
+<ul>
+<li><a href="#1"> User Interface
+</a>
+<li><a href="#1-1"> Document related
+</a>
+<li><a href="#1-2"> Filesystem related
+</a>
+<li><a href="#1-3"> Word list related
+</a>
+<li><a href="#1-4"> Quoting
+</a>
+<li><a href="#1-5"> Hardware
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h3> User Interface
+</h3>
+<a name="1"></a><p> The <a href="#statusMessage">statusMessage</a>() function provides short-duration messages to the
+user. The <a href="#showInputMethod">showInputMethod</a>() function shows the current input method,
+and <a href="#hideInputMethod">hideInputMethod</a>() hides the input method.
+<p> <h3> Document related
+</h3>
+<a name="1-1"></a><p> The <a href="#findDocuments">findDocuments</a>() function creates a set of <a href="doclnk.html">DocLnk</a> objects in a particular folder.
+<p> <h3> Filesystem related
+</h3>
+<a name="1-2"></a><p> Global provides an <a href="#applicationFileName">applicationFileName</a>() function that returns the
+full path of an application-specific file.
+<p> The <a href="#execute">execute</a>() function runs an application.
+<p> <h3> Word list related
+</h3>
+<a name="1-3"></a><p> A list of words relevant to the current locale is maintained by the
+system. The list is held in a <a href="qdawg.html">DAWG</a>
+(implemented by the <a href="qdawg.html">QDawg</a> class). This list is used, for example, by
+the pickboard input method.
+<p> The global QDawg is returned by <a href="#fixedDawg">fixedDawg</a>(); this cannot be updated.
+An updatable copy of the global QDawg is returned by <a href="#addedDawg">addedDawg</a>().
+Applications may have their own word lists stored in <a href="qdawg.html">QDawg</a>s
+which are returned by <a href="#dawg">dawg</a>(). Use <a href="#addWords">addWords</a>() to add words to the
+updateable copy of the global QDawg or to named application
+<a href="qdawg.html">QDawg</a>s.
+<p> <h3> Quoting
+</h3>
+<a name="1-4"></a><p> The <a href="#shellQuote">shellQuote</a>() function quotes a string suitable for passing to a
+shell. The <a href="#stringQuote">stringQuote</a>() function backslash escapes '&#92;' and '"'
+characters.
+<p> <h3> Hardware
+</h3>
+<a name="1-5"></a><p> The <a href="#writeHWClock">writeHWClock</a>() function sets the hardware clock to the system
+clock's date and time.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="addWords"></a>Global::addWords ( const&nbsp;QStringList&nbsp;&amp;&nbsp;wordlist )<tt> [static]</tt>
+</h3>
+Adds <em>wordlist</em> to the <a href="#addedDawg">addedDawg</a>(). Words that are already there
+are not added. Words that are in the 'deleted' dictionary are
+removed from there.
+<p> Note that the addition of words persists between program executions
+(they are saved in the dictionary files), so you should confirm the
+words with the user before adding them.
+<p> This is a slow operation. Call it once with a large list rather than
+multiple times with a small list.
+
+<h3 class=fn>void <a name="addWords-2"></a>Global::addWords ( const&nbsp;QString&nbsp;&amp;&nbsp;dictname, const&nbsp;QStringList&nbsp;&amp;&nbsp;wordlist )<tt> [static]</tt>
+</h3>
+Adds <em>wordlist</em> to the <a href="#dawg">dawg</a>() named <em>dictname</em>.
+<p> Note that the addition of words persists between program executions
+(they are saved in the dictionary files), so you should confirm the
+words with the user before adding them.
+<p> This is a slow operation. Call it once with a large list rather than
+multiple times with a small list.
+
+<h3 class=fn>const&nbsp;<a href="qdawg.html">QDawg</a>&nbsp;&amp; <a name="addedDawg"></a>Global::addedDawg ()<tt> [static]</tt>
+</h3>
+Returns the changeable <a href="qdawg.html">QDawg</a> that contains general
+words for the current locale.
+<p> <p>See also <a href="#fixedDawg">fixedDawg</a>().
+
+<h3 class=fn>QString <a name="applicationFileName"></a>Global::applicationFileName ( const&nbsp;QString&nbsp;&amp;&nbsp;appname, const&nbsp;QString&nbsp;&amp;&nbsp;filename )<tt> [static]</tt>
+</h3>
+Returns the full path for the application called <em>appname</em>, with the
+given <em>filename</em>. Returns QString::null if there was a problem creating
+the directory tree for <em>appname</em>.
+If <em>filename</em> contains "/", it is the caller's responsibility to
+ensure that those directories exist.
+
+<h3 class=fn>QString <a name="architecture"></a>Global::architecture ()<tt> [static]</tt>
+</h3>
+Returns the device architecture string. This is a sequence
+of identifiers separated by "/", from most general to most
+specific (eg. "IBM/PC").
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>const&nbsp;<a href="qdawg.html">QDawg</a>&nbsp;&amp; <a name="dawg"></a>Global::dawg ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
+</h3>
+Returns the <a href="qdawg.html">QDawg</a> with the given <em>name</em>.
+This is an application-specific word list.
+<p> <em>name</em> should not contain "/". If <em>name</em> starts
+with "_", it is a read-only system word list. A string following a
+"-" in the name is interpreted as language (e.g. _words-en_GB -> en_GB/words)
+
+<h3 class=fn>QByteArray <a name="decodeBase64"></a>Global::decodeBase64 ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;encoded )<tt> [static]</tt>
+</h3>
+Decodes base64 encoded <em>encoded</em> and returns a QByteArray containing
+the decoded data.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QString <a name="defaultButtonsFile"></a>Global::defaultButtonsFile ()<tt> [static]</tt>
+</h3>
+Return the name of the defaultbuttons.conf file.
+This allows Qtopia to use a QVFb-supplied defaultbuttons.conf file (if one exists).
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>QString <a name="deviceId"></a>Global::deviceId ()<tt> [static]</tt>
+</h3>
+Returns a unique ID for this device. The value can change, if
+for example, the device is reset.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QByteArray <a name="encodeBase64"></a>Global::encodeBase64 ( const&nbsp;QByteArray&nbsp;&amp;&nbsp;origData )<tt> [static]</tt>
+</h3>
+Encodes <em>origData</em> using base64 mapping and returns a QString containing the
+encoded form.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="execute"></a>Global::execute ( const&nbsp;QString&nbsp;&amp;&nbsp;c, const&nbsp;QString&nbsp;&amp;&nbsp;document = QString::null )<tt> [static]</tt>
+</h3>
+Executes the application identfied by <em>c</em>, passing <em>document</em> if it isn't null.
+<p> Note that a better approach might be to send a QCop message to the
+application's QPE/Application/<em>appname</em> channel.
+
+<h3 class=fn>void <a name="findDocuments"></a>Global::findDocuments ( <a href="doclnkset.html">DocLnkSet</a>&nbsp;*&nbsp;folder, const&nbsp;QString&nbsp;&amp;&nbsp;mimefilter = QString::null )<tt> [static]</tt>
+</h3>
+Finds all documents in the system's document directories which
+match the filter <em>mimefilter</em>, and appends the resulting <a href="doclnk.html">DocLnk</a> objects to <em>folder</em>.
+
+<h3 class=fn>const&nbsp;<a href="qdawg.html">QDawg</a>&nbsp;&amp; <a name="fixedDawg"></a>Global::fixedDawg ()<tt> [static]</tt>
+</h3>
+Returns the unchangeable <a href="qdawg.html">QDawg</a> that contains general
+words for the current locale.
+<p> <p>See also <a href="#addedDawg">addedDawg</a>().
+
+<h3 class=fn><a href="quuid.html">QUuid</a> <a name="generateUuid"></a>Global::generateUuid ()<tt> [static]</tt>
+</h3>
+Returns a Uuid with system-wide uniqueness.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="hasKey"></a>Global::hasKey ( int&nbsp;key )<tt> [static]</tt>
+</h3>
+Returns TRUE if <em>key</em> is available on the device.  The buttons
+may be either fixed function buttons, such as Key_Menu, or user
+mappable buttons, such as Key_F1.
+<p> First availability: Qtopia 2.0
+<p> <p>See also ContextBar and <a href="devicebuttonmanager.html">DeviceButtonManager</a>.
+
+<h3 class=fn>void <a name="hideInputMethod"></a>Global::hideInputMethod ()<tt> [static]</tt>
+</h3>
+Explicitly hide the current input method.
+<p> The current input method is still indicated in the taskbar, but no
+longer takes up screen space, and can no longer be interacted with.
+<p> <p>See also <a href="#showInputMethod">showInputMethod</a>().
+
+<h3 class=fn>QString <a name="homeDirPath"></a>Global::homeDirPath ()<tt> [static]</tt>
+</h3>
+Returns the name of the directory to be used as the current
+users home directory.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="isAppLnkFileName"></a>Global::isAppLnkFileName ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [static]</tt>
+</h3>
+Returns TRUE if <em>file</em> is the filename of an application.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="isDocumentFileName"></a>Global::isDocumentFileName ( const&nbsp;QString&nbsp;&amp;&nbsp;file )<tt> [static]</tt>
+</h3>
+Returns TRUE if <em>file</em> is the filename of a document.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="mousePreferred"></a>Global::mousePreferred ()<tt> [static]</tt>
+</h3>
+
+<p> Returns TRUE if the application can expect the user to
+be able to easily produce mouse events.
+<p> Returns FALSE if the user <em>cannot</em> produce mouse events,
+or chooses not to (eg. does not plug in a mouse).
+<p> Applications may use this to tune interactions.
+<p> Note that you should only call this function after an instance of
+<a href="qpeapplication.html">QPEApplication</a> has been created. This function will return an undefined
+value if called prior to this.  
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="msleep"></a>Global::msleep ( unsigned&nbsp;long&nbsp;msecs )<tt> [static]</tt>
+</h3>
+System independant sleep. Sleep for <em>msecs</em> milliseconds.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>QString <a name="ownerName"></a>Global::ownerName ()<tt> [static]</tt>
+</h3>
+Returns the name of the owner of the device.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QStringList <a name="qtopiaPaths"></a>Global::qtopiaPaths ()<tt> [static]</tt>
+</h3>
+List of base directories containing Qtopia files.
+This is like <a href="qpeapplication.html#qpeDir">QPEApplication::qpeDir</a>(), but allows
+multiple directories to be specified.
+<p> The value is set by the colon-seperated environment
+variable QPEDIRS. The default is just $QPEDIR.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>bool <a name="renameFile"></a>Global::renameFile ( QString&nbsp;from, QString&nbsp;to )<tt> [static]</tt>
+</h3>
+Renames the file <em>from</em> to <em>to</em>.
+Returns TRUE if the operation is successful.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="setWeekStartsMonday"></a>Global::setWeekStartsMonday ( bool&nbsp;v )<tt> [static]</tt>
+</h3>
+Sets the day the user regards their week starting on.
+If <em>v</em> is TRUE, then the week begins on Monday.
+If <em>v</em> is FALSE, then the week begins on Sunday.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>QString <a name="shellQuote"></a>Global::shellQuote ( const&nbsp;QString&nbsp;&amp;&nbsp;s )<tt> [static]</tt>
+</h3>
+Returns the string <em>s</em> with the characters '&#92;', '"', and '$' quoted
+by a preceeding '&#92;', and enclosed by double-quotes (").
+<p> <p>See also <a href="#stringQuote">stringQuote</a>().
+
+<h3 class=fn>void <a name="showInputMethod"></a>Global::showInputMethod ()<tt> [static]</tt>
+</h3>
+Explicitly show the current input method.
+<p> Input methods are indicated in the taskbar by a small icon. If the
+input method is activated (shown) then it takes up some proportion
+of the bottom of the screen, to allow the user to interact (input
+characters) with it.
+<p> <p>See also <a href="#hideInputMethod">hideInputMethod</a>().
+
+<h3 class=fn>void <a name="sleep"></a>Global::sleep ( unsigned&nbsp;long&nbsp;secs )<tt> [static]</tt>
+</h3>
+System independant sleep. Sleep for <em>secs</em> seconds.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>void <a name="statusMessage"></a>Global::statusMessage ( const&nbsp;QString&nbsp;&amp;&nbsp;message )<tt> [static]</tt>
+</h3>
+Displays a status <em>message</em> to the user. This usually appears
+in the taskbar for a short amount of time, then disappears.
+
+<h3 class=fn>QString <a name="stringQuote"></a>Global::stringQuote ( const&nbsp;QString&nbsp;&amp;&nbsp;s )<tt> [static]</tt>
+</h3>
+Returns the string <em>s</em> with the characters '&#92;' and '"' quoted by a
+preceeding '&#92;'.
+<p> <p>See also <a href="#shellQuote">shellQuote</a>().
+
+<h3 class=fn>QString <a name="tempName"></a>Global::tempName ( const&nbsp;QString&nbsp;&amp;&nbsp;fname )<tt> [static]</tt>
+</h3>
+Returns a filename suitable for use as a temporary file using <em>fname</em>
+as a base.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="usleep"></a>Global::usleep ( unsigned&nbsp;long&nbsp;usecs )<tt> [static]</tt>
+</h3>
+System independant sleep. Sleep for <em>usecs</em> microseconds.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>QString <a name="version"></a>Global::version ()<tt> [static]</tt>
+</h3>
+Returns the Qtopia version string. This is of the form:
+<i>major</i>.<i>minor</i>.<i>patchlevel</i> (eg. "1.2.3"),
+possibly followed by a space and special information
+(eg. "1.2.3 beta4").
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>bool <a name="weekStartsOnMonday"></a>Global::weekStartsOnMonday ()<tt> [static]</tt>
+</h3>
+Returns TRUE if the user regards their week as starting on Monday.
+Returns FALSE if the user regards their week as starting on Sunday.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="writeHWClock"></a>Global::writeHWClock ()<tt> [static]</tt>
+</h3>
+Writes the system clock to the hardware clock.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

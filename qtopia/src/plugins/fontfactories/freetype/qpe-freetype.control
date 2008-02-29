@@ -1,0 +1,11 @@
+Files: plugins/fontfactories/libfreetypefactory.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: 1.0.0-9
+Depends: qpe-libqtopia, freetype
+Description: FreeType font renderer.
+ Adds TTF and Type1 support to
+ the Qtopia environment.

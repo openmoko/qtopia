@@ -1,0 +1,134 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/datetimeedit.cpp:452 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QPEDateEdit Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QPEDateEdit Class Reference</h1>
+
+<p>The QPEDateEdit class provides a compact widget for selecting
+a date.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="datetimeedit-h.html">qtopia/datetimeedit.h</a>&gt;</tt>
+<p><a href="qpedateedit-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QPEDateEdit"><b>QPEDateEdit</b></a> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;longDate = FALSE, bool&nbsp;allowNullDate = FALSE )</li>
+<li class=fn><a href="#QPEDateEdit-2"><b>QPEDateEdit</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;dt, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;longDate = FALSE, bool&nbsp;allowNullDate = FALSE )</li>
+<li class=fn>QDate <a href="#date"><b>date</b></a> () const</li>
+<li class=fn>void <a href="#setDateFormat"><b>setDateFormat</b></a> ( DateFormat&nbsp;format )</li>
+<li class=fn>void <a href="#setLongFormat"><b>setLongFormat</b></a> ( bool&nbsp;l )</li>
+<li class=fn>bool <a href="#longFormat"><b>longFormat</b></a> () const</li>
+<li class=fn>bool <a href="#allowNullDate"><b>allowNullDate</b></a> () const</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>virtual void <a href="#setDate"><b>setDate</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )</li>
+<li class=fn>void <a href="#setWeekStartsMonday"><b>setWeekStartsMonday</b></a> ( bool&nbsp;startMonday )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#valueChanged"><b>valueChanged</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QPEDateEdit class provides a compact widget for selecting
+a date.
+<p> QPEDateEdit displays a QPushButton with the selected date displayed.
+When clicked, a <a href="qpedatepicker.html">QPEDatePicker</a> is popped up and a new date can be
+selected.
+<p> The button can display the date in either long or short format.
+<p> It is also possible to allow no to date selected.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QPEDateEdit"></a>QPEDateEdit::QPEDateEdit ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;longDate = FALSE, bool&nbsp;allowNullDate = FALSE )
+</h3>
+Constructs QPEDateEdit with the current date selected.
+<p> If <em>longDate</em> is TRUE the push button will show the selected date in
+long format.
+<p> If <em>allowNullDate</em> is TRUE it is possible to select no date.
+<p> The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+
+<h3 class=fn><a name="QPEDateEdit-2"></a>QPEDateEdit::QPEDateEdit ( const&nbsp;QDate&nbsp;&amp;&nbsp;dt, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;longDate = FALSE, bool&nbsp;allowNullDate = FALSE )
+</h3>
+Constructs QPEDateEdit with the date <em>dt</em>.
+<p> If <em>longDate</em> is TRUE the push button will show the selected date in
+long format.
+<p> If <em>allowNullDate</em> is TRUE it is possible to select no date.
+<p> The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+
+<h3 class=fn>bool <a name="allowNullDate"></a>QPEDateEdit::allowNullDate () const
+</h3>
+Returns TRUE if it is possible to select a null date.
+
+<h3 class=fn>QDate <a name="date"></a>QPEDateEdit::date () const
+</h3>
+Return the currently selected date.
+
+<h3 class=fn>bool <a name="longFormat"></a>QPEDateEdit::longFormat () const
+</h3>
+
+<p> Returns TRUE if dates are displayed in long format.
+<p> <p>See also <a href="#setLongFormat">setLongFormat</a>() and <a href="#setDateFormat">setDateFormat</a>().
+
+<h3 class=fn>void <a name="setDate"></a>QPEDateEdit::setDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )<tt> [virtual slot]</tt>
+</h3>
+Set the current date to <em>d</em>.
+
+<h3 class=fn>void <a name="setDateFormat"></a>QPEDateEdit::setDateFormat ( DateFormat&nbsp;format )
+</h3>
+Set the long date format to <em>format</em>.
+<p> <p>See also <a href="#setLongFormat">setLongFormat</a>().
+
+<h3 class=fn>void <a name="setLongFormat"></a>QPEDateEdit::setLongFormat ( bool&nbsp;l )
+</h3>
+If <em>l</em> is TRUE, display the date in long format.
+<p> <p>See also <a href="#longFormat">longFormat</a>() and <a href="#setDateFormat">setDateFormat</a>().
+
+<h3 class=fn>void <a name="setWeekStartsMonday"></a>QPEDateEdit::setWeekStartsMonday ( bool&nbsp;startMonday )<tt> [slot]</tt>
+</h3>
+Display the calendar with weeks starting on Monday if <em>startMonday</em> is
+TRUE, otherwise weeks start with Sunday.
+
+<h3 class=fn>void <a name="valueChanged"></a>QPEDateEdit::valueChanged ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the date is changed to <em>d</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

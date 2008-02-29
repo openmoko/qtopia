@@ -1,0 +1,114 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/releasenotes.doc:280 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - 2.1.1 Release Notes</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - 2.1.1 Release Notes</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Bug fixes
+</a>
+<li><a href="#3"> Enhancements
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Qtopia 2.1.1 release is a maintenance release and includes the Qtopia PDA and Phone Editions, as well as the Qtopia Core subset edition.
+<p> <h2> Bug fixes
+</h2>
+<a name="2"></a><p> The following bugs have been fixed in Qtopia 2.1.1:
+<p> <ul>
+<li> [MediaPlayer] Fixes problem with unsmooth playback.
+<li> [MediaPlayer] Information dialog is left open after deleting file fix. Memory leak fix. (fixes bug 3644).
+<li> [MediaPlayer] Media dependent functions enabled when no media available fix. Memory leak fix. (fixes bug 3630).
+<li> [MediaPlayer] Hide "select all" and "add to category" options when no files available (fixes bug 3630).
+<li> [MediaPlayer] Handle connection refused socket error (fixes bug 3942).
+<li> [Mail] Widget ignored accepted keyEvent. This fix only applies to phone edition (keypad mode).
+<li> [Mail] Don't accept account w/o name and add missing source files to translation (fixes bug 2555).
+<li> [Mail] Improve the markup of http links when rendering messages.
+<li> [Mail] Fix a problem with SMS messages containing non-unextended ascii characters.
+<li> [Mail] When creating an account don't require the account name to be entered before the dialog can be accepted.
+<li> [Mail] Only allow phone 'number' characters and commas to be included in SMS recipient's addresses (fixes bug 3839).
+<li> [Mail] Hide the SMS and <n><a href="system-customization.html#MMS">MMS</a></n> accounts in the account settings dialog (fixes bug 3468).
+<li> [Mail] Improve logic behind disable/enable of the Get/Send all mail actions (fixes bug 3778).
+<li> [Mail] Prevent crash by doing extra sanity check (fixes bug 3996).
+<li> [Phone] Be verbose about pppd/network module not starting (fixes bug 4033).
+<li> [Phone] Unable to start GPRS session due to modem reporting alternate ready message ie "AT-command Interpreter ready" (fixes bug 4034).
+<li> [Ring Profiles] Don't use cancel to confirm selection (fixes bug 3807).
+<li> [Phone Settings] Double-click needed to expand item fix (fixes bug 3696).
+<li> [Todo] Use translated category labels (fixes bug 3238).
+<li> [Todo] Fix context sensitive help for Tasks.
+<li> [Qpe-server] Connection allowed if user rejects dialog fix (fixes bug 3908).
+<li> [Qpe-server] Stop crash if dtp not created.
+<li> [Qpe-server] Fix a serious crash bug that can happen when deleting a read only file.
+<li> [Qpe-server] Delay the alarms when Qtopia first starts (fixes bug 4007).
+<li> [Photo Edit] Make touchscreen behave like PDA (fixes bug 3981).
+<li> [Photo Edit] Prevent scaling of images to less than 1x1 when loading.
+<li> [Input Methods] Pickers should always be on top. (fixes bug 3921).
+<li> [Input Methods] Function was doing work but doing nothing with the results. Fix.
+<li> [Input Methods] Do some range checking before emiting signals about row/column clicked, or char clicked (fixes bug 4027).
+<li> [Handwriting] To get the combining data for a char set, need to load the whole profile. To keep the order of the list, need to load all the profiles. (fixes bug 3840).
+<li> [Handwriting] Only show relavant char choices given input method type.
+<li> [Handwriting] Handle Esc and Tab keys, as well as marking which special keys are not handled (fixes bug 3733).
+<li> [Handwriting] Enable use with keypad phone when selecting new character.
+<li> [Handwriting] Don't block match if has more or equal strokes to current (fixes bug 3733).
+<li> [Qtopia Desktop] Many improvements to Qtopia Desktop synchronization mechanism.
+<li> [Qtopia Desktop] Set OK button text to "Upload" in upload dialog (fixes bug 1443).
+<li> [Qtopia Desktop] Don't show already installed packages when installing from Documents.
+<li> [SpeedDial] Set default selection for speeddial (fixes bug 3767).
+<li> [Calendar] Enforce the use of correct date (fixes bug 3079).
+<li> [QPEApplication] Screensaver fix.
+<li> [Calculator] pi and e button update the display properly (fixes bug 3844), fix for Backspace button in fractional mode (fixes bug 3836), fix for Backspace button when negative numbers used (fixes bug 3837), Backspace button behaviour (fixes bug 3838), '+/-' can be combined with '.' (fixes bug 3867).
+<li> [libqtopia1] Always prefer maximized dialogs in Qtopia Phone (fixes bug 3881).
+<li> [Language] Show selected text input dictionaries (fixes bug 3409).
+<li> [QAsteroids] Prevent context menu from displaying when game active (fixes bug 3067).
+<li> [Battery Applet] The battery applet should not be empty even when there is no APM enabled and/or the exact battery values aren't available (fixes bug 3575).
+<li> [Battery Applet] Prevent duplication in document list when doclnk changed (fixes bug 3020).
+<li> [qdawg] Increase number of bits for true unicode letter (partially fixes bug 3850).
+</ul>
+<p> <h2> Enhancements
+</h2>
+<a name="3"></a><p> <ul>
+<li> The packaged files have been cleaned up: some files contained an "edited" field and other files contained a comment that included a hardcoded path. With each release the information in these fields changed causing a diff done on the source files to be very noisy. The files have been fixed in such a way that the information is now removed altogether. Therefore, if you diff the 2.1.1 sources against the 2.1.0 sources you will still get a noisy output, but for future releases the diff should be much cleaner.
+<li> Reference documentation has been improved and expanded. The documentation enhancements include: a more comprehensive Style Guide; Getting Started now contains details of Qtopia dependencies; makeqpf documentation; single executable build documentation; details on compiling the required libraries and creating custom configuration files.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

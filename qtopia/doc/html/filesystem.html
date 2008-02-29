@@ -1,0 +1,106 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/storage.cpp:333 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>FileSystem Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FileSystem Class Reference</h1>
+
+<p>The FileSystem class describes a single mount point.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="storage-h.html">qtopia/storage.h</a>&gt;</tt>
+<p><a href="filesystem-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>const QString &amp; <a href="#disk"><b>disk</b></a> () const</li>
+<li class=fn>const QString &amp; <a href="#path"><b>path</b></a> () const</li>
+<li class=fn>const QString &amp; <a href="#name"><b>name</b></a> () const</li>
+<li class=fn>const QString &amp; <a href="#options"><b>options</b></a> () const</li>
+<li class=fn>long <a href="#blockSize"><b>blockSize</b></a> () const</li>
+<li class=fn>long <a href="#totalBlocks"><b>totalBlocks</b></a> () const</li>
+<li class=fn>long <a href="#availBlocks"><b>availBlocks</b></a> () const</li>
+<li class=fn>bool <a href="#isRemovable"><b>isRemovable</b></a> () const</li>
+<li class=fn>bool <a href="#isWritable"><b>isWritable</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The FileSystem class describes a single mount point.
+<p> This class simply returns information about a mount point, including
+file system name, mount point, human readable name, size information
+and mount options information.
+
+<p> <p>See also <a href="storageinfo.html">StorageInfo</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>long <a name="availBlocks"></a>FileSystem::availBlocks () const
+</h3> 
+Returns the number of available blocks on the file system
+
+<h3 class=fn>long <a name="blockSize"></a>FileSystem::blockSize () const
+</h3> 
+Returns the size of each block on the file system.
+
+<h3 class=fn>const QString &amp; <a name="disk"></a>FileSystem::disk () const
+</h3> 
+Returns the file system name, such as /dev/hda3
+
+<h3 class=fn>bool <a name="isRemovable"></a>FileSystem::isRemovable () const
+</h3> 
+Returns flag whether the file system can be removed, such as a CF card
+would be removable, but the internal memory wouldn't
+
+<h3 class=fn>bool <a name="isWritable"></a>FileSystem::isWritable () const
+</h3> 
+Returns flag whether the file system is mounted as writable or read-only.
+Returns FALSE if read-only, TRUE if read and write.
+
+<h3 class=fn>const QString &amp; <a name="name"></a>FileSystem::name () const
+</h3> 
+Returns the translated, human readable name for the mount directory.
+
+<h3 class=fn>const QString &amp; <a name="options"></a>FileSystem::options () const
+</h3> 
+Returns the mount options
+
+<h3 class=fn>const QString &amp; <a name="path"></a>FileSystem::path () const
+</h3> 
+Returns the mount path, such as /home
+
+<h3 class=fn>long <a name="totalBlocks"></a>FileSystem::totalBlocks () const
+</h3> 
+Returns the total number of blocks on the file system
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

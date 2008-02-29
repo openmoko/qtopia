@@ -1,0 +1,197 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/categoryselect.cpp:62 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>CategorySelect Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>CategorySelect Class Reference</h1>
+
+<p>The CategorySelect widget allows users to select Categories with a
+combobox interface.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="categoryselect-h.html">qtopia/categoryselect.h</a>&gt;</tt>
+<p><a href="categoryselect-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#CategorySelect"><b>CategorySelect</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )</li>
+<li class=fn><a href="#CategorySelect-2"><b>CategorySelect</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vl, const&nbsp;QString&nbsp;&amp;&nbsp;appName, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )</li>
+<li class=fn><a href="#CategorySelect-3"><b>CategorySelect</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vl, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )</li>
+<li class=fn><a href="#CategorySelect-4"><b>CategorySelect</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vlCats, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName, bool&nbsp;allCategories, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )</li>
+<li class=fn><a href="#~CategorySelect"><b>~CategorySelect</b></a> ()</li>
+<li class=fn>enum <a href="#SelectorWidget-enum"><b>SelectorWidget</b></a> { ComboBox, ListView }</li>
+<li class=fn>SelectorWidget <a href="#widgetType"><b>widgetType</b></a> () const</li>
+<li class=fn>bool <a href="#containsCategory"><b>containsCategory</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cats )</li>
+<li class=fn>void <a href="#setRemoveCategoryEdit"><b>setRemoveCategoryEdit</b></a> ( bool&nbsp;remove )</li>
+<li class=fn>void <a href="#setAllCategories"><b>setAllCategories</b></a> ( bool&nbsp;all )</li>
+<li class=fn>void <b>setCurrentCategory</b> ( int&nbsp;newCatUid )</li>
+<li class=fn>int <a href="#currentCategory"><b>currentCategory</b></a> () const</li>
+<li class=fn>const QArray&lt;int&gt; &amp; <a href="#currentCategories"><b>currentCategories</b></a> () const</li>
+<li class=fn>QString <a href="#setCategories-2"><b>setCategories</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appName )</li>
+<li class=fn>QString <a href="#setCategories"><b>setCategories</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cals, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName )</li>
+<li class=fn>void <a href="#setFixedWidth"><b>setFixedWidth</b></a> ( int&nbsp;width )</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#slotNewCat"><b>slotNewCat</b></a> ( int&nbsp;newUid )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <b>signalSelected</b> ( int )</li>
+<li class=fn>void <b>editCategoriesClicked</b> ( QWidget * )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The CategorySelect widget allows users to select <a href="categories.html">Categories</a> with a
+combobox interface.
+<p> CategorySelect is useful to provide a QComboBox of Categories for
+filtering (such as in the Contacts table view) or to allow the user
+to select multiple Categories. The allCategories variable sets
+whether the CategorySelect is in filtering or selecting mode.
+<p> In filtering mode, the All and Unfiled categories are added. The
+<p> In selecting mode, the CategorySelect may either be a QComboBox and
+a QToolButton or a QListView with checkable items depending on the
+screen size.
+<p> CategorySelect automatically updates itself if Categories has been
+changed elsewhere in the environment.
+<p> Signals and slots are provided to notify the application of the users
+selections.  A QToolButton is also provided so that users can edit the
+Categories manually.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="SelectorWidget-enum"></a>CategorySelect::SelectorWidget</h3> 
+Chooses a type of widget to use as the selection widget.
+<ul>
+<li><tt>CategorySelect::ComboBox</tt>
+<li><tt>CategorySelect::ListView</tt>
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="CategorySelect"></a>CategorySelect::CategorySelect ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )
+</h3>
+Constructs a category selector with parent <em>parent</em>, name <em>name</em> and
+fixed width <em>width</em>.
+<p> This constructor is provided to make integration with Qt Designer easier.
+
+<h3 class=fn><a name="CategorySelect-2"></a>CategorySelect::CategorySelect ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vl, const&nbsp;QString&nbsp;&amp;&nbsp;appName, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> This constructor accepts an array <em>vl</em> of integers representing <a href="categories.html">Categories</a>.
+<em>appName</em> is used as the visible name string.
+<em>width</em> is an integer used as the fixed width of the widget.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+
+<h3 class=fn><a name="CategorySelect-3"></a>CategorySelect::CategorySelect ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vl, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> This constructor accepts an array <em>vl</em> of integers representing <a href="categories.html">Categories</a>
+for application <em>appName</em>.
+<em>visibleName</em> is the string used when the name of this application is required
+to be displayed.
+<em>width</em> is an integer used as the fixed width of the widget.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+
+<h3 class=fn><a name="CategorySelect-4"></a>CategorySelect::CategorySelect ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;vlCats, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName, bool&nbsp;allCategories, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, int&nbsp;width = 0 )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> This constructor accepts an array <em>vlCats</em> of integers representing
+<a href="categories.html">Categories</a>. <em>appName</em> is the application Categories name to filter on.
+<em>visibleName</em> is the string used when the name of this
+widget is required to be displayed. <em>allCategories</em> sets whether
+the selector offers "All" and "Unfiled" as options. If set to FALSE,
+then the CategorySelect allows the user to select multiple categories. If
+set to TRUE, the CategorySelect allows for only a single category selection.
+<em>width</em> is an integer used as the fixed width of the widget.
+The <em>parent</em> and <em>name</em> parameters are the standard Qt parent parameters.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn><a name="~CategorySelect"></a>CategorySelect::~CategorySelect ()
+</h3>
+Destructs a CategorySelect widget.
+
+<h3 class=fn>bool <a name="containsCategory"></a>CategorySelect::containsCategory ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cats )
+</h3>
+Returns TRUE if the current category contains any categories in <em>cats</em>.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>const QArray&lt;int&gt; &amp; <a name="currentCategories"></a>CategorySelect::currentCategories () const
+</h3>
+Returns a shallow copy of the categories in this CategorySelect.
+
+<h3 class=fn>int <a name="currentCategory"></a>CategorySelect::currentCategory () const
+</h3>
+Return the value of the currently selected category.
+
+<h3 class=fn>void <a name="setAllCategories"></a>CategorySelect::setAllCategories ( bool&nbsp;all )
+</h3>
+Changes this CategorySelect to the All category if <em>all</em> is TRUE.
+
+<h3 class=fn>QString <a name="setCategories"></a>CategorySelect::setCategories ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cals, const&nbsp;QString&nbsp;&amp;&nbsp;appName, const&nbsp;QString&nbsp;&amp;&nbsp;visibleName )
+</h3>
+Resets the CategorySelect to select the <em>cals</em> for
+the <a href="categories.html">Categories</a> assoicated with <em>appName</em> and displays
+the <em>visibleName</em> if the user is selecting and therefore editing
+new Categories.
+
+<h3 class=fn>QString <a name="setCategories-2"></a>CategorySelect::setCategories ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cats, const&nbsp;QString&nbsp;&amp;&nbsp;appName )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Resets the CategorySelect to select <em>cats</em> as
+the <a href="categories.html">Categories</a> associated with <em>appName</em>.
+<p> This function should only be called if <i>filtering</i>
+on Categories and not selecting and therefore possibly
+allowing the user to edit Categories.
+
+<h3 class=fn>void <a name="setFixedWidth"></a>CategorySelect::setFixedWidth ( int&nbsp;width )
+</h3>
+Sets the fixed width of the widget to <em>width</em>.
+
+<h3 class=fn>void <a name="setRemoveCategoryEdit"></a>CategorySelect::setRemoveCategoryEdit ( bool&nbsp;remove )
+</h3>
+Hides the edit section of the CategorySelect widget if <em>remove</em> is TRUE.
+
+<h3 class=fn>void <a name="slotNewCat"></a>CategorySelect::slotNewCat ( int&nbsp;newUid )<tt> [slot]</tt>
+</h3>
+This slot is called when a new Category is available,
+passing the <em>newUid</em> created.
+
+<h3 class=fn><a href="categoryselect.html#SelectorWidget-enum">SelectorWidget</a> <a name="widgetType"></a>CategorySelect::widgetType () const
+</h3>
+Returns the type of widget as a CategorySelect::SelectorWidget.
+<p> First availability: Qtopia 1.6
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

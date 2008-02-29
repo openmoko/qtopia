@@ -1,0 +1,131 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia1/devicebutton.cpp:41 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DeviceButton Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>DeviceButton Class Reference</h1>
+
+<p>The DeviceButton class represents a physical user mappable button on a Qtopia device.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="devicebutton-h.html">qtopia/devicebutton.h</a>&gt;</tt>
+<p><a href="devicebutton-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#DeviceButton"><b>DeviceButton</b></a> ()</li>
+<li class=fn>virtual <a href="#~DeviceButton"><b>~DeviceButton</b></a> ()</li>
+<li class=fn>ushort <a href="#keycode"><b>keycode</b></a> () const</li>
+<li class=fn>QString <a href="#userText"><b>userText</b></a> () const</li>
+<li class=fn>QPixmap <a href="#pixmap"><b>pixmap</b></a> () const</li>
+<li class=fn>ServiceRequest <a href="#pressedAction"><b>pressedAction</b></a> () const</li>
+<li class=fn>ServiceRequest <a href="#heldAction"><b>heldAction</b></a> () const</li>
+<li class=fn>void <a href="#setKeycode"><b>setKeycode</b></a> ( ushort&nbsp;keycode )</li>
+<li class=fn>void <a href="#setUserText"><b>setUserText</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>void <a href="#setPixmap"><b>setPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pmn )</li>
+<li class=fn>void <a href="#setPressedAction"><b>setPressedAction</b></a> ( const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;action )</li>
+<li class=fn>void <a href="#setHeldAction"><b>setHeldAction</b></a> ( const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;action )</li>
+<li class=fn>bool <a href="#operator-eq-eq"><b>operator==</b></a> ( const&nbsp;DeviceButton&nbsp;&amp;&nbsp;e ) const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The DeviceButton class represents a physical user mappable button on a Qtopia device.
+<p> This class represents a physical button on a Qtopia device.    A
+device may have "user programmable" buttons.
+The location and number of buttons will vary from device to
+device.    <a href="#userText">userText</a>() and <a href="#pixmap">pixmap</a>() may be used to describe this button
+to the user in help documentation.
+<p> First availability: Qtopia 1.6
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="DeviceButton"></a>DeviceButton::DeviceButton ()
+</h3>
+Constructs DeviceButton.
+
+<h3 class=fn><a name="~DeviceButton"></a>DeviceButton::~DeviceButton ()<tt> [virtual]</tt>
+</h3>
+Destructs DeviceButton.
+
+<h3 class=fn><a href="servicerequest.html">ServiceRequest</a> <a name="heldAction"></a>DeviceButton::heldAction () const
+</h3>
+Returns the user assigned action for when this button is pressed
+and held.
+
+<h3 class=fn>ushort <a name="keycode"></a>DeviceButton::keycode () const
+</h3>
+Returns the button's keycode.
+
+<h3 class=fn>bool <a name="operator-eq-eq"></a>DeviceButton::operator== ( const&nbsp;<a href="devicebutton.html">DeviceButton</a>&nbsp;&amp;&nbsp;e ) const
+</h3>
+Returns TRUE if this DeviceButton is equal to <em>e</em>.
+
+<h3 class=fn>QPixmap <a name="pixmap"></a>DeviceButton::pixmap () const
+</h3>
+Returns the pixmap for this button.    If there isn't one
+it will return an empty (null) pixmap.
+
+<h3 class=fn><a href="servicerequest.html">ServiceRequest</a> <a name="pressedAction"></a>DeviceButton::pressedAction () const
+</h3>
+Returns the user assigned action for when this button is pressed.
+
+<h3 class=fn>void <a name="setHeldAction"></a>DeviceButton::setHeldAction ( const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;action )
+</h3>
+Set the action to be performed when this button is pressed and
+held to <em>action</em>.
+
+<h3 class=fn>void <a name="setKeycode"></a>DeviceButton::setKeycode ( ushort&nbsp;keycode )
+</h3>
+Sets the keycode <em>keycode</em> that is set when the button is pressed.
+
+<h3 class=fn>void <a name="setPixmap"></a>DeviceButton::setPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pmn )
+</h3>
+Set the pixmap for this button to the <a href="resource.html">Resource</a> names <em>pmn</em>.
+This will ideally match the label on the physical button.
+
+<h3 class=fn>void <a name="setPressedAction"></a>DeviceButton::setPressedAction ( const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;action )
+</h3>
+Set the action to be performed when this button is pressed to <em>action</em>.
+
+<h3 class=fn>void <a name="setUserText"></a>DeviceButton::setUserText ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
+</h3>
+Sets the human readable, translated description of the button to <em>text</em>.
+
+<h3 class=fn>QString <a name="userText"></a>DeviceButton::userText () const
+</h3>
+Returns a human readable, translated description of the button.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

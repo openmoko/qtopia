@@ -1,0 +1,188 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/releasenotes.doc:23 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - 2.2.0 Release Notes</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - 2.2.0 Release Notes</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Enhancements
+</a>
+<li><a href="#3"> Optimizations
+</a>
+<li><a href="#4"> Bug fixes
+</a>
+<li><a href="#5"> Known problems
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Qtopia 2.2.0 release is a minor release and includes the Qtopia Core, PDA, Phone and Refboard Editions.
+<p> <h2> Enhancements
+</h2>
+<a name="2"></a><p> <ul>
+<li> Voice Over IP (VoIP) using SIP
+<li> SMTP authentication using SSL and TLS
+<li> 18bpp LCD support
+<li> Animated GUI
+<li> Live MP3 (SHOUTcast)
+<li> Transparency support
+<li> Dual Display support
+<li> <tt>openssl-0.9.7e</tt> added to 3rdparty libraries
+<li> Translations are available for US-English, GB-English, German, Japanese, Simplified Chinese, Portuguese/Brazilian, Spanish, French and Italian
+<li> Language-specific icon support
+<li> New packaging structure:
+<ul>
+<li> single package containing <n>Qt</n>, Qtopia and TMake
+<li> improved build process
+<li> improved start script
+<li> release and debug ARM builds included in SDK packages
+<li> improved support for <tt>singleexec</tt> builds
+</ul>
+<li> Major update of documentation:
+<ul>
+<li> improved documentation structure
+<li> functional specifications added to documentation
+<li> <n>Qt</n> documentation integrated into Qtopia documentation
+<li> documentation is edition-specific (Phone, PDA, etc)
+<li> significant re-write of large parts of the documentation
+</ul>
+</ul>
+<p> <h2> Optimizations
+</h2>
+<a name="3"></a><p> <ul>
+<li> Cleaned up a range of source code warnings.
+<li> Optimized code for internationalization.
+<li> Improved performance for <tt>mediaplayer</tt>.
+<li> Improved startup time of <tt>qss</tt>, making it available almost immediately after system startup.
+<li> Moved timings for press and hold behavior as well as for multi-tap timeout into default buttons configuration file.
+</ul>
+<p> <h2> Bug fixes
+</h2>
+<a name="4"></a><p> <ul>
+<li> Fixed internal and external dialup mode support for GPRS modems.
+<li> Improved Phone error handling for situations such as SMS store full
+<li> Included an <tt>RPath</tt> when building Qtopia Desktop so that it no longer requires an <tt>LD_LIBRARY_PATH</tt> at run time
+<li> Allow number entry dialog in <tt>qtmail</tt> to return an empty number list 
+<li> Handle mime content-type fields in <tt>qtmail</tt> with multiple parameter entries
+<li> Fixed missing download option for large emails
+<li> Improve handling of IMAP servers
+<li> Fixed the crash when sending SMS vCard (BUG 4589).
+<li> Fixed sending vCard via SMS to Symbian phones didn't work (BUG 4576).
+<li> Fixed the intermittent crash when a <tt>qstring</tt> attempts to delete memory already deleted by a byte array (BUG 4601).
+<li> Prevent a work cell number from being saved as both a work phone and a work cell (BUG 4561).
+<li> Improved display functionality of missed calls (BUG 4402).
+<li> Improved presentation of network server Online status (BUG 89728).
+<li> Allow editing when clicking an edit entry field (BUG 4579).
+<li> Fixed processing of SCKL headers on SMS messages, to correctly receive vCards from Symbian phones (BUG 4576).
+<li> Improved menu positioning (BUG 4578).
+<li> Improved lazy <tt>dlopen</tt> calls made by launched processes (BUG 89590).
+<li> Interpret all Help files as UTF8 (BUG 86513).
+<li> Removed functionality to disable a plug-in after it crashed. A better solution will be implemented in Qtopia 4 (BUG 4560).
+<li> Fixed presentation of <em>missed call</em> information (BUG 4402).
+<li> Fixed audio video/synchronization by setting the audio driver buffer size (BUG 4486).
+<li> Fixed presentation of a window frame not appearing in landscape (BUG 4566).
+<li> Fixed parsing of STK address tags.
+<li> Improved package installer and correctly present available packages (BUG 1438).
+<li> Fixed the crash when receiving a file via IR and <tt>/tmp</tt> is on an unfamiliar device node (BUG 4549).
+<li> Improved initialization of system volume at <tt>qss</tt> startup (BUG 86874).
+<li> Fixed underlining of matching search names in PDA <tt>addressbook</tt> (BUG 4489).
+<li> Fixed the QPE server crash when dialing/selecting a number in the call history (BUG 4542).
+<li> Entering <n><a href="system-customization.html#MMS">MMS</a></n> number now defaults to text entry input method instead of phone number (BUG 4538).
+<li> Fixed the OK Button in the send contact dialog (it did nothing) (BUG 4533).
+<li> Deleting a voice note without restarting the device no longer leaves behind a link in the documents tab (BUG 4462).
+<li> Ensure that dial history is looking at SIM for contact names (BUG 4526).
+<li> Added an option to override default max brightness for <tt>backlight</tt> on device (BUG 87159).
+<li> Ensure that the Info group is selected when the Id key is read after the current configuration group changed (BUG 86081).
+<li> Ensure that input methods are flushed before clearing documents in the <tt>Notes</tt> application (BUG 4132).
+<li> Added <tt>video/3gpp</tt> mime-type (BUG 4527).
+<li> Ensure signal strength is updated immediately after changing themes (BUG 4519).
+<li> Allow PDA Edition to set the volume through QSS instead of modifying <tt>/dev/mixer</tt> (BUG 86874).
+<li> Email address entry dialog in QtMail defaulted to number entry, and made it difficult to enter text (BUG 4508).
+<li> Beaming vCard, events, and <tt>todos</tt> from a Palm to Qtopia with special characters caused them to either not open, or open with the special characters unrecognized (BUG 1041).
+<li> Ensure themes are reloaded correctly and applied for <tt>Call Screen</tt> (BUG 4500).
+<li> Improved Secure key locking by adding security code for locking the phone (BUG 4331).
+<li> Fixed a GUI thread freeze on 2.6 kernels by removing an unnecessary mutex lock (BUG 4497).
+n<li> Allow <tt>simapp</tt> to be closed if the main menu has not been seen, to handle the problem where a dial is pending and the STK response is delayed (BUG 4380).
+<li> Fixed <tt>Worldtime</tt> zoom-in functionality (BUG 4495).
+<li> Removed the redundant <tt>Quality</tt> setting in the <tt>mediarecorder</tt> if the screen is too small to hold it.  The quality can still be changed from the <tt>Options/Settings</tt> menu item (BUG 4494).
+<li> <tt>Contacts</tt> application wasn't changing displayed categories when the user moved a contact from one category to another, which was causing strange behavior (BUG 3755).
+<li> Prevent continual main menu timeout/reloads after <tt>simapp</tt> has exited (BUG 4209).
+<li> The <tt>Addressbook</tt> Send vCard option was giving the user the wrong options for sending method (BUG 4487).
+<li> Fixed inconsistent menu entries in <tt>Call History</tt> (BUG 4484).
+<li> Improved file copy operation and prevent presentation of invalid file links in case of copy failures (BUG 1732).
+<li> Fixed access to call history context menu items in  touch screen phone (BUG 4173).
+<li> Modified definitions of ruled lines to make them visible on all displays (BUG 4428).
+<li> Ensure that a rejected <n>MMS</n> is removed from the system (and not placed in the trash) (BUG 4122).
+<li> Improved counting of new messages by resetting the count when a message is read (rather than whenever <tt>qtmail</tt> is run) (BUG 4482).
+<li> Improved warning dialog when receiving a <em>file too large</em> via IR on a keypad phone (BUG 4476).
+<li> <n>QDL</n> source dialog now functions reliably for PDAs (BUG 4479).
+<li> Fix presentation of background image on <tt>Call Screen</tt> (BUG 4472).
+<li> Setting a SIM contact as the user's business card did not work correctly (BUG 2988).
+<li> Fixed battery charge icon display (BUG 4471).
+<li> Fixed ordering of matched contacts in <tt>QuickDial</tt> (and many other things reliant on <tt>ContactFieldList</tt>) (BUG 4470).
+<li> Prevent the creation of phantom SIM card in the main phone book (BUG 4268).
+<li> Show the correct user name when calling a SIM contact (BUG 4450).
+<li> Clicking on a call history item with no associated contact caused a crash (BUG 4455).
+<li> Make sure the theme cache is regenerated if the phone type is changed between keypad and <tt>touchscreen</tt> (BUG 4449).
+<li> Qtopia Desktop <tt>addressbook</tt> application updates the current item view in the bottom pane while the user is searching (BUG 4433).
+<li> Ensure that Qtopia Desktop always uses a valid time-zone.
+<li> Improved saving of settings changes to the local repository (BUG 4008).
+<li> Added user notification when the SMS store is full.
+<li> Improved quality of large contact images displayed in Contacts by storing both a thumbnail size and a full size image for the contact (BUG 4426).
+<li> Fixed <tt>ThemeCache</tt> scrollbar problems.
+<li> Improved full screen handwriting (BUG 4186).
+<li> Synchronized the PDA clock to the Qtopia Desktop clock.
+</ul>
+<p> <h2> Known problems
+</h2>
+<a name="5"></a><p> <ul>
+<li> Media filesystems limited to 8.3 filenames are problematic due to .desktop files.
+<li> MMS AMR recordings are cut short (with 0.5 sec) when playing back.
+<li> Typed numbers are deleted off the screen too quickly during a call.
+<li> QVFB doesn't gracefully handle a skin directory with missing contents.
+<li> Messages sometimes crashes when sending large attachments ( > 1.5MB ).
+<li> Messages does not gracefully handle out of storage situations.
+<li> Calling an unavailable VoIP contact does not display any message to say they are not connected.
+<li> On Phone edition, there is no way to set system volume besides using the mediaplayer and no way to set the input volume at all.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

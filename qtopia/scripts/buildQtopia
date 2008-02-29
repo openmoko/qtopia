@@ -1,0 +1,133 @@
+#!/bin/sh
+
+# Welcome to the Qtopia build script
+# This script is typically invoked by calling configure and make, and it should not be necessery to
+# call this script directly.
+#
+# Type "buildQtopia -help" on the command line for more verbose help.
+
+#########################################################################################
+#
+#                                 ENVIRONMENT
+#
+# All  environment variables used to build Qtopia are set in a separate script.
+# The same script can also be used as a starting point in case it is desired to
+# build Qtopia manually.
+if [ ! -f config.cache ]; then
+    echo
+    echo "You must run configure before you can run buildQtopia"
+    exit 1
+fi
+. ./config.cache
+#
+#
+#########################################################################################
+
+BUILD="qte qpe"
+MAKECMD=
+
+# Parse the arguments
+while [ -n "$1" ]; do
+    case "$1" in
+    -build)
+        shift
+        BUILD="$1"
+        if [ -n "$2" ]; then
+            shift
+            MAKECMD="$1"
+        fi
+        ;;
+    *)
+        echo "$1: unknown argument"
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+echo $BUILD | grep 'qpe' >/dev/null 2>&1 && qpe=yes || qpe=no
+echo $BUILD | grep 'qte' >/dev/null 2>&1 && qte=yes || qte=no
+
+#
+# This is the exit point for failure.
+#
+die()
+{
+    echo " "
+    echo "***********************************************************************"
+    echo "*  "
+    echo "*                  ERROR: Building Qtopia has failed."
+    echo "*  "
+    echo "* Please search the make output for any error messages."
+    echo "*  "
+    echo "* Hint: If the configuration has changed since the last successfull"
+    echo "* build consider using make clean to ensure that all binaries"
+    echo "* are rebuilt using the new configuration."
+    echo "*  "
+    echo "* For more information about the build process please use a browser"
+    echo "* and go to the getting started section in:"
+    echo "*     $QPEDIR/doc/html/index.html "
+    echo "*  "
+    echo "***********************************************************************"
+    exit 1
+}
+
+# Ensure the tools are up-to-date
+$QTOPIA_DEPOT_PATH/scripts/buildQtopiaTools -check || exit 1
+
+#########################################################################################
+#
+#                                 BUILD
+#
+#
+
+if [ $qte = yes ]; then
+(
+    echo " "
+    echo "***********************************"
+    echo "********* Build Qt/Embedded *******"
+    echo "***********************************"
+    echo "QTE_CFG=\"$QTE_CFG\""
+    echo " "
+    . ./setQteEnv
+    cd $QTEDIR
+
+    if [ -n "$MAKECMD" ]; then
+        eval make $MAKECMD
+    else
+        rm -f $QTDIR/src/tools/qconfig-qpe.h $QTDIR/include/qconfig-qpe.h
+        cp -fp $QTOPIA_DEPOT_PATH/src/qt/qconfig-qpe.h $QTDIR/src/tools/qconfig-qpe.h
+        # make us "compatible" with the old depot build style
+        cp -fp $QTOPIA_DEPOT_PATH/src/qt/qconfig-qpe.h $QTDIR/include/qconfig-qpe.h
+        eval "echo yes | ./configure" $QTE_CFG "|| die"
+        mkdir -p $QPEDIR/lib
+        cd $QTDIR/src
+        make || die
+    fi
+)
+fi
+
+if [ $qpe = yes ]; then
+(
+    echo " "
+    echo "***********************************"
+    echo "********* Build Qtopia ************"
+    echo "***********************************"
+    echo "QPE_CFG=\"$QPE_CFG\""
+    echo " "
+    . ./setQpeEnv
+    cd $QPEDIR
+
+    if [ -n "$MAKECMD" ]; then
+        eval make $MAKECMD
+    else
+        eval "$QTOPIA_DEPOT_PATH/configure" $QPE_CFG "|| die"
+        prefix=`awk -F= '/^PREFIX/{print $2}' $QPEDIR/src/Makefile`
+
+        make || die
+    fi
+)
+fi
+
+exit 0
+

@@ -1,0 +1,99 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/xmlreader.cpp:170 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>XmlHandler Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>XmlHandler Class Reference</h1>
+
+<p>The XmlHandler class is a XML document structure holder.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="xmlreader-h.html">qtopia/xmlreader.h</a>&gt;</tt>
+<p><a href="xmlhandler-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#XmlHandler"><b>XmlHandler</b></a> ()</li>
+<li class=fn><a href="#~XmlHandler"><b>~XmlHandler</b></a> ()</li>
+<li class=fn>bool <a href="#startDocument"><b>startDocument</b></a> ()</li>
+<li class=fn>bool <a href="#endDocument"><b>endDocument</b></a> ()</li>
+<li class=fn>bool <a href="#startElement"><b>startElement</b></a> ( const QString &amp;, const QString &amp;, const&nbsp;QString&nbsp;&amp;&nbsp;qName, const&nbsp;QXmlAttributes&nbsp;&amp;&nbsp;attr )</li>
+<li class=fn>bool <a href="#endElement"><b>endElement</b></a> ( const QString &amp;, const QString &amp;, const QString &amp; )</li>
+<li class=fn>bool <a href="#characters"><b>characters</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;ch )</li>
+<li class=fn>Node * <a href="#firstNode"><b>firstNode</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The XmlHandler class is a XML document structure holder.
+<p> This class provides a tree of Nodes that developers can use to organise their
+XML data.
+<p> 
+<p>See also <a href="node.html">Node</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="XmlHandler"></a>XmlHandler::XmlHandler ()
+</h3>
+Creates an empty XmlHandler.
+
+<h3 class=fn><a name="~XmlHandler"></a>XmlHandler::~XmlHandler ()
+</h3>
+Destructs an XmlHandler.
+
+<h3 class=fn>bool <a name="characters"></a>XmlHandler::characters ( const&nbsp;QString&nbsp;&amp;&nbsp;ch )
+</h3>
+Appends the data <em>ch</em> to the current <a href="node.html">Node</a>.
+
+<h3 class=fn>bool <a name="endDocument"></a>XmlHandler::endDocument ()
+</h3>
+Returns TRUE if the XmlHandler contains a valid tree of Nodes.
+
+<h3 class=fn>bool <a name="endElement"></a>XmlHandler::endElement ( const QString &amp;, const QString &amp;, const QString &amp; )
+</h3>
+Ends a sub-element safely.
+
+<h3 class=fn><a href="node.html">Node</a>&nbsp;* <a name="firstNode"></a>XmlHandler::firstNode () const
+</h3> 
+Returns the root <a href="node.html">Node</a> of the tree.
+
+<h3 class=fn>bool <a name="startDocument"></a>XmlHandler::startDocument ()
+</h3>
+Initialises an XmlHandler with a root <a href="node.html">Node</a> named DOCUMENT.
+Returns TRUE if successful.
+
+<h3 class=fn>bool <a name="startElement"></a>XmlHandler::startElement ( const QString &amp;, const QString &amp;, const&nbsp;QString&nbsp;&amp;&nbsp;qName, const&nbsp;QXmlAttributes&nbsp;&amp;&nbsp;attr )
+</h3>
+Creates a new sub-element, with name <em>qName</em> and attributes <em>attr</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

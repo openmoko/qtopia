@@ -1,0 +1,684 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/phonelibrary.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Phone Library</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Phone Library</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Basic Architecture
+</a>
+<li><a href="#3"> Dialing a Number
+</a>
+<li><a href="#4"> Receiving an Incoming SMS Message
+</a>
+<li><a href="#5"> Detailed Example of the Role of the Phone Server
+</a>
+<li><a href="#6"> Supported Standards
+</a>
+<li><a href="#7"> Adding a New Handler
+</a>
+<li><a href="#8"> AT Control Commands used by Qtopia Phone Edition
+</a>
+<ul>
+<li><a href="#8-1"> General Commands (<n>GSM</n> 07.07, section 5)
+</a>
+<li><a href="#8-2"> Call Control Commands (<n>GSM</n> 07.07, section 6)
+</a>
+<li><a href="#8-3"> Network Services Related Commands (<n>GSM</n> 07.07, section 7)
+</a>
+<li><a href="#8-4"> Mobile Equipment Control and Status Commands (<n>GSM</n> 07.07, section 8)
+</a>
+<li><a href="#8-5"> SMS Commands (<n>GSM</n> 07.05)
+</a>
+<li><a href="#8-6"> Multiplexing Commands (<n>GSM</n> 07.10)
+</a>
+<li><a href="#8-7"> Other Commands
+</a>
+<li><a href="#8-8"> Phone-specific Commands
+</a>
+</ul>
+<li><a href="#9"> WAP Push and Over-The-Air (OTA) Support
+</a>
+<ul>
+<li><a href="#9-1"> WAP Push
+</a>
+<li><a href="#9-2"> Over-The-Air (OTA)
+</a>
+</ul>
+<li><a href="#10"> Video Calls 
+</a>
+<ul>
+<li><a href="#10-1"> Overview
+</a>
+<li><a href="#10-2"> API Example
+</a>
+<li><a href="#10-3"> Modem Requirements
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the architecture of the <b>qtopiaphone</b> library
+which is used for example, to access phone hardware to send and receive calls,
+send SMS messages and access the SIM card.
+<p> <h2> Basic Architecture
+</h2>
+<a name="2"></a><p> The basic architecture is shown in the following diagram:
+<p> <center><img src="../pics/phonelibrary.png" width="276" height="310"></center> 
+<p> An application, such as the dialer, uses C++ APIs to access information
+about a phone line, the phone book in the SIM card, or the SMS message
+system.
+<p> Requests are transmitted to the phone server, which co-ordinates access
+to the phone functionality from multiple applications.  This allows the
+dialer and the SMS messaging client to access the phone hardware
+at the same time.
+<p> The phone server then passes the requests to the device handler,
+which communicates with the hardware device to effect the requests.
+Responses and status messages are passed back in the reverse direction.
+<p> Currently, a device handler accessed via a serial port, is implemented based on AT commands.
+This is the recommended way to interface phone functionality with Qtopia Phone.
+If AT commands are not available, the back-end handler can be replaced
+with code that effects the requests in some other manner.
+<p> The remainder of this document demonstrates the flow of requests and
+responses through the system using the following examples:
+<ul>
+<li> Dialing a Number
+<li> Receiving an Incoming SMS Message.
+</ul>
+<p> <h2> Dialing a Number
+</h2>
+<a name="3"></a><p> To dial a number, the application:
+<ul>
+<li> creates an instance of the <tt>PhoneLine</tt> class
+<li> calls the <tt>PhoneLine::createCall</tt> method to retrieve an
+instance of the <tt>PhoneCall</tt> class that represents
+the call
+<li> calls the <tt>PhoneCall::dial</tt> method to dial the number
+<li> uses <tt>PhoneCall::dial</tt>  to transmit the request to the
+phone server.
+</ul>
+<p> Usually there is only one instance of the <tt>PhoneLine</tt> class per application. 
+However, there may be multiple instances of <tt>PhoneCall</tt> if calls are on hold or a multi-party
+conference call is in progress.
+<p> The phone library transmits the dial request to the phone server using
+<a href="http://doc.trolltech.com/qtopia1.6/html/qcop.html">QCop</a> and 
+the phone server:
+<ul>
+<li> obtains an instance of <tt>PhoneLineAt</tt>, which represents
+the AT command handler for the phone line 
+<li> calls the <tt>PhoneLineAt::createCall</tt> method to create
+an instance of the <tt>PhoneCallAt</tt> class.
+<li> calls the <tt>PhoneCallAt::dial</tt> method to dial the
+number.
+<li> uses <tt>PhoneCallAt::dial</tt> will then send the "<tt>ATD</tt>
+command to the phone device to effect the dial request.
+</ul>
+<p> The sequence of operations mirrors the sequence in the application with the only
+difference being in the final step where: 
+<ul>
+<li> the application sends the request to the phone server
+<li> the handler performs low-level device operations directly. 
+</ul>
+<p> If the device does not support AT commands, new handler
+classes need to be written, modelled on the structure of <tt>PhoneLineAt</tt> and
+<tt>PhoneCallAt</tt>.  The exact details of how the device effects
+the dial command is beyond the scope of this document.
+<p> <h2> Receiving an Incoming SMS Message
+</h2>
+<a name="4"></a><p> When the AT command handler starts it registers for new message
+indications using the <tt>AT+CNMI</tt> command.  This causes the
+phone device to send <tt>+CMTI</tt> indications whenever a new
+message arrives at the device.
+<p> When <tt>+CMTI</tt> is detected by <tt>SMSRequestAt::notification</tt>, it causes the
+AT command handler to initiate the message count check - 
+<tt>SMSRequestAt::check</tt>.  Once the check completes, the number of messages is transmitted to the
+application via the <tt>SMSRequestPrivate::messageCount</tt> signal.
+An alternative device handler would similarly need to arrange for the
+<tt>SMSRequestPrivate::messageCount</tt> signal to be emitted
+when new messages arrive.
+<p> The <tt>SMSRequestPrivate::messageCount</tt> signal is broadcast on the <tt>QPE/Phone</tt> QCop channel.
+Applications listen on this channel to receive notification of new messages. 
+More than one application can listen for new message notifications, but only one (usually the mail client) should subsequently retrieve the message contents.
+<p> When the mail client receives the signal, it calls the
+<tt>SMSRequest::firstMessage</tt> and <tt>SMSRequest::nextMessage</tt> methods to retrieve the
+SMS message contents from the incoming queue.  Each message is returned to
+the application via the <tt>SMSRequestPrivate::fetched</tt>
+signal.
+<p> Finally, once the message is received by the application it is deleted
+from the incoming queue using <tt>SMSRequest::deleteMessage</tt>.
+The application saves the message in another location so that the message
+is never permanently lost and the message store in the device is treated as a
+temporary buffer.
+<p> <b>Note:</b> Signals rather than function returns are used to pass messages and status reports back 
+to the application.  This is because the entire phone system is asynchronous and the 
+information may not be available when the request is made and so must be transmitted later.
+<p> <h2> Detailed Example of the Role of the Phone Server
+</h2>
+<a name="5"></a><p> This section provides an example of the methods to route applications requests through the phone server to the AT command handlers, and describes how the responses are returned to the application.
+Using the <tt>SIMIdentity</tt> query type, which returns the IMSI number of the SIM the methods used are as follows:
+<ul>
+<li> The <tt>PhoneLine</tt> object is created to handle the request:
+<pre>
+     PhoneLine *line = new PhoneLine();
+     </pre>
+ 
+<li> The <tt>PhoneLineQCop</tt> object is created to transmit requests from the application to the phone server.
+<li> Responses to queries are returned via the <tt>queryResult</tt> signal
+<p> <li> A slot is created and the signal is connected:
+<pre>
+   connect( line, SIGNAL(queryResult(PhoneLine::QueryType, const QString&amp;)),
+            this, SLOT(simIdResult(PhoneLine::QueryType, const QString&amp;)) );
+   ...
+   void AppClass::simIdResult( PhoneLine::QueryType type, const QString&amp; value )
+   {
+       // Process the result "value".
+       ...
+   }
+   </pre>
+ 
+<li> Once the signal has been connected, the application issues the query
+as follows:
+<pre>
+   line-&gt;query( PhoneLine::SIMIdentity );
+   </pre>
+ 
+<li> <tt>PhoneLine::query</tt> calls the private
+phone handler method <tt>query</tt>. For this example the <tt>query</tt> method is 
+<tt>PhoneLineQCop::query</tt> which sends a QCop message to the phone server
+on the <tt>QPE/Phone</tt> channel.
+<p> <li> The phone server listening on the <tt>QPE/Phone</tt> channel, receives the message in
+<tt>PhoneServerQCop::phoneMessage</tt> and dispatches it to its own <tt>PhoneLine</tt> object.
+<p> <b>Note:</b> The <tt>PhoneLine</tt> for the phone server contains a private <tt>PhoneLineAt</tt>
+object rather than the <tt>PhoneLineQCop</tt> object used by  applications.
+<p> <li> The phone server calls <tt>PhoneLineAt::query</tt> which determines the AT command to execute to perform the request.  In this case, the command is <tt>AT+CIMI</tt>.
+<li> After the command is executed, the <tt>PhoneLineAt::queryDone</tt> method decodes the response
+and emits the <tt>queryResult</tt> signal.
+<li> The <tt>queryResult</tt> signal is intercepted by the phone server
+<tt>PhoneServerQCop::queryResult</tt> in <tt>phoneserver.cpp</tt>) and
+turned into a QCop message on the <tt>QPE/Phone</tt> channel.
+<p> <li> The QCop message is received in the application by
+<tt>PhoneLineQCop::stateListen</tt> which emits the <tt>queryResult</tt> signal to the application's
+<tt>AppClass::simIdResult</tt> slot.
+<p> </ul>
+This completes the example.  Other commands and notifications within the
+phone library follow a similar pattern.
+<p> <h2> Supported Standards
+</h2>
+<a name="6"></a><p> The following standards are currently supported:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Standard  <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top">GSM 03.40
+<td valign="top">Format information for SMS messages.
+<tr bgcolor="#d0d0d0">
+<td valign="top">GSM 11.11 <n>GSM 11.14</n>
+<td valign="top">SIM application toolkit.
+<tr bgcolor="#f0f0f0">
+<td valign="top">WAP-183-PROVCONT, 
+OMA-WAP-PROVCONT
+<td valign="top">Format for over-the-air (OTA) provisioning messages.
+<tr bgcolor="#d0d0d0">
+<td valign="top">WAP-192-WBXML
+<td valign="top">Format for WBXML messages.
+<tr bgcolor="#f0f0f0">
+<td valign="top">WAP-203-WSP
+<td valign="top">Wireless session protocol specification.
+<tr bgcolor="#d0d0d0">
+<td valign="top">WAP-205-MMSARCHOVERVIEW,
+WAP-206-MMSCTR,
+WAP-209-MMSENCAPSULATION,
+OMA-MMS-ARCH,
+OMA-MMS-CONF,
+OMA-MMS-CTR,
+OMA-MMS-ENC
+<td valign="top">Format and handling for the <a href="system-customization.html#MMS">MMS</a> messaging service.
+<tr bgcolor="#f0f0f0">
+<td valign="top">WAP-235
+<td valign="top">Push over-the-air protocol.
+<tr bgcolor="#d0d0d0">
+<td valign="top">Nokia Over The-Air Settings Specification 7.0
+<td valign="top">Format for over-the-air (OTA) provisioning messages (Nokia compatible).
+<tr bgcolor="#f0f0f0">
+<td valign="top">Nokia Smart Messaging Specification 3.0.0
+<td valign="top">Port numbers for Nokia-style push messages for applications such as for vcard and vcalendar.
+</table></center>
+<p> <h2> Adding a New Handler
+</h2>
+<a name="7"></a><p> The process to add a new device handler is as follows:
+<ul>
+<li> Inherit the <tt>PhoneLinePrivate</tt> class and override its functionality, using
+the <tt>PhoneLineAt</tt> class used as a guide to the necessary structure.
+<li> Modify the <tt>PhoneLinePrivate::create</tt> method to return an instance of the user-defined 
+class instead of <tt>PhoneLineAt</tt>.
+</ul>
+<p> <h2> AT Control Commands used by Qtopia Phone Edition
+</h2>
+<a name="8"></a><p> The following sections list the AT control commands that a device is expected
+to support, however, a device may support more commands than listed.  For
+example, some phones support both <tt>AT+CGMI</tt> and <tt>AT+GMI</tt> to retrieve
+the manufacturer name, while only <tt>AT+CGMI</tt> is required.
+<p> In the future, additional commands from the <n><n>GSM</n></n>
+specifications 07.05 and 07.07 may be required, so it is recommended that all device
+manufacturers fully comply with <n>GSM</n> specifications.
+<p> The categories of control commands are:
+<ul>
+<li> General Commands (<n>GSM</n> 07.07, Section 5)
+<li> Call Control Commands (<n>GSM</n> 07.07, Section 6)
+<li> Network Services Related Commands (<n>GSM</n> 07.07, Section 7)
+<li> Mobile Equipment Control and Status Commands (<n>GSM</n> 07.07, Section 8)
+<li> SMS Commands (<n>GSM</n> 07.05)
+<li> Multiplexing Commands (<n>GSM</n> 07.10)
+<li> Other Commands
+<li> Phone-Specific Commands
+</ul>
+<p> <h3> General Commands (<n>GSM</n> 07.07, section 5)
+</h3>
+<a name="8-1"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CGMI</tt>
+<td valign="top">Identify manufacturer
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CGMM</tt>
+<td valign="top">Identify model
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CGMR</tt>
+<td valign="top">Identify revision
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CGSN</tt>
+<td valign="top">Identify serial number (of device, not SIM card)
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CSCS</tt>
+<td valign="top">Select character set
+</table></center>
+<p> <h3> Call Control Commands (<n>GSM</n> 07.07, section 6)
+</h3>
+<a name="8-2"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>ATDnnn;</tt>
+<td valign="top">Dial "nnn" in voice mode.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>ATH</tt>
+<td valign="top">Hangup the current call.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>ATA</tt>
+<td valign="top">Answer an incoming call.
+</table></center>
+<p> <b>Note:</b> When the <tt>ATD</tt> command is used with a trailing '<b>;</b>', it must
+return immediately to command mode after command processing.
+Some phones have been known to wait until the receiving party answers
+the call, or busy is detected, before returning to command mode.
+Such phones are not compliant with the <n>GSM</n> specification and 
+will not be supported.
+<p> The <n>GSM</n> specification permits <tt>ATD</tt> to be used in a special mode
+for dialing directly from phone books. This mode is not required as 
+Qtopia implements its own algorithm for converting phone book entries
+to numbers.
+<p> It is important that <tt>ATD</tt> recognise numbers starting with <tt>+</tt>
+as international, and all other numbers as being local.
+<p> <h3> Network Services Related Commands (<n>GSM</n> 07.07, section 7)
+</h3>
+<a name="8-3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CNUM</tt>
+<td valign="top">Subscriber number
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CREG</tt>
+<td valign="top">Network registration
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+COPS</tt>
+<td valign="top">Operator selection
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CLCK</tt>
+<td valign="top">Facility lock
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CPWD</tt>
+<td valign="top">Change password
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CLIP</tt>
+<td valign="top">Enable caller line identification
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CLIR</tt>
+<td valign="top">Caller ID restriction
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CCUG</tt>
+<td valign="top">Closed user group
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CCFC</tt>
+<td valign="top">Call forwarding number and conditions
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CCWA</tt>
+<td valign="top">Call waiting
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CHLD</tt>
+<td valign="top">Call hold and multiparty
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CTFR</tt>
+<td valign="top">Call transfer
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CAOC</tt>
+<td valign="top">Advice of charge
+</table></center>
+<p> <h3> Mobile Equipment Control and Status Commands (<n>GSM</n> 07.07, section 8)
+</h3>
+<a name="8-4"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CPAS</tt>
+<td valign="top">Phone activity status
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CFUN</tt>
+<td valign="top">Set phone functionality
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CPIN</tt>
+<td valign="top">Enter PIN
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CBC</tt>
+<td valign="top">Battery charge
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CSQ</tt>
+<td valign="top">Signal quality
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CPBS</tt>
+<td valign="top">Select phonebook memory storage
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CPBR</tt>
+<td valign="top">Read phonebook entries
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CPBW</tt>
+<td valign="top">Write phonebook entries
+</table></center>
+<p> The phonebook commands are intended for accessing phone books stored
+on SIM cards, typically the SM phone book. However, Qtopia Phone software
+provides its own mechanisms for managing phone books stored within the
+phone memory.
+<p> <h3> SMS Commands (<n>GSM</n> 07.05)
+</h3>
+<a name="8-5"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CPMS</tt>
+<td valign="top">Preferred message storage
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CMGF</tt>
+<td valign="top">Message format (we use format 0: PDU)
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CSCA</tt>
+<td valign="top">Service centre address
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CNMI</tt>
+<td valign="top">Enable new message indications
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CSCB</tt>
+<td valign="top">Select cell broadcast message types
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CMGL</tt>
+<td valign="top">List messages
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CMGR</tt>
+<td valign="top">Read message
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CMGS</tt>
+<td valign="top">Send message
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CMGD</tt>
+<td valign="top">Delete message
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CMMS</tt>
+<td valign="top">More messages to send
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>+CMTI</tt>
+<td valign="top">Notification of SMS message delivery.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>+CBMI</tt>
+<td valign="top">Notification of a cell broadcast message.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>+CDSI</tt>
+<td valign="top">Notification of an SMS status report message.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>+CBM</tt>
+<td valign="top">Notification of a directly delivered cell broadcast message.
+</table></center>
+<p> It is assumed that incoming SMS messages are stored in a temporary
+storage area on the device and that Qtopia will retrieve
+the messages using the <tt>AT+CMGL</tt> and <tt>AT+CMGR</tt> commands.
+<p> <h3> Multiplexing Commands (<n>GSM</n> 07.10)
+</h3>
+<a name="8-6"></a><p> Qtopia Phone expects to use <n>GSM</n> 07.10 multiplexing to establish
+multiple communications paths with the modem.
+The modem needs to support the AT+CMUX command plus the basic packet mode
+in <n>GSM</n> 07.10.  If the modem supports some other form of multiplexing, then it 
+is necessary to modify <tt>muxdevice.cpp</tt> in the source code.
+Multiplexing support is required for GPRS.
+<p> <h3> Other Commands
+</h3>
+<a name="8-7"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+VTS</tt>
+<td valign="top">DTMF and tone generation (<n>GSM</n> 07.07, Appendix C)
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CVIB</tt>
+<td valign="top">Select vibrate mode
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CPUC</tt>
+<td valign="top">Price per unit
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CIMI</tt>
+<td valign="top">SIM identity
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT+CHSC</tt>
+<td valign="top">Get phone status (only needed if AT+CPAS is not available)
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT+CLCC</tt>
+<td valign="top">List active calls
+</table></center>
+<p> <h3> Phone-specific Commands
+</h3>
+<a name="8-8"></a><p> The <n>GSM</n> specification lacks some functionality required to provide a complete
+feature set. The most important of these is <em>Call Monitoring</em>, that is, when an outgoing
+dial request is made, a method of detecting call acceptance or rejection by the other
+party is required.
+<p> Ericsson phones have an <tt>AT*ECAM</tt> command that is used to turn on
+supplementary call monitoring events. That is, each time the call status
+changes, the phone emits an <tt>*ECAV</tt> message with the details.
+It is recommended that device manufacturers provide these or similar commands.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>AT*ECAM</tt>
+<td valign="top">Turn on call monitoring
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>AT*ESIL</tt>
+<td valign="top">Select silent mode
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>*ECAV</tt>
+<td valign="top">Unsolicited response for <tt>AT*ECAM</tt>
+</table></center>
+<p> <a name="push"></a>
+<h2> WAP Push and Over-The-Air (OTA) Support
+</h2>
+<a name="9"></a><p> <h3> WAP Push
+</h3>
+<a name="9-1"></a><p> Qtopia Phone intercepts WAP push messages arriving via SMS and
+delivers them to an interested application.
+<p> When an SMS message is received with a destination port
+number, Qtopia will attempt to find a service that can handle it by:
+<ul>
+<li> looking for a service named <tt>Push/T</tt> where <tt>T</tt> is
+the MIME type from the WAP push header
+<li> looking for a service named <tt>smsapp/N</tt> where <tt>N</tt> is the port number in decimal.
+</ul>
+<p> If a matching service is found then:
+<ul>
+<li> if the SMS message is
+sent to the corresponding application via QCop.  The QCop
+message is <tt>smsApplicationDatagram(SMSMessage)</tt>, sent on
+the application's primary QCop channel.  Thus, applications
+can register to receive special SMS messages.
+<li> if the application fails to process an SMS message sent 
+via QCop, then the message will be lost.  It is important that such
+applications take steps to save the message if necessary.
+</ul>
+<p> If a matching service is not found:
+<ul>
+<li> the SMS message
+will be delivered to the <tt>qtmail</tt> application and saved by that application.
+</ul>
+<p> <h3> Over-The-Air (OTA)
+</h3>
+<a name="9-2"></a><p> Qtopia Phone provides built-in support for:
+<ul>
+<li> OTA network configuration messages with the MIME type <tt>application/vnd.wap.connectivity-wbxml</tt>
+which are handled by <tt>netsetup</tt> program. 
+<p> This is described in the WAP/OMA standards <tt>wap-183-provcont-20010724-a.pdf</tt> and
+<tt>OMA-WAP-ProvCont-V1_1-20021112-C.pdf</tt>.  
+<p> Both of these can be found at <a href="http://www.openmobilealliance.org/tech/affiliates/wap/wapindex.html">Open Mobile Alliance</a>. 
+<p> <li> network configuration messages, with  MIME type <tt>application/x-wap-prov.browser-settings</tt>.
+which are handled by <tt>netsetup</tt> program. 
+<p> This is described in the Nokia Over The Air Settings Specification 7.0.
+<p> <li> MMS notifications that are sent via SMS and are handled by <tt>qtmail</tt>.
+These notifications have the MIME type <tt>application/vnd.wap.mms-message</tt>.
+<p> This is described in the WAP/OMA standard <tt>oma-wap-mms-enc-v1_1-20021030-c.pdf</tt>. 
+</ul>
+<p> Other OTA messages are handled on a type-by-type basis by vendor-supplied
+applications, via the Qtopia Services system.  See
+<a href="qtopia-services.html">Qtopia Application Services</a> for more information
+on configuring a service.
+<p> <h2> Video Calls 
+</h2>
+<a name="10"></a><p> The phone library provides a facility for applications supporting video calls, to interface with the underlying communications hardware in order to send and receive data over the network. A video call application is not provided as part of Qtopia.
+<p> <h3> Overview
+</h3>
+<a name="10-1"></a><p> A video call application, manages video calls similarly to voice calls with the APIs provided by the <tt>PhoneLine</tt> and <tt>PhoneCall</tt> classes. Once the application detects that a video call object in the system has been connected, it can then connect via a TCP socket to the address <tt>localhost:51423</tt> to send and receive data over the network. This socket is called the <em>video data socket</em>.
+<p> Qtopia performs buffering of data:
+<ul>
+<li> in response to flow control signals from the modem 
+<li> when data is received from the modem but no application is connected to the video data socket to receive it.
+</ul>
+<p> Generally, an application can connect to the video data socket, transfer data as required and not be concerned about loss or flow of data between the modem and Qtopia.
+<p> <h3> API Example
+</h3>
+<a name="10-2"></a><p> The following is a simple example of the APIs used to:
+<ul>
+<li> create outgoing video calls
+<li> accept incoming video calls
+<li> hang up video calls.
+</ul>
+<p> <pre>
+MyClass::MyClass()
+{
+    myLine = new PhoneLine(); // Gain access to a PhoneLine instance
+    connect( line, SIGNAL(newCall(const PhoneCall&amp;)), this, SLOT(newCall(const PhoneCall&amp;)) ); // Monitor new PhoneCall objects
+}
+
+void MyClass::createVideoCall( const QString &amp;phoneNumber )
+{
+    // Create an outgoing video call. MyClass::newCall will detect the new PhoneCall object
+    myLine-&gt;startVideo( phoneNumber );
+}
+
+void MyClass::newCall( const PhoneCall &amp;nc )
+{
+    if( nc.callType() == PhoneCall::Video ) {
+        if( myVideoCall != PhoneCall::null )
+            return; // Only one video call at a time
+
+        myVideoCall = nc; // New video call object in the system
+        myVideoCall.connectStateChanged( this, SLOT(videoCallStateChanged(const PhoneCall&amp;)) ); // Monitor its state
+    }
+}
+
+void MyClass::videoCallStateChanged( const PhoneCall &amp;vc ) { // video call object's state changed
+    // vc == myVideoCall
+    if( myVideoCall.connected() ) { 
+        // Video call is connected, connect TCP socket to locahost:51423 and transfer data
+    } else if( myVideoCall.dropped() ) {
+        // Video call disconnected, close video data socket
+        myVideoCall = PhoneCall::null;
+    } else if( myVideoCall.incoming() ) {
+        // ncoming video call - accept it. Next state will be PhoneCall::Connected
+        myVideoCall.accept();
+    }
+}
+
+void MyClass::endVideoCall()
+{
+    // The user wants to end the video call, hangup. Next state will be PhoneCall::HangupLocal
+    myVideoCall.hangup();
+}
+</pre>
+ 
+<p> An application handling incoming video calls must provide the <tt>VideoCall</tt> service and handle the <tt>incomingVideoCall()</tt> message by connecting to the <a href="qpeapplication.html#appMessage">QPEApplication::appMessage</a>() signal. Qtopia sends the message to the service when it detects an incoming video call from the modem. As Qtopia Services use QCop, the application will be started to handle the message if it is not running at the time.  See <a href="qtopia-services.html">Services</a> for more information.
+<p> <h3> Modem Requirements
+</h3>
+<a name="10-3"></a><p> The following is required for video call functionality:
+<p> <ul>
+<li> 3G capabilities, such as, UMTS 
+<li> <n>GSM</n> 07.10 Multiplexing
+<li> All commands and data to be exchanged on MUX channel 5
+<li> Support of the <tt>AT+CBST</tt> command which sets the call bearer service type, required to initialize a video call.
+</ul>
+<p> Below is the expected <b>AT</b> command communication between Qtopia and the modem for successful outgoing and incoming video calls. All communication occurs on mux channel 5.
+<p> Outgoing:
+<pre>
+AT+CBST=134,1,0
+OK
+ATD&lt;number&gt;
+OK
+CONNECT 64000
+&lt;video data follows&gt;
+</pre>
+ 
+<p> Incoming:
+<pre>
++CRING: ASYNC
+ATA
+CONNECT 64000
+&lt;video data follows&gt;
+</pre>
+ 
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

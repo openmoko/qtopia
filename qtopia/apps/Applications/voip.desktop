@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=VoIP
+[Desktop Entry]
+Comment[]=A VoIP Settings Application
+Exec=voip
+Icon=Voip
+Type=Application
+Name[]=VoIP

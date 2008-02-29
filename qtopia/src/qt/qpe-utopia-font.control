@@ -1,0 +1,10 @@
+Files: lib/fonts/UTBI____.pfa lib/fonts/UTB_____.pfa lib/fonts/UTI_____.pfa lib/fonts/UTRG____.pfa
+Priority: required
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: 1.0.0-9
+Depends: qpe-freetype
+Description: A sample TTF font
+ A sample TTF font

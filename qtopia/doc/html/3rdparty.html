@@ -1,0 +1,107 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/3rdparty.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3rd Party Licenses used in Qt</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>3rd Party Licenses used in Qt</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Freetype 2 (freetype)
+</a>
+<li><a href="#3"> The Independent JPEG Group's JPEG software (libjpeg)
+</a>
+<li><a href="#4"> Multiple-image Network Graphics (MNG) Reference Library (libmng)
+</a>
+<li><a href="#5"> PNG Reference Library (\c libpng)
+</a>
+<li><a href="#6"> Data Compression Library (\c zlib)
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the third party licenses used in Qt.
+<p> Run <tt>configure -help</tt> to see any options that may be available for
+controlling the use of these libraries.
+<p> <h2> Freetype 2 (freetype)
+</h2>
+<a name="2"></a><p> The <a href="freetype.html">FreeType</a> project provides font rendering for Qt. FreeType
+is distributed under either the FreeType Project License or the GNU Public
+License. The primary copyright holders are David Turner (david.turner@freetype.org),
+Robery Wilhelm and Werner Lemberg. More information can be found at 
+http://www.freetype.org and <tt>3rdparty/freetype/docs/freetype2.html</tt>.
+<p> Qt optionally links against FreeType.
+<p> See <tt>3rdparty/freetype/docs/FTL.txt</tt> and <tt>3rdparty/freetype/docs/GPL.txt</tt> for license details.
+<p> See also the files in <tt>3rdparty/opentype</tt> which are used by
+Freetype.
+<p> <h2> The Independent JPEG Group's JPEG software (libjpeg)
+</h2>
+<a name="3"></a><p> <em>This package contains C software to implement JPEG image compression and decompression. JPEG (pronounced "jay-peg") is a standardized compression method for full-color and gray-scale images. JPEG is intended for compressing "real-world" scenes; line drawings, cartoons and other non-realistic images are not its strong suit. JPEG is lossy, meaning that the output image is not exactly identical to the input image.</em> -- quoted from <tt>3rdparty/libjpeg/README</tt>.
+<p> Qt optionally links against libjpeg in order to provide JPEG viewing and writing.
+<p> libjpeg is the work of Tom Lane, Philip Gladstone, Jim Boucher,
+Lee Crocker, Julian Minguillon, Luis Ortiz, George Phillips, Davide Rossi,
+Guido Vollbeding, Ge' Weijers, and other members of the Independent JPEG
+Group.
+<p> See <tt>3rdparty/libjpeg/README</tt> for license details.
+<p> <h2> Multiple-image Network Graphics (MNG) Reference Library (libmng)
+</h2>
+<a name="4"></a><p> <em>The libmng library supports decoding, displaying, encoding, and various other manipulations of the Multiple-image Network Graphics (MNG) format image files. It uses the zlib compression library, and optionally the JPEG library by the Independant JPEG Group (IJG) and/or lcms (little cms), a color-management library by Marti Maria Saguer.</em>
+-- quoted from <tt>3rdparty/libmng/doc/libmng.txt</tt>.
+<p> Qt optionally links against libmng in order to provide JPEG viewing and writing.
+<p> The primary copyright holder for libmng is Gerard Juyn (gerard@libmng.com), and
+it is distributed under a very free license.
+<p> See <tt>3rdparty/libmng/LICENSE</tt> for license details.
+<p> <h2> PNG Reference Library (<tt>libpng</tt>)
+</h2>
+<a name="5"></a><p> <em>Libpng was written as a companion to the PNG specification, as a way of reducing the amount of time and effort it takes to support the PNG file format in application programs.</em> -- quoted from <tt>3rdparty/libpng/libpng.txt</tt>.
+<p> Qt optionally links against libpng in order to provide JPEG viewing and writing. 
+<p> The primary copyright holder for libpng is Glenn Randers-Pehrson, and it is
+distributed under a very free license.
+<p> See <tt>3rdparty/libpng/LICENSE</tt> for license details.
+<p> <h2> Data Compression Library (<tt>zlib</tt>)
+</h2>
+<a name="6"></a><p> <em>zlib is a general purpose data compression library. All the code is thread safe. The data format used by the zlib library is described by RFCs (Request for Comments) 1950 to 1952</em> -- quoted from <tt>3rdparty/zlib/README</tt>.
+<p> Qt optionally links against libz to support libmng.
+<p> The primary copyright holders for zlib are Jean-loup Gailly and Mark Adler,
+and it is distributed under a very free license.
+<p> See <tt>3rdparty/zlib/README</tt> for license details.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

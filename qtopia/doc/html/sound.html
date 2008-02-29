@@ -1,0 +1,83 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/sound.cpp:193 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Sound Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Sound Class Reference</h1>
+
+<p>The Sound class plays WAVE sound files and can invoke the audible alarm.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="sound-h.html">qtopia/sound.h</a>&gt;</tt>
+<p><a href="sound-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#Sound"><b>Sound</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</li>
+<li class=fn><a href="#~Sound"><b>~Sound</b></a> ()</li>
+<li class=fn>void <a href="#play"><b>play</b></a> ()</li>
+<li class=fn>void <a href="#playLoop"><b>playLoop</b></a> ()</li>
+<li class=fn>void <a href="#stop"><b>stop</b></a> ()</li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li class=fn>void <a href="#soundAlarm"><b>soundAlarm</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The Sound class plays WAVE sound files and can invoke the audible alarm.
+<p> The Sound class is constructed with the .wav music file name. The Sound
+class retrieves the sound file from the shared <a href="resource.html">Resource</a> class. This class
+ties together QSound and the available sound resources.
+<p> To sound an audible system alarm, call the static method <a href="#soundAlarm">soundAlarm</a>()
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="Sound"></a>Sound::Sound ( const&nbsp;QString&nbsp;&amp;&nbsp;name )
+</h3> Opens a wave sound file <em>name</em> for playing 
+<h3 class=fn><a name="~Sound"></a>Sound::~Sound ()
+</h3> Destroys the sound 
+<h3 class=fn>void <a name="play"></a>Sound::play ()
+</h3> Play the sound once 
+<h3 class=fn>void <a name="playLoop"></a>Sound::playLoop ()
+</h3> Play the sound, repeatedly until <a href="#stop">stop</a>() is called 
+<h3 class=fn>void <a name="soundAlarm"></a>Sound::soundAlarm ()<tt> [static]</tt>
+</h3> Sounds the audible system alarm. This is used for applications such
+as <a href="calendar.html">Calendar</a> when it needs to alarm the user of an event.
+
+<h3 class=fn>void <a name="stop"></a>Sound::stop ()
+</h3> Do not repeat the sound after it finishes. This will end a <a href="#playLoop">playLoop</a>() 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

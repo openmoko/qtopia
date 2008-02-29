@@ -1,0 +1,194 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/layout.doc:36 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Layout Classes</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Layout Classes</h1>
+
+ 
+<p> The Qt layout system provides a simple and powerful way of specifying
+the layout of child widgets.
+<p>
+By specifying the logical layout once, you get the following benefits:
+<ul>
+<li> Positioning of child widgets.
+<li> Sensible default sizes for top-level widgets.
+<li> Sensible minimum sizes for top-level widgets.
+<li> Resize handling.
+<li> Automatic update when contents change:
+<ul>
+<li> Font size, text or other contents of subwidgets.
+<li> Hiding or showing a subwidget.
+<li> Removal of subwidget.
+</ul>
+</ul>
+<p> <h2>Layout Widgets</h2>
+<p> The easiest way to give your widgets a good layout is to use the
+layout widgets: QHBox, QVBox
+and QGrid. A layout widget automatically
+lays out its children in the order they are constructed. To make more
+complex layouts, you can nest layout widgets inside each other.
+<p> <dl>
+<dt>QHBox
+<dd>A QHBox lays out its children in a horizontal row, left to right.
+<br><img src="qhbox-m.png" alt="QHBox with five children.">
+<p> <dt>QVBox
+<dd>A QVBox lays out its children in a vertical row, top to bottom.
+<br><img src="qvbox-m.png" alt="QVBox with five children.">
+<dt>QGrid
+<dd>A QGrid lays out its children in a table. You specify how
+many columns the table has, and it is filled left to right,
+beginning a new row when the previous is filled up. The grid
+is fixed; the children will not flow to other rows as the
+widget is resized.
+<br><img src="qgrid-m.png" alt="Two-column QGrid with five children.">
+</dl>
+<p> The grid above can be produced by the following code:
+<pre>
+    QGrid *main = new QGrid( 2 ); // a 2 x n grid
+    new QLabel( "One", main );
+    new QLabel( "Two", main );
+    new QLabel( "Three", main );
+    new QLabel( "Four", main );
+    new QLabel( "Five", main );
+</pre>
+ 
+<p> You can adjust the layout somewhat by calling setMinimumSize() or
+setFixedSize() on
+the children.
+<p> <h2>QLayout</h2>
+<p> If you need more control over the layout, use a QLayout
+subclass. The layout classes included in Qt 2.1 are QGridLayout and QBoxLayout.
+(QHBoxLayout and
+QVBoxLayout are trivial subclasses of QBoxLayout,
+that are simpler to use and make the code easier to read.)
+<p> <p>
+When you use a layout, you have to insert each child both into its
+parent widget (done in the constructor) and into its layout (typically
+done with a function called <tt>addWidget()</tt>). This way, you can give
+layout parameters for each widget, specifying properties like
+alignment, stretch, and placement.
+<p>
+The following code makes a grid like the one above, with a couple of
+improvements:
+<pre>
+    QWidget *main = new QWidget;
+
+    //make a 1x1 grid, it will auto-expand:
+    QGridLayout *grid = new QGridLayout( main, 1, 1 );
+
+    //add the first four widgets with (row, column) addressing
+    grid-&gt;addWidget( new QLabel( "One", main ), 0, 0 );
+    grid-&gt;addWidget( new QLabel( "Two", main ), 0, 1 );
+    grid-&gt;addWidget( new QLabel( "Three", main ), 1, 0 );
+    grid-&gt;addWidget( new QLabel( "Four", main ), 1, 1 );
+
+    //add the last widget on row 2, let it span from column 0 to
+    //column 1, and let it be aligned center.   
+    grid-&gt;addMultiCellWidget( new QLabel( "Five", main ), 2, 2, 0, 1,
+                              Qt::AlignCenter );
+
+    //let the ratio between the widths of columns 0 and 1 be 2:3.
+    grid-&gt;setColStretch( 0, 2 );
+    grid-&gt;setColStretch( 1, 3 );
+</pre>
+ 
+<p> <p>
+<p> You can insert layouts inside a layout by giving the parent layout as
+a parameter in the constructor.
+<pre>
+    QWidget*       main = new QWidget;
+    QLineEdit*    field = new QLineEdit( main );
+    QPushButton*     ok = new QPushButton( "OK", main );
+    QPushButton* cancel = new QPushButton( "Cancel", main );
+    QLabel*       label = new QLabel( "Where do you want to go?", main );
+
+    QVBoxLayout *vbox    = new QVBoxLayout( main ); // A layout on a widget
+    vbox-&gt;addWidget( label );
+    vbox-&gt;addWidget( field );
+
+    QHBoxLayout *buttons = new QHBoxLayout( vbox ); // A layout inside a layout
+    buttons-&gt;addWidget( ok );
+    buttons-&gt;addWidget( cancel );
+</pre>
+ 
+If you are not satisfied with the
+default placement, you can create the layout without a parent and
+then insert it with <tt>addLayout()</tt>.
+<p> <h2>Custom Layouts</h2>
+<p> If the built-in layout classes are not sufficient, you can define your
+own. You will have to make a subclass of QLayout
+that handles resizing and size calculations, as well as a subclass of
+QGLayoutIterator to iterate over your
+layout class.
+<p> See the <a href="customlayout.html">Custom Layout</a> page for an
+in-depth description.
+<p> <h2>Custom Widgets In Layouts</h2>
+<p> When you make your own widget class, you should also communicate its
+layout properties. If the widget has a QLayout, this is already taken
+care of. If the widget does not have any children, or uses manual
+layout, you should reimplement the following QWidget member functions:
+<p> <dl>
+<dt>sizeHint()
+<dd> Returns the preferred size of the widget.
+<dt>minimumSizeHint()
+<dd> Returns the smallest size the widget can have.
+<dt>sizePolicy()
+<dd> Returns a QSizePolicy; a value
+describing the space requirements of the widget.
+<p> </dl>
+<p> Call updateGeometry() whenever
+the size hint, minimum size hint or size policy changes. This will
+cause a layout recalculation. Multiple calls to updateGeometry() will
+only cause one recalculation.
+<p> If the preferred height of your widget depends on its actual width
+(eg. a label with automatic word-breaking), set the <tt>hasHeightForWidth()</tt>
+flag in <tt>sizePolicy()</tt>, and reimplement heightForWidth().
+<p> Even if you implement heightForWidth(), it is still necessary to
+provide a good sizeHint(). The sizeHint() provides the preferred width
+of the widget, and it is used by QLayout subclasses that do not
+support heightForWidth() (both QGridLayout and QBoxLayout support it).
+<p> For further guidance when implementing these functions, see their
+implementations in existing Qt classes that have similar layout
+requirements to your new widget.
+<p> <h2>Manual Layout</h2>
+<p> If you are making a one-of-a-kind special layout, you can also make a
+custom widget as described above. Reimplement resizeEvent() to calculate the
+required distribution of sizes and call setGeometry() on each child.
+<p> The widget will get an event with type
+<tt>LayoutHint</tt> when the layout needs to be
+recalculated. Reimplement event()
+to be notified of <tt>LayoutHint</tt> events.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

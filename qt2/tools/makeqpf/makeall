@@ -1,0 +1,4 @@
+for dpy in Transformed:Rot0 Transformed:Rot90 Transformed:Rot180 Transformed:Rot270
+do
+    QWS_DISPLAY=$dpy ./makeqpf "$@"
+done

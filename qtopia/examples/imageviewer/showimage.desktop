@@ -1,0 +1,10 @@
+[Desktop Entry]
+Comment=An example Image Viewer
+Exec=showimage
+MimeType=image/*
+Icon=Showimage
+Type=Application
+Name=Image Viewer
+Name[ja]=イメージビューワ
+Name[de]=Bildbetrachter
+Name[hu]=Nézõke

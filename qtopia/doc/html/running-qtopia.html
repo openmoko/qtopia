@@ -1,0 +1,280 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/running-qtopia.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Running Qtopia</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Running Qtopia</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> The Location of the Binaries
+</a>
+<ul>
+<li><a href="#2-1"> Why an Image Directory?
+</a>
+</ul>
+<li><a href="#3"> Running Qtopia on the Desktop Machine
+</a>
+<li><a href="#4"> Running Qtopia on an Embedded Device
+</a>
+<ul>
+<li><a href="#4-1"> Using an NFS Mount Partition
+</a>
+<ul>
+<li><a href="#4-1-1"> Step 1: Setting up the Device
+</a>
+<li><a href="#4-1-2"> Step 2: Exporting the Qtopia Image Directory to the Device
+</a>
+<li><a href="#4-1-3"> Step 3: Connecting to the Device
+</a>
+</ul>
+<li><a href="#4-2"> Using a Binary Flashed onto the Device
+</a>
+</ul>
+<li><a href="#5"> Touchscreen Phone Calibration
+</a>
+<li><a href="#6"> Connecting Qtopia Phone to a Phone Device
+</a>
+<ul>
+<li><a href="#6-1"> Using a Phone Simulator
+</a>
+<li><a href="#6-2"> Using a Phone Device
+</a>
+<li><a href="#6-3"> Using a Real Phone
+</a>
+</ul>
+<li><a href="#7"> How do I Switch between Qtopia PDA and Qtopia Phone?
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the commands required to run Qtopia. It is assumed that the Qtopia binaries have been installed using either: 
+<ul>
+<li> an SDK package
+<li> or have been built using a source package according to the <a href="build-from-source.html">Build Instructions</a>.
+</ul>
+<p> For the purpose of this document, the term, <em>desktop</em> refers to a desktop computer running a Linux distribution. There is also an application named Qtopia Desktop and this application is either installed as part of the downloaded package or is available from the <a href="http://www.trolltech.com">Trolltech website</a>. 
+<p> Qtopia can be run in both an emulated environment on a desktop and on an embedded device.
+Running Qtopia on the desktop is not the real thing of course, but it is great for developing, debugging and demonstrating a product. Running Qtopia on the desktop has some consequences, such as, having better performance than on a real device as Qtopia is running using the processor power of the desktop.
+<p> Running Qtopia on an embedded device requires different binaries from those used to run Qtopia on the desktop. Creating binaries for an embedded device is not difficult and is done using a cross-compiler. This is handled in detail in the <a href="build-from-source.html">Build Instructions</a> section of the reference documentation. If you have installed an SDK package (SDK Light or SDK Professional) then you will find pre-built binaries for an ARM based embedded device in the <tt>arm</tt> or <tt>arm-debug</tt> sub-directories. In a SDK package these binaries cannot be rebuilt. For a Qtopia source package the binaries can be built in any configuration required.  
+<p> If you only want to run Qtopia on your desktop machine at this time, then the device-specific (ARM) binaries are irrelevant. However if you do want to run Qtopia on a device then it is assumed that the binaries for that specific type of device are available.
+<p> If this is your first encounter with Qtopia and/or cross-compiling then it might be best to start with experimenting on the desktop and when you are comfortable with that, start running Qtopia on a device.
+<p> <h2> The Location of the Binaries
+</h2>
+<a name="2"></a><p> The location of the Qtopia binaries is dependent on the package being used. The following table displays the default locations:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Package <th valign="top">Location
+<tr bgcolor="#f0f0f0"> <td valign="top">Source package <td valign="top"><tt>$QPEDIR/image/opt/Qtopia/bin</tt>
+<tr bgcolor="#d0d0d0"> <td valign="top">SDK package <td valign="top"><tt>/opt/Qtopia/bin</tt>.
+</table></center>
+<p> The image directory for source packages may be changed to meet your requirements by using the <tt>-prefix</tt> option with the <tt>configure</tt> script.
+<p> For example, if you have installed <tt>qtopia-phone-src-2.2.0</tt> in <tt>~/build/qtopia-phone-2.2.0</tt> then your binaries will be in <tt>~/build/qtopia-phone-2.2.0/qtopia/image/opt/Qtopia/bin</tt>.
+If however you have configured Qtopia with <tt>-prefix ~/myimage</tt> then the binaries will be found in the directory <tt>~/myimage</tt>.
+<p> <h3> Why an Image Directory?
+</h3>
+<a name="2-1"></a><p> The image directory is provided to contain everything that should go onto the real device. It is a prepared package containing all the files and relative links in the correct places. This will make packaging and deployment efforts to install Qtopia with your own applications onto a device a lot easier.
+<p> <h2> Running Qtopia on the Desktop Machine
+</h2>
+<a name="3"></a><p> To run Qtopia on the desktop a <em>startdemo</em> script is provided. The exact location of the script depends on the package:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">package <th valign="top">location
+<tr bgcolor="#f0f0f0"> <td valign="top">SDK package <td valign="top">/opt/Qtopia/bin/startdemo
+<tr bgcolor="#d0d0d0"> <td valign="top">source package <td valign="top">qtopia_root_dir/qtopia/bin/startdemo
+</table></center>
+where <tt>qtopia_root_dir</tt> is the install location of the source package.
+<p> The <em>startdemo</em> script performs the following:
+<ul>
+<li> sets environment variables
+<li> determines an appropriate skin for the run
+<li> sets up sound card support
+<li> sets up a HOME path (if required)
+<li> runs QVFb 
+<li> runs the phone simulator (if required)
+<li> runs qtopia.
+</ul>
+<p> To quit Qtopia right click the outside area of QVFb and selecting File->Quit, this closes all Qtopia applications.
+<p> QVFb is run using a specific skin depending on the package installed. A skin is simply a set of XML files that define the look and feel of QVFb. You may use a different skin, or create your own to replicate your target device. 
+If you are not familiar with QVFb please refer to: <a href="qvfb-qtopia.html">Qtopia QVFb</a> before continuing.
+<p> In practice the startdemo script can be used in all cases to conveniently start Qtopia. In exceptional cases where the script does not perform as expected, it is is advised to take the script as the starting point and modify the procedure to meet your specific requirements.
+<p> The startdemo script accepts two parameters:
+<pre>
+    -skin skin .... The name of the skin to be used for the run.
+    -home home .... The HOME path setting that is to be used by Qtopia.
+</pre>
+ 
+<p> For further information and a description of environment variables used by the script, use the command: 
+<pre> 
+    startdemo -help 
+</pre>
+  
+<p> <b> Note:</b>  To connect to a modem device instead of the simulator, modify the QTOPIA_PHONE_DEVICE variable and <b>DO NOT</b> start <tt>phonesim</tt>. If the <em>startdemo</em> script is used, it will automatically skip the phone simulator unless this variable is set to <tt>sim:localhost</tt>. This subject is discussed in more detail in one of the next sections.
+<p> <h2> Running Qtopia on an Embedded Device
+</h2>
+<a name="4"></a><p> This section describes the procedure to run Qtopia on a device and is the same for all Qtopia editions. 
+<p> <h3> Using an NFS Mount Partition
+</h3>
+<a name="4-1"></a><p> This section describes how to run Qtopia on a device using an NFS mount partition.
+<p> To use an NFS mount partition your device requires a network connection with the desktop machine and accesses Qtopia binaries on the desktop machine. The binaries must be cross-compiled for the device-type (e.g. ARM) and you control the start/stop of Qtopia through a terminal connection to the device.
+<p> This approach is ideal for debugging and testing on a real device. The binaries can be quickly modified and re-built and the application under test can be restarted almost instantly. It provides an efficient work process when compared with the delays introduced by building packages and the usually very slow upload and flash process required to run Qtopia from a standalone device.
+<p> <h4> Step 1: Setting up the Device
+</h4>
+<a name="4-1-1"></a><p> To setup the device,  use command line tools (or whatever is available on the device) to setup the network configuration and use <em>ifconfig</em> to determine the IP address.
+<b> Note:</b> Network settings in Qtopia can be used, however, you would need to exit that Qtopia in order to run over the network.
+<p> <h4> Step 2: Exporting the Qtopia Image Directory to the Device
+</h4>
+<a name="4-1-2"></a><p> To export the Qtopia image directory to the device, execute the 
+following commands on the desktop machine:
+<p> <ol type=1>
+<li> First verify that NFS is running:
+<pre>
+     ps aux | grep nfs
+</pre>
+ 
+Output will be something like this:
+<pre>
+tester@desk:~&gt; ps aux | grep nfs
+root     10661  0.0  0.0     0    0 ?        SW   16:20   0:00 [nfsd]
+root     10662  0.0  0.0     0    0 ?        SW   16:20   0:00 [nfsd]
+tester     10554  0.0  0.1  3540  564 pts/8    S    16:12   0:00 grep nfs
+</pre>
+ 
+If you only get the bottom line, then NFS is NOT running and needs to be started.<br>
+To start NFS use <tt>/etc/init.d/nfsserver</tt> start (or similar) as root.
+<p> <li> indicate to NFS to export a directory by editing 
+the <tt>/etc/exports</tt> file (as root) and adding the following line:
+<pre>
+     /path/to/image/ *(ro)
+</pre>
+ 
+<p> This exports the <tt>/path/to/image</tt> directory (and all subdirectories), and gives read-only access from any computer. In this procedure it is assumed this is the directory you want to export.
+<p> <li> indicate to NFS (again as root) that the configuration has changed using:
+<pre>
+     exportfs -a
+</pre>
+ 
+<p> The Qtopia binaries in <tt>/path/to/image/bin</tt> are now accessible from the network.
+<p> </ol>
+<p> <h4> Step 3: Connecting to the Device
+</h4>
+<a name="4-1-3"></a><p> <ol type=1>
+<li> login to the connected device via telnet or ssh (using the IP address displayed in the current tab)
+<li> enter your password as root and create the directory on the device that links to the desktop file system using the following command:
+<pre>
+     mkdir -p /opt/Qtopia
+</pre>
+ 
+<li> mount/assign the file system to the device by mounting the created folder using the following command:
+<pre>
+     mount desk:/path/to/image -orsize=8192,wsize=8192 /opt/Qtopia
+</pre>
+ 
+<li> You should now be able to fill <tt>/path/to/image</tt> on your desktop machine (named <em>desk</em>) with files that are accessible from the device.
+</ol>
+<p> <h3> Using a Binary Flashed onto the Device
+</h3>
+<a name="4-2"></a><p> This is the ultimate goal and is mentioned here for completeness. However, this option is clearly not within the scope of this introduction.
+<p> As a general rule Qtopia (or any other application) can be flashed onto a device using a CF or SD card or can be uploaded onto the device using a serial connection. Usually this means the image (for example, <tt>/path/to/image</tt>) must first be packed into a special file such as <tt>initrd.bin</tt>. This file is uploaded and flashed into the device flash memory. The correct procedure is entirely dependent on the device used and cannot be described here. Please refer to the device manufacturers documentation for details of installing to the device.
+<p> Once the software is installed on the device the general rule is to reboot the device and the Linux boot script will ensure that Qtopia is started automatically. If this doesn't work it is a system integration task to modify the relevant boot scripts.
+<p> So, from a Qtopia perspective, running Qtopia on a device means: power on the device and off you go!
+<p> For more information about system integration refer to <a href="system-customization.html">System Customization.</a>.
+<p> <h2> Touchscreen Phone Calibration
+</h2>
+<a name="5"></a><p> When building Qtopia Phone edition for a touchscreen device,  the touchscreen must be calibrated manually as <em>Calibration</em> is not run automatically. With Qtopia Phone running, enter the following command to start calibration:
+<p> <pre>
+      qcop "QPE/System" "execute(QString)" "calibrate"
+</pre>
+ 
+<p> This outputs calibration information to the <tt>$HOME/Settings/pointercal</tt> file which should be copied to i<tt>/etc/</tt> to avoid repeating this process. 
+<p> <b>Note: </b> QPE_NEED_CALIBRATION must be defined in the <tt>custom-&amp;lt;platform-spec&amp;gt;.h</tt> file.  See alsa:o <a href="system-customization.html#Configuring Qtopia to suit device">Qtopia - Customizing Qtopia for a Device</a> .
+<p> <h2> Connecting Qtopia Phone to a Phone Device
+</h2>
+<a name="6"></a><p> Qtopia Phone provides the GUI software that runs on a mobile phone. To make a <em>real</em> phone call the electronics need to connect to a phone network. These electronics are assumed to be in the phone device itself. This section describes how the Qtopia Phone software can be connected to the phone device hardware.
+<p> <h3> Using a Phone Simulator
+</h3>
+<a name="6-1"></a><p> The phone simulator is an internal tool used to test part of the Qtopia Phone functionality. It simulates part of the modem functionality and is the first step in debugging software.
+The simulator has been included in the package because it is well suited to illustrating the capabilities of Qtopia Phone.
+Please be advised however that the phone simulator is an unsupported tool.
+<p> Connect Qtopia Phone to the simulator using the following command:
+<pre>
+     export QTOPIA_PHONE_DEVICE=sim:localhost
+</pre>
+ 
+This must be set before either Qtopia or the simulator are started. If the <em>startdemo</em> script is used, the default value for the environment variable QTOPIA_PHONE_DEVICE is <tt>sim:localhost</tt>.
+It is possible to run Qtopia Phone on one machine (embedded device) and the phone simulator on another machine. To do this replace <em>localhost</em> with the name of the machine on which the <tt>phonesim</tt> is running.
+<p> Further phone simulator information is available in the Tools section of the reference documentation.
+To call to peers in the same network the <tt>peers.xml</tt> file must be modified by entering valid machine names within your network environment.
+<p> <h3> Using a Phone Device
+</h3>
+<a name="6-2"></a><p> Qtopia Phone can be connected to a real phone device using a serial connection.
+Please be advised that the phone device must support the standard AT commands.
+To connect use the following command:
+<pre>
+     export QTOPIA_PHONE_DEVICE=/dev/ttyS1:115200
+</pre>
+ 
+where:
+<ul>
+<li> ttyS1  = the serial port
+<li> 115200 = the baudrate
+</ul>
+<p> The environment variable QTOPIA_PHONE_DEVICE must be set before Qtopia Phone is started. Entering a baud rate after the serial port name is optional and depends on the modem being used. It is not necessary to start the <tt>phonesim</tt> application.
+<p> <h3> Using a Real Phone
+</h3>
+<a name="6-3"></a><p> Qtopia Phone is tested with real phones such as the Ericson T39M. To connect to a phone, use the serial cable provided with the phone and use the command:
+<p> <pre>
+     export QTOPIA_PHONE_DEVICE=/dev/ttyS1:115200
+</pre>
+ 
+where:
+<ul>
+<li> ttyS1  = the serial port
+<li> 115200 = the baudrate
+</ul>
+<p> This environment variable must be set before Qtopia Phone is started, however,
+it is not necessary to start the <tt>phonesim</tt> application.
+<p> <h2> How do I Switch between Qtopia PDA and Qtopia Phone?
+</h2>
+<a name="7"></a><p> The answer is simple: you can't.
+<p> There is no such thing as a command line switch to toggle between Phone and PDA. The way Qtopia looks and behaves is determined by the way it is configured at compile time. After that, the binaries are either Qtopia Phone binaries or Qtopia PDA binaries.
+<p> If you have a SDK package then the package is pre-built for either Phone or PDA, and if you have a Qtopia source package then the package is either suitable for building Qtopia Phone or Qtopia PDA, but not both.
+<p> The exception to the rule is the <em>refboard-source</em> package which will allow both Phone and PDA configurations.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

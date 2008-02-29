@@ -1,0 +1,122 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/textcodecinterface.cpp:36 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TextCodecInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>TextCodecInterface Class Reference</h1>
+
+<p>The TextCodecInterface class defines the interface for text codec plugins.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="textcodecinterface-h.html">qtopia/textcodecinterface.h</a>&gt;</tt>
+<p><a href="textcodecinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual QStringList <a href="#names"><b>names</b></a> () const = 0</li>
+<li class=fn>virtual QTextCodec * <a href="#createForName"><b>createForName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name ) = 0</li>
+<li class=fn>virtual QValueList&lt;int&gt; <a href="#mibEnums"><b>mibEnums</b></a> () const = 0</li>
+<li class=fn>virtual QTextCodec * <a href="#createForMib"><b>createForMib</b></a> ( int&nbsp;mib ) = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The TextCodecInterface class defines the interface for text codec plugins.
+<p> Internally, Qtopia works completely with Unicode text strings, however
+it is sometimes necessary to convert to or from other character sets.
+<p> To add support for a character set format, you must create a
+Text Codec plugin. To do so, follow these steps:
+<p> <ol>
+<li> Create a subclass of QTextCodec that implements the conversion.
+This procedure is a standard part of Qt, and is documented there.
+<li> Create a subclass of TextCodecInterface that creates your
+QTextCodec subclass. Ensure that your class:
+<ul>
+<li> Inherits TextCodecInterface
+<li> Inplements all pure-virtual methods of TextCodecInterface
+<li> Includes the declarations:
+<pre>
+public:
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&, QUnknownInterface** );
+    Q_REFCOUNT
+private:
+    ulong ref;
+</pre><p> </ul>
+<li> In the code of the TextCodecInterface subclass:
+<pre>
+QRESULT <i>YourTextCodecInterfaceSubClass</i>::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
+{
+    *iface = 0;
+    if ( uuid == IID_QUnknown )
+        *iface = this;
+    else if ( uuid == IID_QtopiaTextCodec )
+        *iface = this;
+
+    if ( *iface )
+        (*iface)->addRef();
+    return (*iface) ? QS_OK : QS_FALSE;
+}
+
+Q_EXPORT_INTERFACE()
+{
+    Q_CREATE_INSTANCE( <i>YourTextCodecInterfaceSubClass</i> )
+}
+</pre><p> <li> Build your code as a Shared Object (.so file)
+(such as by using the tmake lib template).
+<li> Ship your plugin in the Qtopia plugins/textcodecs/ directory.
+</ol>
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QTextCodec * <a name="createForMib"></a>TextCodecInterface::createForMib ( int&nbsp;mib )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns a new QTextCodec (subclass) for the given <em>mib</em>.
+
+<h3 class=fn>QTextCodec * <a name="createForName"></a>TextCodecInterface::createForName ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns a new QTextCodec (subclass) for the given codec <em>name</em>.
+
+<h3 class=fn>QValueList&lt;int&gt; <a name="mibEnums"></a>TextCodecInterface::mibEnums () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the list of codec MIBs. You should use IANA registered MIB values.
+
+<h3 class=fn>QStringList <a name="names"></a>TextCodecInterface::names () const<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the list of codec names. You should use IANA registered names.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

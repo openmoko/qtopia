@@ -1,0 +1,107 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/callscreen.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Call Screen Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Call Screen Specification</h1>
+
+
+<p> 
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Incoming Call
+</a>
+<li><a href="#1-2"> Outgoing Call
+</a>
+<li><a href="#1-3"> Call Details
+</a>
+<li><a href="#1-4"> Active Calls
+</a>
+<li><a href="#1-5"> Held Calls
+</a>
+<li><a href="#1-6"> Multi-party Calls
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> Call Screen displays current incoming, outgoing, and active calls.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Incoming Call
+</h3>
+<a name="1-1"></a><p> Call Screen is shown when an incoming call arrives. The incoming call is positioned at the top of the list of calls.
+<p> The user is able to:
+<p> <ul>
+<li> Accept the call by pressing the Call key or selecting Answer from the
+context menu.
+<li> Reject the call by pressing the hang-up key or selecting Send Busy from
+the context menu.
+<li> Ignore the call by selecting Mute from the context menu.
+</ul>
+<p> <h3> Outgoing Call
+</h3>
+<a name="1-2"></a><p> Call Screen is shown when an outgoing call is initiated. The outgoing call is positioned at the top of the list of calls. The user is able to cancel the call by
+pressing the Hang-up button, or selecting End from the context menu.
+<p> <h3> Call Details
+</h3>
+<a name="1-3"></a><p> Call Screen presents the following details for each call:
+<p> <ul>
+<li> Name or number: if the number matches an address book entry, the name
+is shown, otherwise the number.
+<li> Contact's photo: if the number matches an address book entry.
+<li> Call duration: the duration the call has been connected.
+<li> Whether the call is on hold.
+<li> Whether the call is part of a multi-party call.
+</ul>
+<p> <h3> Active Calls
+</h3>
+<a name="1-4"></a><p> The user is able to end active calls by pressing the Hang-up button, or selecting End from the context menu. The user is able to place and active calls on hold by
+pressing Select (default action) or selecting Hold from the context menu.
+<p> <h3> Held Calls
+</h3>
+<a name="1-5"></a><p> The user is able to activate calls on hold by pressing Select or selecting Resume
+from the context menu.  If there are both calls on hold and active calls, then
+the Select button swaps between the active and held calls.
+<p> <h3> Multi-party Calls
+</h3>
+<a name="1-6"></a><p> If there are active call(s) and held call(s), then the user is able to join the
+calls to form a multi-party call by selecting Join from the context menu.
+<p> The user is able to split from a multi-party call by selecting Split from the
+context menu.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

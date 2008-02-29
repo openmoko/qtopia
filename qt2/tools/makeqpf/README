@@ -1,0 +1,25 @@
+To compile makeqpf 
+    o QT_NO_QWS_TRANSFORMED and QT_NO_QWS_SAVEFONTS must not be defined by your qconfig
+    o QT_TRANSFORM_VFB must be defined if you wish to run makeqpf under QVFb
+    o QT_NO_BDF must not be defined should you wish to process BDF files 
+    o QT_NO_FREETYPE must not be defined should you wish to process TTF files 
+
+	    
+    Typically this means doing a build of Qt/Embedded selecting the makeqpf configure. eg :
+	./configure -qconfig makeqpf [extra options]
+
+
+
+To make a "fixed" font with the currency symbols, create a file with the line:
+
+fixed 0-ff,20a0-20af
+
+and run "makeall -f yourfile".
+
+See also ./makeqpf --help 
+
+
+Hint:Press CTRL+Key_Q should you wish to quit makeqpf.
+
+Warning:If TTF(Freetype) support is allowed then the freetype development headers libraries need to be available.
+

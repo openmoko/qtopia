@@ -1,0 +1,316 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/env-prereq.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Operating Environment Pre-requisites</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Operating Environment Pre-requisites</h1>
+
+
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Kernel
+</a>
+<li><a href="#3"> Libraries
+</a>
+<ul>
+<li><a href="#3-1"> Overview
+</a>
+<li><a href="#3-2"> Jpeg
+</a>
+<ul>
+<li><a href="#3-2-1"> Overview
+</a>
+<li><a href="#3-2-2"> Desktop Compilation
+</a>
+<li><a href="#3-2-3"> Device Compilation
+</a>
+</ul>
+<li><a href="#3-3"> Zlib
+</a>
+<li><a href="#3-4"> Uuid
+</a>
+<ul>
+<li><a href="#3-4-1"> Overview
+</a>
+<li><a href="#3-4-2"> Desktop Compilation
+</a>
+<li><a href="#3-4-3"> Device Compilation
+</a>
+</ul>
+</ul>
+<li><a href="#4"> Linux Utilities
+</a>
+<ul>
+<li><a href="#4-1"> Overview
+</a>
+<li><a href="#4-2"> Time
+</a>
+<li><a href="#4-3"> Time conversion data
+</a>
+</ul>
+<li><a href="#5"> Linux Devices
+</a>
+<ul>
+<li><a href="#5-1"> Overview
+</a>
+<li><a href="#5-2"> Display
+</a>
+<li><a href="#5-3"> Sound
+</a>
+<ul>
+<li><a href="#5-3-1"> Overview
+</a>
+<li><a href="#5-3-2"> Playback and Recording Capabilities
+</a>
+<li><a href="#5-3-3"> Audio Volume
+</a>
+</ul>
+<li><a href="#5-4"> Camera
+</a>
+</ul>
+<li><a href="#6"> Development Environment
+</a>
+<ul>
+<li><a href="#6-1"> Compilers
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> Qtopia is not a complete operating system or environment.  Instead, it is an
+application platform that sits above the Linux kernel and associated operating
+environment.  As such, Qtopia expects certains libraries, device drivers and 
+services to be exposed by the Linux environment within which it operates.  
+This document covers the Linux environment configuration Qtopia requires.
+<p> <h2> Kernel
+</h2>
+<a name="2"></a><p> Qtopia supports both 2.4 and 2.6 series Linux kernels.  Most code is common
+between the two, although some sections of Qtopia that interact with 
+<tt>/proc/</tt> file-system entries do differ.  The selection between the 2.4 and 
+2.6 kernel code paths is made at runtime.  That is, the same Qtopia build
+should run on both a 2.4 and 2.6 series Linux kernel.
+<p> Qtopia only relies on the most standard of kernel services.  Among these
+required services are:
+<ul>
+<li> System V Shared Memory
+<li> Memory Mapped Files
+<li> BSD Sockets
+</ul>
+<p> <h2> Libraries
+</h2>
+<a name="3"></a><p> <h3> Overview
+</h3>
+<a name="3-1"></a><p> This section covers the libraries needed to build and run Qtopia.  It does
+not include a discussion of "standard" libraries, like the C runtime library,
+that may also be required.
+<p> <h3> Jpeg
+</h3>
+<a name="3-2"></a><p> <h4> Overview
+</h4>
+<a name="3-2-1"></a><p> Qtopia requires that Qt/Embedded is configured with JPEG support in order to 
+build.  Qt/Embedded relies on the "libjpeg" library, available from the 
+<a href="http://www.ijg.org/">http://www.ijg.org/</a> site.
+<p> <h4> Desktop Compilation
+</h4>
+<a name="3-2-2"></a><p> The libjpeg library can be downloaded and compiled from source by following
+the steps outlined at <a href="http://www.ijg.org/">http://www.ijg.org/</a>.
+Alternatively, most modern desktop Linux distributions include a pre-built 
+version of libjpeg.  The SuSE Linux distribution provides this in the aptly 
+named "libjpeg" package.
+<p> <h4> Device Compilation
+</h4>
+<a name="3-2-3"></a><p> The JPEG source can be downloaded from <a href="http://www.ijg.org/">http://www.ijg.org/</a>.
+<p> libjpeg should be configured with the <tt>--target=arch</tt> option.  If 
+<tt>libjpeg.so</tt> is not copied to <tt>$QTDIR</tt>  the <tt>-L</tt> option needs to be used 
+when running Qt/Embedded's configure, as demonstrated below.
+<p> <pre>
+  cd $QTDIR
+  ./configure -L/path/that/libjpeg/lives/in
+  </pre>
+ 
+<p> <h3> Zlib
+</h3>
+<a name="3-3"></a><p> Qt/Embedded requires the zlib library.  The Qt distribution includes a version
+of the zlib source that can be compiled into the Qt library.  If integrators
+wish to use a later version of the zlib library, it can be downloaded from the
+<a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a> website.
+<p> <h3> Uuid
+</h3>
+<a name="3-4"></a><p> <h4> Overview
+</h4>
+<a name="3-4-1"></a><p> Qtopia relies on the Uuid library to generate 128-bit universally unique
+identifiers.  The Uuid library is not provided with Qtopia, but is distributed
+as part of the "e2fsprogs" project, available from
+<a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/</a>.
+<p> Failure to have libuuid installed will produce a build, or runtime, link 
+error.  For illustrative purposes, a build time link error is shown below.
+<p> <pre>
+  /usr/lib/gcc-lib/i586-suse-Linux/3.3.3/../../../../i586-suse-linux/bin/ld:
+  cannot find -luuid
+  </pre>
+ 
+<p> <h4> Desktop Compilation
+</h4>
+<a name="3-4-2"></a><p> The libuuid library can be downloaded and compiled from source by following
+the steps outlined at <a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/</a>.  Alternatively, most modern 
+desktop Linux distributions include a pre-built version of libuuid.  The SuSE
+Linux distribution provides this in the "e2fsprogs-devel" package, and the 
+Debian distribution in the "uuid-dev" package.
+<p> <h4> Device Compilation
+</h4>
+<a name="3-4-3"></a><p> The libuuid source can be downloaded from 
+<a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/</a>.
+<p> libuuid should be configured with the <tt>--target=arch</tt> and 
+<tt>--enable-elf-shlibs</tt> options.  If <tt>libuuid.so</tt> is not copied to <tt>$QTDIR</tt> 
+or <tt>$QPEDIR</tt> the <tt>-L</tt> option will need to be used when running Qtopia's 
+configure.
+<p> For example:
+<pre>
+  cd $QPEDIR
+  ./configure -L/path/that/libuuid/lives/in
+  </pre>
+ 
+<p> <h2> Linux Utilities
+</h2>
+<a name="4"></a><p> <h3> Overview
+</h3>
+<a name="4-1"></a><p> Where possible, Qtopia leverages standard Linux utility applications to help
+provide system functionality.  These applications are invoked directly by 
+the Qtopia runtime, and must be present on the target system.
+<p> <h3> Time
+</h3>
+<a name="4-2"></a><p> For Qtopia to maintain correct "time of day"-time, the device must support a 
+hardware Real Time Clock.  While Qtopia does not interact with this component
+directly, it relies on a number of standard Linux utilities that do:
+<p> <ol type=1>
+<li> /sbin/hwclock
+<p> Whenever Qtopia changes the "time of day" time setting, it executes
+<tt>/sbin/hwclock -systohc</tt> to synchronize the hardware time from the 
+system time.
+<p> Trolltech recommends that integrators compile their Linux kernel's with the
+RTC interface enabled.  Doing so will allow the standard <tt>hwclock</tt> 
+application to work correctly.  It is also recommended that the system's
+boot scripts set the system time to hardware time on startup using the
+<tt>/sbin/hwclock -s</tt> command.
+<p> <li> <a href="atd.html">atd</a>
+<p> Some Qtopia applications, such as the "Clock" application, rely on 
+receiving notifications at specified times.  As the device may be put into
+a suspended state, Qtopia relies on the Linux "at daemon" to wake the 
+device at a given time.
+<p> Qtopia schedules "at" jobs by writing them into the <tt>/var/spool/at/</tt> 
+directory.  System integrators must ensure that the at daemon is launched
+at system startup, and monitors this spool directory.
+</ol>
+<p> <h3> Time conversion data
+</h3>
+<a name="4-3"></a><p> To ensure that Qtopia can convert time into various time zones the time zone information must be installed.
+Typically the zone info is installed in <tt>/usr/share/zoneinfo/</tt> directory . See : the <tt>timezone</tt> man page 
+<p> <h2> Linux Devices
+</h2>
+<a name="5"></a><p> <h3> Overview
+</h3>
+<a name="5-1"></a><p> <h3> Display
+</h3>
+<a name="5-2"></a><p> Qt/Embedded, the system component responsible for graphical drawing, provides
+a graphics device abstraction architecture.  Support for new graphics 
+accelerators can be added by creating a new Qt/Embedded graphics driver.
+<p> By default, Qt/Embedded comes with a number of prewritten graphics drivers.
+The most common of these is the "Linux Frame Buffer" driver, that, as its name
+suggests can draw to a standard Linux frame buffer.  Most accelerated drivers
+are based on this frame buffer driver, and accelerate only a subset of drawing
+operations.
+<p> Trolltech recommends, at least initially, that integrators configure their 
+device to support the standard Linux frame buffer interface, and expose this
+through the default <tt>/dev/fb0</tt> device node.
+<p> <h3> <a href="sound.html">Sound</a>
+</h3>
+<a name="5-3"></a><p> <h4> Overview
+</h4>
+<a name="5-3-1"></a><p> Qtopia requires an <a href="http://www.opensound.com">Open Sound System</a>
+(OSS) compatible sound device to be available.  Qtopia can only interact with
+an <a href="http://www.alsa-project.org">Advance Linux Sound Architecture</a>
+(ALSA) compatible device is OSS compatibility is enabled.
+<p> <h4> Playback and Recording Capabilities
+</h4>
+<a name="5-3-2"></a><p> Qtopia expects both the playback and recording device to be available through
+the <tt>/dev/dsp</tt> device node.  The <tt>/dev/dsp</tt> node must be writable by Qtopia
+and the device should support the following IO controls:
+<p> <ul>
+<li> SNDCTL_DSP_SETFRAGMENT - Qtopia will set this to 0x4000c.
+<li> SNDCTL_DSP_SETFM - Qtopia will set this to AFMT_S16_LE
+<li> SNDCTL_DSP_STEREO - Qtopia will set this to 1/true.
+<li> SNDCTL_DSP_SPEED - Qtopia will set this to 44100.
+<li> SNDCTL_DSP_GETOSPACE
+</ul>
+<p> The device must support both blocking and non-blocking IO.
+<p> <h4> Audio Volume
+</h4>
+<a name="5-3-3"></a><p> Qtopia uses the Open <a href="sound.html">Sound</a> System mixer interface to control system audio 
+volume.  Qtopia expects the mixer to be available through the <tt>/dev/mixer</tt>
+device node.  Qtopia uses the following mixer channels to control volume:
+<p> <ul>
+<li> SOUND_MIXER_VOLUME - Used control playback volume.
+<li> SOUND_MIXER_MIC - Used to control recording volume by the voice recorder
+application.
+</ul>
+<p> <h3> Camera
+</h3>
+<a name="5-4"></a><p> The Camera application requires a kernel with Video4Linux version 1 support. 
+Please refer to the official <a href="http://www.exploits.org/v4l/">Video for 
+  Linux</a> resources site for details about this API.
+<p> The Camera application expects the camera to be available through the 
+<tt>/dev/video</tt> device node.
+<p> <h2> Development Environment
+</h2>
+<a name="6"></a><p> <h3> Compilers
+</h3>
+<a name="6-1"></a><p> Qtopia is built using a fairly standard subset of the C++ language.  Trolltech
+has found a large number of compilers can successfully build Qtopia.  In 
+particular, the following versions of the <a href="http://gcc.gnu.org">GNU GCC 
+  compiler</a> are known to work:
+<ul>
+<li> 2.95.2
+<li> 3.2.4
+<li> 3.3.0 
+<li> 3.3.3 
+<li> 3.3.4
+<li> 3.4.1
+</ul>
+
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

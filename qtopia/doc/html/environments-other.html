@@ -1,0 +1,67 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/environments-other.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Other Qtopia Environments</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Other Qtopia Environments</h1>
+
+
+<p> 
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Runtime Environment
+</a>
+<li><a href="#2"> Time Environment
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Runtime Environment
+</h2>
+<a name="1"></a><p> The functionality of the Qtopia runtime environment varies according to the platform.  For example, Qtopia 1.5 for the Zaurus platform does not have thread support.
+<p> Further understanding can be obtained by examining default configuration files, for example, for Qt/Embedded examine <tt>$QPEDIR/src/qt/qconfig-qpe.h</tt> file. This file is copied to <tt>$QTDIR/src/tools</tt> when building Qt/Embedded. It may be modified, for example, to  reduce the memory and space requirements for Qtopia which can be useful if requirements are very specific and the device has only a small amount of memory. 
+<p> <h2> Time Environment
+</h2>
+<a name="2"></a><p> Qtopia sets up the time zone based on the settings provided by the end-user. If the end-user does not adjust the settings to reflect local time then a default value is set.
+<p> The time is set using the <tt>Date &amp;amp; Time</tt> tool, or by clicking on the clock in the taskbar, and selecting <tt>Set time...</tt>.
+<p> If you have an SDK and are unable to set this directly then you can manually create the default time values by producing a
+<tt>~/Settings/locale.conf</tt> file, and inserting values similar to those shown in the example below:
+<p> <PRE>
+[Language]
+Language = en
+[Location]
+Timezone = Australia/Brisbane
+</PRE>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

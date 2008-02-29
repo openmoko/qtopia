@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Applets
+[Desktop Entry]
+Name[]=Applets
+Comment[]=Applets provide status information and easy access to settings via the Taskbar.
+Apply=QPE/TaskBar reloadApplets()

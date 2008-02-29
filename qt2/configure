@@ -1,0 +1,2030 @@
+#!/bin/sh
+#
+# Configures to build the Qt library
+#
+# Copyright 1999-2005 Trolltech AS.  All rights reserved.
+#
+
+# To remove the need for the first test, do this:
+# QTDIR=`pwd` export QTDIR
+
+relpath=`dirname $0`
+relpath=`(cd $relpath; pwd)`
+
+HELP=no
+if [ "$1" = -h -o "$1" = -help -o "$1" = --help ]
+then
+    HELP=yes
+else
+
+touch .test.qt.
+if [ '!' -f ${QTDIR}/.test.qt. ];
+then
+    rm .test.qt.
+    echo
+    echo
+    echo '   The environment variable $QTDIR is not set correctly. It is currently'
+    echo '   set to "'$QTDIR'", but it should be set to this directory,'
+    echo '   which is "'`pwd`'".'
+    echo
+    echo '   Please read the INSTALL file for instructions on how to set $QTDIR'
+    echo '   correctly. If you have set $QTDIR in your .profile or .login, you '
+    echo '   will need to log out and log in again to make the setting effective.'
+    echo
+    echo
+    exit 1
+fi
+rm .test.qt.
+
+# Find a make command
+if ( make /dev/null ) >/dev/null 2>/dev/null
+then
+    MAKE=make
+else
+    if ( gmake /dev/null ) >/dev/null 2>/dev/null
+    then
+        MAKE=gmake
+    else
+        echo "You don't seem to have 'make' or 'gmake' in your PATH."
+        echo "Cannot proceed."
+        exit 1
+    fi
+fi
+
+if [ ! -d $TMAKEDIR ] || [ ! -f $TMAKEDIR/bin/tmake ]; then
+    echo "TMAKEDIR is not set. Please create an environment variable named TMAKEDIR and point it to the location of tmake."
+    exit 1
+fi
+
+# Defaults
+#
+# Short parenthesis:
+# Initialize all variables (for example "no" will do) so that they can be
+# tested for equality like in [ "$FOO" = "yes" ].
+# Alternatively keep them empty but use tests like [ "x$FOO" = "xyes" ] or
+# [ -n "$FOO" ].
+# In any case be consistent. This is to handle shells like the BSDi shell.
+
+KDE=no
+GPLUSPLUS_EXCEPTIONS=default
+VERBOSE=no
+DEBUG=no
+SHARED=yes
+GIF=no
+OPENGL=auto
+THREAD=auto
+SM=auto
+ZLIB=yes
+LIBPNG=yes
+JPEG=no
+MNG=no
+NAS_SOUND=no
+XFT=auto
+XKB=auto
+I_FLAGS=
+D_FLAGS=
+L_FLAGS=
+R_FLAGS=
+l_FLAGS=
+PLATFORM=
+XPLATFORM=
+FROMMAKE=
+QT_CXX=""
+QWS_KEYPAD=n
+
+QT_EMBEDDED=no
+QCONFIG=prompted
+QWS_QVFB=prompted
+DEPTHS=prompted
+
+# Parse the arguments, setting things to "yes" or "no".
+
+while [ -n "$1" ]; do
+   case $1 in
+   -frommake)
+        FROMMAKE=yes
+    ;;
+   -qconfig)
+        shift; QCONFIG=$1
+        if [ "$QCONFIG" = all ]
+        then
+            QCONFIG=
+        fi
+    ;;
+   -depths)
+        shift; DEPTHS=$1
+    ;;
+   -accel-snap)
+        QWS_ACCEL_SNAP=y
+    ;;
+   -accel-voodoo3)
+        QWS_ACCEL_VOODOO3=y
+    ;;
+   -accel-mach64)
+        QWS_ACCEL_MACH64=y
+    ;;
+   -accel-matrox)
+        QWS_ACCEL_MATROX=y
+    ;;
+   -qvfb)
+        QWS_QVFB=y
+    ;;
+   -no-qvfb)
+        QWS_QVFB=n
+    ;;
+   -vnc)
+        QWS_VNC=y
+    ;;
+   -keypad-mode)
+        QWS_KEYPAD=y
+    ;;
+   -platform)
+        shift; PLATFORM=$1
+    ;;
+   -xplatform)
+        shift; XPLATFORM=$1
+    ;;
+   -release)
+       DEBUG=no
+    ;;
+   -debug)
+       DEBUG=yes
+    ;;
+   -shared)
+       SHARED=yes
+    ;;
+   -static)
+       SHARED=no
+    ;;
+   -no-gif)
+       GIF=no
+    ;;
+   -gif)
+       GIF=yes
+    ;;
+   -no-sm)
+       SM=no
+    ;;
+   -sm)
+       SM=yes
+    ;;
+   -no-thread)
+       THREAD=no
+    ;;
+   -thread)
+       THREAD=yes
+    ;;
+   -qt-zlib)
+       ZLIB=yes
+    ;;
+   -system-zlib)
+       ZLIB=no
+    ;;
+   -qt-libpng)
+       LIBPNG=yes
+    ;;
+   -system-libpng)
+       LIBPNG=no
+    ;;
+   -no-mng)
+       MNG=no
+    ;;
+   -system-libmng)
+       MNG=yes
+    ;;
+   -no-jpeg)
+       JPEG=no
+    ;;
+   -system-jpeg)
+       JPEG=yes
+    ;;
+   -no-nas-sound)
+       NAS_SOUND=no
+    ;;
+   -system-nas-sound)
+       NAS_SOUND=yes
+    ;;
+   -kde)
+       KDE=yes
+    ;;
+   -tslib)
+       TSLIB=yes
+    ;;
+    -no-g++-exceptions)
+        GPLUSPLUS_EXCEPTIONS=no
+    ;;
+   -no-xft)
+        XFT=no
+    ;;
+   -xft)
+        XFT=yes
+    ;;
+   -no-xkb)
+        XKB=no
+    ;;
+   -xkb)
+        XKB=yes
+    ;;
+   -no-*)
+       MODULE=`echo $1 | sed -e "s/-no-//"`;
+       if [ -d "src/$MODULE" ]
+       then
+            NO_MODULES="$NO_MODULES $MODULE"
+       else
+            FEATURE=`echo $1 | sed -e "s/-/_/g" | tr '[a-z]' '[A-Z]'`;
+            QT_CXX="$QT_CXX -DQT"`echo $1 | sed -e "s/-/_/g" | tr '[a-z]' '[A-Z]'`
+       fi
+    #buildpath=`dirname $a | sed -e "s;$sepath;.;g"`
+    ;;
+   -h | -help | --help)
+       HELP=yes
+    ;;
+   -v)
+       VERBOSE=yes
+    ;;
+   -I?*)
+        I_FLAGS="$I_FLAGS $1"
+    ;;
+   -D?*)
+        D_FLAGS="$D_FLAGS $1"
+    ;;
+   -L?*)
+        L_FLAGS="$L_FLAGS $1"
+    ;;
+   -R?*)
+        R_FLAGS="$R_FLAGS $1"
+    ;;
+   -l?*)
+        l_FLAGS="$l_FLAGS $1"
+    ;;
+   -I)
+        shift
+        I_FLAGS="$I_FLAGS -I$1"
+    ;;
+   -D)
+        shift
+        D_FLAGS="$D_FLAGS -D$1"
+    ;;
+   -L)
+        shift
+        L_FLAGS="$L_FLAGS -L$1"
+    ;;
+   -R)
+        shift
+        R_FLAGS="$R_FLAGS -R$1"
+    ;;
+   -embedded)
+        QT_EMBEDDED=yes
+    
+   ;;
+   *)
+       echo $1: unknown argument
+       HELP=yes
+       ERROR=yes
+    ;;
+   esac
+   shift
+done
+
+if [ "$QT_EMBEDDED" = no ]; then
+    if [ "$QCONFIG" = "prompted" ]; then
+        QCONFIG=
+    else
+        echo "WARNING: Using a different qconfig.h will most likely"
+        echo "         make the Qt library you build incompatible with"
+        echo "         other software."
+        echo "         This is not recommended nor supported."
+    fi
+fi
+
+## ///////////////////////////////////////
+
+# Pseudo-shadow builds
+# Basically, we determine a good location to put stuff (based on
+# platform/xplatform and keypad/no-keypad) then we just prepend
+# it to all the .o lines in the Makefile. We then write out some
+# new implicit rules so make can actually build the object files
+objects_dir="tmp/"
+if [ "$DEBUG" = yes ]; then
+    objects_dir="${objects_dir}debug"
+else
+    objects_dir="${objects_dir}release"
+fi
+if [ "$SHARED" = yes ]; then
+    objects_dir="${objects_dir}-shared"
+else
+    objects_dir="${objects_dir}-static"
+fi
+if [ "$QT_EMBEDDED" = yes ]; then
+    objects_dir="${objects_dir}-$XPLATFORM"
+    if [ "$QWS_KEYPAD" = y ]; then
+        objects_dir="${objects_dir}-keypad"
+    else
+        objects_dir="${objects_dir}-no-keypad"
+    fi
+else
+    objects_dir="${objects_dir}-$PLATFORM"
+fi
+# make sure the tmp dir exists
+mkdir -p $QTDIR/src/$objects_dir
+
+#if [ -e $QTDIR/LICENSE.Qtopia -o -e $QTDIR/LICENSE.TROLL ]; then
+(
+    # remove redundant files from the Qt 2.3 depot that will cause problems
+    find $QTDIR -name Makefile -o -name GNUmakefile | xargs rm -f
+
+    # Make it so that tmake can run
+    if [ -z "$TMAKEDIR" ]; then
+        echo "ERROR: TMAKEDIR is not set!"
+        exit 1
+    fi
+    export TMAKEPATH="$TMAKEDIR/lib/linux-g++"
+    export PATH=$TMAKEDIR/bin:$PATH
+
+    # Update the configs files
+    export UPDATE_CONFIGS=yes
+    $QTDIR/util/scripts/mkconfigs
+    $QTDIR/util/scripts/mkconfigs qws
+
+    TMAKEARG=
+    if [ "$QT_EMBEDDED" = "yes" ]; then
+        TMAKEARG="$TMAKEARG CONFIG+=embedded" # CONFIG+=png CONFIG+=zlib"
+    fi
+    TMAKEARG="$TMAKEARG CONFIG+=enterprise"  # Enable everything (it gets disabled later)
+
+    (
+        cd $QTDIR/src/moc
+        tmake -t $QTDIR/tmake/propagate.t moc.pro >Makefile.in
+        cat >>Makefile.in <<END
+mocgen.cpp: moc.l moc.y
+	lex moc.l
+	yacc moc.y
+	rm -f mocgen.cpp
+	mv y.tab.c mocgen.cpp
+END
+    )
+
+    $QTDIR/util/scripts/makemake $SUBARGS $PLATFORM
+
+    # allmoc depends on the configuration so it must live in the shadow
+    rm -f $QTDIR/src/allmoc.o $QTDIR/src/allmoc.cpp
+    if [ -f $QTDIR/src/$objects_dir/allmoc.o ]; then
+        cp -fp $QTDIR/src/$objects_dir/allmoc.o $QTDIR/src/allmoc.o
+    fi
+    if [ -f $QTDIR/src/$objects_dir/allmoc.cpp ]; then
+        cp -fp $QTDIR/src/$objects_dir/allmoc.cpp $QTDIR/src/allmoc.cpp
+    fi
+
+    (
+        cd $QTDIR/src
+        tmake $TMAKEARG -t $QTDIR/tmake/propagate.t qt.pro | perl -p -e "s{$QTDIR}{\\\$(QTDIR)}" >Makefile.in
+        
+        # Fix Makefile.in to handle pseudo-shadow builds
+        perl -i -e '
+            use File::Basename;
+            use File::Path;
+            my $objects_dir = "'$objects_dir'";
+            my $qpedir = "'$QPEDIR'";
+            my $qt_embedded = "'$QT_EMBEDDED'";
+            my $file = shift @ARGV;
+            open IN, "$file" or die $!;
+            my @data = <IN>;
+            close IN;
+            open OUT, ">$file" or die $!;
+            my $searching_for_allmoc = 0;
+            for ( @data ) {
+                if ( /rm -f allmoc\.cpp/ ) {
+                    # instead of removing allmoc.cpp, just remove the tmp directory
+                    # slightly undesirable behaviour but nothing else makes sense
+                    $_ = "\t-rm -rf tmp\n".
+                         "\t-rm $qpedir/lib/libqte*\n";
+                } elsif ( /rm allmoc\.h/ ) {
+                    # removing allmoc.h means we can update the shadow allmoc.cpp
+                    print OUT "\tcp -fp allmoc.cpp $objects_dir/allmoc.cpp\n";
+                } elsif ( /allmoc\.o:/ ) {
+                    $searching_for_allmoc = 1;
+                } elsif ( $searching_for_allmoc && /^\s*$/ ) {
+                    $searching_for_allmoc = 0;
+                    # add an explicit compile line and then update the shadow allmoc.o
+                    $_ = "\t\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o \$@ \$<\n".
+                         "\tcp -fp \$@ $objects_dir/allmoc.o\n\n";
+                } elsif ( $qt_embedded eq "yes" && /^DESTDIR =/ ) {
+                    # libqte* goes in QPEDIR
+                    $_ = "DESTDIR = $qpedir/lib/\n";
+                } else {
+                    s,([^\s]+/[^\s]+\.o),$objects_dir/$1,g;
+                    my $dir = dirname("$objects_dir/$1");
+                    if ( ! -d $dir ) {
+                        mkpath($dir);
+                    }
+                }
+                print OUT;
+            }
+            # These rules let the compile actually happen
+            print OUT <<END;
+$objects_dir/%.o: %.cpp
+	\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o \$@ \$<
+$objects_dir/%.o: %.cxx
+	\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o \$@ \$<
+$objects_dir/%.o: %.cc
+	\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o \$@ \$<
+$objects_dir/%.o: %.C
+	\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o \$@ \$<
+$objects_dir/%.o: %.c
+	\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<
+END
+            close OUT;
+        ' Makefile.in
+    )
+
+    cd $QTDIR
+    find tutorial tools examples extensions -name '*.pro' | while read pro_file; do
+        (
+        DIR=$(dirname $pro_file)
+        cd $DIR # we are in a subshell
+        TEMPLATE=$(basename $DIR).t
+        if [ -f $TEMPLATE ]
+        then
+            TEMPLATE="-t $TEMPLATE"
+        else
+            if egrep -q -s 'TEMPLATE.*(app|lib)' $QTDIR/$pro_file
+            then
+                TEMPLATE="-t $QTDIR/tmake/propagate.t"
+            else
+                TEMPLATE=""
+            fi
+        fi
+        mkfiledotin=Makefile.in
+        case $pro_file in
+            */examples.pro) TEMPLATE=;;
+            */tutorial.pro) TEMPLATE=;;
+            *-pro.pro) mkfiledotin=Makefile-pro.in;;
+            *-kde.pro) mkfiledotin=Makefile-kde.in;;
+        esac
+
+        tmake $TMAKEARG ${TEMPLATE} $(basename $pro_file) > $mkfiledotin
+        )
+    done
+
+    if [ "$QT_EMBEDDED" = "yes" ]; then
+        rm $QTDIR/tools/Makefile.in
+        echo "all clean:" > $QTDIR/tools/Makefile.in
+    fi
+)
+#fi
+
+## ///////////////////////////////////////
+
+# Check licensed modules
+MODULES=`echo $MODULES | $MAKE -f src/Makefile.in listallmodules`
+for MODULE in $NO_MODULES; do
+    MODULES=`echo $MODULES | sed -e "s/$MODULE//"`
+done
+
+if [ "$QT_EMBEDDED" = "yes" ]; then
+    EMB="/Embedded"
+    FT=yes
+else
+    EMB=""
+    QCONFIG=
+    DEPTHS=
+    QWS_QVFB=
+    FT=no
+fi
+
+if [ -f LICENSE.Qtopia ]
+then
+    # Qtopia edition - may only be used under the terms of the
+    # license the Qtopia package is distributed with
+    Edition=qtopia
+    Licensee=you
+    TheLicense=`head -n 1 LICENSE.Qtopia`
+    while true
+    do
+        echo
+        echo "This is the Qt$EMB Qtopia Edition."
+        echo
+        echo "You are licensed to use this software under the terms of"
+        echo "the $TheLicense."
+        echo
+        echo "Type '?' to view the $TheLicense."
+        echo "Type 'yes' to accept this license offer."
+        echo "Type 'no' to decline this license offer."
+        echo
+        if echo '\c' | grep '\c' >/dev/null; then
+            echo -n "Do you accept the terms of the $TheLicense? "
+        else
+            echo "Do you accept the terms of the $TheLicense? \c"
+        fi
+        read acceptance
+	if [ "$acceptance" = yes ]
+	then
+	    break
+	else
+	    if [ "$acceptance" = no ]
+	    then
+		echo
+		echo "You are not licensed to use this software."
+		echo
+		exit 1
+	    elif [ "$acceptance" = "?" ]
+	    then
+		more LICENSE.Qtopia
+	    fi
+	fi
+    done
+elif [ -f LICENSE.QPL -o -f LICENSE.GPL ]
+then
+    # Free edition - may only be used under the terms of the GPL,
+    # or, on X11, the QPL.
+    #
+    Edition=free
+    Licensee=you
+    while true
+    do
+        echo
+        echo "This is the Qt$EMB Free Edition."
+        echo
+        if [ -n "$EMB" ]
+        then
+            echo "You are licensed to use this software under the terms of"
+            echo "the GNU General Public License (GPL)."
+            echo
+        else
+            echo "You are licensed to use this software under the terms of either"
+            echo "the Q Public License (QPL) or the GNU General Public License (GPL)."
+            echo
+            echo "Type 'Q' to view the Q Public License."
+        fi
+        echo "Type 'G' to view the GNU General Public License."
+        echo "Type 'yes' to accept this license offer."
+        echo "Type 'no' to decline this license offer."
+        echo
+        echo "Do you accept the terms of the license?"
+        read acceptance
+        if [ "$acceptance" = yes ]
+        then
+            break
+        else
+            if [ "$acceptance" = no ]
+            then
+                echo
+                echo "You are not licensed to use this software."
+                echo
+                exit 0
+            elif [ "$acceptance" = G -o "$acceptance" = g ]
+            then
+                more LICENSE.GPL
+            elif [ "$acceptance" = Q -o "$acceptance" = q ]
+            then
+                if [ -z "$EMB" ]
+                then
+                    more LICENSE.QPL
+                fi
+            fi
+        fi
+    done
+elif [ -f LICENSE.EVAL ]
+then
+    # Evaluation edition
+    #
+    Edition=eval
+    Licensee=Evaluation
+    while true
+    do
+        echo
+        echo "This is the Qt$EMB Evaluation Edition."
+        echo
+        echo "You are licensed to use this software under the terms of"
+        echo "the Qt EVALUATION VERSION LICENSE AGREEMENT"
+        echo
+        echo "Type '?' to view the Evaluation License."
+        echo "Type 'yes' to accept this license offer."
+        echo "Type 'no' to decline this license offer."
+        echo
+        echo "Do you accept the terms of the license?"
+        read acceptance
+        if [ "$acceptance" = "yes" ]
+        then
+            break
+        else
+            if [ "$acceptance" = "no" ]
+            then
+                echo
+                echo "You are not licensed to use this software."
+                echo
+                exit 0
+            elif [ "$acceptance" = "?" ]
+            then
+                more LICENSE.EVAL
+            fi
+        fi
+    done
+elif [ -f LICENSE.TROLL ]
+then
+    # Internal Trolltech edition.
+    E="Qt$EMB Trolltech Edition"
+    Edition=ent
+    echo
+    echo "This is the $E."
+    echo
+else
+    if [ -f LICENSE ]
+    then
+        echo
+        E="Qt$EMB Professional Edition"
+        Edition=pro
+
+        if [ -f $HOME/.qt-license ]
+        then
+            . $HOME/.qt-license
+            if echo $Products | grep >/dev/null 'qt-enterprise'
+            then
+                E="Qt$EMB Enterprise Edition"
+                Edition=ent
+            else
+                MODULES="$Products "`$MAKE -f src/Makefile.in listpromodules`
+                if [ -n "$EMB" ]
+                then
+                    MODULES="$MODULES network"
+                fi
+            fi
+            ExpiryDate=`echo $ExpiryDate | sed -e "s,-,,g"`
+            NOW=`date +%Y%m%d`
+            if [ "$NOW" -gt "0$ExpiryDate" ]
+            then
+                echo
+                echo "WARNING  WARNING  WARNING  WARNING"
+                echo
+                echo "  Your support and upgrade period has expired."
+                echo
+                echo "  You may continue to use your last licensed release"
+                echo "  of Qt under the terms of your existing license"
+                echo "  agreement, but you are not entitled to technical"
+                echo "  support, nor are you entitled to use any more recent"
+                echo "  Qt releases."
+                echo
+                echo "  Please contact sales@trolltech.com to renew your"
+                echo "  support and upgrades for this license."
+                echo
+                echo "WARNING  WARNING  WARNING  WARNING"
+                echo
+                sleep 3
+            fi
+        else
+            echo
+            echo "\"$HOME/.qt-license\" not found"
+            echo
+            echo "You have not installed a valid license file."
+            echo
+            echo "Please install the license file supplied by Trolltech,"
+            echo "or install the Qt Free Edition if you intend to develop"
+            echo "free software."
+            exit 1
+        fi
+        echo
+        echo "This is the $E."
+        echo
+        while true
+        do
+            echo
+            echo "Type '?' to view the $E License."
+            echo "Type 'yes' to accept this license offer."
+            echo "Type 'no' to decline this license offer."
+            echo
+            echo "Do you accept the terms of the $E License?"
+            read acceptance
+            if [ "$acceptance" = yes ]
+            then
+                break
+            else
+                if [ "$acceptance" = no ]
+                then
+                    echo
+                    echo "You are not licensed to use this software."
+                    echo
+                    exit 0
+                fi
+                more LICENSE
+            fi
+        done
+    else
+        echo "The LICENSE, LICENSE.QPL, or LICENSE.GPL file shipped with"
+        echo "this software has disappeared."
+        echo
+        echo "Sorry, you are not licensed to use this software."
+        echo "Try re-installing."
+        echo
+        exit 0
+    fi
+fi
+
+
+
+# Remove the build options file
+[ -f .buildopts ] && rm .buildopts
+
+fi # help
+
+# we used to check the options here...
+
+if [ -z "$PLATFORM" ]
+then
+    UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+    UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+    UNAME_SYSTEM=`(uname -s) 2>/dev/null` || UNAME_SYSTEM=unknown
+    UNAME_VERSION=`(uname -v) 2>/dev/null` || UNAME_VERSION=unknown
+
+    ARCH=""
+    if [ "$QT_EMBEDDED" = "yes" ]
+    then
+        # This is a Qt/Embedded distribution
+        SM=no
+        MODULES=`echo $MODULES | sed -e 's/opengl//'`
+        PLATFORMS=`/bin/ls configs | sed -e 's/-debug//' -e 's/-static//' -e 's/-shared//' | sort -u | fmt`
+        case "$UNAME_MACHINE" in
+        *86) ARCH=x86-
+        ;; *) ARCH=generic-
+        esac
+    else
+        ##### Generate?  Look in configs/?
+        PLATFORMS="aix-g++ aix-xlc bsdi-g++ dgux-g++ dynix-g++ freebsd-g++
+            hpux-acc hpux-cc hpux-g++ hpux-n64 hpux-o64 hurd-g++
+            irix-64 irix-g++ irix-n32 irix-o32 linux-cxx linux-g++ linux-kcc
+            netbsd-g++ openbsd-g++ osf1-cxx osf1-g++ qnx-rtp-g++ sco-g++
+            solaris-cc-gcc solaris-cc solaris-64 solaris-g++ sunos-g++
+            ultrix-g++ unixware-g++ unixware7-cc unixware7-g++"
+    fi
+
+    PLATFORM_NOTES=""
+
+    case "$UNAME_SYSTEM:$UNAME_RELEASE" in
+     AIX*)
+        #PLATFORM=aix-g++
+        PLATFORM=aix-xlc
+        PLATFORM_NOTES="
+            - Also available: aix-g++
+    "
+    ;;
+     QNX:*)
+        #PLATFORM=qnx-g++
+        MODULES=`echo $MODULES | sed -e 's/opengl//'`
+        OPENGL=no
+        PLATFORM=qnx-rtp-g++
+        PLATFORM_NOTES="
+            - Experimental support only!
+        "
+    ;;
+     GNU:*)
+        PLATFORM=hurd-g++
+    ;;
+     BSD/OS:*|BSD/386:*)
+        PLATFORM=bsdi-g++
+    ;;
+     dgux:*)
+        PLATFORM=dgux-g++
+    ;;
+     dynix:*)
+        PLATFORM=dynix-g++
+    ;;
+     ULTRIX:*)
+        PLATFORM=ultrix-g++
+    ;;
+     FreeBSD:*)
+        PLATFORM=freebsd-g++
+    ;;
+     OpenBSD:*)
+        PLATFORM=openbsd-g++
+    ;;
+     NetBSD:*)
+        PLATFORM=netbsd-g++
+    ;;
+     IRIX64:*)
+        PLATFORM=irix-64
+    ;;
+     IRIX:*)
+        #PLATFORM=irix-g++
+        PLATFORM=irix-n32
+        #PLATFORM=irix-o32
+        PLATFORM_NOTES="
+            - Also available for IRIX: irix-64 irix-g++ irix-o32
+        "
+    ;;
+     HP-UX:*)
+        #PLATFORM=hpux-acc
+        #PLATFORM=hpux-cc
+        #PLATFORM=hpux-n64
+        #PLATFORM=hpux-o64
+        PLATFORM=hpux-g++
+        PLATFORM_NOTES="
+            - Also available for HP-UX: hpux-acc hpux-cc hpux-n64 hpux-o64
+        "
+    ;;
+     OSF1:*)
+        PLATFORM=osf1-cxx
+        #PLATFORM=osf1-g++
+        PLATFORM_NOTES="
+            - Also available for OSF1: osf1-g++
+        "
+    ;;
+     Linux:*)
+        PLATFORM=linux-${ARCH}g++
+        ;;
+            SunOS:5*)
+        #PLATFORM=solaris-g++
+        PLATFORM=solaris-cc
+        PLATFORM_NOTES="
+            - Also available for SunOS:5: solaris-64 solaris-g++
+            - To mix GNU C and SunPRO C++, add -platform solaris-cc-gcc
+        "
+    ;;
+     SunOS:4*)
+        PLATFORM=sunos-g++
+    ;;
+     UNIX_SV:4.2*)
+        PLATFORM=unixware-g++
+    ;;
+     UnixWare:5*)
+        PLATFORM=unixware7-cc
+        #PLATFORM=unixware7-g++
+        PLATFORM_NOTES="
+            - Also available for UnixWare:5: unixware7-g++
+        "
+    ;;
+     *:3.2)
+        PLATFORM=sco-g++
+    ;;
+     *)
+        if [ "$HELP" != "yes" ]; then
+            echo
+            for p in $PLATFORMS
+            do
+                echo "    $0 $* -platform $p"
+            done
+            echo
+            echo "The build script does not currently recognize all platforms"
+            echo "supported by Qt."
+            echo "Rerun this script with a -platform option listed to"
+            echo "set the operating system / compiler combination you use."
+            echo
+            exit 2
+        fi
+    esac
+fi
+
+# Check if the platform + static + debug exists
+
+if [ -z "$XPLATFORM" ]
+then
+    XPLATFORM="$PLATFORM"
+fi
+
+TARGET=$PLATFORM
+XTARGET=$XPLATFORM
+if [ "x$SHARED" = "xyes" ]; then
+    TARGET="${TARGET}-shared"
+    XTARGET="${XTARGET}-shared"
+    if [ '!' -f $relpath/configs/$TARGET ]; then
+        echo
+        echo
+        echo '    No shared library support for platform/compiler ' $TARGET
+        echo "    Available platforms: $PLATFORMS"
+        echo
+        echo
+        exit 2
+    fi
+    if [ '!' -f $relpath/configs/$XTARGET ]; then
+        echo
+        echo
+        echo '    No shared library support for platform/compiler ' $XTARGET
+        echo "    Available platforms: $PLATFORMS"
+        echo
+        echo
+        exit 2
+    fi
+else
+    TARGET="${TARGET}-static"
+    XTARGET="${XTARGET}-static"
+    if [ '!' -f $relpath/configs/$TARGET ]; then
+        echo
+        echo
+        echo '    No static library support for platform/compiler ' $TARGET
+        echo "    Available platforms: $PLATFORMS"
+        echo
+        echo
+        exit 2
+    fi
+    if [ '!' -f $relpath/configs/$XTARGET ]; then
+        echo
+        echo
+        echo '    No static library support for platform/compiler ' $XTARGET
+        echo "    Available platforms: $PLATFORMS"
+        echo
+        echo
+        exit 2
+    fi
+fi
+
+if [ "x$DEBUG" = "xyes" ]; then
+    TARGET="${TARGET}-debug"
+    XTARGET="${XTARGET}-debug"
+fi
+
+CONFIG="$relpath/configs/${TARGET}"
+XCONFIG="$relpath/configs/${XTARGET}"
+
+if [ -z "$TARGET" -o '!' -f "$CONFIG" ];
+then
+    echo
+    echo
+    echo '    The specified platform/compiler not supported: ' $TARGET
+    echo "    Available platforms: $PLATFORMS"
+    echo
+    echo
+    exit 2
+fi
+if [ -z "$XTARGET" -o '!' -f "$XCONFIG" ];
+then
+    echo
+    echo
+    echo '    The specified platform/compiler not supported: ' $XTARGET
+    echo "    Available platforms: $PLATFORMS"
+    echo
+    echo
+    exit 2
+fi
+
+if [ -z "$QWS_ACCEL_SNAP" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_SNAP"
+fi
+if [ -z "$QWS_ACCEL_VOODOO3" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_VOODOO3"
+fi
+if [ -z "$QWS_ACCEL_MACH64" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_MACH64"
+fi
+if [ -z "$QWS_ACCEL_MATROX" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_MATROX"
+fi
+if [ -z "$QWS_VNC" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_VNC"
+fi
+if [ "$QWS_KEYPAD" = "y" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_KEYPAD_MODE"
+fi
+
+if [ "$QCONFIG" = prompted ]
+then
+    echo
+    echo "Choose a feature configuration:"
+    echo
+    echo "  1. Minimal (890 kB)"
+    echo "  2. Small (1.7 MB)"
+    echo "  3. Medium (2.3 MB)"
+    echo "  4. Large (3.4 MB)"
+    echo "  5. Everything (5.6 MB)"
+    echo "  6. Your own local configuration (src/tools/qconfig-local.h)"
+    echo
+    echo "Sizes are stripped dynamic 80386 build. Static builds are smaller."
+    echo
+    echo "Your choice (default 5): "
+    read QCONFIG
+    if [ -z "$QCONFIG" ]
+    then
+        QCONFIG=5
+    fi
+    case "$QCONFIG" in
+    1) QCONFIG="minimal";;
+    2) QCONFIG="small";;
+    3) QCONFIG="medium";;
+    4) QCONFIG="large";;
+    5) QCONFIG="";;
+    6) QCONFIG="local";;
+    esac
+else
+    case "$QCONFIG" in
+      minimal|small|medium|large|"") NONSTDQCONFIG=
+    ;; *) NONSTDQCONFIG=y
+    esac
+fi
+
+if [ -n "$QCONFIG" ]
+then
+    QCONFIG="qconfig-$QCONFIG.h"
+    if [ -f "src/tools/$QCONFIG" ]
+    then
+        # "no" means "use system png" in this script
+        if grep -q QT_NO_IMAGEIO_PNG  src/tools/$QCONFIG
+        then
+            REALLY_DONT_USE_LIBPNG=yes
+            REALLY_DONT_USE_LIBZ=yes
+            LIBPNG=no
+            ZLIB=no
+        fi
+        if grep -q QT_NO_FREETYPE src/tools/$QCONFIG
+        then
+            FT=no
+        fi
+        rm -f $QTDIR/src/$objects_dir/qconfig.h
+        cp -fp $QTDIR/src/tools/$QCONFIG $QTDIR/src/$objects_dir/qconfig.h
+    else
+        echo >&2 "configure: no such file: src/tools/$QCONFIG"
+        exit 1
+    fi
+else
+    QCONFIG=qconfig.h
+    if [ -f $QTDIR/src/$objects_dir/qconfig.h ]; then
+        if [ "$(cat $QTDIR/src/$objects_dir/qconfig.h)" != "// Everything" ]; then
+            rm -f $QTDIR/src/$objects_dir/qconfig.h
+        fi
+    fi
+    if [ ! -f $QTDIR/src/$objects_dir/qconfig.h ]; then
+        echo "// Everything" >$QTDIR/src/$objects_dir/qconfig.h
+    fi
+fi
+rm -f $QTDIR/src/tools/qconfig.h include/qconfig.h
+cp -fp $QTDIR/src/$objects_dir/qconfig.h $QTDIR/src/tools/qconfig.h
+rm -f $QTDIR/include/qconfig.h
+ln -s $QTDIR/src/tools/qconfig.h $QTDIR/include/qconfig.h
+
+if [ "$DEPTHS" = prompted ]
+then
+    echo
+    echo "Choose pixel-depths to support:"
+    echo
+    echo "   v. VGA-16 - also enables 8bpp"
+    echo "   4. 4bpp grayscale - also enables 8bpp"
+    echo "   8. 8bpp"
+    echo "  16. 16bpp"
+    echo "  18. 18bpp - packed into 24bpp, cannot be enabled with 24bpp"
+    echo "  24. 24bpp - also enables 32bpp, cannot be enabled with 18bpp"
+    echo "  32. 32bpp"
+    echo
+    echo "Each depth adds around 100Kb on 80386."
+    echo
+    echo "Your choices (default 8,16):"
+    read DEPTHS
+    if [ -z "$DEPTHS" ]
+    then
+	    DEPTHS=8,16
+    fi
+fi
+
+if [ "$DEPTHS" = "16" ]
+then
+    echo
+    echo "WARNING: You have configured with only depth 16."
+    echo "         Usually alphablended graphics will look better"
+    echo "         if you configure with both depths 16 and 32"
+    echo "         even if the display depth is only 16 bit."
+    echo
+fi
+
+if [ -n "$DEPTHS" ]
+then
+    DV=;D4=;D8=;D16=;D18=;D24=;D32=
+    for D in `echo "$DEPTHS" | sed -e 's/,/ /g'`
+    do
+        case "$D" in
+            v) DV=y; D8=y
+        ;;  4) D4=y; D8=y
+        ;;  8) D8=y
+        ;; 16) D16=y
+            ;; 18) D18=y
+        ;; 24) D24=y; D32=y
+        ;; 32) D32=y
+        esac
+    done
+
+    if [ ! -z "$D18" -a ! -z "$D24" ]
+    then
+        echo
+        echo "WARNING: You have configured with depth 18 and 24."
+        echo "         These depths are not compatible. Depth 24"
+        echo "         will be disabled."
+    fi
+
+    if [ -z "$DV" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_VGA_16"
+    fi
+    if [ -z "$D4" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_4"
+    fi
+    if [ -z "$D8" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_8"
+    fi
+    if [ -z "$D16" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_16"
+    fi
+    if [ -z "$D18" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_18"
+    fi
+    if [ -z "$D24" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_24"
+    else
+        # Disable depth 24 if depth 18 enabled
+        if [ ! -z "$D18" ]
+        then
+            QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_24"
+        fi
+    fi
+    if [ -z "$D32" ]
+    then
+        QT_CXX="$QT_CXX -DQT_NO_QWS_DEPTH_32"
+    fi
+fi
+
+if [ "$QWS_QVFB" = prompted ]
+then
+    echo
+    echo "Enable Qt Virtual Framebuffer support for development on X11 (default yes)"
+    read QWS_QVFB
+    if [ "$QWS_QVFB" != n -a "$QWS_QVFB" != no ]
+    then
+        QWS_QVFB=y
+    else
+        QWS_QVFB=n
+    fi
+fi
+
+if [ "$QWS_QVFB" = "n" -a -n "$EMB" ]
+then
+    QT_CXX="$QT_CXX -DQT_NO_QWS_VFB"
+fi
+
+# Auto-detect opengl support
+
+if echo $MODULES | grep >/dev/null opengl
+then
+    DUMMY=dummy
+else
+    OPENGL=no
+fi
+
+# Find default thread option for target
+if grep >/dev/null '^SYSCONF_LIBS_THREAD' $XCONFIG
+then
+    AUTOTHREAD=yes
+    AUTOTHREAD=no  ####### leave off for now
+else
+    AUTOTHREAD=never
+fi
+if [ $AUTOTHREAD = never ]
+then
+    if [ $THREAD = yes ]
+    then
+        echo
+        echo "ERROR: Qt is not configured to support threading on this platform"
+        echo "       See the THREAD settings in $XCONFIG"
+        echo
+        exit 2
+    fi
+    AUTOTHREAD=no
+fi
+if [ $THREAD = auto ]
+then
+    THREAD=$AUTOTHREAD
+fi
+
+if [ "$QT_EMBEDDED" = "no" -a $OPENGL = "auto" ]
+then
+    OPENGL=yes
+
+    if [ "$VERBOSE" = "yes" ]; then
+        echo "OpenGL auto-detection..."
+    fi
+
+    LIBS=`sed -n -e '/^SYSCONF_LIBS_OPENGL[	]*=/ { s/[^=]*=[	 ]*//; s/-l/ /g; p; }' $XCONFIG`
+    GLDIRS=`sed -n -e '/^SYSCONF_LFLAGS_OPENGL[	]*=/ { s/[^=]*=[	 ]*//; s/-L/ /g; p; }' $XCONFIG`
+    XDIRS=`sed -n -e '/^SYSCONF_LFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-L/ /g; p; }' $XCONFIG`
+    LIBDIRS="$GLDIRS $XDIRS /usr/lib /lib"
+    for L in $L_FLAGS
+    do
+        LL=`echo $L | sed -e 's/^-L//'`
+        LIBDIRS="$LIBDIRS $LL"
+    done
+
+    for L in $LIBS
+    do
+        FOUND_LIB=
+        F=
+        for LIBDIR in $LIBDIRS
+        do
+            FOUND_LIB=`ls $LIBDIR/lib$L.* 2>/dev/null`
+            if [ ! -z "$FOUND_LIB" ]
+            then
+                F=yes
+                if [ "$VERBOSE" = "yes" ]; then
+                    echo "Found $L lib in $LIBDIR"
+                fi
+                break
+            fi
+        done
+
+        if [ ! -z "$FOUND_LIB" -a  ! "x$THREAD" = "xyes" -a ! -z "$F" ]; then
+            LDD_P=`which ldd 2>/dev/null`
+            if [ ! -z "$LDD_P" ]; then
+                for a in $FOUND_LIB; do
+                    if $LDD_P $a 2>/dev/null | grep -i thread >/dev/null 2>&1
+                    then
+                        FOUND_LIB=$a
+                        F_REASON="threads"
+                        F=
+                        break
+                    fi
+                done
+            fi
+        fi
+
+        if [ -z "$F" ]; then
+            MODULES=`echo $MODULES | sed -e 's/opengl//'`
+            OPENGL=no
+                if [ "x$F_REASON" = "xthreads" ]; then
+                    echo "        $FOUND_LIB is a threaded library, Qt needs to be as well."
+                else
+                if [ "$VERBOSE" = "yes" ]; then
+                    echo "Could not find $L lib anywhere in $LIBDIRS"
+                fi
+                fi
+            break
+        fi
+    done
+
+    if [ "$OPENGL" = "yes" ]
+    then
+        INCS="GL/gl.h GL/glu.h"
+        GLDIRS=`sed -n -e '/^SYSCONF_CXXFLAGS_OPENGL[	]*=/ { s/[^=]*=[	 ]*//; s/-I/ /g; p; }' $XCONFIG`
+        XDIRS=`sed -n -e '/^SYSCONF_CXXFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-I/ /g; p; }' $XCONFIG`
+        INCDIRS="$GLDIRS $XDIRS /usr/include /include"
+        for I in $I_FLAGS
+        do
+            II=`echo $I | sed -e 's/^-I//'`
+            INCDIRS="$INCDIRS $II"
+        done
+
+
+        for I in $INCS
+        do
+            F=
+            for INCDIR in $INCDIRS
+            do
+                if [ -f $INCDIR/$I ]
+                then
+                    F=yes
+                    if [ "$VERBOSE" = "yes" ]; then
+                        echo "Found $I in $INCDIR"
+                    fi
+                    break
+                fi
+            done
+            if [ -z "$F" ]; then
+                MODULES=`echo $MODULES | sed -e 's/opengl//'`
+                OPENGL=no
+                if [ "$VERBOSE" = "yes" ]; then
+                    echo "Could not find $I anywhere in $INCDIRS"
+                fi
+                break
+            fi
+        done
+    fi
+
+    if [ "$VERBOSE" = "yes" ]; then
+        if [ "$OPENGL" != "yes" ]; then
+            echo "OpenGL module disabled."
+        else
+            echo "OpenGL module enabled."
+        fi
+    fi
+fi
+
+# Auto-detect session management support
+if [ $SM = auto ]
+then
+    SM=no
+    for INC in `sed -n -e '/^SYSCONF_CXXFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-I/ /g; p; }' $XCONFIG`
+    do
+        if [ -f $INC/X11/SM/SM.h ]
+        then
+            SM=yes
+            break
+        fi
+    done
+fi
+
+# Auto-detect Xft anti-aliased font support for X11
+if [ $XFT = auto -a -z "$EMB" ]
+then
+    XFT=yes
+
+    if [ "$VERBOSE" = "yes" ]; then
+        echo "Xft auto-detection..."
+    fi
+
+    XDIRS=`sed -n -e '/^SYSCONF_LFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-L/ /g; p; }' $XCONFIG`
+    LIBDIRS="$XDIRS /usr/lib /lib"
+
+    FOUND_LIB=
+    F=
+    for LIBDIR in $LIBDIRS
+    do
+        FOUND_LIB=`ls $LIBDIR/libXft.* 2>/dev/null`
+        if [ ! -z "$FOUND_LIB" ]
+        then
+            F=yes
+            if [ "$VERBOSE" = "yes" ]
+            then
+                echo "Found Xft lib in $LIBDIR"
+            fi
+            break
+        fi
+    done
+
+    if [ -z "$F" ]
+    then
+        XFT=no
+        if [ "$VERBOSE" = "yes" ]
+        then
+            echo "Could not find Xft lib anywhere in $LIBDIRS"
+        fi
+    fi
+
+    if [ "$XFT" = "yes" ]
+    then
+        INCS="X11/Xft/Xft.h"
+        XDIRS=`sed -n -e '/^SYSCONF_CXXFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-I/ /g; p; }' $XCONFIG`
+        INCDIRS="$XDIRS /usr/include /include"
+
+        for I in $INCS
+        do
+            F=
+            for INCDIR in $INCDIRS
+            do
+            if [ -f $INCDIR/$I ]
+            then
+                F=yes
+                if [ "$VERBOSE" = "yes" ]; then
+                    echo "Found $I in $INCDIR"
+                fi
+                break
+            fi
+            done
+
+            if [ -z "$F" ]
+            then
+                XFT=no
+                if [ "$VERBOSE" = "yes" ]
+                then
+                    echo "Could not find $I anywhere in $INCDIRS"
+                fi
+                break
+            fi
+        done
+    fi
+
+    if [ "$VERBOSE" = "yes" ]; then
+        if [ "$XFT" != "yes" ]; then
+            echo "Xft support disabled."
+        else
+            echo "Xft support enabled."
+        fi
+    fi
+fi
+
+case "$XPLATFORM" in
+solaris-*)
+    UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+    case "$UNAME_RELEASE" in
+    5.7)
+        if [ "x$VERBOSE" = "xyes" ]
+        then
+            echo "XKB extension known to be broken on this platform."
+        fi
+        XKB=no
+    ;;
+    esac
+;;
+tru64-*)
+    UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
+    if [ "x$VERBOSE" = "xyes" ]
+    then
+        echo "XKB extension not supported on this platform."
+    fi
+    XKB=no
+;;
+esac
+
+XKBLIB_H=
+if [ "$XKB" != "no" ]
+then
+    # find XKB support
+    if [ "$VERBOSE" = "yes" ]
+    then
+        echo "XKB auto-detection..."
+    fi
+
+
+    # check for XKB headers
+
+    if [ "$XKB" != "yes" ]
+    then
+        INC="X11/XKBlib.h"
+        XDIRS=`sed -n -e '/^SYSCONF_CXXFLAGS_X11[	]*=/ { s/[^=]*=[	 ]*//; s/-I/ /g; p; }' $XCONFIG`
+        INCDIRS="$XDIRS /usr/include /include"
+        F=
+        for INCDIR in $INCDIRS
+        do
+            if [ -f $INCDIR/$INC ]
+            then
+                F=yes
+                XKBLIB_H=$INCDIR/$INC
+                if [ "$VERBOSE" = "yes" ]
+                then
+                    echo "  Found $INC in $INCDIR"
+                fi
+                break
+            fi
+        done
+        if [ -z "$F" ]
+        then
+            XKB=no
+            if [ "$VERBOSE" = "yes" ]
+            then
+                echo "  Could not find $INC anywhere in $INCDIRS"
+            fi
+        else
+            XKB=yes
+            if [ "$VERBOSE" = "yes" ]
+            then
+                echo "  XKB support enabled."
+            fi
+        fi
+    fi
+fi
+
+# check for XkbSetPerClientControls in X11/XKBlib.h
+# if it is not found, we disable xkb support
+
+if [ "$XKB" = "yes" ] && [ -f "$XKBLIB_H" ]
+then
+    grep XkbSetPerClientControls $XKBLIB_H >/dev/null || XKB=no
+
+    if [ "$VERBOSE" = "yes" ]
+    then
+        if [ "$XKB" = "yes" ]
+        then
+            echo "  XkbSetPerClientControls found."
+        else
+            echo "  XkbSetPerClientControls not found."
+        fi
+    fi
+fi
+
+# Next, emit a usage message if something failed.
+
+if [ "$HELP" = "yes" ]; then
+   [ "x$ERROR" = "xyes" ] && echo
+    if [ "x$SM" = "xno" ]
+    then
+        SMY=" "
+        SMN="*"
+    else
+        SMY="*"
+        SMN=" "
+    fi
+
+    MODULES_HELP=`$MAKE -f src/Makefile.in listaddonentmodules`
+    if [ -f $HOME/.qt-license ]
+    then
+        . $HOME/.qt-license
+        if echo $Products | grep >/dev/null 'qt-enterprise'
+        then
+            MODULES_HELP="opengl table network canvas"
+        else
+            MODULES_HELP=""
+        fi
+    else
+        MODULES_HELP="opengl table network canvas"
+    fi
+
+    cat <<EOF
+Usage: $0 [-debug] [-release] [-shared] [-static] [-gif] [-no-gif] \\
+          [-sm] [-no-sm] [-thread] [-no-thread] [-qt-zlib] [-system-zlib] \\
+          [-qt-libpng] [-system-libpng] [-no-jpeg] [-system-jpeg] \\
+          [-no-<module>] [-kde] [-Istring] [-Lstring] [-Rstring] [-lstring]
+
+The defaults (*) are usually acceptable.  Here is a short explanation of
+each option:
+
+ *  -release ........... Compile and link Qt with debugging turned off.
+    -debug ............. Compile and link Qt with debugging turned on.
+
+ *  -shared ............ Create and use a shared Qt library (libqt.so)
+    -static ............ Create and use a static Qt library (libqt.a)
+
+ *  -no-gif ............ Do not compile in GIF reading support.
+    -gif ............... Compile in GIF reading support. See src/kernel/qgif.h
+
+ $SMN  -no-sm ............. Do not support X Session Management.
+ $SMY  -sm ................ Support X Session Management, links in -lSM -lICE.
+
+ *  -no-thread ......... Do not compile with Threading Support
+    -thread ............ Compile with Threading Support
+
+ *  -qt-zlib ........... Use the zlib bundled with Qt.
+    -system-zlib ....... Use a zlib from the operating system
+                         http://www.info-zip.org/pub/infozip/zlib
+
+ *  -qt-libpng ......... Use the libpng bundled with Qt.
+    -system-libpng ..... Use a libpng from the operating system.
+                         See http://www.libpng.org/pub/png
+
+ *  -no-mng ............ Do not compile in MNG I/O support.
+    -system-libmng ..... Use libmng from the operating system.
+                         See http://www.libmng.com
+
+ *  -no-jpeg ........... Do not compile in JPEG I/O support.
+    -system-jpeg ....... Use jpeglib from the operating system.
+                         See http://www.ijg.org
+
+ *  -no-nas-sound ...... Do not compile in NAS sound support.
+    -system-nas-sound .. Use NAS libaudio from the operating system.
+                         See http://radscan.com/nas.html
+
+    -no-<module> ....... Disables a module, where module can
+                         can be one of: $MODULES_HELP
+
+    -kde ............... Builds the Qt Designer with KDE 2 support, so that
+                         KDE 2 widgets can be used directly in
+                         the Qt Designer. \$KDEDIR must be
+                         set to point to a KDE 2 installation.
+                         See http://www.kde.org
+
+    -tslib ............. Enable TSlib (touchscreen library) mouse handler.
+                         See http://arm.linux.org.uk 			
+
+    -no-g++-exceptions . Disable exceptions on platforms using the GNU C++
+                         compiler by using the -fno-exceptions flag.
+
+    -no-xft ............ Disable support for Anti-Aliased fonts through the
+                         Xft extension library (XFree86 4.0.2 and newer).
+    -xft ............... Enable support for Anti-Aliased fonts.
+
+                         Xft support is auto-detected, but you may use these
+                         flags to explicitly enable/disable support.
+
+    -platform target ... The platform you are building on ($PLATFORM)
+    -xplatform target .. The platform when cross-compiling.
+
+                         See the PLATFORMS file for a list of supported
+                         operating systems and compilers.
+
+    -Istring ........... Add an explicit include path.
+    -Lstring ........... Add an explicit library path.
+    -Rstring ........... Add an explicit dynamic library runtime search path.
+    -lstring ........... Add an explicit library.
+
+EOF
+    cat <<EOF
+
+Qt/Embedded only:
+
+    -embedded .......... Enable building of Qt/Embedded.
+
+    -qconfig local ..... Use src/tools/qconfig-local.h rather than the
+                         default ($QCONFIG).
+
+    -depths list ....... Comma-separated list of supported bit-per-pixel
+                         depths, from:  v, 4, 8, 16, 18, 24, and 32.  'v' is VGA16.
+
+    -accel-snap ........ Enable SciTech SNAP Graphics acceleration.
+    -accel-voodoo3 ..... Enable Voodoo3 acceleration.
+    -accel-mach64 ...... Enable Mach64 acceleration.
+    -accel-matrox ...... Enable Matrox MGA acceleration.
+    -qvfb .............. Enable X11-based Qt Virtual Frame Buffer.
+    -vnc ............... Enable VNC server (requires network module).
+    -keypad-mode ....... Enable keypad widget navigation.
+    -keypad-input ...... Include keypad keys.
+
+EOF
+
+   [ "x$ERROR" = "xyes" ] && exit 1
+   exit 0;
+fi
+
+# sync includes (internal only)
+if [ -f $QTDIR/bin/syncqt ]; then
+    $QTDIR/bin/syncqt
+fi
+
+# Build up the variables for output
+
+QT_LIBS=""
+QT_MODOBJ=""
+
+[ "x$GIF" = "xyes" ] && QT_CXX="${QT_CXX} -DQT_BUILTIN_GIF_READER=1"
+[ "x$GIF" = "xno" ] && QT_CXX="${QT_CXX} -DQT_BUILTIN_GIF_READER=0"
+[ "x$JPEG" = "xno" ] && QT_CXX="${QT_CXX} -DQT_NO_IMAGEIO_JPEG"
+[ "x$MNG" = "xno" ] && QT_CXX="${QT_CXX} -DQT_NO_IMAGEIO_MNG"
+[ "x$NAS_SOUND" = "xyes" ] && QT_CXX="${QT_CXX} -DQT_NAS_SUPPORT"
+[ "x$SM" = "xno" ] && QT_CXX="${QT_CXX} -DQT_NO_SM_SUPPORT"
+[ "x$XFT" = "xyes" ] && QT_CXX="${QT_CXX} -DQT_XFT"
+[ "x$XFT" = "xno" ] && QT_CXX="${QT_CXX} -DQT_NO_XKB"
+if [ "x$TSLIB" = "xyes" ]
+then
+   QT_CXX="${QT_CXX} -DQT_QWS_TSLIB"
+   QT_LIBS="${QT_LIBS} -lts"
+fi
+if [ "x$THREAD" = "xyes" ]
+then
+   cat >src-mt.mk <<EOF
+SHELL=/bin/sh
+
+src-mt:
+	cd src; \$(MAKE) \
+	    'QT_THREAD_SUFFIX=-mt' \
+	    'QT_LFLAGS_MT=\$\$(SYSCONF_LFLAGS_THREAD) \$\$(SYSCONF_LIBS_THREAD)' \
+	    'QT_CXX_MT=\$\$(SYSCONF_CXXFLAGS_THREAD) -DQT_THREAD_SUPPORT' \
+	    'QT_C_MT=\$\$(SYSCONF_CFLAGS_THREAD) -DQT_THREAD_SUPPORT'
+	cd examples/guithreads; \$(MAKE) \
+	    'QT_THREAD_SUFFIX=-mt' \
+	    'QT_LFLAGS_MT=\$\$(SYSCONF_LFLAGS_THREAD) \$\$(SYSCONF_LIBS_THREAD)' \
+	    'QT_CXX_MT=\$\$(SYSCONF_CXXFLAGS_THREAD) -DQT_THREAD_SUPPORT' \
+	    'QT_C_MT=\$\$(SYSCONF_CFLAGS_THREAD) -DQT_THREAD_SUPPORT'
+	cd examples/semaphores; \$(MAKE) \
+	    'QT_THREAD_SUFFIX=-mt' \
+	    'QT_LFLAGS_MT=\$\$(SYSCONF_LFLAGS_THREAD) \$\$(SYSCONF_LIBS_THREAD)' \
+	    'QT_CXX_MT=\$\$(SYSCONF_CXXFLAGS_THREAD) -DQT_THREAD_SUPPORT' \
+	    'QT_C_MT=\$\$(SYSCONF_CFLAGS_THREAD) -DQT_THREAD_SUPPORT'
+	cd src; \$(MAKE) clean
+EOF
+else
+    cat >src-mt.mk <<EOF
+all:
+	@echo "(not building threaded Qt)"
+EOF
+fi
+if [ "x$ZLIB" = "xyes" ]
+then
+    I_FLAGS="${I_FLAGS} -I\$(QTDIR)/src/3rdparty/zlib"
+fi
+if [ "x$LIBPNG" = "xyes" ]
+then
+    I_FLAGS="${I_FLAGS} -I\$(QTDIR)/src/3rdparty/libpng"
+fi
+if [ "$QWS_ACCEL_SNAP" -a -n "$EMB" ];
+then
+    I_FLAGS="${I_FLAGS} -I\$(SCITECH)/include"
+    if [ "x$DEBUG" = "xyes" ]; then
+	QT_LIBS="${QT_LIBS} -L\$(SCITECH)/lib/debug/linux/gcc/x86/so -lpm"
+    else
+	QT_LIBS="${QT_LIBS} -L\$(SCITECH)/lib/release/linux/gcc/x86/so -lpm"
+    fi
+fi
+
+[ "x$SM" = "xyes" ] && QT_LIBS="${QT_LIBS} -lSM -lICE"
+[ "x$XFT" = "xyes" ] && QT_LIBS="${QT_LIBS} -lXft"
+if [ -z "$EMB" -o "$SHARED" = no ]
+then
+    [ "x$LIBPNG" = "xyes" ] && QT_MODOBJ=$QT_MODOBJ' $(PNG_OBJECTS)'
+    [ "x$ZLIB" = "xyes" ] && QT_MODOBJ=$QT_MODOBJ' $(ZLIB_OBJECTS)'
+    [ "x$FT" = "xyes" ] && QT_MODOBJ=$QT_MODOBJ' $(FT_OBJECTS)'
+elif [ ! -z "$EMB" ]
+then
+    [ "x$LIBPNG" = "xyes" ] && QT_MODOBJ=$QT_MODOBJ' $(PNG_OBJECTS)'
+    [ "x$ZLIB" = "xyes" ] && QT_MODOBJ=$QT_MODOBJ' $(ZLIB_OBJECTS)'
+    [ "$FT" = "yes" ] && QT_MODOBJ=$QT_MODOBJ' $(FT_OBJECTS)' && I_FLAGS="$I_FLAGS -I3rdparty/freetype/src -I3rdparty/freetype/include -I3rdparty/freetype/builds/unix"
+fi
+if [ -f $QTDIR/src/$objects_dir/qmodules.h ]; then
+    mv $QTDIR/src/$objects_dir/qmodules.h $QTDIR/src/$objects_dir/qmodules.h.old
+fi
+cat >$QTDIR/src/$objects_dir/qmodules.h << EOF
+// These modules are licensed to $Licensee
+EOF
+for MODULE in $MODULES
+do
+    if [ -d src/$MODULE ]
+    then
+        M=`echo $MODULE | tr '[a-z]' '[A-Z]'`
+        echo "#define QT_MODULE_$M" >>$QTDIR/src/$objects_dir/qmodules.h
+            QT_MODOBJ=$QT_MODOBJ' \
+            $(OBJECTS_'$MODULE')'
+        if [ $MODULE = opengl ]
+        then
+            I_FLAGS=$I_FLAGS' $(SYSCONF_CXXFLAGS_OPENGL)'
+            QT_LIBS=$QT_LIBS' $(SYSCONF_LFLAGS_OPENGL) $(SYSCONF_LIBS_OPENGL)'
+        fi
+    fi
+done
+if [ -f $QTDIR/src/$objects_dir/qmodules.h.old ]; then
+    if diff $QTDIR/src/$objects_dir/qmodules.h.old $QTDIR/src/$objects_dir/qmodules.h >/dev/null 2>&1; then
+        # Don't change the timestamp if the file hasn't changed
+        touch -r $QTDIR/src/$objects_dir/qmodules.h.old $QTDIR/src/$objects_dir/qmodules.h
+    fi
+    rm -f $QTDIR/src/$objects_dir/qmodules.h.old
+fi
+rm -f $QTDIR/src/tools/qmodules.h
+cp -fp $QTDIR/src/$objects_dir/qmodules.h $QTDIR/src/tools/qmodules.h
+rm -f $QTDIR/include/qmodules.h
+ln -s $QTDIR/src/tools/qmodules.h $QTDIR/include/qmodules.h
+
+# Depot file is read-only
+if [ -e $QTDIR/util/scripts/make_qfeatures_dot_h ]; then
+    chmod +w src/tools/qfeatures.h
+    mv src/tools/qfeatures.h src/tools/qfeatures.h.old
+    $QTDIR/util/scripts/make_qfeatures_dot_h
+    if diff src/tools/qfeatures.h.old src/tools/qfeatures.h >/dev/null 2>&1; then
+        # don't change timestamp unless the file actually changes
+        touch -r src/tools/qfeatures.h.old src/tools/qfeatures.h
+    fi
+    chmod -w src/tools/qfeatures.h
+    rm -f src/tools/qfeatures.h.old
+fi
+rm -f $QTDIR/include/qfeatures.h
+ln -s $QTDIR/src/tools/qfeatures.h $QTDIR/include/qfeatures.h
+
+# include math lib for compilers that don't automatically include it
+QT_LIBS="${QT_LIBS} -lm"
+[ "x$LIBPNG" = "xno" ] && [ ! "x$REALLY_DONT_USE_LIBPNG" = "xyes" ] && QT_LIBS="${QT_LIBS} -lpng"
+[ "x$ZLIB" = "xno" ] && [ ! "x$REALLY_DONT_USE_LIBZ" = "xyes" ] && QT_LIBS="${QT_LIBS} -lz"
+[ "x$JPEG" = "xyes" ] && QT_LIBS="${QT_LIBS} -ljpeg"
+[ "x$MNG" = "xyes" ] && QT_LIBS="${QT_LIBS} -lmng -ljpeg" # assume JNG support
+[ "x$NAS_SOUND" = "xyes" ] && QT_LIBS="${QT_LIBS} -laudio -lXt" # Xt junk in audio library
+QT_LIBS="$L_FLAGS $R_FLAGS $QT_LIBS $l_FLAGS"
+
+
+# Check if we are using gcc/g++
+COMPILER=`echo $PLATFORM | cut -f 2- -d-`
+if [ "$COMPILER" = "g++" ]
+then
+    if [ "$GPLUSPLUS_EXCEPTIONS" = "no" ]
+    then
+       QT_C="$QT_C -fno-exceptions"
+       QT_CXX="$QT_CXX -fno-exceptions"
+    else
+	cat <<EOF
+
+        This target is using the GNU C++ compiler ($PLATFORM).
+
+        Recent versions of this compiler automatically include
+        code for exceptions, which increase both the size of
+        the Qt library and the amount of memory taken by your
+        applications.
+
+        You may elect to re-run $0 with the -no-g++-exceptions
+        option to compile Qt without exceptions.  This is
+        completely binary compatible, and existing
+        applications will continue to work (like KDE 2).
+
+EOF
+    fi
+fi
+
+# Create the .buildopts file
+
+cat > .buildopts <<EOF
+QT_CXXFLAGS_OPT =$QT_CXX $I_FLAGS $D_FLAGS
+QT_CFLAGS_OPT   =$QT_C $I_FLAGS $D_FLAGS
+QT_LIBS_OPT	=$QT_LIBS
+QT_MODULE_OBJ      =$QT_MODOBJ $QT_SUBLIBS
+
+EOF
+
+
+QTDIR='$(QTDIR)'
+
+
+# Give feedback...
+
+echo
+if [ "$XTARGET" = "$TARGET" ]
+then
+    echo "Build type:    $TARGET"
+else
+    echo "Building on:   $TARGET"
+    echo "Building for:  $XTARGET"
+fi
+
+if [ -n "$PLATFORM_NOTES" ]
+then
+    echo "Platform notes:"
+    echo "$PLATFORM_NOTES"
+else
+    echo
+fi
+
+if [ "$VERBOSE" = "yes" ]
+then
+    echo "Compile flags...................... $QT_CXX $I_FLAGS $D_FLAGS"
+    echo "Link flags......................... $QT_LIBS"
+fi
+
+echo "Thread support..................... $THREAD"
+if [ "$QCONFIG" = qconfig.h ]
+then
+    echo "GIF support........................ $GIF"
+    echo "MNG support........................ $MNG"
+    echo "JPEG support....................... $JPEG"
+    if [ -z "$EMB" ]
+    then
+        echo "OpenGL support .................... $OPENGL"
+        echo "NAS sound support.................. $NAS_SOUND"
+        echo "Session management................. $SM"
+        echo "Xft support (Anti-Aliased Fonts) .. $XFT"
+        echo "XKB support ....................... $XKB"
+    fi
+else
+    echo "Configuration...................... $QCONFIG"
+fi
+echo
+
+echo Creating makefiles...
+
+sepath=`echo $relpath | sed -e 's/\\./\\\\./g'`
+
+if [ $KDE = yes ]
+then
+    if [ '!' -f $KDEDIR/bin/dcopserver ]
+    then
+        KDE=no
+        echo ""
+        echo "You wanted to compile the Qt Designer with"
+        echo "KDE 2 support, but \$KDEDIR does not point"
+        echo "to a valid KDE 2 installation. KDE 2 support"
+        echo "has been turned off."
+        echo ""
+    fi
+fi
+
+# make shure we have a bin directory
+test -d $relpath/bin || mkdir $relpath/bin
+
+for a in `find $relpath/. -name Makefile.in -print | sort` ; do
+    dir=`dirname $a`
+    buildpath=`echo "$dir" | sed -e "s;$sepath;.;g"`
+    test -d $buildpath || mkdir $buildpath
+    N=$buildpath/Makefile
+    M=$a
+#    if [ -f $dir/Makefile-$Edition.in ]
+#    then
+#	M=$dir/Makefile-$Edition.in
+#    fi
+    if [ $KDE = yes ]
+    then
+        if [ -f $dir/Makefile-kde.in ]
+        then
+            M=$dir/Makefile-kde.in
+        fi
+    fi
+    if [ $buildpath = ././src/moc ]
+    then
+        # Don't cross-compile this
+        CONF=$CONFIG
+    else
+        CONF=$XCONFIG
+    fi
+
+    if [ $buildpath = ././examples -o $buildpath = ././tutorial ]
+    then
+        if [ -n "$NONSTDQCONFIG" ]
+        then
+            # No examples built for these non-standard configs
+            REQ="standard configuration"
+            M=
+        fi
+    fi
+
+    if [ -n "$M" ]
+    then
+        REQ=`sed -n -e '/^REQUIRES *=/ { s/[^=]*= *//; p; }' $M`
+        for r in $REQ
+        do
+            if [ "$r" = large-config ]
+            then
+                if [ "$QCONFIG" != qconfig-large.h -a "$QCONFIG" != qconfig.h ]
+                then
+                    M=
+                    break
+                fi
+            elif [ "$r" = medium-config ]
+            then
+                if [ "$QCONFIG" = qconfig-minimal.h -o "$QCONFIG" = qconfig-small.h ]
+                then
+                    M=
+                    break
+                fi
+            elif [ "$r" = small-config ]
+            then
+                if [ "$QCONFIG" = qconfig-minimal.h ]
+                then
+                    M=
+                    break
+                fi
+            elif [ "$r" = full-config ]
+            then
+                if [ "$QCONFIG" != qconfig.h ]
+                then
+                    M=
+                    break
+                fi
+            elif echo $MODULES | grep -v "$r" >/dev/null
+            then
+                M=
+                break
+            fi
+        done
+    fi
+
+    if [ -z "$M" ]
+    then
+        echo "all clean:" >$N
+        echo "	@echo 'Some requirements ($REQ) are not met.'" >>$N
+        echo "	@echo 'Skipped.'" >>$N
+        if [ "$VERBOSE" = "yes" ]; then
+            echo '  Created dummy' $N
+        fi
+    else
+        cat > $N <<EOF
+#############################################################################
+# Automatically generated from $M
+# Build options from $1
+#############################################################################
+
+EOF
+
+        if [ $N = ././src/moc/Makefile ] ; then
+        # we don't want to link moc to SM and ICE
+            OPT="sed -e s/^QT_LIBS_OPT.*$//g .buildopts"
+        else
+            OPT="cat .buildopts"
+        fi
+
+        if [ $relpath != `pwd` ] ; then
+            echo VPATH=$relpath/$buildpath >> $N
+            $OPT >> $N
+            if [ $N = ././src/moc/Makefile ] ; then
+                cat $CONF | sed -e "s/^SYSCONF_LIBS_QTAPP.*$/SYSCONF_LIBS_QTAPP =/" >> $N
+            else
+                if [ $OPENGL = "no" ]
+                then
+                    cat $CONF | sed -e "s/^SYSCONF_LIBS_OPENGL.*$/SYSCONF_LIBS_OPENGL =/" >> $N
+                else
+                    cat $CONF >> $N
+                fi
+            fi
+
+            sed -e's/	\$(MOC) [^ ]* -o .*/	$(MOC) $< -o $@/g' \
+            -e's/\(	\$(CXX) -c \$(CXXFLAGS) \$(INCPATH) -o\) [^ ]* [^ ]*/\1 $@ $</g' $M >> $N
+        else
+            $OPT >> $N
+            if [ $N = ././src/moc/Makefile ] ; then
+                cat $CONF $M | sed -e "s/^SYSCONF_LIBS_QTAPP.*$/SYSCONF_LIBS_QTAPP =/" >> $N
+            else
+                if [ $OPENGL = "no" ]
+                then
+                    cat $CONF $M | sed -e "s/^SYSCONF_LIBS_OPENGL.*$/SYSCONF_LIBS_OPENGL =/" >> $N
+                else
+                    cat $CONF $M >> $N
+                fi
+            fi
+        fi
+        if [ "$VERBOSE" = "yes" ]; then
+            echo '  Created' $N
+        fi
+    fi
+done
+
+# Store this in $QPEDIR for embedded builds
+[ -n "$QPEDIR" -a "$QT_EMBEDDED" = yes ] && cp -f .buildopts "$QPEDIR/.buildopts"
+
+if echo $LD_LIBRARY_PATH | grep >/dev/null $QTDIR/lib
+then
+    if grep >/dev/null SYSCONF_RPATH $XCONFIG
+    then
+        echo # Using -R/-rpath, so no need to warn
+    else
+        if [ -n "$FROMMAKE" ]
+        then
+            echo
+            echo "WARNING: \$LD_LIBRARY_PATH does not contain \$QTDIR/lib"
+            echo "         many platforms require this."
+            echo
+        fi
+    fi
+fi
+
+echo Qt is now configured for building. Just run $MAKE.
+echo To reconfigure, run $MAKE clean and configure.
+echo
+

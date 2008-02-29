@@ -1,0 +1,225 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/build-from-source.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Building Qtopia from Source</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Building Qtopia from Source</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Installing the Source Package
+</a>
+<li><a href="#3"> How to Build Qtopia 
+</a>
+<ul>
+<li><a href="#3-1"> Building Qtopia Tools
+</a>
+<li><a href="#3-2"> Building Qtopia
+</a>
+<li><a href="#3-3"> Re-building parts of Qtopia
+</a>
+<li><a href="#3-4"> Configuring for a Device
+</a>
+</ul>
+<li><a href="#4"> Now What?
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document should be read after <a href="getting-started.html">Getting Started</a> which explains the process of selecting and downloading a Qtopia source package. It is assumed that you have read the section on the <a href="qtopia-all-tools.html">Tools</a> available in the package to help build and develop Qtopia and Qtopia-based applications. 
+<p> It is further assumed that the necessary source packages have been downloaded and you are ready to build Qtopia from the source code.
+<p> <b>Note:</b> If you have downloaded an RPM package such as a <tt>qtopia-phone-developer-sdk-suse82.i386.rpm</tt> then you need to read the <a href="installing-an-rpm.html">Installing an RPM</a> section and then proceed to <a href="running-qtopia.html">Running Qtopia</a> or to the <em>Building and Compiling</em> section in the <a href="index.html">reference</a> documentation for further information on building and compiling Qtopia applications from RPM packages.
+<p> <h2> Installing the Source Package
+</h2>
+<a name="2"></a><p> For Qtopia 2.2.0 and later, any Qtopia source package is a combination of Qtopia, Qt and <tt>tmake</tt> sources. 
+<p> Qtopia packages can be installed anywhere, as long as the user has read/write access to the directories. There are some limits to the acceptable characters in directories however; spaces and characters that can be interpreted as a regular expression (<tt>regexp</tt>) are not allowed. For more details see the <a href="environment-setup-build.html#acceptable_directory_characters">Acceptable Directory Characters</a> section of the Build Environment document.
+<p> To install the package,  <tt>cd</tt> into the directory in which the package should be installed and then use the following command:
+<pre>
+   tar -xzf mypackage (where 'mypackage' is the name of the package to be installed)
+</pre>
+ 
+<p> After execution of the <tt>tar</tt> command a sub-directory is created that forms the root directory of the Qtopia source package. For the various Qtopia products the product base directory name will be as follows:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Product              <th valign="top">Directory Name
+<tr bgcolor="#f0f0f0">    <td valign="top">Qtopia PDA Edition   <td valign="top">qtopia-pda-2.2.0
+<tr bgcolor="#d0d0d0">    <td valign="top">Qtopia Phone Edition <td valign="top">qtopia-phone-2.2.0
+<tr bgcolor="#f0f0f0">    <td valign="top">Qtopia Core Edition  <td valign="top">qtopia-core-2.2.0
+</table></center>
+<p> For the rest of this documentation it is assumed that the package was unpacked in <tt>~/build</tt> and that the unpacked package was a phone source package, that is, there will now be a <tt>~/build/qtopia-phone-2.2.0</tt> directory. This directory will be referred to as <tt>qtopia_root_dir</tt>.
+<p> The following sub-directories are within <tt>qtopia_root_dir</tt>: 
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Sub-directory <th valign="top">Description
+<tr bgcolor="#d0d0d0"> <td valign="top">qtopia <td valign="top">Contains all qtopia source code.
+<tr bgcolor="#f0f0f0"> <td valign="top">qt2 <td valign="top">Contains the <n>Qt</n> 2.3.x source code that compiles for both X11 and embedded configurations.
+<tr bgcolor="#d0d0d0"> <td valign="top">dqt <td valign="top">Contains Qt-x11-3.3.x sources. Qt-x11-3.x is used to build certain tools such as <tt>Assistant</tt> and <tt>Linguist</tt> as well as providing a <n>Qt</n> for Qtopia Desktop to build against.
+<tr bgcolor="#f0f0f0"> <td valign="top">tmake <td valign="top">Contains <tt>tmake-1.14</tt> sources. <tt>tmake</tt> is a tool that is used to configure <n>Qt</n> 2.3.x
+</table></center>
+<p> The following files and scripts are also contained in <tt>qtopia_root_dir</tt>:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File/Script <th valign="top">Description
+<tr bgcolor="#d0d0d0"> <td valign="top">LICENSE <td valign="top">The official license text that is applicable to the package. <b>Note:</b> The LICENSE file will not be available until the configure command has been executed at least once.
+<tr bgcolor="#f0f0f0"> <td valign="top">LODI <td valign="top">A List Of Deliverable Items, that is, a list of all files that can be found in the package.
+<tr bgcolor="#d0d0d0"> <td valign="top">README.html <td valign="top">A basic introduction that guides the user to the help documentation.
+<tr bgcolor="#f0f0f0"> <td valign="top">configure <td valign="top">The script that must be used to configure Qtopia.
+<tr bgcolor="#d0d0d0"> <td valign="top">Makefile.in <td valign="top">A template Makefile, used by the <tt>configure</tt> script to create a real Makefile.
+</table></center>
+<p> <h2> How to Build Qtopia 
+</h2>
+<a name="3"></a><p> To build Qtopia, <tt>cd</tt> into <tt>qtopia_root_dir</tt> and use the commands:
+<pre>
+    ./configure
+    make
+    make install
+</pre>
+ 
+That's it!
+<p> There is obviously more to tell, so the next sections go into a little more detail.
+<p> <h3> Building Qtopia Tools
+</h3>
+<a name="3-1"></a><p> To build Qtopia a number of <a href="qtopia-all-tools.html">Qtopia Tools</a> need to be available. Some of these tools such as <tt>moc</tt>, <tt>uic</tt> and <tt>qmake</tt> are part of any Qt package and are included in the Qtopia source package.
+<p> <b>Note:</b> The building of the tools is completely automatic and in most cases the following guidelines can be ignored.
+<p> Whenever <tt>configure</tt> is called from  <tt>qtopia_root_dir</tt> the tools are configured and calling <tt>make</tt> or <tt>make tools</tt> will build the tools if required. The default configurations that are used for the Qt-x11-2.3.x and Qt-x11-3.3.x versions should work for most machines, but in exceptional cases the configuration may be modified by specifying a configuration explicitly on the command line. For example, the following configuration for <tt>qt2</tt>:
+<pre>
+    ./configure -qt2 "-opengl -no-xft -no-sm"
+</pre>
+     
+will override the default configuration for building Qt-x11-2.3.x.
+<p> The tools need to be built only once. If Qtopia is built with a different configuration the tools remain the same and it is not necessary to recompile them. In fact, it may very well be the case that if you install an upgrade of Qtopia it still won't be necessary to re-build the tools. So in order to make the build process as efficient as possible the tools can be cached into a hidden directory in the directory <tt>$HOME</tt>  and the <tt>-cache</tt> command line option provided to the script <tt>configure</tt> activates this mechanism. 
+<p> When Qtopia is built for the first time and the <tt>-cache</tt> option is used, the build script looks for the directory <tt>$HOME/.qtopia-*-cache</tt>. If it does not exist the tools are built and copied into the cache directory. For any successive builds of  Qtopia the tools are re-used from the cache, saving considerable time.
+<p> Whenever it is necessary to fully re-build the tools it is sufficient to call:
+<pre>
+     make cleantools 
+     make tools  
+</pre>
+ 
+<p> <b>Note:</b> <n>Qt</n>/X11 2.3.x will attempt to locate and use the <tt>freetype 1.x</tt> library for font smoothing (<tt>freetype 2.x</tt> is a different library that does not work with <n>Qti</n>/X11 2.3.x). Unfortunately this can happen even if the <tt>freetype</tt> development library and headers are not installed. The default configuration of <n>Qt</n>-x11-2.3.x has <tt>freetype</tt> fonts disabled by using the option <tt>-no-xft</tt>. This only affects the visual appearance of designer.
+<p> <h3> Building Qtopia
+</h3>
+<a name="3-2"></a><p> As previously stated, Qtopia is built using:
+<pre>
+    ./configure
+    make 
+    make install 
+</pre>
+ 
+<p> The configure script can build all configurations of <n>Qt</n>/Embedded and Qtopia with additional configuration options controlled via command-line options to the <tt>configure</tt> script.
+<p> For a full overview of all possible options use the following command: 
+<pre>
+  ./configure -help
+</pre>
+ 
+<p> The configure process is divided into a number of configure scripts; one for each sub-product in the package. That is, there is a <tt>qtopia/configure</tt>, a <tt>qt2/configure</tt> and a <tt>dqt/configure</tt>. Each of these configure commands provide additional help information for the specific sub-product. To obtain help for a specific sub-product use the option <tt>-help</tt> on the command line of the top-level configure described above.
+<p> In some cases the configure scripts for the sub-products need additional information to provide the best possible help information. This information is provided by setting environment variables using: 
+<pre>
+   . ./config.cache
+</pre>
+ 
+<p> <b>Note:</b> The "dot space dot" is not a typo but instructs the command shell to load the contents of the script into the current environment.
+<p> Additional configuration information for the various sub-products can be found by typing:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">sub-product <th valign="top">command
+<tr bgcolor="#f0f0f0"> <td valign="top">Qtopia <td valign="top">qtopia/configure -help
+<tr bgcolor="#d0d0d0"> <td valign="top">Qt 2.3.x <td valign="top">qt2/configure -help
+<tr bgcolor="#f0f0f0"> <td valign="top">Qt 3.3.x <td valign="top">dqt/configure -help
+</table></center>
+<p> <b>Note:</b> <tt>config.cache</tt> only exists if the top level configure has run at least once. If the cache does not exist run the <tt>./configure</tt> command, then read all the help from the configure scripts to decide the options to be used in the configure call.
+<p> <h3> Re-building parts of Qtopia
+</h3>
+<a name="3-3"></a><p> Parts of Qtopia can be re-built by specifying the target in the <tt>make</tt> command as follows:
+<pre>
+    cd qtopia_root_dir
+    make qpe         to build the Qtopia part only
+    make qte         to build the Qt/Embedded part only
+</pre>
+ 
+<p> <b>Note:</b> Both of these targets will cause the tools to be built if they do not already exist.
+<p> Although we encourage building Qtopia from the <tt>qtopia_root_dir</tt> using <tt>configure</tt> and <tt>make</tt>, it is also possible to cd into a source directory and re-build only a section of the product.
+<p> For convenience a script for each sub-product, that is,  <tt>qtopia</tt>, <tt>qt2</tt> and <tt>dqt</tt>, is made available that can be sourced to set all environment variables. For example, to set all environment variables that are required to build Qtopia:
+<pre>
+  cd qtopia_root_dir
+  . ./setQpeEnv
+</pre>
+ 
+<p> All environment variables are now set and you can manually run the Qtopia <tt>configure</tt> or <tt>make</tt> or make part of Qtopia.
+<p> <b>Note:</b> The set***Env scripts are found in the <tt>qtopia_root_dir</tt> and are generated by configure. If the scripts do not exist, please run <tt>./configure</tt> to generate the files.
+<p> <h3> Configuring for a Device
+</h3>
+<a name="3-4"></a><p> The default Qtopia configuration is to build for an x86 target with defaults provided for an ARM target. If you need to configure Qtopia for your device at some stage, please refer to the following links for further information:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Link <th valign="top">Description
+<tr bgcolor="#d0d0d0">
+<td valign="top"><a href="specification-files.html">Specification Files</a> <td valign="top">details setting up specification files for the target device.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><a href="environment-prereq.html">Prerequisites</a>  <td valign="top">details the prerequisites for running Qtopia.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><a href="system-customization.html">System Customization</a> <td valign="top">details how to customize many aspects of Qtopia.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><a href="environments-other.html">Other Environments</a> <td valign="top">details the runtime and time environments.
+<tr bgcolor="#d0d0d0">
+<td valign="top"><a href="buildsystem.html">Build System</a> <td valign="top">details  Qtopia's <tt>qmake</tt>-based build system.
+</table></center>
+<p> <h2> Now What?
+</h2>
+<a name="4"></a><p> Once Qtopia is built you will have a set of Qtopia binaries that are ready to run!
+The binaries are located in directories such as:
+<ul>
+<li>  <tt>$QPEDIR/bin</tt>
+<li>  <tt>$QPEDIR/lib</tt> 
+<li>  <tt>$QPEDIR/plugins</tt>
+</ul>
+However, these are not the directories to be installed onto a device. In order to make integrating Qtopia on a device easier an image directory is provided containing all the files (and <em>only</em> those files) that should be installed onto the device.
+<p> This image directory is, by default, located at <tt>$QPEDIR/image/opt/Qtopia</tt> and contains all the required directories. 
+<p> For information on changing the image directory prefix <tt>dir</tt> refer to the compiler help using: 
+<pre>
+    qtopia/configure -help
+</pre>
+ 
+<p> <b>Note:</b>
+Depending on the installation device, the following additional libraries may be required:
+<ul>
+<li> libjpeg
+<li> libc
+</ul>
+For backwards compatibility these libraries are provided in the <tt>arm/lib</tt> directory. More information about this can be found in the <a href="environment-prereq.html">Prerequisites</a> section of the documentation.
+<p> If an error referring to one of these libraries occurs when running Qtopia, please move the libraries to a different location and ensure that the correct version of the libraries is installed on your device.
+<p> For further information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

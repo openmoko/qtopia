@@ -1,0 +1,230 @@
+#!/bin/sh
+
+# Welcome to the Qtopia Tools build script.
+# This script will build some Qt based tools that are required
+# to be able to build Qtopia.
+#
+# The script will first build Qt-x11-2.3.x as a shared library
+# and then build and link the following applications to that lib:
+# - uic
+# - qvfb
+# - designer
+# These applications can then be used to build Qtopia and
+# to maintain GUI parts of Qtopia based applications.
+#
+# Finally, the script will build a shared version of Qt 3.x
+# that will be used for building Qtopia Desktop and some
+# Qtopia tools such as the phone simulator. The Qt 3.x build
+# is not required to build Qtopia itself.
+#
+# This script typically needs to be run only once. After this
+# all the tools are available and the script isn't needed
+# anymore.
+#
+# Note that the tools can be 'cached'. This means that the binaries
+# are copied into a hidden directory in your $HOME dir. When you
+# subsequently install a new Qtopia version and configure it with
+# the -cache option the cached binaries from the hidden directory
+# will be used instead of recompiling everything. This will
+# significantly reduce the build time of Qtopia without much risk.
+# The system is not fool proof however, so in case of doubt clean
+# the cache (using 'make cleancache') and then rebuild the tools.
+#
+
+#########################################################################################
+#
+#                                 ENVIRONMENT
+#
+# All  environment variables used by Qtopia are set in a separate script.
+if [ ! -f config.cache ]; then
+    echo
+    echo "You must run configure before you can run buildQtopiaTools"
+    exit 1
+fi
+. ./config.cache
+#
+#########################################################################################
+
+QPE_ROOT=$PWD
+
+BUILD="qt2 dqt"
+MAKECMD=
+CHECK=no
+
+# Parse the arguments
+while [ -n "$1" ]; do
+    case "$1" in
+    -build)
+        shift
+        BUILD="$1"
+        if [ -n "$2" ]; then
+            shift
+            MAKECMD="$1"
+        fi
+        ;;
+    -check)
+        CHECK=yes
+        ;;
+    *)
+        echo "$1: unknown argument"
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+echo $BUILD | grep 'qt2' >/dev/null 2>&1 && qt2=yes || qt2=no
+echo $BUILD | grep 'dqt' >/dev/null 2>&1 && dqt=yes || dqt=no
+
+#
+# This is the exit point for failure.
+#
+die()
+{
+    echo "* ---------------------------------------------------------------------------"
+    echo "* "
+    echo "*               ERROR: Building Qtopia Tools has failed."
+    echo "* "
+    echo "* Please investigate the problem by looking at the error messages in the"
+    echo "* make output."
+    echo "* The Qtopia tools can be build using the separate buildQtopiaTools script "
+    echo "* which can be found in the qtopia/scripts directory of the package. The"
+    echo "* script is also invoked with the command 'make tools' from the package root"
+    echo "* directory."
+    echo "* "
+    echo "* On most machines the default configuration options in the script works fine."
+    echo "* In case this doesn't work the configure parameters in the buildQtopiaTools "
+    echo "* script need to be tweaked to fit the environment/compiler used on the machine"
+    echo "* and then run manually from the cmd line."
+    echo "* "
+    echo "* Please make sure that the following binaries exist before trying to build"
+    echo "* Qtopia: "
+    echo "*   $QT2DIR/bin/moc"
+    echo "*   $QT2DIR/bin/uic"
+    echo "*   $QT2DIR/bin/qvfb"
+    echo "*   $DQTDIR/bin/lrelease"
+    echo "*   $DQTDIR/bin/lupdate"
+    echo "* "
+    echo "* As a rule, these tools need to be built only once."
+    echo "* "
+    echo "******************************************************************************"
+    exit 1
+}
+
+#########################################################################################
+#
+#                             Verify Qtopia Tools existence
+#
+#
+
+if [ $CHECK = yes ]; then
+    if [ -f "$QT2DIR/bin/uic" -a \
+         -f "$QT2DIR/bin/qvfb" -a \
+         -f "$QT2DIR/bin/moc" -a \
+         -f "$DQTDIR/bin/lupdate" -a \
+         -f "$DQTDIR/bin/lrelease" ]; then
+        echo "Qtopia Tools exist."
+        exit 0
+    elif [ -e ~/.qtopia_220_cache/qt2/bin/uic -a -e ~/.qtopia_220_cache/dqt/bin/lrelease ]; then
+        echo "Re-using cached Qtopia Tools."
+        cp -LpRf ~/.qtopia_220_cache/qt2/bin $QT2DIR
+        cp -LpRf ~/.qtopia_220_cache/qt2/lib $QT2DIR
+
+        cp -LpRf ~/.qtopia_220_cache/dqt/bin $DQTDIR
+        cp -LpRf ~/.qtopia_220_cache/dqt/lib $DQTDIR
+        mkdir -p $DQTDIR/include
+        cp -Lpf ~/.qtopia_220_cache/dqt/include/qconfig.h $DQTDIR/include
+        cp -Lpf ~/.qtopia_220_cache/dqt/include/qmodules.h $DQTDIR/include
+        exit 0
+    else
+        echo "Building Qtopia Tools."
+    fi
+fi
+
+#########################################################################################
+#
+#                                 BUILD
+#
+#
+
+if [ $qt2 = yes ]; then
+(
+    echo " "
+    echo "***********************************"
+    echo "********* Build Qt 2 **************"
+    echo "***********************************"
+    echo "QT2_CFG=\"$QT2_CFG\""
+    echo " "
+    . ./setQt2Env
+    cd $QT2DIR
+
+    if [ -n "$MAKECMD" ]; then
+        eval make $MAKECMD
+    else
+        eval "echo yes | ./configure" $QT2_CFG "|| die"
+        cd $QTDIR/src/moc
+        make || die
+        cp -f moc $QTDIR/bin
+        cd $QTDIR/src
+        make || die
+        cd $QTDIR/tools/designer/uic
+        make || die
+        cd $QTDIR/tools/designer
+        make || die
+        cd $QTDIR/tools/qvfb
+        make || die
+        cp -f qvfb $QTDIR/bin
+
+        if [ ! -f $QTDIR/doc/html/index.html -a -d $QTDIR/util/qdoc ]; then
+            cd $QTDIR/util/qdoc
+            ./qdoc $QTDIR
+        fi
+    fi
+)
+fi
+
+if [ $dqt = yes ]; then
+(
+    echo " "
+    echo "***********************************"
+    echo "********* Build Qt 3 **************"
+    echo "***********************************"
+    echo "DQT_CFG=\"$DQT_CFG\""
+    echo " "
+    . ./setDqtEnv
+    cd $DQTDIR
+
+    if [ -n "$MAKECMD" ]; then
+        eval make $MAKECMD
+    else
+        eval "echo yes | ./configure" $DQT_CFG "|| die"
+        make sub-src || die
+        cd $QTDIR/tools/linguist/lrelease
+        make || die
+        cd $QTDIR/tools/linguist/lupdate
+        make || die
+        cd $QTDIR/tools/designer/uilib
+        make || die
+        cd $QTDIR/tools/designer/uic
+        make || die
+        cd $QTDIR/tools/assistant/lib
+        make || die
+        cd $QTDIR/tools/assistant
+        make || die
+        cd $QTDIR/tools/linguist
+        make || die
+
+        # TODO: build docs
+        # ignored for now because we *always* use a source package
+    fi
+)
+fi
+
+if [ -z "$MAKECMD" ]; then
+    if [ "$USE_CACHE" = "yes" ]; then
+        $QTOPIA_DEPOT_PATH/scripts/cacheQtopiaTools
+    fi
+fi
+
+exit 0
+

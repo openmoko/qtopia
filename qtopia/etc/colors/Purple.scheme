@@ -1,0 +1,11 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Purple
+[Colors]
+Background=#F7E8FF
+Button=#EFD5FF
+Highlight=#B406FF
+AlternateBase=#F8E8FF
+HighlightedText=#FFFFFF

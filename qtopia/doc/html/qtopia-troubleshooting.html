@@ -1,0 +1,113 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qtopia-troubleshooting.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Troubleshooting</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Troubleshooting</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Cross-Compiling
+</a>
+<li><a href="#2"> Media Player
+</a>
+<li><a href="#3"> Keyboard
+</a>
+<li><a href="#4"> Passwords
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Cross-Compiling
+</h2>
+<a name="1"></a><p> <em>Problem</em>: Linking fails when cross-compling...
+<p> <em>Cause</em>: The libraries being used by the cross-compiler are not appropriate.
+<p> <em>Fix</em>: Check all libraries that are being used. For example:
+<pre>
+    file -L $QTDIR/src/allmoc.o
+    file -L $QTDIR/lib/libqte*
+    file -L $QPEDIR/lib/*.so
+    file -L `find "*.so" $QPEDIR/plugins/*.so`
+</pre>
+ 
+<p> <h2> Media Player
+</h2>
+<a name="2"></a><p> <em>Problem</em>: Media player is slow...
+<p> <em>Cause</em>: ARM architecture optimizations are disabled.
+<p> <em>Fix</em>: Ensure that your xplatform includes "arm", and ensure that the configuration files being used were based on arm.
+<p> <em>Problem</em>: Media player is slow...
+<p> <em>Cause</em>: A slow storage media is being used.
+<p> <em>Fix</em>: Use a faster storage media for temporary storage of music/videos eg: RAM.
+<p> <h2> Keyboard
+</h2>
+<a name="3"></a><p> <em>Problem</em>: The keyboard does not work...
+<p> <em>Cause</em>: Incorrect keyboard driver.
+<p> <em>Fix</em>: Ensure that the following environment variable is correctly set: <pre> $QWS_KEYBOARD</pre>
+ 
+<p> <em>Problem</em>: Some keys do not work...
+<p> <em>Cause</em>: The keyboard driver does not recognize the scancodes the device generates.
+<p> <em>Fix</em>: Customize the scancodes in <pre> $QTDIR/src/kernel/qkeyboard_qws.cpp or $QPEDIR/src/libraries/custom.cpp.</pre>
+ 
+<p> <h2> Passwords
+</h2>
+<a name="4"></a><p> <em>Problem</em>: I keep getting asked for a password when using Qtopia Phone (using phone simulator)...
+<p> <em>Cause</em>: Password checking is enabled in troll.xml.
+<p> <em>Fix</em>: Edit troll.xml, or whatever xml file is being passed when you run
+phonesim, and remove the PIN code from the configuration by:
+<p> <ul>
+<li> searching for the line: <pre> '&lt;set name="PINNAME" value="SIM PIN"/&gt;'</pre>
+ 
+<li> and changing it into: <pre> '&lt;set name="PINNAME" value=""/&gt;'</pre>
+ 
+<li> then restarting the phone simulator.
+</ul>
+<p> <em>Problem</em>: I keep getting asked for a password when using Qtopia Phone (using hardware modem)...
+<p> <em>Cause</em>: Password checking is enabled for the modem.
+<p> <em>Fix</em>: In the latest Qtopia Phone snapshot it is possible to use the security app in Qtopia
+to disable the pin request.  However if you are not using the latest snapshot you will have to use the minicom program.
+<p> <ul>
+<li> Start minicom, and make sure it is talking to your modem with the
+correct settings. Then type:
+<pre> AT+CLCK="SC",2</pre>
+ 
+<li> it should respond with either 1, 0r 0.  You want 0. If it isn't 0, then type:
+<pre> AT+CLCK="SC",0,"1234"</pre>
+ 
+<li> replacing "1234" with the four digit pin number for the sim card. From now on Qtopia will no longer prompt for a password.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,110 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qtopiadesktop-sync.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Desktop Synchronization</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Desktop Synchronization</h1>
+
+
+
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Synchronization Architecture and Algorithms
+</a>
+<ul>
+<li><a href="#2-1"> Data Conversion during Synchronization
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> <h2> Synchronization Architecture and Algorithms
+</h2>
+<a name="2"></a><p> Qtopia Desktop contains the algorithms for synchronization for any
+plug-in.
+<p> Qtopia Desktop handles synchronizing multiple plug-ins working on the
+same application data.  So there can be multiple plug-ins that
+synchronize Contacts data such as Qtopia's Contacts and My
+Desktop PIM Application's address book.
+<p> The sync algorithm remembers the last state of each plug-in when it was
+last synced. It then uses that information to determine what changes
+have occurred in each plug-in. A master document is created by 
+merging those changes. Each plug-in is then given a list of changes
+that it should apply so that its contents will be same as the
+master document.
+<p> The diffs are performed at a field level, so a conflict is created if
+the user modifies the same field of the same record in multiple
+plug-ins or interfaces. The algorithm used for conflict resolution of
+two records depends on what the user has selected in the
+Settings->Sync dialog (currently, the user can choose from duplicating
+records, or letting the pda or the desktop win).
+<p> This algorithm requires two main methods for each plug-in:
+<ul>
+<li> each plug-in to convert it's data to a generic record format defined
+by Qtopia Desktop - MergeInterface::data()
+<li> each plug-in to apply the changes made during merging to itself -
+MergeInterface::applyChanges()
+</ul>
+<p> Currently, the only architecture supported is synchronizing 
+that data that needs to be merged together. Future versions will
+support plug-ins that simply wish to transfer a set of files and possibly
+do manual operations on those files.
+<p> <h3> Data Conversion during Synchronization
+</h3>
+<a name="2-1"></a><p> Qtopia Desktop requires each plug-in to convert data between the
+plug-in internal representation of data and a generic way to
+define any data. Qtopia Desktop uses MergeML::Record as a generic
+storage class for anyone's data.  MergeML::Record stores its data in
+an QMap&lt;int, QString&gt;, where the key refers to the type of field in the map.
+<p> For the core pims (Contacts, Tasks and <a href="calendar.html">Calendar</a>), the integer
+values used in the QMap&lt;int, QString&gt; have been defined in their PIM
+library classes. There are individual record classes for these data
+sets, which are Contact, Task and Event, respectively. These classes
+provide convenience methods which convert to and from a
+QMap&lt;int,QString&gt; . Each class has a toMap() 
+method and a constructor that takes the QMap&lt;int,QString&gt; in their 
+constructor.
+<p> There are static templated methods provided in mergeml.h that help the
+developer convert between a lists of QMap&lt;int,QString&gt; and a list of
+these PIM classes. They are MergeML::convertToML() and
+MergeML::convertFromML(). These templated methods will be helpfull for the
+developer when implementing SyncAppInterface::load() and
+SyncAppInterface::save().
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

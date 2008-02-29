@@ -1,0 +1,267 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/include/qtopia/applnk.h:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>applnk.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>applnk.h</h1>
+
+<p>This is the verbatim text of the applnk.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+** 
+** This program is free software; you can redistribute it and/or modify it
+** under the terms of the GNU General Public License as published by the
+** Free Software Foundation; either version 2 of the License, or (at your
+** option) any later version.
+** 
+** A copy of the GNU GPL license version 2 is included in this package as 
+** LICENSE.GPL.
+**
+** This program is distributed in the hope that it will be useful, but
+** WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+** See the GNU General Public License for more details.
+**
+** In addition, as a special exception Trolltech gives permission to link
+** the code of this program with Qtopia applications copyrighted, developed
+** and distributed by Trolltech under the terms of the Qtopia Personal Use
+** License Agreement. You must comply with the GNU General Public License
+** in all respects for all of the code used other than the applications
+** licensed under the Qtopia Personal Use License Agreement. If you modify
+** this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so. If you do not wish to do so, delete
+** this exception statement from your version.
+** 
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef __APPLNK_H__
+#define __APPLNK_H__
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qobject.h&gt;
+#include &lt;qiconset.h&gt;
+#include &lt;qlist.h&gt;
+#include &lt;qdict.h&gt;
+#include &lt;qstringlist.h&gt;
+
+class AppLnkSetPrivate;
+class AppLnkPrivate;
+
+class QTOPIA_EXPORT AppLnk
+{
+public:
+    AppLnk();
+    AppLnk( const QString &amp;file );
+    AppLnk( const AppLnk &amp;copy ); // copy constructor
+    virtual ~AppLnk();
+
+    bool isValid() const { return !mLinkFile.isNull(); }
+
+    static void setSmallIconSize(int);
+    static void setBigIconSize(int);
+    static int smallIconSize();
+    static int bigIconSize();
+
+    QString name() const { return mName; }
+    const QPixmap&amp; pixmap() const;
+    const QPixmap&amp; bigPixmap() const;
+    QString icon() const;   // libqtopia
+    virtual QString exec() const { return mExec; }
+    QString type() const;
+    QString rotation() const { return mRotation; }
+    QString comment() const { return mComment; }
+    QString file() const;
+    QString linkFile() const;
+    QStringList mimeTypes() const { return mMimeTypes; }
+    QStringList mimeTypeIcons() const { return mMimeTypeIcons; }
+    const QArray&lt;int&gt; &amp;categories() const;
+    int id() const { return mId; }
+
+    bool fileKnown() const;	// libqtopia
+    bool linkFileKnown() const;	// libqtopia
+
+    void execute() const;
+    void execute(const QStringList&amp; args) const;
+    void removeFiles();
+    void removeLinkFile();
+
+    void setName( const QString&amp; docname );
+#ifdef Q_WS_QWS
+    void setExec( const QString&amp; exec );
+#endif
+    void setFile( const QString&amp; filename );
+    void setLinkFile( const QString&amp; filename );
+    void setComment( const QString&amp; comment );
+    void setType( const QString&amp; mimetype );
+    void setIcon( const QString&amp; iconname );
+    void setCategories( const QArray&lt;int&gt; &amp;v );
+    bool writeLink() const;
+
+    void setProperty(const QString&amp; key, const QString&amp; value);
+    QString property(const QString&amp; key) const;
+
+    bool setLocation( const QString&amp; docPath ); // libqtopia
+
+    bool isDocLnk() const; // libqtopia
+
+#ifdef QTOPIA_INTERNAL_PRELOADACCESS
+// MOC_SKIP_BEGIN
+    bool isPreloaded() const;
+    void setPreloaded(bool yesNo);
+// MOC_SKIP_END
+#endif
+
+    AppLnk &amp;operator=(const AppLnk &amp;other); // libqtopia
+
+protected:
+    QString mName;
+    QPixmap mPixmap;
+    QPixmap mBigPixmap;
+    QString mExec;
+    QString mType;
+    QString mRotation;
+    QString mComment;
+    QString mFile;
+    QString mLinkFile;
+    QString mIconFile;
+    QStringList mMimeTypes;
+    QStringList mMimeTypeIcons;
+    int mId;
+    static int lastId;
+    AppLnkPrivate *d;
+    friend class AppLnkSet;
+    friend class AppLnkPrivate;
+#ifdef Q_WS_QWS
+    virtual void invoke(const QStringList&amp; args) const;
+#endif
+    bool ensureLinkExists() const;
+
+private:
+    void storeLink() const;
+};
+
+#define QTOPIA_DEFINED_APPLNK
+#include &lt;qtopia/qtopiawinexport.h&gt;
+
+class QTOPIA_EXPORT DocLnk : public AppLnk
+{
+public:
+    DocLnk();
+    DocLnk( const DocLnk &amp;o ) : AppLnk(o) { }
+    DocLnk( const QString &amp;file );
+    DocLnk( const QString &amp;file, bool may_be_desktopfile );
+    virtual ~DocLnk();
+
+
+    DocLnk &amp;operator=(const DocLnk &amp;other); // libqtopia
+
+    QString exec() const;
+
+protected:
+    void invoke(const QStringList&amp; args) const;
+
+private:
+    void init(const QString &amp;file);
+};
+
+#define QTOPIA_DEFINED_DOCLNK
+#include &lt;qtopia/qtopiawinexport.h&gt;
+
+class QTOPIA_EXPORT AppLnkSet
+{
+public:
+    AppLnkSet();
+    AppLnkSet( const QString &amp;dir );
+    ~AppLnkSet();
+
+    const AppLnk *find( int id ) const;
+    const AppLnk *findExec( const QString&amp; execname ) const;
+
+    QStringList types() const { return typs; }
+    QString typeName( const QString&amp; ) const;
+    QPixmap typePixmap( const QString&amp; ) const;
+    QPixmap typeBigPixmap( const QString&amp; ) const;
+
+    void add(AppLnk*);
+    bool remove(AppLnk*);
+    void clear(); // libqtopia
+
+    const QList&lt;AppLnk&gt; &amp;children() const { return mApps; }
+    void detachChildren();
+
+protected:
+    friend class AppLnk;
+    QList&lt;AppLnk&gt; mApps;
+    QString mFile;
+    QStringList typs;
+    AppLnkSetPrivate *d;
+
+private:
+    AppLnkSet( const AppLnkSet &amp; ); // no copying!
+    void findChildren(const QString &amp;, const QString&amp; t, const QString&amp; lt, int depth = 0);
+};
+
+#define QTOPIA_DEFINED_APPLNKSET
+#include &lt;qtopia/qtopiawinexport.h&gt;
+
+class QTOPIA_EXPORT DocLnkSet : public AppLnkSet
+{
+public:
+    DocLnkSet();
+    DocLnkSet( const QString &amp;dir, const QString &amp;mimefilter=QString::null );
+
+    const QList&lt;DocLnk&gt; &amp;children() const { return (const QList&lt;DocLnk&gt; &amp;)mApps; }
+
+    void appendFrom( DocLnkSet&amp; other );
+
+private:
+    DocLnkSet( const DocLnkSet &amp; ); // no copying!
+    void findChildren(const QString &amp;dr, const QValueList&lt;QRegExp&gt; &amp;mimeFilters, QDict&lt;void&gt; &amp;reference, int depth=0);
+};
+
+#define QTOPIA_DEFINED_DOCLNKSET
+#include &lt;qtopia/qtopiawinexport.h&gt;
+
+#endif // __APPLNK_H__
+
+</pre>
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

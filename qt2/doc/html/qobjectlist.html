@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt Toolkit - QObjectList Class</title><style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
+--></style>
+</head><body bgcolor="#ffffff">
+
+<table width="100%">
+<tr><td><a href="index.html">
+<img width="100" height="100" src="qtlogo.png"
+alt="Home" border="0"><img width="100"
+height="100" src="face.png" alt="Home" border="0">
+</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
+<a href="classes.html"><b>Classes</b></a>
+- <a href="annotated.html">Annotated</a>
+- <a href="hierarchy.html">Tree</a>
+- <a href="functions.html">Functions</a>
+- <a href="index.html">Home</a>
+- <a href="topicals.html"><b>Structure</b>
+  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
+</a>
+</div>
+</table>
+
+<h1 align=center>QObjectList Class Reference</h1><br clear="all">
+<p>
+The QObjectList class is a <a href="qlist.html">QList</a> of QObjects.
+<a href="#details">More...</a>
+<p>
+<code>#include &lt;<a href="qobjectlist-h.html">qobjectlist.h</a>&gt;</code>
+<p>
+Inherits <a href="qlist.html">QList</a>.
+<p><a href="qobjectlist-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class="fn"><a href="#ceeb7d"><b>QObjectList</b></a> () </div>
+<li><div class="fn"><a href="#e435c0"><b>QObjectList</b></a> ( const QObjectList &amp; list ) </div>
+<li><div class="fn"><a href="#367b9c"><b>~QObjectList</b></a> () </div>
+<li><div class="fn">QObjectList&amp; <a href="#abdca5"><b>operator=</b></a> ( const QObjectList &amp; list ) </div>
+</ul>
+<hr><h2><a name="details"></a>Detailed Description</h2>
+The QObjectList class is a <a href="qlist.html">QList</a> of QObjects.
+<p>
+A QObjectList is a QList&lt;<a href="qobject.html">QObject</a>&gt;. The list can be traversed using
+inherited functions, e.g. getFirst(), next(), etc., or using a
+QObjectListIterator iterator.
+<p>See <a href="qobject.html#b0bff0">QObject::queryList()</a> for an example of use.
+<p>See also  QObjectListIterator and <a href="qobject.html">QObject</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="ceeb7d"></a>QObjectList::QObjectList ()</h3>
+<p>Constructs an empty <a href="qobject.html">QObject</a> list.
+<h3 class="fn"><a name="e435c0"></a>QObjectList::QObjectList ( const QObjectList &amp; list )</h3>
+<p>Constructs a copy of <em>list.</em>
+<p>Each item in <em>list</em> is appended to this
+list. Only the pointers are copied (shallow copy).
+<h3 class="fn"><a name="367b9c"></a>QObjectList::~QObjectList ()</h3>
+<p>Removes all the object pointers from the list and destroys the
+list.
+<p>All list iterators that access this list will be reset.
+<p>See also  setAutoDelete().
+<h3 class="fn">QObjectList &amp; <a name="abdca5"></a>QObjectList::operator= ( const QObjectList &amp; list )</h3>
+<p>Assigns <em>list</em> to this list and returns a reference to this list.
+<p>This list is first cleared and then each item in <em>list</em> is appended to this list. Only the pointers are
+copied (shallow copy) unless newItem() has been reimplemented().
+<hr><p>
+Search the documentation, FAQ, qt-interest archive and more (uses
+<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
+<form method=post action="http://www.trolltech.com/search.cgi">
+<input type=hidden name="version" value="2.3.12"><nobr>
+<input size="50" name="search"><input type=submit value="Search">
+</nobr></form><hr><p>
+This file is part of the <a href="index.html">Qt toolkit</a>,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr>
+<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qt version 2.3.12</div>
+</table></div></address></body></html>

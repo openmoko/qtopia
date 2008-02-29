@@ -1,0 +1,310 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/messages.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Messages Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Messages Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Sending an Email
+</a>
+<li><a href="#1-2"> Sending an SMS/MMS
+</a>
+<li><a href="#1-3"> Sending an MMS
+</a>
+<li><a href="#1-4"> Receiving an Email
+</a>
+<li><a href="#1-5"> Replying to Messages
+</a>
+<li><a href="#1-6"> Viewing an Embedded Image
+</a>
+<li><a href="#1-7"> Viewing Specific Messages
+</a>
+<li><a href="#1-8"> Searching for a Message
+</a>
+<li><a href="#1-9"> Multiple Mail Servers
+</a>
+<li><a href="#1-10"> Saving an Attachment
+</a>
+<li><a href="#1-11"> Accounts
+</a>
+<li><a href="#1-12"> Folders
+</a>
+<li><a href="#1-13"> Mail List (per folder)
+</a>
+<li><a href="#1-14"> Virtual Folder (queries) and search
+</a>
+<li><a href="#1-15"> Message Properties
+</a>
+<li><a href="#1-16"> Viewing Mail
+</a>
+<li><a href="#1-17"> Viewing MMS Messages
+</a>
+<li><a href="#1-18"> Writing Messages
+</a>
+<li><a href="#1-19"> Writing MMS Messages
+</a>
+<li><a href="#1-20"> Retrieving Messages
+</a>
+<li><a href="#1-21"> Retrieving MMS Messages
+</a>
+<li><a href="#1-22"> Sending Messages
+</a>
+</ul>
+<li><a href="#2"> Dependencies
+</a>
+<ul>
+<li><a href="#2-1"> Storage Space
+</a>
+<li><a href="#2-2"> Image Viewing
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Messages</b> application enables the user to receive
+emails from multiple mail servers as well as SMS and <a href="system-customization.html#MMS">MMS</a> messages from
+other mobile phone devices. It also provides the ability to
+send emails, MMS or SMS messages to multiple people as well as add
+attachments.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Sending an Email
+</h3>
+<a name="1-1"></a><p> It is possible for a user to compose and send an email.
+<p> <h3> Sending an SMS/MMS
+</h3>
+<a name="1-2"></a><p> It is possible for a user to send an SMS / MMS to another mobile phone.
+<p> <h3> Sending an MMS
+</h3>
+<a name="1-3"></a><p> It is possible for a user to send an MMS to another mobile phone.
+<p> <h3> Receiving an Email
+</h3>
+<a name="1-4"></a><p> It is possible for a user to connect to a mail server and
+download emails from their email account to the device.
+<p> <h3> Replying to Messages
+</h3>
+<a name="1-5"></a><p> It is possible for a user to read and reply to a message
+they have received via their Qtopia device.
+<p> <h3> Viewing an Embedded Image
+</h3>
+<a name="1-6"></a><p> It is possible for a user to receive and view a message with an
+image either attached or embedded.
+<p> <h3> Viewing Specific Messages
+</h3>
+<a name="1-7"></a><p> It is possible for a user to filter the messages viewed. For example they are able to view only messages sent by work colleagues in the current month.
+<p> <h3> Searching for a Message
+</h3>
+<a name="1-8"></a><p> It is possible to search the contents of messages. For example, if a user has a password stored in an email they received over three months ago then they are able to search for and find that message.
+<p> <h3> Multiple Mail Servers
+</h3>
+<a name="1-9"></a><p> It is possible for a user to view emails sent to multiple mail servers. For example the user should be able to view messages sent both to a work email address and to a
+personal email address.
+<p> <h3> Saving an Attachment
+</h3>
+<a name="1-10"></a><p> It is possible for a user to receive a message with an attachment and select to save
+it in their documents for later viewing.
+<p> <h3> Accounts
+</h3>
+<a name="1-11"></a><p> The following account features are available:
+<p> <ul>
+<li> Accounts: for creating an arbitrary number of mail accounts.
+<li> Email Protocols: POP, IMAP and SMTP.
+<li> Message Protocols: SMS, EMS and MMS.
+<li> POP: remembers the server mail list so you can keep a
+server copy of your mails.
+<li> SMTP: it is possible to use additional SMTP accounts to allow for more
+than one profile.
+<li> IMAP: it is possible to set individual synchronization settings for
+each mailbox.
+<li> Delete: it is possible to delay server deletion of mails until they
+have been removed locally from trash.
+</ul>
+<p> <h3> Folders
+</h3>
+<a name="1-12"></a><p> The following folder features are available:
+<p> <ul>
+<li> Folders: that are both standard and virtual folders.
+<li> Queries: it is possible to create an arbitrary number of virtual
+folders by adding new queries. 
+<li> Search: it is possible to quickly search for mails by using the search
+folder.
+<li> Mail Account: each mail account is automatically assigned
+a virtual folder.
+</ul>
+<p> <h3> Mail List (per folder)
+</h3>
+<a name="1-13"></a><p> The following mail list features are available:
+<p> <ul>
+<li> Mail view: displays a short description of each mail
+consisting of status, address, subject and date.
+<li> Mail sort: it is possible to select each header file for sorting in
+either ascending or descending order.
+<li> Mail view update: the view is dynamically updated as folder or mail
+contents changes.
+<li> Transfer: it is possible to select messages and to copy or move them to another
+folder.
+</ul>
+<p> <h3> Virtual Folder (queries) and search
+</h3>
+<a name="1-14"></a><p> The following virtual folder features are available:
+<p> <ul>
+<li> Folder properties: defines the search criteria for mails
+that appear in a folder.
+<li> Search keys: allows case-insensitive pattern matching with support
+for optional keys in the same field.
+<li> Virtual properties: the same mail logically appears in
+several folders.
+</ul>
+<p> <h3> Message Properties
+</h3>
+<a name="1-15"></a><p> The following message properties can be handled:
+<p> <ul>
+<li>  Date: this is converted to match your current time zone
+setting.
+<li> Attachments: these are only stored as files when you
+request it.
+<li> Usability: support exists for most messages conforming to RFC822 and
+RFC2045-RFC2049.
+</ul>
+<p> <h3> Viewing Mail
+</h3>
+<a name="1-16"></a><p> The following features are available:
+<p> <ul>
+<li> URL: clicking on a URL in the mail prompts the application to attempt to open
+it in the default browser.
+<li> Addresses: used to compose messages but it is also be possible to add an address/phone number to the address book by clicking on it.
+<li> Format: quoted text is colored to distinguish it from the
+body text.
+<li> Inline: text and image attachments are shown inline with
+images being scaled to the screen width.
+<li> Attachments: it is possible to install/remove mail attachments from the documents tab.
+<li> Reply: it is possible to reply to or forward the currently viewed message.
+<li> Status: it is possible to change the status of messages.
+<li> Plain: the mail is shown in plain mode where the original
+formatting is kept.
+<li> Delete: it is possible to delete the currently viewed message.
+</ul>
+<p> <h3> Viewing MMS Messages
+</h3>
+<a name="1-17"></a><p> The following features are required:
+<p> <ul>
+<li> Display of images and text and playing sounds.
+<li> Playing MMS messages containing SMIL presentaion.
+<li> Reply: it is possible to reply to or forward the currently viewed message.
+<li> Delete: it is possible to delete the currently viewed message
+</ul>
+<p> <h3> Writing Messages
+</h3>
+<a name="1-18"></a><p> The following writing-related features are available:
+<p> <ul>
+<li> Fields: it is possible to add SMS/to/cc/bcc/from/subject/body(text) and
+attach files to the mail.
+<li> Modify: it is possible to make changes as necessary to mails in the <i>Drafts</i>
+and <i>Outbox</i> folder.
+<li> Auto save: modified mails are automatically saved unless they are
+explicitly discarded.
+<li> Store: draft mails are stored in the <i>Drafts</i> folder and mails
+ready to send are stored in the <i>Outbox</i> folder.
+</ul>
+<p> <h3> Writing MMS Messages
+</h3>
+<a name="1-19"></a><p> The following writing-related features are required:
+<ul>
+<li> Fields: it is possible to specify To/Cc/Bcc/subject. It is possible to
+request delivery report and read reply.
+<li> Composing: a standard slideshow with SMIL presentation is supported
+by the MMS composer.  One image, text field and audio file are allowed
+per page of the slideshow.
+<li> Modify: it is possible to make changes as necessary to mails in the drafts
+and outbox folder.
+<li> Auto save: modified mails are automatically be saved unless they are
+explicitly discarded.
+<li> Store: draft mails are stored in the Drafts folder and mails
+ready to send are stored in the Outbox folder.
+</ul>
+<p> <h3> Retrieving Messages
+</h3>
+<a name="1-20"></a><p> The following message retrieval related features are available:
+<p> <ul>
+<li> Retrieve: it is possible to check for new messages in either all accounts or to
+specify only one account to be checked.
+<li> Complete messages: messages not downloaded are individually
+completed.
+<li> Overview: all new/unseen mail-headers are always
+downloaded (unless excused in IMAP mailbox settings).
+<li> Fast: the current download list is sorted by the size of
+the mail (small goes first).
+<li> Logical: viewing a mail or removing it causes it to be respectively pushed to the front or removed from the download list.
+<li> Resume: it is possible to cancel downloads and resume them later.
+<li> Safe: in case of a crash while downloading the client reverts to the state prior to the crash.
+</ul>
+<p> <h3> Retrieving MMS Messages
+</h3>
+<a name="1-21"></a><p> The user will be notifed of the arrival of an MMS message.  The user may
+then download and view the message immediately, or defer downloading to
+a later date.
+<p> <h3> Sending Messages
+</h3>
+<a name="1-22"></a><p> The following message sending- related features are available:
+<p> <ul>
+<li> Send: it is possible to send all queued messages in one go.
+<li> Authenticate: POP or IMAP authentication is always attempted.
+<li> Fallback: sending is attempted even if
+authentication fails (for whatever reasons).
+<li> Single: it is possible to send a single mail instead of all the
+mails in the <i>Outbox</i>.
+<li> Safe: in event of failure no mail in the transfer list is marked as sent.
+<li> Sent Folder: all sent mails are automatically be moved to
+the <i>Sent</i> folder.
+<li> Flexible: default SMTP account or reply-to field is
+used where the from address does not match.
+<li> Diverse: it is possible to send a single message with both SMS and email addresses.
+</ul>
+<p> <h2> Dependencies
+</h2>
+<a name="2"></a><p> <h3> Storage Space
+</h3>
+<a name="2-1"></a><p> Approximately 1.5 times the server mailbox size is required on a device.
+<p> <h3> Image Viewing
+</h3>
+<a name="2-2"></a><p> This application requires the services of an image viewer in order to allow for the display of attached images.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,193 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/qvfb-qtopia.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qt/Embedded Virtual Framebuffer</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qt/Embedded Virtual Framebuffer</h1>
+
+
+<p> 
+<a name="top"></a>
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Framebuffer Design and Refresh Rate
+</a>
+<li><a href="#3"> Using QVFb
+</a>
+<ul>
+<li><a href="#3-1"> Command Line Options
+</a>
+</ul>
+<li><a href="#4"> Modifying QVFb Using Skins
+</a>
+<ul>
+<li><a href="#4-1"> Understanding the <em>.skin</em> File
+</a>
+<li><a href="#4-2"> Co-ordinates
+</a>
+<li><a href="#4-3"> Configuration File : <em>defaultbuttons.conf</em>
+</a>
+<li><a href="#4-4"> Specifying Screen Size Independent of Skin
+</a>
+</ul>
+<li><a href="#5"> Troubleshooting
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> QT Virtual Framebuffer (QVFb) is provided as part of a  standard distribution package.
+QVFb allows Qt/Embedded programs to be developed on a desktop machine, without having to switch between consoles and X11. It runs as a normal X application on a desktop machine but  provides a  virtual framebuffer to Qt/Embedded applications. Linux devices write to the screen using a framebuffer and QVFb emulates this behavior. 
+<p> When QVFb is started it creates files that the Qt/Embedded application detects and uses to connect to QVFb. This is the same behavior used if the files were on a real device connected to the framebuffer, so to the application running on QVFb there is no difference.
+<p> If an embedded application is run on the desktop without using QVFb the screen has spurious behavior. The display may appear as if it is being attacked by a virus and any information displayed will make no sense. If this occurs follow these steps:
+<ol type=1>
+<li> close Qtopia by using, for example, <tt>Ctrl-C</tt> 
+<li> start QVFb
+<li> rerun the embedded application
+</ol>
+<p> QVFb is located in <tt>$QTDIR/tools/qvfb</tt> and is a development tool only. 
+No security issues have been considered and it should not be used in a production environment. To safeguard the production environment the variable <tt>QT_NO_QWS_VFB</tt> should always be defined in production libraries.
+<p> <h2> Framebuffer Design and Refresh Rate
+</h2>
+<a name="2"></a><p> The virtual framebuffer emulates a framebuffer by using a shared memory region
+(the virtual frame buffer) and a utility to display the framebuffer in a
+window (QVFb).  Any changed regions of the display are updated
+periodically, so discrete snapshots of the framebuffer are viewed  rather
+than each individual drawing operation.  For this reason drawing issues 
+such as flickering may not be apparent until the program is run using a real
+framebuffer.
+<p> To check for updated regions more quickly the target refresh rate needs to be set via the <tt>View-&gt;Refresh Rate</tt> menu item.
+The rate is a target only and if little drawing is being done, the framebuffer will
+not show any updates between drawing events.  If an application is displaying
+an animation the updates will be frequent, and the application and
+QVFb will compete for processor time.
+<p> Mouse and keyboard events are passed to the Qt/Embedded master process via
+named pipes.
+<p> <h2> Using QVFb
+</h2>
+<a name="3"></a><p> To use QVFb do the following:
+<ul>
+<li> ensure <tt>QT_NO_QWS_VFB</tt> in <tt>$QTDIR/src/tools/qconfig.h</tt> is not defined
+<li> compile the Qt/Embedded library.
+<li> compile QVFb as a normal Qt/X11 application and run it. Do not
+compile it as a Qt/Embedded application.
+<li> Start a Qt/Embedded master application (that is, construct QApplication with
+<tt>QApplication::GuiServer</tt> flag or use the <tt>-qws</tt> command line parameter).
+You will need to specify to the server that you wish to use the virtual
+framebuffer driver, for example: <pre> widgets -qws -display QVFb:0</pre>
+ 
+<li> You may prefer to set the QWS_DISPLAY environment variable to
+be <tt>QVFb:0</tt>.
+</ul>
+<p> <h3> Command Line Options
+</h3>
+<a name="3-1"></a><p> QVFb supports the following command line options:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Option <th valign="top">Explanation
+<tr bgcolor="#f0f0f0">
+<td valign="top"><pre> -width width </pre>
+ 
+<td valign="top">The width of the virtual framebuffer (default: 240).
+<tr bgcolor="#d0d0d0">
+<td valign="top"><pre> -height height</pre>
+ 
+<td valign="top">The height of the virtual framebuffer (default: 320).
+<tr bgcolor="#f0f0f0">
+<td valign="top"><pre> -depth depth</pre>
+ 
+<td valign="top">The depth of the virtual framebuffer (1, 4, 8 or 32, default: 8).
+<tr bgcolor="#d0d0d0">
+<td valign="top"><pre> -nocursor</pre>
+ 
+<td valign="top">Do not display the X11 cursor in the framebuffer window.
+<tr bgcolor="#f0f0f0">
+<td valign="top"><pre> -qwsdisplay :id</pre>
+ 
+<td valign="top">The Qt/Embedded display id to provide (default :0).
+</table></center>
+<p> <h2> Modifying QVFb Using Skins
+</h2>
+<a name="4"></a><p> By default QVFb looks rather boring. A rectangular area with a border represents the screen of a device. It does not contain any buttons that are usually found on the device and  does not look realistic.
+<p> QVFb supports a feature known as a <em>skin</em> which is used to change the look and feel of the display. A skin is a set of XML and pixmap files that tell the QVFb how it should look and how it should behave. So a skin can change the unrealistic display into a display that isidentical to the device being devolped. A skin can have buttons and when you click on the button a signal will be send to the Qtopia application running inside QVFb, just as would happen on a real device. 
+<p> <h3> Understanding the <em>.skin</em> File
+</h3>
+<a name="4-1"></a><p> The <tt>.skin</tt> file comprises:
+<p> <ul>
+<li> 2 files, one for the <em>normal</em> skin and one for the <em>activated</em> skin.
+<li> 2 lines specifying the offset and size of the virtual screen.
+<li> button definition. There is a number to specify how many buttons are available followed by the buttons. The format is name, keycode, coordinates.
+</ul>
+<p> <h3> Co-ordinates
+</h3>
+<a name="4-2"></a><p> The co-ordinates are a list of at least 2 points in  clockwise order that define a shape for the button. Two points are treated as opposite edges of a rectangle and a click inside the points will be treated as a click on that button. While pressed, the pixels for the button are redrawn from the activated skin.
+<p> For reference see: <tt>SmartPhone.skin</tt> and <tt>SmartPhone2.skin</tt> in $QTDIR/tools/QVFB.
+<p> <h3> Configuration File : <em>defaultbuttons.conf</em>
+</h3>
+<a name="4-3"></a><p> The configuration file <tt>defaultbuttons.conf</tt> provides the following functionality:
+<ul>
+<li> customizes the launch screen applications
+<li> orders the soft keys
+<li> provides input method hints.
+</ul>
+<p> <h3> Specifying Screen Size Independent of Skin
+</h3>
+<a name="4-4"></a><p> QVFb allows the screen size to be specified independently of the skin. For example, you can use the SmartPhone.skin but specify a screen size of 240x320 pixels. The skin (if command-line arguments are used) or screen (if Configure is used) will be scaled accordingly. For example:
+<p> <pre> QVFB -skin SmartPhone.skin -width 240 -height 320 -zoom 0.7 </pre>
+ 
+<p> The above example uses the SmartPhone.skin (screen area 176x208 skin pixels) but with a 240x320 pixel virtual framebuffer. The screen is scaled down by 0.7 resulting in a display that is a smooth-scaled 168x224 pixels.
+<p> <b>Note:</b> The SmartPhone.skin is 176x208, not 3:4 which means that 3:4 pixel screens are slightly distorted (but still pixel-correct).
+<p> <h2> Troubleshooting
+</h2>
+<a name="5"></a><p> <ul>
+<li> If a Qt/Embedded application does not appear inside QVfb then try removing the old Qt/Embedded temporary data. For example:
+<p> <pre>
+    killall qpe quicklauncher qvfb
+    rm -rf "/tmp/qtembedded-$LOGNAME/"
+    rm -rf /tmp/qtembedded-0/
+    </pre>
+ 
+<p> <li> To connect a Qt/Embedded application to QVFb Qt/Embedded must not be configured with the <tt>-no-qvfb</tt> option.
+<p> <li> If you are experiencing trouble with a Qtopia image then a clean install of Qtopia is required as follows:
+<p> <pre>
+    cd $QPEDIR
+    make cleaninstall
+    </pre>
+ 
+and try running your application again.
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,51 @@
+#!/bin/sh
+
+display=${QWS_DISPLAY:=:0}
+# Grab only the stuff after the last :
+display=${display##*:}
+
+if [ -e /tmp/.qtvfb_keyboard-$display ]; then
+    echo "QVFB $display is already running!"
+    exit 1;
+fi
+
+# is this a src package?
+QVFB_DIR=
+if [ -e $QTDIR/bin/qvfb -a -d $QTDIR/tools/qvfb ]; then
+    cd $QTDIR/tools/qvfb
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QTDIR/lib
+    QVFB_DIR=$QTDIR/bin
+    
+# is it an sdk package?
+elif [ -e $QPEDIR/bin/qvfb ]; then
+    cd $QPEDIR/bin
+    export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
+    QVFB_DIR=$QPEDIR/bin
+        
+# any other place we can find it?    
+elif which qvfb >/dev/null 2>&1; then
+    cd $(dirname $(which qvfb))
+    QVFB_DIR=`/bin/pwd`
+    
+# give up?    
+else
+    echo "Cannot find QVFB!"
+    exit 1
+fi
+
+args=
+if [ -z "$*" ]; then
+    for skin in $QVFB_SKIN QtopiaPDA SmartPhone;
+    do
+        if [ -f $skin.skin -o -d $skin.skin ]; then
+            args="-skin ${skin}.skin"
+            break
+        fi
+    done
+else
+    args="-skin ${*}.skin"
+fi;
+
+$QVFB_DIR/qvfb -qwsdisplay :$display $args > /dev/null 2>&1 &
+
+exit 0

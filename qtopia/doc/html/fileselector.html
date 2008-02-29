@@ -1,0 +1,178 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/fileselector.cpp:363 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>FileSelector Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>FileSelector Class Reference</h1>
+
+<p>The FileSelector widget allows the user to select DocLnk objects.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="fileselector-h.html">qtopia/fileselector.h</a>&gt;</tt>
+<p><a href="fileselector-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#FileSelector"><b>FileSelector</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;f, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;newVisible = TRUE, bool&nbsp;closeVisible = TRUE )</li>
+<li class=fn><a href="#~FileSelector"><b>~FileSelector</b></a> ()</li>
+<li class=fn>void <a href="#setNewVisible"><b>setNewVisible</b></a> ( bool&nbsp;b )</li>
+<li class=fn>void <a href="#setCloseVisible"><b>setCloseVisible</b></a> ( bool&nbsp;b )</li>
+<li class=fn>int <a href="#fileCount"><b>fileCount</b></a> ()</li>
+<li class=fn>DocLnk <a href="#selectedDocument"><b>selectedDocument</b></a> () const</li>
+<li class=fn>QValueList&lt;DocLnk&gt; <a href="#fileList"><b>fileList</b></a> () const</li>
+<li class=fn>void <a href="#setCurrentCategory"><b>setCurrentCategory</b></a> ( int&nbsp;newCatUid )</li>
+<li class=fn>void <a href="#reread"><b>reread</b></a> ()</li>
+<li class=fn>enum <b>SortMode</b> { Alphabetical, ReverseAlphabetical, Chronological, ReverseChronological }</li>
+<li class=fn>void <b>setSortMode</b> ( SortMode&nbsp;m )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#fileSelected"><b>fileSelected</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f )</li>
+<li class=fn>void <a href="#newSelected"><b>newSelected</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;f )</li>
+<li class=fn>void <a href="#closeMe"><b>closeMe</b></a> ()</li>
+<li class=fn>void <a href="#typeChanged"><b>typeChanged</b></a> ( void )</li>
+<li class=fn>void <a href="#categoryChanged"><b>categoryChanged</b></a> ( void )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The FileSelector widget allows the user to select <a href="doclnk.html">DocLnk</a> objects.
+<p> This class presents a file selection dialog to the user. This widget
+is usually the first widget seen in a <a href="docwidget.html">document-oriented application</a>. The developer will most often
+create this widget in combination with a <a
+href="qwidgetstack.html"> QWidgetStack</a> and the appropriate
+editor and/or viewer widget for their application. This widget
+should be shown first and the user can the select which document
+they wish to operate on. Please refer to the implementation of
+texteditor for an example of how to tie these classes together.
+<p> Use <a href="#setNewVisible">setNewVisible</a>() depending on whether the application can be used
+to create new files or not. Use <a href="#setCloseVisible">setCloseVisible</a>() depending on
+whether the user may leave the dialog without creating or selecting
+a document or not. The number of files in the view is available from
+<a href="#fileCount">fileCount</a>(). To force the view to be updated call <a href="#reread">reread</a>().
+<p> If the user presses the 'New' button the <a href="#newSelected">newSelected</a>()
+signal is emitted. If the user selects an existing file the
+<a href="#fileSelected">fileSelected</a>() signal is emitted. The selected file's <a href="doclnk.html">DocLnk</a> is available from the selected()
+function. If the file selector is no longer necessary the <a href="#closeMe">closeMe</a>()
+signal is emitted.
+<p> The <a href="#typeChanged">typeChanged</a>() and <a href="#categoryChanged">categoryChanged</a>() signals are emitted when
+either a different file type or category are selected. Note that
+in Qtopia 1.5.0, there were no selectors for this, so these signals
+are never emitted on that platform.
+<p> 
+<p>See also <a href="filemanager.html">FileManager</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="FileSelector"></a>FileSelector::FileSelector ( const&nbsp;QString&nbsp;&amp;&nbsp;f, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;newVisible = TRUE, bool&nbsp;closeVisible = TRUE )
+</h3>
+Constructs a FileSelector with mime filter <em>f</em>.
+The standard Qt <em>parent</em> and <em>name</em> parameters are passed to the
+parent widget.
+<p> If <em>newVisible</em> is TRUE, the widget has a button to allow the user
+the create "new" documents; this is useful for applications that can
+create and edit documents but not suitable for applications that
+only provide viewing.
+<p> <em>closeVisible</em> is deprecated
+<p> <p>See also <a href="doclnkset.html#DocLnkSet">DocLnkSet::DocLnkSet</a>().
+
+<h3 class=fn><a name="~FileSelector"></a>FileSelector::~FileSelector ()
+</h3>
+Destroys the widget.
+
+<h3 class=fn>void <a name="categoryChanged"></a>FileSelector::categoryChanged ( void )<tt> [signal]</tt>
+</h3> 
+This signal is emitted when a different category is selected.
+
+<h3 class=fn>void <a name="closeMe"></a>FileSelector::closeMe ()<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the user no longer needs to view the widget.
+
+<h3 class=fn>int <a name="fileCount"></a>FileSelector::fileCount ()
+</h3>
+Returns the number of files in the view. If this is zero, an editor
+application might bypass the selector and immediately start with
+a "new" document.
+
+<h3 class=fn>QValueList&lt;DocLnk&gt; <a name="fileList"></a>FileSelector::fileList () const
+</h3>
+Returns a list of all documents.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="fileSelected"></a>FileSelector::fileSelected ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the user selects a document.
+<em>f</em> is the document.
+
+<h3 class=fn>void <a name="newSelected"></a>FileSelector::newSelected ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;f )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the user selects a "new" document.
+<em>f</em> is a <a href="doclnk.html">DocLnk</a> for the document. You will need to set the type
+of the document after copying it.
+
+<h3 class=fn>void <a name="reread"></a>FileSelector::reread ()
+</h3>
+Rereads the list of documents.
+
+<h3 class=fn><a href="doclnk.html">DocLnk</a> <a name="selectedDocument"></a>FileSelector::selectedDocument () const
+</h3>
+Returns the selected <a href="doclnk.html">DocLnk</a>,
+or a null <a href="doclnk.html">DocLnk</a> is none is selected.
+<p> First availability: Qtopia 1.6
+
+<h3 class=fn>void <a name="setCloseVisible"></a>FileSelector::setCloseVisible ( bool&nbsp;b )
+</h3>
+If <em>b</em> is TRUE a "close" or "no document" button is visible; if <em>b</em> is FALSE this button is not visible and the user is unable to
+leave the dialog without creating or selecting a document.
+<p> This function is deprecated.
+
+<h3 class=fn>void <a name="setCurrentCategory"></a>FileSelector::setCurrentCategory ( int&nbsp;newCatUid )
+</h3>
+Set the selected category to <em>newCatUid</em>.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>void <a name="setNewVisible"></a>FileSelector::setNewVisible ( bool&nbsp;b )
+</h3>
+If <em>b</em> is TRUE a "new document" entry is visible; if <em>b</em> is FALSE
+this entry is not visible and the user is unable to create new
+documents from the dialog.
+
+<h3 class=fn>void <a name="typeChanged"></a>FileSelector::typeChanged ( void )<tt> [signal]</tt>
+</h3> 
+This signal is emitted when a different file type is selected.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

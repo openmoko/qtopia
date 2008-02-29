@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaSettings
+Context=Sound
+[Desktop Entry]
+Type=Application
+Exec=sound
+Icon=Sound
+Name[]=Sound
+CanFastload=0

@@ -1,0 +1,11 @@
+Files: bin/rotation apps/Settings/Rotation.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia, qt-embedded-fonts-t0, qt-embedded-fonts-t5, qt-embedded-fonts-t10, qt-embedded-fonts-t15
+Description: Rotation settings
+ Allows the display to be rotated. This requires
+ extra fonts, using about 240K of actual flash (jffs2).

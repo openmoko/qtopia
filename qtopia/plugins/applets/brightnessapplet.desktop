@@ -1,0 +1,8 @@
+[Translation]
+File=QtopiaPlugins
+Context=Applets
+Comment [Desktop Entry/Name]=Brightness of the screen
+[Desktop Entry]
+Name[]=Screen Light
+Comment[]=Adjusts the screen brightness.
+X-QPE-Library=libbrightnessapplet.so

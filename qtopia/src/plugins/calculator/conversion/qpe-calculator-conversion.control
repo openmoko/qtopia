@@ -1,0 +1,10 @@
+Files: plugins/calculator/libconversion.so* etc/calculator
+Priority: optional
+Section: qpe/inputmethods
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-11
+Depends: qpe-libqtopia
+Description: Conversion calculator plugin
+  A plugin for the calculator that provides conversion between different measures

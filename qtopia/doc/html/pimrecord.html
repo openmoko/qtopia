@@ -1,0 +1,145 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/pimrecord.cpp:51 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>PimRecord Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>PimRecord Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The PimRecord class is the base class for PIM data recorded in the
+Qtopia database.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="pimrecord-h.html">qtopia/pim/pimrecord.h</a>&gt;</tt>
+<p>Inherited by <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, and <a href="pimtask.html">PimTask</a>.
+<p><a href="pimrecord-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#PimRecord"><b>PimRecord</b></a> ()</li>
+<li class=fn><a href="#PimRecord-2"><b>PimRecord</b></a> ( const&nbsp;PimRecord&nbsp;&amp;&nbsp;other )</li>
+<li class=fn>virtual <a href="#~PimRecord"><b>~PimRecord</b></a> ()</li>
+<li class=fn>virtual PimRecord &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;PimRecord&nbsp;&amp;&nbsp;other )</li>
+<li class=fn>bool <a href="#operator-eq-eq"><b>operator==</b></a> ( const&nbsp;PimRecord&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>bool <a href="#operator!-eq"><b>operator!=</b></a> ( const&nbsp;PimRecord&nbsp;&amp;&nbsp;other ) const</li>
+<li class=fn>void <a href="#setCategories"><b>setCategories</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;categories )</li>
+<li class=fn>void <a href="#setCategories-2"><b>setCategories</b></a> ( int&nbsp;id )</li>
+<li class=fn>QArray&lt;int&gt; <a href="#categories"><b>categories</b></a> () const</li>
+<li class=fn>virtual QString <a href="#customField"><b>customField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</li>
+<li class=fn>virtual void <a href="#setCustomField"><b>setCustomField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )</li>
+<li class=fn>virtual void <a href="#removeCustomField"><b>removeCustomField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key )</li>
+<li class=fn>QUuid <a href="#uid"><b>uid</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+
+
+The PimRecord class is the base class for PIM data recorded in the
+Qtopia database.
+<p> The Pim record class contains data that is common to all data used
+by the PIM applications, in particular a unique ID and a set of
+categories.
+<p> A PimRecord's ID is returned by <a href="#uid">uid</a>() and is set with setUid(). Each
+category is represented by an integer. A PimRecord's categories are
+returned by <a href="#categories">categories</a>() and are set with <a href="#setCategories">setCategories</a>().
+<p> PimRecord comparisons are provided by <a href="#operator-eq-eq">operator==</a>() and <a href="#operator!-eq">operator!=</a>().
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="PimRecord"></a>PimRecord::PimRecord ()
+</h3>
+Creates an empty record.
+
+<h3 class=fn><a name="PimRecord-2"></a>PimRecord::PimRecord ( const&nbsp;<a href="pimrecord.html">PimRecord</a>&nbsp;&amp;&nbsp;other )
+</h3>
+Creates a clone of the record <em>other</em>.
+
+<h3 class=fn><a name="~PimRecord"></a>PimRecord::~PimRecord ()<tt> [virtual]</tt>
+</h3>
+Destroys the record.
+
+<h3 class=fn>QArray&lt;int&gt; <a name="categories"></a>PimRecord::categories () const
+</h3>
+
+<p> Returns the set of categories the record belongs to.
+<p> <p>See also <a href="#setCategories">setCategories</a>().
+
+<h3 class=fn>QString <a name="customField"></a>PimRecord::customField ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const<tt> [virtual]</tt>
+</h3>
+Returns the string stored for the custom field <em>key</em>.
+Returns a null string if the field does not exist.
+
+<h3 class=fn>bool <a name="operator!-eq"></a>PimRecord::operator!= ( const&nbsp;<a href="pimrecord.html">PimRecord</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+Returns TRUE if the record does not have the same Uid as <em>other</em>; otherwise returns FALSE.
+<p> <p>See also <a href="#operator-eq-eq">operator==</a>().
+
+<h3 class=fn><a href="pimrecord.html">PimRecord</a>&nbsp;&amp; <a name="operator-eq"></a>PimRecord::operator= ( const&nbsp;<a href="pimrecord.html">PimRecord</a>&nbsp;&amp;&nbsp;other )<tt> [virtual]</tt>
+</h3>
+Sets the record to be a clone of <em>other</em>.
+
+<h3 class=fn>bool <a name="operator-eq-eq"></a>PimRecord::operator== ( const&nbsp;<a href="pimrecord.html">PimRecord</a>&nbsp;&amp;&nbsp;other ) const
+</h3>
+Returns TRUE if the record has the same Uid as <em>other</em>;
+otherwise returns FALSE.
+<p> <p>See also <a href="#operator!-eq">operator!=</a>().
+
+<h3 class=fn>void <a name="removeCustomField"></a>PimRecord::removeCustomField ( const&nbsp;QString&nbsp;&amp;&nbsp;key )<tt> [virtual]</tt>
+</h3>
+Removes the custom field <em>key</em>.
+
+<h3 class=fn>void <a name="setCategories"></a>PimRecord::setCategories ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;categories )
+</h3>
+
+<p> Sets the record to belong to the set of categories specificed
+by <em>categories</em>.
+<p> <p>See also <a href="#categories">categories</a>().
+
+<h3 class=fn>void <a name="setCategories-2"></a>PimRecord::setCategories ( int&nbsp;id )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Sets the record to belong only to the category specified by <em>id</em>.
+<p> <p>See also <a href="#categories">categories</a>().
+
+<h3 class=fn>void <a name="setCustomField"></a>PimRecord::setCustomField ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )<tt> [virtual]</tt>
+</h3>
+Sets the string stored for the custom field <em>key</em> to <em>value</em>.
+
+<h3 class=fn><a href="quuid.html">QUuid</a> <a name="uid"></a>PimRecord::uid () const
+</h3>
+
+<p> Returns the unique ID for this record.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

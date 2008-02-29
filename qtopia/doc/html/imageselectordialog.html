@@ -1,0 +1,153 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia2/imageselector.cpp:402 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ImageSelectorDialog Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ImageSelectorDialog Class Reference</h1>
+
+<p>The ImageSelectorDialog widget presents the ImageSelector widget as a 
+dialog. It allows the user to select from a collection of images.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="imageselector-h.html">qtopia/imageselector.h</a>&gt;</tt>
+<p><a href="imageselectordialog-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#ImageSelectorDialog"><b>ImageSelectorDialog</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = TRUE, WFlags&nbsp;f = 0 )</li>
+<li class=fn><a href="#ImageSelectorDialog-2"><b>ImageSelectorDialog</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;source, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = TRUE, WFlags&nbsp;f = 0 )</li>
+<li class=fn>ImageSelectorDialog ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name, bool&nbsp;modal, const&nbsp;QString&nbsp;&amp;&nbsp;srcdir, int&nbsp;wflags = 0 ) &nbsp;<em>(obsolete)</em></li>
+<li class=fn><a href="#~ImageSelectorDialog"><b>~ImageSelectorDialog</b></a> ()</li>
+<li class=fn>QString <a href="#selectedFilename"><b>selectedFilename</b></a> () const</li>
+<li class=fn>DocLnk <a href="#selectedDocument"><b>selectedDocument</b></a> () const</li>
+<li class=fn>QPixmap <a href="#selectedImage"><b>selectedImage</b></a> ( const&nbsp;int&nbsp;width, const&nbsp;int&nbsp;height ) const</li>
+<li class=fn>QValueList&lt;DocLnk&gt; <a href="#fileList"><b>fileList</b></a> () const</li>
+<li class=fn>void <a href="#setThumbnailSize"><b>setThumbnailSize</b></a> ( const&nbsp;int&nbsp;maxSide )</li>
+<li class=fn>int <a href="#thumbnailSize"><b>thumbnailSize</b></a> () const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void selected ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image ) &nbsp;<em>(obsolete)</em></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The ImageSelectorDialog widget presents the <a href="imageselector.html">ImageSelector</a> widget as a 
+dialog. It allows the user to select from a collection of images.
+<p> This code snippet allows the user to select a wallpaper from the Qtopia directories:
+<p> <pre>
+    QStringList locations;
+    QStringList qtopiaPaths = Global::<a href="global.html#qtopiaPaths">qtopiaPaths</a>();
+    for( QStringList::Iterator it = qtopiaPaths.begin(); it != qtopiaPaths.end(); ++it )
+        locations.append( *it + "pics/wallpaper" );
+      
+    ImageSelectorDialog dialog( locations, this );
+    if( QPEApplication::<a href="qpeapplication.html#execDialog">execDialog</a>( &amp;dialog ) ) {
+        // Accept
+    } else {
+        // Reject
+    }</pre>
+ 
+<p> You can retrieve the selected image with <a href="#selectedDocument">selectedDocument</a>(),
+<a href="#selectedFilename">selectedFilename</a>() and <a href="#selectedImage">selectedImage</a>(). The <a href="#selectedImage">selectedImage</a>() function
+returns a QPixmap containing a scaled copy of the selected image.
+<p> First availability: Qtopia 2.0
+<p> 
+<p>See also <a href="imageselector.html">ImageSelector</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="ImageSelectorDialog"></a>ImageSelectorDialog::ImageSelectorDialog ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = TRUE, WFlags&nbsp;f = 0 )
+</h3>
+Construct an ImageSelectorDialog called <em>name</em> with parent <em>parent</em> and 
+widget flags <em>f</em>.
+<p> The dialog is modal if <em>modal</em> is TRUE (default), otherwise the dialog is 
+modeless.
+<p> Images are taken from the Documents directory.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn><a name="ImageSelectorDialog-2"></a>ImageSelectorDialog::ImageSelectorDialog ( const&nbsp;QStringList&nbsp;&amp;&nbsp;source, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = TRUE, WFlags&nbsp;f = 0 )
+</h3>
+Construct an ImageSelectorDialog called <em>name</em> with parent <em>parent</em> and 
+widget flags <em>f</em>.
+<p> The dialog is modal if <em>modal</em> is TRUE (default), otherwise the dialog is 
+modeless.
+<p> Images are taken from the directories given in <em>source</em>. If <em>source</em> is 
+empty images are taken from the Documents directory.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn><a name="ImageSelectorDialog-3"></a>ImageSelectorDialog::ImageSelectorDialog ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name, bool&nbsp;modal, const&nbsp;QString&nbsp;&amp;&nbsp;srcdir, int&nbsp;wflags = 0 )
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn><a name="~ImageSelectorDialog"></a>ImageSelectorDialog::~ImageSelectorDialog ()
+</h3>
+Destroy the widget.
+
+<h3 class=fn>QValueList&lt;DocLnk&gt; <a name="fileList"></a>ImageSelectorDialog::fileList () const
+</h3> 
+<p> Return a list of images in the current category.
+
+<h3 class=fn>void <a name="selected"></a>ImageSelectorDialog::selected ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image )<tt> [signal]</tt>
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn><a href="doclnk.html">DocLnk</a> <a name="selectedDocument"></a>ImageSelectorDialog::selectedDocument () const
+</h3> 
+<p> Return the <a href="doclnk.html">DocLnk</a> of the currently selected image, or invalid <a href="doclnk.html">DocLnk</a> if
+there is no current selection.
+
+<h3 class=fn>QString <a name="selectedFilename"></a>ImageSelectorDialog::selectedFilename () const
+</h3> 
+<p> Return the file path of the currently selected image, or QString::null if
+there is no current selection.
+
+<h3 class=fn>QPixmap <a name="selectedImage"></a>ImageSelectorDialog::selectedImage ( const&nbsp;int&nbsp;width, const&nbsp;int&nbsp;height ) const
+</h3> 
+<p> Return a QPixmap containing a scaled copy of the currently selected image, or
+null QPixmap if there is no current selection.
+<p> The image will be scaled to fit within <em>width</em> and <em>height</em> while
+maintaining the original width to height ratio.
+
+<h3 class=fn>void <a name="setThumbnailSize"></a>ImageSelectorDialog::setThumbnailSize ( const&nbsp;int&nbsp;maxSide )
+</h3> 
+<p> Set the maximum side (in pixel units) of a thumbnail to <em>maxSide</em>. The
+largest thumbnail will be no greater than <em>maxSide</em> x <em>maxSide</em> pixels.
+<p> <em>maxSide</em> must be greater than 0.
+<p> <p>See also <a href="#thumbnailSize">thumbnailSize</a>().
+
+<h3 class=fn>int <a name="thumbnailSize"></a>ImageSelectorDialog::thumbnailSize () const
+</h3> 
+<p> Return the current maximum side (in pixel units) of a thumbnail.
+<p> <p>See also <a href="#setThumbnailSize">setThumbnailSize</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

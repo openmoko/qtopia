@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Clock
+[Desktop Entry]
+Comment[]=A Clock Program
+Exec=clock
+Icon=Clock
+Type=Application
+Name[]=Clock

@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Image Codecs
+[Desktop Entry]
+Name[]=Image Codecs
+Comment[]=Image codecs add support for loading different image formats.
+Apply=QPE/System restart()

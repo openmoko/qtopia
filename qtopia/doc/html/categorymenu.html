@@ -1,0 +1,117 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/categorymenu.cpp:43 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>CategoryMenu Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>CategoryMenu Class Reference</h1>
+
+<p>The CategoryMenu widget aids in filtering records or files by Category.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="categorymenu-h.html">qtopia/categorymenu.h</a>&gt;</tt>
+<p><a href="categorymenu-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#CategoryMenu"><b>CategoryMenu</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;application, bool&nbsp;globals, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#~CategoryMenu"><b>~CategoryMenu</b></a> ()</li>
+<li class=fn>bool <a href="#isSelected"><b>isSelected</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cUids ) const</li>
+<li class=fn>void <a href="#setCurrentCategory"><b>setCurrentCategory</b></a> ( int&nbsp;newCatUid )</li>
+<li class=fn>void <a href="#setCurrentCategoryAll"><b>setCurrentCategoryAll</b></a> ()</li>
+<li class=fn>void <a href="#setCurrentCategoryUnfiled"><b>setCurrentCategoryUnfiled</b></a> ()</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#reload"><b>reload</b></a> ()</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#categoryChange"><b>categoryChange</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The CategoryMenu widget aids in filtering records or files by Category.
+<p> The CategoryMenu widget provides a popup menu that will make filtering records
+or files by category much easier.  The widget will lookup the available
+categories for an application, populate the menu, and keep a track of which
+categories are being filtered against.  A set of categories can be tested
+by the <a href="#isSelected">isSelected</a>() function to see if a record or file containing those
+categories would be allowed through by the filter.
+<p> <b>Warning:</b> Currently this class is not suitable for extending.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="CategoryMenu"></a>CategoryMenu::CategoryMenu ( const&nbsp;QString&nbsp;&amp;&nbsp;application, bool&nbsp;globals, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Creates a new CategoryMenu with <em>parent</em> and <em>name</em>.  The menu will be
+populated with the available categories for <em>application</em>.
+<p> If <em>globals</em> is TRUE then it will also poplulate the menu with the
+global categories.
+
+<h3 class=fn><a name="~CategoryMenu"></a>CategoryMenu::~CategoryMenu ()
+</h3>
+Destroys a CategoryMenu.
+
+<h3 class=fn>void <a name="categoryChange"></a>CategoryMenu::categoryChange ()<tt> [signal]</tt>
+</h3>
+
+This signal is emitted when the user selects a different category in the
+menu, hence changing what records or files should be selected.
+
+<h3 class=fn>bool <a name="isSelected"></a>CategoryMenu::isSelected ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;cUids ) const
+</h3>
+Returns TRUE if a record or file with the set of category ids <em>cUids</em>
+is allowed by the current selection in the CategoryMenu.
+Otherwise returns FALSE.
+
+<h3 class=fn>void <a name="reload"></a>CategoryMenu::reload ()<tt> [slot]</tt>
+</h3>
+Repopulates the widget's list of available categories.
+
+<h3 class=fn>void <a name="setCurrentCategory"></a>CategoryMenu::setCurrentCategory ( int&nbsp;newCatUid )
+</h3>
+Sets the menu to have <em>newCatUid</em> as the currently selected Category.
+
+<h3 class=fn>void <a name="setCurrentCategoryAll"></a>CategoryMenu::setCurrentCategoryAll ()
+</h3>
+Sets the menu to allow all category sets.
+
+<h3 class=fn>void <a name="setCurrentCategoryUnfiled"></a>CategoryMenu::setCurrentCategoryUnfiled ()
+</h3>
+Sets the menu to allow only empty category sets.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

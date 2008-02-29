@@ -1,0 +1,72 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/styleinterface.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>StyleInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>StyleInterface Class Reference</h1>
+
+<p>The StyleInterface class provides an interface for Qtopia
+widget styles.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="styleinterface-h.html">qtopia/styleinterface.h</a>&gt;</tt>
+<p><a href="styleinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>virtual QStyle * <a href="#style"><b>style</b></a> () = 0</li>
+<li class=fn>virtual QString <a href="#name"><b>name</b></a> () const = 0</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The StyleInterface class provides an interface for Qtopia
+widget styles.
+<p> Styles may be added to Qtopia via plug-ins. In order to write a
+style plug-in you must create an interface to your QStyle derived class
+by deriving from the StyleInterface class and implementing the pure
+virtual functions.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QString <a name="name"></a>StyleInterface::name () const<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#name">name</a>() function returns the name of the style. This will
+be displayed in the appearance settings dialog.
+
+<h3 class=fn>QStyle * <a name="style"></a>StyleInterface::style ()<tt> [pure virtual]</tt>
+</h3> 
+<p> Returns an instance of your style.  You should always return the same
+style instance if this function is called multiple times.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

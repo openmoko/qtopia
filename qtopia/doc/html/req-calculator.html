@@ -1,0 +1,123 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/calculator.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Calculator Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Calculator Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Basic Operations
+</a>
+<ul>
+<li><a href="#1-1-1"> Touchscreen mode
+</a>
+<li><a href="#1-1-2"> Keypad Mode
+</a>
+</ul>
+<li><a href="#1-2"> Visual History (keypad only)
+</a>
+<li><a href="#1-3"> Memory Operations (touchscreen only)
+</a>
+<li><a href="#1-4"> Backspace
+</a>
+<ul>
+<li><a href="#1-4-1"> Touchscreen mode
+</a>
+<li><a href="#1-4-2"> Keypad Mode
+</a>
+</ul>
+<li><a href="#1-5"> Error Messages
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <b>Calculator</b> provides the ability to perform fast and simple numerical
+calculations useful to everyday situations.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Basic Operations
+</h3>
+<a name="1-1"></a><p> The four basic operations (Addition, Subtraction, Multiplication and Division) are supported by <b>Calculator</b>. It uses floating point numbers with a
+maximum precision of 12 digits.
+<p> <h4> Touchscreen mode
+</h4>
+<a name="1-1-1"></a><p> The <b>Calculator</b> provides a simple user interface similar to those available
+for other basic calculator applications with easy access to the functions 
+using the appropriate buttons.
+<p> <h4> Keypad Mode
+</h4>
+<a name="1-1-2"></a><p> The user is able to enter numbers using the number keys on the keypad as
+well as choosing one of the four operations by using the direction keys:
+<ul>
+<li> Key_Up    - Addition
+<li> Key Down  - Substraction
+<li> Key_Right - Multiplication
+<li> Key_Left  - Division
+</ul>
+<p> In addition to the direction keys the user can cycle through
+these operations using the # key on the keypad.
+<p> The * key provides the decimal point and pressing
+the Key_Select button initiates the actual calculation.
+<p> <h3> Visual History (keypad only)
+</h3>
+<a name="1-2"></a><p> <b>Calculator</b> presents the history of previous calculations on the screen.
+<p> <h3> Memory Operations (touchscreen only)
+</h3>
+<a name="1-3"></a><p> The user can access a single number storage via the Store(M+), Clear(MC)
+and Retrieve(MR) functions.
+<p> <h3> Backspace
+</h3>
+<a name="1-4"></a><p> <h4> Touchscreen mode
+</h4>
+<a name="1-4-1"></a><p> The user-interface provides a Backspace button that deletes the
+last character of the current calculation.
+<p> <h4> Keypad Mode
+</h4>
+<a name="1-4-2"></a><p> It is possible to delete the last character of the current number as
+well as entire numbers from previous calculations by using Backspace.
+Holding down the Backspace button exits the calculator
+application.
+<p> <h3> Error Messages
+</h3>
+<a name="1-5"></a><p> Translatable error messages (e.g. Division by zero) are displayed if
+the user enters an undefinable calculation.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

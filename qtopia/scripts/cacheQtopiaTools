@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Welcome to the Qtopia Tools cache build script.
+# This script will make a copy of the Qtopia Tool binaries in your HOME directory.
+# The cached binaries can subsequently be used for future upgrades to speed up the 
+# build process.
+
+# All  environment variables used by Qtopia are set in a separate script.
+if [ ! -f config.cache ]; then
+    echo
+    echo "You must run configure before you can run cacheQtopiaTools"
+    exit 1
+fi
+. ./config.cache
+
+# Remove an old cache directory and the copy the latest binaries
+rm -rf ~/.qtopia_220_cache
+mkdir -p ~/.qtopia_220_cache/qt2/bin
+mkdir -p ~/.qtopia_220_cache/qt2/include
+mkdir -p ~/.qtopia_220_cache/qt2/lib
+cp -LpRf $QT2DIR/bin/* ~/.qtopia_220_cache/qt2/bin/.
+cp -LpRf $QT2DIR/lib/lib* ~/.qtopia_220_cache/qt2/lib/.
+cp -Lpf $QT2DIR/src/tools/qglobal.h ~/.qtopia_220_cache/qt2/include
+
+mkdir -p ~/.qtopia_220_cache/dqt/bin
+mkdir -p ~/.qtopia_220_cache/dqt/include
+mkdir -p ~/.qtopia_220_cache/dqt/lib
+cp -LpRf $DQTDIR/bin/* ~/.qtopia_220_cache/dqt/bin/.
+cp -LpRf $DQTDIR/lib/* ~/.qtopia_220_cache/dqt/lib/.
+cp -Lpf $DQTDIR/include/qglobal.h ~/.qtopia_220_cache/dqt/include
+cp -Lpf $DQTDIR/include/qconfig.h ~/.qtopia_220_cache/dqt/include
+cp -Lpf $DQTDIR/include/qmodules.h ~/.qtopia_220_cache/dqt/include

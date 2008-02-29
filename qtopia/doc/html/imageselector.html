@@ -1,0 +1,249 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia2/imageselector.cpp:36 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ImageSelector Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>ImageSelector Class Reference</h1>
+
+<p>The ImageSelector widget allows the user to select from a collection of 
+images.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="imageselector-h.html">qtopia/imageselector.h</a>&gt;</tt>
+<p><a href="imageselector-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#ImageSelector"><b>ImageSelector</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, WFlags&nbsp;f = 0 )</li>
+<li class=fn><a href="#ImageSelector-2"><b>ImageSelector</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;source, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, WFlags&nbsp;f = 0 )</li>
+<li class=fn>ImageSelector ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name, const&nbsp;QString&nbsp;&amp;&nbsp;srcdir, int&nbsp;wflags = 0 ) &nbsp;<em>(obsolete)</em></li>
+<li class=fn><a href="#~ImageSelector"><b>~ImageSelector</b></a> ()</li>
+<li class=fn>enum <a href="#ViewMode-enum"><b>ViewMode</b></a> { Single, Thumbnail }</li>
+<li class=fn>void <a href="#setViewMode"><b>setViewMode</b></a> ( ViewMode&nbsp;mode )</li>
+<li class=fn>ViewMode <a href="#viewMode"><b>viewMode</b></a> () const</li>
+<li class=fn>void <a href="#setThumbnailSize"><b>setThumbnailSize</b></a> ( const&nbsp;int&nbsp;maxSide )</li>
+<li class=fn>int <a href="#thumbnailSize"><b>thumbnailSize</b></a> () const</li>
+<li class=fn>void <a href="#setCategory"><b>setCategory</b></a> ( int&nbsp;id )</li>
+<li class=fn>int <a href="#category"><b>category</b></a> () const</li>
+<li class=fn>QString <a href="#selectedFilename"><b>selectedFilename</b></a> () const</li>
+<li class=fn>DocLnk <a href="#selectedDocument"><b>selectedDocument</b></a> () const</li>
+<li class=fn>QPixmap <a href="#selectedImage"><b>selectedImage</b></a> ( const&nbsp;int&nbsp;width, const&nbsp;int&nbsp;height ) const</li>
+<li class=fn>QValueList&lt;DocLnk&gt; <a href="#fileList"><b>fileList</b></a> () const</li>
+<li class=fn>int <a href="#fileCount"><b>fileCount</b></a> () const</li>
+<li class=fn>void showImageView ( bool&nbsp;show, bool&nbsp;fullscreen = false ) &nbsp;<em>(obsolete)</em></li>
+<li class=fn>bool imageViewVisible () const &nbsp;<em>(obsolete)</em></li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#selected"><b>selected</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image )</li>
+<li class=fn>void <a href="#held"><b>held</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image, const&nbsp;QPoint&nbsp;&amp;&nbsp;pos )</li>
+<li class=fn>void <a href="#fileAdded"><b>fileAdded</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image )</li>
+<li class=fn>void <a href="#fileUpdated"><b>fileUpdated</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image )</li>
+<li class=fn>void <a href="#fileRemoved"><b>fileRemoved</b></a> ( const&nbsp;DocLnk&nbsp;&amp;&nbsp;image )</li>
+<li class=fn>void <a href="#categoryChanged"><b>categoryChanged</b></a> ()</li>
+<li class=fn>void <a href="#reloaded"><b>reloaded</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The ImageSelector widget allows the user to select from a collection of 
+images.
+<p> ImageSelector allows the user to preview a collection of images and select
+individual images from the collection.
+<p> You can control how ImageSelector displays the collection by using
+<a href="#setViewMode">setViewMode</a>(). ImageSelector supports two modes of display. One mode is
+<a href="#ViewMode-enum">ImageSelector::Single</a>. In this mode images are resized to fit within the
+dimensions of the ImageSelector widget. Users navigate this mode by viewing
+each image one after another. The other mode is <a href="#ViewMode-enum">ImageSelector::Thumbnail</a>.
+In this mode images are resized and displayed in groups. The maximum size of
+the resized images can be controlled with <a href="#setThumbnailSize">setThumbnailSize</a>(). Users
+navigate this mode by moving a highlight through the collection to the desired
+image.
+<p> ImageSelector emits a <a href="#selected">selected</a>() signal when the user has made a selection. 
+A <a href="doclnk.html">DocLnk</a> to the selected image is passed with the signal. In addition you can
+retrieve the selected image with <a href="#selectedFilename">selectedFilename</a>() or <a href="#selectedImage">selectedImage</a>().
+The <a href="#selectedImage">selectedImage</a>() function returns a QPixmap containing a scaled copy of
+the selected image.
+<p> First availability: Qtopia 2.0
+<p> 
+<p>See also <a href="imageselectordialog.html">ImageSelectorDialog</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Type Documentation</h2>
+<h3 class=fn><a name="ViewMode-enum"></a>ImageSelector::ViewMode</h3>
+
+<p> This enum describes modes of display
+<ul>
+<li><tt>ImageSelector::Single</tt> - The images are display one at a time.
+<li><tt>ImageSelector::Thumbnail</tt> - Groups of images are displayed as thumbnails in a scrolling
+viewport.
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="ImageSelector"></a>ImageSelector::ImageSelector ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, WFlags&nbsp;f = 0 )
+</h3>
+Construct an ImageSelector called <em>name</em> with parent <em>parent</em> and widget
+flags <em>f</em>.
+<p> Images are taken from the Documents directory.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn><a name="ImageSelector-2"></a>ImageSelector::ImageSelector ( const&nbsp;QStringList&nbsp;&amp;&nbsp;source, QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, WFlags&nbsp;f = 0 )
+</h3>
+Construct an ImageSelector called <em>name</em> with parent <em>parent</em> and widget
+flags <em>f</em>.
+<p> Images are taken from the directories given in <em>source</em>. If <em>source</em> is 
+empty images are taken from the Documents directory.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn><a name="ImageSelector-3"></a>ImageSelector::ImageSelector ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name, const&nbsp;QString&nbsp;&amp;&nbsp;srcdir, int&nbsp;wflags = 0 )
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn><a name="~ImageSelector"></a>ImageSelector::~ImageSelector ()
+</h3>
+Destroy the widget.
+
+<h3 class=fn>int <a name="category"></a>ImageSelector::category () const
+</h3>
+Return the current category.
+<p> See <a href="categories.html">Categories</a> for more information on category IDs.
+<p> First availability: Qtopia 2.1
+<p> <p>See also <a href="#setCategory">setCategory</a>().
+
+<h3 class=fn>void <a name="categoryChanged"></a>ImageSelector::categoryChanged ()<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when the category has changed.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>void <a name="fileAdded"></a>ImageSelector::fileAdded ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image )<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when an image is added to the current category. A
+<a href="doclnk.html">DocLnk</a> to the image is given in <em>image</em>.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>int <a name="fileCount"></a>ImageSelector::fileCount () const
+</h3>
+Return the number of images in the current category.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>QValueList&lt;DocLnk&gt; <a name="fileList"></a>ImageSelector::fileList () const
+</h3>
+Return a list of images in the current category.
+
+<h3 class=fn>void <a name="fileRemoved"></a>ImageSelector::fileRemoved ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image )<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when an image is removed from the current category.
+A <a href="doclnk.html">DocLnk</a> to the image is given in <em>image</em>.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>void <a name="fileUpdated"></a>ImageSelector::fileUpdated ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image )<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when an image is updated in the current category. A
+<a href="doclnk.html">DocLnk</a> to the image is given in <em>image</em>.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>void <a name="held"></a>ImageSelector::held ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image, const&nbsp;QPoint&nbsp;&amp;&nbsp;pos )<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when the user has held down on an image. A <a href="doclnk.html">DocLnk</a> to
+the image is given in <em>image</em>. The global position of the hold is given
+in <em>pos</em>.
+<p> First availability: Qtopia 2.1
+
+<h3 class=fn>bool <a name="imageViewVisible"></a>ImageSelector::imageViewVisible () const
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn>void <a name="reloaded"></a>ImageSelector::reloaded ()<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when the collection has reloaded due to a disk mount
+or unmount.
+<p> First availability: Qtopia 2.1
+<p> <p>See also <a href="storageinfo.html#disksChanged">StorageInfo::disksChanged</a>().
+
+<h3 class=fn>void <a name="selected"></a>ImageSelector::selected ( const&nbsp;<a href="doclnk.html">DocLnk</a>&nbsp;&amp;&nbsp;image )<tt> [signal]</tt>
+</h3> 
+<p> This signal is emitted when the user has selected an image from the 
+collection. A <a href="doclnk.html">DocLnk</a> to the selected image is given in <em>image</em>.
+
+<h3 class=fn><a href="doclnk.html">DocLnk</a> <a name="selectedDocument"></a>ImageSelector::selectedDocument () const
+</h3>
+Return the <a href="doclnk.html">DocLnk</a> of the currently selected image, or invalid <a href="doclnk.html">DocLnk</a> if
+there is no current selection.
+
+<h3 class=fn>QString <a name="selectedFilename"></a>ImageSelector::selectedFilename () const
+</h3>
+Return the file path of the currently selected image, or QString::null if
+there is no current selection.
+
+<h3 class=fn>QPixmap <a name="selectedImage"></a>ImageSelector::selectedImage ( const&nbsp;int&nbsp;width, const&nbsp;int&nbsp;height ) const
+</h3>
+Return a QPixmap containing a scaled copy of the currently selected image, or
+null QPixmap if there is no current selection.
+<p> The image will be scaled to fit within <em>width</em> and <em>height</em> while
+maintaining the original width to height ratio.
+
+<h3 class=fn>void <a name="setCategory"></a>ImageSelector::setCategory ( int&nbsp;id )
+</h3>
+Set the current category to <em>id</em>. Only images in this category will be 
+displayed.
+<p> See <a href="categories.html">Categories</a> for more information on category IDs.
+<p> <p>See also <a href="#category">category</a>().
+
+<h3 class=fn>void <a name="setThumbnailSize"></a>ImageSelector::setThumbnailSize ( const&nbsp;int&nbsp;maxSide )
+</h3>
+Set the maximum side (in pixel units) of a thumbnail to <em>maxSide</em>. The
+largest thumbnail will be no greater than <em>maxSide</em> x <em>maxSide</em> pixels.
+<p> <em>maxSide</em> must be greater than 0.
+<p> <p>See also <a href="#thumbnailSize">thumbnailSize</a>().
+
+<h3 class=fn>void <a name="setViewMode"></a>ImageSelector::setViewMode ( <a href="imageselector.html#ViewMode-enum">ViewMode</a>&nbsp;mode )
+</h3>
+Set the view mode to <em>mode</em>.
+<p> See <a href="#ViewMode-enum">ImageSelector::ViewMode</a> for a listing of supported modes.
+<p> First availability: Qtopia 2.1
+<p> <p>See also <a href="#viewMode">viewMode</a>().
+
+<h3 class=fn>void <a name="showImageView"></a>ImageSelector::showImageView ( bool&nbsp;show, bool&nbsp;fullscreen = false )
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<h3 class=fn>int <a name="thumbnailSize"></a>ImageSelector::thumbnailSize () const
+</h3>
+Return the current maximum side (in pixel units) of a thumbnail.
+<p> <p>See also <a href="#setThumbnailSize">setThumbnailSize</a>().
+
+<h3 class=fn><a href="imageselector.html#ViewMode-enum">ViewMode</a> <a name="viewMode"></a>ImageSelector::viewMode () const
+</h3>
+Return the current view mode.
+<p> See <a href="#ViewMode-enum">ImageSelector::ViewMode</a> for a listing of supported modes.
+<p> First availability: Qtopia 2.1
+<p> <p>See also <a href="#setViewMode">setViewMode</a>().
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

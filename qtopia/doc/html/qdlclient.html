@@ -1,0 +1,154 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia2/qdl.cpp:814 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QDLClient Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QDLClient Class Reference</h1>
+
+<p>The QDLClient class provides a set of links and communication with a data source.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qdl-h.html">qtopia/qdl.h</a>&gt;</tt>
+<p>Inherited by <a href="qdlwidgetclient.html">QDLWidgetClient</a>.
+<p><a href="qdlclient-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QDLClient"><b>QDLClient</b></a> ( QObject&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name )</li>
+<li class=fn>bool <a href="#isRequestActive"><b>isRequestActive</b></a> () const</li>
+<li class=fn>QDLLink <a href="#link"><b>link</b></a> ( uint&nbsp;lid ) const</li>
+<li class=fn>QMap&lt;uint, QDLLink&gt; <a href="#links"><b>links</b></a> () const</li>
+<li class=fn>uint <a href="#count"><b>count</b></a> () const</li>
+<li class=fn>virtual void <a href="#addLink"><b>addLink</b></a> ( const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</li>
+<li class=fn>virtual void <a href="#setLink"><b>setLink</b></a> ( uint&nbsp;lid, const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</li>
+<li class=fn>virtual void <a href="#removeLink"><b>removeLink</b></a> ( uint&nbsp;lid )</li>
+<li class=fn>QString <a href="#hint"><b>hint</b></a> () const</li>
+<li class=fn>void <a href="#setHint"><b>setHint</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;hint )</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>virtual void <a href="#clear"><b>clear</b></a> ()</li>
+<li class=fn>virtual void <a href="#verifyLinks"><b>verifyLinks</b></a> ()</li>
+<li class=fn>void <a href="#requestLink-2"><b>requestLink</b></a> ( QWidget&nbsp;*&nbsp;parent )</li>
+<li class=fn>void <a href="#requestLink"><b>requestLink</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;channel )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The QDLClient class provides a set of links and communication with a data source.
+<p> A QDLClient contains a set of links and handles communication with a data source.
+<p> A single client can have an unlimited number of links. To load and save links to and from a client
+you can use the utility functions <a href="qdl.html#loadLinks">QDL::loadLinks</a>() and <a href="qdl.html#saveLinks">QDL::saveLinks</a>() respectively.
+<p> This class operates independently of any other object. The subclass <a href="qdlwidgetclient.html">QDLWidgetClient</a> extends 
+this class to operate on a widget and its text dependently.
+<p> <p>See also <a href="qdlwidgetclient.html">QDLWidgetClient</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<p> 
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QDLClient"></a>QDLClient::QDLClient ( QObject&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name )
+</h3>
+Constructs a QDLClient. <em>parent</em> and <em>name</em> are passed on to QObject.
+
+<h3 class=fn>void <a name="addLink"></a>QDLClient::addLink ( const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
+</h3>
+Adds <em>newLink</em> to the client. A new link identifier is generated.
+
+<p>Reimplemented in <a href="qdlwidgetclient.html#addLink">QDLWidgetClient</a>.
+<h3 class=fn>void <a name="clear"></a>QDLClient::clear ()<tt> [virtual slot]</tt>
+</h3>
+Clears all links in the client.
+
+<h3 class=fn>uint <a name="count"></a>QDLClient::count () const
+</h3>
+Returns the number of links in the client.
+
+<h3 class=fn>QString <a name="hint"></a>QDLClient::hint () const
+</h3>
+Returns the request hint for this client.
+<p> Subclasses may override this function if they wish to dynamically determine a hint.
+<p> <p>See also <a href="qdlwidgetclient.html#hint">QDLWidgetClient::hint</a>().
+
+<h3 class=fn>bool <a name="isRequestActive"></a>QDLClient::isRequestActive () const
+</h3>
+Returns TRUE if a request for links is active, otherwise returns FALSE.
+
+<h3 class=fn><a href="qdllink.html">QDLLink</a> <a name="link"></a>QDLClient::link ( uint&nbsp;lid ) const
+</h3>
+Returns the link specified by the link identifier <em>lid</em>.
+If no such link exists a null link is returned. 
+
+<h3 class=fn>QMap&lt;uint, QDLLink&gt; <a name="links"></a>QDLClient::links () const
+</h3>
+Returns a link identifier to <a href="qdllink.html">QDLLink</a> map of all links in the client.
+
+<h3 class=fn>void <a name="removeLink"></a>QDLClient::removeLink ( uint&nbsp;lid )<tt> [virtual]</tt>
+</h3> 
+Removes the link specified by the link identifier <em>lid</em>.
+
+<p>Reimplemented in <a href="qdlwidgetclient.html#removeLink">QDLWidgetClient</a>.
+<h3 class=fn>void <a name="requestLink"></a>QDLClient::requestLink ( const&nbsp;QString&nbsp;&amp;&nbsp;channel )<tt> [slot]</tt>
+</h3>
+Sends a request for links to the data source listening on <em>channel</em>.
+
+<h3 class=fn>void <a name="requestLink-2"></a>QDLClient::requestLink ( QWidget&nbsp;*&nbsp;parent )<tt> [slot]</tt>
+</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Prompts the user to select a data source application, determines source
+application's channel
+based on the user's selection, and then passes it to the above function.
+<em>parent</em> is the parent of the dialog used.
+
+<h3 class=fn>void <a name="setHint"></a>QDLClient::setHint ( const&nbsp;QString&nbsp;&amp;&nbsp;hint )
+</h3>
+Sets the request hint for the client to <em>hint</em>.
+A hint is sent to a data source as part of the request to help it determine 
+pertinent data.
+<p> A hint can only be used with a QDLClient by calling <a href="#setHint">setHint</a>() explicitly.
+<p> <p>See also <a href="qdlwidgetclient.html">QDLWidgetClient</a>.
+
+<h3 class=fn>void <a name="setLink"></a>QDLClient::setLink ( uint&nbsp;lid, const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
+</h3> 
+Sets the link specified by the link identifier <em>lid</em> to <em>newLink</em>.
+If no link for <em>lid</em> currently exists, it is created.
+
+<p>Reimplemented in <a href="qdlwidgetclient.html#setLink">QDLWidgetClient</a>.
+<h3 class=fn>void <a name="verifyLinks"></a>QDLClient::verifyLinks ()<tt> [virtual slot]</tt>
+</h3>
+Verifies that all links in the client are valid. The default implementation does nothing,
+This function is called from <a href="qdl.html#saveLinks">QDL::saveLinks</a>().
+<p> Subclasses that wish to perform any verification processing should override this function.
+
+<p>Reimplemented in <a href="qdlwidgetclient.html#verifyLinks">QDLWidgetClient</a>.
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,14 @@
+****************************************************************************
+*                   Qt/Embedded-specific changes                           *
+****************************************************************************
+
+- Add keypad navigation.  Allows navigation of all controls using only
+  arrows, Key_Select and Key_Back keys.
+
+- Add shared pixmap caching to QPixmapCache.  Pixmaps are now shared between
+  processes.
+
+- Rendered font data is now also shared between processes.
+
+- Make showFullScreen() display the window on top of all others, except
+  its children.

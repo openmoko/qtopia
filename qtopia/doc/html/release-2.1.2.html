@@ -1,0 +1,149 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/releasenotes.doc:170 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia - 2.1.2 Release Notes</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia - 2.1.2 Release Notes</h1>
+
+ 
+
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Bug fixes
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The Qtopia 2.1.2 release is a maintenance release and includes the Qtopia Core, PDA and Phone Editions. 
+<p> <h2> Bug fixes
+</h2>
+<a name="2"></a><p> The following bugs have been fixed in Qtopia 2.1.2:
+<p> <ul>
+<li> [Language] Change Qtopia's default font when a new language is loaded.
+<li> [Language] Much improved language support.
+<li> [Themeing] Significantly improve support for themeing by ensuring that all used pixmaps are available to be edited without need to change source code.
+<li> [configure] Enable automatic language detection for source packages.
+<li> [qtopia] Fixed/improved layout in some dialogs.
+<li> [qtopia] avoid warnings when an img is null.
+<li> [qtopia] Enable space and OK in non-phone mode for selecting an event.
+<li> [qtopia] Allow pseudo semi-transparent backgrounds in all applications.
+<li> [qtopia] fixed a segfault when $QPEDIR is not set correctly.
+<li> [qtopia] Avoid crashing when clicking on an empty menu.
+<li> [qtopia] Show a wait icon while network access is being performed.
+<li> [Calculator] Fix calculation of (-27) root 3.
+<li> {Calculator] Fixed tan operator when using Gradians measure.
+<li> [Calculator] Prevent a crash when changing to fraction plug-in.
+<li> [Calculator] Fix a font problem for languages like Chinese and Japanese.
+<li> [Calculator] Correct division by zero behavior for fraction and integer mode.
+<li> [Calculator] Add missing desktop files for calculator plug-ins.
+<li> [Calculator] Remove the limits of integer data type. Fraction calculations use longlong type.
+<li> [Calculator] Converts the data type of the memory to the data type of the engine.
+<li> [Calculator] Fixes a crash in the fraction plug-in after "out of range error".
+<li> [BatteryMonitor] Improved BatteryMonitor status.
+<li> [Messages] Speed improvement (~20%) by making ImapProtocol::parseFetch more asynchronous. 
+<li> [Messages] Fixed a crash when having a completely empty email list.
+<li> [Messages] Delete all mails retrieved from an account when deleting the account and delete the info for this account in the settings file.
+<li> [Messages] Speed up retrieval of large messages by an order of magnitude (10x).
+<li> [Contacts] Contacts dropped any names after a third name; they are now added on as part of the last name. 
+<li> [Contacts] Support the sending of vCard via SMS from Contacts.
+<li> [Contacts] Modified the contact editing dialog to delete a contact if all details are removed.
+<li> [Contacts] Stopped Phone Edition's address book from destroying PDA Edition's information display settings.
+<li> [Call History] Get day of month correct in call history.
+<li> [Call OPtions] Make it easier to add new/fewer sections to the Call Options setting application.
+<li> [Themeing] Add name attribute to background tag in theme.
+<li> [Callscreen] Sync callscreen and homescreen background: Previously callscreen had no background image.
+<li> [performance] Optimized performance by more efficient scaling of images.
+<li> [performance] Optimize performance of fileinfolist.
+<li> [performance] Optimize performance by not scaling the keypad images.
+<li> [performance] Improve performance by making qcop startup quicker (disabling/delaying GUI features).
+<li> [performance] Optimised translation loading.
+<li> [Sound] Extend support for CUSTOM_SOUND_ALARM function to multiple target devices.
+<li> [Sound] Allow setting profile volume to also affect volume of other non-priority sounds.
+<li> [Phone] Add "+EXT ERROR" as one of the recognised "ERROR" responses,
+<li> [Phone] Improve suppport for supplementary services.
+<li> [Phone] Add user interface support for the preferred operator list.
+<li> [Phone] Parse numeric format operator names from AT+CPOL correctly.
+<li> [Phone] Fix: backspace implicitly deleted an existing operator.
+<li> [Phone] Added functionality to convert numeric preferred operator identifiers into real operator names.
+<li> [Phone] Improved support for setPassword and clearPassword functions in combination with SIM PIN2.
+<li> [Phone] Added query/modify types for AT+CPOL, AT+CPLS, and AT+COPN.
+<li> [Phone] Hook up the speed dial "dial voice number" feature to the AT+CSVM command in the phone settings app and the server.
+<li> [Phone] Add missing query/modify/notification types for advice of charge, price per unit, accumulated call meter, etc.
+<li> [Phone] Add support for unsolicited advice of charge notifications, and better explain how "AdviceOfCharge" should be used.
+<li> [Phone] Added new options for CLCK and CPWD from SM 27.007.
+<li> [Phone] Added a vendor-specific facility to modify the GPRS AT commands when a data connection is started.
+<li> [Phone] Added extra commands to initialize GPRS sessions.
+<li> [Phone] Send "AT+C<n><a href="system-customization.html#MMS">MMS</a></n>=1" before transmitting multiple SMS messages to keep the radio link open for faster transmission.
+<li> [Phone] Repeat the AT+CNMI command up to 5 times, because some modems don't properly execute it just after AT+CPIN due to "SIM busy".
+<li> [Phone] Add a vendor option for empty <index> field in the AT+CPBW command.
+<li> [Phone] Use the standard 27.007 AT+CSIL command instead of the Ericsson-specific AT*ESIL command.
+<li> [Phone] Fix up "decodeSimCommand" and "encodeSimResponse" to match the <a href="gsm.html">GSM</a> 11.14 specification better.
+<li> [Phone] Reordered execution of AT%SATC, AT%CPI and AT+CFUN.
+<li> [Phone] No longer strip the '+' from international numbers in formatForwarding.
+<li> [Phone] Added a "SMSFull" notification, based on CIND notifications.
+<li> [Phone] Add support for +CIEV notifications of indicator changes, especially signal quality and battery charge.
+<li> [Phone] Add support for CSMI multiplexing.
+<li> [Phone] Use the AT+CSVM command to get and set the voice mail number.
+<li> [Phone] Add support for SS and USSD notifications.
+<li> [Phone] Added routines to encode and decode raw SIM toolkit packets, where the modem doesn't provide any decoding support of its own.
+<li> [Phone] Use SMS_Address_Unknown instead of SMS_Address_National for non-'+' addresses, because some networks are picky.
+<li> [Phone] Added phonevendor plug-in support
+<li> [Phone] Fixed a crash after pressing p or w at the call screen.
+<li> [Phone] Fix a crash when user removes last broadcast channel.
+<li> [libqpe] Fix a font problem in PhoneDecoration where the window title wasn't properly shown in Chinese due to static use of Helvetica.
+<li> [libqpe] Comments added to TimeStringFormat in order to give the translator a better understanding what he's translating.
+<li> [Qpe-server] Enforce translation of previously untranslated default button names.
+<li> [Qpe-server] If the BatteryMonitor is receiving the battery status via the modem this fix will ensure that the battery widget changes to charging mode when the modem is powered by an external power source. TimerEvents will be checked for their validity.
+<li> [Qpe-server] Avoids that the server kills an application that has been terminated by lazy application shutdown (this could happen if the server is in critical memory condition)
+<li> [Plug-in Manager] Load the correct name and comment entry in desktop files for plug-ins.
+<li> [libqtopia1] Fixes the missing translation for name of the month in Datepicker. This problem is not obvious in languages which use the latin alphabet.
+<li> [libqtopia2] Optimizes the use of available space for speeddial dialog.
+<li> [Snake] Fix incorrect font usage which prevents Asian languages from being properly shown.
+<li> [QAsteriods] Fix incorrect font usage which prevents Asian languages from being properly shown.
+<li> [Parashoot] Fix incorrect font usage which prevents Asian languages from being properly shown.
+<li> [Solitaire] Fix incorrect font usage which prevents Asian languages from being properly shown.
+<li> [Worldtime] Fix a font problem and clean up translation code.
+<li> [Today] Convert old-style translation in desktop files to new style. Now the Plug-in Manager shows the correct (and translated) description for all today plug-ins.
+<li> [Applets] Convert old-style translation in desktop files to new style. Now the Plug-in Manager shows the correct (and translated) description for all applets.
+<li> [Inputmethod plug-ins] Convert old-style translation of desktop files to new style. Now the Plug-in Manager shows the correct (and translated) description for all inputmethod plug-ins.
+<li> [PhoneProfile-config file] String change that prevented that Outdoor was not translated in ringprofiles application.
+<li> [FirstUse] Fixes the incorrect display of translated time zone names.
+<li> [FirstUse] Reload default font for each language (as stated in FontMap).
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

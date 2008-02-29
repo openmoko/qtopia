@@ -1,0 +1,9 @@
+Files: lib/fonts/unifont_160_50_t10.qpf
+Priority: required
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: 1.0.0-8
+Description: GNU UniFont
+ A full Unicode font

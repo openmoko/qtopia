@@ -1,0 +1,125 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/requirements/applications/camera.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>&lt;b&gt;Camera&lt;/b&gt; Specification</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center><b>Camera</b> Specification</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Features
+</a>
+<ul>
+<li><a href="#1-1"> Supported Formats
+</a>
+<li><a href="#1-2"> Take Photo
+</a>
+<li><a href="#1-3"> View Recent Photo
+</a>
+<li><a href="#1-4"> Browse Photos
+</a>
+<li><a href="#1-5"> Edit Photo
+</a>
+<li><a href="#1-6"> Delete Photo
+</a>
+<li><a href="#1-7"> Photo Identifier
+</a>
+<li><a href="#1-8"> Send Photo
+</a>
+<li><a href="#1-9"> Adjust Camera Settings
+</a>
+</ul>
+<li><a href="#2"> Dependencies
+</a>
+<ul>
+<li><a href="#2-1"> Integrated Camera
+</a>
+<li><a href="#2-2"> Pictures
+</a>
+<li><a href="#2-3"> Contacts
+</a>
+<li><a href="#2-4"> Messages
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> The <b>Camera</b> application allows the user to take photos using an integrated camera. In addition to this the user is able to quickly view recent photos, browse all photos, edit photos, take photos for contacts, send photos, and adjust camera settings.
+<p> <h2> Features
+</h2>
+<a name="1"></a><p> <h3> Supported Formats
+</h3>
+<a name="1-1"></a><p> <b>Camera</b> supports the JPEG image format.
+<p> <h3> Take Photo
+</h3>
+<a name="1-2"></a><p> The user is able to take a photo using an integrated camera and preview the photo using the viewfinder.
+<p> <h3> View Recent Photo
+</h3>
+<a name="1-3"></a><p> The user is able to quickly access and view the five most recent photos.
+<p> <h3> Browse Photos
+</h3>
+<a name="1-4"></a><p> The user is able to browse through all photos taken by <b>Camera</b>. This service is provided by the <b>Pictures</b> application. See <a href="req-pictures.html">Pictures</a> for more detail.
+<p> <h3> Edit Photo
+</h3>
+<a name="1-5"></a><p> The user is able to rotate, crop and adjust the brightness of photos taken by <b>Camera</b>. This service is provided by the <b>Pictures</b> application. See <a href="req-pictures.html">Pictures</a> for more detail.
+<p> <h3> Delete Photo
+</h3>
+<a name="1-6"></a><p> The user is able to delete photos taken by <b>Camera</b>.
+<p> <h3> Photo Identifier
+</h3>
+<a name="1-7"></a><p> The user is able to take a photo to be used as an identifier for a contact. This service is provided by the <b>Contacts</b> application. See <a href="req-contacts.html">Contacts</a> for more detail.
+<p> <h3> Send Photo
+</h3>
+<a name="1-8"></a><p> The user is able to send photos via <a href="system-customization.html#MMS">MMS</a>. This service is provided by the <b>Messages</b> application. See <a href="req-messages.html">Messages</a> for more detail
+<p> <h3> Adjust Camera Settings
+</h3>
+<a name="1-9"></a><p> The user is able to adjust the capture settings of photos and to adjust the resolution, quality and storage location of the capture.
+<p> <h2> Dependencies
+</h2>
+<a name="2"></a><p> <h3> Integrated Camera
+</h3>
+<a name="2-1"></a><p> <b>Camera</b> requires the device be equipped with an integrated camera with Video4Linux support in order to function.
+<p> <h3> Pictures
+</h3>
+<a name="2-2"></a><p> <b>Camera</b> uses services provided by <b>Pictures</b> for browsing and editing photos.
+<p> <h3> Contacts
+</h3>
+<a name="2-3"></a><p> <b>Camera</b> uses services provided by <b>Contacts</b> for applying photo identifiers to contacts.
+<p> <h3> Messages
+</h3>
+<a name="2-4"></a><p> <b>Camera</b> uses services provided by <b>Messages</b> for sending MMS messages.
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

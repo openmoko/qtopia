@@ -1,0 +1,11 @@
+Files: plugins/imagecodecs/libnotepad.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: PalmOS "NotePad" image reader.
+    Allows you to view NotePad images such as those
+    beamed from a PalmOS(tm) device.

@@ -1,0 +1,124 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/addressbookaccess.cpp:182 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>AddressBookIterator Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>AddressBookIterator Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The AddressBookIterator class provides iterators of AddressBookAccess.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="addressbookaccess-h.html">qtopia/pim/addressbookaccess.h</a>&gt;</tt>
+<p><a href="addressbookiterator-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#AddressBookIterator-3"><b>AddressBookIterator</b></a> ( const&nbsp;AddressBookAccess&nbsp;&amp;&nbsp;aba )</li>
+<li class=fn><a href="#AddressBookIterator-4"><b>AddressBookIterator</b></a> ( const&nbsp;AddressBookIterator&nbsp;&amp;&nbsp;it )</li>
+<li class=fn>AddressBookIterator &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;AddressBookIterator&nbsp;&amp;&nbsp;other )</li>
+<li class=fn><a href="#~AddressBookIterator"><b>~AddressBookIterator</b></a> ()</li>
+<li class=fn>bool <a href="#atFirst"><b>atFirst</b></a> () const</li>
+<li class=fn>bool <a href="#atLast"><b>atLast</b></a> () const</li>
+<li class=fn>const PimContact * <a href="#toFirst"><b>toFirst</b></a> ()</li>
+<li class=fn>const PimContact * <a href="#toLast"><b>toLast</b></a> ()</li>
+<li class=fn>const PimContact * <a href="#operator++"><b>operator++</b></a> ()</li>
+<li class=fn>const PimContact * <a href="#operator*"><b>operator*</b></a> () const</li>
+<li class=fn>const PimContact * <a href="#current"><b>current</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The AddressBookIterator class provides iterators of <a href="addressbookaccess.html">AddressBookAccess</a>.
+<p> The only way to traverse the data of an AddressBookAccess is with an
+AddressBookIterator.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="AddressBookIterator-3"></a>AddressBookIterator::AddressBookIterator ( const&nbsp;<a href="addressbookaccess.html">AddressBookAccess</a>&nbsp;&amp;&nbsp;aba )
+</h3>
+Constructs a new AddressBookIterator pointing to the start of the data in <em>aba</em>.
+
+<h3 class=fn><a name="AddressBookIterator-4"></a>AddressBookIterator::AddressBookIterator ( const&nbsp;<a href="addressbookiterator.html">AddressBookIterator</a>&nbsp;&amp;&nbsp;it )
+</h3>
+Constructs a copy of the iterator <em>it</em>.
+
+<h3 class=fn><a name="~AddressBookIterator"></a>AddressBookIterator::~AddressBookIterator ()
+</h3>
+Destroys the iterator.
+
+<h3 class=fn>bool <a name="atFirst"></a>AddressBookIterator::atFirst () const
+</h3>
+Returns TRUE if the iterator is at the first item of the data.
+Otherwise returns FALSE.
+
+<h3 class=fn>bool <a name="atLast"></a>AddressBookIterator::atLast () const
+</h3>
+Returns TRUE if the iterator is at the last item of the data.
+Otherwise returns FALSE.
+
+<h3 class=fn>const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;* <a name="current"></a>AddressBookIterator::current () const
+</h3>
+If the iterator is at a valid <a href="pimcontact.html">PimContact</a> returns a const pointer to
+the current PimContact.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;* <a name="operator*"></a>AddressBookIterator::operator* () const
+</h3>
+If the iterator is at a valid <a href="pimcontact.html">PimContact</a> returns a const pointer to
+the current PimContact.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;* <a name="operator++"></a>AddressBookIterator::operator++ ()
+</h3>
+Sets the iterator to the next item of the data.
+If the iterator is moved pass the end of the list returns 0.
+Otherwise returns a const pointer to the current <a href="pimcontact.html">PimContact</a>.
+
+<h3 class=fn><a href="addressbookiterator.html">AddressBookIterator</a>&nbsp;&amp; <a name="operator-eq"></a>AddressBookIterator::operator= ( const&nbsp;<a href="addressbookiterator.html">AddressBookIterator</a>&nbsp;&amp;&nbsp;other )
+</h3>
+Sets the iterator to be a copy of <em>other</em>.
+
+<h3 class=fn>const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;* <a name="toFirst"></a>AddressBookIterator::toFirst ()
+</h3>
+Sets the iterator to the first item of the data.
+If a <a href="pimcontact.html">PimContact</a> exists in the data will return a const pointer to the
+PimContact.  Otherwise returns 0.
+
+<h3 class=fn>const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;* <a name="toLast"></a>AddressBookIterator::toLast ()
+</h3>
+Sets the iterator to the last item of the data.
+If a <a href="pimcontact.html">PimContact</a> exists in the data will return a const pointer to the
+PimContact.  Otherwise returns 0.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

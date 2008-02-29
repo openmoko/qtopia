@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaColorSchemes
+Context=ColorScheme
+[Global]
+Name[]=Gray
+[Colors]
+Background=#EFEFEF
+Button=#D0D0D0
+Highlight=#707070
+AlternateBase=#EFEFEF

@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Font Factories
+[Desktop Entry]
+Name[]=Font Factories
+Comment[]=Font factories provide support for different font formats.
+Apply=QPE/System restart()

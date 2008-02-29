@@ -1,0 +1,160 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopiapim/datebookaccess.cpp:55 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DateBookAccess Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>DateBookAccess Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The DateBookAccess class provides a safe API for accessing PimEvents.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="datebookaccess-h.html">qtopia/pim/datebookaccess.h</a>&gt;</tt>
+<p><a href="datebookaccess-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#DateBookAccess"><b>DateBookAccess</b></a> ()</li>
+<li class=fn><a href="#~DateBookAccess"><b>~DateBookAccess</b></a> ()</li>
+<li class=fn>bool <a href="#editSupported"><b>editSupported</b></a> () const</li>
+<li class=fn>void <a href="#updateEvent"><b>updateEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event )</li>
+<li class=fn>void <a href="#removeEvent"><b>removeEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;ev )</li>
+<li class=fn>void <a href="#addEvent"><b>addEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;ev )</li>
+<li class=fn>void <a href="#addException"><b>addException</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date, const&nbsp;PimEvent&nbsp;&amp;&nbsp;exception )</li>
+<li class=fn>void <a href="#addException-2"><b>addException</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date )</li>
+<li class=fn>void <a href="#removeException"><b>removeException</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event, const&nbsp;PimEvent&nbsp;&amp;&nbsp;exception )</li>
+<li class=fn>void <a href="#removeException-2"><b>removeException</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date )</li>
+<li class=fn>void <a href="#removeAllExceptions"><b>removeAllExceptions</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event )</li>
+<li class=fn>PimEvent <a href="#eventForId"><b>eventForId</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#dateBookUpdated"><b>dateBookUpdated</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The DateBookAccess class provides a safe API for accessing PimEvents.
+<p> DateBookAccess provides a safe API for accessing PimEvents stored by
+Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook
+application in sync with modifications, and alerts the user of
+the library when modifications ahve been made by other applications.
+<p>See also <a href="qpepim.html">Qtopia PIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="DateBookAccess"></a>DateBookAccess::DateBookAccess ()
+</h3>
+Constructor.
+
+<h3 class=fn><a name="~DateBookAccess"></a>DateBookAccess::~DateBookAccess ()
+</h3>
+Cleans up the the DataBookAccess.
+
+<h3 class=fn>void <a name="addEvent"></a>DateBookAccess::addEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
+</h3>
+If supported will assign a new unique ID to <em>ev</em> and add the event to
+the pim data.
+<p> Adding event requires the Events service to be available.
+<p> If the event is added correctly, an addedEvent(int,PimEvent) message will be 
+sent to the QPE/PIM channel.  The event in this message can be used to determine
+the assigned ID.
+
+<h3 class=fn>void <a name="addException"></a>DateBookAccess::addException ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date, const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;exception )
+</h3>
+Adds an exception to the repeat partern of the <em>event</em>.  <em>event</em> will be suppressed from
+occuring on the <em>date</em> given, instead will occur as described by <em>exception</em>.  The date the
+<em>exception</em> occurs on need not be the same as the <em>date</em> given.
+<p> <p>See also <a href="#removeException">removeException</a>() and <a href="#removeAllExceptions">removeAllExceptions</a>().
+
+<h3 class=fn>void <a name="addException-2"></a>DateBookAccess::addException ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date )
+</h3>
+Adds an exception to the repeat partern of the <em>event</em>.  <em>event</em> will be suppressed from
+occuring on the <em>date</em> given.
+<p> <p>See also <a href="#removeException">removeException</a>() and <a href="#removeAllExceptions">removeAllExceptions</a>().
+
+<h3 class=fn>void <a name="dateBookUpdated"></a>DateBookAccess::dateBookUpdated ()<tt> [signal]</tt>
+</h3> 
+Emitted whenever the datebook is updated.
+
+<h3 class=fn>bool <a name="editSupported"></a>DateBookAccess::editSupported () const
+</h3>
+Returns TRUE if it is possible to add, remove and update events in
+the pim data.  Otherwise returns FALSE.
+<p> Adding, removing and updating events requires the Events service to be
+available
+
+<h3 class=fn><a href="pimevent.html">PimEvent</a> <a name="eventForId"></a>DateBookAccess::eventForId ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const
+</h3>
+If there exists an event with the uid <em>u</em>, return that event.
+Returns a null event if otherwise.
+<p> If <em>ok</em> is non-null, *ok is set to TRUE if the event is
+found, and FALSE if the event is not found.
+
+<h3 class=fn>void <a name="removeAllExceptions"></a>DateBookAccess::removeAllExceptions ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event )
+</h3>
+Removes all exceptions for the repeat pattern of <em>event</em>.  The exceptions
+will be replaced by the normal occurance for the repeat pattern of <em>event</em>.
+<p> <p>See also <a href="#removeException">removeException</a>() and <a href="#addException">addException</a>().
+
+<h3 class=fn>void <a name="removeEvent"></a>DateBookAccess::removeEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
+</h3>
+If supported will remove event <em>ev</em> from the pim data.
+<p> Removing events requires the Events service to be available.
+
+<h3 class=fn>void <a name="removeException"></a>DateBookAccess::removeException ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event, const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;exception )
+</h3>
+Removes the <em>exception</em> for the repeat patern of <em>event</em>.  Does not compare the
+data for the <em>exception</em> passed, rather matches the uid for the <em>exception</em> passed
+and determines if it matches an event described as an exception to the repeat pattern
+of the <em>event</em>.  The <em>exception</em> event will be replaced by a normal occurance for the
+repeat pattern of <em>event</em>.
+<p> If no exception can be matched, then this function will have no effect.
+<p> <p>See also <a href="#addException">addException</a>() and <a href="#removeAllExceptions">removeAllExceptions</a>().
+
+<h3 class=fn>void <a name="removeException-2"></a>DateBookAccess::removeException ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event, const&nbsp;QDate&nbsp;&amp;&nbsp;date )
+</h3>
+Removes the exception given by <em>date</em> for the repeat pattern of <em>event</em>.
+The exception event will be replaced by a normal occurance for the
+repeat pattern of <em>event</em>.
+<p> If there is no exception for the repeat pattern of <em>event</em> on the \date passed,
+then this function will have no effect.
+<p> <p>See also <a href="#addException">addException</a>() and <a href="#removeAllExceptions">removeAllExceptions</a>().
+
+<h3 class=fn>void <a name="updateEvent"></a>DateBookAccess::updateEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event )
+</h3>
+If supported will update <em>event</em> in the pim data.
+<p> Updating events requires the Events service to be available.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

@@ -1,0 +1,31 @@
+----------------------------------------------------------------------
+KPhone 4.1.1                           http://www.wirlab.net/kphone/
+----------------------------------------------------------------------
+
+KPhone is a SIP (Session Initiation Protocol) user agent for Linux, with
+which you can initiate VoIP (Voice over IP) connections over the Internet,
+send Instant Messages and subscribe your friends' presence information.
+
+KPhone requires various programming libraries and header files (Qt, OpenSSL
+et al) to be present in the system. KPhone has been somewhat tested on most
+of todays Linux distributions. Requirements with each distribution vary
+according to distributions' installation layout.
+
+KPhone has been tested with a multitude of SIP proxies.
+
+The original KPhone was written by Billy Biggs, current version by Pekka
+Raisio, Jouni Vuorela and Juha Heinanen at Wirlab with suggestions and
+fixes from the KPhone community around the world.
+
+This software package comes with NO warranty. You should note that by
+downloading, compling and installing it you agree to full self
+responsibility.
+
+Read INSTALL for installation instructions, and CHANGES for the latest
+additions in functionality and COPYING for the General Public License
+(GPL).
+
+More information about Wirlab available at http://www.wirlab.net/
+
+Note: "This program is released under the GPL with the additional
+exemption that compiling, linking, and/or using OpenSSL is allowed."

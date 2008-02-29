@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>Qtopia component sizes</title>
+
+<STYLE type="text/css">
+BODY { background:#FFFFFF; color:#000000; }
+TABLE { border:solid; border-spacing:0; }
+TD { padding:5; margin:0; border:solid; border-width:1; text-align:right; }
+TD.onep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#EEEEFF }
+TD.twop { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#DDDDFF }
+TD.fivep { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#CCCCFF }
+TD.tenp { padding:5; margin:0; border:solid; border-width:1; text-align:right; background:#BBBBFF }
+
+TH { background:#E0E0E0; color: #000000; padding:5; margin:0; border:solid; border-width:1; }
+</STYLE>
+
+</head>
+<body>
+<h1>Qtopia component sizes</title>
+<h2>pda: dynamic</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>20942 kb</td><td>9141 kb</td><td>8456 kb</td><td>7492 kb</td></tr>
+<tr><th>Minimal build</th><td>12048 kb</td><td>5355 kb</td><td>4956 kb</td><td>4364 kb</td></tr>
+</table>
+<p><img src="pda-dynamic.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>addressbook</th><td class=twop>570 kb</td><td class=twop>211 kb</td><td class=twop>192 kb</td><td class=twop>156 kb</td></tr>
+<tr><th>appearance</th><td>96 kb</td><td>56 kb</td><td>52 kb</td><td>40 kb</td></tr>
+<tr><th>buttons</th><td>32 kb</td><td>41 kb</td><td>40 kb</td><td>20 kb</td></tr>
+<tr><th>camera</th><td>148 kb</td><td>75 kb</td><td>68 kb</td><td>56 kb</td></tr>
+<tr><th>clock</th><td>144 kb</td><td class=onep>96 kb</td><td class=onep>92 kb</td><td class=onep>80 kb</td></tr>
+<tr><th>datebook</th><td class=twop>549 kb</td><td class=twop>229 kb</td><td class=twop>208 kb</td><td class=twop>172 kb</td></tr>
+<tr><th>fifteen</th><td>-16 kb</td><td>7 kb</td><td>8 kb</td><td>4 kb</td></tr>
+<tr><th>games</th><td class=fivep>1329 kb</td><td class=fivep>488 kb</td><td class=fivep>456 kb</td><td class=fivep>420 kb</td></tr>
+<tr><th>handwriting</th><td class=twop>477 kb</td><td class=twop>199 kb</td><td class=twop>180 kb</td><td class=twop>164 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>68 kb</td><td>45 kb</td><td>40 kb</td><td>28 kb</td></tr>
+<tr><th>handwriting_popup</th><td>124 kb</td><td>61 kb</td><td>52 kb</td><td>48 kb</td></tr>
+<tr><th>keyboard</th><td>104 kb</td><td>51 kb</td><td>48 kb</td><td>44 kb</td></tr>
+<tr><th>keypebble</th><td>128 kb</td><td>64 kb</td><td>60 kb</td><td>52 kb</td></tr>
+<tr><th>konsole</th><td>172 kb</td><td class=onep>92 kb</td><td class=onep>88 kb</td><td class=onep>76 kb</td></tr>
+<tr><th>language</th><td>72 kb</td><td>50 kb</td><td>48 kb</td><td>32 kb</td></tr>
+<tr><th>launchersettings</th><td>104 kb</td><td>60 kb</td><td>60 kb</td><td>48 kb</td></tr>
+<tr><th>mediaplayer</th><td class=tenp>2596 kb</td><td class=tenp>1378 kb</td><td class=tenp>1296 kb</td><td class=tenp>1140 kb</td></tr>
+<tr><th>mediarecorder</th><td class=onep>269 kb</td><td class=onep>114 kb</td><td class=onep>104 kb</td><td class=onep>84 kb</td></tr>
+<tr><th>mindbreaker</th><td>20 kb</td><td>44 kb</td><td>44 kb</td><td>28 kb</td></tr>
+<tr><th>minesweep</th><td>-56 kb</td><td>5 kb</td><td>8 kb</td><td>16 kb</td></tr>
+<tr><th>notes</th><td>140 kb</td><td>61 kb</td><td>56 kb</td><td>52 kb</td></tr>
+<tr><th>parashoot</th><td class=onep>229 kb</td><td class=onep>118 kb</td><td class=onep>112 kb</td><td class=onep>96 kb</td></tr>
+<tr><th>photo</th><td>128 kb</td><td>47 kb</td><td>44 kb</td><td>36 kb</td></tr>
+<tr><th>pkim</th><td class=onep>261 kb</td><td class=onep>115 kb</td><td class=onep>108 kb</td><td class=onep>84 kb</td></tr>
+<tr><th>qasteroids</th><td class=twop>604 kb</td><td class=onep>180 kb</td><td class=onep>168 kb</td><td class=onep>148 kb</td></tr>
+<tr><th>qtmail</th><td class=fivep>1054 kb</td><td class=twop>431 kb</td><td class=twop>396 kb</td><td class=twop>340 kb</td></tr>
+<tr><th>rotation</th><td>36 kb</td><td>32 kb</td><td>32 kb</td><td>12 kb</td></tr>
+<tr><th>snake</th><td>96 kb</td><td>54 kb</td><td>52 kb</td><td>40 kb</td></tr>
+<tr><th>solitaire</th><td>208 kb</td><td>91 kb</td><td>84 kb</td><td>64 kb</td></tr>
+<tr><th>sound</th><td>-24 kb</td><td>26 kb</td><td>24 kb</td><td>20 kb</td></tr>
+<tr><th>today</th><td>149 kb</td><td>69 kb</td><td>64 kb</td><td>60 kb</td></tr>
+<tr><th>todo</th><td>64 kb</td><td>49 kb</td><td>44 kb</td><td>56 kb</td></tr>
+<tr><th>uniselect</th><td>-44 kb</td><td>13 kb</td><td>12 kb</td><td>32 kb</td></tr>
+<tr><th>worldtime</th><td>60 kb</td><td>33 kb</td><td>32 kb</td><td>28 kb</td></tr>
+</table>
+<h2>pda: static</h2>
+<p><table>
+<td></td><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>Complete build</th><td>13968 kb</td><td>6275 kb</td><td>5864 kb</td><td>4976 kb</td></tr>
+<tr><th>Minimal build</th><td>7652 kb</td><td>3482 kb</td><td>3252 kb</td><td>2764 kb</td></tr>
+</table>
+<p><img src="pda-static.png">
+<p><table>
+<tr><th>Component</th><th>uncompressed</th><th>mkjffs2</th><th>mkcramfs</th><th>mksquashfs</th></tr>
+<tr><th>addressbook</th><td class=twop>434 kb</td><td class=twop>146 kb</td><td class=twop>132 kb</td><td class=onep>92 kb</td></tr>
+<tr><th>appearance</th><td>108 kb</td><td>42 kb</td><td>36 kb</td><td>24 kb</td></tr>
+<tr><th>buttons</th><td>40 kb</td><td>23 kb</td><td>20 kb</td><td>8 kb</td></tr>
+<tr><th>camera</th><td>76 kb</td><td>31 kb</td><td>28 kb</td><td>28 kb</td></tr>
+<tr><th>clock</th><td>116 kb</td><td class=onep>69 kb</td><td class=onep>64 kb</td><td class=onep>64 kb</td></tr>
+<tr><th>datebook</th><td class=twop>401 kb</td><td class=twop>152 kb</td><td class=twop>136 kb</td><td class=twop>100 kb</td></tr>
+<tr><th>fifteen</th><td>24 kb</td><td>20 kb</td><td>16 kb</td><td>-4 kb</td></tr>
+<tr><th>games</th><td class=fivep>1149 kb</td><td class=fivep>396 kb</td><td class=fivep>368 kb</td><td class=fivep>324 kb</td></tr>
+<tr><th>handwriting</th><td class=twop>316 kb</td><td class=onep>115 kb</td><td class=onep>104 kb</td><td class=onep>88 kb</td></tr>
+<tr><th>handwriting_fsim</th><td>68 kb</td><td>18 kb</td><td>12 kb</td><td>4 kb</td></tr>
+<tr><th>handwriting_popup</th><td>88 kb</td><td>28 kb</td><td>24 kb</td><td>28 kb</td></tr>
+<tr><th>keyboard</th><td>64 kb</td><td>26 kb</td><td>24 kb</td><td>20 kb</td></tr>
+<tr><th>keypebble</th><td>0 kb</td><td>0 kb</td><td>0 kb</td><td>0 kb</td></tr>
+<tr><th>konsole</th><td>0 kb</td><td>0 kb</td><td>0 kb</td><td>0 kb</td></tr>
+<tr><th>language</th><td>16 kb</td><td>8 kb</td><td>4 kb</td><td>0 kb</td></tr>
+<tr><th>launchersettings</th><td>64 kb</td><td>32 kb</td><td>28 kb</td><td>12 kb</td></tr>
+<tr><th>mediaplayer</th><td class=tenp>1991 kb</td><td class=tenp>1189 kb</td><td class=tenp>1132 kb</td><td class=tenp>988 kb</td></tr>
+<tr><th>mediarecorder</th><td>0 kb</td><td>0 kb</td><td>0 kb</td><td>0 kb</td></tr>
+<tr><th>mindbreaker</th><td>60 kb</td><td>38 kb</td><td>36 kb</td><td>24 kb</td></tr>
+<tr><th>minesweep</th><td>48 kb</td><td>19 kb</td><td>16 kb</td><td>0 kb</td></tr>
+<tr><th>notes</th><td>64 kb</td><td>16 kb</td><td>12 kb</td><td>0 kb</td></tr>
+<tr><th>parashoot</th><td class=onep>213 kb</td><td class=onep>89 kb</td><td class=onep>80 kb</td><td class=onep>68 kb</td></tr>
+<tr><th>photo</th><td>128 kb</td><td>38 kb</td><td>32 kb</td><td>28 kb</td></tr>
+<tr><th>pkim</th><td class=onep>165 kb</td><td>43 kb</td><td>36 kb</td><td>32 kb</td></tr>
+<tr><th>qasteroids</th><td class=twop>620 kb</td><td class=twop>173 kb</td><td class=twop>156 kb</td><td class=twop>136 kb</td></tr>
+<tr><th>qtmail</th><td class=fivep>806 kb</td><td class=fivep>330 kb</td><td class=fivep>304 kb</td><td class=twop>244 kb</td></tr>
+<tr><th>rotation</th><td>20 kb</td><td>13 kb</td><td>12 kb</td><td>0 kb</td></tr>
+<tr><th>snake</th><td>40 kb</td><td>22 kb</td><td>20 kb</td><td>4 kb</td></tr>
+<tr><th>solitaire</th><td class=onep>140 kb</td><td>52 kb</td><td>48 kb</td><td>36 kb</td></tr>
+<tr><th>sound</th><td>16 kb</td><td>7 kb</td><td>4 kb</td><td>-4 kb</td></tr>
+<tr><th>today</th><td>120 kb</td><td>47 kb</td><td>40 kb</td><td>20 kb</td></tr>
+<tr><th>todo</th><td class=onep>172 kb</td><td class=onep>64 kb</td><td>56 kb</td><td>44 kb</td></tr>
+<tr><th>uniselect</th><td>12 kb</td><td>6 kb</td><td>4 kb</td><td>0 kb</td></tr>
+<tr><th>worldtime</th><td>76 kb</td><td>35 kb</td><td>32 kb</td><td>20 kb</td></tr>
+</table>
+</body>
+</html>

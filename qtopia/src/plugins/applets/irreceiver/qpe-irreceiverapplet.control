@@ -1,0 +1,11 @@
+Files: plugins/applets/libirreceiverapplet.so* plugins/applets/irreceiverapplet.desktop etc/beam
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: IR applet
+ Allows the Infrared to be turned on and off,
+ and the protocols to be controlled.

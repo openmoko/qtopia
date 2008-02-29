@@ -1,0 +1,97 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/backend/categories.cpp:63 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>CategoryGroup Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>CategoryGroup Class Reference</h1>
+
+<p>The CategoryGroup class is a group of categories.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="categories-h.html">qtopia/categories.h</a>&gt;</tt>
+<p><a href="categorygroup-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn>bool <a href="#contains"><b>contains</b></a> ( int&nbsp;uid ) const</li>
+<li class=fn>bool <a href="#contains-2"><b>contains</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;label ) const</li>
+<li class=fn>const QString &amp; <a href="#label"><b>label</b></a> ( int&nbsp;uid ) const</li>
+<li class=fn>int <a href="#id"><b>id</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;label ) const</li>
+<li class=fn>QStringList <a href="#labels"><b>labels</b></a> () const</li>
+<li class=fn>QArray&lt;int&gt; <a href="#ids"><b>ids</b></a> () const</li>
+<li class=fn>QStringList <a href="#labels-2"><b>labels</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids ) const</li>
+<li class=fn>const QMap&lt;int, QString&gt; &amp; <a href="#idMap"><b>idMap</b></a> () const</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The CategoryGroup class is a group of categories.
+<p> CategoryGroup is a group of categories that is associated with an
+application or global set. Mainly it defines a map of ids to
+category labels and category labels to ids. Lookups can be done with
+labels or unique idenifiers.
+<p> This is mainly an internal class used by <a href="categories.html">Categories</a>. Categories
+does return this class in it's <a href="categories.html#appGroupMap">Categories::appGroupMap</a>() and
+<a href="categories.html#globalGroup">Categories::globalGroup</a>().
+<p> 
+
+<b>Warning:</b> Categories API will likely change for Qtopia 2.
+<p>See also <a href="qtopiadesktop.html">Qtopia Desktop Classes</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>bool <a name="contains"></a>CategoryGroup::contains ( int&nbsp;uid ) const
+</h3> Returns TRUE if <em>uid</em> is stored in this group, FALSE if not. 
+<h3 class=fn>bool <a name="contains-2"></a>CategoryGroup::contains ( const&nbsp;QString&nbsp;&amp;&nbsp;label ) const
+</h3> Returns TRUE if <em>label</em> is stored in this group, FALSE if not. 
+<h3 class=fn>int <a name="id"></a>CategoryGroup::id ( const&nbsp;QString&nbsp;&amp;&nbsp;label ) const
+</h3> Returns the uid associated with <em>label</em> or 0 if not found 
+<h3 class=fn>const QMap&lt;int, QString&gt; &amp; <a name="idMap"></a>CategoryGroup::idMap () const
+</h3> 
+<p> Returns a const reference to the id to label QMap
+
+<h3 class=fn>QArray&lt;int&gt; <a name="ids"></a>CategoryGroup::ids () const
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Returns list of ids associated with the group.
+<p> First availability: Qtopia 2.0
+
+<h3 class=fn>const QString &amp; <a name="label"></a>CategoryGroup::label ( int&nbsp;uid ) const
+</h3> Returns label associated with the <em>uid</em> or QString::null if
+not found
+
+<h3 class=fn>QStringList <a name="labels"></a>CategoryGroup::labels () const
+</h3> Returns a list of all labels stored in this group. 
+<h3 class=fn>QStringList <a name="labels-2"></a>CategoryGroup::labels ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;catids ) const
+</h3> Returns a list of all labels associated with the <em>catids</em> 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

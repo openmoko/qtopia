@@ -1,0 +1,246 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/doc/src2/buildsystem-sp.doc:1 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Qtopia Single Package System</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>Qtopia Single Package System</h1>
+
+
+<p> 
+<p> <a name="top"></a>
+<p> <!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> Overview
+</a>
+<li><a href="#3"> Build Overview
+</a>
+<ul>
+<li><a href="#3-1"> Generated Files
+</a>
+</ul>
+<li><a href="#4"> Advanced Topics
+</a>
+<ul>
+<li><a href="#4-1"> Redefining the Default Configuration
+</a>
+<li><a href="#4-2"> Shadow Building
+</a>
+</ul>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> This document describes the system used to configure and build the single-package Qtopia releases for Qtopia 2.2 and above. 
+For information on the <tt>qmake</tt> based build system used by Qtopia please refer to: <a href="buildsystem.html">Qtopia Build System</a>.
+<p> <h2> Overview
+</h2>
+<a name="2"></a><p> To build Qtopia requires three separate versions of Qt. In earlier releases of Qtopia, these packages were configured and built separately, which made the building of Qtopia rather complex.
+<p> Qtopia 2.2 introduces a single package containing all the files previously available in separate packages.
+The following table shows where the various packages are located:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Previous package <th valign="top">single package location
+<tr bgcolor="#f0f0f0"> <td valign="top">tmake-1.13.tar.gz <td valign="top">.../tmake
+<tr bgcolor="#d0d0d0"> <td valign="top">qt-embedded-2.3.11-commercial.tar.gz <td valign="top">.../qt2
+<tr bgcolor="#f0f0f0"> <td valign="top">qt-x11-2.3.2-commercial.tar.gz <td valign="top">.../qt2
+<tr bgcolor="#d0d0d0"> <td valign="top">qt-x11-commercial-3.3.0-utf8.tar.gz <td valign="top">.../dqt
+<tr bgcolor="#f0f0f0"> <td valign="top">qtopia-pda-source-2.1.2.tar.gz <td valign="top">.../qtopia
+</table></center>
+<p> The single package system simplifies package configuration by providing a scripted environment that is self-contained with no requirement to set environment variables or apply patch files. 
+<p> <h2> Build Overview
+</h2>
+<a name="3"></a><p> The first step for any build is to run the <tt>configure</tt> script.
+The script uses default configuration values unless user-defined values are provided and <a href="buildsystem-sp.html#GeneratedFiles">generates</a> a number of output files. All settings are written to a file for use by the build scripts and a <tt>Makefile</tt> is created to facilitate commands such as:
+<pre>
+    ./configure; make; make install
+</pre>
+ 
+<p> The <tt>Makefile</tt> is not complex and invokes the <tt>buildQtopiaTools</tt> scripts.  These scripts are based on the build scripts from earlier releases with the addition of functionality to obtain configuration variables from the output of <tt>configure</tt>.
+<p> The build scripts are responsible for the following tasks:
+<center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Script Name <th valign="top">Task
+<tr bgcolor="#d0d0d0">
+<td valign="top"><tt>buildQtopiaTools</tt> <td valign="top">Building Qt 2 and Qt 3
+<tr bgcolor="#f0f0f0">
+<td valign="top"><tt>buildQtopia</tt> <td valign="top">Building Qt/Embedded and Qtopia.
+</table></center>
+<p> <!-- index GeneratedFiles --><a name="GeneratedFiles"></a>
+<p> <h3> Generated Files
+</h3>
+<a name="3-1"></a><p> The <tt>configure</tt> script generates a number of files required for a variety of tasks as shown below:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">File <th valign="top">Purpose
+<tr bgcolor="#d0d0d0"> <td valign="top">config.cache <td valign="top">Sets up the package variables and stores the commandlines to use.
+<tr bgcolor="#f0f0f0"> <td valign="top">config.status <td valign="top">Indicates to <tt>configure</tt> to use values in <tt>config.cache</tt> (reconfigure).
+<tr bgcolor="#d0d0d0"> <td valign="top">setQt2Env <td valign="top">Sets up the environment to build Qt 2.
+<tr bgcolor="#f0f0f0"> <td valign="top">setDqtEnv <td valign="top">Sets up the environment to build  Qt 3.
+<tr bgcolor="#d0d0d0"> <td valign="top">setQteEnv <td valign="top">Sets up the environment to build Qt/Embedded.
+<tr bgcolor="#f0f0f0"> <td valign="top">setQpeEnv <td valign="top">Sets up the environment to build Qtopia.
+</table></center>
+<p> To reconfigure simply run:
+<pre>
+    ./config.status
+</pre>
+ 
+<p> If you would like to build things manually you can source <tt>config.cache</tt> to obtain access to the component variables and configure lines.
+<pre>
+    ./config.cache
+</pre>
+ 
+<p> Before configuring a component, you should source its environment variable. For example, to manually
+configure Qtopia using the configure line that was created by <tt>configure</tt> you would do the following.
+<pre>
+    . ./setQpeEnv
+    cd $QPEDIR
+    ./configure $QPE_CFG
+</pre>
+ 
+<p> <h2> Advanced Topics
+</h2>
+<a name="4"></a><p> <h3> Redefining the Default Configuration
+</h3>
+<a name="4-1"></a><p> Redefining the default configuration can be tedious so a facility to create a file of default configuration options is provided. 
+Simply create a file named <tt>config.defaults</tt> containing the values required for <tt>configure</tt> command line options. The <tt>configure</tt> command will look for this file and use the arguments it contains. This occurs before the arguments are processed so it is still possible to override the contents of this file.
+<p> For example, the following <tt>config.defaults</tt> file:
+<p> <pre>
+    QTE_CFG=no-keypad
+    QPE_CFG="-edition pda"
+    DEBUG=yes
+    QTOPIADESKTOP=no
+</pre>
+ 
+<p> allows you to run <tt>configure</tt> and have the same effect as running the command: 
+<pre>
+    configure -qte no-keypad -qpe '-edition pda' -debug
+</pre>
+ 
+<b>Note:</b> The variables are read by the configure script so they must make sense to it. No error checking is performed.
+<p> The variables available to override are as follows:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Variable <th valign="top">Description
+<tr bgcolor="#d0d0d0"> <td valign="top">QT2_CFG <td valign="top">Qt 2 configure line
+<tr bgcolor="#f0f0f0"> <td valign="top">DQT_CFG <td valign="top">Qt 3 configure line
+<tr bgcolor="#d0d0d0"> <td valign="top">QTE_CFG <td valign="top">Qt/Embedded configure line or a shortcut value
+<tr bgcolor="#f0f0f0"> <td valign="top">QPE_CFG <td valign="top">Qtopia configure line or a shortcut value
+<tr bgcolor="#d0d0d0"> <td valign="top">QTOPIADESKTOP 
+<td valign="top">
+<ul>
+<li> yes : indicates build Qtopia Desktop
+<li> no  : indicates do not build Qtopia Desktop
+</ul>
+<tr bgcolor="#f0f0f0"> <td valign="top">DEBUG 
+<td valign="top">
+<ul>
+<li> yes : indicates build in debug mode 
+<li> no  : indicates do not build in debug mode
+</ul>
+<tr bgcolor="#d0d0d0"> <td valign="top">PREFIX <td valign="top">Sets the <tt>-prefix=value</tt>.  However the value of <tt>-prefix=value</tt> provided on the command line will override this choice.
+<tr bgcolor="#f0f0f0"> <td valign="top">DPREFIX <td valign="top">Sets the <tt>-dprefix=value</tt>.  However the value of <tt>-dprefix=value</tt> provided on the command line will override this choice.
+<tr bgcolor="#d0d0d0"> <td valign="top">EXTRA_QTOPIA_LIB_PATH <td valign="top">Set the value of  <tt>-L=value -R=value</tt>. However the value of <tt>-L=value -R=value</tt> provided on the command line will override this choice. 
+</table></center>
+<p> <h3> Shadow Building
+</h3>
+<a name="4-2"></a><p> There is support for various types of shadow building in Qtopia.
+<p> The <tt>qt2</tt> directory supports pseudo-shadow builds of object files. They are separated
+based on desktop/embedded, release/debug, static/shared and platform/xplatform. This
+means that you can build Qt/Embedded for x86 and then recompile for ARM without having
+to run <tt>make clean</tt> first. However, the location of libqte.* is the same for all of
+these (<tt>$QPEDIR/lib/lbiqte.*</tt>) so you must forcibly remove it when you change
+configuration. For example:
+<pre>
+    cd $QPE_ROOT
+    ./configure [new qte options]
+    rm -f qtopia/lib/libqte.*
+    make qte
+</pre>
+ 
+<p> The <tt>qtopia</tt> directory also supports pseudo-shadow builds based of object files.
+However it only separates them based on release/debug and static/shared. Any other
+configuration differences can be handled by the proper shadow build support that Qtopia
+has. Also note that <tt>make cleaninstall</tt> is generally a good idea when changing
+configurations. It removes the image before installing so that no stale files are left
+behind.
+<p> An example would be the best way to demonstrate the shadow building abilities of both
+directories. Consider the following situation: Both Qt/Embedded and Qtopia are to be
+built, first for x86 then for ARM.
+<p> First, the source package is prepared for shadow building. Qtopia cannot handle the
+x86/arm split so 2 directories are created to build in. The source directory is moved
+to signal to the build system that shadow builds are taking place.
+<p> <pre>
+    cd $QPE_ROOT
+    mkdir qtopia_x86
+    mkdir qtopia_arm
+    mv qtopia qtopia_depot
+</pre>
+ 
+<p> The build for x86 happens.
+<p> <pre>
+    rm -f qtopia
+    ln -s qtopia_x86 qtopia
+    ./configure -qpe phone
+    make
+    make cleaninstall
+</pre>
+ 
+<p> The build for ARM happens.
+<p> <pre>
+    rm -f qtopia
+    ln -s qtopia_arm qtopia
+    ./configure -qpe arm-phone
+    make
+    make cleaninstall
+</pre>
+ 
+<p> The table below shows where all of the build files for x86 are.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Files <th valign="top">Location
+<tr bgcolor="#f0f0f0"> <td valign="top">Qt/Embedded object files <td valign="top">$QPE_ROOT/qt2/src/tmp/...generic...shared.../
+<tr bgcolor="#d0d0d0"> <td valign="top">Qt/Embedded library      <td valign="top">$QPE_ROOT/qtopia_x86/lib/
+<tr bgcolor="#f0f0f0"> <td valign="top">Qtopia object files      <td valign="top">$QPE_ROOT/qtopia_x86/src/.../.obj/...shared.../
+<tr bgcolor="#d0d0d0"> <td valign="top">Qtopia library           <td valign="top">$QPE_ROOT/qtopia_x86/lib/
+<tr bgcolor="#f0f0f0"> <td valign="top">Qtopia install image     <td valign="top">$QPE_ROOT/qtopia_x86/image
+</table></center>
+<p> The table below shows where all of the build files for ARM are.
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Files <th valign="top">Location
+<tr bgcolor="#d0d0d0"> <td valign="top">Qt/Embedded object files <td valign="top">$QPE_ROOT/qt2/src/tmp/...arm...shared.../
+<tr bgcolor="#f0f0f0"> <td valign="top">Qt/Embedded library      <td valign="top">$QPE_ROOT/qtopia_arm/lib/
+<tr bgcolor="#d0d0d0"> <td valign="top">Qtopia object files      <td valign="top">$QPE_ROOT/qtopia_arm/src/.../.obj/...shared.../
+<tr bgcolor="#f0f0f0"> <td valign="top">Qtopia library           <td valign="top">$QPE_ROOT/qtopia_arm/lib/
+<tr bgcolor="#d0d0d0"> <td valign="top">Qtopia install image     <td valign="top">$QPE_ROOT/qtopia_arm/image
+</table></center>
+<p> 
+<!-- eof -->
+<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

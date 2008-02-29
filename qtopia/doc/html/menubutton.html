@@ -1,0 +1,161 @@
+<!-- /home/qt/dist/qtopia/2-latest/qtopia-free-2.2.0/qtopia/src/libraries/qtopia/menubutton.cpp:40 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MenuButton Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>MenuButton Class Reference</h1>
+
+<p>The MenuButton class is a pushbutton with a menu.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="menubutton-h.html">qtopia/menubutton.h</a>&gt;</tt>
+<p><a href="menubutton-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#MenuButton"><b>MenuButton</b></a> ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn><a href="#MenuButton-2"><b>MenuButton</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;items, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )</li>
+<li class=fn>void <a href="#clear"><b>clear</b></a> ()</li>
+<li class=fn>int <a href="#currentItem"><b>currentItem</b></a> () const</li>
+<li class=fn>QString <a href="#currentText"><b>currentText</b></a> () const</li>
+<li class=fn>void <a href="#insertItems"><b>insertItems</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;items )</li>
+<li class=fn>void <a href="#insertItem"><b>insertItem</b></a> ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text = QString::null )</li>
+<li class=fn>void <a href="#insertItem-2"><b>insertItem</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+<li class=fn>void <a href="#insertSeparator"><b>insertSeparator</b></a> ()</li>
+<li class=fn>void <a href="#setLabel"><b>setLabel</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;label )</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>void <a href="#select-2"><b>select</b></a> ( int&nbsp;s )</li>
+<li class=fn>void <a href="#select"><b>select</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#selected-2"><b>selected</b></a> ( int&nbsp;index )</li>
+<li class=fn>void <a href="#selected"><b>selected</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The MenuButton class is a pushbutton with a menu.
+<p> When the user presses the menubutton's pushbutton, the menu pops up.
+A menu is composed of menu items each of which has a string label,
+and optionally an icon.
+<p> The index of the item that the user's input device (e.g. stylus) is
+pointing at is the <a href="#currentItem">currentItem</a>(), whose text is available using
+<a href="#currentText">currentText</a>().
+<p> Menu items are inserted with the <a href="#MenuButton">constructor</a>, <a href="#insertItem">insertItem</a>() or <a href="#insertItems">insertItems</a>(). Separators are
+inserted with <a href="#insertSeparator">insertSeparator</a>(). All the items in the menu can be
+removed by calling <a href="#clear">clear</a>().
+<p> Items can be selected programmatically using <a href="#select">select</a>(). When a menu
+item is selected (programmatically or by the user), the <a href="#selected">selected</a>()
+signal is emitted.
+<p> 
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="MenuButton"></a>MenuButton::MenuButton ( QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs an empty MenuButton.
+The standard <em>parent</em> an <em>name</em> arguments are passed to the base class.
+<p> <p>See also <a href="#insertItem">insertItem</a>() and <a href="#insertItems">insertItems</a>().
+
+<h3 class=fn><a name="MenuButton-2"></a>MenuButton::MenuButton ( const&nbsp;QStringList&nbsp;&amp;&nbsp;items, QWidget&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name = 0 )
+</h3>
+Constructs a MenuButton. A menu item is created (see <a href="#insertItem">insertItem</a>()
+and <a href="#insertItems">insertItems</a>()) for each string in the <em>items</em> string list. The
+standard <em>parent</em> an <em>name</em> arguments are passed to the base
+class.
+
+<h3 class=fn>void <a name="clear"></a>MenuButton::clear ()
+</h3>
+Removes all the menu items from the button and menu.
+
+<h3 class=fn>int <a name="currentItem"></a>MenuButton::currentItem () const
+</h3>
+Returns the index position of the current item.
+
+<h3 class=fn>QString <a name="currentText"></a>MenuButton::currentText () const
+</h3>
+Returns the label text of the current item.
+
+<h3 class=fn>void <a name="insertItem"></a>MenuButton::insertItem ( const&nbsp;QIconSet&nbsp;&amp;&nbsp;icon, const&nbsp;QString&nbsp;&amp;&nbsp;text = QString::null )
+</h3>
+Inserts a menu item with the icon <em>icon</em> and label <em>text</em> into
+the menu.
+<p> <p>See also <a href="#insertItems">insertItems</a>().
+
+<h3 class=fn>void <a name="insertItem-2"></a>MenuButton::insertItem ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Inserts a menu item with the label <em>text</em> into the menu.
+<p> <p>See also <a href="#insertItems">insertItems</a>().
+
+<h3 class=fn>void <a name="insertItems"></a>MenuButton::insertItems ( const&nbsp;QStringList&nbsp;&amp;&nbsp;items )
+</h3>
+A menu item is created (see <a href="#insertItem">insertItem</a>()) for each string in the <em>items</em> string list. If any string is "--" a separator (see
+<a href="#insertSeparator">insertSeparator</a>()) is inserted in its place.
+
+<h3 class=fn>void <a name="insertSeparator"></a>MenuButton::insertSeparator ()
+</h3>
+Inserts a separator into the menu.
+<p> <p>See also <a href="#insertItems">insertItems</a>().
+
+<h3 class=fn>void <a name="select"></a>MenuButton::select ( const&nbsp;QString&nbsp;&amp;&nbsp;s )<tt> [slot]</tt>
+</h3>
+Selects the items with label text <em>s</em>.
+
+<h3 class=fn>void <a name="select-2"></a>MenuButton::select ( int&nbsp;s )<tt> [slot]</tt>
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> Selects the item at index position <em>s</em>.
+
+<h3 class=fn>void <a name="selected"></a>MenuButton::selected ( const&nbsp;QString&nbsp;&amp;&nbsp;text )<tt> [signal]</tt>
+</h3>
+
+<p> This signal is emitted when the item with the label <em>text</em> is selected.
+
+<h3 class=fn>void <a name="selected-2"></a>MenuButton::selected ( int&nbsp;index )<tt> [signal]</tt>
+</h3>
+This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+<p> This signal is emitted when the item at position <em>index</em> is selected.
+
+<h3 class=fn>void <a name="setLabel"></a>MenuButton::setLabel ( const&nbsp;QString&nbsp;&amp;&nbsp;label )
+</h3>
+Sets the menubutton's label. If <em>label</em> is empty, the
+current item text is displayed, otherwise <em>label</em> should contain
+"%1", which will be replaced by the current item text.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

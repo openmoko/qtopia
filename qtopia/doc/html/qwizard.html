@@ -1,0 +1,241 @@
+<!-- /home/qt/dev/qt/2.3/src/dialogs/qwizard.cpp:54 -->
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QWizard Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="../pics/dochead.png" border="0"></a><br>
+<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
+   <a href="index.html">Home</a>
+ - <a href="classes.html">Classes</a>
+ - <a href="hierarchy.html">Hierachy</a>
+ - <a href="annotated.html">Annotated</a>
+ - <a href="functions.html">Functions</a>
+ - <a href="all_qtopia_licenses.html">Licenses</a>
+ - <a href="references.html">Reference</a>
+</td>
+<td align="right" valign="top">
+  <img height="100" width="100" src="../pics/qpelogo.png" align="top" border="0">
+</td>
+</tr>
+</table><h1 align=center>QWizard Class Reference</h1>
+
+<p>The QWizard class provides a framework for easily writing wizards.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qwizard-h.html">qtopia/qwizard.h</a>&gt;</tt>
+<p><a href="qwizard-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li class=fn><a href="#QWizard"><b>QWizard</b></a> ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = FALSE, WFlags&nbsp;f = 0 )</li>
+<li class=fn><a href="#~QWizard"><b>~QWizard</b></a> ()</li>
+<li class=fn>virtual void <a href="#addPage"><b>addPage</b></a> ( QWidget&nbsp;*&nbsp;page, const&nbsp;QString&nbsp;&amp;&nbsp;title )</li>
+<li class=fn>virtual void <a href="#removePage"><b>removePage</b></a> ( QWidget&nbsp;*&nbsp;page )</li>
+<li class=fn>QString <a href="#title"><b>title</b></a> ( QWidget&nbsp;*&nbsp;page ) const</li>
+<li class=fn>void <a href="#setTitle"><b>setTitle</b></a> ( QWidget&nbsp;*&nbsp;page, const&nbsp;QString&nbsp;&amp;&nbsp;t )</li>
+<li class=fn>virtual void <a href="#showPage"><b>showPage</b></a> ( QWidget&nbsp;*&nbsp;page )</li>
+<li class=fn>QWidget * <a href="#currentPage"><b>currentPage</b></a> () const</li>
+<li class=fn>QWidget * <a href="#page"><b>page</b></a> ( int&nbsp;pos ) const</li>
+<li class=fn>int <a href="#pageCount"><b>pageCount</b></a> () const</li>
+<li class=fn>virtual bool <a href="#appropriate"><b>appropriate</b></a> ( QWidget&nbsp;*&nbsp;w ) const</li>
+<li class=fn>virtual void <a href="#setAppropriate"><b>setAppropriate</b></a> ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )</li>
+<li class=fn>QPushButton * <a href="#backButton"><b>backButton</b></a> () const</li>
+<li class=fn>QPushButton * <a href="#nextButton"><b>nextButton</b></a> () const</li>
+<li class=fn>QPushButton * <a href="#finishButton"><b>finishButton</b></a> () const</li>
+<li class=fn>QPushButton * <a href="#cancelButton"><b>cancelButton</b></a> () const</li>
+<li class=fn>QPushButton * <a href="#helpButton"><b>helpButton</b></a> () const</li>
+</ul>
+<h2>Public Slots</h2>
+<ul>
+<li class=fn>virtual void <a href="#setBackEnabled"><b>setBackEnabled</b></a> ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )</li>
+<li class=fn>virtual void <a href="#setNextEnabled"><b>setNextEnabled</b></a> ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )</li>
+<li class=fn>virtual void <a href="#setFinishEnabled"><b>setFinishEnabled</b></a> ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )</li>
+<li class=fn>virtual void <a href="#setHelpEnabled"><b>setHelpEnabled</b></a> ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )</li>
+<li class=fn>virtual void setFinish ( QWidget *, bool ) &nbsp;<em>(obsolete)</em></li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li class=fn>void <a href="#helpClicked"><b>helpClicked</b></a> ()</li>
+<li class=fn>void <a href="#selected"><b>selected</b></a> ( const QString &amp; )</li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li class=fn>virtual void <a href="#layOutButtonRow"><b>layOutButtonRow</b></a> ( QHBoxLayout&nbsp;*&nbsp;layout )</li>
+<li class=fn>virtual void <a href="#layOutTitleRow"><b>layOutTitleRow</b></a> ( QHBoxLayout&nbsp;*&nbsp;layout, const&nbsp;QString&nbsp;&amp;&nbsp;title )</li>
+</ul>
+<h2>Protected Slots</h2>
+<ul>
+<li class=fn>virtual void <a href="#back"><b>back</b></a> ()</li>
+<li class=fn>virtual void <a href="#next"><b>next</b></a> ()</li>
+<li class=fn>virtual void <a href="#help"><b>help</b></a> ()</li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+<p> 
+
+<p> The QWizard class provides a framework for easily writing wizards.
+<p> A wizard is a dialog that consists of a sequential number of steps,
+each consisting of a single page.  QWizard provides a title for each
+page, and "Next", "Back", "Finish", "Cancel" and "Help" buttons, as
+appropriate.
+<p> <p>See also 
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QWizard"></a>QWizard::QWizard ( QWidget&nbsp;*&nbsp;parent = 0, const&nbsp;char&nbsp;*&nbsp;name = 0, bool&nbsp;modal = FALSE, WFlags&nbsp;f = 0 )
+</h3>  Constructs an empty wizard dialog. 
+<h3 class=fn><a name="~QWizard"></a>QWizard::~QWizard ()
+</h3> Destructs the object and frees any allocated resources, including,
+of course, all pages and controllers.
+
+<h3 class=fn>void <a name="addPage"></a>QWizard::addPage ( QWidget&nbsp;*&nbsp;page, const&nbsp;QString&nbsp;&amp;&nbsp;title )<tt> [virtual]</tt>
+</h3>  Adds <em>page</em> to the end of the wizard, titled <em>title</em>.
+
+<h3 class=fn>bool <a name="appropriate"></a>QWizard::appropriate ( QWidget&nbsp;*&nbsp;w ) const<tt> [virtual]</tt>
+</h3>  This virtual function returns TRUE if <em>w</em> is appropriate for
+display in the current context of the wizard, and FALSE if QWizard
+should go on.
+<p> It is called when the Next button is clicked.
+<p> <b>Warning:</b> The last page of a wizard will be displayed if nothing else wants
+to, and the Next button was enabled when the user clicked.
+<p> The default implementation returns whatever was set using
+<a href="#setAppropriate">setAppropriate</a>().  The ultimate default is TRUE.
+
+<h3 class=fn>void <a name="back"></a>QWizard::back ()<tt> [virtual protected slot]</tt>
+</h3>
+Called when the user clicks the Back button, this function shows
+the page which the user saw prior to the current one.
+
+<h3 class=fn>QPushButton * <a name="backButton"></a>QWizard::backButton () const
+</h3>
+Returns the Back button of the dialog.
+<p> By default, this button is connected to the <a href="#back">back</a>()
+slot, which is virtual.
+
+<h3 class=fn>QPushButton * <a name="cancelButton"></a>QWizard::cancelButton () const
+</h3>
+Returns the Cancel button of the dialog.
+<p> By default, this button is connected to the QDialog::reject() slot,
+which is virtual so you may reimplement it in a QWizard subclass.
+
+<h3 class=fn>QWidget * <a name="currentPage"></a>QWizard::currentPage () const
+</h3>  Returns a pointer to the page currently being displayed by the
+wizard.  The wizard does its best to make sure that this value is
+never 0, but if you try hard enough it can be.
+
+<h3 class=fn>QPushButton * <a name="finishButton"></a>QWizard::finishButton () const
+</h3>
+Returns the Finish button of the dialog.
+<p> By default, this button is connected to the QDialog::accept() slot,
+which is virtual so you may reimplement it in a QWizard subclass.
+
+<h3 class=fn>void <a name="help"></a>QWizard::help ()<tt> [virtual protected slot]</tt>
+</h3>  This slot either makes the wizard help you, if it can.  The only
+way it knows is to emit the <a href="#helpClicked">helpClicked</a>() signal.
+
+<h3 class=fn>QPushButton * <a name="helpButton"></a>QWizard::helpButton () const
+</h3>
+Returns the Help button of the dialog.
+<p> By default, this button is connected to the <a href="#help">help</a>() slot.
+
+<h3 class=fn>void <a name="helpClicked"></a>QWizard::helpClicked ()<tt> [signal]</tt>
+</h3>
+
+This signal is emitted when the user clicks on the help button.
+
+<h3 class=fn>void <a name="layOutButtonRow"></a>QWizard::layOutButtonRow ( QHBoxLayout&nbsp;*&nbsp;layout )<tt> [virtual protected]</tt>
+</h3>  This virtual function is responsible for adding the bottom
+divider and buttons below it.
+<p> <em>layout</em> is the vertical layout of the entire wizard.
+
+<h3 class=fn>void <a name="layOutTitleRow"></a>QWizard::layOutTitleRow ( QHBoxLayout&nbsp;*&nbsp;layout, const&nbsp;QString&nbsp;&amp;&nbsp;title )<tt> [virtual protected]</tt>
+</h3>  This virtual function is responsible for laying out the title row
+and adding the vertical divider between the title and the wizard page.
+<em>layout</em> is the vertical layout for the wizard, <em>title</em> is the title
+for this page, and this function is called every time <em>title</em>
+changes.
+
+<h3 class=fn>void <a name="next"></a>QWizard::next ()<tt> [virtual protected slot]</tt>
+</h3>
+Called when the user clicks the Next button, this function shows
+the next appropriate page.
+
+<h3 class=fn>QPushButton * <a name="nextButton"></a>QWizard::nextButton () const
+</h3>
+Returns the Next button of the dialog.
+<p> By default, this button is connected to the <a href="#next">next</a>()
+slot, which is virtual.
+
+<h3 class=fn>QWidget * <a name="page"></a>QWizard::page ( int&nbsp;pos ) const
+</h3>
+Returns a pointer to page a position <em>pos</em>, or 0 if <em>pos</em> is out of range.
+The first page has position 0.
+
+<h3 class=fn>int <a name="pageCount"></a>QWizard::pageCount () const
+</h3>  Returns the number of pages in the wizard. 
+<h3 class=fn>void <a name="removePage"></a>QWizard::removePage ( QWidget&nbsp;*&nbsp;page )<tt> [virtual]</tt>
+</h3>  Removes <em>page</em> from this wizard.  Does not delete
+<em>page</em>. If <em>page</em> is currently being displayed, QWizard will
+display something else.
+
+<h3 class=fn>void <a name="selected"></a>QWizard::selected ( const QString &amp; )<tt> [signal]</tt>
+</h3>
+
+This signal is emitted when the page changes, signalling
+the title of the page.
+
+<h3 class=fn>void <a name="setAppropriate"></a>QWizard::setAppropriate ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )<tt> [virtual]</tt>
+</h3>
+Sets whether it is appropriate for <em>w</em> to be displayed in the
+current context of the wizard.
+<p> <p>See also <a href="#appropriate">appropriate</a>().
+
+<h3 class=fn>void <a name="setBackEnabled"></a>QWizard::setBackEnabled ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )<tt> [virtual slot]</tt>
+</h3>
+Enables or disables the "Back" button for pages <em>w</em> in the wizard.
+By default, all pages have this button.
+
+<h3 class=fn>void <a name="setFinish"></a>QWizard::setFinish ( QWidget *, bool )<tt> [virtual slot]</tt>
+</h3>
+<b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+<p> 
+<h3 class=fn>void <a name="setFinishEnabled"></a>QWizard::setFinishEnabled ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )<tt> [virtual slot]</tt>
+</h3>
+Enables or disables the "Finish" button for pages <em>w</em> in the wizard.
+By default, <em>no</em> pages have this button.
+
+<h3 class=fn>void <a name="setHelpEnabled"></a>QWizard::setHelpEnabled ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )<tt> [virtual slot]</tt>
+</h3>
+Enables or disables the "Help" button for pages <em>w</em> in the wizard.
+By default, all pages have this button.
+
+<h3 class=fn>void <a name="setNextEnabled"></a>QWizard::setNextEnabled ( QWidget&nbsp;*&nbsp;w, bool&nbsp;enable )<tt> [virtual slot]</tt>
+</h3>
+Enables or disables the "Next" button for pages <em>w</em> in the wizard.
+By default, all pages have this button.
+
+<h3 class=fn>void <a name="setTitle"></a>QWizard::setTitle ( QWidget&nbsp;*&nbsp;page, const&nbsp;QString&nbsp;&amp;&nbsp;t )
+</h3>  Sets the title for the <em>page</em> to <em>title</em>.
+
+<h3 class=fn>void <a name="showPage"></a>QWizard::showPage ( QWidget&nbsp;*&nbsp;page )<tt> [virtual]</tt>
+</h3>  Makes <em>page</em> be the displayed page and emits the <a href="#selected">selected</a>() signal. 
+<h3 class=fn>QString <a name="title"></a>QWizard::title ( QWidget&nbsp;*&nbsp;page ) const
+</h3>  Returns the title of <em>page</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="index.html">Qtopia</a> platform,
+copyright &copy; 1995-2005
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
+<table width="100%" cellspacing="0" border="0">
+<tr>
+<td>Copyright &copy; 2005 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align="right"><div align="right">Qtopia version 2.2.0</div>
+</table></div></address></body>
+</html>

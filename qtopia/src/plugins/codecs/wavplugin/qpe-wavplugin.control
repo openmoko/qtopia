@@ -1,0 +1,10 @@
+Files: plugins/codecs/libwavplugin.so.1.0.0 plugins/codecs/libwavplugin.so.1.0 plugins/codecs/libwavplugin.so.1 plugins/codecs/libwavplugin.so
+Priority: optional
+Section: qpe/plugins
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
+Description: WAV file plugin
+ Plugin to play WAV files with the mediaplayer in the Qtopia environment.
