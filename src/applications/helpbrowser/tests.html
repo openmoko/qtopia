@@ -1,95 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Help Browser Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Help Browser Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond n-to-1 with features.
-
-    Note: TITLEs may be used as identifiers in bug reports.
-	Tests of different facets of the same feature should
-	have " - [Qualifier]" appended.
-
-    (eg.
-	Add Task
-	Blah Blah.
-
-	Add Task - Empty
-	Blah Blah Blah.
-    )
--->
-
-<h3>First use</h3>
-<ol>
-        <li>Start Qtopia, and proceed to launcher</li>
-        <li>Start Help Browser.</li>
-        <li>Check that it is possible to browse to applications and use help for
-                <ul>
-                        <li>Help Browser</li>
-                        <li>Address Book</li>
-                        <li>Email</li>
-                </ul>
+<h1>Qtopia/Help Browser</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Qtopia help index</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the Help Browser
+starts with the Qtopia help index.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Verify that the help browser starts with the help home page
+showing the Qt logo and an index to the most important topics.</li>
+        <li>Browse a bit through the documentation by clicking on some
+links.</li>
+        <li>Click on the "Home" button.</li>
+        <li>Verify that the help returns to the index page.<br>
         </li>
-        <li>Clock home button and check that it is possible to browse to setup
-                 and use help for
-                <ul>
-                        <li>Add/Remove software</li>
-                        <li>Appearance</li>
-                        <li>Date/Time</li>
-                        <li>Network</li>
-                </ul>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">The Home page should show an
+index with the following items:<br>
+      <ul>
+        <li>Using Qtopia</li>
+        <li>Synchronizing with a PC</li>
+        <li>Applications</li>
+        <li>Games</li>
+        <li>Settings</li>
+        <li>Documents</li>
+        <li>About Qtopia<br>
         </li>
-
-
-</ol>
-
-<h3>How do I</h3>
-Consider what types of tasks the user will want to do. Check that there is clear where
-to find information about that task.
-
-<h3>Provide help when using an application</h3>
-For each application and setting accessable via the launcher check that there the
-help button is available at the top of the applications window that when the clicked
-causes the browser to
-
-<h3>Navigate to home page</h3>
-For every page accessable in the Help Browser check that the home button is available.
-This test case would only need to be done before a major release.
-
-<h3>Navigate to previous page</h3>
-<ol>
-<li>Browse to applications index page</li>
-<li>Browse to address book page</li>
-<li>Click the <b>Home</b> button</li>
-<li>Verify that clicking the <b>Back</b> button</li> twice causes
-    the applications index page to be displayed
-</ol>
-
-<h3>Add bookmark</h3>
-<ol>
-        <li>Browse to the applications index page</li>
-        <li>Click add bookmark item from the Bookmark menu</li>
-</ol>
-<h3>Browse to bookmark</h3>
-<ol>
-        <li>Browse to the home page</li>
-        <li>Click the book mark added in previous test case</li>
-        <li>Verify that the applications index page is now show</li>
-</ol>
-<h3>Remove bookmark</h3>
-<ol>
-        <li>Click the book mark added in previous test case</li>
-        <li>Click the remove bookmark item from the Bookmark menu</li>
-        <li>Verify that the applications index page has been removed from list of
-                bookmarks</li>
-</ol>
-
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Navigating</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can navigate
+through the help<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">For this test it is important to
+start with an empty history for the navigate buttons. So close and
+reopen the Help browser if neccessery.
+      <ol>
+        <li>Verify that both navigate buttons (Left arrow and Right
+arrow) are grayed.</li>
+        <li>Click "Applications"</li>
+        <li>Verify that the "Left" arrow gets enabled.<br>
+        </li>
+        <li>Click "Calculator"</li>
+        <li>Click "Simple mode"</li>
+        <li>Verify that the current help page gives a description of
+the Simple Mode of the calculator.</li>
+        <li>Click on the "Left" button and verify that this brings you
+back to the "Calculator" help.</li>
+        <li>Verify that the "Right" arrow is now enabled too.<br>
+        </li>
+        <li>Click on the "Left" button again and verify that this
+brings you back to the "Applications" help.</li>
+        <li>Click two times on the "Right" button and verify that you
+are back in the "Simple Mode" help page.</li>
+        <li>Verify that the "Right" button is disabled again.</li>
+        <li>Click on the "Home" button</li>
+        <li>Click in the "Left" button multiple times and verify that
+this 'replays' exactly the sequence in which you have browsed through
+the information.</li>
+        <li>Verify that after 4 clicks you are back in the Home page
+again and the "Left" button is disabled.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Adding a Bookmark</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a bookmark can be
+set for quick acces to help<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click "Home" if you are not in the home page</li>
+        <li>Click "Settings"</li>
+        <li>Click "Backups"</li>
+        <li>In the Bookmark menu click on "<span
+ style="font-weight: bold;">Add Bookmark</span>"</li>
+        <li>Click on the Bookmark menu and verify that "Backups" is now
+available in the list of bookmarks.</li>
+        <li>Click on the "Home" button and then on "Backups" in the
+Bookmark menu.</li>
+        <li>Verify that the backups help page is shown again.</li>
+        <li>Repeat the same but start from an arbitrary page somewhere
+in the available help.</li>
+        <li>Close and reopen the Help Browser and verify that the same
+bookmarks are still available.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Removing a bookmark</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a bookmark can be
+removed from the bookmark list<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a bookmark for the "Contacts" and "Calendar"
+applications.</li>
+        <li>Click the "Bookmark" &nbsp;menu and select the "Contacts"
+bookmark from the list.</li>
+        <li>Verify that the browser shows the "Contacts" help page.</li>
+        <li>Click the "Bookmark" menu and select "Remove from bookmarks"</li>
+        <li>Open the "Bookmark" menu again and verify that the
+"Contacts" bookmark is removed from the list.</li>
+        <li>Click the "Bookmark" menu and select "Remove from
+bookmarks" again</li>
+        <li>Open the "Bookmark" menu again and verify that nothing is
+changed in the list, i.e. at least the "Calendar" bookmark should still
+be available.</li>
+        <li>Click the "Bookmark" &nbsp;menu and select the "Calendar"
+bookmark from the list.</li>
+        <li>Verify that the browser shows the "Calendar" help page.</li>
+        <li>Click the "Bookmark" menu and select "Remove from bookmarks"</li>
+        <li>Verify that the "Calendar" bookmark is removed from the
+menu.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
 </body>
 </html>

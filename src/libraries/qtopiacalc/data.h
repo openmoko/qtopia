@@ -21,20 +21,26 @@
 #ifndef CALCULATOR_DATA_H
 #define CALCULATOR_DATA_H
 
+//#define NEW_STYLE_DISPLAY
+
 #include <qtopia/qpeglobal.h>
 #include <qstring.h>
+#include <qpainter.h>
 
 class QTOPIA_EXPORT Data {
 public:
-    Data(){};
-    virtual ~Data(){};
+    Data();
+    virtual ~Data();
 
-    virtual void push(char){};
-    virtual void del(){};
-    virtual void clear(){formattedOutput.truncate(0);formattedOutput.append("0");};
+    virtual bool push(char,bool commit=TRUE);
+    virtual void del();
+    virtual void clear();
 
-    virtual QString getType(){return QString("NONE");};
-    virtual QString getFormattedOutput(){return formattedOutput;};
+    virtual QString getType();
+    virtual QString getFormattedOutput();
+#ifdef NEW_STYLE_DISPLAY
+    virtual void draw(QPainter *);
+#endif
 protected:
     QString formattedOutput;
 };

@@ -45,7 +45,7 @@ class MonthView : public QPEDatePicker
     Q_OBJECT
 
 public:
-    MonthView( DateBookTable *, QWidget *parent = 0, const char *name = 0, bool ac = FALSE );
+    MonthView( DateBookTable *, QWidget *parent = 0, const char *name = 0 );
     ~MonthView();
 
 public slots:
@@ -64,7 +64,8 @@ private:
 
     DateBookTable *mDb;
 
-    QVector<DayPaintCache> paintCache;
+    //QVector<DayPaintCache> paintCache;
+    QMap<QDate, DayPaintCache*> paintCache;
     int line_height;
 };
 

@@ -39,6 +39,7 @@ protected:
     void drawContents( QPainter *p );
 
 private:
+    QString statusText() const;
     const PowerStatus *ps;
     int percent;
     bool popup;

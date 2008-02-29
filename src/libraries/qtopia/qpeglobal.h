@@ -98,4 +98,23 @@
 #  define QPC_EXPORT
 #endif
 
+
+// These are the additional Qt templates we export
+#if defined(QTOPIA_TEMPLATE_EXTERN)
+#include <qdict.h>
+#include <qlibrary.h>
+#include <qguardedptr.h>
+#include <qwidget.h>
+#include <qmap.h>
+#include <qcanvas.h>
+#define QTOPIA_TEMPLATE_EXPORT QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT
+QTOPIA_TEMPLATE_EXPORT QDict<QLibrary>;
+QTOPIA_TEMPLATE_EXPORT QGuardedPtr<QWidget>;
+QTOPIA_TEMPLATE_EXPORT QMap<int, int>;
+QTOPIA_TEMPLATE_EXPORT QMap<int, bool>;
+QTOPIA_TEMPLATE_EXPORT QMap<QString, int>;
+QTOPIA_TEMPLATE_EXPORT QMap<int, QString>;
+#endif
+
+
 #endif

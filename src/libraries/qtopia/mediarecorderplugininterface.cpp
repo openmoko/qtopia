@@ -19,11 +19,14 @@
 **********************************************************************/
 
 /*!
-  \class MediaRecorderEncoder mediarecorderplugininterface.h
-  \brief Record multimedia data and encode using a specific format
+  \class MediaRecorderEncoder
+  \brief The MediaRecorderEncoder class provides an abstract base class for
+  Qtopia MediaRecorder encoder plugins.
 
-  The abstract MediaRecorderEncoder class represents an interface for
-  recording multimedia data to a file or other output device.
+  Writing an encoder plugin is achieved by subclassing this base class,
+  reimplementing the pure virtual functions and exporting the class with
+  the \c Q_EXPORT_PLUGIN macro. See the \link pluginintro.html Plugins
+  documentation\endlink for details.
 
   The functions in this class are typically used in the following order
   when recording audio:
@@ -47,6 +50,12 @@
 */
 
 /*!
+  \fn MediaRecorderEncoder::~MediaRecorderEncoder()
+
+  Destructs a MediaRecorderEncoder.
+*/
+
+/*!
   \fn int MediaRecorderEncoder::pluginNumFormats() const
 
   Returns the number of formats that are supported by this plugin.
@@ -55,15 +64,16 @@
 /*!
   \fn QString MediaRecorderEncoder::pluginFormatName( int format ) const
 
-  Returns the name of a plugin's data format.  For example, "Wav Format".
-  This may be displayed to the user in a list of supported recording formats.
+  Returns the name of one of a plugin's data format, e.g. "Wav Format".
+  The data format is selected using \a format as an index.  The name may be displayed 
+  to the user in a list of supported recording formats.
 */
 
 /*!
   \fn QString MediaRecorderEncoder::pluginFormatTag( int format ) const
 
   Returns the tag name of a plugin's data format.  For example, "pcm".
-  This value is used with \link MediaRecorderEncoder::begin \endlink .
+  The data format is selected using \a format as an index.  This value is used with \link MediaRecorderEncoder::begin \endlink .
 */
 
 /*!
@@ -78,12 +88,12 @@
   Returns the version of the plugin.  Normally 1.0.
 */
 
+//  \link MediaRecorderEncoder::pluginExtension() file extension \endlink .
 /*!
   \fn QString MediaRecorderEncoder::pluginMimeType() const
 
-  Returns the MIME type for the plugin's recommended
-  \link MediaRecorderEncoder::pluginExtension() file extension \endlink .
-  For example, \c audio/x-wav .
+  Returns the MIME type for the plugin's recommended file extension, e.g.
+  \c audio/x-wav
 */
 
 /*!
@@ -92,7 +102,7 @@
   Begin recording on the specified output \a device, which must be
   capable of direct access (seeking) if
   \link MediaRecorderEncoder::requiresDirectAccess() \endlink returns
-  TRUE.
+  TRUE. \a formatTag selects which format to use.
 
   Returns TRUE if recording has begun.  Returns FALSE if recording
   is already in progress or if \a device is not capable of seeking.
@@ -103,7 +113,7 @@
   and \link addComment() file comments \endlink.
 
   \sa setAudioChannels(), setAudioFrequency(), addComment(),
-  writeAudioSample(), requiresDirectAccess()
+  writeAudioSamples(), requiresDirectAccess()
 */
 
 /*!
@@ -176,7 +186,7 @@
 /*!
   \fn bool MediaRecorderEncoder::addComment( const QString& tag, const QString& contents )
 
-  Add a tagged comment string to the recorded output.  The plugin may
+  Adds a comment string \a contents tagged as \a tag to the recorded output.  The plugin may
   ignore tags that it doesn't understand.
 
   Returns TRUE if the comment was successfully added (or ignored).
@@ -233,16 +243,16 @@
 */
 
 /*!
-  \class MediaRecorderPluginInterface mediarecorderplugininterface.h
-  \brief Obtain an encoder for recording multimedia data.
+  \class MediaRecorderPluginInterface
+  \brief The MediaRecorderPluginInterface class provides a method of obtaining a multimedia encoder.
+
+  \mainclass
 
   The abstract MediaRecorderPluginInterface class allows applications
   to obtain an encoder to record multimedia data to a file or other
   output device.
 
   \sa MediaRecorderEncoder
-
-  \ingroup qtopiaemb
 */
 
 /*!

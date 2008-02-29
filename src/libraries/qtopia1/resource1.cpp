@@ -24,7 +24,7 @@
 #include <qtopia/config.h>
 
 /*!
-  Returns a QIconSet for the pixmap named \a name.
+  Returns a QIconSet for the pixmap named \a pix.
   You should avoid including any filename type extension (eg. .png, .xpm).
   The icon size is determined by the Qtopia font setting.
 */

@@ -43,6 +43,8 @@ private:
     Accessory* acc;
     int it[4];
     State state;
+    QStringList targets;
+    int protocount;
 };
 
 

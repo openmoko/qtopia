@@ -29,7 +29,7 @@
 class QTOPIA_EXPORT Instruction {
 public:
     Instruction();
-    virtual ~Instruction(){};
+    virtual ~Instruction();
     virtual Data *eval(Data *);
     Data *num;
 //    QStack<Data> stack;
@@ -38,7 +38,7 @@ public:
 class QTOPIA_EXPORT InstructionDescription {
 public:
     InstructionDescription();
-    virtual ~InstructionDescription(){};
+    virtual ~InstructionDescription();
 
     virtual Instruction *getInstruction();
     void eval();

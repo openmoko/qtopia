@@ -154,3 +154,6 @@ extern void qtopia_buz_touch(bool press);
 #define CUSTOM_SOUND_TOUCH(press) qtopia_buz_touch(press)
 extern void qtopia_buz_key(int keycode, bool press, bool repeat);
 #define CUSTOM_SOUND_KEYCLICK(k,p,r) qtopia_buz_key(k,p,r)
+
+#define QPE_ARCHITECTURE "SHARP/SL5500"
+#define QPE_DEFAULT_TODAY_MODE "Daily"

@@ -18,6 +18,7 @@ HEADERS	=   accessory.h \
 SOURCES	=   applnk1.cpp \
 	    categories1.cpp \
 	    categoryselect1.cpp \
+	    config1.cpp \
 	    qpeapplication1.cpp \
 	    storage1.cpp \
 	    accessory.cpp \
@@ -54,6 +55,7 @@ embedded:SOURCES +=  	   services.cpp \
 unix:SOURCES += qprocess_unix.cpp
 win32:SOURCES += qprocess_win.cpp
 
+qt2:SOURCES += quuid1.cpp
 
 INCLUDEPATH += $(QPEDIR)/src/server
 

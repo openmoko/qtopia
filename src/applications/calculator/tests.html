@@ -1,87 +1,1008 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Calculator Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Calculator Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond 1-to-1 with features
-
-    Note: TITLEs may be used as identifiers in bug reports.
--->
-
-<p><h3>Backspace</h3>
-<pre>Enter a multi-digit number, delete some digits with backspace,
-use the resulting number in a calculation and check the result is
-correct.</pre>
-
-<p><h3>Double operations</h3>
-<pre>Enter a number, enter a common operation (such as addition), enter
-another number, press equals, check the result.</pre>
-
-<p><h3>Common user interface elements.</h3>
-<pre>Keypad usage
-
-Make sure all numeric key presses display the value clicked.
-The maximum number of digits available to be keyed in is 16.
-
-Enter the following...
-12345678901234567
-The last 7 will not be displayed, or be used in any calculation.
-
-Enter the following:
-12345678901234567
-+
-1
-=
-
-The answer should be 1234567890123457.</pre>
-
-<!--
-Framework can automatically convert data types to match operations.
-Select "Simple" plugin. Enter the following :
-3
-+
-Select "Fraction" plugin.
-5/10
-=
-Result should be "3 1/2".
---!>
-
-<p><h3>Memory operations</h3>
-<pre>Enter a number, press M+ to save it to memory.
-Clear the display.
-Press MR to retrieve the number entered.
-Enter another number.
-Press M+ to add it to the number already saved in memory.
-Clear the display.
-Press MR to retrieve the total of the two numbers entered.</pre>
-
-<p><h3>Most-recently-used plugin is active when the calculator is restarted.</h3>
-<p>Start calculator. Select a different plugin from the one currently active.
-Close calculator. Start calculator. Ensure the plugin selected is now active.</p>
-
-<h3>Braces</h3>
-<pre>Select "Advanced" plugin.
-Enter the following:
-2
-*
-(
-3
-+
-4
-)
-
-7 should be displayed.
-
-Enter =
-14 should be displayed.</pre>
-
+<h1>Qtopia/Calculator</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Backspace and clear</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that numbers in the
+editor can be edited before applying an operation.. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Go to "Scientific" mode</li>
+        <li>Enter12.567</li>
+        <li>Press backspace two times</li>
+        <li>Verify that the number shown is 12.5</li>
+        <li>Press + , enter 4.3 and Press =</li>
+        <li>Verify that the calculated value == 16.8</li>
+        <li>Go to "Simple" mode</li>
+        <li>Press CE/C</li>
+        <li>Verify that the input is cleared (to 0)</li>
+        <li>Enter 1.234567890</li>
+        <li>Open the softkeyboard</li>
+        <li>Verify that all buttons are visible and the entered value
+is still correct</li>
+        <li>Press &lt;- (backspace) on the softkeyboard</li>
+        <li>Verify that the last digit (0) is gone</li>
+        <li>Use the softkeyboard again to press -, to enter 0.234567899</li>
+        <li>Press &lt;- (backspace) on the softkeyboard</li>
+        <li>Verify that the last digit (9) is gone</li>
+        <li>Press = on the softkeyboard</li>
+        <li>Verify that the calculated value == 0.9999999999999999
+(rounding takes place)</li>
+        <li>Press CE/C</li>
+        <li>Enter10</li>
+        <li>Press X</li>
+        <li>Enter 8</li>
+        <li>Press CE/C</li>
+        <li>Enter 7</li>
+        <li>Press =</li>
+        <li>Verify the calculated value == 70</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match, For floating point
+numbers a rounding may take place. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Binary operations</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that binary operations
+work correctly. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Press CE/C</li>
+        <li>Enter an <span style="font-weight: bold;">input data 1</span>
+value</li>
+        <li>Tap on the <span style="font-weight: bold;">operator</span></li>
+        <li>Enter an <span style="font-weight: bold;">input data 2</span>
+value</li>
+        <li>Tap on <span style="font-weight: bold;">=</span></li>
+        <li>Verify the <span style="font-weight: bold;">Expected Result</span></li>
+        <li>Repeat the above for all testdata </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<table width="100%" bgcolor="#e5e5e5">
+  <tbody>
+    <tr>
+      <th bgcolor="#a2c511" align="left">Input data 1</th>
+      <th bgcolor="#a2c511" align="left">operator</th>
+      <th bgcolor="#a2c511" align="left">Input data 2</th>
+      <th bgcolor="#a2c511" align="left">Expected result</th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0 </td>
+      <td style="vertical-align: top;">+<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">+<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-2</td>
+      <td style="vertical-align: top;">+</td>
+      <td style="vertical-align: top;">1</td>
+      <td style="vertical-align: top;">-1</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-0.56789<br>
+      </td>
+      <td style="vertical-align: top;">+<br>
+      </td>
+      <td style="vertical-align: top;">7<br>
+      </td>
+      <td style="vertical-align: top;">6.43211<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">6<br>
+      </td>
+      <td style="vertical-align: top;">+<br>
+      </td>
+      <td style="vertical-align: top;">-3<br>
+      </td>
+      <td style="vertical-align: top;">3<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">-<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">-<br>
+      </td>
+      <td style="vertical-align: top;">5<br>
+      </td>
+      <td style="vertical-align: top;">-4<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">9<br>
+      </td>
+      <td style="vertical-align: top;">-<br>
+      </td>
+      <td style="vertical-align: top;">-9<br>
+      </td>
+      <td style="vertical-align: top;">18<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">255<br>
+      </td>
+      <td style="vertical-align: top;">-<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">254<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0.3456<br>
+      </td>
+      <td style="vertical-align: top;">-<br>
+      </td>
+      <td style="vertical-align: top;">1.345<br>
+      </td>
+      <td style="vertical-align: top;">-0.9994<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">5<br>
+      </td>
+      <td style="vertical-align: top;">/<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">Infinity<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">10<br>
+      </td>
+      <td style="vertical-align: top;">/<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">10<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">8<br>
+      </td>
+      <td style="vertical-align: top;">/<br>
+      </td>
+      <td style="vertical-align: top;">0.1<br>
+      </td>
+      <td style="vertical-align: top;">80<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1024<br>
+      </td>
+      <td style="vertical-align: top;">/<br>
+      </td>
+      <td style="vertical-align: top;">0.25<br>
+      </td>
+      <td style="vertical-align: top;">4096<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3.43758<br>
+      </td>
+      <td style="vertical-align: top;">/<br>
+      </td>
+      <td style="vertical-align: top;">-2.45<br>
+      </td>
+      <td style="vertical-align: top;">-1.40309387755102<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">482<br>
+      </td>
+      <td style="vertical-align: top;">*<br>
+      </td>
+      <td style="vertical-align: top;">5.67<br>
+      </td>
+      <td style="vertical-align: top;">2732.94<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">10<br>
+      </td>
+      <td style="vertical-align: top;">*<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">65598<br>
+      </td>
+      <td style="vertical-align: top;">*<br>
+      </td>
+      <td style="vertical-align: top;">-0.1<br>
+      </td>
+      <td style="vertical-align: top;">-6559,8<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-2<br>
+      </td>
+      <td style="vertical-align: top;">*<br>
+      </td>
+      <td style="vertical-align: top;">-5.25<br>
+      </td>
+      <td style="vertical-align: top;">10.5<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-834759<br>
+      </td>
+      <td style="vertical-align: top;">*<br>
+      </td>
+      <td style="vertical-align: top;">2984205<br>
+      </td>
+      <td style="vertical-align: top;">-2491091981595<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">8<br>
+      </td>
+      <td style="vertical-align: top;">256<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">16<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">256<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">x^y<br>
+      </td>
+      <td style="vertical-align: top;">16<br>
+      </td>
+      <td style="vertical-align: top;">65536<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Keyboard Interface</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the keyboard can be
+used to enter values and that simple operations can be executed using
+the keyboard. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open the hard keyboard</li>
+        <li>Enter &nbsp;01234567890</li>
+        <li>Verify that each value is shown on the screen</li>
+        <li>Use &lt;- (backspace) to delete some digits</li>
+        <li>Verify that the digits are deleted.</li>
+        <li>Enter 34.5 + 3 =</li>
+        <li>Verify result == 37.5</li>
+        <li>Check some more calculations using the hardkeys and
+operation +, - and x. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Memory Operations</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify the memory store, recall
+and clear functions. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Switch to simple mode</li>
+        <li>Enter a number</li>
+        <li>press M+ to save it to memory.</li>
+        <li>Verify that the m sign appears on the left side of the
+display.</li>
+        <li> Clear the display.</li>
+        <li>Verify that the m sign is still visible</li>
+        <li> Press MR to retrieve the number entered.</li>
+        <li>Enter another number.</li>
+        <li>Press M+ to add it to the number already saved in memory.</li>
+        <li>Clear the display.</li>
+        <li>Press MR to retrieve the total of the two numbers entered.</li>
+        <li>Press MC</li>
+        <li>Verify that the m sign on the left of the display disappears</li>
+        <li>Enter a 5</li>
+        <li> Press MR</li>
+        <li>Verify that the display shows a 0 (zero)</li>
+        <li>Repeat the same test in Scientific mode.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Recent Plugin</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the last used plugin
+is loaded again the next time Calculator is started </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Start Calculator.&nbsp;</li>
+        <li>Select a different plugin from the one currently
+active.&nbsp;</li>
+        <li>Close Calculator.&nbsp;</li>
+        <li>Start Calculator.&nbsp;</li>
+        <li>Ensure the last selected plugin is now active.</li>
+        <li>Repeat the same again for the other available plugin(s). </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Unary Operations</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that unary operations in
+scientific mode work correctly. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Press CE/C</li>
+        <li>Enter an <span style="font-weight: bold;">input data</span>
+value</li>
+        <li>Tap on the <span style="font-weight: bold;">operator</span></li>
+        <li>Verify the <span style="font-weight: bold;">Expected Result</span></li>
+        <li>Repeat the above for all testdata </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<table width="100%" bgcolor="#e5e5e5">
+  <tbody>
+    <tr>
+      <th bgcolor="#a2c511" align="left">Input data</th>
+      <th bgcolor="#a2c511" align="left">operator</th>
+      <th bgcolor="#a2c511" align="left">Expected result</th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">9<br>
+      </td>
+      <td style="vertical-align: top;">sqrt<br>
+      </td>
+      <td style="vertical-align: top;">3<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3<br>
+      </td>
+      <td style="vertical-align: top;">sqrt<br>
+      </td>
+      <td style="vertical-align: top;">1.732050807568877<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+      <td style="vertical-align: top;">sqrt<br>
+      </td>
+      <td style="vertical-align: top;">Not a number<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">ln<br>
+      </td>
+      <td style="vertical-align: top;">0.6931471805599453<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">255</td>
+      <td style="vertical-align: top;">ln<br>
+      </td>
+      <td style="vertical-align: top;">5.541263545158426<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+      <td style="vertical-align: top;">ln<br>
+      </td>
+      <td style="vertical-align: top;">Not a number<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">+/-<br>
+      </td>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">n!<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">n!<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">4<br>
+      </td>
+      <td style="vertical-align: top;">n!<br>
+      </td>
+      <td style="vertical-align: top;">24<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">100<br>
+      </td>
+      <td style="vertical-align: top;">n!<br>
+      </td>
+      <td style="vertical-align: top;">9.332621544394418e+157<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+      <td style="vertical-align: top;">n!<br>
+      </td>
+      <td style="vertical-align: top;">Not a positive number<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">4<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">254<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">64516<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">123456789<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">1.524157875019052e+16<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">987654321<br>
+      </td>
+      <td style="vertical-align: top;">x^2<br>
+      </td>
+      <td style="vertical-align: top;">9.754610577899711e+17<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">2.718281828459045<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">7.38905609893065<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">255<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">5.560231647727676e+110<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">0.3678794411714423<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-10<br>
+      </td>
+      <td style="vertical-align: top;">e^x<br>
+      </td>
+      <td style="vertical-align: top;">4.539992976248485e-05<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">1/x<br>
+      </td>
+      <td style="vertical-align: top;">Infinity<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">1/x<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">1/x<br>
+      </td>
+      <td style="vertical-align: top;">0.5<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1.570796326794895 (1/2 PI)<br>
+      </td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0.7853981633974475 (1/4 PI)<br>
+      </td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">0.7071067811865469<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3.14159265358979 (PI)<br>
+      </td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">3.231089148865173e-15
+(approximates 0)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1.570796326794895 (-1/2 PI)</td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-0.7853981633974475 (-1/4 PI)</td>
+      <td style="vertical-align: top;">sin<br>
+      </td>
+      <td style="vertical-align: top;">-0.7071067811865469</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1<br>
+      </td>
+      <td style="vertical-align: top;">asin<br>
+      </td>
+      <td style="vertical-align: top;">1.570796326794897<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+      <td style="vertical-align: top;">asin<br>
+      </td>
+      <td style="vertical-align: top;">-1.570796326794897</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">cos<br>
+      </td>
+      <td style="vertical-align: top;">1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">1.570796326794895 (1/2 PI)</td>
+      <td style="vertical-align: top;">cos<br>
+      </td>
+      <td style="vertical-align: top;">1.615544574432587e-15
+(approximates 0)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">0.7853981633974475 (1/4 PI)</td>
+      <td style="vertical-align: top;">cos<br>
+      </td>
+      <td style="vertical-align: top;">0.7071067811865481</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3.14159265358979 (PI)</td>
+      <td style="vertical-align: top;">cos<br>
+      </td>
+      <td style="vertical-align: top;">-1<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3.926990816987237<br>
+      </td>
+      <td style="vertical-align: top;">cos<br>
+      </td>
+      <td style="vertical-align: top;">-0.7071067811865505<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Standard plugins</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the standard
+calculator provides the simple and scientific plugins<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the combobox just below the edit field.</li>
+        <li>Verify that at least "simple" and "scientific" are offered.</li>
+        <li>Select both options and verify that the display changes
+according to the selected plugin.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<br>
 </body>
 </html>

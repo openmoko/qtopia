@@ -30,7 +30,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>350</width>
+            <width>346</width>
             <height>526</height>
         </rect>
     </property>
@@ -48,7 +48,7 @@
     <vbox>
         <property stdset="1">
             <name>margin</name>
-            <number>11</number>
+            <number>6</number>
         </property>
         <property stdset="1">
             <name>spacing</name>
@@ -76,6 +76,10 @@
                         <cstring>addEmailBtn</cstring>
                     </property>
                     <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>TabFocus</enum>
+                    </property>
+                    <property stdset="1">
                         <name>text</name>
                         <string>New</string>
                     </property>
@@ -85,6 +89,10 @@
                     <property stdset="1">
                         <name>name</name>
                         <cstring>removeEmailBtn</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>TabFocus</enum>
                     </property>
                     <property stdset="1">
                         <name>text</name>
@@ -98,6 +106,10 @@
                         <cstring>emailUpBtn</cstring>
                     </property>
                     <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>TabFocus</enum>
+                    </property>
+                    <property stdset="1">
                         <name>text</name>
                         <string>Move Up</string>
                     </property>
@@ -107,6 +119,10 @@
                     <property stdset="1">
                         <name>name</name>
                         <cstring>emailDownBtn</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>focusPolicy</name>
+                        <enum>TabFocus</enum>
                     </property>
                     <property stdset="1">
                         <name>text</name>
@@ -260,4 +276,14 @@
     <slot access="public">moveCurrentUp()</slot>
     <slot access="public">removeCurrent()</slot>
 </connections>
+<tabstops>
+    <tabstop>addEmailBtn</tabstop>
+    <tabstop>removeEmailBtn</tabstop>
+    <tabstop>emailUpBtn</tabstop>
+    <tabstop>emailDownBtn</tabstop>
+    <tabstop>emailList</tabstop>
+    <tabstop>emailEdit</tabstop>
+    <tabstop>okButton</tabstop>
+    <tabstop>cancelButton</tabstop>
+</tabstops>
 </UI>

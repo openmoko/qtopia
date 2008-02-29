@@ -743,16 +743,22 @@ static char* lexGet1Value() {
     lexSkipWhite();
     c = lexLookahead();
     lexClearToken();
-    while (c != EOF && c != ';') {
+    while (c != EOF && (c != ';' || !fieldedProp)) {
 	if (c == '\\' ) {
 	    int a;
 	    lexSkipLookahead();
 	    a = lexLookahead();
-	    if ( a != ';' ) {
-		lexAppendc('\\');
-	    } else {
+	    if ( a == ';' ) {
 		lexAppendc( ';' );
 		lexSkipLookahead();
+	    } else if ( a == '\n' ) {
+		lexAppendc( '\n' );
+		lexSkipLookahead();
+	    } else if ( a == '\\' ) {
+		lexAppendc( '\\' );
+		lexSkipLookahead();
+	    } else {
+		lexAppendc('\\');
 	    }
 	} else if (c == '\n') {
 	    int a;
@@ -950,68 +956,79 @@ static int match_begin_end_name(int end) {
     }
 
 static char* lexGetQuotedPrintable()
-    {
-    int cur;
-
+{
+    int c;
+    lexSkipWhite();
+    c = lexLookahead();
     lexClearToken();
-    do {
-	cur = lexGetc();
-	switch (cur) {
-	    case '=': {
-		int c = 0;
-		int next[2];
-		int i;
-		for (i = 0; i < 2; i++) {
-		    next[i] = lexGetc();
-		    if (next[i] >= '0' && next[i] <= '9')
-			c = c * 16 + next[i] - '0';
-		    else if (next[i] >= 'A' && next[i] <= 'F')
-			c = c * 16 + next[i] - 'A' + 10;
-		    else
-			break;
-		    }
-		if (i == 0) {
-		    /* single '=' follow by LINESEP is continuation sign? */
-		    if (next[0] == '\n') {
-			++mime_lineNum;
-			}
-		    else {
-			lexPushLookaheadc('=');
-			goto EndString;
-			}
-		    }
-		else if (i == 1) {
-		    lexPushLookaheadc(next[1]);
-		    lexPushLookaheadc(next[0]);
-		    lexAppendc('=');
-		} else {
-		    lexAppendc(c);
-		    }
-		break;
-		} /* '=' */
-	    case '\n': {
-		lexPushLookaheadc('\n');
-		goto EndString;
-		}
-	    case (int)EOF:
-		break;
-	    default:
-		lexAppendc(cur);
-		break;
-	    } /* switch */
-	} while (cur != (int)EOF);
 
-EndString:
+    while (c != EOF && c != ';') {
+	if (c == '\n') {
+	    // break, leave '\n' on remaining chars.
+	    break;
+	} else if (c == '=') {
+	    int cur = 0;
+	    int next;
+
+	    lexSkipLookahead(); // skip '='
+	    next = lexLookahead();
+
+	    if (next == '\n') {
+		// skip and only skip the \n
+		lexSkipLookahead(); 
+		c = lexLookahead();
+		++mime_lineNum; // aid in error reporting
+		continue;
+	    } else if (next >= '0' && next <= '9') {
+		cur = next - '0';
+	    } else if (next >= 'A' && next <= 'F') {
+		cur = next - 'A' + 10;
+	    } else {
+		// we have been sent buggy stuff. doesn't matter
+		// what we do so long as we keep going.
+		// should probably spit an error here
+		lexSkipLookahead(); 
+		c = lexLookahead();
+		continue;
+	    }
+
+	    lexSkipLookahead(); // skip A-Z0-9
+	    next = lexLookahead();
+
+	    cur = cur * 16;
+	    // this time really just expecting 0-9A-F
+	    if (next >= '0' && next <= '9') {
+		cur += next - '0';
+	    } else if (next >= 'A' && next <= 'F') {
+		cur += next - 'A' + 10;
+	    } else {
+		// we have been sent buggy stuff. doesn't matter
+		// what we do so long as we keep going.
+		// should probably spit an error here
+		lexSkipLookahead(); 
+		c = lexLookahead();
+		continue;
+	    }
+
+	    // got a valid escaped =.  append it.
+	    lexSkipLookahead(); // skip second 0-9A-F
+	    lexAppendc(cur);
+	} else {
+	    lexSkipLookahead(); // skip whatever we just read.
+	    lexAppendc(c); // and append it.
+	}
+	c = lexLookahead();
+    }
     lexAppendc(0);
-    return lexStr();
-    } /* LexQuotedPrintable */
+    return c==EOF?0:lexStr();
+}
 
 static int yylex() {
 
     int lexmode = LEXMODE();
     if (lexmode == L_VALUES) {
 	int c = lexGetc();
-	if (c == ';') {
+	if (c == ';' && fieldedProp) {
 	    DBG_(("db: SEMICOLON\n"));
 	    lexPushLookaheadc(c);
 	    handleMoreRFC822LineBreak(c);
@@ -1217,7 +1234,7 @@ void mime_error_(char *s)
 	}
     }
 
-#line 1221 "y.tab.c"
+#line 1238 "y.tab.c"
 #define YYABORT goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
@@ -1517,7 +1534,7 @@ case 45:
 	popVObject();
 	}
 break;
-#line 1521 "y.tab.c"
+#line 1538 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

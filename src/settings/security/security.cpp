@@ -20,8 +20,10 @@
 #include "security.h"
 
 #include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
 #include <qtopia/password.h>
 #include <qtopia/qpedialog.h>
+#include <qtopia/qcopenvelope_qws.h>
 
 #include <qcheckbox.h>
 #include <qpushbutton.h>
@@ -33,7 +35,7 @@ Security::Security( QWidget* parent,  const char* name, WFlags fl )
     : SecurityBase( parent, name, TRUE, fl )
 {
     valid=FALSE;
-    Config cfg("Security");
+    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File);
     cfg.setGroup("Passcode");
     passcode = cfg.readEntry("passcode");
     passcode_poweron->setChecked(cfg.readBoolEntry("passcode_poweron",FALSE));
@@ -189,7 +191,7 @@ void Security::setSyncNet(const QString& sn)
 void Security::applySecurity()
 {
     if ( valid ) {
-	Config cfg("Security");
+	Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File);
 	cfg.setGroup("Passcode");
 	cfg.writeEntry("passcode",passcode);
 	cfg.writeEntry("passcode_poweron",passcode_poweron->isChecked());
@@ -202,6 +204,7 @@ void Security::applySecurity()
 	QHostAddress allowed((Q_UINT32)auth_peer);
 	cfg.writeEntry("auth_peer",allowed.toString());
 	cfg.writeEntry("auth_peer_bits",auth_peer_bits);
+	
 	/*
 	cfg.setGroup("Remote");
 	if ( telnetAvailable() )
@@ -211,6 +214,8 @@ void Security::applySecurity()
 	// ### write ssh/telnet sys config files
 	*/
     }
+
+    QCopEnvelope("QPE/System", "securityChanged()");
 }
 
 void Security::changePassCode()

@@ -27,7 +27,7 @@
 #include <qwhatsthis.h>
 #include <qpopupmenu.h>
 #include "qcopenvelope_qws.h"
-#include "qpedecoration_qws.h"
+#include "qpedecoration_p.h"
 #include <qdialog.h>
 #include <qdrawutil.h>
 #include <qgfx_qws.h>
@@ -460,7 +460,8 @@ class DefaultWindowDecoration : public WindowDecorationInterface
 public:
     DefaultWindowDecoration() : ref(0) {}
     QString name() const {
-	return "Default";
+	return qApp->translate("WindowDecoration", "Default", 
+		"List box text for default window decoration");
     }
     QPixmap icon() const {
 	return QPixmap();
@@ -504,6 +505,9 @@ QPEDecoration::QPEDecoration()
     for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !helpExists; ++it)
 	helpExists = QFile::exists( *it + "/" + helpFile );
     qpeManager = new QPEManager( this );
+    imageOk = Resource::loadImage( "OKButton" );
+    imageClose = Resource::loadImage( "CloseButton" );
+    imageHelp = Resource::loadImage( "HelpButton" );
 }
 
 QPEDecoration::QPEDecoration( const QString &plugin )
@@ -515,15 +519,19 @@ QPEDecoration::QPEDecoration( const QString &plugin )
     } else {
 	delete wdiface;
     }
-    wdLoader = new PluginLoaderIntern( "decorations" ); // No tr
-    WindowDecorationInterface *iface = 0;
-    if ( !wdLoader->inSafeMode() && wdLoader->isEnabled(plugin) &&
-	wdLoader->queryInterface( plugin, IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
-	wdiface = iface;
-    } else {
-	delete wdLoader;
-	wdLoader = 0;
+    if ( plugin == "Qtopia" ) { // No tr
 	wdiface = new DefaultWindowDecoration;
+    } else {
+	wdLoader = new PluginLoaderIntern( "decorations" ); // No tr
+	WindowDecorationInterface *iface = 0;
+	if ( !wdLoader->inSafeMode() && wdLoader->isEnabled(plugin) &&
+		wdLoader->queryInterface( plugin, IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	    wdiface = iface;
+	} else {
+	    delete wdLoader;
+	    wdLoader = 0;
+	    wdiface = new DefaultWindowDecoration;
+	}
     }
 
     helpFile = QString(qApp->argv()[0]) + ".html";
@@ -835,12 +843,12 @@ QPopupMenu *QPEDecoration::menu( const QWidget *, const QPoint & )
 {
     QPopupMenu *m = new QPopupMenu();
 
-    m->insertItem(QObject::tr("Restore"), (int)Normalize);
-    m->insertItem(QObject::tr("Move"), (int)Title);
-    m->insertItem(QObject::tr("Size"), (int)BottomRight);
-    m->insertItem(QObject::tr("Maximize"), (int)Maximize);
+    m->insertItem(QPEManager::tr("Restore"), (int)Normalize);
+    m->insertItem(QPEManager::tr("Move"), (int)Title);
+    m->insertItem(QPEManager::tr("Size"), (int)BottomRight);
+    m->insertItem(QPEManager::tr("Maximize"), (int)Maximize);
     m->insertSeparator();
-    m->insertItem(QObject::tr("Close"), (int)Close);
+    m->insertItem(QPEManager::tr("Close"), (int)Close);
 
     return m;
 }

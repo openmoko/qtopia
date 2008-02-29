@@ -37,7 +37,7 @@ class AbTable : public QTable
 public:
     static const int FREQ_CONTACT_FIELD;
 
-    AbTable(const SortedContacts &tasks,  QWidget *parent, const char *name=0, const char *appPath=0 );
+    AbTable(ContactXmlIO *,  QWidget *parent, const char *name=0, const char *appPath=0 );
     ~AbTable();
 
     bool hasCurrentEntry();
@@ -68,7 +68,7 @@ public:
     void setCurrentCell(int, int);
 
 public slots:
-    void reload(const SortedContacts &c);
+    void reload();
     void findNext( const QString &str, int category );
     void fitHeadersToWidth();
 
@@ -91,6 +91,7 @@ protected:
     void contentsMousePressEvent( QMouseEvent *e );
     void contentsMouseReleaseEvent( QMouseEvent *e );
     void resizeEvent( QResizeEvent *e );
+    void showEvent( QShowEvent *e);
 
     void fontChange(const QFont &);
      int rowHeight( int ) const;
@@ -134,7 +135,7 @@ private:
     QWidget *createEditor(int,int,bool) const { return 0;}
 
 
-    SortedContacts contacts;
+    ContactXmlIO *contacts;
     int currFindRow;
     QString currFindString;
     QStringList choicenames;

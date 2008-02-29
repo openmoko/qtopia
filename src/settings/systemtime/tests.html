@@ -1,53 +1,472 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Date / Time Settings Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Date / Time Settings Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-
-<h3>Date and Time adjustment</h3>
-<ol>
-<li>Start the <b>Date / Time Settings</b> application from the <b>Settings</b>
-    tab.
-<li>Change the <b>Hour</b> and <b>Minute</b>.  Tap <img src=inline/OKButton>.
-    Note the new time in the clock applet in the taskbar.
-<li>Select a different <b>Timezone</b> and tap <img src=inline/OKButton>.
-    Note that the time in the clock applet has changed to match that of the
-    timezone.
-</ol>
-
-<h3>Six available timezones</h3>
-<ol>
-<li>Tap the <b>World Time</b> icon <img src=inline/citytime_icon>.
-<li>Tap on one of the six city buttons, then tap and hold around the world
-    map.  Different cities are displayed with their local time.  Release on
-    any city.  The city button now has that cities' time in it.
-<li>Tap <img src=inline/CloseButton> to close the <b>World Time</b>
-    viewer.
-<li>Tap the <b>Time Zone</b> selector.  Note that the timezone previously
-    selected from the<b>World Time</b> application is now in the list.
-</ol>
-
-<h3>Display configuration</h3>
-<ol>
-<li>Toggle the <b>Time Format</b> listview between <b>24</b> and <b>12</b>
-    hour.  Note that the <b>AM/PM</b> listview will toggle between enabled
-    (12-hour) and disabled (24-hour).  Also note that when this is performed
-    in the afternoon, the <b>Hour</b> field will change automatically.
-<li><b>Weeks start on</b> can either be <b>Monday</b> or <b>Sunday</b>.
-    Change to <b>Monday</b> and tap <img src=inline/OKButton>.  Start the
-    <b>Calendar</b> application from the <b>Applications</b> tab, and switch
-    to the week or month views.  Note that the weeks now begin on Monday.
-<li>Use the <b>Date Format</b> listview to select which format the date
-    should appear in.  The changes are reflected in the <b>Date</b> listview.
-</ol>
-
+<h1>Qtopia/Date and Time</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Time adjustment</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the time can be
+adjusted.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Set the <span style="font-weight: bold;">Time format</span>
+to 24 hour.</li>
+        <li>Verify that the <span style="font-weight: bold;">Hour</span>
+can be changed between 0 and 23.</li>
+        <li>Change the <b>Hour</b> and <b>Minute</b> using the up/down
+buttons.</li>
+        <li>Also try changing the time using the keyboard.<br>
+        </li>
+        <li>Select a new time and tap <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the new time is visible in the clock applet in
+the taskbar.</li>
+        <li>Open <span style="font-weight: bold;">Date/Time</span>
+again, select a different <b>Timezone</b> and tap <span
+ style="font-weight: bold;">OK</span>.</li>
+        <li>Verify that the time in the clock applet has changed to
+match that of the     timezone.</li>
+        <li>Set the <span style="font-weight: bold;">Time format</span>
+to 12 hours.</li>
+        <li>Verify that the <span style="font-weight: bold;">Hour</span>
+can be changed between 1 and 12.</li>
+        <li>Set a time + <span style="font-weight: bold;">AM</span> and
+tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Verify that the time is shown on the clock applet on the
+taskbar.</li>
+        <li>Set a time + <span style="font-weight: bold;">PM</span> and
+tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Verify that the time is shown on the clock applet on the
+taskbar.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Select from six timezones</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can set the
+timezone to one of the six available timezones<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap the <b>World Time</b> icon. </li>
+        <li>Tap on one of the six city buttons, then tap and hold the
+stylus around the world     map.  Different cities are displayed with
+their local time.  Release on     any city.&nbsp;</li>
+        <li>Verify that the city button now has the selected cities'
+time in it. </li>
+        <li>Tap <span style="font-weight: bold;">Close</span> (x) to
+close the <b>World Time</b> viewer. </li>
+        <li>Tap the <b>Time Zone</b> selector.&nbsp;</li>
+        <li>Verify that the timezone previously     selected from the<b>World
+Time</b> application is now in the list.</li>
+        <li>Select the newly added timezone and tap <span
+ style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the time in the clock applet has changed to
+match that of the timezone.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Time format</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the time
+presentation can be configured.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Start the <span style="font-weight: bold;">Clock</span>, <span
+ style="font-weight: bold;">Calendar</span> and <span
+ style="font-weight: bold;">Today</span> applications and keep them
+running during the test.</li>
+        <li>If required create an event in <span
+ style="font-weight: bold;">Calendar</span> for today (the event should
+be visible in <span style="font-weight: bold;">Calendar</span> and in <span
+ style="font-weight: bold;">Today</span>).<br>
+        </li>
+        <li>Set the <b>Time Format</b> listview to <b>24</b> hour
+mode.&nbsp;</li>
+        <li>Verify that the <b>AM/PM</b> listview is disabled.</li>
+        <li>Verify in <span style="font-weight: bold;">Clock</span>
+that the displayed time is shown in 24 hour format.</li>
+        <li>Verify that the event(s) are shown in 24 hour format in <span
+ style="font-weight: bold;">Today</span>.</li>
+        <li>Create a new event in <span style="font-weight: bold;">Calendar</span>
+and verify that the time edits in the dialog show the time in 24 hour
+format.</li>
+        <li>Verify that the time presented in the clock applet on the
+status bar is shown in 24 hour format.</li>
+        <li>Set the <b>Time Format</b> listview to <b>12</b> hour
+mode.&nbsp;</li>
+        <li>Verify that the <span style="font-weight: bold;">AM/PM</span>
+listview is enabled.</li>
+        <li>Verify in <span style="font-weight: bold;">Clock</span>
+that the displayed time is shown in 12 hour format.</li>
+        <li>Verify that the event(s) are shown in 12 hour format in <span
+ style="font-weight: bold;">Today</span>.</li>
+        <li>Create a new event in <span style="font-weight: bold;">Calendar</span>
+and verify that the time edits in the dialog show the time in 12 hour
+format.</li>
+        <li>Verify that the time presented in the clock applet on the
+status bar is shown in 12 hour format.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Configuring the week start day</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the week start can
+be configured<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Start the <span style="font-weight: bold;"></span> <span
+ style="font-weight: bold;">Calendar</span>&nbsp;<span
+ style="font-weight: bold;"></span>application and keep it running
+during the test.</li>
+        <li>In the <span style="font-weight: bold;">Date/Time</span>
+app select <span style="font-weight: bold;">Week starts on "Monday"</span>.</li>
+        <li>In the <span style="font-weight: bold;">Calendar</span> app
+verify that the day and week views indeed start on monday (e.g. M T W T
+F S S).</li>
+        <li>In the <span style="font-weight: bold;">Date/Time</span>
+app select <span style="font-weight: bold;">Week starts on "Sunday"</span>.</li>
+        <li>In the <span style="font-weight: bold;">Calendar</span> app
+verify that the day and week views indeed start on sunday (e.g. S M T W
+T F S).</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Configuring date format</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the date format can
+be configured<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open the <span style="font-weight: bold;">Clock</span> and <span
+ style="font-weight: bold;">Calendar</span> applications and keep them
+running during the test.</li>
+        <li>In the <span style="font-weight: bold;">Date/Time</span>
+app select a date format.</li>
+        <li>In the <span style="font-weight: bold;">Clock</span> app
+verify that the presented date at the bottom of the screen is in the
+expected format.</li>
+        <li>In the <span style="font-weight: bold;">Calendar</span> app
+verify that the presented date in the date picker is in the expected
+format.</li>
+        <li>Repeat the same test for all the possible date formats.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">The following output is to be
+expected for the different formats (assuming the date is Wednesday Feb
+19, 2003):<br>
+      <ul>
+        <li>M/D/Y: Wednesday Februari 19, 2003</li>
+        <li>D.M.Y: Wednesday, 19.Februari 2003</li>
+        <li>Y-M-D: Wednesday, 2003, Februari 19</li>
+        <li>D/M/Y: Wednesday, 19 Februari 2003<br>
+        </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Setting a date</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the current date can
+be selected<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">date</span>
+button and select a date from the date picker dialog (please play a bit
+with all the controls before you select a final date).</li>
+        <li>Verify that after you tapped on the date the picker dialog
+closes automatically and the selected date is shown on the date button.</li>
+        <li>Tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Open the <span style="font-weight: bold;">Clock</span> app
+and verify that the selected date is shown at the bottom.</li>
+        <li>Open <span style="font-weight: bold;">Date/Time</span>
+again and set the date to 19 Februari 2003, set the timezone to
+Brisbane, adjust the time to 06:00 and tap <span
+ style="font-weight: bold;">OK</span>.</li>
+        <li>Verify in <span style="font-weight: bold;">Clock</span>
+that the presented date is 19 Februari 2003.</li>
+        <li>Open <span style="font-weight: bold;">Date/Time</span>
+again, set the timezone to Oslo and tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Verify in <span style="font-weight: bold;">Clock</span>
+that the presented date is18 Februari 2003 and the time is approx 21:00.</li>
+        <li>Open <span style="font-weight: bold;">Date/Time</span>
+again, set the timezone to Los Angeles and tap <span
+ style="font-weight: bold;">OK</span>.</li>
+        <li>Verify in <span style="font-weight: bold;">Clock</span>
+that the presented date is18 Februari 2003 and the time is approx 12:00.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Help</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that help is available
+for the application.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the question mark on the title bar.</li>
+        <li>Verify that help is shown for the application.</li>
+        <li>Browse through the help and verify that at least the most
+essential functionality is covered.</li>
+        <li>Tap on all available links to verify that there are no
+loose links.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </body>
 </html>

@@ -47,6 +47,7 @@ BatteryMeter::BatteryMeter( QWidget *parent )
 
 BatteryMeter::~BatteryMeter()
 {
+    delete (QWidget *) batteryView;
     delete ps;
 }
 
@@ -59,24 +60,41 @@ void BatteryMeter::mousePressEvent( QMouseEvent *)
 {
     if ( batteryView && batteryView->isVisible() ) {
 	delete (QWidget *) batteryView;
+	// batteryView becomes 0 because it's a QGuardedPtr
     } else {
 	if ( qApp->desktop()->height() >= 300 ) {
+	    // Plenty of room
 	    if ( !batteryView ) {
 		batteryView = new BatteryStatus( ps, TRUE, 0, WStyle_StaysOnTop | WType_Popup | WDestructiveClose );
 		batteryView->setFrameStyle( QFrame::PopupPanel | QFrame::Raised );
 	    }
-	    QPoint curPos = mapToGlobal( rect().topLeft() );
-	    int lp = qApp->desktop()->width() - batteryView->sizeHint().width();
-	    batteryView->move( lp, curPos.y()-batteryView->sizeHint().height()-1 );
-	    batteryView->resize( batteryView->sizeHint() );
 	} else {
 	    if ( !batteryView )
 		batteryView = new BatteryStatus( ps, FALSE, 0, WDestructiveClose );
 	    batteryView->showMaximized();
 	}
+	bvsz = QSize();
+	updateBatteryViewGeometry();
 	batteryView->raise();
 	batteryView->show();
     }
+}
+
+bool BatteryMeter::updateBatteryViewGeometry()
+{
+    QSize sz=batteryView->sizeHint();
+    if ( sz != bvsz ) {
+	bvsz = sz;
+	QRect r(batteryView->pos(),batteryView->sizeHint());
+	if ( qApp->desktop()->height() >= 300 ) {
+	    QPoint curPos = mapToGlobal( rect().topLeft() );
+	    int lp = qApp->desktop()->width() - batteryView->sizeHint().width();
+	    r.moveTopLeft( QPoint(lp, curPos.y()-batteryView->sizeHint().height()-1) );
+	}
+	batteryView->setGeometry(r);
+	return TRUE;
+    }
+    return FALSE;
 }
 
 void BatteryMeter::timerEvent( QTimerEvent * )
@@ -98,8 +116,12 @@ void BatteryMeter::timerEvent( QTimerEvent * )
 		batteryView->updatePercent( percent );
 	}
 	repaint(FALSE);
-	if ( batteryView )
-	    batteryView->repaint();
+	if ( batteryView ) {
+	    if ( updateBatteryViewGeometry() )
+		batteryView->update();
+	    else
+		batteryView->repaint();
+	}
     }
 }
 

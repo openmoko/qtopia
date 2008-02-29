@@ -52,13 +52,26 @@ public:
     void setNameFocus();
     PimContact entry() const { return ent; }
 
+#ifdef QTOPIA_DESKTOP
+    void updateCategories();
+    CategorySelect *categorySelect() { return cmbCat; }
+#endif
+
+ signals:
+    void categoriesChanged(); // for Qtopia Desktop only
+
+
 public slots:
     void setEntry( const PimContact &entry );
 
 protected slots:
     void accept();
+    void reject();
     void tabClicked( QWidget *tab );
     void editEmails();
+
+protected:
+    void closeEvent(QCloseEvent *e);
 
 private:
     void init();
@@ -70,7 +83,7 @@ private:
 
 private:
     PimContact ent;
-    QMultiLineEdit *txtNote;
+    QMultiLineEdit *txtNote, *homeStreetEdit, *businessStreetEdit;
     QTabWidget *tabs;
     QWidget *personalTab;
     QWidget *summaryTab;
@@ -87,6 +100,7 @@ private:
     QHBox *ehb;
     QLineEdit *emailLE;
     QPushButton *emailBtn;
+    bool quitExplicitly;
 };
 
 #endif

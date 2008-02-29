@@ -145,12 +145,14 @@ HEADERS =	calculator.h \
 		doubleinstruction.h
 SOURCES =	calculator.cpp \
 		engine.cpp \
+		data.cpp \
 		instruction.cpp \
 		stdinputwidgets.cpp \
 		doubledata.cpp \
 		doubleinstruction.cpp
 OBJECTS =	$(OBJECTS_DIR)/calculator.o \
 		$(OBJECTS_DIR)/engine.o \
+		$(OBJECTS_DIR)/data.o \
 		$(OBJECTS_DIR)/instruction.o \
 		$(OBJECTS_DIR)/stdinputwidgets.o \
 		$(OBJECTS_DIR)/doubledata.o \
@@ -241,6 +243,10 @@ $(OBJECTS_DIR)/calculator.o: calculator.cpp \
 $(OBJECTS_DIR)/engine.o: engine.cpp \
 		engine.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/engine.o engine.cpp
+
+$(OBJECTS_DIR)/data.o: data.cpp \
+		data.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/data.o data.cpp
 
 $(OBJECTS_DIR)/instruction.o: instruction.cpp \
 		instruction.h \

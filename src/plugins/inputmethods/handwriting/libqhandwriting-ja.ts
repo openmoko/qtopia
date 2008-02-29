@@ -165,7 +165,7 @@
     </message>
     <message>
         <source>ms</source>
-        <translation type="unfinished">ms [unknown, need explanation]</translation>
+        <translation type="obsolete">ms [unknown, need explanation]</translation>
     </message>
     <message>
         <source>Input areas displayed</source>
@@ -204,7 +204,7 @@
     </message>
     <message>
         <source>%1 ms</source>
-        <translation type="unfinished">%1 ms [unkown, need explanation]</translation>
+        <translation type="obsolete">%1 ms [unkown, need explanation]</translation>
     </message>
     <message>
         <source>Out of space</source>
@@ -221,6 +221,11 @@ Quit anyway?</source>
 やり直してください。
 
 このまま中止しますか？</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <comment>milliseconds</comment>
+        <translation type="unfinished">%1 ms [unkown, need explanation]</translation>
     </message>
 </context>
 </TS>

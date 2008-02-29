@@ -30,6 +30,8 @@ class PluginLoaderIntern;
 
 struct QTOPIA_EXPORT FontFactory
 {
+    // Internal Qtopia Class
+    // Do NOT use.
     FontFactoryInterface *interface;
     QFontFactory *factory;
 };

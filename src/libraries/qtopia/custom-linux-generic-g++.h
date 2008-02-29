@@ -23,3 +23,4 @@
 #endif
 
 #define QPE_FONT_HEIGHT_TO_ICONSIZE(x) (x+1)
+#define QPE_DEFAULT_TODAY_MODE "Daily"

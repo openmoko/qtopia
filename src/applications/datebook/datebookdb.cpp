@@ -46,25 +46,46 @@ QValueList<Occurrence> DateBookTable::getOccurrences(
     return dba->getOccurrencesInCurrentTZ(from, to);
 }
 
-Occurrence DateBookTable::getNextAlarm( const QDateTime &from, bool *ok) const
+QValueList<Occurrence> DateBookTable::getNextAlarm( const QDateTime &when, int warn) const
 {
+    QDateTime from = when.addSecs(60*warn);
     QValueList<Occurrence> list = getOccurrences(from.date(), from.date());
+    QValueList<Occurrence> res;
 
     // need to find the one that matches the 'when' we got...
     QValueListIterator<Occurrence> it;
 
     for (it = list.begin(); it != list.end(); ++it ) {
-	if ((*it).startInCurrentTZ() == from && (*it).event().hasAlarm()) {
+	if ((*it).startInCurrentTZ() == from && (*it).event().hasAlarm()
+		&& (*it).event().alarmDelay() == warn ) {
 	    // the right event.
-	    if (ok)
-		*ok = TRUE;
-	    return *it;
+	    // put the audiable ones first (sort of like priority)
+	    if ((*it).event().alarmSound() == PimEvent::Loud)
+		res.prepend(*it);
+	    else 
+		res.append(*it);
 	}
     }
 
-    if (ok)
-	*ok = FALSE;
-    return Occurrence();
+    return res;
+}
+
+void DateBookTable::updateAlarm(const PimEvent &e) 
+{
+  dba->addEventAlarm((const PrEvent &)e);
+}
+
+void DateBookTable::updateAlarms()
+{
+    const QList<PimEvent> &list = (QList<PimEvent> &)(dba->events());
+
+    // need to find the one that matches the 'when' we got...
+    QListIterator<PimEvent> it(list);
+
+    PimEvent p;
+    for (; it.current(); ++it ) {
+	updateAlarm(*(it.current()));
+    }
 }
 
 Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,

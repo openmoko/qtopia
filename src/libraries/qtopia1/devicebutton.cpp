@@ -23,7 +23,7 @@
 #include <qstring.h>
 #include "devicebutton.h"
 
-/*! \class DeviceButton
+/*! \class DeviceButton devicebutton.h
     \brief The DeviceButton class represents a physical user mappable button on a Qtopia device.
 
     This class represents a physical button on a Qtopia device.    A
@@ -33,19 +33,24 @@
     to the user in help documentation.
 
     \ingroup qtopiaemb
-    \internal
 */
 
+/*!
+  Constructs DeviceButton.
+*/
 DeviceButton::DeviceButton()
 {
 }
 
+/*!
+  Destructs DeviceButton.
+*/
 DeviceButton::~DeviceButton()
 {
 }
 
 /*!
- Returns the button's keycode.
+  Returns the button's keycode.
  */
 ushort DeviceButton::keycode() const
 {
@@ -54,7 +59,7 @@ ushort DeviceButton::keycode() const
 
 
 /*!
- This function returns a human readable, translated description of the button.
+  Returns a human readable, translated description of the button.
  */
 QString DeviceButton::userText() const
 {
@@ -62,8 +67,8 @@ QString DeviceButton::userText() const
 }
 
 /*!
- This function returns the pixmap for this button.    If there isn't one
- it will return an empty (null) pixmap.
+  Returns the pixmap for this button.    If there isn't one
+  it will return an empty (null) pixmap.
  */
 QPixmap DeviceButton::pixmap() const
 {
@@ -75,7 +80,7 @@ QPixmap DeviceButton::pixmap() const
 }
 
 /*!
- This function returns the user assigned action for when this button is pressed.
+  Returns the user assigned action for when this button is pressed.
  */
 ServiceRequest DeviceButton::pressedAction() const
 {
@@ -83,24 +88,34 @@ ServiceRequest DeviceButton::pressedAction() const
 }
 
 /*!
- This function returns the user assigned action for when this button is pressed
- and held.
+  Returns the user assigned action for when this button is pressed
+  and held.
  */
 ServiceRequest DeviceButton::heldAction() const
 {
     return m_HeldAction;
 }
 
+/*!
+  Sets the keycode \a keycode that is set when the button is pressed.
+*/
 void DeviceButton::setKeycode(ushort keycode)
 {
     m_Keycode = keycode;
 }
 
+/*!
+  Sets the human readable, translated description of the button.
+*/
 void DeviceButton::setUserText(const QString& text)
 {
     m_UserText = text;
 }
 
+/*!
+  Set the pixmap for this button.  This will ideally match the label
+  on the physical button.
+*/
 void DeviceButton::setPixmap(const QString& pmn)
 {
     if ( !m_PixmapName.isEmpty() )
@@ -108,16 +123,26 @@ void DeviceButton::setPixmap(const QString& pmn)
     m_PixmapName = pmn;
 }
 
+/*!
+  Set the action to be performed when this button is pressed to \a action.
+*/
 void DeviceButton::setPressedAction(const ServiceRequest& action)
 {
     m_PressedAction = action;
 }
 
+/*!
+  Set the action to be performed when this button is pressed and
+  held to \a action.
+*/
 void DeviceButton::setHeldAction(const ServiceRequest& action)
 {
     m_HeldAction = action;
 }
 
+/*!
+  Returns TRUE if this DeviceButton is equal to \a e.
+*/
 bool DeviceButton::operator==(const DeviceButton &e) const
 {
     return ((keycode() == e.keycode()) &&

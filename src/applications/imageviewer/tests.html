@@ -1,100 +1,455 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Imageviewer Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Imageviewer Test List</h1>
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-
-<h3>File List</h3>
-<ol>
-<li>Start the <b>ImageViewer</b> application from the <b>Applications</b>
-    tab.  A list of available images will show up.
-<li>Click any image file.  The image will be displayed.
-<li>Return to the file list by closing the window (clicking the X in the top
-    right corner), pressing <b>ESC</b>ape, or clicking the <b>File</b> button
-    in the toolbar.
-<li>To view the next image in the list, click the <b>Next</b> button in the
-    toolbar, select <b>Next</b> from the <b>View</b> menu, or the <b>Right</b>
-    key on the keypad.
-<li>To view the previous image in the list, click the <b>Prev</b> button in the
-    toolbar, select <b>Previous</b> from the <b>View</b> menu, or the
-    <b>Left</b> key on the keypad.
-</ol>
-
-<h3>Image Formats</h3>
-<ol>
-<li>Create or locate at least one image in each of the following formats:
-    PNG, BMP, XBM, XPM, PNM, JPEG, MNG, GIF and NPD.
-<li>Make these files available to the QPE server program.
-<li>Start the <b>ImageViewer</b> application, and view each picture.
-</ol>
-
-<h3>Rotation and Fullscreen</h3>
-<ol>
-<li>Load any image.
-<li>Click the <b>rotation buttons</b> in the toolbar.  The image should rotate
-    and flip accordingly.
-<li>Select <b>Horizontal flip</b> and <b>Vertical flip</b> from the
-    <b>Image</b> menu.  The image should flip accordingly.
-<li>Use the <b>Up</b> and <b>Down</b> keys on the keypad to rotate the image.
-<li>To make the image fullscreen, click the <b>fullscreen button</b> in the
-    toolbar, select <b>Fullscreen</b> from the <b>View</b> menu or click
-    anywhere on the image.  The image will resize to the size of the screen.
-    Images that are not sized in proportion to the screen will have a
-    surrounding black edge.  Click in the window or press <b>ESC</b>ape on the
-    keypad to return to normal view.
-</ol>
-
-<h3>Slideshow</h3>
-<ol>
-<li>To start the slideshow, click the <b>slideshow button</b> in the toolbar
-    or select <b>Slideshow</b> from the <b>Image</b> menu.  The first image in
-    the list will be displayed.  After a pause, the next image in the list will
-    be displayed.
-<li>To change the amount of time between each image, select <b>Settings</b>
-    from the <b>View</b> menu, and move the slider to increase or decrease
-    the amount of time to wait between each image.
-<li>To have the images loop (the first image is shown after the last image)
-    check the <b>Repeat slideshow</b> option in the <b>Settings</b> dialog.
-<li>To reverse the direction of images that are shown, check the <b>Show
-    pictures in reverse</b> option.
-<li>To view the next image in the list, click the <b>Next</b> button in the
-    toolbar, select <b>Next</b> from the <b>View</b> menu, or the <b>Right</b>
-    key on the keypad.  The timeout period is reset after each image is loaded.
-<li>To view the previous image in the list, click the <b>Previous</b> button
-    in the toolbar, select <b>Previous</b> from the <b>View</b> menu, or the
-    <b>Left</b> key on the keypad.  The timeout period is reset after each
-    image is loaded.
-</ol>
-
-<h3>Document View</h3>
-<ol>
-<li>Select an image from the document view.  The <b>ImageViewer</b> will start
-    and load the selected image.
-</ol>
-
-<h3>Fast load</h3>
-<ol>
-<li>Uncheck <b>Fast load pictures</b> from the <b>Settings</b> dialog.  Large
-    images will take some time to load (around 8 seconds for a 2048x2048 image).
-<li>Check <b>Fast load pictures</b> from the <b>Settings</b> dialog.  Large
-    images will load much faster (around 2 seconds for a 2048x2048 image).
-</ol>
-
-<h3>Rotate-to-fit</h3>
-<ol>
-<li>Check <b>Rotate pictures to fit screen</b> from the <b>Settings</b>
-    dialog.  Any picture loaded will be rotated to best fit the available
-    space.
-<li>Check <b>Rotate clockwise</b> to specify a clockwise rotation on load,
-    or leave it unchecked to specify a counter-clockwise rotation.
-</ol>
-
+<h1>Qtopia/Image Viewer</h1>
+Before starting these tests, prepare the device to have a set of test
+images available.<br>
+For Troll testers you can upload these images to the device from
+aurochs/common/qtopia_test_doc/images<br>
+<br>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;View image</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that images of various
+types can be viewed<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span> and uncheck <span style="font-weight: bold;">Fast load
+pictures</span> and click OK</li>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image.</li>
+        <li>Verify that the image looks good (you can compare the image
+by viewing the same file on a desktop PC).</li>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span> and check <span style="font-weight: bold;">Fast load
+pictures</span> and click OK</li>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image</li>
+        <li>Verify that the image looks good.</li>
+        <li>If the image is a JPEG image: verify that the image is
+shown faster than without the option enabled.<br>
+        </li>
+        <li>Repeat the same for test images of type PNG, BMP, XBM, XPM,
+PNM,     JPEG, MNG, GIF and NPD.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Rotate image</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an image can be
+rotated<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span>&nbsp;</li>
+        <li>In the <span style="font-weight: bold;">Options</span> tab,
+uncheck <span style="font-weight: bold;">Rotate pictures to fit screen</span>
+and click <span style="font-weight: bold;">OK</span></li>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image.</li>
+        <li>Click on the <span style="font-weight: bold;">Rotate 90</span>
+button.</li>
+        <li>Verify that the image is rotated 90 degrees counter
+clockwise.</li>
+        <li>Click <span style="font-weight: bold;">Rotate 90</span>
+again.</li>
+        <li>Verify that the image is now shown upside down.</li>
+        <li>Click <span style="font-weight: bold;">Rotate 180</span>&nbsp;</li>
+        <li>Verify that the image is shown 'normal' again.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Flipping an image</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an image can be
+'flipped'<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span>&nbsp;</li>
+        <li>In the <span style="font-weight: bold;">Options</span> tab,
+uncheck <span style="font-weight: bold;">Rotate pictures to fit screen</span>
+and click <span style="font-weight: bold;">OK</span></li>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image.</li>
+        <li>Click on the <span style="font-weight: bold;">Image</span>
+menu and select <span style="font-weight: bold;">Horizontal flip</span>&nbsp;</li>
+        <li>Verify that the image has flipped horizontally (e.g. a
+person looking to the right on the image now looks to the left).</li>
+        <li>Click on the <span style="font-weight: bold;">Image</span>
+menu and select <span style="font-weight: bold;">Vertical flip</span>&nbsp;</li>
+        <li>Verify that the image has flipped vertically (e.g. a person
+standing on the floor suddenly hangs on the ceiling).</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Fullscreen mode</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an image can be
+viewed 'Fullscreen'<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image.</li>
+        <li>Click on the <span style="font-weight: bold;">Full Screen</span>
+button and verify that the image is shown full screen, e.g. there is no
+title bar, no menu bar, no status bar, just a picture and possibly some
+black areas on two sides of the image to solve scaling issues.</li>
+        <li>Tap the screen.</li>
+        <li>Verify that the display returns to 'normal' mode, e.g. the
+title bar, menu bar and status bar are visible again.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Slide show</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that multiple images can
+be shown in a 'slide show'<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on <span style="font-weight: bold;">View &gt; Slide
+show</span>&nbsp;</li>
+        <li>Verify that all available images are shown one after the
+other.</li>
+        <li>End the slide show by clicking <span
+ style="font-weight: bold;">View &gt; Slide Show</span> again.</li>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span>&nbsp;</li>
+        <li>Select the <span style="font-weight: bold;">Slideshow</span>
+tab</li>
+        <li>Drag the slider to adjust the interval time between
+pictures.</li>
+        <li>Click on <span style="font-weight: bold;">Slide Show</span>
+again.</li>
+        <li>Verify that the show is now proceeding with the new
+interval.</li>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span> and go to the <span style="font-weight: bold;">Slideshow</span>
+tab</li>
+        <li>Drag the slider to the left again.</li>
+        <li>Check the <span style="font-weight: bold;">Repeat slideshow</span>
+checkbox and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Start the slideshow again.</li>
+        <li>Verify that the slideshow starts again after the last image
+is shown.<br>
+        </li>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span> and go to the <span style="font-weight: bold;">Slideshow</span>
+tab</li>
+        <li>Uncheck the <span style="font-weight: bold;">Repeat
+slideshow</span> checkbox.</li>
+        <li>Check the <span style="font-weight: bold;">Show pictures
+in reverse</span> checkbox and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that after the slideshow is started again pictures
+are now shown in reverse order.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Image scaling</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that small pictures can
+be scaled up<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span>&nbsp;</li>
+        <li>Uncheck <span style="font-weight: bold;">Scale up small
+pictures</span> and click <span style="font-weight: bold;">OK</span></li>
+        <li>Open images until you find a small one ( for instance
+qt.bmp ).</li>
+        <li>Click on <span style="font-weight: bold;">View &gt;
+Settings</span>&nbsp;</li>
+        <li>Check <span style="font-weight: bold;">Scale up small
+pictures</span> and click <span style="font-weight: bold;">OK</span></li>
+        <li>Open the same image again.</li>
+        <li>Verify that it is shown at a larger scale.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Navigating</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can navigate
+through the available images.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the <span style="font-weight: bold;">Open</span>
+button and select an image.</li>
+        <li>Click on the <span style="font-weight: bold;">Next</span>
+button and verify that the next available image is shown.</li>
+        <li>Click on the <span style="font-weight: bold;">Previous</span>
+button and verify that the previous button is shown again.</li>
+        <li>Play with the <span style="font-weight: bold;">Next</span>
+and <span style="font-weight: bold;">Previous</span> buttons to navigate
+through all available images.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
 </body>
 </html>

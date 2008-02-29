@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/nightly/qt-2.3.4/src/kernel/qfontmanager_qws.cpp:104 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QRenderedFont Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QRenderedFont Class Reference</h1>
+
+<p>A QRenderedFont is the rendered version of a particular font (as 
+specified by QFont - that is, at a given weight,family and point size, 
+italic or not, and so on). There is one and only one QRenderedFont
+for each particular QFont specification; if you specify two Times 10pt
+bold italic QFonts they will both refer to the same QRenderedFont.
+QRenderedFonts are cached by QFontManager and are reference counted;
+when there is no QGfx referring to a particular QRenderedFont it is deleted.
+Each QRenderedFont renders glyphs (that is, images of characters) on demand
+and caches the rendered glyphs. It can be subclassed by individual factories
+since they create new QRenderedFonts.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qfontmanager_qws-h.html">qfontmanager_qws.h</a>&gt;</tt>
+<p><a href="qrenderedfont-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#QRenderedFont"><b>QRenderedFont</b></a> ( QDiskFont&nbsp;*&nbsp;df, const&nbsp;QFontDef&nbsp;&amp;&nbsp;d )</div></li>
+<li><div class=fn>virtual <a href="#~QRenderedFont"><b>~QRenderedFont</b></a> ()</div></li>
+<li><div class=fn>QFontDef <b>fontDef</b> () const</div></li>
+<li><div class=fn>void <b>ref</b> ()</div></li>
+<li><div class=fn>bool <b>deref</b> ()</div></li>
+<li><div class=fn>int <a href="#ascent"><b>ascent</b></a> ()</div></li>
+<li><div class=fn>int <a href="#descent"><b>descent</b></a> ()</div></li>
+<li><div class=fn>int <a href="#width"><b>width</b></a> ( int )</div></li>
+<li><div class=fn>int <a href="#width-2"><b>width</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s, int&nbsp;l = -1 )</div></li>
+<li><div class=fn>int <b>leftBearing</b> ( int )</div></li>
+<li><div class=fn>int <a href="#rightBearing"><b>rightBearing</b></a> ( int )</div></li>
+<li><div class=fn>int <a href="#minLeftBearing"><b>minLeftBearing</b></a> ()</div></li>
+<li><div class=fn>int <b>minRightBearing</b> ()</div></li>
+<li><div class=fn>int <a href="#maxWidth"><b>maxWidth</b></a> ()</div></li>
+<li><div class=fn>virtual bool <b>inFont</b> ( QChar&nbsp;ch ) const = 0</div></li>
+<li><div class=fn>virtual QGlyph <a href="#render"><b>render</b></a> ( QChar&nbsp;ch ) = 0</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+A QRenderedFont is the rendered version of a particular font (as 
+specified by <a href="qfont.html">QFont</a> - that is, at a given weight,family and point size, 
+italic or not, and so on). There is one and only one QRenderedFont
+for each particular QFont specification; if you specify two Times 10pt
+bold italic QFonts they will both refer to the same QRenderedFont.
+QRenderedFonts are cached by <a href="qfontmanager.html">QFontManager</a> and are reference counted;
+when there is no QGfx referring to a particular QRenderedFont it is deleted.
+Each QRenderedFont renders glyphs (that is, images of characters) on demand
+and caches the rendered glyphs. It can be subclassed by individual factories
+since they create new QRenderedFonts.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QRenderedFont"></a>QRenderedFont::QRenderedFont ( QDiskFont&nbsp;*&nbsp;df, const&nbsp;QFontDef&nbsp;&amp;&nbsp;d )
+</h3>
+
+This constructs a QRenderedFont; the QDiskFont and QFontDef are needed by 
+the font factory to render glyphs.
+
+<h3 class=fn><a name="~QRenderedFont"></a>QRenderedFont::~QRenderedFont ()<tt> [virtual]</tt>
+</h3>
+
+Destroys a QRenderedFont
+
+<h3 class=fn>int <a name="ascent"></a>QRenderedFont::ascent ()
+</h3>
+
+Returns the font's ascent (the distance from the baseline to the top of
+the tallest character)
+
+<h3 class=fn>int <a name="descent"></a>QRenderedFont::descent ()
+</h3>
+
+Returns the font's descent (the distance from the baseline to the bottom
+of the lowest character)
+
+<h3 class=fn>int <a name="maxWidth"></a>QRenderedFont::maxWidth ()
+</h3>
+
+Returns the maximum width in pixels of any character in the font.
+
+<h3 class=fn>int <a name="minLeftBearing"></a>QRenderedFont::minLeftBearing ()
+</h3>
+
+Returns the minimum right bearing (distance from the end of a character)
+of any character in the font. Unimplemented.
+
+<h3 class=fn>QGlyph <a name="render"></a>QRenderedFont::render ( <a href="qchar.html">QChar</a>&nbsp;ch )<tt> [pure virtual]</tt>
+</h3>
+
+Renders the unicode character ch, returning a QGlyph.
+A QGlyph has two members, metrics and data. Metrics contains
+information on the size, advance width and so forth of the character,
+data a pointer to the raw data for the character - either a 1 bit per pixel
+bitmap or an 8 bit per pixel alpha map of the character, the linestep
+of which is specified in QGlyphMetrics.
+
+<h3 class=fn>int <a name="rightBearing"></a>QRenderedFont::rightBearing ( int )
+</h3>
+
+Returns the right bearing (distance in pixels after the end of the letter)
+of the character specified.
+
+<h3 class=fn>int <a name="width"></a>QRenderedFont::width ( int )
+</h3>
+
+Returns the width in pixels of the unicode character specified
+
+<h3 class=fn>int <a name="width-2"></a>QRenderedFont::width ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;s, int&nbsp;l = -1 )
+</h3>
+
+Returns the width in pixels of the first l characters of the string s,
+or the whole string if the value for l is not specified. This should be
+used in preference to adding up the widths of each character in the string
+since it can take account of kerning and inter-character spacing
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

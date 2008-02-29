@@ -29,10 +29,43 @@
 #include <qpushbutton.h>
 #include <qobject.h>
 
-#include "categorywidget.h"
+#include "categoryedit_p.h"
 #include "categoryselect.h"
 
 #include <stdlib.h>
+
+/*! \enum CategorySelect::SelectorWidget
+  Chooses a type of widget to use as the selection widget.
+
+  \value ComboBox
+  \value ListView
+*/
+
+/*!
+  \class CategorySelect
+  \brief The CategorySelect widget allows users to select Categories with a
+  combobox interface.
+
+  CategorySelect is useful to provide a QComboBox of Categories for
+  filtering (such as in the Contacts table view) or to allow the user
+  to select multiple Categories. The allCategories variable sets
+  whether the CategorySelect is in filtering or selecting mode.
+
+  In filtering mode, the All and Unfiled categories are added. The
+
+  In selecting mode, the CategorySelect may either be a QComboBox and
+  a QToolButton or a QListView with checkable items depending on the
+  screen size.
+
+  CategorySelect automatically updates itself if Categories has been
+  changed elsewhere in the environment.
+
+  Signals and slots are provided to notify the application of the users
+  selections.  A QToolButton is also provided so that users can edit the
+  Categories manually.
+
+  \ingroup qtopiaemb
+*/
 
 static QString categoryEdittingFileName()
 {
@@ -175,7 +208,7 @@ QArray<int> CategoryCombo::initComboWithRefind( const QArray<int> &recCats,
       }
     }
     else{
-      results = recCats;
+      results = recCats.copy();
     }
     // addition end
 
@@ -230,6 +263,7 @@ QArray<int> CategoryCombo::initComboWithRefind( const QArray<int> &recCats,
 
 CategoryCombo::~CategoryCombo()
 {
+    delete d;
 }
 
 int CategoryCombo::currentCategory() const
@@ -321,16 +355,19 @@ public:
     Categories cats;
     QString appName;
 
-    void reloadCatSelector()
+    void reloadCatSelector( const QStringList &checked )
 	{
 	    catSelector->clear();
 	    catSelector->addCheckableList( cats.labels( appName ) );
+	    catSelector->setChecked( checked );
+	}
 
+    void reloadCatSelector()
+	{
 	    // labels() from qtopia1
 	    QStringList strs = cats.globalGroup().labels( mRec );
 	    strs += cats.appGroupMap()[appName].labels( mRec );
-
-	    catSelector->setChecked( strs );
+	    reloadCatSelector( strs );
 	}
     void pruneDeletedCats()
 	{
@@ -353,27 +390,13 @@ public slots:
 };
 
 
-CategorySelect::CategorySelect( QWidget *parent, const char *name,int width)
-    : QHBox( parent, name ),
-      cmbCat( 0 ),
-      cmdCat( 0 ),
-      d( 0 )
-{
-    init(width);
-}
+/*!
+  \overload
 
-CategorySelect::CategorySelect( const QArray<int> &vl,
-				const QString &appName, QWidget *parent,
-				const char *name ,int width)
-    : QHBox( parent, name ),
-      cmbCat( 0 ),
-      cmdCat( 0 ),
-      d( 0 )
-{
-    init(width);
-    setCategories( vl, appName, appName );
-}
-
+  This constructor accepts an array \a vl of integers representing Categories.
+  \a visibleName is the string used when the name of this widget is required
+  to be displayed. \a width is an integer used as the fixed width of the widget.
+*/
 CategorySelect::CategorySelect( const QArray<int> &vl,
 				const QString &appName,
 				const QString &visibleName,
@@ -387,40 +410,99 @@ CategorySelect::CategorySelect( const QArray<int> &vl,
     setCategories( vl, appName, visibleName );
 }
 
+/*!
+  \overload
+  This constructor accepts an array \a vl of integers representing Categories.
+  \a appName is used as the visible name string.
+*/
 
+CategorySelect::CategorySelect( const QArray<int> &vl,
+				const QString &appName, QWidget *parent,
+				const char *name ,int width)
+    : QHBox( parent, name ),
+      cmbCat( 0 ),
+      cmdCat( 0 ),
+      d( 0 )
+{
+    init(width);
+    setCategories( vl, appName, appName );
+}
+
+
+/*!
+  Constructs a category selector with parent \a parent, name \a name and
+  fixed width \a width.
+
+  This constructor is provided to make integration with Qt Designer easier.
+*/
+
+CategorySelect::CategorySelect( QWidget *parent, const char *name,int width)
+    : QHBox( parent, name ),
+      cmbCat( 0 ),
+      cmdCat( 0 ),
+      d( 0 )
+{
+    init(width);
+}
+
+
+/*!
+  Destructs a CategorySelect widget.
+*/
 CategorySelect::~CategorySelect()
 {
 }
 
+class EditDlg : public QDialog
+{
+public:
+    EditDlg(QWidget *parent, const char *name, bool modal,
+	    const QArray<int> &vlRecs, const QString &appName, const QString &visibleName)
+	: QDialog(parent, name, modal)
+    {
+	setCaption( tr("Edit Categories") );
+	QVBoxLayout *vb = new QVBoxLayout( this );
+	ce = new CategoryEdit( vlRecs, appName, visibleName, this );
+	vb->addWidget( ce );
+    }
+
+    QArray<int> newCategories() { return ce->newCategories(); };
+
+protected:
+    void accept()
+    {
+	if ( !ce->tryAccept() )
+	    return;
+
+	QDialog::accept();
+    }
+
+private:
+    CategoryEdit *ce;
+};
+
+/*!
+  This slot is called when the user pushes the button to edit Categories.
+*/
+
 void CategorySelect::slotDialog()
 {
-    if (QFile::exists( categoryEdittingFileName() )){
-        QMessageBox::warning(this,tr("Error"),
-	   tr("Sorry, another application is\nediting categories.") );
-        return;
-    }
-
-    QFile f( categoryEdittingFileName() );
-    if ( !f.open( IO_WriteOnly) ){
-        return;
-    }
-
-    QDialog editDlg( this, "categories", TRUE ); // No tr
-    editDlg.setCaption( tr("Edit Categories") );
-    QVBoxLayout *vb = new QVBoxLayout( &editDlg );
-    CategoryWidget ce( d->mRec, mStrAppName, d->mVisibleName, &editDlg );
-    vb->addWidget( &ce );
+    EditDlg editDlg( this, "categories", TRUE, d->mRec, mStrAppName, d->mVisibleName ); // No tr
+#ifndef QTOPIA_DESKTOP
     editDlg.showMaximized();
+    // need to add OKAY, CANCEL button
+#endif
 
     d->editMode = TRUE;
     if ( editDlg.exec() ) {
-	d->mRec = ce.newCategories();
+	d->mRec = editDlg.newCategories();
 	cmbCat->initCombo( d->mRec, mStrAppName, d->mVisibleName );
     }
-
-    f.close();
-    QFile::remove( categoryEdittingFileName() );
 }
+
+/*!
+  This slot is called when the available Categories have been changed.
+*/
 
 void CategorySelect::categoriesChanged()
 {
@@ -445,12 +527,17 @@ void CategorySelect::categoriesChanged()
 	    }
 	}
 	else {
+	    QStringList current = d->catSelector->checked();
 	    d->cats.load( categoryFileName() );
 	    d->pruneDeletedCats();
-	    d->reloadCatSelector();
+	    d->reloadCatSelector( current );
 	}
     }
 }
+
+/*!
+  This slot is called when a new Category is available.
+*/
 
 void CategorySelect::slotNewCat( int newUid )
 {
@@ -471,12 +558,29 @@ void CategorySelect::slotNewCat( int newUid )
     emit signalSelected( currentCategory() );
 }
 
+/*!
+  \overload
+
+  Resets the CategorySelect to select the \a vlCats for
+  the Categories assoicated with \a appName.
+
+  This function should only be called if <i>filtering</i>
+  on Categories and not selecting and therefore possibly
+  allowing the user to edit Categories.
+*/
 QString CategorySelect::setCategories( const QArray<int> &rec,
 				    const QString &appName )
 {
     return setCategories( rec, appName, appName );
 }
 
+
+/*!
+  Resets the CategorySelect to select the \a vlCats for
+  the Categories assoicated with \a appName and displays
+  the \a visibleName if the user is selecting and therefore editing
+  new Categories.
+ */
 QString CategorySelect::setCategories( const QArray<int> &rec,
 				    const QString &appName,
 				    const QString &visibleName )
@@ -487,14 +591,20 @@ QString CategorySelect::setCategories( const QArray<int> &rec,
     if ( d->type == ComboBox )
 	d->mRec = cmbCat->initComboWithRefind( rec, appName );
     else {
-	d->mRec = rec;
+	d->mRec = rec.copy();
 	d->reloadCatSelector();
     }
     return Qtopia::Record::idsToString(d->mRec);
 }
 
+#ifdef QTOPIA_DESKTOP
 void CategorySelect::init(int width, bool usingAll )
 {
+#else
+void CategorySelect::init(int width)
+{
+    const bool usingAll = FALSE;
+#endif
     if ( d ) {
 	delete d->layout;
 	delete d->container;
@@ -558,7 +668,9 @@ void CategorySelect::init(int width, bool usingAll )
     d->fixedWidth = width;
 }
 
-
+/*!
+  Return the value of the currently selected category.
+ */
 int CategorySelect::currentCategory() const
 {
     if ( d->type == ComboBox )
@@ -574,12 +686,17 @@ void CategorySelect::setCurrentCategory( int newCatUid )
     else d->catSelector->setChecked( d->cats.label( mStrAppName, newCatUid ) );
 }
 
-
+/*!
+  Returns a shallow copy of the categories in this CategorySelect.
+ */
 const QArray<int> &CategorySelect::currentCategories() const
 {
     return d->mRec;
 }
 
+/*!
+  Hides the edit section of the CategorySelect widget if \a remove is TRUE.
+ */
 void CategorySelect::setRemoveCategoryEdit( bool remove )
 {
     d->canEdit = !remove;
@@ -595,6 +712,9 @@ void CategorySelect::setRemoveCategoryEdit( bool remove )
     }
 }
 
+/*!
+  Changes this CategorySelect to the All category if \a all is TRUE.
+ */
 void CategorySelect::setAllCategories( bool all )
 {
     // if showing all category, then that means the
@@ -610,7 +730,12 @@ void CategorySelect::setAllCategories( bool all )
 	reinit = TRUE;
 
     if ( reinit ) {
+#ifdef QTOPIA_DESKTOP
 	init( d->fixedWidth, all );
+#else
+	init( d->fixedWidth );
+	d->usingAll = all;
+#endif
 	setCategories( d->mRec, d->appName, d->mVisibleName );
     }
 
@@ -627,6 +752,9 @@ void CategorySelect::setAllCategories( bool all )
 }
 
 // 01.12.21 added
+/*!
+  Sets the fixed width of the widget to \a width.
+  */
 void CategorySelect::setFixedWidth(int width)
 {
     if ( d->type == ComboBox ) {

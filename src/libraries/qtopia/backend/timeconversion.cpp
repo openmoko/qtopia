@@ -176,13 +176,13 @@ QDateTime TimeConversion::fromISO8601( const QCString &s )
 
     int tzoff = 0;
     bool inLocalTime = FALSE;
-    if ( timestr.find( 'z', 0, TRUE ) == (int)timestr.length() - 1 )
+    if ( timestr.find( 'z', 0, TRUE ) == (int)timestr.length() - 1 && !timestr.isEmpty())
 	// UTC
 	timestr = timestr.left( timestr.length() -1 );
     else {
 	int plus = timestr.find( "+" );
 	int minus = timestr.find( "-" );
-	if ( plus != -1 || minus != -1 ) {
+	if ( plus != -1 || minus != -1 && !timestr.isEmpty()) {
 	    // have a timezone offset
 	    plus = (plus != -1) ? plus : minus;
 	    QCString off = timestr.mid( plus );

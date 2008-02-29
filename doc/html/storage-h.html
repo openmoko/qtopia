@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/storage.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>storage.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>storage.h</h1>
+
+<p>This is the verbatim text of the storage.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef __storage_h__
+#define __storage_h__
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qobject.h&gt;
+#include &lt;qlist.h&gt;
+
+class FileSystem;
+#ifndef QT_NO_COP
+class QCopChannel;
+#endif
+
+
+#if defined (QTOPIA_TEMPLATEDLL)
+//MOC_SKIP_BEGIN
+template class QTOPIA_EXPORT QList&lt;FileSystem&gt;;
+//MOC_SKIP_END
+#endif
+
+class QTOPIA_EXPORT StorageInfo : public QObject
+{
+    Q_OBJECT
+public:
+    StorageInfo( QObject *parent=0 );
+
+    const QList&lt;FileSystem&gt; &amp;fileSystems() const { return mFileSystems; }
+    const FileSystem *fileSystemOf( const QString &amp;filename );
+    QStringList fileSystemNames() const; // libqtopia
+
+signals:
+    void disksChanged();
+
+public slots:
+    void update();
+
+private slots:
+    void cardMessage( const QCString&amp; msg, const QByteArray&amp; data );
+private:
+    QList&lt;FileSystem&gt; mFileSystems;
+#ifndef QT_NO_COP
+    QCopChannel *channel;
+#endif
+};
+
+class QTOPIA_EXPORT FileSystem
+{
+public:
+    const QString &amp;disk() const { return fsdisk; }
+    const QString &amp;path() const { return fspath; }
+    const QString &amp;name() const { return humanname; }
+    const QString &amp;options() const { return opts; }
+    long blockSize() const { return blkSize; }
+    long totalBlocks() const { return totalBlks; }
+    long availBlocks() const { return availBlks; }
+    bool isRemovable() const { return removable; }
+    bool isWritable() const { return opts.contains("rw"); }
+
+private:
+    friend class StorageInfo;
+    FileSystem( const QString &amp;disk, const QString &amp;path, const QString &amp;humanname, bool rem, const QString &amp;opts );
+    void update();
+
+    QString fsdisk;
+    QString fspath;
+    QString humanname;
+    long blkSize;
+    long totalBlks;
+    long availBlks;
+    bool removable;
+    QString opts;
+};
+
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

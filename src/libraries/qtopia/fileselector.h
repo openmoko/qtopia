@@ -60,17 +60,16 @@ public:
     QValueList<DocLnk> fileList() const;    // libqtopia
     const DocLnk *selected(); // use selectedDocument() instead
 
-public slots:
     void reread();
 
 signals:
     void fileSelected( const DocLnk & );
     void newSelected( const DocLnk & );
     void closeMe();
-    void typeChanged(void);
-    void categoryChanged(void);
+    void typeChanged(void); // not available in 1.5.0
+    void categoryChanged(void); // not available in 1.5.0
 
-protected:
+private:
     void showEvent( QShowEvent * );
 
 private slots:
@@ -83,6 +82,7 @@ private slots:
     void catSelected( int );
     void cardChanged();
     void linkChanged( const QString & );
+    void slotReread();
 
 private:
     void updateView();

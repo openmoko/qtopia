@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/3rdparty/plugins/codecs/libmad/libmadplugin.cpp:54 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>LibMadPlugin Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>LibMadPlugin Class Reference</h1>
+
+<p>The LibMadPlugin class is a wrapper for the libmad library.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="libmadplugin-h.html">libmadplugin.h</a>&gt;</tt>
+<p>Inherits <a href="mediaplayerdecoder.html">MediaPlayerDecoder</a>.
+<p><a href="libmadplugin-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><b>LibMadPlugin</b> ()</div></li>
+<li><div class=fn><b>~LibMadPlugin</b> ()</div></li>
+<li><div class=fn>virtual const char * <b>pluginName</b> ()</div></li>
+<li><div class=fn>virtual const char * <b>pluginComment</b> ()</div></li>
+<li><div class=fn>virtual double <b>pluginVersion</b> ()</div></li>
+<li><div class=fn>virtual bool <b>isFileSupported</b> ( const QString &amp; )</div></li>
+<li><div class=fn>virtual bool <b>open</b> ( const QString &amp; )</div></li>
+<li><div class=fn>virtual bool <b>close</b> ()</div></li>
+<li><div class=fn>virtual bool <b>isOpen</b> ()</div></li>
+<li><div class=fn>virtual const QString &amp; <b>fileInfo</b> ()</div></li>
+<li><div class=fn>virtual int <b>audioStreams</b> ()</div></li>
+<li><div class=fn>virtual int <b>audioChannels</b> ( int&nbsp;stream )</div></li>
+<li><div class=fn>virtual int <b>audioFrequency</b> ( int&nbsp;stream )</div></li>
+<li><div class=fn>virtual int <b>audioSamples</b> ( int&nbsp;stream )</div></li>
+<li><div class=fn>virtual bool <b>audioSetSample</b> ( long&nbsp;sample, int&nbsp;stream )</div></li>
+<li><div class=fn>virtual long <b>audioGetSample</b> ( int&nbsp;stream )</div></li>
+<li><div class=fn>virtual bool <b>audioReadSamples</b> ( short&nbsp;*&nbsp;output, int&nbsp;channels, long&nbsp;samples, long&nbsp;&amp;&nbsp;samplesRead, int&nbsp;stream )</div></li>
+<li><div class=fn>bool <b>read</b> ()</div></li>
+<li><div class=fn>bool <b>decode</b> ( short&nbsp;*&nbsp;output, long&nbsp;samples, long&nbsp;&amp;&nbsp;samplesRead )</div></li>
+<li><div class=fn>virtual int <b>videoStreams</b> ()</div></li>
+<li><div class=fn>virtual int <b>videoWidth</b> ( int )</div></li>
+<li><div class=fn>virtual int <b>videoHeight</b> ( int )</div></li>
+<li><div class=fn>virtual double <b>videoFrameRate</b> ( int )</div></li>
+<li><div class=fn>virtual int <b>videoFrames</b> ( int )</div></li>
+<li><div class=fn>virtual bool <b>videoSetFrame</b> ( long, int )</div></li>
+<li><div class=fn>virtual long <b>videoGetFrame</b> ( int )</div></li>
+<li><div class=fn>virtual bool <b>videoReadFrame</b> ( unsigned char **, int, int, int, int, ColorFormat, int )</div></li>
+<li><div class=fn>virtual bool <b>videoReadScaledFrame</b> ( unsigned char **, int, int, int, int, int, int, ColorFormat, int )</div></li>
+<li><div class=fn>virtual bool <b>videoReadYUVFrame</b> ( char *, char *, char *, int, int, int, int, int )</div></li>
+<li><div class=fn>virtual double <b>getTime</b> ()</div></li>
+<li><div class=fn>virtual bool <b>setSMP</b> ( int )</div></li>
+<li><div class=fn>virtual bool <b>setMMX</b> ( bool )</div></li>
+<li><div class=fn>virtual bool <b>supportsAudio</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsVideo</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsYUV</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsMMX</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsSMP</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsStereo</b> ()</div></li>
+<li><div class=fn>virtual bool <b>supportsScaling</b> ()</div></li>
+<li><div class=fn>virtual long <b>getPlayTime</b> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The LibMadPlugin class is a wrapper for the libmad library.
+<p> 
+<p> The libmad library is distributed under the terms of the GNU General Public License,
+Version 2.
+The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
+More information about the Mad library can be found at http://www.mars.org/home/rob/proj/mpeg/
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

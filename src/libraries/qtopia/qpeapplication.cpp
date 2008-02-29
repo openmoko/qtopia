@@ -57,6 +57,8 @@
 #include <qevent.h>
 #include <qtooltip.h>
 #include <qsignal.h>
+#include <qclipboard.h>
+#include <qtimer.h>
 
 #ifdef Q_WS_QWS
 #include <qwsdisplay_qws.h>
@@ -85,6 +87,7 @@
 #  include "styleinterface.h"
 #  include "resource.h"
 #  include "qpestyle.h"
+#  include "qpedecoration_p.h"
 #endif
 #include "alarmserver.h"
 #include "pluginloader_p.h"
@@ -407,12 +410,17 @@ public:
 
 class ResourceMimeFactory : public QMimeSourceFactory {
 public:
-    ResourceMimeFactory()
+    ResourceMimeFactory() : resImage(0)
     {
 #ifdef Q_WS_QWS
 	setFilePath( Global::helpPath() );
 	setExtensionType("html","text/html;charset=UTF-8");
 #endif
+    }
+
+    ~ResourceMimeFactory()
+    {
+	delete resImage;
     }
 
     const QMimeSource* data(const QString& abs_name) const
@@ -428,13 +436,20 @@ public:
 		    name = name.left(dot);
 #ifdef Q_WS_QWS
 		QImage img = Resource::loadImage(name);
-		if ( !img.isNull() )
-		    r = new QImageDrag(img);
+		if ( !img.isNull() ) {
+		    ResourceMimeFactory *that = (ResourceMimeFactory*)this;
+		    delete that->resImage;
+		    that->resImage = new QImageDrag( img );
+		    r = resImage;
+		}
 #endif
 	    } while (!r && sl>0);
 	}
 	return r;
     }
+
+private:
+    QImageDrag *resImage;
 };
 
 int qtopia_muted=0;
@@ -445,11 +460,11 @@ static void setVolume(int t=0, int percent=-1)
 	case 0: {
 	    Config cfg("Sound");
 	    cfg.setGroup("System");
-	    if ( percent < 0 )
+	    if ( percent < 0 ) 
 		percent = cfg.readNumEntry("Volume",50);
 	    int fd = 0;
 #ifndef Q_OS_WIN32
-	    if ((fd = open("/dev/mixer", O_RDWR))>=0) {
+	    if ((fd = open("/dev/mixer", O_RDWR))>=0) { // Some devices require this, O_RDONLY doesn't always work
 		int vol = qtopia_muted ? 0 : percent;
 		// set both channels to same volume
 		vol |= vol << 8;
@@ -715,6 +730,20 @@ static void setScreenSaverInterval(int interval)
   If the application offers the TimeMonitor service, it will get
   the QCop message that causes this signal even if it is not running,
   thus allowing it to update any alarms or other time-related records.
+*/
+
+/*!
+  \fn void QPEApplication::categoriesChanged();
+
+  This signal is emitted whenever a category is added, removed or edited.
+  Note, on Qtopia 1.5.0, this signal is never emitted.
+*/
+
+/*!
+  \fn void QPEApplication::linkChanged( const QString &linkFile );
+
+  This signal is emitted whenever an AppLnk or DocLnk is stored, removed or edited.
+  \a linkFile contains the name of the link that is being modified.
 */
 
 /*!
@@ -1029,7 +1058,7 @@ void QPEApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
 
 #ifdef Q_WS_QWS
 /*!
-  Filters Qt events to implement Qtopia-specific functionality.
+  Filters Qt event \a e to implement Qtopia-specific functionality.
 */
 bool QPEApplication::qwsEventFilter( QWSEvent *e )
 {
@@ -1192,11 +1221,12 @@ QString QPEApplication::qpeDir()
 
     QString key = "/palmtopcenter/qtopiadir";
     bool okay;
-    QString dir = settings.readEntry(key, QString::null, &okay);
+    QString dir = settings.readEntry(key, QString::null, &okay) + "/";
     if (!okay || dir.isNull()) {
 	dir = "/opt/Qtopia/qtopiadesktop";
 	settings.writeEntry( key, dir);
     }
+
     return dir;
 #else
     qWarning("Cannot determine the install path");
@@ -1450,13 +1480,17 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	stream >> tmp;
 	emit dateFormatChanged( tmp );
     } else if ( msg == "setVolume(int,int)" ) {
-	int t,v;
-	stream >> t >> v;
-	setVolume(t,v);
+	if ( type() == GuiServer ) {
+	    int t,v;
+	    stream >> t >> v;
+	    setVolume(t,v);
+	}
 	emit volumeChanged( qtopia_muted );
     } else if ( msg == "volumeChange(bool)" ) {
 	stream >> qtopia_muted;
-	setVolume();
+	if ( type() == GuiServer ) {
+	    setVolume();
+	}
 	emit volumeChanged( qtopia_muted );
     } else if ( msg == "flush()" ) {
 	emit flush();
@@ -1481,6 +1515,13 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    //qDebug("setScreenSaverMode(%d)", disable_suspend );
 	    if ( disable_suspend > old )
 		setScreenSaverInterval( -1 );
+	}
+    } else if ( msg == "getMarkedText()" ) {
+	if ( type() == GuiServer ) {
+	    const ushort unicode = 'C'-'@';
+	    const int scan = Key_C;
+	    qwsServer->processKeyEvent( unicode, scan, ControlButton, TRUE, FALSE );
+	    qwsServer->processKeyEvent( unicode, scan, ControlButton, FALSE, FALSE );
 	}
     }
 #endif
@@ -1746,12 +1787,14 @@ void QPEApplication::prepareForTermination(bool willrestart)
 	//### revise add a different pix map
 	qDebug("Missing pixmap : QPEApplication::prepareForTermination()");
 #endif
-	QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize | // no tr
-		QWidget::WStyle_NoBorder | QWidget::WStyle_Tool | QWidget::WStyle_StaysOnTop );
+	QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize | // No tr
+		QWidget::WStyle_NoBorder | QWidget::WStyle_Tool |
+		QWidget::WStyle_StaysOnTop | QWidget::WDestructiveClose );
 	lblWait->setPixmap( pix );
 	lblWait->setAlignment( QWidget::AlignCenter );
 	lblWait->setGeometry( desktop()->geometry() );
 	lblWait->show();
+	QTimer::singleShot( 5000, lblWait, SLOT(close()) ); // If we don't restart we want to get this out of the way
     }
 #ifndef SINGLE_APP
 #ifndef QT_NO_COP
@@ -1980,6 +2023,7 @@ int QPEApplication::exec()
 {
 #ifndef QT_NO_COP
     d->sendQCopQ();
+    processEvents(); // we may have received QCop messages in the meantime.
 #endif
     if ( d->keep_running)
 	//|| d->qpe_main_widget && d->qpe_main_widget->isVisible() )
@@ -2055,7 +2099,6 @@ void QPEApplication::pluginLibraryManager( PluginLibraryManager **m )
     *m = 0;
 #endif
 }
-
 
 /*!
     \fn void QPEApplication::showDialog( QDialog* dialog, bool nomax )

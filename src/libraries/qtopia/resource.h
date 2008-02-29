@@ -37,7 +37,7 @@ public:
     static QBitmap loadBitmap( const QString &name );
     static QString findPixmap( const QString &name );
 
-    static QIconSet loadIconSet( const QString &name );
+    static QIconSet loadIconSet( const QString &name ); // libqtopia
 
     static QString findSound( const QString &name );
     static QStringList allSounds();

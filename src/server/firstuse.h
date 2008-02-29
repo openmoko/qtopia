@@ -78,4 +78,6 @@ private:
     int waitForExit;
     bool waitingForLaunch;
     bool needRestart;
+
+    QFont defaultFont;
 };

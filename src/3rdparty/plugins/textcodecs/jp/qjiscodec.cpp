@@ -39,9 +39,11 @@
 // a.k.a. Junji Takagi, and is include in Qt with the author's permission,
 // and the grateful thanks of the Trolltech team.
 
-/*! \class QJisCodec qjiscodec.h
+/*! \class QJisCodec
 
-  \brief Provides conversion to and from JIS character sets
+  \brief The QJisCodec class provides conversion to and from JIS character sets.
+
+  \ingroup qtopiaemb
 
   The QJisCodec class subclasses QTextCodec to provide support for JIS
   X 0201 Latin, JIS X 0201 Kana, JIS X 0208 and JIS X 0212.
@@ -55,7 +57,7 @@
   thanks of the Trolltech team. Here is the copyright statement for
   that code:
 
-  \mustquote
+  \quote
 
   Copyright (c) 1999 Serika Kurusugawa, All rights reserved.
 
@@ -80,6 +82,9 @@
   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
   SUCH DAMAGE.
+
+  \endquote
+
 */
 
 #include "qjiscodec.h"
@@ -120,10 +125,16 @@ static const char * const Esc_SEQ[] = { Esc_Ascii,
 					Esc_JISX0208_1983,
 					Esc_JISX0212 };
 
-/*! \internal */
+/*!
+  Constructs a QJisCodec.
+ */
 QJisCodec::QJisCodec() : conv(QJpUnicodeConv::newConverter(JU_Default))
 {
 }
+
+/*!
+  Destructs the codec.
+*/
 
 QJisCodec::~QJisCodec()
 {
@@ -131,7 +142,9 @@ QJisCodec::~QJisCodec()
 }
 
 
-/*! \internal */
+/*! 
+  Returns 16.
+*/
 int QJisCodec::mibEnum() const
 {
     /*
@@ -144,7 +157,7 @@ int QJisCodec::mibEnum() const
     return 16;
 }
 
-/*! \internal */
+/*! \reimp */
 QCString QJisCodec::fromUnicode(const QString& uc, int& len_in_out) const
 {
     int l = QMIN((int)uc.length(),len_in_out);
@@ -206,7 +219,7 @@ QCString QJisCodec::fromUnicode(const QString& uc, int& len_in_out) const
     return result;
 }
 
-/*! \internal */
+/*! \reimp */
 QString QJisCodec::toUnicode(const char* chars, int len) const
 {
     QString result;
@@ -316,13 +329,13 @@ QString QJisCodec::toUnicode(const char* chars, int len) const
     return result;
 }
 
-/*! \internal */
+/*! \reimp */
 const char* QJisCodec::name() const
 {
     return "JIS7";
 }
 
-/*! \internal */
+/*! \reimp */
 int QJisCodec::heuristicNameMatch(const char* hint) const
 {
     int score = 0;
@@ -354,7 +367,7 @@ int QJisCodec::heuristicNameMatch(const char* hint) const
     return QTextCodec::heuristicNameMatch(hint);
 }
 
-/*! \internal */
+/*! \reimp */
 int QJisCodec::heuristicContentMatch(const char* chars, int len) const
 {
     int score = 0;
@@ -630,7 +643,7 @@ public:
     }
 };
 
-/*! \internal */
+/*! \reimp */
 QTextDecoder* QJisCodec::makeDecoder() const
 {
     return new QJisDecoder(conv);

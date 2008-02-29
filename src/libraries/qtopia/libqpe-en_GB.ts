@@ -1,5 +1,17 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>AlarmServer</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to schedule alarm.
+Free some memory and try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Categories</name>
     <message>
         <source>All</source>
@@ -44,6 +56,33 @@
         <source>New Category </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Duplicate categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is already a category named
+%1.
+Please choose another name, or delete
+the duplicate.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removing Category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Making a global category local will delete it from all other applications that may use it. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a local category will make all items in this category unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CategoryEditBase</name>
@@ -72,10 +111,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter a new category to the left and press to add it to the list.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -89,6 +124,10 @@
     </message>
     <message>
         <source>Check to make this property available to all applications.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -106,15 +145,6 @@
 <context>
     <name>CategorySelect</name>
     <message>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sorry, another application is
-editing categories.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Edit Categories</source>
         <translation type="unfinished"></translation>
     </message>
@@ -128,154 +158,7 @@ editing categories.</source>
     </message>
 </context>
 <context>
-    <name>DateBookMonthHeader</name>
-    <message>
-        <source>Show January in the selected year</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show the previous month</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show the next month</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show December in the selected year</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>FileSelector</name>
-    <message>
-        <source>Close the File Selector</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show documents of this type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Document View</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show documents in this category</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Click to select a document from the list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>, or select &lt;b&gt;New Document&lt;/b&gt; to create a new document.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;br&gt;&lt;br&gt;Click and hold for document properties.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>FileSelectorView</name>
-    <message>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>OwnerDlg</name>
-    <message>
-        <source>Owner Information</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>PasswordBase</name>
-    <message>
-        <source>1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>9</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enter passcode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Passcode</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>New Document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Restore</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Move</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Maximize</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
+    <name>Config</name>
     <message>
         <source>Out of Space</source>
         <translation type="unfinished"></translation>
@@ -289,29 +172,9 @@ Please free up some space and
 try again.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Unable to create start up files
-Please free up some space
-before entering data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unable to schedule alarm.
-Free some memory and try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;qt&gt;Are you sure you want to delete: %1?&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unfiled</source>
-        <translation type="unfinished"></translation>
-    </message>
+</context>
+<context>
+    <name>Contact</name>
     <message>
         <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
@@ -574,6 +437,146 @@ Free some memory and try again.</source>
     </message>
 </context>
 <context>
+    <name>DateBookDB</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to create start up files
+Please free up some space
+before entering data</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DateBookMonthHeader</name>
+    <message>
+        <source>Show January in the selected year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the previous month</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the next month</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show December in the selected year</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FileSelector</name>
+    <message>
+        <source>Close the File Selector</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show documents of this type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Document View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show documents in this category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Click to select a document from the list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>, or select &lt;b&gt;New Document&lt;/b&gt; to create a new document.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;br&gt;&lt;br&gt;Click and hold for document properties.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Document</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FileSelectorView</name>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OwnerDlg</name>
+    <message>
+        <source>Owner Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PasswordBase</name>
+    <message>
+        <source>1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter passcode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passcode</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>QPEApplication</name>
     <message>
         <source>%1 document</source>
@@ -611,6 +614,33 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>Click to make this window movable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QPEMessageBox</name>
+    <message>
+        <source>Are you sure you want to delete: %1?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -746,6 +776,14 @@ Please free up space and try again</source>
     </message>
     <message>
         <source>All files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WindowDecoration</name>
+    <message>
+        <source>Default</source>
+        <comment>List box text for default window decoration</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

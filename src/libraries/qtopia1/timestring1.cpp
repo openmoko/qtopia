@@ -54,7 +54,7 @@ private:
 	Config config("qpe");
 	config.setGroup( "Date" );
 	format = ::DateFormat(QChar(config.readEntry("Separator", "/")[0]),
-		(::DateFormat::Order)config .readNumEntry("ShortOrder", ::DateFormat::DayMonthYear), 
+		(::DateFormat::Order)config .readNumEntry("ShortOrder", ::DateFormat::DayMonthYear),
 		(::DateFormat::Order)config.readNumEntry("LongOrder", ::DateFormat::DayMonthYear));
 
 	connect( qApp, SIGNAL( dateFormatChanged(DateFormat) ),
@@ -189,6 +189,37 @@ QString TimeString::localHM( const QTime &t )
 QString TimeString::localHMS( const QTime &t )
 { return timeString( t, currentAMPM(), TRUE ); }
 
+static QString dayname(int weekday, bool lng)
+{
+    char buffer[255];
+    struct tm tt;
+    memset( &tt, 0, sizeof( tm ) );
+    tt.tm_wday = ( weekday == 7 ) ? 0 : weekday;
+    if ( strftime( buffer, sizeof( buffer ), lng ? "%A" : "%a", &tt ) )
+	return QString::fromLocal8Bit( buffer );
+    else
+	return QDate().dayName(weekday);
+}
+
+
+QString TimeString::localHMDayOfWeek( const QDateTime &t )
+{
+    // just create a shorter time String
+    QString strTime = TimeStringFormat1::tr( "%1 %2", "1=Monday 2=12:45" )
+	.arg(::dayname(t.date().dayOfWeek(), FALSE))
+	.arg(timeString( t.time(), currentAMPM(), FALSE ));
+    return strTime;
+}
+
+QString TimeString::localHMSDayOfWeek( const QDateTime &t )
+{
+    // just create a shorter time String
+    QString strTime = TimeStringFormat1::tr( "%1 %2", "1=Monday 2=12:45" )
+	.arg(::dayname(t.date().dayOfWeek(), FALSE))
+	.arg(timeString( t.time(), currentAMPM(), TRUE ));
+    return strTime;
+}
+
 QString TimeString::localYMDHMS( const QDateTime &t, Length )
 {
     return dateString( t, currentAMPM(), TRUE, currentDateFormat() );
@@ -202,7 +233,7 @@ QString TimeString::localMD( const QDate &dt, Length len )
 	DateFormat::Order(dfo.shortOrder()&0333),
 	DateFormat::Order(dfo.longOrder()&0333));
     int v=0;
-    if ( len==Long ) 
+    if ( len==Long )
 	v |= DateFormat::longNumber | DateFormat::longWord;
     return df.wordDate(dt,v);
 }
@@ -214,24 +245,12 @@ QString TimeString::localYMD( const QDate &dt, Length len )
     return longDateString(dt);
 }
 
-static QString dayname(int weekday, bool lng)
-{
-    char buffer[255];
-    struct tm tt;
-    memset( &tt, 0, sizeof( tm ) );
-    tt.tm_wday = ( weekday == 7 ) ? 0 : weekday;
-    if ( strftime( buffer, sizeof( buffer ), lng ? "%A" : "%a", &tt ) )
-	return QString::fromLocal8Bit( buffer );
-    else
-	return QDate().dayName(weekday);
-}
-
 QString TimeString::localDayOfWeek( const QDate& dt, Length len )
 {
     DateFormat dfo = currentDateFormat();
     DateFormat df(dfo.separator(),DateFormat::Order(0),DateFormat::Order(0));
     int v=DateFormat::showWeekDay;
-    if ( len==Long ) 
+    if ( len==Long )
 	v |= DateFormat::longWord;
     return df.wordDate(dt,v);
 }
@@ -243,5 +262,15 @@ QString TimeString::localDayOfWeek( int day1to7, Length len )
 
 bool TimeString::currentAMPM()
 { return LocalTimeFormat::currentAMPM(); }
+
+QArray<DateFormat> TimeString::formatOptions()
+{
+    QArray<DateFormat> options(4);
+    options[0] = DateFormat('/', DateFormat::MonthDayYear);
+    options[1] = DateFormat('.', DateFormat::DayMonthYear);
+    options[2] = DateFormat('-', DateFormat::YearMonthDay);
+    options[3] = DateFormat('/', DateFormat::DayMonthYear);
+    return options;
+}
 
 #include "timestring1.moc"

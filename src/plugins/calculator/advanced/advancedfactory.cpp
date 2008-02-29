@@ -21,9 +21,10 @@
 #include "advancedfactory.h"
 #include "advanced.h"
 #include <qstringlist.h>
+#include <qapplication.h>
 
 QWidget * AdvancedInterface::create (QWidget *parent) {
-    return new FormAdvanced(parent,pluginName(),0);
+    return new FormAdvanced(parent);
 }
 
 #ifndef QT_NO_COMPONENT
@@ -46,3 +47,5 @@ Q_EXPORT_INTERFACE()
     Q_CREATE_INSTANCE( AdvancedInterface )
 }
 #endif
+
+QString AdvancedInterface::pluginName() const { return qApp->translate("Advanced","Scientific"); }

@@ -50,21 +50,12 @@ void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
     // show for each day, that day traveling into next :)
     // e.g. work out the pixel values.  the lines.
 
-
-    int yea = selectedDate().year();
-    int mont = selectedDate().month();
-
-    bool sMon = weekStartsMonday();
-
-    int index = Calendar::indexForDate(yea, mont, cDay, sMon);
-    if (index < 0)
-	return; // wrong action, but....
-    DayPaintCache *dpc = paintCache.at(index);
-
-    if (!dpc) {
+    if (!paintCache.contains(cDay)) {
 	QPEDatePicker::paintDayBackground(cDay, p, cr, cg);
 	return;
     }
+
+    DayPaintCache *dpc = paintCache[cDay];
 
     // now, do the painting.
     // later will want to pattern on all day, for now, just paint
@@ -151,10 +142,9 @@ void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
     }
 }
 
-MonthView::MonthView( DateBookTable *db, QWidget *parent, const char *name, bool ac)
-    : QPEDatePicker(parent, name, ac), mDb(db), paintCache(6*7), line_height(5)
+MonthView::MonthView( DateBookTable *db, QWidget *parent, const char *name)
+    : QPEDatePicker(parent, name), mDb(db), line_height(5)
 {
-    paintCache.setAutoDelete(TRUE);
     // we need to get events from the mdb, we need to watch for changes as
     // well.
     connect(mDb, SIGNAL(datebookUpdated()),
@@ -172,14 +162,15 @@ void MonthView::updateOccurrences()
 
 void MonthView::getEventsForMonth(int y, int m)
 {
+    // Clear the old cache
+    QMap<QDate, DayPaintCache*>::Iterator ptit;
+    for (ptit = paintCache.begin(); ptit != paintCache.end(); ++ptit)
+	delete(*ptit);
     paintCache.clear();
-    paintCache.resize(6*7);
 
-    bool sMon = weekStartsMonday();
-
-    QDate from = Calendar::dateAtCoord(y, m, 0, 0, sMon);
-    QDate to = Calendar::dateAtCoord(y, m, 5, 6, sMon);
-
+    // Get enough days that it won't matter if the start of week changes.
+    QDate from = Calendar::dateAtCoord(y, m, 0, 0, FALSE);
+    QDate to = Calendar::dateAtCoord(y, m, 5, 6, TRUE);
 
     daysEvents = mDb->getOccurrences(from, to);
 
@@ -218,29 +209,26 @@ void MonthView::getEventsForMonth(int y, int m)
 	    endPos = ev.endInCurrentTZ().time().hour();
 	}
 
-	int startIndex = Calendar::indexForDate(y, m, f, sMon);
-	int endIndex = Calendar::indexForDate(y, m, t, sMon);
 	if (f < from) {
-	    startIndex = 0;
+	    f = from;
 	    startPos = 0;
 	}
 	if (t > to) {
-	    endIndex = 41;
+	    t = to;
 	    endPos = 23;
 	}
-
-	if (endIndex < startIndex)
+	if (t < f)
 	    continue;
 
-
-	for (int i = (startIndex < 0 ? 0 : startIndex);
-		i <= (endIndex > 41 ? 41 : endIndex); i++) {
+	for (QDate i = f; i <= t; i = i.addDays(1)) {
 
 	    // get item.
-	    DayPaintCache *dpc = paintCache.at(i);
-	    if (!dpc) {
+	    DayPaintCache *dpc;
+	    if (!paintCache.contains(i)) {
 		dpc = new DayPaintCache();
 		paintCache.insert(i, dpc);
+	    } else {
+		dpc = paintCache[i];
 	    }
 
 	    if (normalAllDay) {
@@ -249,22 +237,22 @@ void MonthView::getEventsForMonth(int y, int m)
 		dpc->rAllDay = TRUE;
 	    } else {
 		if (ev.repeatType() == PimEvent::NoRepeat) {
-		    if (i == startIndex)
+		    if (i == f)
 			dpc->nLine.append(startPos);
 		    else
 			dpc->nLine.append(0);
 
-		    if (i == endIndex)
+		    if (i == t)
 			dpc->nLine.append(endPos);
 		    else
 			dpc->nLine.append(24);
 		} else {
-		    if (i == startIndex)
+		    if (i == f)
 			dpc->rLine.append(startPos);
 		    else
 			dpc->rLine.append(0);
 
-		    if (i == endIndex)
+		    if (i == t)
 			dpc->rLine.append(endPos);
 		    else
 			dpc->rLine.append(24);

@@ -21,9 +21,10 @@
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qtimer.h>
-#include <qlayout.h>
+#include <qvbox.h>
 #include "graph.h"
 #include "storage.h"
+#include <qtopia/storage.h>
 
 #include <stdio.h>
 #if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
@@ -32,132 +33,71 @@
 #include <errno.h>
 #endif
 
-StorageInfo::StorageInfo( QWidget *parent, const char *name )
-    : QWidget( parent, name )
+StorageInfoView::StorageInfoView( QWidget *parent, const char *name )
+    : QWidget( parent, name ), vb(0)
 {
+    sinfo = new StorageInfo(this);
     vb = 0;
-    disks.setAutoDelete(TRUE);
-    lines.setAutoDelete(TRUE);
     updateMounts();
-    startTimer( 5000 );
+    connect(sinfo, SIGNAL(disksChanged()), this, SLOT(updateMounts()));
+    startTimer(5000);
 }
 
-void StorageInfo::timerEvent(QTimerEvent*)
+void StorageInfoView::timerEvent(QTimerEvent*)
 {
-    updateMounts();
+    sinfo->update();
+    emit updated();
 }
 
-static bool isCF(const QString& m)
+void StorageInfoView::resizeEvent(QResizeEvent*)
 {
-    FILE* f = fopen("/var/run/stab", "r");
-    if (!f) f = fopen("/var/state/pcmcia/stab", "r");
-    if (!f) f = fopen("/var/lib/pcmcia/stab", "r");
-    if ( f ) {
-	char line[1024];
-	char devtype[80];
-	char devname[80];
-	while ( fgets( line, 1024, f ) ) {
-	    // 0       ide     ide-cs  0       hda     3       0
-	    if ( sscanf(line,"%*d %s %*s %*s %s", devtype, devname )==2 )
-	    {
-		if ( QString(devtype) == "ide" && m.find(devname)>0 ) {
-		    fclose(f);
-		    return TRUE;
-		}
-	    }
-	}
-	fclose(f);
+    if ( vb )
+	setVBGeom();
+}
+
+void StorageInfoView::setVBGeom()
+{
+    vb->setGeometry(4,0,width()-8,height());
+}
+
+void StorageInfoView::updateMounts()
+{
+    const QList<FileSystem>& sifs(sinfo->fileSystems());
+    QListIterator<FileSystem> sit(sifs);
+
+    int n = sifs.count();
+    delete vb;
+    vb = new QVBox( this );
+    vb->setSpacing( n > 3 ? 1 : 5 );
+    bool frst=TRUE;
+    FileSystem* fs;
+    for ( ; (fs=sit.current()); ++sit ) {
+	if ( !frst ) {
+	    QFrame *f = new QFrame( vb );
+	    f->setFrameStyle( QFrame::HLine | QFrame::Sunken );
+	    f->show();
+	} else frst=FALSE;
+	MountInfo* mi = new MountInfo(fs, vb);
+	connect(this, SIGNAL(updated()), mi, SLOT(refresh()));
     }
-    return FALSE;
-}
-
-void StorageInfo::updateMounts()
-{
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
-    struct mntent *me;
-    FILE *mntfp = setmntent( "/etc/mtab", "r" );
-    QStringList curdisks;
-    QStringList curfs;
-    bool rebuild = FALSE;
-    int n=0;
-    if ( mntfp ) {
-	while ( (me = getmntent( mntfp )) != 0 ) {
-	    QString fs = me->mnt_fsname;
-	    if ( fs.left(7)=="/dev/hd" || fs.left(7)=="/dev/sd"
-		    || fs.left(8)=="/dev/mtd" || fs.left(9) == "/dev/mmcd"
-		    || fs.left(8) == "/dev/ram" )
-	    {
-		n++;
-		curdisks.append(fs);
-		QString d = me->mnt_dir;
-		curfs.append(d);
-		if ( !disks.find(d) )
-		    rebuild = TRUE;
-	    }
-	}
-	endmntent( mntfp );
-    }
-    if ( rebuild || n != (int)disks.count() ) {
-	disks.clear();
-	lines.clear();
-	delete vb;
-	vb = new QVBoxLayout( this, n > 3 ? 1 : 5 );
-	bool frst=TRUE;
-	QStringList::ConstIterator it=curdisks.begin();
-	QStringList::ConstIterator fsit=curfs.begin();
-	for (; it!=curdisks.end(); ++it, ++fsit) {
-	    if ( !frst ) {
-		QFrame *f = new QFrame( this );
-		vb->addWidget(f);
-		f->setFrameStyle( QFrame::HLine | QFrame::Sunken );
-		lines.append(f);
-		f->show();
-	    } frst=FALSE;
-	    QString humanname=*it;
-	    if ( isCF(humanname) )
-		humanname = tr("CF Card");
-	    else if ( humanname == "/dev/hda1" )
-		humanname = tr("Hard Disk");
-	    else if ( humanname.left(9) == "/dev/mmcd" )
-		humanname = tr("SD Card");
-	    else if ( humanname.left(7) == "/dev/hd" )
-		humanname = tr("Hard Disk") + " " + humanname.mid(7);
-	    else if ( humanname.left(7) == "/dev/sd" )
-		humanname = tr("SCSI Hard Disk") + " " + humanname.mid(7);
-	    else if ( humanname == "/dev/mtdblock1" || humanname == "/dev/mtdblock/1" )
-		humanname = tr("Internal Storage");
-	    else if ( humanname.left(14) == "/dev/mtdblock/" )
-		humanname = tr("Internal Storage") + " " + humanname.mid(14);
-	    else if ( humanname.left(13) == "/dev/mtdblock" )
-		humanname = tr("Internal Storage") + " " + humanname.mid(13);
-	    else if ( humanname.left(8) == "/dev/ram" )
-		humanname = tr("RAM disk") + " " + humanname.mid(8);
-	    // etc.
-	    MountInfo* mi = new MountInfo( *fsit, humanname, this );
-	    vb->addWidget(mi);
-	    disks.insert(*fsit,mi);
-	    mi->show();
-	}
-	vb->addStretch();
-    } else {
-	// just update them
-	for (QDictIterator<MountInfo> i(disks); i.current(); ++i)
-	    i.current()->updateData();
-    }
-#endif
+    if ( n < 3 ) // add a filler
+	(new QWidget(vb))->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    setVBGeom();
+    vb->show();
 }
 
 
-MountInfo::MountInfo( const QString &path, const QString &ttl, QWidget *parent, const char *name )
-    : QWidget( parent, name ), title(ttl)
+MountInfo::MountInfo( const FileSystem* f, QWidget *parent, const char *name )
+    : QWidget( parent, name ), title(f->name())
 {
-    fs = new FileSystem( path );
+    fs = f;
     QVBoxLayout *vb = new QVBoxLayout( this, 3 );
 
     totalSize = new QLabel( this );
     vb->addWidget( totalSize );
 
     data = new GraphData();
+
     graph = new BarGraph( this );
     graph->setFrameStyle( QFrame::Panel | QFrame::Sunken );
     vb->addWidget( graph, 1 );
@@ -167,21 +107,22 @@ MountInfo::MountInfo( const QString &path, const QString &ttl, QWidget *parent, 
     vb->addWidget( legend );
     legend->setData( data );
 
-    updateData();
+    refresh();
 }
 
 MountInfo::~MountInfo()
 {
     delete data;
-    delete fs;
 }
 
-void MountInfo::updateData()
+void MountInfo::refresh()
 {
-    fs->update();
-
-    long mult = fs->blockSize() / 1024;
-    long div = 1024 / fs->blockSize();
+    long mult = 0;
+    long div = 0;
+    if ( fs->blockSize() ) {
+	mult = fs->blockSize() / 1024;
+	div = 1024 / fs->blockSize();
+    }
     if ( !mult ) mult = 1;
     if ( !div ) div = 1;
     long total = fs->totalBlocks() * mult / div;
@@ -196,28 +137,3 @@ void MountInfo::updateData()
     graph->show();
     legend->show();
 }
-
-//---------------------------------------------------------------------------
-
-FileSystem::FileSystem( const QString &p )
-    : fspath( p ), blkSize(512), totalBlks(0), availBlks(0)
-{
-    update();
-}
-
-void FileSystem::update()
-{
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
-    struct statfs fs;
-    if ( !statfs( fspath.latin1(), &fs ) ) {
-	blkSize = fs.f_bsize;
-	totalBlks = fs.f_blocks;
-	availBlks = fs.f_bavail;
-    } else {
-	blkSize = 0;
-	totalBlks = 0;
-	availBlks = 0;
-    }
-#endif
-}
-

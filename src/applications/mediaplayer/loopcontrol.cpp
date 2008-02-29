@@ -46,6 +46,7 @@ static bool	    previousSuspendMode = FALSE;
 
 pthread_t	audio_tid;
 pthread_attr_t  audio_attr;
+pthread_cond_t	audioCond;
 bool threadOkToGo = FALSE;
 
 
@@ -70,6 +71,12 @@ public:
 	pthread_mutex_unlock( &mutex );
     }
 
+    void waitForCondition( pthread_cond_t *cond ) {
+	lock();
+	pthread_cond_wait ( cond, &mutex );
+	unlock();
+    }
+
 private:
     pthread_mutex_t mutex;
 };
@@ -82,22 +89,48 @@ void *startAudioThread( void *ptr )
 {
     LoopControl *mpegView = (LoopControl *)ptr;
     while ( TRUE ) {
-	audioMutex->lock();
-	bool needSleep = FALSE;
-	if ( threadOkToGo && mpegView->moreAudio )
+	audioMutex->waitForCondition( &audioCond );
+	while ( threadOkToGo && mpegView->moreAudio ) {
+	    audioMutex->lock();
 	    mpegView->startAudio();
-	else
-	    needSleep = TRUE;
-	audioMutex->unlock();
-	if ( needSleep )
-	    usleep( 10000 ); // Semi-busy-wait till we are playing again
+	    audioMutex->unlock();
+	}
     }
     return 0;
 }
 
 
+void LoopControl::setPriority( AudioPriority priority )
+{
+    if ( getuid() == 0 ) {
+        qDebug("running as root, can change realtime priority");
+	sched_param params;
+
+	switch ( priority ) {
+	    case Normal:
+		params.sched_priority = 0;
+		// Attempt to set it back to normal priority
+		if ( pthread_setschedparam(audio_tid,SCHED_OTHER,&params) != 0 ) {
+		    qDebug( "Failed to set thread priority normal" );
+		}
+		break;
+	    case High:
+		params.sched_priority = 50;
+		// Attempt to set it to real-time round robin
+		if ( pthread_setschedparam(audio_tid,SCHED_RR,&params) != 0 ) {
+		    qDebug( "Failed to set thread priority to realtime round robin" );
+		}
+		break;
+	    default:
+		break;
+	}
+
+    }
+}
+
+
 LoopControl::LoopControl( QObject *parent, const char *name )
-    : QObject( parent, name ), videoId(0)
+    : QObject( parent, name ), videoId(0), sliderId(0)
 {
     isMuted = FALSE;
 
@@ -107,24 +140,30 @@ LoopControl::LoopControl( QObject *parent, const char *name )
 
     audioMutex = new Mutex;
 
+    pthread_condattr_t cattr;
+    pthread_condattr_init(&cattr);
+    pthread_cond_init(&audioCond, &cattr);
+    pthread_condattr_destroy(&cattr);
+
     pthread_attr_init(&audio_attr);
+
+//    pthread_create(&audio_tid, &audio_attr, (void * (*)(void *))startAudioThread, this);
+//    setPriority( High );
 
     if ( getuid() == 0 ) {
         qDebug("running as root, can set realtime priority");
 
-	// Attempt to set it to real-time round robin
-	if ( pthread_attr_setschedpolicy( &audio_attr, SCHED_RR ) == 0 ) {
-	//if ( pthread_attr_setschedpolicy( &audio_attr, SCHED_OTHER ) == 0 ) {
-	    sched_param params;
-	    params.sched_priority = 50;
-	    pthread_attr_setschedparam(&audio_attr,&params);
-	} else {
-	    qDebug( "Error setting up a realtime thread, reverting to using a normal thread." );
-	    pthread_attr_destroy(&audio_attr);
-	    pthread_attr_init(&audio_attr);
-	}
+       // Attempt to set it to real-time round robin
+       if ( pthread_attr_setschedpolicy( &audio_attr, SCHED_RR ) == 0 ) {
+           sched_param params;
+           params.sched_priority = 50;
+           pthread_attr_setschedparam(&audio_attr,&params);
+       } else {
+           qDebug( "Error setting up a realtime thread, reverting to using a normal thread." );
+           pthread_attr_destroy(&audio_attr);
+           pthread_attr_init(&audio_attr);
+       }
     }
-    usleep( 100 );
 
     pthread_create(&audio_tid, &audio_attr, (void * (*)(void *))startAudioThread, this);
 }
@@ -272,9 +311,11 @@ void LoopControl::startVideo()
 	} else {
 	    moreVideo = FALSE;
 	    killTimer( videoId );
+	    videoId = 0;
 	}
     } else {
 	killTimer( videoId );
+	videoId = 0;
     }
 }
 
@@ -333,9 +374,12 @@ void LoopControl::killTimers()
 {
     audioMutex->lock();
 
-    if ( hasVideoChannel ) 
+    if ( hasVideoChannel ) { 
 	killTimer( videoId );
+	videoId = 0;
+    }
     killTimer( sliderId );
+    sliderId = 0;
     threadOkToGo = FALSE;
 
     audioMutex->unlock();
@@ -353,24 +397,29 @@ void LoopControl::startTimers()
 	moreVideo = TRUE;
 	int mSecsBetweenFrames = (int)(100 / framerate); // 10% of the real value
 //	mSecsBetweenFrames = 0;
+	if ( videoId )
+	    killTimer( videoId );
 	videoId = startTimer( mSecsBetweenFrames );
     }
 
     if ( hasAudioChannel ) {
 	moreAudio = TRUE;
 	threadOkToGo = TRUE;
+	pthread_cond_signal( &(audioCond) );
     }
 
     if ( mediaPlayerState->decoderVersion() == Decoder_1_6 ) {
 	MediaPlayerDecoder_1_6 *decoder = (MediaPlayerDecoder_1_6 *)mediaPlayerState->decoder();
 	mediaPlayerState->updatePosition( decoder->tell() );
 	if ( decoder->tellAvailable() ) {
-	    sliderId = startTimer( 300 ); // update slider every 1/3 second
+	    if (!sliderId)
+		sliderId = startTimer( 300 ); // update slider every 1/3 second
 	} else {
 	    //disableSlider();
 	}
     } else {
-	sliderId = startTimer( 300 ); // update slider every 1/3 second
+        if (!sliderId)
+	    sliderId = startTimer( 300 ); // update slider every 1/3 second
     }
 
     audioMutex->unlock();

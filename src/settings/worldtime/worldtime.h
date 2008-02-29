@@ -20,17 +20,29 @@
 
 #ifndef WORLDTIME_H
 #define WORLDTIME_H
-
+ 
 #include <qlist.h>
 #include <qwidget.h>
+#include <qlabel.h>
+#include <qpushbutton.h>
 
 #include "worldtimebase.h"
+#include <qtopia/qpeglobal.h>
+
 
 const int CITIES = 6;    // the number of cities...
 
+#ifdef QTOPIA_DESKTOP
+#ifndef Q_DEFINED_QLABEL
+#define Q_DEFINED_QLABEL
+#endif
+#include <common/qpcwinexports.h>
+#endif
+
+
 class ZoneMap;
 
-class WorldTime : public WorldTimeBase
+class QPC_EXPORT WorldTime : public WorldTimeBase
 {
     Q_OBJECT
 public:
@@ -40,6 +52,11 @@ public:
 public slots:
     void beginNewTz();
     void slotNewTz( const QCString& zoneID);
+    void saveChanges();
+    void cancelChanges();
+
+signals:
+    void timeZoneListChange(); 
 
 protected:
     void timerEvent( QTimerEvent* );

@@ -589,6 +589,10 @@
                                             </size>
                                         </property>
                                         <property stdset="1">
+                                            <name>wrapping</name>
+                                            <bool>true</bool>
+                                        </property>
+                                        <property stdset="1">
                                             <name>maxValue</name>
                                             <number>23</number>
                                         </property>
@@ -641,7 +645,7 @@
                                         </property>
                                         <property stdset="1">
                                             <name>maxValue</name>
-                                            <number>55</number>
+                                            <number>59</number>
                                         </property>
                                         <property stdset="1">
                                             <name>lineStep</name>

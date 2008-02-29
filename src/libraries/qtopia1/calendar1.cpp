@@ -20,7 +20,14 @@
 #include <qtopia/calendar.h>
 #include <qapplication.h>
 
+/*!
+  Returns a list of 42 dates (6 weeks) that cover the given \a month and
+  \a year.
 
+  The list starts on the Monday on or before the 1st of the month if 
+  \a startWithMonday is TRUE, otherwise the list starts on the Sunday on 
+  or before the 1st of the month.
+*/
 QValueList<QDate> Calendar::datesOfMonth( int year, int month,
 						 bool startWithMonday )
 {
@@ -48,6 +55,14 @@ QValueList<QDate> Calendar::datesOfMonth( int year, int month,
     return days;
 }
 
+/*!
+    Using the calender page given by datesOfMonth() will return the 
+    date at the position \a row, \a col, for the given \a month and \a year.
+
+  The page starts on the Monday on or before the 1st of the month if 
+  \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
+  or before the 1st of the month.
+*/
 QDate Calendar::dateAtCoord( int year, int month, 
 	int row, int col, bool startWithMonday)
 {
@@ -55,6 +70,14 @@ QDate Calendar::dateAtCoord( int year, int month,
     return dateAtIndex(year, month, pos, startWithMonday);
 }
 
+/*!
+    Using the calender page given by datesOfMonth() will return the 
+    date at the position \a index for the given \a month and \a year.
+
+  The page starts on the Monday on or before the 1st of the month if 
+  \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
+  or before the 1st of the month.
+*/
 QDate Calendar::dateAtIndex( int year, int month, int index,
 	bool startWithMonday)
 {
@@ -76,7 +99,14 @@ QDate Calendar::dateAtIndex( int year, int month, int index,
     return currentDate.addDays(index + 1);
 }
 
+/*!
+  Returns the index for \a date on the calendar page given by datesOfMonth()
+  for the given \a year and \a month.
 
+  The page starts on the Monday on or before the 1st of the month if 
+  \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
+  or before the 1st of the month.
+*/
 int Calendar::indexForDate( int year, int month, const QDate &date, 
 	bool startWithMonday)
 {    
@@ -100,6 +130,15 @@ int Calendar::indexForDate( int year, int month, const QDate &date,
     return index;
 }
 
+/*!
+  Sets the \a row and \a col to the position for
+  \a date on the calendar page given by datesOfMonth()
+  for the given \a year and \a month.
+
+  The page starts on the Monday on or before the 1st of the month if 
+  \a startWithMonday is TRUE, otherwise the page starts on the Sunday on 
+  or before the 1st of the month.
+*/
 void Calendar::coordForDate( int year, int month,
 	const QDate &date, int &row, int &col,
 	bool startWithMonday)
@@ -114,7 +153,11 @@ void Calendar::coordForDate( int year, int month,
     }
 }
 
-
+/*!
+  Returns the week number the date \a dt is in the month for that date.
+  For instance the first Wednesday of the month is in the first week the second
+  Wednesday in the month is in the second week and so on.
+*/
 int Calendar::weekInMonth(const QDate &dt)
 {
     if (dt.day() == 1)
@@ -122,6 +165,12 @@ int Calendar::weekInMonth(const QDate &dt)
     return ((dt.day() - 1) / 7) + 1;
 }
 
+/*!
+  Returns a date \a nmonths later than the date \a orig (or earlier if \a nmonths is negative).
+
+  Rounds to the last day of month if the day of the calculated date would be
+  invalid.
+*/
 QDate Calendar::addMonths(int nmonths, const QDate &orig)
 {
     int y, m, d;
@@ -165,6 +214,9 @@ QDate Calendar::addMonths(int nmonths, const QDate &orig)
     return date;
 }
 
+/*!
+  Returns a date \a nyears later than the date \a orig (or earlier if \a nyears is negative).
+*/
 QDate Calendar::addYears( int nyears , const QDate &orig)
 {
     int y, m, d;

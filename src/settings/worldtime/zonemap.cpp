@@ -72,7 +72,8 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
       drawableW( -1 ),
       drawableH( -1 ),
       bZoom( FALSE ),
-      bIllum( TRUE )
+      bIllum( TRUE ),
+      citiesInit( FALSE )
 {
     viewport()->setFocusPolicy( StrongFocus );
 
@@ -119,10 +120,15 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
     // update the sun's movement every 5 minutes
     tUpdate->start( 5 * 60 * 1000 );
     // May as well read in the timezone information too...
+
+    cities.setAutoDelete(TRUE);
+
+    QTimer::singleShot( 0, this, SLOT(initCities()) );
 }
 
 ZoneMap::~ZoneMap()
 {
+    delete pixCurr;
 }
 
 void ZoneMap::viewportMousePressEvent( QMouseEvent* event )
@@ -136,7 +142,10 @@ void ZoneMap::viewportMousePressEvent( QMouseEvent* event )
 
 void ZoneMap::viewportMouseMoveEvent( QMouseEvent* event )
 {
-    norm.addEvent( event->pos() );
+    if ((event->x() >= 0 && event->x() < viewport()->width()) &&
+	    (event->y() >= 0 && event->y() < viewport()->height())) {
+	norm.addEvent( event->pos() );
+    }
 }
 
 void ZoneMap::viewportMouseReleaseEvent( QMouseEvent* )
@@ -186,20 +195,14 @@ void ZoneMap::keyPressEvent( QKeyEvent *ke )
 
 const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
 {
-    TimeZone curZone, closestZone;
+    initCities();
+
     long ddist = LONG_MAX;
-    const char *zoneID;
-    QStrList list = TimeZone::ids() ;
-    QStrListIterator it( list );
-    for (; it.current(); ++it) {
-	zoneID = it.current();
-	curZone = TimeZone( zoneID );
-	if ( !curZone.isValid() ){
-	    qDebug("ZoneMap::findCityNear  Invalid zoneID %s", zoneID);
-	    break;
-	}
-	long dy = (curZone.lat() - city.lat())/100;
-	long dx = (curZone.lon() - city.lon())/100;
+    QCString closestZone;
+    for ( unsigned i = 0; i < cities.count(); i++ ) {
+	CityPos *cp = cities[i];
+	long dy = (cp->lat - city.lat())/100;
+	long dx = (cp->lon - city.lon())/100;
 	switch ( key ) {
 	    case Key_Right:
 	    case Key_Left:
@@ -209,7 +212,7 @@ const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
 		    long dist = QABS(dy)*4 + dx;
 		    if ( dist < ddist ) {
 			ddist = dist;
-			closestZone = curZone;
+			closestZone = cp->id;
 		    }
 		}
 		break;
@@ -221,61 +224,55 @@ const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
 		    long dist = QABS(dx)*4 + dy;
 		    if ( dist < ddist ) {
 			ddist = dist;
-			closestZone = curZone;
+			closestZone = cp->id;
 		    }
 		}
 		break;
 	}
     }
     
-    closestZone.dump();
-    return closestZone;
+    TimeZone nearCity( closestZone );
+//    nearCity.dump();
+    return nearCity;
 }
 
 void ZoneMap::slotFindCity( const QPoint &pos )
 {
+    initCities();
+
     // given coordinates on the screen find the closest city and display the
     // label close to it
     int tmpx, tmpy, x, y;
-    long lDistance,
-         lClosest;
-    TimeZone curZone, closestZone;
-    const char *zoneID;
 
-    if ( tHide->isActive() ) {
+    if ( tHide->isActive() )
         tHide->stop();
-    }
+
     viewportToContents(pos.x(), pos.y(), tmpx, tmpy);
     winToZone( tmpx, tmpy, x, y );
+
     // Find city alogorithim: start out at an (near) infinite distance away and
     // then find the closest city, (similar to the Z-buffer technique, I guess)
     // the only problem is that this is all done with doubles, but I don't know
     // another way to do it at the moment.  Another problem is a linked list is
     // used obviously something indexed would help
-    lClosest = LONG_MAX;
-    QStrList list = TimeZone::ids() ;
-    QStrListIterator it( list );
-    for (; it.current(); ++it) {
-	zoneID = it.current();
-	curZone = TimeZone( zoneID );
-	if ( !curZone.isValid() ){
-	    qDebug("ZoneMap::slotFindCity  Invalid zoneID %s", zoneID);
-	    break;
-	}
-
+    long lDistance;
+    long lClosest = LONG_MAX;
+    QCString closestZone;
+    for ( unsigned i = 0; i < cities.count(); i++ ) {
+	CityPos *cp = cities[i];
 	// use the manhattenLength, a good enough of an appoximation here
-	lDistance = QABS( y - curZone.lat() ) + QABS( x - curZone.lon());
+	lDistance = QABS(y - cp->lat) + QABS(x - cp->lon);
 	// first to zero wins!
 	if ( lDistance < lClosest ) {
 	    lClosest = lDistance;	    
-	    closestZone = curZone;
+	    closestZone = cp->id;
 	}
     }
 
     // Okay, we found the closest city, but it might still be too far away.
     if ( lClosest <= iTHRESHOLD ) {
-	showCity( closestZone );
-	m_cursor = closestZone;
+	m_cursor = TimeZone(closestZone);
+	showCity( m_cursor );
     }
 }
 
@@ -418,7 +415,7 @@ static void dayNight(QImage *pImage)
 	    darken( pImage, 0, wImage, i );
 	}
     }
-    delete wtab;
+    delete [] wtab;
 }
 
 static inline void darken( QImage *pImage, int start, int stop, int row )
@@ -541,4 +538,35 @@ void ZoneMap::slotRedraw( void )
 	updateContents( x - iCITYOFFSET, y - iCITYOFFSET, iCITYSIZE, iCITYSIZE);
         m_repaint = TimeZone();
     }
+}
+
+void ZoneMap::initCities()
+{
+    // Contructing TimeZone::TimeZone( city ) is hideously expensive -
+    // preload the position of each city.
+    if ( citiesInit )
+	return;
+    QStrList list = TimeZone::ids() ;
+    QStrListIterator it( list );
+    int count = 0;
+    cities.resize( list.count() );
+    for (; it.current(); ++it) {
+	QCString zoneID = it.current();
+	TimeZone curZone( zoneID );
+
+	if ( !curZone.isValid() ){
+	    qDebug("ZoneMap::slotFindCity  Invalid zoneID %s", zoneID.data() );
+	    continue;
+	}
+
+	CityPos *cp = new CityPos;
+	cp->lat = curZone.lat();
+	cp->lon = curZone.lon();
+	cp->id = zoneID.copy();
+
+	cities.insert( count++, cp );
+    }
+
+    cities.resize(count);
+    citiesInit = TRUE;
 }

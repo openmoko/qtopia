@@ -48,7 +48,7 @@ SystemInfo::SystemInfo( QWidget *parent, const char *name, WFlags f )
     sv->setResizePolicy(QScrollView::AutoOneFit);
     sv->setFrameStyle(QFrame::NoFrame);
 
-    sv->addChild(new StorageInfo(tab));
+    sv->addChild(new StorageInfoView(tab));
     tab->addTab(sv, tr("Storage"));
 #endif
 

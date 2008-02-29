@@ -31,7 +31,9 @@
 #include <qtopia/timeconversion.h>
 #include <qtopia/timestring.h>
 #include <qtopia/tzselect.h>
-
+#ifdef QTOPIA_DESKTOP
+#include <worldtimedialog.h>
+#endif
 
 #include <qcheckbox.h>
 #include <qstyle.h>
@@ -45,10 +47,11 @@
 #include <qspinbox.h>
 #include <qtoolbutton.h>
 #include <qlabel.h>
+#include <qlayout.h>
 
 #include <stdlib.h>
 
-bool onceAWeek(const PimEvent &e) 
+bool onceAWeek(const PimEvent &e)
 {
     int orig = e.start().date().dayOfWeek();
 
@@ -103,6 +106,10 @@ DateEntry::DateEntry( bool startOnMonday, const PimEvent &event,
     : DateEntryBase( parent, name ), mEvent(event),
       startWeekOnMonday( startOnMonday )
 {
+#ifdef QTOPIA_DESKTOP
+    tabLayout->setSpacing(6);
+    startEndLayout->setSpacing(6);
+#endif
     init();
     if (mEvent.timeZone().isValid()) {
 	timezone->setCurrentZone(mEvent.timeZone().id());
@@ -135,7 +142,7 @@ DateEntry::DateEntry( bool startOnMonday, const PimEvent &event,
 	    repeatSelect->setCurrentItem(2);
 	else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Yearly)
 	    repeatSelect->setCurrentItem(3);
-	else 
+	else
 	    repeatSelect->setCurrentItem(4);
 	if (mEvent.repeatForever())
 	    endDateSelect->setDate(QDate());
@@ -201,6 +208,11 @@ void DateEntry::init()
     }
 #endif
 
+    // XXX should load/save this
+    comboLocation->insertItem(tr("Office"));
+    comboLocation->insertItem(tr("Home","ie. not work"));
+    addOrPick( comboLocation, "" );
+
     // XXX enable these two lines to be able to specify local time events.
     timezone->setLocalIncluded(TRUE);
     timezone->setCurrentZone("None");
@@ -218,6 +230,7 @@ void DateEntry::init()
 #else
     setTabOrder((QWidget *)comboCategory->child("category combo"), // No tr
 	    (QWidget *)startButton->child("date")); // No tr
+    connect((QObject *)timezone->d, SIGNAL(configureTimeZones()), this, SLOT(configureTimeZones()));
 #endif
     setTabOrder((QWidget *)startButton->child("date"),  // No tr
 	    (QWidget *)startButton->child("time")); // No tr
@@ -274,11 +287,21 @@ DateEntry::~DateEntry()
  */
 void DateEntry::endDateTimeChanged( const QDateTime &e )
 {
-    mEvent.setEnd(e);
-    if (e.addSecs(-300) < mEvent.start()) {
-	mEvent.setStart(e.addSecs(-300));
-	startButton->setDateTime(mEvent.start());
+    startButton->blockSignals(TRUE);
+    endButton->blockSignals(TRUE);
+
+    QDateTime target = e;
+
+    // since setting the start can change the end, do this first.
+    if (target.addSecs(-300) < mEvent.start()) {
+	mEvent.setStart(target.addSecs(-300));
     }
+
+    mEvent.setEnd(target);
+    startButton->setDateTime(mEvent.start());
+
+    startButton->blockSignals(FALSE);
+    endButton->blockSignals(FALSE);
 }
 
 /*
@@ -286,13 +309,18 @@ void DateEntry::endDateTimeChanged( const QDateTime &e )
  */
 void DateEntry::startDateTimeChanged( const QDateTime &s )
 {
+    startButton->blockSignals(TRUE);
+    endButton->blockSignals(TRUE);
+
+    // start always works.
     mEvent.setStart(s);
-    // moving the start automatically moves the end.
-    if (mEvent.end().addSecs(-300) < s) {
-	mEvent.setEnd(s.addSecs(300));
-    }
-    // so even if we didn't need to set a new end, update the label.
+
+    // modifying start modifies end, so no need check or modify anything.
+    // just ensure we update the widget.
     endButton->setDateTime(mEvent.end());
+
+    startButton->blockSignals(FALSE);
+    endButton->blockSignals(FALSE);
 }
 
 void DateEntry::slotRepeat()
@@ -365,7 +393,7 @@ void DateEntry::setRepeatLabel()
 		repeatSelect->setCurrentItem(2);
 	    else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Yearly)
 		repeatSelect->setCurrentItem(3);
-	    else 
+	    else
 		repeatSelect->setCurrentItem(4);
 	} else {
 	    repeatSelect->setCurrentItem(0);
@@ -396,6 +424,17 @@ void DateEntry::allDayToggled(bool b)
     comboSound->setEnabled(!b);
     comboSound->setCurrentItem(0);
     spinAlarm->setEnabled(!b);
+}
+
+
+void DateEntry::configureTimeZones()
+{
+#ifdef QTOPIA_DESKTOP
+    // Show the WorldTime as a dialog
+    WorldTimeDialog *dlg = new  WorldTimeDialog(0, timezone);
+    dlg->exec();
+    delete dlg;
+#endif
 }
 
 void DateEntry::turnOnAlarm()
@@ -450,3 +489,15 @@ void DateEntry::setEndDate(const QDate &date)
 	endDateSelect->blockSignals(FALSE);
     }
 }
+
+#ifdef QTOPIA_DESKTOP
+void DateEntry::updateCategories()
+{
+    connect( this, SIGNAL( categoriesChanged() ),
+	     comboCategory, SLOT( categoriesChanged() ) );
+    emit categoriesChanged();
+    disconnect( this, SIGNAL( categoriesChanged() ),
+		comboCategory, SLOT( categoriesChanged() ) );
+}
+#endif
+

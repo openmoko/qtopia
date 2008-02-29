@@ -36,7 +36,7 @@
 **********************************************************************/
 
 // Most of the code here was originally written by Serika Kurusugawa
-// a.k.a. Junji Takagi, and is include in Qt with the author's permission,
+// a.k.a. Junji Takagi, and is included in Qt with the author's permission,
 // and the grateful thanks of the Trolltech team.
 
 /*

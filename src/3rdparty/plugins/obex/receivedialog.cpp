@@ -148,7 +148,7 @@ static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
     if ( events.count() ) {
 	*cal = TRUE;
 	
-	desc = QObject::tr( "You received an event for:\n" );
+	desc = ReceiveDialog::tr( "You received an event for:\n" );
 	int i = 0;
 	for( QValueList<Event>::ConstIterator it = events.begin(); it != events.end() && i < 3; ++it ) {
 	    desc += "\n" + (*it).description();
@@ -165,7 +165,7 @@ static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
 	if ( *cal )
 	    desc += "\n";
 	
-	desc += QObject::tr( "You received a todo item:\n" );
+	desc += ReceiveDialog::tr( "You received a todo item:\n" );
 	int i = 0;
 	for( QValueList<Task>::ConstIterator it = tasks.begin(); it != tasks.end() && i < 3; ++it ) {
 	    desc += "\n" + (*it).description();
@@ -185,6 +185,7 @@ void ReceiveDialog::received()
     MimeType mt( w->filename->text() );
     QString service = "Receive/"+mt.id();
     QCString receiveChannel = Service::channel(service);
+    application = QString::null;
     if ( receiveChannel.isEmpty() ) {
 	// Special cases...
 	// ##### should split file, or some other full fix

@@ -22,6 +22,7 @@
 
 #include <qtopia/mimetype.h>
 #include <qtopia/qcopenvelope_qws.h>
+#include <qtopia/private/task.h>
 
 #include <qsocketnotifier.h>
 #include <qfile.h>
@@ -32,6 +33,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+//#define QTOPIA_DEBUG_OBEX
 
 extern "C" { 
 #include "openobex/obex.h"
@@ -302,6 +305,12 @@ void QObexSender::updateProgress( obex_object_t * /* obj */)
     emit progress( file_being_sent->at() );
 }
 
+static bool hasTasks( const QString &filename )
+{
+    QValueList<Task> tasks = Task::readVCalendar( filename );
+    return tasks.count();
+}
+
 void QObexSender::putFile( const QString &filename, const QString& mimetype )
 {
 
@@ -331,6 +340,17 @@ void QObexSender::putFile( const QString &filename, const QString& mimetype )
 	OBEX_ObjectAddHeader(self, object,
 			     OBEX_HDR_TYPE, hd, mimetype.length()+1, 0);
         
+	/* Add PalmOS-style application id header */
+	// ####### if more PalmOS applications have this problem,
+	// ####### a more general solution is required.
+	if ( mimetype == "text/x-vCalendar" ) {
+	    if ( hasTasks( filename ) )
+		hd.bq4 = 0x746F646F; // "todo"
+	    else
+		hd.bq4 = 0x64617465; // "date"
+	    OBEX_ObjectAddHeader(self, object, 0xcf, hd, 4, 0);
+	}
+        
 	/* Add unicode name header*/
 	
 	QString uc = filename + QChar( 0x0 );
@@ -354,6 +374,7 @@ void QObexSender::putFile( const QString &filename, const QString& mimetype )
 
 
 
+static bool transmitDone = FALSE;
 
 void QObexSender::doPending()
 {
@@ -378,26 +399,25 @@ void QObexSender::doPending()
 
 	OBEX_TransportDisconnect(self);
 	state = Init;
+	emit done();
 	deleteMeLater();
 
     }
 }
 
 
-
-
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mode*/, gint event, gint obex_cmd, gint /*obex_rsp*/)
+static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /* mode */ , gint event, gint obex_cmd, gint /* obex_rsp */)
 {
     QObexSender *sender = (QObexSender*)OBEX_GetUserData( handle );
 
 //    qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
-//        sender, handle, obj, mode, event, obex_cmd, obex_rsp );
+//       sender, handle, obj, mode, event, obex_cmd, obex_rsp );
 
     switch (event) {
     case OBEX_EV_REQDONE:
 	sender->finished = TRUE;
-	if ( obex_cmd == OBEX_CMD_PUT ) {
-	    emit sender->done();
+	if ( obex_cmd == OBEX_CMD_DISCONNECT ) {
+	    transmitDone = TRUE;
 	}
 	// else if OBEX_CMD_CONNECT, we could give feedback
 	break;
@@ -405,7 +425,7 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mod
     case OBEX_EV_LINKERR:
 	// sometime we get a link error after we believed the connection was done.  Ignore this
 	// as emitting an error after done does not make sense
-	if ( !sender->finished ) {
+	if ( !transmitDone ) {
 	    emit sender->error();
 	    sender->abort();
 	    sender->state = QObexSender::Error;
@@ -456,10 +476,10 @@ void QObexSender::beam( const QString& filename, const QString& mimetype )
 {
     file_to_send = filename;
     mime_to_send = mimetype;
+    transmitDone = FALSE;
 
     connectCount = 0;
     tryConnecting();
-
 }
 
 
@@ -474,7 +494,7 @@ void QObexSender::tryConnecting()
     }
 	
     int retc = IrOBEX_TransportConnect(self, "OBEX");
-        
+    
     if ( retc < 0 ) {
 	const int maxTry = 20;
 	if ( connectCount > maxTry ) {
@@ -646,38 +666,40 @@ void QObexReceiver::getHeaders( obex_object_t *object )
 	switch ( hi ) {
 
 	case OBEX_HDR_LENGTH:
-	    //qDebug( "******** Got length %d", hv.bq4 );
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug( "******** Got length %d", hv.bq4 );
+#endif
 	    reclen = hv.bq4;
 	    break;
 
 	case OBEX_HDR_NAME:
 	    filename = getString(hv.bs, hv_size);
-	    /*
-		qDebug( "******** Got name %s (%d)", 
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug( "******** Got name %s (%d)", 
 			getString(hv.bs, hv_size).latin1(), hv_size );
-	    */
+#endif
 	    break;
 
 
 	case HDR_DESCRIPTION:
-	    /*
-		qDebug( "******** Got description %s (%d)", 
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug( "******** Got description %s (%d)", 
 			getString(hv.bs, hv_size).latin1(), hv_size );
-	    */
+#endif
 	    break;
 
 
 
 	case OBEX_HDR_TYPE:
 	    mimetype = QString::fromLatin1( (const char*)hv.bs, hv_size );
-	    /*
-		qDebug( "******** Got type %s", mimetype.latin1() );
-	    */
+#ifdef QTOPIA_DEBUG_OBEX
+	    qDebug( "******** Got type \"%s\"", mimetype.latin1() );
+#endif
 	    break;
 
 
 	default:
-	    /*
+#ifdef QTOPIA_DEBUG_OBEX
 	    if ( hi < 0x40 ) //unicode header
 		qDebug( "******** Got header 0x%x %s (%d)", hi, 
 			getString(hv.bs, hv_size).latin1(), hv_size );
@@ -685,7 +707,7 @@ void QObexReceiver::getHeaders( obex_object_t *object )
 		qDebug( "******** Got header 0x%x (%d)", hi, hv.bq4 );
 	    else
 		qDebug( "******** Got header 0x%x (size=%d)", hi, hv_size );
-	    */
+#endif
 	    ;
 	}
     }
@@ -744,9 +766,9 @@ void QObexReceiver::updateProgress( obex_object_t * /* obj */)
 }
 
 
-static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint /* obex_rsp */)
+static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint /*obex_rsp*/ )
 {
-    //qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+//    qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
     QObexReceiver* receiver = 
 	(QObexReceiver*)OBEX_GetUserData( handle );
 

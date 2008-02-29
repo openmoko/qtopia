@@ -18,7 +18,4 @@
         <translation>&amp;Ok</translation>
     </message>
 </context>
-<context>
-    <name>Taskbar Applet</name>
-</context>
 </TS>

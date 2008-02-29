@@ -89,6 +89,7 @@ private slots:
     void startPlaying();
     void stopPlaying();
     void replayClicked();
+    void deleteClicked();
     void clearData();
     void processAudioData();
     void configure();
@@ -121,9 +122,11 @@ private:
     QualitySetting qualities[MaxQualities];
     long recordTime;
     long maxRecordTime;
+    long samplesPlayed;
     bool recording;
     bool playing;
     QString lastSaved;
+    QString lastSavedLink;
     QTimer *lightTimer;
     bool recordLightState;
     QCopChannel *trayChannel;

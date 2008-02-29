@@ -3,7 +3,7 @@
     <name>KAstTopLevel</name>
     <message>
         <source>Asteroids</source>
-        <translation>アステロイド</translation>
+        <translation type="unfinished">アステロイド</translation>
     </message>
     <message>
         <source>Score</source>

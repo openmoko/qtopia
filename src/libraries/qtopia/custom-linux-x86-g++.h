@@ -21,3 +21,5 @@
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #define QPE_USE_MALLOC_FOR_NEW
 #endif
+#define QPE_ARCHITECTURE "PC"
+#define QPE_DEFAULT_TODAY_MODE "Daily"

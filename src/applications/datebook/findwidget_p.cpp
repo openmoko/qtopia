@@ -70,11 +70,11 @@ void FindWidget::slotFindClicked()
 	emit signalFindClicked( findText(),
 				mDate,
 				chkCase->isChecked(),
-				chkBackwards->isChecked(),
+				FALSE,
 				cmbCat->currentCategory() );
     else
 	emit signalFindClicked( findText(), chkCase->isChecked(),
-				chkBackwards->isChecked(),
+				FALSE,
 				cmbCat->currentCategory() );
 }
 
@@ -87,7 +87,7 @@ void FindWidget::setUseDate( bool show )
 	lblStartDate->hide();
 	cmdDate->hide();
     }
-    chkBackwards->setDisabled( show );
+    //chkBackwards->setDisabled( show );
 }
 
 void FindWidget::setDate( const QDate &dt )

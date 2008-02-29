@@ -8,8 +8,5 @@ INTERFACES	= worldtimebase.ui
 
 TARGET		= worldtime
 
-qdesktop:unix:LIBS	 += -lqd-qpe -L$(QPEDIR)/lib
-qdesktop:win32:LIBS += $(QPEDIR)/lib/qd-qpe.lib 
-
 TRANSLATIONS = worldtime-en_GB.ts worldtime-de.ts worldtime-ja.ts worldtime-no.ts
 

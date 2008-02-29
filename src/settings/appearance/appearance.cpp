@@ -305,7 +305,8 @@ class DefaultWindowDecoration : public WindowDecorationInterface
 public:
     DefaultWindowDecoration() : ref(0) {}
     QString name() const {
-	return "Default";
+	return qApp->translate("WindowDecoration", "Default", 
+		"List box text for default window decoration");
     }
     QPixmap icon() const {
 	return QPixmap();
@@ -539,9 +540,6 @@ void AppearanceSettings::decorationSelected( int idx )
 void AppearanceSettings::fontSelected( const QString &name )
 {
     sample->setUpdatesEnabled( FALSE );
-    QFont f( name, fontSize->currentText().toInt() );
-    sample->setFont( f );
-    QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 
     fontSize->clear();
 
@@ -559,6 +557,10 @@ void AppearanceSettings::fontSelected( const QString &name )
 	    }
 	}
     }
+
+    QFont f( name, fontSize->currentText().toInt() );
+    sample->setFont( f );
+    QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 }
 
 void AppearanceSettings::fontSizeSelected( const QString &sz )

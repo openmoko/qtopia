@@ -19,6 +19,7 @@
 **********************************************************************/
 
 #include <qtopia/global.h>
+#include <qtopia/qpeapplication.h>
 #include "contact.h"
 #include "contactxmlio_p.h"
 #include <qtopia/config.h>
@@ -141,6 +142,12 @@ void ContactXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 	    internalUpdateRecord(new PimContact(contact));
 	    emit contactsUpdated();
 	}
+    } else if (message == "reloadContacts()") {
+        ensureDataCurrent();
+    } else if (message == "reload(int)") {
+	int force;
+	ds >> force;
+        ensureDataCurrent(force);
     }
 }
 
@@ -248,6 +255,9 @@ PrContact ContactXmlIO::contactForId( const QUuid &u, bool *ok ) const
  */
 bool ContactXmlIO::saveData()
 {
+    if ( !QFile::exists( dataFilename() ) )
+	needsSave = TRUE;
+
     if (!needsSave)
 	return TRUE;
     if (accessMode() != ReadOnly ) {
@@ -506,7 +516,7 @@ QString businessCardName() {
 
 void updateBusinessCard(const PimContact &cnt)
 {
-    Config cfg("Security");
+    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
     cfg.setGroup("Sync");
     cfg.writeEntry("ownername", cnt.fullName());
 
@@ -515,7 +525,7 @@ void updateBusinessCard(const PimContact &cnt)
 
 void removeBusinessCard()
 {
-    Config cfg("Security");
+    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
     cfg.setGroup("Sync");
     cfg.writeEntry("ownername", "");
 

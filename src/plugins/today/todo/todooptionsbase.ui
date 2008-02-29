@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>294</width>
+            <width>290</width>
             <height>189</height>
         </rect>
     </property>
@@ -164,6 +164,7 @@
                             <property stdset="1">
                                 <name>text</name>
                                 <string>Tasks due the next</string>
+                                <comment>... 3 days</comment>
                             </property>
                         </widget>
                         <widget>
@@ -175,6 +176,7 @@
                             <property stdset="1">
                                 <name>suffix</name>
                                 <string> days</string>
+                                <comment>Tasks due the next... 5 days</comment>
                             </property>
                             <property stdset="1">
                                 <name>maxValue</name>

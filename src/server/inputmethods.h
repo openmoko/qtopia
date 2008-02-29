@@ -41,10 +41,14 @@ struct InputMethod
 	ExtInputMethodInterface *extInterface;
     };
 
-    inline QString name() { return newIM ? extInterface->name() : interface->name(); } 
-    inline QPixmap *icon() { return newIM ? extInterface->icon() : interface->icon(); } 
-    inline QUnknownInterface *iface() { return newIM ? extInterface : interface; }
+    inline QString name() const { return newIM ? extInterface->name() : interface->name(); } 
+    inline QPixmap *icon() const { return newIM ? extInterface->icon() : interface->icon(); } 
+    inline QUnknownInterface *iface() { return newIM ? (QUnknownInterface *)extInterface : (QUnknownInterface *)interface; }
     inline void resetState() { if ( !newIM ) interface->resetState(); }
+
+    int operator <(const InputMethod& o) const;
+    int operator >(const InputMethod& o) const;
+    int operator <=(const InputMethod& o) const;
 };
 
 class InputMethods : public QWidget
@@ -88,6 +92,7 @@ private:
     InputMethod *imethod;
     QValueList<InputMethod> inputMethodList;
     QValueList<InputMethod> inputModifierList;
+    QValueList<QUnknownInterface*> ifaceList;
     PluginLoader *loader;
 };
 

@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>247</width>
+            <width>243</width>
             <height>280</height>
         </rect>
     </property>
@@ -101,10 +101,6 @@
                             <width>45</width>
                             <height>0</height>
                         </size>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>ms</string>
                     </property>
                     <property stdset="1">
                         <name>alignment</name>

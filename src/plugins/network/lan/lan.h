@@ -41,7 +41,7 @@ public:
 private slots:
     void ipSelect( int id );
     void chooseDefaultWepKey();
-    void chooseWepType(int i);
+    void wepTypeChanged(int i);
 
 private:
     void readConfig();

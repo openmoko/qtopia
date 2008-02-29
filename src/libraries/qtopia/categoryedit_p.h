@@ -41,6 +41,13 @@ public:
 			const QString &appName, const QString &visibleName );
     QArray<int> newCategories();
     void kludge();
+#ifdef QTOPIA_DESKTOP
+    void setCategories( const QArray<int> &vlRecs,
+			QString appName, QString visibleName, bool checkable );
+    void refresh();
+#endif
+
+    bool tryAccept(); // not in 1.5.0
 
 protected:
     void accept();
@@ -50,9 +57,15 @@ protected slots:
     void slotRemove();
     void slotSetText( QListViewItem *selected );
     void slotSetGlobal( bool isChecked );
-    void slotTextChanged( const QString &strNew );
+    void slotTextChanged( const QString &strNew ); // not in 1.5.0
+
+private slots:
+    void reloadCategories();
 
 private:
+    bool updateInline();
+    int tryRename(const QString &newName, bool global);
+    
     CategoryEditPrivate *d;
 };
 

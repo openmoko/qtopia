@@ -28,14 +28,17 @@
 
 #include <qpainter.h>
 #include <qtimer.h>
+#include <qmessagebox.h>
 #include <qwindowsystem_qws.h>
 #include <qgfx_qws.h>
+#include <stdlib.h>
 
 
 Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
     QDialog( parent, name, TRUE, wf | WStyle_Customize | WStyle_StaysOnTop )
 {
     showCross = TRUE;
+    pressed = FALSE;
     const int offset = 30;
     QRect desk = qApp->desktop()->geometry();
     setGeometry( 0, 0, desk.width(), desk.height() );
@@ -67,17 +70,22 @@ Calibrate::~Calibrate()
 
 void Calibrate::show()
 {
-    grabMouse();
     if ( !isVisible() ) {
 	QWSServer::mouseHandler()->getCalibration(&goodcd);
 	QWSServer::mouseHandler()->clearCalibration();
     }
     QDialog::show();
+    setActiveWindow();
+    if ( !checkTouch() )
+	QTimer::singleShot(0, this, SLOT(reject()) );
+    else
+	QTimer::singleShot(0, this, SLOT(doGrab()) );
 }
 
 void Calibrate::store()
 {
     QWSServer::mouseHandler()->calibrate( &goodcd );
+    reset();
 }
 
 void Calibrate::hide()
@@ -122,6 +130,24 @@ bool Calibrate::sanityCheck()
 	return FALSE;
 
     return TRUE;
+}
+
+bool Calibrate::checkTouch()
+{
+    QString proto = getenv( "QWS_MOUSE_PROTO" );
+    bool touch = proto.contains("tpanel", FALSE);
+    if ( !touch ) {
+	QWSMouseHandler *h = QWSServer::mouseHandler();
+	if ( h && h->inherits("QCalibratedMouseHandler") )
+	    touch = TRUE;
+    }
+    if ( !touch ) {
+	qDebug( "show dlg" );
+	QMessageBox::warning( this, tr("Calibrate"), 
+	    tr("<qt>Calibration may only be performed on the touch screen.") );
+    }
+
+    return touch;
 }
 
 void Calibrate::moveCrosshair( QPoint pt )
@@ -191,6 +217,7 @@ void Calibrate::keyReleaseEvent( QKeyEvent *e )
 
 void Calibrate::mousePressEvent( QMouseEvent *e )
 {
+    pressed = TRUE;
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),
 			QSize(qt_screen->width(), qt_screen->height()) );
@@ -203,6 +230,8 @@ void Calibrate::mousePressEvent( QMouseEvent *e )
 
 void Calibrate::mouseMoveEvent( QMouseEvent *e )
 {
+    if ( !pressed )
+	return;
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),
 			QSize(qt_screen->width(), qt_screen->height()) );
@@ -215,8 +244,17 @@ void Calibrate::mouseMoveEvent( QMouseEvent *e )
 
 void Calibrate::mouseReleaseEvent( QMouseEvent * )
 {
+    if ( !pressed )
+	return;
+    pressed = FALSE;
     if ( timer->isActive() )
 	return;
+
+    if ( !checkTouch() ) {
+	hide();
+	reject();
+	return;
+    }
 
     bool doMove = TRUE;
 
@@ -267,6 +305,14 @@ void Calibrate::timeout()
     }
 
     moveCrosshair( newPos );
+}
+
+void Calibrate::doGrab()
+{
+    if ( !QWidget::mouseGrabber() )
+	grabMouse();
+    else
+	QTimer::singleShot( 50, this, SLOT(doGrab()) );
 }
 
 #endif // _WS_QWS_

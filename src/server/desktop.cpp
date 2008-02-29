@@ -181,13 +181,14 @@ KeyFilter::KeyFilter(QObject* parent) : QObject(parent), held_tid(0), heldButton
 void KeyFilter::timerEvent(QTimerEvent* e)
 {
     if ( e->timerId() == held_tid ) {
+	killTimer(held_tid);
 	// button held
 	if ( heldButton ) {
 	    emit activate(heldButton, TRUE);
 	    heldButton = 0;
 	}
+	held_tid = 0;
     }
-    killTimer(e->timerId());
 }
 
 bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
@@ -209,15 +210,17 @@ bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
 	if ( !((DesktopApplication*)qApp)->keyboardGrabbed() ) {
 	    // First check to see if DeviceButtonManager knows something about this button:
 	    const DeviceButton* button = DeviceButtonManager::instance().buttonForKeycode(keycode);
-	    if (button) {
-		if ( held_tid )
+	    if (button && !autoRepeat) {
+		if ( held_tid ) {
 		    killTimer(held_tid);
+		    held_tid = 0;
+		}
 		if ( button->heldAction().isNull() ) {
 		    if ( press )
 			emit activate(button, FALSE);
 		} else if ( press ) {
 		    heldButton = button;
-		    held_tid = startTimer(1000);
+		    held_tid = startTimer(500);
 		} else if ( heldButton ) {
 		    heldButton = 0;
 		    emit activate(button, FALSE);
@@ -273,7 +276,7 @@ DesktopApplication::DesktopApplication( int& argc, char **argv, Type t )
     applyLightSettings(ps);
 
     if ( PluginLoader::inSafeMode() )
-	QTimer::singleShot(0, this, SLOT(showSafeMode()) );
+	QTimer::singleShot(500, this, SLOT(showSafeMode()) );
     QTimer::singleShot(20*1000, this, SLOT(clearSafeMode()) );
 }
 
@@ -316,11 +319,11 @@ void DesktopApplication::psTimeout()
     if ( qpedesktop )
 	qpedesktop->checkMemory(); // in case no events are being generated
 
-    PowerStatus prev = *ps;
+    PowerStatus::ACStatus oldStatus = ps->acStatus();
 
     *ps = PowerStatusManager::readStatus();
 
-    if ( prev != *ps ) {
+    if ( oldStatus != ps->acStatus() ) {
 	// power source changed, read settings applying to current powersource
 	applyLightSettings(ps);
     }
@@ -383,6 +386,10 @@ Desktop::Desktop() :
     CUSTOM_SOUND_INIT;
 #endif
 
+    tid_xfer = 0;
+    tid_today = startTimer(3600*2*1000);
+    last_today_show = QDate::currentDate();
+
     qpedesktop = this;
 
     KeyFilter* kf = new KeyFilter(this);
@@ -398,6 +405,7 @@ Desktop::Desktop() :
 //    bg = new Info( this );
     tb = new TaskBar;
     connect(tb, SIGNAL(forceSuspend()), this, SLOT(togglePower()) );
+    tb->setGeometry( 0, qApp->desktop()->height()-20, qApp->desktop()->width(), 20 );
 
     launcher = new Launcher( 0, 0, WStyle_Customize | QWidget::WGroupLeader );
     connect(tb, SIGNAL(tabSelected(const QString&)), launcher, SLOT(showTab(const QString&)) );
@@ -427,6 +435,11 @@ Desktop::Desktop() :
     qApp->desktop()->installEventFilter( this );
 
     setGeometry( -10, -10, 9, 9 );
+    
+    QCopChannel *channel = new QCopChannel("QPE/System", this);
+    connect(channel, SIGNAL(received(const QCString &, const QByteArray &)),
+	    this, SLOT(systemMsg(const QCString &, const QByteArray &)) );
+ 
 }
 
 void Desktop::show()
@@ -548,6 +561,16 @@ void Desktop::appMessage(const QCString& message, const QByteArray&)
 {
     if ( message == "nextView()" )
 	launcher->nextView();
+}
+
+void Desktop::systemMsg(const QCString &msg, const QByteArray &)
+{
+    if ( msg == "securityChanged()" ) {
+	if ( transferServer )
+	   transferServer->authorizeConnections();
+	if ( qcopBridge )
+	    qcopBridge->authorizeConnections();
+    }
 }
 
 void Desktop::raiseMenu()
@@ -711,6 +734,8 @@ void Desktop::startTransferServer()
 	qcopBridge = new QCopBridge( 4243 );
 	if ( qcopBridge->ok() ) {
 	    // ... OK
+	    connect( qcopBridge, SIGNAL(connectionClosed(const QHostAddress &)),
+		    this, SLOT(syncConnectionClosed(const QHostAddress &)) );
 	} else {
 	    delete qcopBridge;
 	    qcopBridge = 0;
@@ -727,13 +752,29 @@ void Desktop::startTransferServer()
 	}
     }
     if ( !transferServer || !qcopBridge )
-	startTimer( 2000 );
+	tid_xfer = startTimer( 2000 );
 }
 
 void Desktop::timerEvent( QTimerEvent *e )
 {
-    killTimer( e->timerId() );
-    startTransferServer();
+    if ( e->timerId() == tid_xfer ) {
+	killTimer( tid_xfer );
+	tid_xfer = 0;
+	startTransferServer();
+    } else if ( e->timerId() == tid_today ) {
+	QDate today = QDate::currentDate();
+	if ( today != last_today_show ) {
+	    last_today_show = today;
+	    Config cfg("today");
+	    cfg.setGroup("Start");
+#ifndef QPE_DEFAULT_TODAY_MODE
+#define QPE_DEFAULT_TODAY_MODE "Never"
+#endif
+	    if ( cfg.readEntry("Mode",QPE_DEFAULT_TODAY_MODE) == "Daily" ) {
+		QCopEnvelope env(Service::channel("today"),"raise()");
+	    }
+	}
+    }
 }
 
 void Desktop::terminateServers()
@@ -742,6 +783,12 @@ void Desktop::terminateServers()
     delete qcopBridge;
     transferServer = 0;
     qcopBridge = 0;
+}
+
+void Desktop::syncConnectionClosed( const QHostAddress & )
+{
+    qDebug( "Lost sync connection" );
+    launcher->syncConnectionClosed();
 }
 
 void Desktop::rereadVolumes()

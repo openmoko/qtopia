@@ -11,11 +11,11 @@
     </message>
     <message>
         <source>Restore Time Zone</source>
-        <translation type="unfinished">Zeitzone wiederherstellen</translation>
+        <translation type="obsolete">Zeitzone wiederherstellen</translation>
     </message>
     <message>
         <source>There was a problem setting your timezone.Your time may be wrong now...</source>
-        <translation type="unfinished">Beim Einstellen der Zeitzone ist ein Problem aufgetreten. Die Zeitangaben sind daher möglicherweise falsch...</translation>
+        <translation type="obsolete">Beim Einstellen der Zeitzone ist ein Problem aufgetreten. Die Zeitangaben sind daher möglicherweise falsch...</translation>
     </message>
 </context>
 <context>
@@ -89,7 +89,7 @@
     </message>
     <message>
         <source>Unable to Find Timezone Info</source>
-        <translation>Kann keine Zeitzoneninformationen finden.</translation>
+        <translation type="obsolete">Kann keine Zeitzoneninformationen finden.</translation>
     </message>
     <message>
         <source>Couldn&apos;t Find Map</source>
@@ -101,7 +101,7 @@
     </message>
     <message>
         <source>&lt;p&gt;Unable to find any timezone information in %1</source>
-        <translation>&lt;p&gt;Kann keine Zeitzoneninformationen in %1 finden</translation>
+        <translation type="obsolete">&lt;p&gt;Kann keine Zeitzoneninformationen in %1 finden</translation>
     </message>
     <message>
         <source>Click to zoom the map in/out.</source>

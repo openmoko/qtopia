@@ -24,7 +24,9 @@
 #include <qtopia/qpeglobal.h>
 #include <qstack.h>
 #include <qlist.h>
+#ifndef NEW_STYLE_DISPLAY
 #include <qlineedit.h>
+#endif
 #include <qlabel.h>
 
 #include <qtopia/calc/instruction.h>
@@ -49,7 +51,7 @@ public:
     void evaluate();
 
     void dualReset();
-    void softReset();
+    void softReset(bool = true);
     void hardReset();
     void pushChar(char);
     void delChar();
@@ -62,7 +64,11 @@ public:
 
     void setError(Error = eError);
     void setError(QString);
+#ifdef NEW_STYLE_DISPLAY
+    void setDisplay(QLabel *);
+#else
     void setDisplay(QLineEdit *);
+#endif
     void setAccType(QString);
     QString getDisplay();
 protected:
@@ -86,7 +92,6 @@ private:
     QString currentType;
     State state;
     int braceCount;
-    int decimalPlaces;
     bool secondaryReset;
 
     QStack<InstructionDescription> stack;
@@ -101,7 +106,12 @@ private:
     InstructionDescription *kDesc;
 
     QList<InstructionDescription> list;
+#ifdef NEW_STYLE_DISPLAY
+    QLabel *lcd;
+    QPainter *lcdPainter;
+#else
     QLineEdit *lcd;
+#endif
 };
 
 #define QTOPIA_DEFINED_ENGINE

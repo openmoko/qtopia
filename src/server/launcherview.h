@@ -66,6 +66,8 @@ public:
     void setViewFont( const QFont & );
     void clearViewFont();
 
+    void relayout(void);
+
 public slots:
     void populate( AppLnkSet *folder, const QString& categoryfilter );
 
@@ -86,6 +88,8 @@ protected slots:
 protected:
     void internalPopulate( AppLnkSet *, const QString& categoryfilter );
     void paletteChange( const QPalette & );
+
+    void fontChanged(const QFont &);
 
 private:
     static bool bsy;

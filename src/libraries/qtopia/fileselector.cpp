@@ -200,7 +200,7 @@ class NewDocItem : public FileSelectorItem
 public:
     NewDocItem( QListView *parent, const DocLnk &f )
 	: FileSelectorItem( parent, f ) {
-	setText( 0, QObject::tr("New Document") );
+	setText( 0, FileSelector::tr("New Document") );
 	QImage img( Resource::loadImage( "new" ) );
 	QPixmap pm;
 	pm = img.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() );
@@ -229,13 +229,25 @@ public:
 class FileSelectorPrivate
 {
 public:
+    FileSelectorPrivate()
+    {
+	newDocItem = 0;
+	files = new DocLnkSet;
+    }
+
+    ~FileSelectorPrivate()
+    {
+	delete files;
+	// everything else is a subobject
+    }
+
     TypeCombo *typeCombo;
     CategorySelect *catSelect;
     QValueList<QRegExp> mimeFilters;
     int catId;
     bool showNew;
-    NewDocItem *newDocItem;
-    DocLnkSet files;
+    NewDocItem *newDocItem; // child of listview
+    DocLnkSet* files;
     QHBox *toolbar;
     StorageInfo *storage;
     bool needReread;
@@ -270,10 +282,20 @@ public:
   signal is emitted.
 
   The typeChanged() and categoryChanged() signals are emitted when
-  either a different file type or category are selected.
+  either a different file type or category are selected. Note that
+  in Qtopia 1.5.0, there were no selectors for this, so these signals
+  are never emitted on that platform.
 
   \ingroup qtopiaemb
   \sa FileManager
+*/
+
+/*! \fn void FileSelector::typeChanged(void)
+  This signal is emitted when a different file type is selected.
+*/
+
+/*! \fn void FileSelector::categoryChanged(void)
+  This signal is emitted when a different category is selected.
 */
 
 /*!
@@ -297,7 +319,6 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     setSpacing( 0 );
 
     d = new FileSelectorPrivate();
-    d->newDocItem = 0;
     d->showNew = newVisible;
     d->catId = -2; // All files
 
@@ -307,7 +328,7 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     d->toolbar->hide();
 
     d->rereadTimer = new QTimer( this );
-    connect( d->rereadTimer, SIGNAL(timeout()), this, SLOT(reread()) );
+    connect( d->rereadTimer, SIGNAL(timeout()), this, SLOT(slotReread()) );
 
     d->needReread = FALSE;
 
@@ -347,14 +368,15 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     QArray<int> vl( 0 );
     d->catSelect = new CategorySelect( hb );
     d->catSelect->setRemoveCategoryEdit( TRUE );
-    d->catSelect->setCategories( vl, "Document View", tr("Document View") );
+    d->catSelect->setCategories( vl, "Document View", // No tr
+	tr("Document View") );
     d->catSelect->setAllCategories( TRUE );
     connect( d->catSelect, SIGNAL(signalSelected(int)), this, SLOT(catSelected(int)) );
     QWhatsThis::add( d->catSelect, tr("Show documents in this category") );
 
     setCloseVisible( closeVisible );
 
-    d->storage = new StorageInfo;
+    d->storage = new StorageInfo( this );
     connect( d->storage, SIGNAL( disksChanged() ), SLOT( cardChanged() ) );
 
     connect( qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)) );
@@ -378,7 +400,7 @@ FileSelector::~FileSelector()
 */
 int FileSelector::fileCount()
 {
-    return d->files.children().count();;
+    return d->files->children().count();;
 }
 
 /*!
@@ -459,7 +481,7 @@ void FileSelector::cardChanged()
 	d->needReread = TRUE;
 }
 
-void FileSelector::linkChanged( const QString &lf )
+void FileSelector::linkChanged( const QString & )
 {
     if ( isVisible() )
 	d->rereadTimer->start( 200, TRUE );
@@ -534,12 +556,18 @@ void FileSelector::setCloseVisible( bool b )
 void FileSelector::reread()
 {
 #ifdef Q_WS_QWS
-    d->files.clear();
-    Global::findDocuments(&d->files, filter);
-    d->typeCombo->reread( d->files, filter );
+    delete d->files;
+    d->files = new DocLnkSet;
+    Global::findDocuments(d->files, filter);
+    d->typeCombo->reread( *d->files, filter );
 #endif
     d->needReread = FALSE;
     updateView();
+}
+
+void FileSelector::slotReread()
+{
+    reread();
 }
 
 void FileSelector::showEvent( QShowEvent *e )
@@ -584,8 +612,8 @@ void FileSelector::updateView()
     if ( item )
 	oldFile = item->file().file();
     view->clear();
-    int ndocs = d->files.children().count();
-    QListIterator<DocLnk> dit( d->files.children() );
+    int ndocs = d->files->children().count();
+    QListIterator<DocLnk> dit( d->files->children() );
     DocLnk* *doc = new DocLnk*[ndocs];
     int i=0;
     for ( ; dit.current(); ++dit ) {
@@ -614,6 +642,8 @@ void FileSelector::updateView()
 	}
     }
 
+    delete [] doc;
+
     if ( d->showNew )
 	d->newDocItem = new NewDocItem( view, DocLnk() );
     else
@@ -641,7 +671,7 @@ void FileSelector::updateWhatsThis()
     Returns a copy of the selected \link doclnk.html DocLnk\endlink which
     must be deleted by the caller.
     This function is deprecated. It will be removed in Qtopia 2.
-    Please switch to using \sa selectedDocument() instead.
+    Please switch to using \link selectedDocument() \endlink instead.
 */
 
 /*!

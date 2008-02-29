@@ -31,6 +31,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 
@@ -454,6 +456,7 @@ bool Process::exec( const QByteArray& in, QByteArray& out, QStringList *env )
 	    fd_set r; FD_ZERO(&r);
 	    fd_set w; FD_ZERO(&w);
 	    FD_SET( sStdout[0], &r );
+	    FD_SET( sStderr[0], &r );
 	    out.resize( readden+bufsize );
 	    if ( int(in.size()) > written )
 		FD_SET( sStdin[1], &w );
@@ -466,6 +469,10 @@ bool Process::exec( const QByteArray& in, QByteArray& out, QStringList *env )
 		else
 		    break;
 	    }
+	    if ( FD_ISSET( sStderr[0], &r ) ) {
+		char buf[bufsize];
+		int n = read( sStderr[0], buf, bufsize );
+	    }
 	    if ( FD_ISSET( sStdin[1], &w ) ) {
 		int n = write( sStdin[1], in.data()+written, in.size()-written );
 		if ( n > 0 )
@@ -475,13 +482,17 @@ bool Process::exec( const QByteArray& in, QByteArray& out, QStringList *env )
 	out.resize(readden);
     }
 
+    //don't leave a zombie behind
+    int status;
+    waitpid( -1, &status, WNOHANG );
+    
     // cleanup and return
     delete[] arglistQ;
     delete[] arglist;
     ::close( sStdin[1] );
     ::close( sStdout[0] );
     ::close( sStderr[0] );
-    return TRUE;
+    return status==0;
 
 error:
 #if defined(QT_QPROCESS_DEBUG)

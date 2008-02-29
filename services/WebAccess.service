@@ -1,0 +1,2 @@
+[Service]
+Actions = openURL(QString);retrieveURL(QString);getURL(QString,QString)

@@ -215,6 +215,7 @@ void MediaPlayer::startScanningBackward()
 	return;
     if ( ltTimerId )
 	return;
+    mediaPlayerState->setPaused( !mediaPlayerState->paused() );
     ltTimerId = startTimer( 200 );
     mediaPlayerState->startTemporaryMute();
 }
@@ -226,6 +227,7 @@ void MediaPlayer::startScanningForward()
 	return;
     if ( rtTimerId )
 	return;
+    mediaPlayerState->setPaused( !mediaPlayerState->paused() );
     rtTimerId = startTimer( 200 );
     mediaPlayerState->startTemporaryMute();
 }
@@ -328,6 +330,7 @@ void MediaPlayer::stopScanningBackward()
     if ( ltTimerId ) {
 	killTimer( ltTimerId );
 	ltTimerId = 0;
+	mediaPlayerState->setPaused( !mediaPlayerState->paused() );
 	mediaPlayerState->stopTemporaryMute( 500 );
     }
 }
@@ -338,6 +341,7 @@ void MediaPlayer::stopScanningForward()
     if ( rtTimerId ) {
 	killTimer( rtTimerId );
 	rtTimerId = 0;
+	mediaPlayerState->setPaused( !mediaPlayerState->paused() );
 	mediaPlayerState->stopTemporaryMute( 500 );
     }
 }
@@ -356,8 +360,10 @@ void MediaPlayer::timerEvent( QTimerEvent *te )
 	int newPos;
 	if ( mediaPlayerState->view() == AudioView )
 	    newPos = mediaPlayerState->position() - 200000;
-	else
-	    newPos = mediaPlayerState->position() - 30;
+	else {
+	    int increment = mediaPlayerState->length() / 50;
+	    newPos = mediaPlayerState->position() - increment;
+	}
 	if ( newPos > 0 )
 	    mediaPlayerState->setPosition( newPos );
 	else
@@ -367,8 +373,10 @@ void MediaPlayer::timerEvent( QTimerEvent *te )
 	int newPos;
 	if ( mediaPlayerState->view() == AudioView )
 	    newPos = mediaPlayerState->position() + 200000;
-	else
-	    newPos = mediaPlayerState->position() + 30;
+	else {
+	    int increment = mediaPlayerState->length() / 50;
+	    newPos = mediaPlayerState->position() + increment;
+	}
 	if ( newPos <= mediaPlayerState->length() )
 	    mediaPlayerState->setPosition( newPos );
 	else
@@ -454,16 +462,20 @@ bool MediaPlayer::keyReleaseEvent( QKeyEvent *e )
     switch( e->key() ) {
 	case Key_Left:
 	    if ( ltTimerId ) {
-		if ( !scanning )
+		if ( !scanning ) {
 		    prev();
+		    mediaPlayerState->setPaused( !mediaPlayerState->paused() );
+		}
 		stopScanningBackward();
 		return TRUE;
 	    }
 	    break;
 	case Key_Right:
 	    if ( rtTimerId ) {
-		if ( !scanning )
+		if ( !scanning ) {
 		    next();
+		    mediaPlayerState->setPaused( !mediaPlayerState->paused() );
+		}
 		stopScanningForward();
 		return TRUE;
 	    }

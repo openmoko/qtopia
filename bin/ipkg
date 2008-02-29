@@ -14,11 +14,28 @@
 # GNU General Public License for more details.
 #
 # modified by sharp 2001
+#
+# This version of ipkg is based on revision 1.21 from  
+#
+# http://cvs.handhelds.org/cgi-bin/viewcvs.cgi/familiar/dist/ipkg/sh/ipkg
+#
+# It contains the following changes for Qtopia:
+#
+# * IPKG_CONF_DIR is located in the Qtopia directory by default
+# * The script works under ash, and with non-GNU tar
+# * It accepts some common errors in 3rdparty Qtopia packages:
+#   - Uppercase letters in package names
+#   - pre/post scripts without executable permissions
+# * More testing for error conditions, and cleanups
+# * Shorter timeout for network install
+# * Removed warning output -- user cannot do anything about it
+#
+# Trolltech 2003
 
 set -e
 
 if [ -z "$QTDIR" ]; then
-	QTDIR=/opt/QtPalmtop
+	QTDIR=/opt/Qtopia
 fi
 if [ -z "$IPKG_CONF_DIR" ]; then
 	IPKG_CONF_DIR=/$QTDIR/etc

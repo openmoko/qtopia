@@ -49,10 +49,12 @@ private slots:
     void changeClock( bool );
     void setDailyAmPm( int );
     void setDailyMinute( int );
+    void dailyEdited();
     void enableDaily( bool );
     void appMessage(const QCString& msg, const QByteArray& data);
     void alarmTimeout();
     void applyDailyAlarm();
+    void scheduleApplyDailyAlarm();
 
 protected:
     QDateTime nextAlarm( int h, int m );
@@ -61,6 +63,8 @@ protected:
     void updateLap();
     void setSwatchLcd( QLCDNumber *lcd, int ms, bool showMs );
     bool eventFilter( QObject *, QEvent * );
+    bool spinBoxValid( QSpinBox *sb );
+    bool validDaysSelected(void);
 
 private:
     QTimer *t;
@@ -84,6 +88,7 @@ private:
     QLabel* alarmDlgLabel;
     QToolButton **dayBtn;
     bool init;
+    QTimer *applyAlarmTimer;
 };
 
 #endif

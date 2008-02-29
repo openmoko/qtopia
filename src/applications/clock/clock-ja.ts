@@ -64,6 +64,15 @@
         <comment>Sunday</comment>
         <translation>日曜</translation>
     </message>
+    <message>
+        <source>Select Day</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Daily alarm requires at least
+one day to be selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ClockBase</name>

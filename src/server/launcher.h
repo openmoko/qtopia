@@ -62,6 +62,7 @@ public:
     void setBusy(bool on);
     QString getAllDocLinkInfo() const;
     LauncherView *view( const QString &id );
+    LauncherView *currentView(void);
 
 signals:
     void selected(const QString&);
@@ -102,6 +103,8 @@ public:
 
     virtual void showMaximized();
     static bool mkdir(const QString &path);
+
+    void syncConnectionClosed();
 
 public slots:
     void viewSelected(const QString&);

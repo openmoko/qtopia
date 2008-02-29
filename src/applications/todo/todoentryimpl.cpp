@@ -109,6 +109,7 @@ NewTaskDialog::NewTaskDialog( int id, QWidget* parent,  const char* name, bool m
 
 void NewTaskDialog::init()
 {
+    buttonclose = FALSE;
     QScrollView *sv = new QScrollView(this);
     sv->setResizePolicy(QScrollView::AutoOneFit);
 
@@ -126,23 +127,24 @@ void NewTaskDialog::init()
     setTabOrder(s->buttonDue, s->buttonStart);
     setTabOrder(s->buttonStart, s->buttonEnd);
     setTabOrder(s->buttonEnd, s->comboCategory);
-    
+
 #ifdef Q_WS_QWS
     s->buttonCancel->hide();
     s->buttonOk->hide();
 #else
     setTabOrder(s->comboCategory, s->buttonCancel);
     setTabOrder(s->buttonCancel, s->buttonOk);
+    s->buttonOk->setDefault(TRUE);
 
     connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
     connect( s->buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
 #endif
 
-    connect( s->buttonDue, SIGNAL( dateSelected( const QDate& ) ),
+    connect( s->buttonDue, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( dueDateChanged( const QDate& ) ) );
-    connect( s->buttonStart, SIGNAL( dateSelected( const QDate& ) ),
+    connect( s->buttonStart, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( startDateChanged( const QDate& ) ) );
-    connect( s->buttonEnd, SIGNAL( dateSelected( const QDate& ) ),
+    connect( s->buttonEnd, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( endDateChanged( const QDate& ) ) );
 
     QDate current = QDate::currentDate();
@@ -164,22 +166,13 @@ void NewTaskDialog::init()
 void NewTaskDialog::dueButtonToggled()
 {
     s->buttonDue->setEnabled( s->checkDue->isChecked() );
-    s->buttonStart->setEnabled( s->checkDue->isChecked() );
 }
 
 void NewTaskDialog::statusChanged()
 {
     PimTask::TaskStatus t = (PimTask::TaskStatus)s->comboStatus->currentItem();
 
-    if ( t != PimTask::NotStarted ) {
-	s->checkDue->setChecked( TRUE );
-	dueButtonToggled();
-	if ( !s->buttonStart->date().isValid() )
-	    s->buttonStart->setDate( QDate::currentDate() );
-    }
-    else
-	s->buttonStart->setDate( QDate() );
-
+    s->buttonStart->setEnabled( t != PimTask::NotStarted );
     s->buttonEnd->setEnabled( t == PimTask::Completed );
 
     // status change may lead to percent complete change. Work it out.
@@ -205,29 +198,12 @@ NewTaskDialog::~NewTaskDialog()
 {
     // no need to delete child widgets, Qt does it all for us
 }
-void NewTaskDialog::dueDateChanged( const QDate& date )
+void NewTaskDialog::dueDateChanged( const QDate& /* date */ )
 {
-    // if the due date is before the start date, make the start date null;
-    // debated not changing the date (and telling the user, like outlook does)
-    // but I feel this will just frustrate the user, since the user is
-    // manually changing the dueDate; they can manually change the start
-    // date if they wish (which is what the dialog would have forced them to
-    // do) - Greg
-    if ( s->buttonStart->date().isValid() &&
-	 date < s->buttonStart->date() )
-	s->buttonStart->setDate( QDate() );
 }
 
 void NewTaskDialog::startDateChanged( const QDate& date )
 {
-    if ( s->buttonDue->date().isNull() )
-	s->buttonDue->setDate( date );
-    else if ( date.isValid() && s->buttonDue->date().isValid()
-	      && s->buttonDue->date() < date ) {
-	QMessageBox::information ( this, tr("Qtopia Desktop ToDo List"),
-				   tr("The start date must occur before the tasks due date.\nPlease change the due date first."), QMessageBox::Ok );
-	s->buttonStart->setDate( QDate() );
-    }
     if ( date > s->buttonEnd->date() )
 	s->buttonEnd->setDate( date );
 }
@@ -279,25 +255,68 @@ PimTask NewTaskDialog::todoEntry()
     return todo;
 }
 
+void NewTaskDialog::show()
+{
+    buttonclose = FALSE;
+    QDialog::show();
+}
 
 /*!
 
 */
+void NewTaskDialog::closeEvent(QCloseEvent *e)
+{
+#ifdef QTOPIA_DESKTOP
+    PimTask old(todo);
+    if ( !buttonclose && old.toRichText() != todoEntry().toRichText() ) {
+	QString message = tr("Discard changes?");
+	switch( QMessageBox::warning(this, tr("Todo List"), message,
+		QMessageBox::Yes, QMessageBox::No) ) {
+
+	    case QMessageBox::Yes:
+		QDialog::closeEvent(e);
+	    break;
+	    case QMessageBox::No:
+		e->ignore();
+		todo = old;
+	    break;
+	}
+    } else
+	QDialog::closeEvent(e);
+#else
+    QDialog::closeEvent(e);
+#endif
+}
 
 void NewTaskDialog::reject()
 {
+    buttonclose = TRUE;
     QDialog::reject();
 }
 
 void NewTaskDialog::accept()
 {
-/*
-    QString strText = inputDescription->text();
-    if ( !strText || strText == "") {
-       // hmm... just decline it then, the user obviously didn't care about it
-       QDialog::reject();
-       return;
-    }
-*/
+    buttonclose = TRUE;
     QDialog::accept();
 }
+
+
+#ifdef QTOPIA_DESKTOP
+
+CategorySelect *NewTaskDialog::categorySelect()
+{
+    return s->comboCategory;
+}
+
+void NewTaskDialog::updateCategories()
+{
+    if ( !s->comboCategory )
+	return;
+
+    connect( this, SIGNAL( categoriesChanged() ),
+	     s->comboCategory, SLOT( categoriesChanged() ) );
+    emit categoriesChanged();
+    disconnect( this, SIGNAL( categoriesChanged() ),
+		s->comboCategory, SLOT( categoriesChanged() ) );
+}
+#endif

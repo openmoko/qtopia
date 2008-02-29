@@ -36,8 +36,8 @@
 
 #include <qtopia/applnk.h>
 
-VolumeControl::VolumeControl( QWidget *parent, const char *name, WFlags /* f */)
-    : QFrame( parent, name, WStyle_StaysOnTop | WType_Popup )
+VolumeControl::VolumeControl( QWidget *parent, const char *name, WFlags f )
+    : QFrame( parent, name, WStyle_StaysOnTop | WType_Popup | f )
 {
     setFrameStyle( QFrame::PopupPanel | QFrame::Raised );
 

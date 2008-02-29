@@ -192,11 +192,6 @@
 */
 
 /*!
-  \fn QDateTime PimEvent::endTimeZone() const
-  \internal
-*/
-
-/*!
   \enum PimEvent::EventFields
   \internal
 */
@@ -623,6 +618,20 @@ void PimEvent::addException( const QDate &d, const QUuid &u )
     mChildren.append(u);
 }
 
+/*!
+  Returns TRUE if the event can occur.  Otherwise returns FALSE.
+*/
+bool PimEvent::isValid() const
+{
+    bool ok;
+    nextOccurrence(start().date(), &ok);
+    if ( !ok && mChildren.isEmpty() )  {
+	// no longer exist!
+	return FALSE;
+    }
+    return TRUE;
+}
+
 /*! \internal */
 void PimEvent::clearExceptions()
 {
@@ -876,22 +885,19 @@ QDate PimEvent::p_nextOccurrence( const QDate &from, bool *ok) const
     return result;
 }
 
-// vcal conversion code
+// In pimrecord.cpp
+void qpe_startVObjectInput();
+bool qpe_vobjectCompatibility(const char* misfeature);
+void qpe_endVObjectInput();
+void qpe_startVObjectOutput();
+void qpe_setVObjectProperty(const QString&, const QString&, const char* type, PimRecord*);
+void qpe_endVObjectOutput(VObject *,const char* type,const PimRecord*);
+VObject *qpe_safeAddPropValue( VObject *o, const char *prop, const QString &value );
 static inline VObject *safeAddPropValue( VObject *o, const char *prop, const QString &value )
-{
-    VObject *ret = 0;
-    if ( o && !value.isEmpty() )
-	ret = addPropValue( o, prop, value.latin1() );
-    return ret;
-}
-
+{ return qpe_safeAddPropValue(o,prop,value); }
+VObject *qpe_safeAddProp( VObject *o, const char *prop);
 static inline VObject *safeAddProp( VObject *o, const char *prop)
-{
-    VObject *ret = 0;
-    if ( o )
-	ret = addProp( o, prop );
-    return ret;
-}
+{ return qpe_safeAddProp(o,prop); }
 
 const char *dayToString(int d)
 {
@@ -916,21 +922,38 @@ const char *dayToString(int d)
 
 static VObject *createVObject( const PimEvent &e )
 {
+    qpe_startVObjectOutput();
+
     VObject *vcal = newVObject( VCCalProp );
     safeAddPropValue( vcal, VCVersionProp, "1.0" );
     VObject *event = safeAddProp( vcal, VCEventProp );
 
-    // don't give UTC times if we don't have a timezone, or we
-    // are an allday event.
-    bool timeAsUTC = (e.timeZone().isValid() && !e.isAllDay());
+    bool timeAsUTC = FALSE;
+    QString start, end;
+    if ( !e.isAllDay() ) {
+	// don't give UTC times if we don't have a timezone
+	timeAsUTC = e.timeZone().isValid();
+	start = TimeConversion::toISO8601( e.start(), timeAsUTC );
+	end = TimeConversion::toISO8601( e.end(), timeAsUTC );
+    } else {
+	start = TimeConversion::toISO8601( e.start().date(), FALSE );
+	end = TimeConversion::toISO8601( e.end().date(), FALSE );
+    }
+    safeAddPropValue( event, VCDTstartProp, start );
+    safeAddPropValue( event, VCDTendProp, end );
 
-    safeAddPropValue( event, VCDTstartProp, 
-	    TimeConversion::toISO8601( e.start(), timeAsUTC ) );
-    safeAddPropValue( event, VCDTendProp, 
-	    TimeConversion::toISO8601( e.end(), timeAsUTC ) );
+    // vCal spec: VCSummaryProp is required
+    // Palm m100:     Yes (but accepts VCDescriptionProp VCAttachProp)
+    // SL5500:        No
+    // Ericsson T39m: Yes
+    if ( qpe_vobjectCompatibility("Palm-Event-DN") ) {
+	safeAddPropValue( event, VCDescriptionProp, e.description() );
+	safeAddPropValue( event, VCAttachProp, e.notes() );
+    } else {
+	safeAddPropValue( event, VCSummaryProp, e.description() );
+	safeAddPropValue( event, VCDescriptionProp, e.notes() );
+    }
 
-    safeAddPropValue( event, VCAttachProp, e.description() );
-    safeAddPropValue( event, VCDescriptionProp, e.description() );
     safeAddPropValue( event, VCLocationProp, e.location() );
 
     if ( e.hasAlarm() ) {
@@ -1013,7 +1036,7 @@ static VObject *createVObject( const PimEvent &e )
 	}
     }
 
-    // ### categories missing XXX Mandatory if we want to claim conformance
+    qpe_endVObjectOutput(event,"Calendar",&e); // No tr
 
     return vcal;
 }
@@ -1046,7 +1069,7 @@ static void parseRrule( PimEvent &e, const QString &v)
 		} else if (value[i] == QChar('M')) {
 		    i++;
 		    if (i >= (int)value.length())
-			return;
+			break;
 
 		    // may need to change from MonthlyDay to MonthlyEndDay
 		    // later.
@@ -1057,8 +1080,11 @@ static void parseRrule( PimEvent &e, const QString &v)
 		} else if (value[i] == QChar('Y')) {
 		    i++;
 		    if (i >= (int)value.length() ||
-			    value[i] != QChar('M'))
-			return;  // only know Yearly Month.
+			    value[i] != QChar('M')) {
+			// force exit from lup
+			i = (int)value.length();
+			break;;  // only know Yearly Month.
+		    }
 		    e.setRepeatType(PimEvent::Yearly);
 		}
 		st = interval; // frequency;
@@ -1072,9 +1098,9 @@ static void parseRrule( PimEvent &e, const QString &v)
 		    else if (e.repeatType() == PimEvent::Weekly)
 			st = weekdaylist;
 		    else if (e.repeatType() == PimEvent::MonthlyDay)
-			st = daylist;
+			st = occurrencelist;
 		    else if (e.repeatType() == PimEvent::MonthlyDate)
-			st = daynumberlist;
+			st = daylist;
 		    else 
 			st = monthlist;
 		    acc = 0;
@@ -1120,8 +1146,10 @@ static void parseRrule( PimEvent &e, const QString &v)
 		    break;
 		}
 		// read the next 2/3 (if third is space)
-		if (i+1 >= (int)value.length())
-		    return;
+		if (i+1 >= (int)value.length()) {
+		    i = (int)value.length();
+		    break;  // only know Yearly Month.
+		}
 		if (value[i] == QChar('M'))
 		    e.setRepeatOnWeekDay(1, TRUE);
 		else if (value[i] == QChar('T') && 
@@ -1152,16 +1180,20 @@ static void parseRrule( PimEvent &e, const QString &v)
 	    case monthlist:
 		// find the optional duration.
 		// find a # or more than 3 digets from end.
+		// note we will be at the start of the string here.
 		{
 		    int space = value.findRev(QChar(' '));
-		    if (space < i)
-			return;  // no duration;
+		    if (space < i-1) {
+			i = (int)value.length();
+			break;
+		    }
 		    if (space + 4 < (int)value.length()
-			    || value[i+1] == QChar('#')) {
+			    || value[i] == QChar('#')) {
 			i = space;
 			st = duration;
 		    } else {
-			return;
+			i = (int)value.length();
+			break;
 		    }
 		}
 		break;
@@ -1217,6 +1249,7 @@ static PimEvent parseVObject( VObject *obj )
 
     VObjectIterator it;
     initPropIterator( &it, obj );
+    QString summary, description, attach; // vCal properties, not Qtopias
     while( moreIteration( &it ) ) {
 	VObject *o = nextVObject( &it );
 	QCString name = vObjectName( o );
@@ -1254,11 +1287,15 @@ static PimEvent parseVObject( VObject *obj )
 	    e.setEnd( TimeConversion::fromISO8601( QCString(value) ) );
 	    haveEnd = TRUE;
 	}
+	// X-Qtopia-NOTES is for 1.5.0 compatibility
 	else if ( name == "X-Qtopia-NOTES" || name == VCAttachProp) {
-	    e.setNotes( value );
+	    attach = value;
+	}
+	else if ( name == VCSummaryProp ) {
+	    summary = value;
 	}
 	else if ( name == VCDescriptionProp ) {
-	    e.setDescription( value );
+	    description = value;
 	}
 	else if ( name == VCLocationProp ) {
 	    e.setLocation( value );
@@ -1293,7 +1330,23 @@ static PimEvent parseVObject( VObject *obj )
 	    for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
 		((PrEvent&)e).addException(TimeConversion::fromISO8601(QCString(*it)).date());
 	    }
+	} else {
+	    qpe_setVObjectProperty(name,value,"Calendar",&e); // No tr
 	}
+    }
+
+    // Find best mapping from (Summary,Description,Attach) to our (Description,Notes)
+    // Similar code in task.cpp
+    if ( !!summary && !!description && summary != description ) {
+	e.setDescription( summary );
+	e.setNotes( description );
+	// all 3 - drop attach
+    } else if ( !!summary ) {
+	e.setDescription( summary );
+	e.setNotes( attach );
+    } else {
+	e.setDescription( description );
+	e.setNotes( attach );
     }
 
     if ( !haveStart && !haveEnd )
@@ -1368,6 +1421,7 @@ QValueList<PimEvent> PimEvent::readVCalendar( const QString &filename )
 
     QValueList<PimEvent> events;
 
+    qpe_startVObjectInput();
     while ( obj ) {
 	QCString name = vObjectName( obj );
 	if ( name == VCCalProp ) {
@@ -1387,6 +1441,7 @@ QValueList<PimEvent> PimEvent::readVCalendar( const QString &filename )
 	obj = nextVObjectInList(obj);
 	cleanVObject( t );
     }
+    qpe_endVObjectInput();
 
     return events;
 }

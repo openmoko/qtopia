@@ -40,6 +40,7 @@ class QPEToolBar;
 
 class TodoSettings: public QDialog
 {
+    Q_OBJECT
 public:
     TodoSettings(QWidget *parent = 0, const char *name = 0, bool modal = FALSE, WFlags fl = 0);
     
@@ -126,6 +127,7 @@ private:
     TodoTable *table;
     TodoView *tView;
     QAction *listAction;
+    QAction *detailsAction;
     QAction *editAction;
     QAction *deleteAction;
     QAction *findAction;

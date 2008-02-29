@@ -22,8 +22,7 @@
 #include "simple.h"
 
 
-FormSimple::FormSimple(QWidget *parent,const char *name,WFlags fl)
-	:QWidget(parent,name,fl) {
+FormSimple::FormSimple(QWidget *parent) :QWidget(parent) {
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
 
     QVBoxLayout *vbl = new QVBoxLayout(this);

@@ -155,10 +155,12 @@ void QIr::traySocket( const QCString &msg, const QByteArray &data)
 		    sendWindow->showMaximized();
 		break;
 	    case QIrServer::Receiving:
-		if ( receiveWindow->isVisible() )
+		if ( receiveWindow->isVisible() ) {
 		    receiveWindow->raise();
-		else
+		} else {
 		    receiveWindow->showMaximized();
+		    Global::statusMessage( "" );
+		}
 		break;
 	   default:
 		qDebug("should not be visible");
@@ -179,10 +181,12 @@ void QIr::receiveInit()
 
 void QIr::received( const QString&, const QString &)
 {
-    if ( receiveWindow->isVisible() )
+    if ( receiveWindow->isVisible() ) {
 	receiveWindow->raise();
-    else
+    } else {
 	receiveWindow->showMaximized();
+	Global::statusMessage( "" );
+    }
 
     QCopEnvelope("Qt/Tray", "remove(int)")
 	<< BEAM_TRAY_ID;

@@ -449,6 +449,7 @@ bool LauncherIconView::removeLink(const QString& linkfile)
     DocLnk dl(linkfile);
     while (item) {
 	l = item->appLnk();
+	LauncherItem *nextItem = (LauncherItem *)item->nextItem();
 	if (  l->linkFileKnown() && l->linkFile() == linkfile
 		|| l->fileKnown() && (
 		    l->file() == linkfile
@@ -456,7 +457,7 @@ bool LauncherIconView::removeLink(const QString& linkfile)
 	    delete item;
 	    did = TRUE;
 	}
-	item = (LauncherItem*)item->nextItem();
+	item = nextItem;
     }
     QListIterator<AppLnk> it(hidden);
     while ((l=it.current())) {
@@ -713,11 +714,21 @@ QImage LauncherView::loadBackgroundImage(QString &bgName)
 	imgio.read();
     } else {
 	if (further_scaling) {
+	    int	t1 = imgio.image().width() * ds.height();
+	    int t2 = imgio.image().height() * ds.width();
+	    int dsth = ds.height();
+	    int dstw = ds.width();
+	    
+	    if (t1 > t2) {
+		dsth = t2 / imgio.image().width();
+	    } else {
+		dstw = t1 / imgio.image().height();
+	    }
+
 	    //
 	    // Loader didn't scale for us.  Do it manually.
 	    //
-	    int min = QMIN(ds.width(), ds.height());
-	    return imgio.image().smoothScale(min, min);
+	    return imgio.image().smoothScale(dstw, dsth);
 	}
     }
 
@@ -768,27 +779,29 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 	    break;
 
 	case Image:
-	    bgName = val;
-	    QPixmap bg;
-	    if ( bgCache->contains( bgName ) ) {
-		(*bgCache)[bgName]->ref++;
-		bg = (*bgCache)[bgName]->pm;
-	    } else {
-		bool tile = FALSE;
-		if ( bgName[0]!='/' || !QFile::exists(bgName) ) {
-		    bgName = Resource::findPixmap( "wallpaper/" + bgName );
-		    tile = TRUE;
+	    if (!val.isEmpty()) {
+		bgName = val;
+		QPixmap bg;
+		if ( bgCache->contains( bgName ) ) {
+		    (*bgCache)[bgName]->ref++;
+		    bg = (*bgCache)[bgName]->pm;
+		} else {
+		    bool tile = FALSE;
+		    if ( bgName[0]!='/' || !QFile::exists(bgName) ) {
+			bgName = Resource::findPixmap( "wallpaper/" + bgName );
+			tile = TRUE;
+		    }
+		    QImage img = loadBackgroundImage(bgName);
+
+
+		    if ( img.depth() == 1 )
+			img = img.convertDepth(8);
+		    img.setAlphaBuffer(FALSE);
+		    bg.convertFromImage(img);
+		    bgCache->insert( bgName, new BgPixmap(bg) );
 		}
-		QImage img = loadBackgroundImage(bgName);
-
-
-		if ( img.depth() == 1 )
-		    img = img.convertDepth(8);
-		img.setAlphaBuffer(FALSE);
-		bg.convertFromImage(img);
-		bgCache->insert( bgName, new BgPixmap(bg) );
+		icons->setBackgroundPixmap( bg );
 	    }
-	    icons->setBackgroundPixmap( bg );
 	    break;
     }
 
@@ -938,3 +951,13 @@ void LauncherView::paletteChange( const QPalette &p )
     icons->setPalette( QPalette(cg,cg,cg) );
 }
 
+void LauncherView::fontChanged(const QFont&)
+{
+    qDebug("LauncherView::fontChanged()");
+    icons->hideOrShowItems( FALSE );
+}
+
+void LauncherView::relayout(void)
+{
+    icons->hideOrShowItems(FALSE);
+}

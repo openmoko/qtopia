@@ -159,10 +159,6 @@
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>&lt;p&gt;&lt;tt&gt;ipkg&lt;/tt&gt; says something went wrong. Sorry.</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>PackageWizardBase</name>
@@ -260,7 +256,7 @@
     </message>
     <message>
         <source>Package</source>
-        <translation type="unfinished">パッケージ</translation>
+        <translation type="obsolete">パッケージ</translation>
     </message>
     <message>
         <source>Show Details...</source>

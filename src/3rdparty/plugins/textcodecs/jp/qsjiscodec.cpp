@@ -36,14 +36,16 @@
 **********************************************************************/
 
 // Most of the code here was originally written by Serika Kurusugawa
-// a.k.a. Junji Takagi, and is include in Qt with the author's permission,
+// a.k.a. Junji Takagi, and is included in Qt with the author's permission,
 // and the grateful thanks of the Trolltech team.
 
-/*! \class QSjisCodec qsjiscodec.h
+/*! \class QSjisCodec
 
-  \brief Provides conversion to and from Shift-JIS.
+  \brief The QSjisCodec class provides conversion to and from Shift-JIS.
 
-  The QJisCodec class subclasses QTextCodec to provide support for
+  \ingroup qtopiaemb
+
+  The QSjisCodec class subclasses QTextCodec to provide support for
   Shift-JIS, an encoding of JIS X 0201 Latin, JIS X 0201 Kana or JIS X
   0208.
 
@@ -56,7 +58,7 @@
   thanks of the Trolltech team. Here is the copyright statement for
   that code:
 
-  \mustquote
+  \quote
 
   Copyright (c) 1999 Serika Kurusugawa, All rights reserved.
 
@@ -81,6 +83,8 @@
   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
   SUCH DAMAGE.
+
+  \endquote
 */
 
 #include "qsjiscodec.h"
@@ -104,13 +108,17 @@ QSjisCodec::QSjisCodec() : conv(QJpUnicodeConv::newConverter(JU_Default))
 {
 }
 
+/*!
+  Destructs the codec.
+*/
+
 QSjisCodec::~QSjisCodec()
 {
     delete conv;
 }
 
 /*!
-  \reimp
+  Returns 17.
 */
 int QSjisCodec::mibEnum() const
 {

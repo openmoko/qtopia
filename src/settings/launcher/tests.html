@@ -1,57 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Launcher Settings Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Launcher Settings Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-
-<h3>All launcher tabs</h3>
-<ol>
-<li>Start the <b>Launcher Settings</b> application.
-<li>Verify that all launcher tabs are available in the <b>Category</b>
-    listview.
-</ol>
-
-<h3>Icon size</h3>
-<ol>
-<li>Select the <b>Applications</b> category, and check the "Large" icon size
-    from the <b>Icons</b> tab.  Click <b>OK</b>.
-<li>Select the <b>Applications</b> tab.  Verify the icons are large.
-<li>Change the icon size to "Small".  Click <b>OK</b>.
-<li>Select the <b>Applications</b> tab.  Verify the icons are small.
-<li>Repeat for the other categories.
-</ol>
-
-<h3>Background</h3>
-<ol>
-<li>Select the <b>Applications</b> category, change to the <b>Background</b>
-    tab, and change the <b>Style</b> to "Solid Color".  Pick a color from the
-    color picker.  Click <b>OK</b>.
-<li>Select the <b>Applications</b> tab.  Verify the background color is now
-    the color selected from the color picker.
-<li>Pick the "Faint Ruled" <b>Style</b>.  Click <b>OK</b>.
-<li>Select the <b>Applications</b> tab.  Verify the background is the same
-    as it was before the test started.
-<li>Repeat for the other categories.  Also try using the <b>Image</b> style
-    to tile the background with an image.
-</ol>
-
-<h3>Font size</h3>
-<ol>
-<li>Select the <b>Applications</b> category, change to the <b>Font</b> tab,
-    and change the <b>Family</b>, <b>Size</b> and / or <b>Color</b>.  Click
-    <b>OK</b>.
-<li>Select the <b>Applications</b> tab.  Verify the icon font has been changed
-    according to your selection.
-<li>Repeat for the other categories.
-</ol>
-
+<h1>Qtopia/Launcher</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Background</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the background can
+be set for each launcher category individually. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the <b>Applications</b> category, change to the <b>Background</b>
+tab, and change the <b>Style</b> to "Solid Color".  Pick a color from
+the color picker.  Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab.  Verify the background
+color is now     the color selected from the color picker.</li>
+        <li>Restart Settings-&gt;Launcher</li>
+        <li> Pick the "Image" <span style="font-weight: bold;">Style</span>
+and select an image. Click <span style="font-weight: bold;">OK</span>.</li>
+        <li>Select the <b>Applications</b> tab.  Verify that the
+background shows the selected image (one or multiple times).</li>
+        <li>Restart Settings-&gt;Launcher</li>
+        <li>Pick the "Faint Ruled" <b>Style</b>.  Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab.  Verify the background
+is a subtle combination of light and darker horizontal lines. </li>
+        <li>Repeat for the other categories and inspect the apropriate
+tab (e.g. Games, Settings, etc) each time. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Font</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the font size can be
+set for each launcher category individually. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the <b>Applications</b> category, change to the <b>Font</b>
+tab, and change the <b>Family</b>, <b>Size</b> and / or <b>Color</b>.
+Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab.  Verify the icon font
+has been changed     according to your selection.</li>
+        <li>Restart Settings-&gt;Launcher, select the <b>Applications</b>
+category again and check that the Font tab reflects the latests changes.</li>
+        <li>Change the <b>Family</b>, <b>Size</b> and <b>Color </b>again.
+Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab.  Verify the icon font
+has been changed     according to your selection.</li>
+        <li>Repeat for the other categories. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Icon Size</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the icon size can be
+adjusted for each tab of the launcher individually. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the <b>Applications</b> category, and check the
+"Large" icon size     from the <b>Icons</b> tab.  Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab and verify that the
+icons are large. </li>
+        <li>Start Settings-&gt;Launcher again.</li>
+        <li>Verify that the "Large" radiobutton is selected.</li>
+        <li>Change the icon size to "Small".  Click <b>OK</b>. </li>
+        <li>Select the <b>Applications</b> tab.  Verify the icons are
+small.</li>
+        <li>Start Settings-&gt;Launcher again.</li>
+        <li>Verify that the "Small" radiobutton is selected.</li>
+        <li>Repeat for the other categories. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Launcher tabs</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that all launcher tabs
+are available in the application<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Verify that all launcher tabs are available in the category
+combobox. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;"> The current tabs are:<br>
+      <ul>
+        <li>Applications</li>
+        <li>Games&nbsp;</li>
+        <li>Settings</li>
+        <li>Documents</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
 </body>
 </html>

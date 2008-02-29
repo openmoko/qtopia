@@ -23,14 +23,61 @@
   \brief The Node class is a single element in an XML structure defined by XmlHandler.
 
   \ingroup qtopiaemb
+  \sa XmlHandler
  */
 
+/*! \fn Node *Node::nextNode() const;
+  Returns the Node's next sibling.
+*/
+
+/*! \fn Node *Node::prevNode() const;
+  Returns the Node's previous sibling.
+*/
+
+/*! \fn Node *Node::parentNode() const;
+  Returns the Node's parent.
+*/
+
+/*! \fn Node *Node::lastChild() const;
+  Returns the Node's last child.
+*/
+
+/*! \fn Node *Node::firstChild() const;
+  Returns the Node's first child.
+*/
+
+/*! \fn void Node::setTagName( const QString &s );
+  Sets the current tag's name to \a s.
+*/
+
+/*! \fn QString Node::tagName() const;
+  Returns the current tag's name.
+*/
+
+/*! \fn void Node::setData (const QString &s );
+  Sets the current tag's data to \a s.
+*/
+
+/*! \fn QString Node::data() const;
+  Returns the current tag's data.
+*/
+
+/*! \fn void Node::appendData ( const QString s );
+  Appends \a s to the current tag's data.
+*/
+
+/*!
+  Creates an invalid Node
+*/
 Node::Node()
     : parent( 0 ), prev( 0 ),
       next( 0 ), first( 0 ), last( 0 )
 {
 }
 
+/*!
+  Destructs a Node, and deletes its children.
+*/
 
 Node::~Node()
 {
@@ -43,6 +90,9 @@ Node::~Node()
     }
 }
 
+/*!
+  Safely sets Node \a child to be a child of this Node.
+*/
 
 void Node::addChild( Node *child )
 {
@@ -57,10 +107,19 @@ void Node::addChild( Node *child )
     last = child;
 }
 
+/*!
+  Returns the value of the attribute tagged as \a name.
+*/
+
 QString Node::attribute( const QString& name )
 {
     return attributes[name];
 }
+
+/*!
+  Adds the attributes in \a a to the Node's current attributes,
+  overwriting any conflicts with existing attributes.
+*/
 
 void Node::setAttributes( const QXmlAttributes &a )
 {
@@ -68,10 +127,19 @@ void Node::setAttributes( const QXmlAttributes &a )
 	attributes[ a.qName( i ) ] = a.value( i );
 }
 
+/*!
+  Returns all of the Node's attributes.
+*/
+
 QMap<QString, QString> Node::attributeMap()
 {
     return attributes;
 }
+
+/*!
+  Returns the value of the first attribute named \a tag from any
+  of the Node's children.
+*/
 
 QString Node::subData(const QString& tag) const
 {
@@ -87,10 +155,15 @@ QString Node::subData(const QString& tag) const
 /*! \class XmlHandler xmlreader.h
   \brief The XmlHandler class is a XML document structure holder.
 
-  This class provides a Node structure that developers can read their
-  xml data into.
+  This class provides a tree of Nodes that developers can use to organise their
+  XML data.
 
   \ingroup qtopiaemb
+  \sa Node
+*/
+
+/*!
+  Creates an empty XmlHandler.
 */
 
 XmlHandler::XmlHandler()
@@ -98,10 +171,18 @@ XmlHandler::XmlHandler()
 {
 }
 
+/*!
+  Destructs an XmlHandler.
+*/
+
 XmlHandler::~XmlHandler()
 {
 }
 
+/*!
+  Initialises an XmlHandler with a root Node named DOCUMENT.
+  Returns TRUE if successful.
+*/
 
 bool XmlHandler::startDocument()
 {
@@ -111,6 +192,9 @@ bool XmlHandler::startDocument()
     return TRUE;
 }
 
+/*!
+  Returns TRUE if the XmlHandler contains a valid tree of Nodes.
+*/
 
 bool XmlHandler::endDocument()
 {
@@ -119,6 +203,10 @@ bool XmlHandler::endDocument()
 
     return TRUE;
 }
+
+/*!
+  Creates a new sub-element, with name \a qName and attributes \a attr.
+*/
 
 bool XmlHandler::startElement( const QString &, const QString &,
 			       const QString &qName, const QXmlAttributes &attr )
@@ -133,6 +221,9 @@ bool XmlHandler::startElement( const QString &, const QString &,
     return TRUE;
 }
 
+/*!
+   Ends a sub-element safely.
+*/
 
 bool XmlHandler::endElement( const QString &, const QString &, const QString & )
 {
@@ -143,6 +234,9 @@ bool XmlHandler::endElement( const QString &, const QString &, const QString & )
     return TRUE;
 }
 
+/*!
+   Appends the data \a ch to the current Node.
+*/
 
 bool XmlHandler::characters( const QString &ch )
 {
@@ -150,3 +244,7 @@ bool XmlHandler::characters( const QString &ch )
 
     return TRUE;
 }
+
+/*! \fn Node *XmlHandler::firstNode() const;
+  Returns the root Node of the tree.
+*/

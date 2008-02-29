@@ -32,6 +32,12 @@
 #include <qcombobox.h>
 #include <qtabbar.h>
 
+/*!
+  \class QPEStyle qpestyle.h
+  \brief The QPEStyle class implements the default Qtopia widget style.
+
+  \ingroup qtopiaemb
+*/
 
 QPEStyle::QPEStyle()
 {

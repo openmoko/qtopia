@@ -172,8 +172,8 @@ static bool triggerAtd( bool writeHWClock = FALSE )
 	int len = strlen(data);
 	int total_written = trigger.writeBlock(data,len);
 	if ( total_written != len ) {
-	    QMessageBox::critical( 0, QObject::tr( "Out of Space" ),
-				   QObject::tr( "Unable to schedule alarm.\nFree some memory and try again." ) );
+	    QMessageBox::critical( 0, 0, qApp->translate( "AlarmServer",  "Out of Space" ),
+				   qApp->translate( "AlarmServer", "Unable to schedule alarm.\nFree some memory and try again." ) );
 	    trigger.close();
 	    QFile::remove( trigger.name() );
 	    return FALSE;

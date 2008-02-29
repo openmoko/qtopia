@@ -36,7 +36,7 @@ public:
 #endif
 
     QWidget * create(QWidget *);
-    const char * pluginName() { return "Simple"; };
+    QString pluginName() const;
 
 private:
     ulong ref;

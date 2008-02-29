@@ -162,6 +162,12 @@ void TodoXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 	    internalUpdateRecord(new PimTask(task));
 	    emit tasksUpdated();
 	}
+    } else if (message == "reloadTasks()") {
+        ensureDataCurrent();
+    } else if ( message == "reload(int)" ) {
+	int force;
+	ds >> force;
+        ensureDataCurrent(force);
     }
 }
 
@@ -274,6 +280,9 @@ void TodoXmlIO::clear()
  */
 bool TodoXmlIO::saveData()
 {
+    if ( !QFile::exists( dataFilename() ) )
+	needsSave = TRUE;
+
     if (!needsSave)
 	return TRUE;
     if (accessMode() != ReadOnly) {
@@ -337,7 +346,7 @@ QUuid TodoXmlIO::addTask(const PimTask &task, bool assignUid )
 
     if ( assignUid || tsk->uid().isNull() )
 	assignNewUid(tsk);
-    
+
     u = tsk->uid();
 
     if (internalAddRecord(tsk)) {
@@ -436,14 +445,17 @@ PimRecord *TodoXmlIO::createRecord() const
 
 bool TodoXmlIO::select(const PrTask &c) const
 {
-    if (cCompFilter && c.isCompleted())
+    if (cFilter == -3 || cCompFilter && c.isCompleted())
 	return FALSE;
+
+    if (cFilter == -2)
+	return TRUE;
 
     QArray<int> cats = c.categories();
     if ( cFilter == -1 ) {
 	if ( cats.count() > 0 )
 	    return FALSE;
-    }  else if ( cFilter != -2 ) {
+    } else {
 	if (cats.find(cFilter) == -1)
 	    return FALSE;
     }

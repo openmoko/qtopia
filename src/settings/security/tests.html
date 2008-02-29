@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
+<body>
+<h1>Qtopia/Security</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Power-on protection</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that qtopia can be
+protected by a passcode at power-on </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click <span style="font-weight: bold;">Set Code</span> and
+enter a passcode "1234". Click OK</li>
+        <li>Repeat the code 1234 and click OK again.</li>
+        <li>Make sure that <span style="font-weight: bold;">Require at
+power-on</span> is checked and click OK</li>
+        <li>Power down the device</li>
+        <li>Power up the device and verify that the <span
+ style="font-weight: bold;">Enter passcode</span> dialog appears.</li>
+        <li>Try to enter invalid values first: an empty string, "1",
+"123", "12345", "4321", "1234567890" each attempt followed by OK</li>
+        <li>Finally try "1234" and enter OK</li>
+        <li>Verify that you get access to the device. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Remote sync protection</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that a Qtopia desktop
+user can only sync to the device if he has been granted syncing rights. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Set the <span style="font-weight: bold;">Accept sync from
+network</span> to "None" and click OK</li>
+        <li>Press the sync button on the cradle (assuming the device is
+in the cradle).</li>
+        <li>Verify that the sync is refused.</li>
+        <li>Click <span style="font-weight: bold;">Sync All</span> on
+the desktop.</li>
+        <li>Verify that the sync is refused.</li>
+        <li>Set the <span style="font-weight: bold;">Accept sync from
+network</span> to the previous setting and click OK</li>
+        <li>Verify that a sync can be done both from the cradle and
+from the desktop. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Passcode editing</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that entering a passcode
+is safe and that a passcode protected Security app can only be accessed
+with the passcode. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click the <span style="font-weight: bold;">Change Code</span>
+button and enter 1234. Click OK</li>
+        <li>Re-enter 1234 to verify. Click OK</li>
+        <li>Verify that the <span style="font-weight: bold;">Clear code</span>
+button and <span style="font-weight: bold;">Require at power-on</span>
+checkbox are enabled.</li>
+        <li> Close <span style="font-weight: bold;">Security</span>
+using OK</li>
+        <li>Re-start <span style="font-weight: bold;">Security</span>
+and verify that you have to enter a passcode.</li>
+        <li>Try using a false code, e.g. 123 and click OK</li>
+        <li>Verify that you get an error dialog reporting an invalid
+code and don't get access to the app.</li>
+        <li>Retry again for an empty passcode, for 12345 and for a very
+long passcode e.g. 12345678.</li>
+        <li>Verify that there is no way to get in.</li>
+        <li>Restart <span style="font-weight: bold;">Security</span>
+again and this time try to get access by clicking on the x in the
+passcode entry dialog.</li>
+        <li>Verify that you can't get access.</li>
+        <li>Restart <span style="font-weight: bold;">Security</span>
+again and this time enter 1234 + OK.</li>
+        <li>Verify that you get access.</li>
+        <li>Click the <span style="font-weight: bold;">Change Code</span>
+button and click OK e.g. no passcode entered.</li>
+        <li>Verify that you get an error message and the passcode is
+not accepted.</li>
+        <li>Try to enter a long password (&gt; 8 characters) &nbsp;and
+verify that the max length is limited to 8 characters. Click x to cancel
+this entry.</li>
+        <li> Restart <span style="font-weight: bold;">Security</span>
+again and verify that the password is still the same (e.g. 1234)</li>
+        <li>Press <span style="font-weight: bold;">Clear Code</span>.</li>
+        <li>Verify that the <span style="font-weight: bold;">Clear Code</span>
+button and <span style="font-weight: bold;">Require at power-on</span>
+checkbox are disabled. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+</body>
+</html>

@@ -20,8 +20,8 @@
 
 
 #define QTOPIA_INTERNAL_LANGLIST
-#ifndef QTOPIA_FILEOPERATIONS
-#define QTOPIA_FILEOPERATIONS
+#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #endif
 #include <qtopia/global.h>
 
@@ -55,6 +55,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <qfileinfo.h>
 #else
 #include <sys/locking.h>
 #include <io.h>
@@ -64,6 +65,60 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
+
+
+// added in qtopia 1.6, so don't export this
+QString qtopia_tempName( const QString &fname )
+{
+    QString temp;
+#ifndef Q_OS_WIN32
+    temp = fname + ".new";
+#else
+    QFileInfo fileInfo( fname );
+    temp = fileInfo.dirPath( TRUE ) + "/" + fileInfo.baseName() +
+		 "_new." + fileInfo.extension(); // No tr
+#endif
+    return temp;
+}
+
+bool qtopia_renameFile( QString from, QString to )
+{
+    if ( from.isEmpty() || to.isEmpty() ) {
+	qWarning("qtopia_renameFile emptry string(s) from '%s' to '%s'",
+		 from.latin1(), to.latin1() );
+	return FALSE;
+    }
+
+    // now do the rename
+#ifdef Q_OS_WIN32
+    if ( QFile::exists( to ) && !QFile::remove( to ) )
+	qWarning("Global::renameFile failed removing %s before rename", to.latin1() );
+#endif
+
+    QDir dir;
+    if ( dir.rename( from, to ) )
+	return TRUE;
+
+    qWarning( "problem renaming file using qdir::rename %s to %s",
+	      from.latin1(), to.latin1() );
+    //QFile::remove( from );
+    // return FALSE;
+
+    from = QDir::convertSeparators( QDir::cleanDirPath( from ) );
+    to = QDir::convertSeparators( QDir::cleanDirPath( to ) );
+    if ( ::rename( from, to ) != 0 ) {
+ 	qWarning( "::rename problem renaming file %s to %s errno %d",
+	 	  from.latin1(), to.latin1(), errno );
+#ifdef Q_OS_WIN32
+ 	qWarning("\trename error = %s", strerror(NULL) );
+#endif
+	return FALSE;
+    }
+
+    qDebug("worked using ::rename");
+    return TRUE;
+}
 
 #ifdef Q_WS_QWS
 
@@ -265,10 +320,12 @@ void Global::addWords(const QString& dictname, const QStringList& wordlist)
     d.createFromWords(all);
 
     QString dawgfilename = applicationFileName("Dictionary", dictname) + ".dawg"; // No tr
-    QFile dawgfile(dawgfilename);
+    QString dawgfilenamenew = dawgfilename + ".new";
+    QFile dawgfile(dawgfilenamenew);
     if ( dawgfile.open(IO_WriteOnly) ) {
 	d.write(&dawgfile);
 	dawgfile.close();
+	qtopia_renameFile(dawgfilenamenew,dawgfilename);
     }
 
     // #### Re-read the dawg here if we use mmap().
@@ -289,7 +346,7 @@ void Global::createDocDir()
 #ifndef Q_WS_WIN32
 	    mkdir( QPEApplication::documentDir().latin1(), 0755 );
 #else
-	    d.mkdir(QPEApplication::documentDir().latin1());	
+	    d.mkdir(QPEApplication::documentDir().latin1());
 #endif
 	}else{
 	    docDirCreated = TRUE;
@@ -377,7 +434,7 @@ bool Global::isBuiltinCommand( const QString &name )
 	    return TRUE;
 	}
     }
-    
+
     return FALSE;
 }
 
@@ -447,13 +504,13 @@ void Global::terminate( const AppLnk* app )
 
 
 /*!
-  Low-level function to run command \a c.
+  Low-level function to run command.
 
   \warning Do not use this function. Use execute instead.
 
   \sa execute()
 */
-void Global::invoke(const QString &c)
+void Global::invoke(const QString &)
 {
     qDebug("Global::invoke does not work anymore");
 }
@@ -480,9 +537,11 @@ void Global::execute( const QString &c, const QString& document )
 
 }
 
+#endif
+
 /*!
   Returns the string \a s with the characters '\', '"', and '$' quoted
-  by a preceeding '\'.
+  by a preceeding '\', and enclosed by double-quotes (").
 
   \sa stringQuote()
 */
@@ -521,6 +580,8 @@ QString Global::stringQuote(const QString& s)
     r += "\"";
     return r;
 }
+
+#ifdef Q_WS_QWS
 
 /*!
   Finds all documents in the system's document directories which
@@ -597,7 +658,7 @@ QStringList Global::helpPath()
 QString Global::applicationFileName(const QString& appname, const QString& filename)
 {
     QDir d;
-    QString r = QDir::homeDirPath(); 
+    QString r = QDir::homeDirPath();
 #ifdef QTOPIA_DESKTOP
     r += "/.palmtopcenter/";
 #else
@@ -629,7 +690,7 @@ void Global::statusMessage(const QString& message)
 }
 
 #ifdef Q_WS_QWS
-#ifdef QTOPIA_FILEOPERATIONS
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
   /*! \enum Global::Lockflags
     \internal
      This enum controls what type of locking is performed on file.
@@ -724,7 +785,7 @@ bool Global::unlockFile(QFile &f)
  \a f must be an opened file
  \a flags the desired lock type required
 */
-bool Global::isFileLocked(QFile &f, int flags)
+bool Global::isFileLocked(QFile &f, int /* flags */)
 {
   struct flock fileLock;
 

@@ -1,7 +1,7 @@
 Files: lib/libgsm*
 Priority: optional
 Section: qpe/system
-Maintainer: Martin Jones <mjones@trolltech.com>
+Maintainer: Trolltech (www.trolltech.com)
 Architecture: $CPU_ARCH
 Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-9

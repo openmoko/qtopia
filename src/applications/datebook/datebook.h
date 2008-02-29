@@ -58,6 +58,7 @@ public slots:
     void reload();
 
     // some setting or env changed, data hasn't but how its displayed may have.
+    void updateAlarms();
     void refreshWidgets();
 
 private slots:
@@ -91,6 +92,8 @@ private slots:
 
     void beamCurrentEvent();
     void beamDone( Ir *ir );
+
+    void checkToday();
 
 private:
     bool newEvent(const QDateTime& dstart,const QDateTime& dend,const QString& description,const QString& notes);
@@ -126,12 +129,16 @@ private:
     bool ampm;
     bool onMonday;
 
+    bool checkSyncing();
     bool syncing;
     bool inSearch;
+    QDate lastToday; // last date that was the selected as 'Today'
+    QTimer *midnightTimer;
 
     QString checkEvent(const PimEvent &);
 
     QMessageBox *exceptionMb;
+    QDateTime lastcall;
 };
 
 #endif

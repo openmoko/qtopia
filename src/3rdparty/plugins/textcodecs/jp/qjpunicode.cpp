@@ -40,6 +40,8 @@
   \brief The QJpUnicodeConv class provides implementation support for
   QJisCodec, QSjisCodec, and QEucJpCodec.
 
+  \ingroup qtopiaemb
+
   You should not need to use this class directly.  If you do, keep in
   mind that the function names will change in Qt 3.0: Every function
   name will get a lower-case first letter: Jisx0212ToUnicode becomes
@@ -93,7 +95,7 @@
   permission, and the grateful thanks of the Trolltech team. Here is
   the copyright statement for that code:
 
-  \mustquote
+  \quote
 
   Copyright (c) 1999 Serika Kurusugawa, All rights reserved.
 
@@ -118,6 +120,14 @@
   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
   SUCH DAMAGE.
+
+  \endquote
+
+  \sa QEucJisCodec QJisCodec QSJisCodec
+
+  \legalese
+  This class and the classes that use it (QEucJisCodec, QJisCodec,
+  QSJisCodec) are the copyright of Serika Kurusugawa.
 
 */
 

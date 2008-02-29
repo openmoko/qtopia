@@ -1,225 +1,966 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Todo List Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Todo List Test List</h1>
-
-<p>
-When testing, it is important to check that changes are
-recorded not just when the change is made, but also that it
-persists after stopping and restarting the application. Check
-that the application is not fast-loaded prior to testing.
-
-<p>
-Non-ASCII and non-Latin-1 characters should be tested.
-
-<hr>
-
-<h2>Reference input data</h2>
-
-<h3>Table 1</h3>
-<table border=1 cellspacing=0>
-<tr>
- <th>ID
- <th>Description
- <th>Priority
- <th>Due Date
- <th>Categories
-<tr><td>1<td>Tax return<td>2<td>Apr. 14<td>Personal
-<tr><td>2<td>Fix car<td>1<td><td>Personal
-<tr><td>3<td>Buy new hat<td>3<td><td>Personal
-<tr><td>4<td>Ask boss for a raise<td>2<td><td>Business
-<tr><td>5<td>File progress reports<td>3<td><td>Business
-<tr><td>6<td>Submit budget<td>1<td>Dec. 10<td>Business
-<tr><td>7<td>Buy present for Greggy<td>1<td>Sep. 1<td>Kids, Personal
+<h1>Qtopia/Todo</h1>
+<p> When testing, it is important to check that changes are recorded not
+just when the change is made, but also that it persists after stopping
+and restarting the application. Check that the application is not
+fast-loaded prior to testing. </p>
+<p> Non-ASCII and non-Latin-1 characters should be tested.<br>
+<br>
+</p>
+<h2><a name="usecases"></a></h2>
+<p> </p>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Adding tasks</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that tasks can be appended<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <a name="usecases"></a><a name="usecases"><li>Remove all
+current tasks Todo list. </li>
+        <li>Append the tasks listed in table 1.</li>
+        <li>Verify that all tasks are in the order 	of importance
+(present, budget, car, tax, raise, hat, reports).</li>
+        <li>Tap on the header of the <span style="font-weight: bold;">status</span>
+column (the one with the checkbox icon in it) until the triangle points
+downwards.<br>
+        </li>
+        <li> Check the left-hand checkbox for the Fix Car item</li>
+        <li>Verify that it moves to 	the end of the list. </li>
+        <li>Tap the priority field of File Progress Reports and change
+priority to 2.</li>
+        <li>Verify that it moves to the fifth position.</li>
+        <li>Tap the priority field of the File Progress Reports again
+and change priority to 5.</li>
+        <li>Verify that it is shown as the last unfinished task (e.g.
+just above <span style="font-weight: bold;">fix car</span>).&nbsp;</li>
+        </a>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
 </table>
-<p>
-</p>
-
-<hr>
-<a name=usecases>
-<h2>Use Case Tests</h2>
-<!-- use case tests correspond 1-to-1 with use cases.
-
-    Note: Titles are used as identifiers in bug reports.
--->
-
-<h3>What do I do now</h3>
-<p>
-<ol>
- <li> Using Button Editor, ensure that "Add new task" is bound to
-	the Hold action of an appropriate key (some devices have a Todo
-	key, otherwise take another key).
- <li> Start with empty Todo list.
- <li> While running other application,
-	for Table 1 data 1..6, activate the "Add new task" key, and:
- <ol>
-  <li> Enter information, press OK.
-  <li> Use clock applet to advance time by some amount to fake waiting.
- </ol>
- <li> Run Todo List application.
- <li> Observer that all tasks are in the order
-	of importance (budget, car, tax, raise, hat, reports).
- <li> Check the left-hand checkbox for the Fix Car item; check it moves to
-	the end of the list.
- <li> Click the priority field of File Progress Reports, change priority to 2;
-	check it moves to the fourth position.
-</ol>
-
-<h3>Different hats</h3>
-<p>
-<ol>
- <li> Enter all Table 1 data.
- <li> Select Person category from category filter combobox.
- <li> Check that only items 1, 2, 3, 4, and 7 are shown.
- <li> Select Kids category from category filter combobox.
- <li> Check that only item 7 is shown.
-</ol>
-
-<h3>Progress report</h3>
-<p>
-<i>Incomplete</i>
-
-<h3>Delegator</h3>
-<p>
-<i>Incomplete</i>
-</p>
-
-<hr>
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- There are n tests per feature.
-
-    Note: Titles with " - blah" stripped off are feature identifiers.
--->
-
-<h3>Add Task</h3>
-<ol>
- <li>Click <img src=pics/new>.
- <li>Enter details, non-empty description.
- <li>Click OK.
- <li>Check that item is added.
-</ol>
-
-<h3>Add Task - Empty</h3>
-<ol>
- <li>Click <img src=pics/new>.
- <li>Enter details, but no description.
- <li>Click OK.
- <li>Check that item is <i>not</i> added.
-</ol>
-
-
-<h3>Delete Task</h3>
-<ol>
- <li>Click <img src=pics/trash>.
- <li>Check that prompt is correct.
- <li>Click OK.
- <li>Check that item is gone.
-</ol>
-
-<h3>Completion</h3>
-<ol>
- <li>Click on empty checkbox to left of item.
- <li>Check that item is now recorded as completed.
- <li>Click on checked checkbox to left of item.
- <li>Check that item is now recorded as not completed.
-</ol>
-
-<h3>Priority</h3>
-<ol>
- <li>Click on priority number towards left of item.
- <li>Choose a priority.
- <li>Check that item is now recorded as having chosen priority.
-</ol>
-
-<h3>Categories</h3>
-<ol>
- <li>Optionally, click on a task.
- <li>Click on <img src=pics/edit>.
- <li>Choose a category from the combobox.
- <li>Click OK.
- <li>Check that item is now recorded as having chosen category.
-</ol>
-
-<h3>Categories - Multiple</h3>
-<ol>
- <li>Optionally, click on a task.
- <li>Click on <img src=pics/edit>.
- <li>Choose "..." to right of category combobox.
- <li>Choose multiple categories by clicking checkboxes.
- <li>Click OK.
- <li>Check that item is now recorded as having chosen categories,
-	showing "&lt;first category&gt; (Multi.)" in combobox.
-</ol>
-
-<h3>Due Date</h3>
-<ol>
- <li>Check that for tasks with the same completedness and priority,
-	those with a Due Date precedes tasks without a Due Date,
-	and that of those with a due date, tasks with the earlier
-	due dates precedes tasks with later due dates.
-</ol>
-
-<h3>Today Plugin</h3>
-<ol>
- <li>Check that changes are reflected immediately in the Today application.
-</ol>
-
-<h3>Beam</h3>
-<ol>
- <li>Check beaming to other Qtopia device.
-</ol>
-
-<h3>Beam - Palm OS</h3>
-<ol>
- <li>Check beaming from Palm OS device.
- <li>Check beaming to Palm OS device.
-</ol>
-
-<h3>Beam - Pocket PC</h3>
-<ol>
- <li>Check beaming from Pocket PC device.
- <li>Check beaming to Pocket PC device.
-</ol>
-
-<h3>Find</h3>
-<ol>
- <li>Click find
- <li>Typing text should immediately select match,
-	or show "Find: not found" in status (tool) bar.
-</ol>
-
-<h3>Filter by category</h3>
-<ol>
- <li>Check that filtering works for tasks in no category:
-	should only be visible in All and Unfiled categories.
- <li>Check that filtering works for tasks in one category:
-	should only be visible in that one category, and All.
- <li>Check that filtering works for tasks in more than one category:
-	should only be visible in those categories, and All.
-</ol>
-
-<h3>Filter by completion</h3>
-<ol>
- <li>Only specified events should be visible.
-</ol>
-
-<h3>Maximum tasks</h3>
-<ol>
- <li>Check memory and storage usage using System Info.
- <li>Add all Table 1 tasks.
- <li>Select all items, duplicate. (not implemented)
- <li>Repeat previous step until failure message box occurs. (not implemented)
- <li>Check memory and storage usage using System Info.
-     Compare number of tasks successfully entered with
-	memory and storage prerequisites.
-</ol>
-
+<br>
+<br>
+<h3>&nbsp;Add empty task</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you cannot add a
+task without a description<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on <span style="font-weight: bold;">New Task</span>&nbsp;</li>
+        <li>Click <span style="font-weight: bold;">OK&nbsp;</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that no new
+task is appended.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Editing a task</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a task can be edited.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on an existing task.</li>
+        <li>Verify that the <span style="font-weight: bold;">Task
+Details</span> are shown.</li>
+        <li>Tap on the <span style="font-weight: bold;">Edit</span>
+button or select <span style="font-weight: bold;">Task &gt; Edit</span>
+from the menu.</li>
+        <li>Modify the <span style="font-weight: bold;">Priority</span>
+and tap OK.</li>
+        <li>Verify that the <span style="font-weight: bold;">Task
+Details</span> present the correct (modified) values.</li>
+        <li>Repeat the same for the <span style="font-weight: bold;">Status</span>
+field (try different percentages) and the <span
+ style="font-weight: bold;">Due</span> field.</li>
+        <li>Repeat again for the <span style="font-weight: bold;">Started
+Date</span> and the <span style="font-weight: bold;">Completed Date</span>.</li>
+        <li>Finally edit the <span style="font-weight: bold;">Category</span>
+and verify again that the changes are shown in the <span
+ style="font-weight: bold;">Task Details</span>.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Delete Task</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a task can be
+deleted.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select a task.</li>
+        <li>Tap the <span style="font-weight: bold;">Delete</span>
+button.<br>
+        </li>
+        <li>Verify that the dialog mentiones the selected task.</li>
+        <li>Click <span style="font-weight: bold;">No&nbsp;</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that the
+task is NOT deleted.</li>
+        <li>Tap the <span style="font-weight: bold;">Delete</span>
+button again.<br>
+        </li>
+        <li>Click <span style="font-weight: bold;">Yes&nbsp;</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that the
+selected task is deleted.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Find Task</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a task can be found
+using the Find function.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click Find </li>
+        <li>Type some text that can be found in one of the task
+descriptions:</li>
+        <li>Verify that a match is found.</li>
+        <li>Tap on the <span style="font-weight: bold;">Find next</span>
+button behind the Find editor line.</li>
+        <li>Verify that a next match is found or&nbsp;that the status
+bar shows "Find: not found" for a short period.</li>
+        <li>Type some text that is not to be found in one of the task
+descriptions, e.g. "qxyz":</li>
+        <li>Verify that the status bar shows "Find: not found" for a
+short period.</li>
+        <li>Try some more text entries to find different tasks.</li>
+        <li>Open a task for editing and add a note to the task: "This
+is an exclusive_note" and tap <span style="font-weight: bold;">OK</span></li>
+        <li>Enter "Exclusive_note" in the search field and verify that
+the last edited task is found.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Task Completion</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a task can be
+checked as completed.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select <span style="font-weight: bold;">All Tasks</span>&nbsp;in
+the left bottom combobox.</li>
+        <li>Tap on an empty checkbox to left of a task.</li>
+        <li>Tap on the task to view the task details.</li>
+        <li>Verify that the task is now recorded as completed. </li>
+        <li>Uncheck the checkbox to the left of the task. </li>
+        <li>Verify that the task is now recorded as not completed.</li>
+        <li>Open the task for editing.</li>
+        <li>Change the status to completed and tap <span
+ style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the checkbox in front of the task is checked
+again.</li>
+        <li>Select <span style="font-weight: bold;">Pending Tasks</span>
+in the left bottom combobox.</li>
+        <li>Verify that only the pending (unfinished tasks) are shown.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Editing Priorities</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that priorities can be
+quickly edited in the main view<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">priority number</span>
+for a task.</li>
+        <li>Choose a new priority. </li>
+        <li>Check that the task is now recorded as having the newly
+chosen priority.</li>
+        <li>Tap on the <span style="font-weight: bold;">Priority</span>
+header</li>
+        <li>Verify that tasks are sorted according to priority.</li>
+        <li>Edit the <span style="font-weight: bold;">Priority</span>
+of one or more tasks and verify that the tasks are sorted according to
+their new priorities.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Editing a Category</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the category for a
+task can be edited.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">Fix car</span>
+task and open the task for editing.</li>
+        <li>Tap on "<span style="font-weight: bold;">...</span>" behind <span
+ style="font-weight: bold;">Category</span>.</li>
+        <li>Verify that the <span style="font-weight: bold;">Edit
+Categories</span> dialog is shown.</li>
+        <li>Create a new category named "MyTestCat".</li>
+        <li>Check the checkbox in front of "MyTestCat" in the list,
+uncheck all other checkboxes and click <span style="font-weight: bold;">OK</span></li>
+        <li><span style="font-weight: bold;"></span>Go back to the <span
+ style="font-weight: bold;">Task List</span> view and select the <span
+ style="font-weight: bold;">MyTestCat</span> category in the bottom
+right combobox.</li>
+        <li>Verify that only the <span style="font-weight: bold;">Fix
+car</span><span style="font-weight: bold;"></span> task is shown.</li>
+        <li>Select the <span style="font-weight: bold;">All</span>
+category again in the category combobox (bottom right).</li>
+        <li>Verify that all tasks are shown again.</li>
+        <li>Open <span style="font-weight: bold;">Fix car</span> again
+for editing.</li>
+        <li>Tap on "<span style="font-weight: bold;">...</span>" behind <span
+ style="font-weight: bold;">Category</span>.</li>
+        <li>Uncheck <span style="font-weight: bold;">MyTestCat</span>
+and check <span style="font-weight: bold;">Business</span> and <span
+ style="font-weight: bold;">Personal</span> and tap <span
+ style="font-weight: bold;">OK</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that the
+task <span style="font-weight: bold;">Fix car</span> is shown if <span
+ style="font-weight: bold;">All</span>, <span
+ style="font-weight: bold;">Business</span> or <span
+ style="font-weight: bold;">Personal</span> is selected as the category
+in the bottom right combobox of the <span style="font-weight: bold;">Task
+List</span>.</li>
+        <li>Verify that the task <span style="font-weight: bold;">Fix
+car</span> is NOT shown if any of the other categories is selected in
+the combobox.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Sorting on Due date</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that tasks are sorted on
+due date<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Verify that all tasks are entered as specified in table 1</li>
+        <li>Tap on the header of the completed column (the one with the
+checkbox icon) until the tasks are sorted with the tasks with prio 1 on
+top.</li>
+        <li>Verify that <span style="font-weight: bold;">Submit budget</span>
+is shown before (above) <span style="font-weight: bold;">Fix car</span>
+(because Submit budget has a Due date and Fix car has not).</li>
+        <li>Verify that <span style="font-weight: bold;">Tax return</span>
+is shown before <span style="font-weight: bold;">Ask for a raise</span>
+(because Tax return has a Due date).</li>
+        <li><span style="font-weight: bold;"></span>Verify that <span
+ style="font-weight: bold;">Buy new hat</span> is shown before <span
+ style="font-weight: bold;">File progress report</span> (because both
+don't have a Due date and B comes before F).</li>
+        <li><span style="font-weight: bold;"></span>Edit the
+description of <span style="font-weight: bold;">Buy new hat</span> and
+change it to: <span style="font-weight: bold;">Must buy new hat</span>.</li>
+        <li>Verify that <span style="font-weight: bold;">Must b</span><span
+ style="font-weight: bold;">uy new hat</span> is now shown after <span
+ style="font-weight: bold;">File progress report</span> (because both
+don't have a Due date and F comes before M).</li>
+        <li>Edit the <span style="font-weight: bold;">Due date</span>
+for <span style="font-weight: bold;">Ask boss for raise</span> and set
+it to April 13th.</li>
+        <li>Verify that the task is now shown before <span
+ style="font-weight: bold;">Tax return</span>.</li>
+        <li>Edit the <span style="font-weight: bold;">Due date</span>
+for <span style="font-weight: bold;">Ask boss for raise</span> and set
+it to April 15th.</li>
+        <li>Verify that the task is now shown after <span
+ style="font-weight: bold;">Tax return</span>.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Beaming a task to another Qtopia device</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a task can be beamed
+to another Qtopia device<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Get a second Qtopia device and enable the IR Receiver for
+receiving.</li>
+        <li>Position the two devices such that the IR ports can see
+each other.<br>
+        </li>
+        <li>Select a task.</li>
+        <li>Tap <span style="font-weight: bold;">Task &gt; Beam</span>
+in the menu.</li>
+        <li>Verify that the status bar shows the progress of the
+beaming.</li>
+        <li>Verify that <span style="font-weight: bold;">Todo</span>
+will retry for maximally 20 times if the beaming failed.</li>
+        <li>Verify that the other Qtopia device has received the task.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Exchanging a task with a Palm OS device</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can beam a task
+to and from a Palm OS device.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Get a Palm OS device and enable the IR Receiver for
+receiving (if required).</li>
+        <li>Position the two devices such that the IR ports can see
+each other.<br>
+        </li>
+        <li>Select a task.</li>
+        <li>Tap <span style="font-weight: bold;">Task &gt; Beam</span>
+in the menu.</li>
+        <li>Verify that the status bar shows the progress of the
+beaming.</li>
+        <li>Verify that <span style="font-weight: bold;">Todo</span>
+will retry for maximally 20 times if the beaming failed.</li>
+        <li>Verify that the Palm device has received the task.</li>
+        <li>Tap the <span style="font-weight: bold;">Qt menu</span> and
+select <span style="font-weight: bold;">IR Receiver</span></li>
+        <li><span style="font-weight: bold;"></span>Tap <span
+ style="font-weight: bold;">On for 5 minutes</span>&nbsp;</li>
+        <li>Select a task on the Palm device and beam it to this Qtopia
+device.</li>
+        <li>Verify that the task is received.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Exchanging a task with a Pocket PC device</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can beam a task
+to and from a Pocket PC device. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Get a Pocket PC device and enable the IR Receiver for
+receiving (if required).</li>
+        <li>Position the two devices such that the IR ports can see
+each other.<br>
+        </li>
+        <li>Select a task.</li>
+        <li>Tap <span style="font-weight: bold;">Task &gt; Beam</span>
+in the menu.</li>
+        <li>Verify that the status bar shows the progress of the
+beaming.</li>
+        <li>Verify that <span style="font-weight: bold;">Todo</span>
+will retry for maximally 20 times if the beaming failed.</li>
+        <li>Verify that the Pocket PC device has received the task.</li>
+        <li>Tap the <span style="font-weight: bold;">Qt menu</span> and
+select <span style="font-weight: bold;">IR Receiver</span></li>
+        <li><span style="font-weight: bold;"></span>Tap <span
+ style="font-weight: bold;">On for 5 minutes</span>&nbsp;</li>
+        <li>Select a task on the Pocket PC device and beam it to this
+Qtopia device.</li>
+        <li>Verify that the task is received.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Configure Task list columns</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can configure
+the headers of the Task list<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap <span style="font-weight: bold;">View &gt; Configure
+Headers</span>.</li>
+        <li>Tap on an item in the left (available) list (e.g. <span
+ style="font-weight: bold;">Percent Completed</span>) and then tap on
+the <span style="font-weight: bold;">Right Arrow</span> button.</li>
+        <li>Verify that the selected item is moved to the right
+(displayed) list.</li>
+        <li>Tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Tap <span style="font-weight: bold;">View &gt; Fit to width</span>.</li>
+        <li>Verify that the new selected column is shown in the <span
+ style="font-weight: bold;">Table list</span></li>
+        <li>Tap <span style="font-weight: bold;">View &gt; Configure
+Headers</span> again.</li>
+        <li>Select an item in the right list and then tap on <span
+ style="font-weight: bold;">Move up</span> or <span
+ style="font-weight: bold;">Move down</span> to change the order.</li>
+        <li>Tap <span style="font-weight: bold;">OK</span>.</li>
+        <li>Verify that the columns are shown in the expected order.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Using Categories</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that tasks can be
+filtered on a category<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <a name="usecases"></a>
+      </ol>
+      <ol>
+        <li>Ensure that the tasks from Table 1 are entered.<a
+ name="usecases"></a></li>
+        <li><a name="usecases">Select <span style="font-weight: bold;">category</span>
+Business</a></li>
+        <a name="usecases"> <li>Verify that only the todo items:
+budget, raise and reports are shown.</li>
+        <li>Select <span style="font-weight: bold;">category</span>
+Personal.</li>
+        <li>Verify that only the todo items: present, car, tax and hat
+are shown.</li>
+        <li>Select <span style="font-weight: bold;">category</span>
+Kids.</li>
+        <li>Verify that only the todo item: present is shown.</li>
+        <li>Select <span style="font-weight: bold;">category</span> All.</li>
+        <li>Verify that all tasks are shown again.</li>
+        </a>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Fit to width</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can easily
+change the width of the headers to fit the width of the screen </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap the stylus on the border of a header and drag the
+header to resize it.</li>
+        <li>Repeat the same for other headers.</li>
+        <li>Tap <span style="font-weight: bold;">View &gt; Fit to
+Width.</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that the
+headers are resized again to nicely fit within the screen width.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </body>
 </html>

@@ -48,7 +48,7 @@
     </message>
     <message>
         <source>Day</source>
-        <translation type="unfinished">曜日 [Translated day but not date, eg. Monday, Tuesday etc.]</translation>
+        <translation type="obsolete">曜日 [Translated day but not date, eg. Monday, Tuesday etc.]</translation>
     </message>
     <message>
         <source>Show selected day&apos;s events</source>
@@ -68,7 +68,7 @@
     </message>
     <message>
         <source>Show selected months&apos;s events</source>
-        <translation>選択した月の行事を表示</translation>
+        <translation type="obsolete">選択した月の行事を表示</translation>
     </message>
     <message>
         <source>Find Event</source>
@@ -168,6 +168,15 @@ Quit anyway?</source>
         <source>Single</source>
         <comment>1 event, not all</comment>
         <translation type="unfinished">単一 [various kind of way to say, please provide sample]</translation>
+    </message>
+    <message>
+        <source>Show selected month&apos;s events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <comment>day, not date</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -340,6 +349,15 @@ Quit anyway?</source>
         <source>Calendar</source>
         <translation>カレンダー</translation>
     </message>
+    <message>
+        <source>Office</source>
+        <translation type="unfinished">オフィス</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <comment>ie. not work</comment>
+        <translation type="unfinished">ホーム [Translated as Home, such as home directory of your computer.]</translation>
+    </message>
 </context>
 <context>
     <name>DateEntryBase</name>
@@ -381,11 +399,11 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Office</source>
-        <translation>オフィス</translation>
+        <translation type="obsolete">オフィス</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation type="unfinished">ホーム [Translated as Home, such as home directory of your computer.]</translation>
+        <translation type="obsolete">ホーム [Translated as Home, such as home directory of your computer.]</translation>
     </message>
     <message>
         <source>All day</source>
@@ -545,22 +563,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Search Backwards</source>
-        <translation>逆方向へ検索</translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Start</source>
-        <translation>開始</translation>
-    </message>
-    <message>
-        <source>End</source>
-        <translation>終了</translation>
-    </message>
-    <message>
-        <source>All day</source>
-        <translation>一日</translation>
+        <translation type="obsolete">逆方向へ検索</translation>
     </message>
 </context>
 <context>
@@ -718,7 +721,7 @@ Quit anyway?</source>
     <message>
         <source>Repeat every %1 months on the %2 of the month.</source>
         <comment>eg. %1 = 4, %2 = 3rd</comment>
-        <translation type="unfinished">%1か月毎、%2日に繰り返す [%1 must be number only, eg. %1=1 or 2,3...31]</translation>
+        <translation type="obsolete">%1か月毎、%2日に繰り返す [%1 must be number only, eg. %1=1 or 2,3...31]</translation>
     </message>
     <message>
         <source>Repeat every month on the %1 %2 of the month.</source>
@@ -834,6 +837,26 @@ Quit anyway?</source>
         <source>fifth</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Repeat every %1 months on day %2 of the month.</source>
+        <comment>eg. %1 = 4, %2 = 3rd</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WeekView</name>
+    <message>
+        <source>Start</source>
+        <translation>開始</translation>
+    </message>
+    <message>
+        <source>End</source>
+        <translation>終了</translation>
+    </message>
+    <message>
+        <source>All day</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>WeekViewContents</name>
@@ -887,6 +910,17 @@ Quit anyway?</source>
         <source>%1-%2</source>
         <comment>2 dates</comment>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WorldTimeDialog</name>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished">OK</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished">取り消し</translation>
     </message>
 </context>
 </TS>

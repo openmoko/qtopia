@@ -14,15 +14,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Events the next</source>
+        <source>Calendar Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the next</source>
+        <comment>... 3 days</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source> days</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Calendar Options</source>
+        <comment>&quot;Show the next 3&quot; days</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

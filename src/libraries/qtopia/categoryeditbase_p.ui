@@ -30,7 +30,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>197</width>
+            <width>193</width>
             <height>287</height>
         </rect>
     </property>
@@ -148,7 +148,7 @@
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string>Add</string>
+                        <string>New</string>
                     </property>
                     <property>
                         <name>whatsThis</name>
@@ -240,4 +240,6 @@
     <slot access="public">slotSetText( QListViewItem* )</slot>
     <slot access="public">slotTextChanged(const QString &amp;)</slot>
 </connections>
+<include impldecl="in declaration">qtopia/qpeglobal.h</include>
+<exportmacro>QTOPIA_EXPORT</exportmacro>
 </UI>

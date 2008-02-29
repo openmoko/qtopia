@@ -1236,4 +1236,6 @@
     <tabstop>cmdCity9</tabstop>
     <tabstop>frmMap</tabstop>
 </tabstops>
+<include impldecl="in declaration">qtopia/qpeglobal.h</include>
+<exportmacro>QPC_EXPORT</exportmacro>
 </UI>

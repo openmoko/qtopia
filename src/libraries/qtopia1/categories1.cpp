@@ -26,3 +26,4 @@ QStringList Categories::labels( const QString & app, const QArray<int> &catids )
     strs += mAppCats[app].labels( catids );
     return strs;
 }
+

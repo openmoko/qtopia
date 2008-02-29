@@ -42,11 +42,7 @@ public:
     int countWords() const;
 
     // Unicode 0..3FFF; an offset can be used for other ranges
-    //static const int nodebits=18;
     enum {nodebits = 18};
-/*
-    static const int nodebits = 18;
-*/
 
     class Node {
 	friend class QDawgPrivate;

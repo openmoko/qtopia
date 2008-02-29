@@ -25,6 +25,7 @@
 #include <qpushbutton.h> 
 #include <qdrawutil.h> 
 
+static const int marg=10;
 
 BatteryStatus::BatteryStatus( const PowerStatus *p, bool pop, QWidget *parent, WFlags f )
     : QFrame( parent, 0, f), ps(p), popup(pop)
@@ -39,7 +40,10 @@ BatteryStatus::~BatteryStatus()
 
 QSize BatteryStatus::sizeHint() const
 {
-    return QSize( 200, 120 );
+    QString text = statusText();
+    QFontMetrics fm = fontMetrics();
+    QRect r=fm.boundingRect( marg, 0, width()-marg*2, height(), AlignVCenter, text );
+    return QSize(QMAX(200,2*marg+r.width()),2*marg+60+r.height());
 }
 
 void BatteryStatus::updatePercent( int pc )
@@ -69,6 +73,48 @@ void BatteryStatus::drawSegment( QPainter *p, const QRect &r, const QColor &topg
     }
 }
 
+QString BatteryStatus::statusText() const
+{
+    QString text;
+    if ( ps->batteryStatus() == PowerStatus::Charging ) {
+	text = tr("Charging");
+    } else if ( ps->batteryPercentAccurate() ) {
+	text.sprintf( tr("Percentage battery remaining") + ": %i%%", percent );
+    } else {
+	text = tr("Battery status: ");
+	switch ( ps->batteryStatus() ) {
+	    case PowerStatus::High:
+		text += tr("Good");
+		break;
+	    case PowerStatus::Low:
+		text += tr("Low");
+		break;
+	    case PowerStatus::VeryLow:
+		text += tr("Very Low");
+		break;
+	    case PowerStatus::Critical:
+		text += tr("Critical");
+		break;
+	    default: // NotPresent, etc.
+		text += tr("Unknown");
+	}
+    }
+    if ( ps->acStatus() == PowerStatus::Backup )
+	text += "\n\n" + tr("On backup power");
+    else if ( ps->acStatus() == PowerStatus::Online )
+	text += "\n\n" + tr("Power on-line");
+    else if ( ps->acStatus() == PowerStatus::Offline )
+	text += "\n\n" + tr("External power disconnected");
+
+    if ( ps->batteryTimeRemaining() >= 0 ) {
+	text += "\n\n" + QString().sprintf( tr("Battery time remaining") +
+		": %im %02is", // No tr
+	    ps->batteryTimeRemaining() / 60, ps->batteryTimeRemaining() % 60 );
+    }
+
+    return text;
+}
+
 void BatteryStatus::drawContents( QPainter *p )
 {
     int ypos = height() / 20;
@@ -95,53 +141,14 @@ void BatteryStatus::drawContents( QPainter *p )
     p->setPen( black );
     qDrawShadePanel( p,   9, ypos, width()-26, 39, colorGroup(), TRUE, 1, NULL);
     qDrawShadePanel( p, width()-18, ypos+7,  12, 24, colorGroup(), TRUE, 1, NULL);
-    drawSegment( p, QRect( 10, ypos, length, 40 ), lightc, darkc, lightc.light(115), 6 );
-    drawSegment( p, QRect( 11 + length, ypos, width()-30-length, 40 ), white.light(80), black, white.light(90), 6 );
-    drawSegment( p, QRect( width()-18, ypos+7, 10, 25 ), white.light(80), black, white.light(90), 2 );
+    drawSegment( p, QRect( marg, ypos, length, 40 ), lightc, darkc, lightc.light(115), 6 );
+    drawSegment( p, QRect( marg+1 + length, ypos, width()-30-length, 40 ), white.light(80), black, white.light(90), 6 );
+    drawSegment( p, QRect( width()-marg-8, ypos+7, 10, 25 ), white.light(80), black, white.light(90), 2 );
 
-    QString text;
-    if ( ps->batteryStatus() == PowerStatus::Charging ) {
-	text = tr("Charging");
-    } else if ( ps->batteryPercentAccurate() ) {
-	text.sprintf( tr("Percentage battery remaining") + ": %i%%", percent );
-    } else {
-	text = tr("Battery status: ");
-	switch ( ps->batteryStatus() ) {
-	    case PowerStatus::High:
-		text += tr("Good");
-		break;
-	    case PowerStatus::Low:
-		text += tr("Low");
-		break;
-	    case PowerStatus::VeryLow:
-		text += tr("Very Low");
-		break;
-	    case PowerStatus::Critical:
-		text += tr("Critical");
-		break;
-	    default: // NotPresent, etc.
-		text += tr("Unknown");
-	}
-    }
+    QString text = statusText();
 
     p->setPen( black );
     ypos += 60;
-    p->drawText( 10, ypos, text );
-
-    ypos += 25;
-    if ( ps->acStatus() == PowerStatus::Backup )
-	p->drawText( 10, ypos, tr("On backup power") );
-    else if ( ps->acStatus() == PowerStatus::Online )
-	p->drawText( 10, ypos, tr("Power on-line") );
-    else if ( ps->acStatus() == PowerStatus::Offline )
-	p->drawText( 10, ypos, tr("External power disconnected") );
-
-    ypos += 25;
-    if ( ps->batteryTimeRemaining() >= 0 ) {
-	text.sprintf( tr("Battery time remaining") +
-		": %im %02is", // No tr
-	    ps->batteryTimeRemaining() / 60, ps->batteryTimeRemaining() % 60 );
-	p->drawText( 10, ypos, text );
-    }
+    p->drawText( marg, ypos, width()-marg*2, height()-marg-ypos, AlignVCenter, text );
 }
 

@@ -169,6 +169,14 @@
         <source>Pronunciation</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Last Name Pronunciation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Company Pronunciation</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PimEvent</name>
@@ -240,13 +248,62 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>QtopiaPim</name>
     <message>
-        <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
+        <source>Due: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
+        <source>Started: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Completed: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not yet started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>In progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deferred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Status: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Priority: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> percent</source>
+        <comment>Word or symbol after numbers for percentage</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notes: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Work Address: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Home Address: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>

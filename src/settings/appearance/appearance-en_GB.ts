@@ -85,4 +85,12 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>WindowDecoration</name>
+    <message>
+        <source>Default</source>
+        <comment>List box text for default window decoration</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

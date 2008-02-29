@@ -109,6 +109,8 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
 	     this, SLOT( recordClicked() ) );
     connect( contents->replayButton, SIGNAL( clicked() ),
 	     this, SLOT( replayClicked() ) );
+    connect( contents->deleteButton, SIGNAL( clicked() ),
+	     this, SLOT( deleteClicked() ) );
     connect( lightTimer, SIGNAL( timeout() ),
 	     this, SLOT( recordLightBlink() ) );
 
@@ -158,8 +160,7 @@ void MediaRecorder::initializeContents()
 
     // Cannot replay yet, because there is no recorded sound.
     contents->replayButton->setEnabled( FALSE );
-    // TODO - unhide the button once we have real replay functionality
-    contents->replayButton->hide();
+    contents->deleteButton->setEnabled( FALSE );
 
     // Load the initial quality settings.
     config = new ConfigureRecorder( qualities, recorderPlugins, this );
@@ -332,6 +333,7 @@ void MediaRecorder::startSave()
 
     // Record the location of the file that we are saving.
     lastSaved = doc.file();
+    lastSavedLink = doc.linkFile();
 }
 
 void MediaRecorder::endSave()
@@ -415,6 +417,7 @@ void MediaRecorder::startRecording()
     contents->recordButton->setText( tr("Stop") );
     contents->recordButton->setEnabled( TRUE );
     contents->replayButton->setEnabled( FALSE );
+    contents->deleteButton->setEnabled( FALSE );
 
     // Turn on the recording light.
     setRecordLight( TRUE );
@@ -438,6 +441,7 @@ void MediaRecorder::stopRecording()
     recording = FALSE;
     contents->recordButton->setText( tr("Record") );
     contents->replayButton->setEnabled( TRUE );
+    contents->deleteButton->setEnabled( TRUE );
 
     // Turn off the recording light.
     setRecordLight( FALSE );
@@ -479,12 +483,17 @@ void MediaRecorder::startPlaying()
     contents->qualityGroup->setEnabled( FALSE );
     contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
-    contents->progress->setTotalSteps( 120 );
+    samplesPlayed = 0;
+    long samples = decoder->audioSamples( 0 );
+    long freq = decoder->audioFrequency( 0 );
+    samples = (samples + freq - 1) / freq;
+    contents->progress->setTotalSteps( samples );
     contents->progress->setProgress( 0 );
     playing = TRUE;
     contents->recordButton->setEnabled( FALSE );
     contents->replayButton->setText( tr("Stop") );
     contents->replayButton->setEnabled( TRUE );
+    contents->deleteButton->setEnabled( TRUE );
 
     // Create the waveform display.
     contents->waveform->changeSettings( decoder->audioFrequency( 0 ),
@@ -527,6 +536,8 @@ void MediaRecorder::stopPlaying()
     playing = FALSE;
     contents->replayButton->setEnabled( TRUE );
     contents->replayButton->setText( tr("Play") );
+    contents->deleteButton->setEnabled( TRUE );
+    contents->progress->setProgress( 0 );
 }
 
 
@@ -537,6 +548,19 @@ void MediaRecorder::replayClicked()
     } else {
 	startPlaying();
     }
+}
+
+
+void MediaRecorder::deleteClicked()
+{
+    if ( playing ) {
+	stopPlaying();
+    }
+    DocLnk doc( lastSaved );
+    doc.setLinkFile( lastSavedLink );
+    doc.removeFiles();
+    contents->replayButton->setEnabled( FALSE );
+    contents->deleteButton->setEnabled( FALSE );
 }
 
 
@@ -665,6 +689,12 @@ void MediaRecorder::closeEvent( QCloseEvent *e )
 	stopPlaying();
     }
 
+    // Disable the "Play" and "Delete" buttons so that if we
+    // are restarted in "fast load" mode, we will return to
+    // the initial "nothing is recorded" state in the UI.
+    contents->replayButton->setEnabled( FALSE );
+    contents->deleteButton->setEnabled( FALSE );
+
     e->accept();
 }
 
@@ -673,7 +703,6 @@ void MediaRecorder::audioOutputDone()
 {
     // Read the next block of samples.
     long samplesRead = 0;
-    qDebug("%d", audioOutput->bufferSize());
     if ( !decoder->audioReadSamples( sampleBuffer, 2, 1024, samplesRead, 0 ) ) {
 	stopPlaying();
 	return;
@@ -688,6 +717,17 @@ void MediaRecorder::audioOutputDone()
 
     // Update the waveform display.
     contents->waveform->newSamples( sampleBuffer, samplesRead );
+
+    // Update the playback time if another second has elapsed.
+    samplesPlayed += samplesRead;
+    long newTime = samplesPlayed / (long)(decoder->audioFrequency( 0 ));
+    if ( newTime != recordTime ) {
+	recordTime = newTime;
+	if ( recordTime > contents->progress->totalSteps() ) {
+	    recordTime = contents->progress->totalSteps();
+	}
+	contents->progress->setProgress( (int)recordTime );
+    }
 }
 
 

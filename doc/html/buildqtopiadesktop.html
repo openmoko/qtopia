@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/buildqtopiadesktop.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Instructions for Building Qtopia Desktop</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>Instructions for Building Qtopia Desktop</h1>
+
+
+
+<p> <h2> Windows
+</h2>
+<a name="1"></a><p> <ol type=1> 
+<li> <a href="qt.html">Qt</a> 3.1.2 is required to build Qtopia Desktop 1.6.0.
+Download and install Qt 3.1.2 for windows with default settings,
+(ie install to c:\qt&#92;3.1.2, substitute below if different)
+<li>	    From a command prompt,
+<br>
+<br>
+If QMAKESPEC has not been set, set QMAKESPEC
+appropriately for the compiler which is to be used.<br>
+For MS Visual C++:<br>
+<pre>
+                set QMAKESPEC=win32-msvc
+</pre>
+ 
+<br>
+Otherwise if the newer .NET compiler is to be used:<br>
+<pre>
+                set QMAKESPEC=win32-msvc.net
+</pre>
+ 
+<br>
+Compile Qt with the -qwinexport configuration option:<br>
+<pre>
+                set QTDIR=c:\qt\3.1.2
+                set PATH=%QTDIR%\bin;%PATH%
+                cd %QTDIR%
+                configure -thread -qwinexport -lean
+                cd src
+                nmake clean
+                nmake
+</pre>
+ 
+<br>
+Ensure assistant.exe and qaxcontainer.dll were built
+in step one, if not compile them with:<br>
+<pre>
+                cd %QTDIR%\tools\assistant
+                nmake
+                cd %QTDIR%\extensions\activeqt
+                nmake
+</pre>
+ 
+<br>
+<a href="qt.html">Qt</a> is now ready to be used with Qtopia Desktop
+<li> Download and install tmake 1.11
+(ftp://ftp.trolltech.com/freebies/tmake/tmake-1.11.zip)
+(example commands assumes it is installed to c:\tmake-1.11)
+<li> Download and install a version of perl for Windows.
+<li> Install Qtopia source to c:\qtopia&#92;1.6 (substitute below if different)
+<li> From command prompt, Compile Qtopia Desktop and all of its plugins:<br>
+<pre>
+                set QTDIR=c:\qt\3.1.2
+                set QPEDIR=c:\qtopia\1.6
+                set TMAKEDIR=c:\tmake-1.11
+                set TMAKEPATH=%TMAKEDIR%\lib\win32-msvc
+                set PATH=%QTDIR%\bin;%QPEDIR%\bin;%TMAKEDIR%\bin;%PATH%
+                cd %QPEDIR%
+                cd src
+                perl configure.pl -product qtopiadesktop
+                nmake -f Makefile
+</pre>
+ 
+</ol>
+<p> <h2> Linux
+</h2>
+<a name="2"></a><p> <ol type=1>
+<li>   Download and extract qt-3.1.2 for X11
+<li>    Compile qt:<br>
+<pre>
+                export QTDIR=~/qt/3.1.2
+                export PATH=$QTDIR/bin:$PATH
+                cd $QTDIR
+                ./configure -thread
+                make
+</pre>
+ 
+<br>
+<li> Extract Qtopia source package for example to ~/qtopia/1.6
+(substitute below if different)
+<li> Compile Qtopia Desktop as follows:<br>
+<pre>
+                export QTDIR=~/qt/3.1.2
+                export QPEDIR=~/qtopia/1.6
+                export PATH=$QTDIR/bin:$QPEDIR/bin:$PATH
+                cd $QPEDIR
+                cd src
+                ./configure -qtopiadesktop
+                make
+</pre>
+ 
+<br>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

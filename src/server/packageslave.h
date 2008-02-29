@@ -54,6 +54,7 @@ protected slots:
     void iProcessExited();
     void rmProcessExited();
     void readyReadStdout();
+    void readyReadStderr();
 
 private:
     void sendReply( const QCString& msg, const QString& arg );
@@ -62,6 +63,7 @@ private:
     QCopChannel *packageChannel;
     QProcess *currentProcess;
     QString currentPackage;
+    QString currentProcessError;
     bool mNoSpaceLeft;
 };
 

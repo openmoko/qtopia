@@ -165,9 +165,6 @@
     </message>
 </context>
 <context>
-    <name>QPEDateButton</name>
-</context>
-<context>
     <name>QPEDateEdit</name>
     <message>
         <source>None</source>
@@ -194,6 +191,14 @@
     </message>
     <message>
         <source>Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TimeStringFormat1</name>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=12:45</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

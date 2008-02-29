@@ -41,6 +41,8 @@ public:
 
     QTime time() const;
 
+    bool changed() const { return userChanged; }
+
 public slots:
     void slotTzChange( const QString& tz );
     void show12hourTime( int );
@@ -58,6 +60,7 @@ protected:
     QComboBox *ampm;
     QSpinBox *sbHour;
     QSpinBox *sbMin;
+    bool userChanged;
 };
 
 class QPEDateEdit;
@@ -72,6 +75,7 @@ protected slots:
     void tzChange( const QString &tz );
     void formatChanged(int);
     void weekStartChanged(int);
+    void dateChange(const QDate &);
 
 protected:
     virtual void accept();
@@ -86,7 +90,9 @@ protected:
 
     QPEDialogListener *dl;
 
-    DateFormat date_formats[4];
+    QArray<DateFormat> date_formats;
+    bool dateChanged;
+    bool tzChanged;
 };
 
 

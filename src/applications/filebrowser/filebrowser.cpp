@@ -148,17 +148,53 @@ bool FileItem::isLib()
 
 int FileItem::launch()
 {
-    MimeType mt(fileInfo.filePath());
+    //
+    // If this item is in $QPEDIR/Documents, pass it's
+    // associated .desktop file along to the third party rather
+    // than itself, to avoid double referencing the same file from
+    // separate .desktop files.
+    //
+    QString	file_to_launch = fileInfo.filePath();
+    MimeType	mt(fileInfo.filePath());
+    QString	fname_desktop(file_to_launch);
+
+    if (file_to_launch.contains(QDir::homeDirPath() + "/Documents")) {
+	int	idx;
+
+	idx = fname_desktop.findRev('.');           // fix suffix
+	if (idx != -1) {
+	    fname_desktop.truncate(idx);
+	}
+	fname_desktop += ".desktop";
+
+	idx = fname_desktop.findRev('/');           // take filename only
+	if (idx != -1) {
+	    fname_desktop = fname_desktop.right(fname_desktop.length() - idx);
+	}
+	fname_desktop = QDir::homeDirPath() + "/Documents/" + mt.id() +
+	       fname_desktop;
+    }
+
+    if (!QFile::exists(fname_desktop)) {
+	//
+	// We're trying to open a file that lives in $QPEDIR/Documents
+	// but doesn't have an associated .desktop.  Something bad has
+	// happened to get into this state; revert back to opening the
+	// file we were originally asked for.
+	//
+	fname_desktop = fileInfo.filePath();
+    }
+
     QString type = mt.id();
     Config cfg(Service::appConfig("Open/"+type),Config::File);
     cfg.setGroup("Standard");
     if ( cfg.readNumEntry("Version") > 100 ) {
 	// Use Open service
 	QCopEnvelope e(Service::channel("Open/"+type), "openFile(QString)");
-	e << fileInfo.filePath();
+	e << fname_desktop;
     } else {
 	// Use setDocument()
-	DocLnk doc( fileInfo.filePath(), FALSE );
+	DocLnk doc( fname_desktop, FALSE );
 	doc.execute();
     }
 
@@ -307,9 +343,10 @@ void FileView::rename()
     setSelected( itemToRename, FALSE );
 
     if( le == NULL ){
-		le = new InlineEdit( this );
-		le->setFrame( FALSE );
-		connect( le, SIGNAL( lostFocus() ), SLOT( endRenaming() ) );
+	le = new InlineEdit( this );
+	le->setFrame( FALSE );
+	connect( le, SIGNAL( lostFocus() ), SLOT( endRenaming() ) );
+	connect(le, SIGNAL(returnPressed()), this, SLOT(endRenaming()));
     }
 
     QRect r = itemRect( itemToRename );
@@ -327,24 +364,28 @@ void FileView::rename()
 
 void FileView::endRenaming()
 {
-    if( le && itemToRename ){
-		le->hide();
-		setSelected( itemToRename, selected );
+    if( le && itemToRename ) {
+	le->hide();
+	setSelected( itemToRename, selected );
 
-		if( !itemToRename->rename( le->text() ) ){
-			QMessageBox::warning( this, tr( "Rename file" ),
-								  tr( "Rename failed!" ), tr( "&OK" ) );
-		} else {
-			updateDir();
-		}
-		itemToRename = NULL;
-		horizontalScrollBar()->setEnabled( TRUE );
-		verticalScrollBar()->setEnabled( TRUE );
+	if (itemToRename) {
+	    if( !itemToRename->rename( le->text() ) ){
+		QMessageBox::warning( this, tr( "Rename file" ),
+		    tr( "Rename failed!" ), tr( "&OK" ) );
+	    } else {
+		updateDir();
+	    }
+	    itemToRename = NULL;
+	    horizontalScrollBar()->setEnabled( TRUE );
+	    verticalScrollBar()->setEnabled( TRUE );
+	}
     }
 }
 
 void FileView::copy()
 {
+    endRenaming();
+
     // dont keep cut files any longer than necessary
     // ##### a better inmplementation might be to rename the CUT file
     // ##### to ".QPE-FILEBROWSER-MOVING" rather than copying it.
@@ -463,6 +504,9 @@ void FileView::cut()
     // ##### a better inmplementation might be to rename the CUT file
     // ##### to ".QPE-FILEBROWSER-MOVING" rather than copying it.
     QString cmd, dest, basename, cd = "/tmp/qpemoving";
+
+    endRenaming();
+
 	QStringList newflist;
 	newflist.clear();
 	
@@ -561,6 +605,8 @@ void FileView::newFolder()
     FileItem * i;
     QString nd = currentDir + "/NewFolder";
 
+    endRenaming();
+
     while( QFile( nd ).exists() ){
 		nd.sprintf( "%s/NewFolder (%d)", (const char *) currentDir, t++ );
     }
@@ -620,11 +666,13 @@ void FileView::itemDblClicked( QListViewItem * i)
 
 void FileView::parentDir()
 {
+    endRenaming();
     setDir( currentDir + "./.." );
 }
 
 void FileView::lastDir()
 {
+    endRenaming();
     if( dirHistory.count() == 0 ) return;
 
     QString newDir = dirHistory.last();
@@ -675,15 +723,16 @@ void FileView::showFileMenu()
 
     QPopupMenu * m = new QPopupMenu( this );
 
-    if ( !i->isDir() ) {
-		m->insertItem( tr( "Add to Documents" ), this, SLOT( addToDocuments() ) );
-		m->insertSeparator();
-    }
-
     MimeType mt(i->getFilePath());
     const AppLnk* app = mt.application();
 
-    if ( !i->isDir() ) {
+    // Opening .desktop files is too ambiguous - disabled.
+    // If the user *really* wants to touch those files, and take
+    // responsibility for whatever mess they make, they can use Terminal.
+    if ( !i->isDir() && i->getFilePath().right(8) != ".desktop" ) {
+		m->insertItem( tr( "Add to Documents" ), this, SLOT( addToDocuments() ) );
+		m->insertSeparator();
+
 		if ( app )
 			m->insertItem( app->pixmap(), tr("Open in %1","eg. text editor").arg(app->name()), this, SLOT( run() ) );
 		else if( i->isExecutable() )

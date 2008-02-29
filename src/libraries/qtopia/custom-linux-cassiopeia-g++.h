@@ -20,3 +20,5 @@
 
 #define QPE_NEED_CALIBRATION
 #define QPE_USE_MALLOC_FOR_NEW
+#define QPE_ARCHITECTURE "Casio/Cassiopeia"
+#define QPE_DEFAULT_TODAY_MODE "Daily"

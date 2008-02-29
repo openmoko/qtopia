@@ -215,6 +215,8 @@ void MenuButton::updateLabel()
     setText(t);
 }
 
+/*! \internal */
+
 void MenuButton::keyPressEvent( QKeyEvent *e )
 {
     if (e->key() == Key_Left) {

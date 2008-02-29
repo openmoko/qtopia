@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/inputmethodinterface.doc:61 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ExtInputMethodInterface Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>ExtInputMethodInterface Class Reference</h1>
+
+<p>The ExtInputMethodInterface class provides an extended interface for Qtopia
+input methods.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="inputmethodinterface-h.html">qtopia/inputmethodinterface.h</a>&gt;</tt>
+<p><a href="extinputmethodinterface-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn>virtual QString <a href="#name"><b>name</b></a> () = 0</div></li>
+<li><div class=fn>virtual QPixmap * <a href="#icon"><b>icon</b></a> () = 0</div></li>
+<li><div class=fn>virtual void <a href="#resetState"><b>resetState</b></a> () = 0</div></li>
+<li><div class=fn>virtual QWidget * <a href="#keyboardWidget"><b>keyboardWidget</b></a> ( QWidget&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f ) = 0</div></li>
+<li><div class=fn>virtual QStringList <a href="#compatible"><b>compatible</b></a> () = 0</div></li>
+<li><div class=fn>virtual QWSInputMethod * <a href="#inputMethod"><b>inputMethod</b></a> () = 0</div></li>
+<li><div class=fn>virtual QWidget * <a href="#statusWidget"><b>statusWidget</b></a> ( QWidget&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f ) = 0</div></li>
+<li><div class=fn>virtual void <a href="#qcopReceive"><b>qcopReceive</b></a> ( const&nbsp;QCString&nbsp;&amp;&nbsp;msg, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data ) = 0</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The ExtInputMethodInterface class provides an extended interface for Qtopia
+input methods.
+<p> There are two kinds of input methods that may be implemented using this
+interface.
+<p> One is a virtual keyboard like <a href="inputmethodinterface.html">InputMethodInterface</a>, but with access
+to the Qtopia 1.6 input method API. In this case, implement
+<a href="#keyboardWidget">keyboardWidget</a>(). There is no <tt>onKeyPress</tt> method; use
+<a href="qwsserver.html#sendKeyEvent">QWSServer::sendKeyEvent</a>() to send key events when a key is pressed.
+<p> The other is a composing input methods that modifies input from a
+separate keyboard (real or virtual). In this case, implement <a href="#inputMethod">inputMethod</a>()
+and <a href="#statusWidget">statusWidget</a>(). Composing input methods are used to implement text
+input for languages such as Chinese, Japanese and Korean.
+<p> There may be dependencies between specific virtual keyboard input
+methods and composing input methods. This can be specified by
+implementing <a href="#compatible">compatible</a>().
+<p> Input methods may be added to Qtopia via plugins. In order to write an
+input method plugin you must create an interface to your input method by
+deriving from the ExtInputMethodInterface class and implementing the pure
+virtual functions.
+<p> See also: <a href=inputmethods.html>Input Method Tutorial</a>
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="compatible"></a>ExtInputMethodInterface::compatible ()<tt> [pure virtual]</tt>
+</h3> 
+Returns a list of plugin library filenames that are compatible
+with this input method.  An empty list means that there are no
+restrictions; it is compatible with anything.
+
+<h3 class=fn><a href="qpixmap.html">QPixmap</a>&nbsp;* <a name="icon"></a>ExtInputMethodInterface::icon ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#icon">icon</a>() function returns the icon for the input method. This will
+be displayed in the taskbar when the input method is selected.
+
+<h3 class=fn><a href="qwsinputmethod.html">QWSInputMethod</a>&nbsp;* <a name="inputMethod"></a>ExtInputMethodInterface::inputMethod ()<tt> [pure virtual]</tt>
+</h3> 
+If this is a composing input method, this function returns the input
+method object, which is a subclass of <a href="qwsinputmethod.html">QWSInputMethod</a>.
+<p> Returns 0 for a virtual keyboard.  
+
+<h3 class=fn><a href="qwidget.html">QWidget</a>&nbsp;* <a name="keyboardWidget"></a>ExtInputMethodInterface::keyboardWidget ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f )<tt> [pure virtual]</tt>
+</h3> 
+<p> For a virtual keyboard, creates keyboard widget (if not already
+created) and returns the keyboard widget. Returns 0 for a composing
+input method.
+<p> <em>parent</em> is the parent of the  widget.
+<em>f</em> contains the flags to pass to the  widget.
+<p> This
+widget will be display just above the task bar when the user needs to input
+text. You should always return the same widget if this function is called
+multiple times.
+
+<h3 class=fn><a href="qstring.html">QString</a> <a name="name"></a>ExtInputMethodInterface::name ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#name">name</a>() function returns the name of the input method. This will
+be displayed in the popup list of available input methods.
+
+<h3 class=fn>void <a name="qcopReceive"></a>ExtInputMethodInterface::qcopReceive ( const&nbsp;<a href="qcstring.html">QCString</a>&nbsp;&amp;&nbsp;msg, const&nbsp;QByteArray&nbsp;&amp;&nbsp;data )<tt> [pure virtual]</tt>
+</h3> 
+Reimplemented to receive QCop messages from the input method channel.
+
+<h3 class=fn>void <a name="resetState"></a>ExtInputMethodInterface::resetState ()<tt> [pure virtual]</tt>
+</h3> 
+<p> The <a href="#resetState">resetState</a>() function should return the input method to its default
+state.
+
+<h3 class=fn><a href="qwidget.html">QWidget</a>&nbsp;* <a name="statusWidget"></a>ExtInputMethodInterface::statusWidget ( <a href="qwidget.html">QWidget</a>&nbsp;*&nbsp;parent, Qt::WFlags&nbsp;f )<tt> [pure virtual]</tt>
+</h3> 
+<p> For a composing input method, this function returns a widget to
+be shown in the taskbar, which 
+<p> 
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

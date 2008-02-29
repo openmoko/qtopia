@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/global.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>global.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>global.h</h1>
+
+<p>This is the verbatim text of the global.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef GLOBAL_H
+#define GLOBAL_H
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qtopia/quuid.h&gt;
+#include &lt;qstringlist.h&gt;
+#include &lt;qguardedptr.h&gt;
+#include &lt;qwidget.h&gt;
+
+class QDawg;
+class QLabel;
+class AppLnk;
+class DocLnkSet;
+class QFile;
+
+class QTOPIA_EXPORT Global
+{
+public:
+    static QUuid generateUuid(); // libqtopia
+
+    static QString homeDirPath(); // libqtopia
+    static bool renameFile( QString from, QString to ); // libqtopia
+    static QString tempName(const QString &amp;filename); // libqtopia
+    static QString journalFileName(const QString &amp;filename); // libqtopia
+
+    static QString applicationFileName(const QString&amp; appname, const QString&amp; filename);
+    static void findDocuments(DocLnkSet* folder, const QString &amp;mimefilter=QString::null);
+    static bool isDocumentFileName(const QString&amp; file); // libqtopia
+    static bool isAppLnkFileName(const QString&amp; file); // libqtopia
+
+#ifdef QTOPIA_INTERNAL_LANGLIST
+    static QStringList languageList();
+    static QStringList helpPath();
+#endif
+
+    static void statusMessage(const QString&amp;);
+
+    static QString shellQuote(const QString&amp; s);
+    static QString stringQuote(const QString&amp; s);
+
+    static QByteArray encodeBase64(const QByteArray&amp; origData); // libqtopia
+    static QByteArray decodeBase64(const QByteArray&amp; encoded); // libqtopia
+    static bool weekStartsOnMonday(); // libqtopia
+    static void setWeekStartsMonday(bool ); // libqtopia
+
+#ifdef Q_WS_QWS
+
+    Global();
+
+    // Dictionaries
+    static const QDawg&amp; fixedDawg();
+    static const QDawg&amp; addedDawg();
+    static const QDawg&amp; dawg(const QString&amp; name);
+
+    static void addWords(const QStringList&amp; word);
+    static void addWords(const QString&amp; dictname, const QStringList&amp; word);
+    // static void removeWords(const QStringList&amp; word); -- if someone wants it
+
+    static void createDocDir();
+
+    static QString version(); // libqtopia
+    static QString architecture(); // libqtopia
+    static QString deviceId(); // libqtopia
+    static QString ownerName(); // libqtopia
+
+    struct Command {
+	const char *file;
+	QWidget *(*func)( bool );
+	bool maximized;
+	bool documentary;
+    };
+    static void setBuiltinCommands( Command* );
+    static Command* builtinCommands();
+    static QGuardedPtr&lt;QWidget&gt;* builtinRunning();
+
+    static void execute( const QString &amp;exec, const QString &amp;document=QString::null );
+    static void setDocument( QWidget* receiver, const QString&amp; document );
+    static bool terminateBuiltin( const QString&amp; );
+    static void terminate( const AppLnk* );
+
+    static bool isBuiltinCommand( const QString &amp;name );
+
+    // system messaging
+    static void applyStyle();
+    static QWidget *shutdown( bool = FALSE );
+    static QWidget *restart( bool = FALSE );
+    static void hideInputMethod();
+    static void showInputMethod();
+
+    static void writeHWClock();
+
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
+    static bool truncateFile(QFile &amp;f, int size);
+
+    enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
+    static bool lockFile(QFile &amp;f, int flags = -1);
+    static bool unlockFile(QFile &amp;f);
+    static bool isFileLocked(QFile &amp;f, int flags = -1);
+#endif
+
+private:
+    static void invoke( const QString &amp;exec);
+    static Command* builtin;
+    static QGuardedPtr&lt;QWidget&gt; *running;
+#endif
+};
+
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
+QString qtopia_tempName( const QString &amp;fname );
+bool qtopia_renameFile( QString from, QString to );
+#endif
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

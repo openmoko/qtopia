@@ -271,9 +271,15 @@ void MimeType::registerApp( const AppLnk& lnk )
 	    data().insert( *it, cur );
 	    cur->apps.append(l);
 	} else if ( cur->apps.count() ) {
-	    Config binding(serviceBinding("Open/"+*it));
-	    binding.setGroup("Service");
-	    QString def = binding.readEntry("default");
+	    QString type=*it;
+	    if ( type.right(2)=="/*")
+		type.truncate(type.length()-2);
+	    Config binding(serviceBinding("Open/"+type));
+	    QString def;
+	    if ( binding.isValid() ) {
+		binding.setGroup("Service");
+		def = binding.readEntry("default");
+	    }
 	    if ( l->exec() == def )
 		cur->apps.prepend(l);
 	    else
@@ -291,6 +297,10 @@ void MimeType::clear()
 {
     delete d;
     d = 0;
+    delete extFor;
+    extFor = 0;
+    delete typeFor;
+    typeFor = 0;
 }
 
 void MimeType::loadExtensions()

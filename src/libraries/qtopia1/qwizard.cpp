@@ -56,8 +56,7 @@
 // NOT REVISED
 /*! \class QWizard qwizard.h
 
-  \ingroup abstractwidgets
-  \ingroup organizers
+  \ingroup qtopiaemb
 
   \brief The QWizard class provides a framework for easily writing wizards.
 

@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/tzselect.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>tzselect.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>tzselect.h</h1>
+
+<p>This is the verbatim text of the tzselect.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef TZSELECT_H
+#define TZSELECT_H
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qhbox.h&gt;
+#include &lt;qcombobox.h&gt;
+#include &lt;qstringlist.h&gt;
+
+class QToolButton;
+class TimeZoneSelector;
+class TimeZoneSelectorPrivate;
+
+// a function to load defaults in case there is no file
+QTOPIA_EXPORT QStringList timezoneDefaults( void );
+
+class QTOPIA_EXPORT TZCombo : public QComboBox
+{
+    Q_OBJECT
+public:
+    TZCombo( QWidget* parent, const char* name = 0 );
+    ~TZCombo();
+
+    QString currZone() const;
+    void setCurrZone( const QString&amp; id );
+
+protected:
+#ifdef QTOPIA_DESKTOP
+    friend class TimeZoneSelectorPrivate;
+#endif
+    friend class TimeZoneSelector;
+    void keyPressEvent( QKeyEvent *e );
+    void mousePressEvent(QMouseEvent*e);
+    void updateZones();
+
+private slots:
+    void handleSystemChannel(const QCString&amp;, const QByteArray&amp;);
+
+private:
+    QStringList identifiers;
+    QStringList extras;
+};
+
+class QTOPIA_EXPORT TimeZoneSelector : public QHBox
+{
+    Q_OBJECT
+public:
+    TimeZoneSelector( QWidget* parent = 0, const char* name=0 );
+    ~TimeZoneSelector();
+
+#ifdef QTOPIA_INTERNAL_TZSELECT_INC_LOCAL
+    // badly named.. not to be used outside of qtopia (not forward compatable)
+    // basically allows the "No Timezone" or "None" option.
+    void setLocalIncluded(bool);
+    bool localIncluded() const;
+#endif
+    QString currentZone() const;
+    void setCurrentZone( const QString&amp; id );
+
+signals:
+    void signalNewTz( const QString&amp; id );
+private slots:
+    void slotTzActive( int index );
+    void slotExecute( void );
+
+private:
+    QToolButton *cmdTz;
+#ifdef QTOPIA_DESKTOP
+    public:
+#endif
+    TZCombo *cmbTz;
+    TimeZoneSelectorPrivate *d;
+};
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

@@ -22,7 +22,4 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
-<context>
-    <name>Taskbar Applet</name>
-</context>
 </TS>

@@ -152,6 +152,12 @@ void EventXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 	    internalUpdateRecord(new PimEvent(event));
 	    emit eventsUpdated();
 	}
+    } else if (message == "reloadEvents()") {
+        ensureDataCurrent();
+    } else if ( message == "reload(int)" ) {
+	int force;
+	ds >> force;
+        ensureDataCurrent(force);
     }
 }
 
@@ -208,6 +214,9 @@ bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
 
 bool EventXmlIO::saveData()
 {
+    if ( !QFile::exists( dataFilename() ) )
+	needsSave = TRUE;
+
     if (!needsSave)
 	return TRUE;
 
@@ -326,6 +335,10 @@ QUuid EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
     if (accessMode() == ReadOnly)
 	return u;
 
+    // Don't add events that will never occur.
+    if (!event.isValid())
+	return u;
+
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
     if ( assignUid || ev->uid().isNull() )
@@ -358,7 +371,15 @@ void EventXmlIO::addException(const QDate &d, const PimEvent &p)
 
     PrEvent *parent = new PrEvent((const PrEvent &)p);
     parent->addException(d);
-    parent->addChildUid(QUuid());
+    // don't add empty uid to parent.
+    //parent->addChildUid(QUuid());
+
+    if (!parent->isValid()) {
+	// apperently this is really a delete of the event.
+	delete (parent);
+	removeEvent(p);
+	return;
+    }
 
     if (internalUpdateRecord(parent)) {
 	needsSave = TRUE;
@@ -381,6 +402,7 @@ QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent
     if (accessMode() == ReadOnly)
 	return u;
 
+    // don't need to check is valid as can't disapear by adding an exception.
     PrEvent *parent = new PrEvent((const PrEvent &)p);
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
@@ -421,7 +443,21 @@ void EventXmlIO::removeEvent(const PimEvent &event)
     if (accessMode() == ReadOnly)
 	return;
 
+    // in case parent becomes invalid.
+    PimEvent parent;
+
     PrEvent *ev = new PrEvent((const PrEvent &)event);
+
+    if (event.isException()) {
+	for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
+	    if (m_PrEvents.current()->uid() == ev->seriesUid()) {
+		m_PrEvents.current()->removeChildUid(ev->uid());
+		if (!m_PrEvents.current()->isValid()) {
+		    parent = *(m_PrEvents.current());
+		}
+	    }
+	}
+    }
 
     for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	if (m_PrEvents.current()->uid() == ev->uid()) {
@@ -442,12 +478,23 @@ void EventXmlIO::removeEvent(const PimEvent &event)
 #endif
 	}
     }
+
+    if (!parent.uid().isNull()) {
+	// parent is invalid,
+	removeEvent(parent);
+    }
 }
 
 void EventXmlIO::updateEvent(const PimEvent &event)
 {
     if (accessMode() == ReadOnly)
 	return;
+
+    if (!event.isValid()) {
+	// really a remove.
+	removeEvent(event);
+	return;
+    }
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 

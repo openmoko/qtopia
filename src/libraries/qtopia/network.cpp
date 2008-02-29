@@ -139,7 +139,7 @@ QStringList Network::choices(QListBox* lb, const QString& dir)
 class NetworkServer : public QCopChannel {
     Q_OBJECT
 public:
-    NetworkServer(QObject* parent) : QCopChannel("QPE/Network",parent), wait(0)
+    NetworkServer(QObject* parent) : QCopChannel("QPE/Network",parent), wait(0), reannounce(FALSE)
     {
 	up = FALSE;
 	examineNetworks( TRUE );
@@ -188,6 +188,9 @@ private:
 	    stop();
 	} else if ( msg == "choicesChanged()" ) {
 	    examineNetworks();
+	} else if ( msg == "announceChoices()" ) {
+	    reannounce = TRUE;
+	    examineNetworks();
 	}
     }
 
@@ -235,15 +238,17 @@ private:
 
 	// Try to work around unreproducible bug whereby
 	// the netmon applet shows wrong state.
-	bool reannounce = wait<0;
+	bool reannounceWorkaround = wait<0;
 
-	if ( available != pavailable || reannounce ) {
+	if ( available != pavailable || reannounce || reannounceWorkaround ) {
 	    QCopEnvelope e("QPE/Network", "available(QStringList)");
 	    e << available;
 	}
-	if ( up != wasup || reannounce ) {
+	if ( up != wasup || reannounce || reannounceWorkaround ) {
 	    QCopEnvelope("QPE/Network", up ? "up()" : "down()");
 	}
+
+	reannounce = FALSE;
     }
 
     void start( const QString& file, const QString& password )
@@ -323,6 +328,7 @@ private:
     QString current;
     bool up;
     int wait;
+    bool reannounce;
 };
 
 static NetworkServer* ns=0;
@@ -437,7 +443,7 @@ NetworkInterface* Network::loadPlugin(const QString& type)
 	return 0;
 #ifndef QT_NO_COMPONENT
     if ( !ifaces ) ifaces = new QDict<NetworkInterface>;
-    if ( !loader ) loader = new PluginLoaderIntern( "network" );
+    if ( !loader ) loader = new PluginLoaderIntern( "network" ); // No tr
     NetworkInterface *iface = ifaces->find(type);
     if ( !iface ) {
 	if ( loader->queryInterface( type, IID_Network, (QUnknownInterface**)&iface ) != QS_OK )

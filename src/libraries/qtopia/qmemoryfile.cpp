@@ -46,25 +46,24 @@
 /*
   \class QMemoryFile qmemoryfile_p.h
   \intern
-  \brief The QMemoryFile class provide means to map a file info memory or refere to a block or memory by name.
+  \brief The QMemoryFile class provides a means to map a file info memory or reference
+  to a block or memory by name.
 
-  Warning: This class is not part of the Qt APi and subject to change.
+  Warning: This class is not part of the Qt API and subject to change.
              This file file may change from version to version without
              notice, or even be removed.
 
 
-Currently this
-         class supports read only access on all platforms; and read plus write
-         accces provided on unix and windows based plaforms.
-	 The size of mapped file can not be changed.
+  Currently this class supports read only access on all platforms; and read plus write
+  accces provided on unix and windows based plaforms.  The size of mapped file can not be changed.
 */
 
 
-/* \ enum QMemoryFile::Flags
+/*! \enum QMemoryFile::Flags
   This enum specifies the possible types of connections made to the file to
   be memory mapped.
 
-   The currently defined values are :
+  The currently defined values are :
 
   \value Write  Allow write access to file.
   \value Shared Allow file to be shared with other proceses.
@@ -74,24 +73,26 @@ Currently this
 /*!
   \fn QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags, 
 					 uint size )
-  Initialize the memory map.  If sucessful wil return a pointer to the memory file
- data.  Otherwise returns null.
+  Initializes the memory map.  If sucessful wil return a pointer to the memory file
+  data.  Otherwise returns null.
 */
 
 /*!
   \fn void QMemoryFile::closeData(QMemoryFileData *memoryFile)
-  Close memory file and free any memory used
+  Closes the memory file and frees any memory used.
 */
 
 /*
   Construct a memory mapped to an actual file or named memory block.
   If \a fileName is not preceeded by an \\ then it is treated as a real
-     file name.
-  Otherwise the characters after the \\ are used as the name for the memory block required.
+  file name.  Otherwise the characters after the \\ are used as the
+  name for the memory block required.
 
-  A value for \a size should always be provided, though if the size is not provided it will be determined if possible.
+  A value for \a size should always be provided, though if the size is not provided it will
+  be determined if possible.
 
- If a file is being mapped to be written to, then the \a flags of subsequent QMemoryFiles mapped to the same file should include QMemoryFile::Write.
+ If a file is being mapped to be written to, then the \a flags of subsequent QMemoryFiles
+ mapped to the same file should include QMemoryFile::Write.
 
  Example:
  \code
@@ -139,24 +140,29 @@ QMemoryFile::~QMemoryFile()
     closeData(d);
 }
 
+/*!
+  \fn uint QMemoryFile::size()
 
-/*
+  Returns the length of the block of memory that this QMemoryFile is associated with.
+*/
+
+/*!
  \fn char* QMemoryFile::data()
 
- Returns a pointer to memory that this QMemoryFile is associated with
+ Returns a pointer to memory that this QMemoryFile is associated with.
 */
 
 
-/*
+/*!
   \fn bool QMemoryFile::isShared()
 
-  Returns true if memory is shared
+  Returns TRUE if the memory block is shared.
 */
 
 
-/*
+/*!
  \fn bool QMemoryFile::isWritable()
    
- Returns true if memory is writable
+ Returns TRUE if the memory block is writable.
 */
 

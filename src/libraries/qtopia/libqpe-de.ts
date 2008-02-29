@@ -1,5 +1,19 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>AlarmServer</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to schedule alarm.
+Free some memory and try again.</source>
+        <translation type="unfinished">Der Alarm konnte nicht eingestellt werden.
+Geben Sie Speicherplatz frei und
+versuchen Sie es erneut.</translation>
+    </message>
+</context>
+<context>
     <name>Categories</name>
     <message>
         <source>All</source>
@@ -48,6 +62,33 @@
         <source>New Category </source>
         <translation>Neue Kategorie</translation>
     </message>
+    <message>
+        <source>Duplicate categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is already a category named
+%1.
+Please choose another name, or delete
+the duplicate.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removing Category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Making a global category local will delete it from all other applications that may use it. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a local category will make all items in this category unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CategoryEditBase</name>
@@ -69,7 +110,7 @@
     </message>
     <message>
         <source>Add</source>
-        <translation>Hinzufügen</translation>
+        <translation type="obsolete">Hinzufügen</translation>
     </message>
     <message>
         <source>Global</source>
@@ -95,6 +136,10 @@
         <source>Check to make this property available to all applications.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CategoryMenu</name>
@@ -118,17 +163,308 @@
         <translation>Alle</translation>
     </message>
     <message>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sorry, another application is
-editing categories.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Categories</source>
         <translation type="unfinished">Kategorien</translation>
+    </message>
+</context>
+<context>
+    <name>Config</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There was a problem creating
+Configuration Information 
+for this program.
+
+Please free up some space and
+try again.</source>
+        <translation type="unfinished">Es war nicht möglich,
+Konfigurationsinformationen für
+diese Anwendung zu erstellen.
+
+Geben Sie Speicherplatz frei
+und versuchen Sie es erneut.</translation>
+    </message>
+</context>
+<context>
+    <name>Contact</name>
+    <message>
+        <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
+        <translation type="unfinished">&lt;b&gt;Adresse (dienstl):&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
+        <translation type="unfinished">&lt;b&gt;Adresse (privat):&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Email Addresses: </source>
+        <translation type="unfinished">E-Mail-Adressen:</translation>
+    </message>
+    <message>
+        <source>Home Phone: </source>
+        <translation type="unfinished">Telefon (priv):</translation>
+    </message>
+    <message>
+        <source>Home Fax: </source>
+        <translation type="unfinished">Fax (priv):</translation>
+    </message>
+    <message>
+        <source>Home Mobile: </source>
+        <translation type="unfinished">Mobiltel. (priv):</translation>
+    </message>
+    <message>
+        <source>Home Web Page: </source>
+        <translation type="unfinished">Website (priv):</translation>
+    </message>
+    <message>
+        <source>Business Web Page: </source>
+        <translation type="unfinished">Website (dienstl):</translation>
+    </message>
+    <message>
+        <source>Office: </source>
+        <translation type="unfinished">Büro:</translation>
+    </message>
+    <message>
+        <source>Business Phone: </source>
+        <translation type="unfinished">Telefon (dienstl):</translation>
+    </message>
+    <message>
+        <source>Business Fax: </source>
+        <translation type="unfinished">Fax (dienstl):</translation>
+    </message>
+    <message>
+        <source>Business Mobile: </source>
+        <translation type="unfinished">Mobiltel. (dienstl):</translation>
+    </message>
+    <message>
+        <source>Business Pager: </source>
+        <translation type="unfinished">Pager (dienstl):</translation>
+    </message>
+    <message>
+        <source>Profession: </source>
+        <translation type="unfinished">Beruf:</translation>
+    </message>
+    <message>
+        <source>Assistant: </source>
+        <translation type="unfinished">Assistent:</translation>
+    </message>
+    <message>
+        <source>Manager: </source>
+        <translation type="unfinished">Manager:</translation>
+    </message>
+    <message>
+        <source>Male</source>
+        <translation type="unfinished">Männlich</translation>
+    </message>
+    <message>
+        <source>Female</source>
+        <translation type="unfinished">Weiblich</translation>
+    </message>
+    <message>
+        <source>Gender: </source>
+        <translation type="unfinished">Geschlecht:</translation>
+    </message>
+    <message>
+        <source>Spouse: </source>
+        <translation type="unfinished">Ehegatte:</translation>
+    </message>
+    <message>
+        <source>Birthday: </source>
+        <translation type="unfinished">Geburtstag:</translation>
+    </message>
+    <message>
+        <source>Anniversary: </source>
+        <translation type="unfinished">Jahrestag:</translation>
+    </message>
+    <message>
+        <source>Nickname: </source>
+        <translation type="unfinished">Rufname:</translation>
+    </message>
+    <message>
+        <source>Name Title</source>
+        <translation type="unfinished">Titel</translation>
+    </message>
+    <message>
+        <source>First Name</source>
+        <translation type="unfinished">Vorname</translation>
+    </message>
+    <message>
+        <source>Middle Name</source>
+        <translation type="unfinished">Zweitname</translation>
+    </message>
+    <message>
+        <source>Last Name</source>
+        <translation type="unfinished">Nachname</translation>
+    </message>
+    <message>
+        <source>Suffix</source>
+        <translation type="unfinished">Suffix</translation>
+    </message>
+    <message>
+        <source>File As</source>
+        <translation type="unfinished">Speichern unter</translation>
+    </message>
+    <message>
+        <source>Job Title</source>
+        <translation type="unfinished">Titel</translation>
+    </message>
+    <message>
+        <source>Department</source>
+        <translation type="unfinished">Abteilung</translation>
+    </message>
+    <message>
+        <source>Company</source>
+        <translation type="unfinished">Firma</translation>
+    </message>
+    <message>
+        <source>Business Phone</source>
+        <translation type="unfinished">Telefon (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business Fax</source>
+        <translation type="unfinished">Fax (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business Mobile</source>
+        <translation type="unfinished">Mobiltel. (dienstl)</translation>
+    </message>
+    <message>
+        <source>Default Email</source>
+        <translation type="unfinished">Bevorzugte Email</translation>
+    </message>
+    <message>
+        <source>Emails</source>
+        <translation type="unfinished">E-Mail-Adressen</translation>
+    </message>
+    <message>
+        <source>Home Phone</source>
+        <translation type="unfinished">Telefon (priv)</translation>
+    </message>
+    <message>
+        <source>Home Fax</source>
+        <translation type="unfinished">Fax (priv)</translation>
+    </message>
+    <message>
+        <source>Home Mobile</source>
+        <translation type="unfinished">Mobiltel. (priv)</translation>
+    </message>
+    <message>
+        <source>Business Street</source>
+        <translation type="unfinished">Straße (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business City</source>
+        <translation type="unfinished">Stadt (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business State</source>
+        <translation type="unfinished">Region (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business Zip</source>
+        <translation type="unfinished">PLZ (diesntl)</translation>
+    </message>
+    <message>
+        <source>Business Country</source>
+        <translation type="unfinished">Land (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business Pager</source>
+        <translation type="unfinished">Pager (dienstl)</translation>
+    </message>
+    <message>
+        <source>Business WebPage</source>
+        <translation type="unfinished">Website (dienstl)</translation>
+    </message>
+    <message>
+        <source>Office</source>
+        <translation type="unfinished">Büro</translation>
+    </message>
+    <message>
+        <source>Profession</source>
+        <translation type="unfinished">Beruf</translation>
+    </message>
+    <message>
+        <source>Assistant</source>
+        <translation type="unfinished">Assistent</translation>
+    </message>
+    <message>
+        <source>Manager</source>
+        <translation type="unfinished">Manager</translation>
+    </message>
+    <message>
+        <source>Home Street</source>
+        <translation type="unfinished">Straße (priv)</translation>
+    </message>
+    <message>
+        <source>Home City</source>
+        <translation type="unfinished">Stadt (priv)</translation>
+    </message>
+    <message>
+        <source>Home State</source>
+        <translation type="unfinished">Region (priv)</translation>
+    </message>
+    <message>
+        <source>Home Zip</source>
+        <translation type="unfinished">PLZ (priv)</translation>
+    </message>
+    <message>
+        <source>Home Country</source>
+        <translation type="unfinished">Land (priv)</translation>
+    </message>
+    <message>
+        <source>Home Web Page</source>
+        <translation type="unfinished">Website (priv):</translation>
+    </message>
+    <message>
+        <source>Spouse</source>
+        <translation type="unfinished">Ehegatte</translation>
+    </message>
+    <message>
+        <source>Gender</source>
+        <translation type="unfinished">Geschlecht</translation>
+    </message>
+    <message>
+        <source>Birthday</source>
+        <translation type="unfinished">Geburtstag</translation>
+    </message>
+    <message>
+        <source>Anniversary</source>
+        <translation type="unfinished">Jahrestag</translation>
+    </message>
+    <message>
+        <source>Nickname</source>
+        <translation type="unfinished">Rufname</translation>
+    </message>
+    <message>
+        <source>Children</source>
+        <translation type="unfinished">Kinder</translation>
+    </message>
+    <message>
+        <source>Notes</source>
+        <translation type="unfinished">Notizen</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DateBookDB</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to create start up files
+Please free up some space
+before entering data</source>
+        <translation type="unfinished">Die benötigten Dateien konnten
+nicht angelegt werden.
+Geben Sie Speicherplatz frei,
+bevor Sie Daten eingeben.</translation>
     </message>
 </context>
 <context>
@@ -182,6 +518,10 @@ editing categories.</source>
     </message>
     <message>
         <source>&lt;br&gt;&lt;br&gt;Click and hold for document properties.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Document</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -258,7 +598,7 @@ editing categories.</source>
     <name>QObject</name>
     <message>
         <source>Out of Space</source>
-        <translation>Kein freier Speicher</translation>
+        <translation type="obsolete">Kein freier Speicher</translation>
     </message>
     <message>
         <source>There was a problem creating
@@ -267,7 +607,7 @@ for this program.
 
 Please free up some space and
 try again.</source>
-        <translation>Es war nicht möglich,
+        <translation type="obsolete">Es war nicht möglich,
 Konfigurationsinformationen für
 diese Anwendung zu erstellen.
 
@@ -278,7 +618,7 @@ und versuchen Sie es erneut.</translation>
         <source>Unable to create start up files
 Please free up some space
 before entering data</source>
-        <translation>Die benötigten Dateien konnten
+        <translation type="obsolete">Die benötigten Dateien konnten
 nicht angelegt werden.
 Geben Sie Speicherplatz frei,
 bevor Sie Daten eingeben.</translation>
@@ -286,7 +626,7 @@ bevor Sie Daten eingeben.</translation>
     <message>
         <source>Unable to schedule alarm.
 Free some memory and try again.</source>
-        <translation>Der Alarm konnte nicht eingestellt werden.
+        <translation type="obsolete">Der Alarm konnte nicht eingestellt werden.
 Geben Sie Speicherplatz frei und
 versuchen Sie es erneut.</translation>
     </message>
@@ -300,267 +640,267 @@ versuchen Sie es erneut.</translation>
     </message>
     <message>
         <source>First Name</source>
-        <translation>Vorname</translation>
+        <translation type="obsolete">Vorname</translation>
     </message>
     <message>
         <source>Middle Name</source>
-        <translation>Zweitname</translation>
+        <translation type="obsolete">Zweitname</translation>
     </message>
     <message>
         <source>Last Name</source>
-        <translation>Nachname</translation>
+        <translation type="obsolete">Nachname</translation>
     </message>
     <message>
         <source>Suffix</source>
-        <translation>Suffix</translation>
+        <translation type="obsolete">Suffix</translation>
     </message>
     <message>
         <source>File As</source>
-        <translation>Speichern unter</translation>
+        <translation type="obsolete">Speichern unter</translation>
     </message>
     <message>
         <source>Emails</source>
-        <translation>E-Mail-Adressen</translation>
+        <translation type="obsolete">E-Mail-Adressen</translation>
     </message>
     <message>
         <source>Home Street</source>
-        <translation>Straße (priv)</translation>
+        <translation type="obsolete">Straße (priv)</translation>
     </message>
     <message>
         <source>Home City</source>
-        <translation>Stadt (priv)</translation>
+        <translation type="obsolete">Stadt (priv)</translation>
     </message>
     <message>
         <source>Home State</source>
-        <translation>Region (priv)</translation>
+        <translation type="obsolete">Region (priv)</translation>
     </message>
     <message>
         <source>Home Zip</source>
-        <translation>PLZ (priv)</translation>
+        <translation type="obsolete">PLZ (priv)</translation>
     </message>
     <message>
         <source>Home Country</source>
-        <translation>Land (priv)</translation>
+        <translation type="obsolete">Land (priv)</translation>
     </message>
     <message>
         <source>Home Phone</source>
-        <translation>Telefon (priv)</translation>
+        <translation type="obsolete">Telefon (priv)</translation>
     </message>
     <message>
         <source>Home Fax</source>
-        <translation>Fax (priv)</translation>
+        <translation type="obsolete">Fax (priv)</translation>
     </message>
     <message>
         <source>Home Mobile</source>
-        <translation>Mobiltel. (priv)</translation>
+        <translation type="obsolete">Mobiltel. (priv)</translation>
     </message>
     <message>
         <source>Company</source>
-        <translation>Firma</translation>
+        <translation type="obsolete">Firma</translation>
     </message>
     <message>
         <source>Business Street</source>
-        <translation>Straße (dienstl)</translation>
+        <translation type="obsolete">Straße (dienstl)</translation>
     </message>
     <message>
         <source>Business City</source>
-        <translation>Stadt (dienstl)</translation>
+        <translation type="obsolete">Stadt (dienstl)</translation>
     </message>
     <message>
         <source>Business State</source>
-        <translation>Region (dienstl)</translation>
+        <translation type="obsolete">Region (dienstl)</translation>
     </message>
     <message>
         <source>Business Zip</source>
-        <translation>PLZ (diesntl)</translation>
+        <translation type="obsolete">PLZ (diesntl)</translation>
     </message>
     <message>
         <source>Business Country</source>
-        <translation>Land (dienstl)</translation>
+        <translation type="obsolete">Land (dienstl)</translation>
     </message>
     <message>
         <source>Business WebPage</source>
-        <translation>Website (dienstl)</translation>
+        <translation type="obsolete">Website (dienstl)</translation>
     </message>
     <message>
         <source>Job Title</source>
-        <translation>Titel</translation>
+        <translation type="obsolete">Titel</translation>
     </message>
     <message>
         <source>Department</source>
-        <translation>Abteilung</translation>
+        <translation type="obsolete">Abteilung</translation>
     </message>
     <message>
         <source>Office</source>
-        <translation>Büro</translation>
+        <translation type="obsolete">Büro</translation>
     </message>
     <message>
         <source>Business Phone</source>
-        <translation>Telefon (dienstl)</translation>
+        <translation type="obsolete">Telefon (dienstl)</translation>
     </message>
     <message>
         <source>Business Fax</source>
-        <translation>Fax (dienstl)</translation>
+        <translation type="obsolete">Fax (dienstl)</translation>
     </message>
     <message>
         <source>Business Mobile</source>
-        <translation>Mobiltel. (dienstl)</translation>
+        <translation type="obsolete">Mobiltel. (dienstl)</translation>
     </message>
     <message>
         <source>Business Pager</source>
-        <translation>Pager (dienstl)</translation>
+        <translation type="obsolete">Pager (dienstl)</translation>
     </message>
     <message>
         <source>Profession</source>
-        <translation>Beruf</translation>
+        <translation type="obsolete">Beruf</translation>
     </message>
     <message>
         <source>Assistant</source>
-        <translation>Assistent</translation>
+        <translation type="obsolete">Assistent</translation>
     </message>
     <message>
         <source>Manager</source>
-        <translation>Manager</translation>
+        <translation type="obsolete">Manager</translation>
     </message>
     <message>
         <source>Spouse</source>
-        <translation>Ehegatte</translation>
+        <translation type="obsolete">Ehegatte</translation>
     </message>
     <message>
         <source>Gender</source>
-        <translation>Geschlecht</translation>
+        <translation type="obsolete">Geschlecht</translation>
     </message>
     <message>
         <source>Birthday</source>
-        <translation>Geburtstag</translation>
+        <translation type="obsolete">Geburtstag</translation>
     </message>
     <message>
         <source>Anniversary</source>
-        <translation>Jahrestag</translation>
+        <translation type="obsolete">Jahrestag</translation>
     </message>
     <message>
         <source>Nickname</source>
-        <translation>Rufname</translation>
+        <translation type="obsolete">Rufname</translation>
     </message>
     <message>
         <source>Children</source>
-        <translation>Kinder</translation>
+        <translation type="obsolete">Kinder</translation>
     </message>
     <message>
         <source>Notes</source>
-        <translation>Notizen</translation>
+        <translation type="obsolete">Notizen</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Alle</translation>
+        <translation type="obsolete">Alle</translation>
     </message>
     <message>
         <source>Unfiled</source>
-        <translation>Nicht zugeordnet</translation>
+        <translation type="obsolete">Nicht zugeordnet</translation>
     </message>
     <message>
         <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Adresse (dienstl):&lt;/b&gt;</translation>
+        <translation type="obsolete">&lt;b&gt;Adresse (dienstl):&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Adresse (privat):&lt;/b&gt;</translation>
+        <translation type="obsolete">&lt;b&gt;Adresse (privat):&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Email Addresses: </source>
-        <translation>E-Mail-Adressen:</translation>
+        <translation type="obsolete">E-Mail-Adressen:</translation>
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation>Telefon (priv):</translation>
+        <translation type="obsolete">Telefon (priv):</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation>Fax (priv):</translation>
+        <translation type="obsolete">Fax (priv):</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
-        <translation>Mobiltel. (priv):</translation>
+        <translation type="obsolete">Mobiltel. (priv):</translation>
     </message>
     <message>
         <source>Home Web Page: </source>
-        <translation>Website (priv):</translation>
+        <translation type="obsolete">Website (priv):</translation>
     </message>
     <message>
         <source>Business Web Page: </source>
-        <translation>Website (dienstl):</translation>
+        <translation type="obsolete">Website (dienstl):</translation>
     </message>
     <message>
         <source>Office: </source>
-        <translation>Büro:</translation>
+        <translation type="obsolete">Büro:</translation>
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation>Telefon (dienstl):</translation>
+        <translation type="obsolete">Telefon (dienstl):</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation>Fax (dienstl):</translation>
+        <translation type="obsolete">Fax (dienstl):</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
-        <translation>Mobiltel. (dienstl):</translation>
+        <translation type="obsolete">Mobiltel. (dienstl):</translation>
     </message>
     <message>
         <source>Business Pager: </source>
-        <translation>Pager (dienstl):</translation>
+        <translation type="obsolete">Pager (dienstl):</translation>
     </message>
     <message>
         <source>Profession: </source>
-        <translation>Beruf:</translation>
+        <translation type="obsolete">Beruf:</translation>
     </message>
     <message>
         <source>Assistant: </source>
-        <translation>Assistent:</translation>
+        <translation type="obsolete">Assistent:</translation>
     </message>
     <message>
         <source>Manager: </source>
-        <translation>Manager:</translation>
+        <translation type="obsolete">Manager:</translation>
     </message>
     <message>
         <source>Male</source>
-        <translation>Männlich</translation>
+        <translation type="obsolete">Männlich</translation>
     </message>
     <message>
         <source>Female</source>
-        <translation>Weiblich</translation>
+        <translation type="obsolete">Weiblich</translation>
     </message>
     <message>
         <source>Gender: </source>
-        <translation>Geschlecht:</translation>
+        <translation type="obsolete">Geschlecht:</translation>
     </message>
     <message>
         <source>Spouse: </source>
-        <translation>Ehegatte:</translation>
+        <translation type="obsolete">Ehegatte:</translation>
     </message>
     <message>
         <source>Birthday: </source>
-        <translation>Geburtstag:</translation>
+        <translation type="obsolete">Geburtstag:</translation>
     </message>
     <message>
         <source>Anniversary: </source>
-        <translation>Jahrestag:</translation>
+        <translation type="obsolete">Jahrestag:</translation>
     </message>
     <message>
         <source>Nickname: </source>
-        <translation>Rufname:</translation>
+        <translation type="obsolete">Rufname:</translation>
     </message>
     <message>
         <source>Name Title</source>
-        <translation>Titel</translation>
+        <translation type="obsolete">Titel</translation>
     </message>
     <message>
         <source>Default Email</source>
-        <translation>Bevorzugte Email</translation>
+        <translation type="obsolete">Bevorzugte Email</translation>
     </message>
     <message>
         <source>Home Web Page</source>
-        <translation>Website (priv):</translation>
+        <translation type="obsolete">Website (priv):</translation>
     </message>
     <message>
         <source>Mon</source>
@@ -615,36 +955,8 @@ versuchen Sie es erneut.</translation>
         <translation type="obsolete">Jahr</translation>
     </message>
     <message>
-        <source>New Document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;qt&gt;Are you sure you want to delete: %1?&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Groups</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Restore</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Move</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Maximize</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Close</source>
-        <translation type="unfinished">Schließen</translation>
+        <translation type="obsolete">Schließen</translation>
     </message>
 </context>
 <context>
@@ -685,6 +997,33 @@ versuchen Sie es erneut.</translation>
     </message>
     <message>
         <source>Click to make this window use all available screen area.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished">Schließen</translation>
+    </message>
+</context>
+<context>
+    <name>QPEMessageBox</name>
+    <message>
+        <source>Are you sure you want to delete: %1?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -830,6 +1169,14 @@ versuchen Sie es erneut.</translation>
     </message>
     <message>
         <source>All files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WindowDecoration</name>
+    <message>
+        <source>Default</source>
+        <comment>List box text for default window decoration</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

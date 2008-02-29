@@ -34,6 +34,7 @@ public:
    void createMouse(); 
    bool onTop();
    int rtti() const;
+   bool position(void);
 
 private:
    QCanvasPixmapArray* mouse;

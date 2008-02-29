@@ -41,14 +41,6 @@ void Target::newTarget()
          QTime midnight(0, 0, 0);
          srand(midnight.secsTo(QTime::currentTime()) );
     }
-   do {
-     int x = rand() % (canvas()->width()-10);
-     x = x - (x % 16) + 2;
-     int y = rand() % (canvas()->height()-10);
-     y = y - (y % 16) + 2;
-     move(x, y);
-   } while (onTop());  
-   show();
 }
 
 bool Target::onTop()
@@ -74,4 +66,23 @@ int Target::rtti() const
 
 Target::~Target()
 {
+}
+
+//
+// Try and position the target.
+//
+bool
+Target::position(void)
+{
+   int max_position_tries = 100;
+
+   do {
+     int x = rand() % (canvas()->width()-10);
+     x = x - (x % 16) + 2;
+     int y = rand() % (canvas()->height()-10);
+     y = y - (y % 16) + 2;
+     move(x, y);
+   } while (onTop() && --max_position_tries);
+
+    return max_position_tries > 0;
 }

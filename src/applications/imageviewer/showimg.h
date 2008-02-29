@@ -117,6 +117,7 @@ private:
     void updateStatus();
     void openFile( const QString &name, const QString &file );
     int  imageIndex(void);
+    void setControls(bool force = FALSE, bool valid = TRUE);
 
 signals:
     void keypress(int keycode);
@@ -171,11 +172,19 @@ private:
     bool isFullScreen;
     bool bFromDocView;	    // a flag to indicate whether or not we were
 			    // launched from the document view...
+
+    QPopupMenu *edit;
     QAction *openAction;
     QAction *propAction;
     QAction *slideAction;
     QAction *prevImageAction;
     QAction *nextImageAction;
+    QAction *rotateAction;
+    QAction *flipAction;
+    QAction *fullscreenAction;
+    int	    hflip_id;
+    int	    vflip_id;
+
     QValueList<DocLnk> imageList;
     int slideDelay;
     bool slideRepeat;

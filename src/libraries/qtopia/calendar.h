@@ -47,25 +47,25 @@ public:
     static QString nameOfDay( int d );
 
     // New functions
-    static QValueList<QDate> datesOfMonth( int year, int month, bool startWithMonday = FALSE );
+    static QValueList<QDate> datesOfMonth( int year, int month, bool startWithMonday = FALSE ); // libqtopia
 
     static QDate dateAtIndex( int year, int month, int index, 
-	    bool startWithMonday = FALSE);
+	    bool startWithMonday = FALSE); // libqtopia
 
     static QDate dateAtCoord( int year, int month, int row, int col,
-	    bool startWithMonday = FALSE);
+	    bool startWithMonday = FALSE); // libqtopia
 
     static void coordForDate( int year, int month, const QDate &date, 
 	    int &row, int &col,
-	    bool startWithMonday = FALSE);
+	    bool startWithMonday = FALSE); // libqtopia
 
     static int indexForDate( int year, int month, const QDate &date,
-	    bool startWithMonday = FALSE);
+	    bool startWithMonday = FALSE); // libqtopia
 
-    static int weekInMonth(const QDate &d);
+    static int weekInMonth(const QDate &d); // libqtopia
 
-    static QDate addMonths(int nmonths, const QDate &orig);
-    static QDate addYears(int nyears, const QDate &orig);
+    static QDate addMonths(int nmonths, const QDate &orig); // libqtopia
+    static QDate addYears(int nyears, const QDate &orig); // libqtopia
 };
 
 #endif

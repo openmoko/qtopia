@@ -43,21 +43,22 @@
 
 
 class ID3TagEditWidget : public QWidget {
-    public:
-	ID3TagEditWidget( QWidget *parent, const DocLnk& lnk );
-	void writeTagData();
-    private:
-	bool tagDataChanged();
-	void readInputFields();
-	const DocLnk& fileInfo;
-	ID3Tag inputTag;
-	ID3Tag outputTag;
-	QLineEdit *id3Title;
-	QLineEdit *id3Artist;
-	QSpinBox *id3Year;
-	QLineEdit *id3Album;
-	QSpinBox *id3Track;
-	QLineEdit *id3Comment;
+    Q_OBJECT
+public:
+    ID3TagEditWidget( QWidget *parent, const DocLnk& lnk );
+    void writeTagData();
+private:
+    bool tagDataChanged();
+    void readInputFields();
+    const DocLnk& fileInfo;
+    ID3Tag inputTag;
+    ID3Tag outputTag;
+    QLineEdit *id3Title;
+    QLineEdit *id3Artist;
+    QSpinBox *id3Year;
+    QLineEdit *id3Album;
+    QSpinBox *id3Track;
+    QLineEdit *id3Comment;
 };
 
 

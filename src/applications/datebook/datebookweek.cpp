@@ -517,6 +517,8 @@ WeekView::WeekView( DateBookTable *newDB, bool startOnMonday,
              lblDesc, SLOT( hide() ) );
     connect( header->spinYear, SIGNAL(valueChanged(int)),
 	     this, SLOT(setYear(int)) );
+    connect( qApp, SIGNAL( weekChanged(bool) ),
+             this, SLOT( setStartsOnMonday(bool) ) );
     selectDate(QDate::currentDate());
 
 }
@@ -748,11 +750,11 @@ void WeekView::showEventsLabel( QValueList<Occurrence> &events )
 		str += TimeString::longDateString( ev.event().end().date() );
 		str += "<br>";
 	    }
-	    str += "<b>" + QObject::tr("All day") + "</b>";
+	    str += "<b>" + tr("All day") + "</b>";
 	} else {
 	*/
 	if (ev.start().date() != ev.end().date() || !ev.event().isAllDay()) {
-	    str += "<b>" + QObject::tr("Start") + "</b>: ";
+	    str += "<b>" + tr("Start") + "</b>: ";
 
 	    if (ev.start().date() != ev.end().date()) {
 		// multi-day event.  Show start date
@@ -763,7 +765,7 @@ void WeekView::showEventsLabel( QValueList<Occurrence> &events )
 	    if (! ev.event().isAllDay())
 		str += TimeString::localHM(ev.start().time());
 
-	    str += "<br><b>" + QObject::tr("End") + "</b>: ";
+	    str += "<br><b>" + tr("End") + "</b>: ";
 	    if (ev.start().date() != ev.end().date()) {
 		str += TimeString::localYMD( ev.end().date(), TimeString::Long );
 		str += ", ";
@@ -774,7 +776,7 @@ void WeekView::showEventsLabel( QValueList<Occurrence> &events )
 	}
 
 	if (ev.event().isAllDay())
-	    str += "<b>" + QObject::tr("All day") + "</b><br>";
+	    str += "<b>" + tr("All day") + "</b><br>";
 	str += "<br>" + strNote;
     }
 

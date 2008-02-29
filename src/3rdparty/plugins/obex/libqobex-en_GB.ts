@@ -19,19 +19,6 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
-    <message>
-        <source>You received an event for:
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You received a todo item:
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ReceiveDialog</name>
     <message>
         <source>unknown</source>
@@ -43,6 +30,16 @@
     </message>
     <message>
         <source>Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You received an event for:
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You received a todo item:
+</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

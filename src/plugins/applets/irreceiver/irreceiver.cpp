@@ -22,11 +22,15 @@
 
 #include <qtopia/resource.h>
 #include <qtopia/qcopenvelope_qws.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qfile.h>
+#include <qdir.h>
 #include <qpopupmenu.h>
 
-const char* servicefile = "/var/lock/subsys/irda";
+static const char* servicefile = "/var/lock/subsys/irda";
+static const int protobase=100;
 
 
 //===========================================================================
@@ -35,12 +39,46 @@ IRReceiverApplet::IRReceiverApplet( QWidget *parent, const char *name )
     : QWidget( parent, name )
 {
     QPopupMenu* menu = new QPopupMenu;
-    it[0] = menu->insertItem(tr("Off"));
-    it[1] = menu->insertItem(tr("On"));
+    it[0] = menu->insertItem(tr("Receiver off"));
+    it[1] = menu->insertItem(tr("Receiver on"));
     it[2] = menu->insertItem(tr("On for 5 minutes"));
     it[3] = menu->insertItem(tr("On for 1 item"));
+
+    // Load protocols
+    QString tdir = QPEApplication::qpeDir()+"/etc/beam/targets";
+    QDir dir(tdir,"*.conf");
+    protocount=0;
+    Config cfgout("Beam");
+    cfgout.setGroup("Send");
+    QString curdev=cfgout.readEntry("Device");
+    for (int i=0; i<(int)dir.count(); i++) {
+	QString t=tdir+"/"+dir[i];
+	Config cfg(t,Config::File);
+	if ( cfg.isValid() ) {
+	    cfg.setGroup("Device");
+	    QString n = cfg.readEntry("Name");
+	    QString ic = cfg.readEntry("Icon");
+	    if ( !protocount ) {
+		menu->insertSeparator();
+		if ( curdev.isEmpty() )
+		    curdev=t;
+	    }
+	    QIconSet icon;
+	    if ( !ic.isEmpty() )
+		icon = Resource::loadIconSet(ic);
+	    if ( icon.pixmap().isNull() )
+		menu->insertItem(n,protobase+protocount);
+	    else
+		menu->insertItem(icon,n,protobase+protocount);
+	    if ( t==curdev )
+		menu->setItemChecked(protobase+protocount,TRUE);
+	    protocount++;
+	    targets.append(t);
+	}
+    }
+    
     acc = new Accessory(Resource::loadIconSet("irreceive"),
-	    tr("IR Receiver"), menu, this);
+	    tr("Beaming"), menu, this);
     connect(acc, SIGNAL(activated(int)), this, SLOT(activate(int)));
     setFixedWidth( 0 );
     
@@ -76,29 +114,46 @@ void IRReceiverApplet::obexMessage(const QCString& msg, const QByteArray&)
 
 void IRReceiverApplet::activate(int choice)
 {
-    for (int i=0; i<4; i++) {
-	bool y = choice==it[i];
-	acc->popup()->setItemChecked(it[i],y);
-	if ( y ) {
-	    state = (State)i;
-	    switch ((State)i) {
+    QPopupMenu* menu = acc->popup();
+    if ( choice >= protobase ) {
+	// read target config
+	QString dev = targets[choice-protobase];
+	Config cfgin(dev,Config::File);
+	if ( cfgin.isValid() ) {
+	    // write Beam config
+	    Config cfgout("Beam");
+	    cfgout.setGroup("Send");
+	    cfgout.writeEntry("DeviceConfig",dev);
+	} else {
+	    choice = -1;
+	}
+	for (int i=protobase; i-protobase<protocount; i++)
+	    menu->setItemChecked(i,i==choice);
+    } else {
+	for (int i=0; i<4; i++) {
+	    bool y = choice==it[i];
+	    menu->setItemChecked(it[i],y);
+	    if ( y ) {
+		state = (State)i;
+		switch ((State)i) {
 
-		case Off:
-		    QCopEnvelope("QPE/Obex", "turnOff()");
-		    break;
-		case On:
-		    QCopEnvelope("QPE/Obex", "turnOn()");
-		    break;
-		case On5Mins:
-		    {
-			int t = 5;  // 5 minutes
-			QCopEnvelope("QPE/Obex", "turnOnTimed(int)")
-			    << t;
+		    case Off:
+			QCopEnvelope("QPE/Obex", "turnOff()");
 			break;
-		    }
-		case On1Item:
-		    QCopEnvelope("QPE/Obex", "turnOn1Item()");
-		    break;
+		    case On:
+			QCopEnvelope("QPE/Obex", "turnOn()");
+			break;
+		    case On5Mins:
+			{
+			    int t = 5;  // 5 minutes
+			    QCopEnvelope("QPE/Obex", "turnOnTimed(int)")
+				<< t;
+			    break;
+			}
+		    case On1Item:
+			QCopEnvelope("QPE/Obex", "turnOn1Item()");
+			break;
+		}
 	    }
 	}
     }

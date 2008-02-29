@@ -122,6 +122,8 @@ void QLibraryPrivate::killTimer()
   \brief The QLibrary class provides a wrapper for handling shared libraries.
 
   This class is temporarily copied from Qt 3.0.
+
+  \ingroup qtopiaemb
 */
 
 /*!

@@ -45,6 +45,7 @@ private:
     QString settingsDir() const;
     QStringList filelist;
     NetworkSettingInterface* loadPlugin(const QString& type);
+    QString emptyString,notEmptyString;
 };
 
 #endif // NETWORKSETTINGS_H

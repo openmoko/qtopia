@@ -87,7 +87,7 @@ public:
     QMap<QFrame *,int> frameStyles;
 };
 
-FlatStyle::FlatStyle() : revItem(FALSE)
+FlatStyle::FlatStyle() : revItem(FALSE), fillBtnBorder(FALSE)
 {
     setButtonMargin(3);
     setScrollBarExtent(13,13);
@@ -169,7 +169,7 @@ void FlatStyle::unPolish( QWidget *w )
 
 int FlatStyle::defaultFrameWidth() const
 {
-    return 1;
+    return 2;
 }
 
 void FlatStyle::drawItem( QPainter *p, int x, int y, int w, int h,
@@ -202,15 +202,29 @@ void FlatStyle::drawButton( QPainter *p, int x, int y, int w, int h,
 {
     QPen oldPen = p->pen();
 
-    if ( h >= 10 ) {
-	x++; y++;
-	w -= 2; h -= 2;
-    }
-
-    p->fillRect( x+1, y+1, w-2, h-2, fill?(*fill):cg.brush(QColorGroup::Button) );
-
     int x2 = x+w-1;
     int y2 = y+h-1;
+
+    if ( fillBtnBorder && btnBg != cg.color(QColorGroup::Button) ) {
+	p->setPen( btnBg );
+	p->drawLine( x, y, x2, y );
+	p->drawLine( x, y2, x2, y2 );
+	p->drawLine( x, y+1, x, y2-1 );
+	p->drawLine( x2, y+1, x2, y2-1 );
+	p->fillRect( x+1, y+1, 3, 3, btnBg );
+	p->fillRect( x+1, y2-3, 3, 3, btnBg );
+	p->fillRect( x2-3, y2-3, 3, 3, btnBg );
+	p->fillRect( x2-3, y+1, 3, 3, btnBg );
+	p->fillRect( x+2, y+2, w-4, h-4, fill?(*fill):cg.brush(QColorGroup::Button) );
+    } else {
+	p->fillRect( x+1, y+1, w-2, h-2, fill?(*fill):cg.brush(QColorGroup::Button) );
+    }
+
+    if ( h >= 10 ) {
+	x++; y++;
+	x2--; y2--;
+	w -= 2; h -= 2;
+    }
 
     p->setPen( cg.foreground() );
 
@@ -256,12 +270,23 @@ void FlatStyle::drawBevelButton( QPainter *p, int x, int y, int w, int h,
 void FlatStyle::drawToolButton( QPainter *p, int x, int y, int w, int h,
                                 const QColorGroup &g, bool sunken, const QBrush* fill )
 {
+    if ( p->device()->devType() == QInternal::Widget ) {
+	QWidget *w = (QWidget *)p->device();
+	if ( w->isA("QToolButton") ) {
+	    QToolButton *btn = (QToolButton *)w;
+	    if ( btn->parentWidget() ) {
+		btnBg = btn->parentWidget()->backgroundColor();
+		fillBtnBorder = TRUE;
+	    }
+	}
+    }
     QBrush fb( fill ? *fill : g.button() );
     if ( sunken && fb == g.brush( QColorGroup::Button ) ) {
 	fb = g.buttonText();
 	revItem = TRUE;	// ugh
     }
     drawButton( p, x, y, w, h, g, sunken, &fb );
+    fillBtnBorder = FALSE;
 }
 
 void FlatStyle::drawPushButton( QPushButton *btn, QPainter *p )
@@ -287,6 +312,11 @@ void FlatStyle::drawPushButton( QPushButton *btn, QPainter *p )
 	y2 -= diw;
     }
     */
+
+    if ( btn->parentWidget() ) {
+	btnBg = btn->parentWidget()->backgroundColor();
+	fillBtnBorder = TRUE;
+    }
 
     bool clearButton = TRUE;
     if ( btn->isDown() ) {
@@ -314,6 +344,7 @@ void FlatStyle::drawPushButton( QPushButton *btn, QPainter *p )
     }
     */
 
+    fillBtnBorder = FALSE;
     if ( p->brush().style() != NoBrush )
 	p->setBrush( NoBrush );
 }
@@ -1046,7 +1077,7 @@ QStyle *FlatStyleImpl::style()
 
 QString FlatStyleImpl::name() const
 {
-    return QString("Flat");
+    return qApp->translate("FlatStyle", "Flat", "Name of the style Flat");
 }
 
 QRESULT FlatStyleImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )

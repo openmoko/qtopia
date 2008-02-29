@@ -35,7 +35,7 @@ public:
     int pluginNumFormats() const;
     QString pluginFormatName( int format ) const;
     QString pluginFormatTag( int format ) const;
-    QString pluginComment() const { return "This plugin is used to record wav files"; }
+    QString pluginComment() const { return qApp->translate("WavRecorder", "This plugin is used to record wav files"); }
     double pluginVersion() const { return 1.0; }
     QString pluginMimeType() const { return "audio/x-wav"; }
 

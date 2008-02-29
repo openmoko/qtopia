@@ -51,7 +51,7 @@ public:
 	    QArray<int> vl( 0 );
 	    QHBox *hbox = new QHBox( tab );
 	    locMenu = new QComboBox( hbox );
-	    locMenu->insertStringList( si.fileSystemStrings() );
+	    locMenu->insertStringList( si.fileSystemNames() );
 	    locMenu->insertItem( qApp->translate( "PlayListSelection", "All Locations" ) );
 	    locMenu->setCurrentItem( locMenu->count() - 1 );
 	    tabList->setLocationFilter( locMenu );

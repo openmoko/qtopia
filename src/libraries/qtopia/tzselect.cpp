@@ -33,14 +33,42 @@
 #include <qcopchannel_qws.h>
 #endif
 
+/*!
+  \class TimeZoneSelector
+
+  \brief The TimeZoneSelector widget allows users to configure their time zone information.
+
+  \ingroup qtopiaemb
+*/
+
 QIconSet qtopia_internal_loadIconSet( const QString &pix );
 
-class TimeZoneSelectorPrivate 
+class TimeZoneSelectorPrivate : public QObject
 {
+#ifdef QTOPIA_DESKTOP
+Q_OBJECT
+#endif
 public:
-    TimeZoneSelectorPrivate() : includeLocal(FALSE) {}
+    TimeZoneSelectorPrivate() : QObject(0), includeLocal(FALSE) {}
     bool includeLocal;
+
+#ifdef QTOPIA_DESKTOP
+    void doEmitConfigureTimeZones();
+    TZCombo *cmbTz;
+signals:
+    void configureTimeZones();
+
+public slots:
+    void applyZoneSelection();
+#endif
+
 };
+
+#ifdef QTOPIA_DESKTOP
+void TimeZoneSelectorPrivate::doEmitConfigureTimeZones() {
+    emit configureTimeZones();
+}
+#endif
 
 TZCombo::TZCombo( QWidget *p, const char* n )
     : QComboBox( p, n )
@@ -108,12 +136,11 @@ void TZCombo::updateZones()
 	}
     }
     int cfgIndex = 0;
-    bool configEmpty = TRUE;
     while (1) {
 	QString zn = cfg.readEntry("Zone"+QString::number(cfgIndex), QString::null);
-	if ( zn.isNull() )
+	if ( zn.isNull() ){
 	    break;
-	configEmpty = FALSE;
+	}
 	if ( zn == tz )
 	    tzFound = TRUE;
 	QString nm = cfg.readEntry("ZoneName"+QString::number(cfgIndex));
@@ -123,20 +150,6 @@ void TZCombo::updateZones()
 	    curix = listIndex;
 	++cfgIndex;
 	++listIndex;
-    }
-    if ( configEmpty ) {
-        QStringList list = timezoneDefaults();
-        for ( QStringList::Iterator it = list.begin(); it!=list.end(); ++it ) {
-	    QString zn = *it;
-	    QString nm = *++it;
-	    if ( zn == tz )
-		tzFound = TRUE;
-	    if ( nm == cur )
-		curix = listIndex;
-            identifiers.append(zn);
-            insertItem(nm);
-	    ++listIndex;
-        }
     }
     for (QStringList::Iterator it=extras.begin(); it!=extras.end(); ++it) {
 	insertItem(*it);
@@ -200,17 +213,28 @@ void TZCombo::handleSystemChannel(const QCString&msg, const QByteArray&)
     }
 }
 
+/*!
+    Creates a new TimeZoneSelector with parent \a p and name \a n.  The combobox will be
+    populated with the available timezones.
+*/
 
 TimeZoneSelector::TimeZoneSelector(QWidget* p, const char* n) :
     QHBox(p,n)
 {
     d = new TimeZoneSelectorPrivate();
+
     // build the combobox before we do any updates...
     cmbTz = new TZCombo( this, "timezone combo" );
 
     cmdTz = new QToolButton( this, "timezone button" ); // No tr
     cmdTz->setIconSet( qtopia_internal_loadIconSet( "citytime_icon" ) );
     cmdTz->setMaximumSize( cmdTz->sizeHint() );
+#ifdef QTOPIA_DESKTOP
+    d->cmbTz = cmbTz;
+#endif
+
+    cmdTz->setFocusPolicy(QWidget::TabFocus);
+    setTabOrder(cmbTz, cmdTz);
 
     // set up a connection to catch a newly selected item and throw our
     // signal
@@ -219,6 +243,10 @@ TimeZoneSelector::TimeZoneSelector(QWidget* p, const char* n) :
     QObject::connect( cmdTz, SIGNAL( clicked() ),
                       this, SLOT( slotExecute() ) );
 }
+
+/*!
+  Destroys a TimeZoneSelector.
+*/
 
 TimeZoneSelector::~TimeZoneSelector()
 {
@@ -236,21 +264,38 @@ bool TimeZoneSelector::localIncluded() const
     return d->includeLocal;
 }
 
+/*!
+  Returns the currently selected timezone as a string in location format, e.g.
+  \code Australia/Brisbane \endcode
+*/
 
 QString TimeZoneSelector::currentZone() const
 {
     return cmbTz->currZone();
 }
 
+/*!
+  Sets the current timezone to \a id.
+*/
+
 void TimeZoneSelector::setCurrentZone( const QString& id )
 {
     cmbTz->setCurrZone( id );
 }
 
+/*! \fn void TimeZoneSelector::signalNewTz( const QString& id )
+  This signal is emitted when a timezone has been selected by the user. The id
+  is a \l QString in location format, eg \code Australia/Brisbane \endcode
+*/
+
 void TimeZoneSelector::slotTzActive( int )
 {
     emit signalNewTz( cmbTz->currZone() );
 }
+
+/*!
+  \internal
+*/
 
 void TimeZoneSelector::slotExecute( void )
 {
@@ -258,16 +303,26 @@ void TimeZoneSelector::slotExecute( void )
     // execute the city time application...
     Global::execute( "worldtime" );
 #else
-#ifdef __GNUG__
-#warning "Need to be able to select timezone on desktop"
+#ifdef QTOPIA_DESKTOP
+    d->doEmitConfigureTimeZones();
 #endif
 #endif
 }
 
+#ifdef QTOPIA_DESKTOP
+// Called when WorldTime has rewritten its configuration
+void TimeZoneSelectorPrivate::applyZoneSelection()
+{
+   cmbTz->updateZones();
+}
+#endif
+
+// This should never be called as these string are not translated
 QStringList timezoneDefaults( void )
 {
     QStringList tzs;
     // load up the list just like the file format (citytime.cpp)
+    // BEGIN no tr
     tzs.append( "America/New_York" );
     tzs.append( "New York" );
     tzs.append( "America/Los_Angeles" );
@@ -280,7 +335,10 @@ QStringList timezoneDefaults( void )
     tzs.append( "Tokyo" );
     tzs.append( "Asia/Hong_Kong" );
     tzs.append( "Hong Kong" );
+    // END no tr
     return tzs;
 }
 
-
+#ifdef QTOPIA_DESKTOP
+#include "tzselect.moc"
+#endif

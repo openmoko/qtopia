@@ -115,6 +115,10 @@
         <source>Occupation or job description.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AbSettings</name>
@@ -134,31 +138,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>H</source>
-        <comment>Home phone</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>B</source>
-        <comment>Business phone</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>HM</source>
-        <comment>Home mobile</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BM</source>
-        <comment>Business mobile</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Male</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Female</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>H: </source>
+        <comment>Short title for Home phone</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>B: </source>
+        <comment>Short title for Business phone</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HM: </source>
+        <comment>Short title for Home mobile</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BM: </source>
+        <comment>Short title for Business mobile</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -230,18 +234,6 @@
     </message>
     <message>
         <source>List of contacts in the selected category.  Click to view detailed information.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Email</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Business Phone</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Home Phone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -369,15 +361,19 @@ VCards already in your addressbook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>View list of Contacts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Contact details.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

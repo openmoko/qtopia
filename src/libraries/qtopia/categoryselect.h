@@ -105,7 +105,7 @@ public:
     void setFixedWidth(int width);
 signals:
     void signalSelected( int );
-    void editCategoriesClicked();
+    void editCategoriesClicked(); // added in qtopia 1.6
 
 private slots:
     void slotDialog();
@@ -115,7 +115,11 @@ public slots:
     void slotNewCat( int id );
 
 private:
-    void init(int width=0, bool usingAll=FALSE );
+#ifdef QTOPIA_DESKTOP
+    void init(int width, bool usingAll = FALSE );
+#else
+    void init(int width);
+#endif
     QString mStrAppName;
     CategoryCombo *cmbCat;
     QToolButton *cmdCat;

@@ -20,7 +20,19 @@
 
 #include <qtopia/categoryselect.h>
 
+/*!
+  \overload
 
+  This constructor accepts an array \a vlCats of integers representing
+  Categories. \a appName is the application Categories name to filter on.
+  \a visibleName is the string used when the name of this
+  widget is required to be displayed. \a allCategories sets whether
+  the selector offers "All" and "Unfiled" as options. If set to FALSE,
+  then the CategorySelect allows the user to select multiple categories. If
+  set to TRUE, the CategorySelect allows for only a single category selection.
+  \a width is an integer used as the fixed width of the widget.
+
+*/
 CategorySelect::CategorySelect( const QArray<int> &vlCats, const QString &appName,
 				 const QString &visibleName, bool add, QWidget *parent,
 				const char *name , int width) :
@@ -29,10 +41,19 @@ CategorySelect::CategorySelect( const QArray<int> &vlCats, const QString &appNam
     cmdCat( 0 ),
     d( 0 )
 {
+#ifdef QTOPIA_DESKTOP
     // d will get set in the init
     init(width, add);
+#else
+    init(width);
+    setAllCategories(add);
+#endif
     setCategories( vlCats, appName, visibleName );
 }
+
+/*!
+  Returns the type of widget as a CategorySelect::SelectorWidget.
+*/
 
 CategorySelect::SelectorWidget CategorySelect::widgetType() const
 {
@@ -41,6 +62,9 @@ CategorySelect::SelectorWidget CategorySelect::widgetType() const
     return ListView;
 }
 
+/*!
+  Returns TRUE if the current category contains any categories in \a cats.
+*/
 bool CategorySelect::containsCategory( const QArray<int>& cats )
 {
     if ( cmdCat && cmdCat->isEnabled() ) {

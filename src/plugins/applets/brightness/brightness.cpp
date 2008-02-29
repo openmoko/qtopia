@@ -96,7 +96,7 @@ extern int qpe_sysBrightnessSteps();
 //
 //
 BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
-    WFlags) : QFrame(parent, name, WStyle_StaysOnTop | WType_Popup)
+    WFlags f) : QFrame(parent, name, WStyle_StaysOnTop | WType_Popup | f)
 {
     setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
 
@@ -148,7 +148,6 @@ BrightnessApplet::BrightnessApplet(QWidget *parent, const char *name)
 //
 BrightnessApplet::~BrightnessApplet()
 {
-    delete bc;
     delete brightnessPixmap;
 }
 

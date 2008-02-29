@@ -84,9 +84,9 @@ public:
     void setProperty(const QString& key, const QString& value);
     QString property(const QString& key) const;
 
-    bool setLocation( const QString& docPath );
+    bool setLocation( const QString& docPath ); // libqtopia
 
-    bool isDocLnk() const;
+    bool isDocLnk() const; // libqtopia
     
 #ifdef QTOPIA_INTERNAL_PRELOADACCESS
 // MOC_SKIP_BEGIN
@@ -95,7 +95,7 @@ public:
 // MOC_SKIP_END
 #endif
 
-    AppLnk &operator=(const AppLnk &other);
+    AppLnk &operator=(const AppLnk &other); // libqtopia
 
 protected:
     QString mName;
@@ -136,7 +136,7 @@ public:
     virtual ~DocLnk();
 
 
-    DocLnk &operator=(const DocLnk &other);
+    DocLnk &operator=(const DocLnk &other); // libqtopia
 
     QString exec() const;
 
@@ -167,17 +167,7 @@ public:
 
     void add(AppLnk*);
     bool remove(AppLnk*);
-    void clear() {
-	QListIterator<AppLnk> it( mApps );
-	for ( ; it.current(); ) {
-	    AppLnk* a = *it;
-	    ++it;
-	    a->mId = 0;
-	    delete a;
-	}
-	mApps.clear();
-	typs.clear();
-    }
+    void clear(); // libqtopia
 
     const QList<AppLnk> &children() const { return mApps; }
     void detachChildren();

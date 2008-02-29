@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>260</width>
-            <height>171</height>
+            <width>226</width>
+            <height>256</height>
         </rect>
     </property>
     <property stdset="1">
@@ -165,17 +165,6 @@
                         <string>Start Search at:</string>
                     </property>
                 </widget>
-                <widget row="3"  column="0"  rowspan="1"  colspan="3" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>chkBackwards</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Search Backwards</string>
-                    </property>
-                </widget>
                 <widget row="0"  column="0" >
                     <class>QLabel</class>
                     <property stdset="1">
@@ -210,7 +199,7 @@
             <width>-1</width>
             <height>-1</height>
         </sizehint>
-        <container>0</container>
+        <container>1</container>
         <sizepolicy>
             <hordata>7</hordata>
             <verdata>1</verdata>

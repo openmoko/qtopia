@@ -36,7 +36,7 @@ public:
 #endif
 
     QWidget * create(QWidget *);
-    const char * pluginName() { return "Fraction"; };
+    const char * pluginName();
 
 private:
     ulong ref;

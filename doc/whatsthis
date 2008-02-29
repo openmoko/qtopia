@@ -1,0 +1,85 @@
+A message box that provides yes, no and cancel options. | QPEMessageBox
+Abstract base class for Qtopia MediaPlayer decoder plugins. | MediaPlayerDecoder
+Abstract base class for Qtopia MediaRecorder encoder plugins. | MediaRecorderEncoder
+Access to named resources. | Resource
+Aids in filtering records or files by Category. | CategoryMenu
+Allows a date to be selected from a calendar view. | QPEDatePicker
+Allows alarms to be scheduled and unscheduled. | AlarmServer
+Allows applet plugins to add themselves to the Q menu. | Accessory
+Allows applications to provide services for other applications to use. | Service
+Allows applications to request services from other applications. | ServiceRequest
+Allows for pluggable image formats. | ImageCodecInterface
+Allows plugin network services. | NetworkInterface
+Allows the user to examine attributes associated with a AppLnk object. | DocPropertiesDialog
+Allows the user to select DocLnk objects. | FileSelector
+Allows users to configure their time zone information. | TimeZoneSelector
+Allows users to select Categories with a combobox interface. | CategorySelect
+Application-wide global functions. | Global
+Assists with AppLnk input/output. | FileManager
+Compact widget for selecting a date. | QPEDateEdit
+Compact widget for selecting a date and time. | QPEDateTimeEdit
+Compact widget for selecting a time. | QPETimeEdit
+Controls for modifying an AppLnks properties. | DocPropertiesWidget
+Conversion to and from EUC-JP character sets. | QEucJpCodec
+Conversion to and from JIS character sets. | QJisCodec
+Conversion to and from Shift-JIS. | QSjisCodec
+Database that groups categories and maps ids to names. | Categories
+Defines a Universally Unique Identifier (UUID). | QUuid
+Defines the interface for text codec plugins. | TextCodecInterface
+Describes a single mount point. | FileSystem
+Describes the disks mounted on the file system. | StorageInfo
+Displays a list of available storage locations. | LocationCombo
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. | atd
+Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. | FFMpeg
+Dummy class. The gsm code was extracted from verison 12.17.3 of the Sox sound tools. The author of Sox is Chris Bagwell &lt;cbagwell at users.sourceforge.net&gt;. Sox is distributed under the terms of the GNU General Public License. | GSM
+Encapsulates and sends QCop messages over QCopChannels. | QCopEnvelope
+Extended interface for Qtopia input methods. | ExtInputMethodInterface
+Extension to the MediaPlayerDecoder class for Qtopia MediaPlayer decoder plugins. | MediaPlayerDecoder_1_6
+For saving application configuration state. | Config
+Group of categories. | CategoryGroup
+Holds the data of a calendar event. | PimEvent
+Holds the data of a todo entry. | PimTask
+Holds the data of an address book entry. | PimContact
+Implementation of a Directed Acyclic Word Graph. | QDawg
+Implementation support for QJisCodec, QSjisCodec, and QEucJpCodec. | QJpUnicodeConv
+Implements basic support for sending objects over an infrared communication link. | Ir
+Implements the Konsole application. | Konsole
+Implements the default Qtopia widget style. | QPEStyle
+Implements various system services that are available to all Qtopia applications. | QPEApplication
+Information about available fonts. | FontDatabase
+Interface for Qtopia input methods. | InputMethodInterface
+Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
+Interface for Qtopia widget styles. | StyleInterface
+Interface for Qtopia window decoration styles. | WindowDecorationInterface
+Interface for adding font renderers to Qtopia. | FontFactoryInterface
+Interface for the Qtopia Today application. | TodayPluginInterface
+Interface to OpenOBEX. | QObex
+Interface to librsync. | QRsync
+Iterators of AddressBookAccess. | AddressBookIterator
+Iterators of DateBookAccess. | DateBookIterator
+Iterators of TodoAccess. | TodoIterator
+MIME type information. | MimeType
+Manages device button mappings. | DeviceButtonManager
+Method of obtaining a multimedia encoder. | MediaRecorderPluginInterface
+Plays WAVE sound files and can invoke the audible alarm. | Sound
+Programmers with an easy to calculate and get information about dates, months and years. | Calendar
+Pushbutton with a menu. | MenuButton
+Represents a physical user mappable button on a Qtopia device. | DeviceButton
+Represents an application available on the system. | AppLnk
+Represents loaded document references. | DocLnk
+Safe API for accessing PimEvents. | DateBookAccess
+Safe API for accessing PimTasks. | TodoAccess
+Safe API for accessing address book data. | AddressBookAccess
+Set of AppLnk objects. | AppLnkSet
+Set of DocLnk objects. | DocLnkSet
+Simplifies plugin loading and allows plugins to be enabled/disabled. | PluginLoader
+Single element in an XML structure defined by XmlHandler. | Node
+The base class for PIM data recorded in the Qtopia database. | PimRecord
+Used to access MediaPlayerDecoder objects. | MediaPlayerPluginInterface
+Used to start external programs and to communicate with them. | QProcess
+VNC client. | KVNC
+Widget to monitor CF cards. | CardMonitor
+Wrapper for handling shared libraries. | QLibrary
+Wrapper for the libflash library. | LibFlashPlugin
+Wrapper for the libmad library. | LibMadPlugin
+XML document structure holder. | XmlHandler

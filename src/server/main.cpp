@@ -27,6 +27,7 @@
 #include <qtopia/qpeapplication.h>
 #include <qtopia/network.h>
 #include <qtopia/config.h>
+#include <qtopia/timezone.h>
 #include <qtopia/custom.h>
 #include <qtopia/global.h>
 
@@ -177,47 +178,101 @@ static void cleanup()
     }
 }
 
+static void refreshTimeZoneConfig()
+{
+   // We need to help WorldTime in setting up its configuration for
+   //   the current translation
+    // BEGIN no tr
+    const char *defaultTz[] = {
+	"America/New_York",
+	"America/Los_Angeles",
+	"Europe/Oslo",
+	"Asia/Tokyo",
+	"Asia/Hong_Kong",
+	"Australia/Brisbane",
+	0
+    };
+    // END no tr
+
+    TimeZone curZone;
+    QString zoneID;
+    int zoneIndex;
+    Config cfg = Config( "WorldTime" );
+    cfg.setGroup( "TimeZones" );
+    if (!cfg.hasKey( "Zone0" )){
+	// We have no existing timezones use the defaults which are untranslated strings
+	QString currTz = TimeZone::current().id();
+	QStringList zoneDefaults;
+	zoneDefaults.append( currTz );
+	for ( int i = 0; defaultTz[i] && zoneDefaults.count() < 6; i++ ) {
+	    if ( defaultTz[i] != currTz )
+		zoneDefaults.append( defaultTz[i] );
+	}
+	zoneIndex = 0;
+	for (QStringList::Iterator it = zoneDefaults.begin(); it != zoneDefaults.end() ; ++it){
+	    cfg.writeEntry( "Zone" + QString::number( zoneIndex ) , *it);
+	    zoneIndex++;
+	} 
+    }
+    // We have an existing list of timezones refresh the 
+    //  translations of TimeZone name 
+    zoneIndex = 0;
+    while (cfg.hasKey( "Zone"+ QString::number( zoneIndex ))){
+	zoneID = cfg.readEntry( "Zone" + QString::number( zoneIndex ));
+	curZone = TimeZone( zoneID );
+	if ( !curZone.isValid() ){
+	    qDebug( "initEnvironment() Invalid TimeZone %s", zoneID.latin1() );
+	    break;
+	}
+	cfg.writeEntry( "ZoneName" + QString::number( zoneIndex ), curZone.city() );
+	zoneIndex++;
+    }
+
+}
+
 void initEnvironment()
 {
 #ifdef Q_OS_WIN32
-  // Config file requires HOME dir which uses QDir which needs the winver 
-  qt_init_winver();
+    // Config file requires HOME dir which uses QDir which needs the winver 
+    qt_init_winver();
 #endif
-  Config config("locale");
-  config.setGroup( "Location" );
-  QString tz = config.readEntry( "Timezone", getenv("TZ") );
+    Config config("locale");
+    config.setGroup( "Location" );
+    QString tz = config.readEntry( "Timezone", getenv("TZ") ).stripWhiteSpace();
 
-  // if not timezone set, pick New York 
-  if (tz.isNull())
-      tz = "America/New_York";
+    // if not timezone set, pick New York 
+    if (tz.isNull() || tz.isEmpty())
+	tz = "America/New_York";
 
-  setenv( "TZ", tz, 1 );
-  config.writeEntry( "Timezone", tz);
+    setenv( "TZ", tz, 1 );
+    config.writeEntry( "Timezone", tz);
 
-  config.setGroup( "Language" );
-  QString lang = config.readEntry( "Language", getenv("LANG") );
-  if ( !lang.isNull() )
+    config.setGroup( "Language" );
+    QString lang = config.readEntry( "Language", getenv("LANG") ).stripWhiteSpace();
+    if( lang.isNull() || lang.isEmpty())
+	lang = "en_US";
+
     setenv( "LANG", lang, 1 );
+    config.writeEntry("Language", lang);
+    config.write();
 
+    config = Config("qpe");
+    config.setGroup( "Rotation" );
+    QString dispRep = config.readEntry( "Screen", getenv("QWS_DISPLAY") ).stripWhiteSpace();
 
-  config = Config("qpe");
-  config.setGroup( "Rotation" );
-  QString dispRep = config.readEntry( "Screen", getenv("QWS_DISPLAY") );
+    if (!dispRep.isNull() && !dispRep.isEmpty()) {
+	setenv( "QWS_DISPLAY", dispRep, 1 );
+	config.writeEntry( "Screen", dispRep);
+    }
 
-  // if not timezone set, pick New York 
-  if (!dispRep.isNull()) {
-      setenv( "QWS_DISPLAY", dispRep, 1 );
-      config.writeEntry( "Screen", dispRep);
-  }
+    QString keyOffset = config.readEntry( "Cursor", getenv("QWS_CURSOR_ROTATION") );
 
-  QString keyOffset = config.readEntry( "Cursor", getenv("QWS_CURSOR_ROTATION") );
+    if (keyOffset.isNull())
+	keyOffset = "0";
 
-  // if not timezone set, pick New York 
-  if (keyOffset.isNull())
-      keyOffset = "0";
-
-  setenv( "QWS_CURSOR_ROTATION", keyOffset, 1 );
-  config.writeEntry( "Cursor", keyOffset);
+    setenv( "QWS_CURSOR_ROTATION", keyOffset, 1 );
+    config.writeEntry( "Cursor", keyOffset);
+    config.write();
 }
 
 static void initBacklight()
@@ -257,9 +312,10 @@ static void firstUse()
     if ( needFirstUse ) {
 	FirstUse *fu = new FirstUse();
 	fu->exec();
-	if ( fu->restartNeeded() )
-	    Global::restart();
+	bool rs = fu->restartNeeded();
 	delete fu;
+	if ( rs )
+	    Global::restart();
     }
 }
 
@@ -286,6 +342,8 @@ int initApplication( int argc, char ** argv )
     QWSServer::setDesktopBackground( QImage() );
 #endif
     DesktopApplication a( argc, argv, QApplication::GuiServer );
+
+    refreshTimeZoneConfig();
 
     initBacklight();
 

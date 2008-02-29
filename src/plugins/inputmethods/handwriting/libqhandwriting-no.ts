@@ -157,10 +157,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>ms</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Input areas displayed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -196,10 +192,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1 ms</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Out of space</source>
         <translation type="unfinished"></translation>
     </message>
@@ -209,6 +201,11 @@ Free up some space
 and try again.
 
 Quit anyway?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <comment>milliseconds</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

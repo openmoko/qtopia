@@ -59,7 +59,8 @@ HEADERS =	desktop.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
+		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
+		syncdialog.h
 SOURCES =	desktop.cpp \
 		appicons.cpp \
 		taskbar.cpp \
@@ -105,7 +106,8 @@ SOURCES =	desktop.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
+		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
+		syncdialog.cpp
 OBJECTS =	$(OBJECTS_DIR)/desktop.o \
 		$(OBJECTS_DIR)/appicons.o \
 		$(OBJECTS_DIR)/taskbar.o \
@@ -152,14 +154,11 @@ OBJECTS =	$(OBJECTS_DIR)/desktop.o \
 		$(OBJECTS_DIR)/version.o \
 		$(OBJECTS_DIR)/whole.o \
 		$(OBJECTS_DIR)/qrsync.o \
-		$(OBJECTS_DIR)/shutdown.o \
-		$(OBJECTS_DIR)/syncdialog.o
-INTERFACES =    shutdown.ui \
-		syncdialog.ui
-UICDECLS =      shutdown.h \
-		syncdialog.h
-UICIMPLS =      shutdown.cpp \
-		syncdialog.cpp
+		$(OBJECTS_DIR)/syncdialog.o \
+		$(OBJECTS_DIR)/shutdown.o
+INTERFACES =    shutdown.ui
+UICDECLS =      shutdown.h
+UICIMPLS =      shutdown.cpp
 SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
 		$(MOC_DIR)/moc_appicons.cpp \
 		$(MOC_DIR)/moc_taskbar.cpp \
@@ -177,8 +176,8 @@ SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
 		$(MOC_DIR)/moc_packageslave.cpp \
 		$(MOC_DIR)/moc_irserver.cpp \
 		$(MOC_DIR)/moc_firstuse.cpp \
-		$(MOC_DIR)/moc_shutdown.cpp \
 		$(MOC_DIR)/moc_syncdialog.cpp \
+		$(MOC_DIR)/moc_shutdown.cpp \
 		$(MOC_DIR)/desktop.moc \
 		$(MOC_DIR)/appicons.moc \
 		$(MOC_DIR)/taskbar.moc
@@ -199,8 +198,8 @@ OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
 		$(OBJECTS_DIR)/moc_packageslave.o \
 		$(OBJECTS_DIR)/moc_irserver.o \
 		$(OBJECTS_DIR)/moc_firstuse.o \
-		$(OBJECTS_DIR)/moc_shutdown.o \
-		$(OBJECTS_DIR)/moc_syncdialog.o
+		$(OBJECTS_DIR)/moc_syncdialog.o \
+		$(OBJECTS_DIR)/moc_shutdown.o
 
 
 ####### Implicit rules
@@ -667,23 +666,20 @@ $(OBJECTS_DIR)/qrsync.o: $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qrsync.o $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
 
+$(OBJECTS_DIR)/syncdialog.o: syncdialog.cpp \
+		syncdialog.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/syncdialog.o syncdialog.cpp
+
 shutdown.h: shutdown.ui
 	$(UIC) shutdown.ui -o $(INTERFACE_DECL_PATH)/shutdown.h
 
 shutdown.cpp: shutdown.ui
 	$(UIC) shutdown.ui -i shutdown.h -o shutdown.cpp
 
-syncdialog.h: syncdialog.ui
-	$(UIC) syncdialog.ui -o $(INTERFACE_DECL_PATH)/syncdialog.h
-
-syncdialog.cpp: syncdialog.ui
-	$(UIC) syncdialog.ui -i syncdialog.h -o syncdialog.cpp
-
-$(OBJECTS_DIR)/shutdown.o: shutdown.cpp
+$(OBJECTS_DIR)/shutdown.o: shutdown.cpp \
+		shutdown.h \
+		shutdown.ui
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/shutdown.o shutdown.cpp
-
-$(OBJECTS_DIR)/syncdialog.o: syncdialog.cpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/syncdialog.o syncdialog.cpp
 
 $(OBJECTS_DIR)/moc_desktop.o: $(MOC_DIR)/moc_desktop.cpp \
 		desktop.h \
@@ -757,13 +753,13 @@ $(OBJECTS_DIR)/moc_firstuse.o: $(MOC_DIR)/moc_firstuse.cpp \
 		firstuse.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_firstuse.o $(MOC_DIR)/moc_firstuse.cpp
 
-$(OBJECTS_DIR)/moc_shutdown.o: $(MOC_DIR)/moc_shutdown.cpp \
-		shutdown.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdown.o $(MOC_DIR)/moc_shutdown.cpp
-
 $(OBJECTS_DIR)/moc_syncdialog.o: $(MOC_DIR)/moc_syncdialog.cpp \
 		syncdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_syncdialog.o $(MOC_DIR)/moc_syncdialog.cpp
+
+$(OBJECTS_DIR)/moc_shutdown.o: $(MOC_DIR)/moc_shutdown.cpp \
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdown.o $(MOC_DIR)/moc_shutdown.cpp
 
 $(MOC_DIR)/moc_desktop.cpp: desktop.h
 	$(MOC) desktop.h -o $(MOC_DIR)/moc_desktop.cpp
@@ -816,6 +812,9 @@ $(MOC_DIR)/moc_irserver.cpp: irserver.h
 $(MOC_DIR)/moc_firstuse.cpp: firstuse.h
 	$(MOC) firstuse.h -o $(MOC_DIR)/moc_firstuse.cpp
 
+$(MOC_DIR)/moc_syncdialog.cpp: syncdialog.h
+	$(MOC) syncdialog.h -o $(MOC_DIR)/moc_syncdialog.cpp
+
 $(MOC_DIR)/desktop.moc: desktop.cpp
 	$(MOC) desktop.cpp -o $(MOC_DIR)/desktop.moc
 
@@ -827,8 +826,5 @@ $(MOC_DIR)/taskbar.moc: taskbar.cpp
 
 $(MOC_DIR)/moc_shutdown.cpp: shutdown.h
 	$(MOC) shutdown.h -o $(MOC_DIR)/moc_shutdown.cpp
-
-$(MOC_DIR)/moc_syncdialog.cpp: syncdialog.h
-	$(MOC) syncdialog.h -o $(MOC_DIR)/moc_syncdialog.cpp
 
 

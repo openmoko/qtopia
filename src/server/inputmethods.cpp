@@ -38,6 +38,7 @@
 #include <qdir.h>
 #include <stdlib.h>
 #include <qtranslator.h>
+#include <qtl.h>
 
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
@@ -72,13 +73,40 @@ static const int inputWidgetStyle = QWidget::WStyle_Customize |
 				    QWidget::WStyle_StaysOnTop |
 				    QWidget::WGroupLeader;
 
+
+int InputMethod::operator <(const InputMethod& o) const
+{
+    return name() < o.name();
+}
+int InputMethod::operator >(const InputMethod& o) const
+{
+    return name() > o.name();
+}
+int InputMethod::operator <=(const InputMethod& o) const
+{
+    return name() <= o.name();
+}
+
+
+/*
+  Slightly hacky: We use WStyle_Tool as a flag to say "this widget
+  belongs to the IM system, so clicking it should not cause a reset".
+ */
+class IMToolButton : public QToolButton
+{
+public:
+    IMToolButton::IMToolButton( QWidget *parent ) : QToolButton( parent )
+    { setWFlags( WStyle_Tool ); }
+};
+
+
 InputMethods::InputMethods( QWidget *parent ) :
     QWidget( parent, "InputMethods", WStyle_Tool | WStyle_Customize ),
     mkeyboard(0), imethod(0), loader(0)
 {
     QHBoxLayout *hbox = new QHBoxLayout( this );
 
-    kbdButton = new QToolButton( this );
+    kbdButton = new IMToolButton( this);
     kbdButton->setFocusPolicy(NoFocus);
     kbdButton->setToggleButton( TRUE );
     if (parent->sizeHint().height() > 0)
@@ -89,7 +117,7 @@ InputMethods::InputMethods( QWidget *parent ) :
     hbox->addWidget( kbdButton );
     connect( kbdButton, SIGNAL(toggled(bool)), this, SLOT(showKbd(bool)) );
 
-    kbdChoice = new QToolButton( this );
+    kbdChoice = new IMToolButton( this );
     kbdChoice->setFocusPolicy(NoFocus);
     kbdChoice->setPixmap( QPixmap( (const char **)tri_xpm ) );
     if (parent->sizeHint().height() > 0)
@@ -107,7 +135,7 @@ InputMethods::InputMethods( QWidget *parent ) :
     imButton->setFocusPolicy(NoFocus);
     if (parent->sizeHint().height() > 0)
 	imButton->setFixedHeight( parent->sizeHint().height() );
-    imButton->setFixedWidth( 32 );
+    imButton->setMaximumWidth( 32 );
     hbox->addWidget(imButton);
 
     imChoice = new QToolButton( this );
@@ -178,14 +206,10 @@ void InputMethods::unloadInputMethods()
 #ifndef QT_NO_COMPONENT
 	int i;
 	// reverse order of load
-	for ( i = inputMethodList.count()-1; i >= 0; i-- ) {
-	    InputMethod &im = inputMethodList[i];
-	    loader->releaseInterface( im.iface() );
+	for ( i = ifaceList.count()-1; i >= 0; i-- ) {
+	    loader->releaseInterface( ifaceList[i] );
 	}
-	for ( i = inputModifierList.count()-1; i >= 0; i-- ) {
-	    InputMethod &im = inputModifierList[i];
-	    loader->releaseInterface( im.iface() );
-	}
+	ifaceList.clear();
 #endif
 	inputMethodList.clear();
 	inputModifierList.clear();
@@ -211,7 +235,6 @@ void InputMethods::loadInputMethods()
 	ExtInputMethodInterface *eface = 0;
 
 	if ( loader->queryInterface( *it, IID_InputMethod, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    qDebug("old input method");
 	    InputMethod input;
 	    input.newIM = FALSE;
 	    input.libName = *it;
@@ -219,8 +242,8 @@ void InputMethods::loadInputMethods()
 	    input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
 	    input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
 	    inputMethodList.append( input );
+	    ifaceList.append( iface );
 	} else if ( loader->queryInterface( *it, IID_ExtInputMethod, (QUnknownInterface**)&eface ) == QS_OK ) {
-	    qDebug("new input method");
 	    InputMethod input;
 	    input.newIM = TRUE;
 	    input.libName = *it;
@@ -239,9 +262,10 @@ void InputMethods::loadInputMethods()
 		    imButton->addWidget(input.widget, inputModifierList.count());
 		}
 	    }
-
+	    ifaceList.append( eface );
 	}
     }
+    qHeapSort( inputMethodList );
 #else
     InputMethod input;
     input.interface = new HandwritingImpl();
@@ -285,7 +309,8 @@ void InputMethods::loadInputMethods()
 void InputMethods::chooseKbd()
 {
     QPopupMenu pop( this );
-
+    pop.setFocusPolicy( NoFocus ); //don't reset IM
+    
     QString imname;
     if (imethod)
 	imname = imethod->libName.mid(imethod->libName.findRev('/') + 1);

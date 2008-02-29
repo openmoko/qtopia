@@ -28,6 +28,12 @@
 #include <qlayout.h>
 #include <qvbox.h>
 
+/*!
+  \class FieldMap fieldmapimpl.h
+
+  \internal
+*/
+
 FieldMap::FieldMap(QWidget *parent, const char* name)
     : QWidget(parent, name)
 {

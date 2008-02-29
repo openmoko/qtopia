@@ -68,6 +68,19 @@ static QPixmap *pm_installed=0;
 static QPixmap *pm_uninstall=0;
 static QPixmap *pm_install=0;
 
+static QString packageId(const QString& name_or_file)
+{
+    // clean up pkg.  If we have a whole file, want just the name of the package.
+    // If we have a _VER_ARCH.ipk ending, try to slim down the name to what
+    // the package name probably is.
+    int start = name_or_file.find(QRegExp("[^/_]+_[^/]*_[^/_]*.ipk$"));
+    int end = name_or_file.find(QRegExp("_[^/]*_[^/_]*.ipk$"));
+    if (start > 0 && end > start)
+	return name_or_file.mid(start, end - start);
+    else
+	return name_or_file;
+}
+/*
 class DetailsPopup : public QPopupMenu {
     QLabel* label;
 public:
@@ -83,7 +96,7 @@ public:
 	label->setText(s);
     }
 };
-
+*/
 class ServerListItem : public QCheckListItem {
     bool isdup;
 public:
@@ -157,6 +170,7 @@ static bool parseInfo(const QStringList& lines, QString& name, QString& descript
 		} else if ( tag == "Section" ) { // No tr
 		    sec = line.mid(sep+2).simplifyWhiteSpace();
 		}
+		description += line + "<p>";
 	    }
 	}
     }
@@ -185,15 +199,15 @@ public:
 	setText(2,size);
     }
 
-    PackageItem(QListView* lv, const DocLnk& lnk ) :
-	QListViewItem(lv,lnk.name()), installed(FALSE),
+    PackageItem(QListView* lv, const DocLnk& lnk, bool inst ) :
+	QListViewItem(lv,packageId(lnk.file())), installed(inst),
 	link(lnk)
     {
     }
 
     QString id() const
     {
-	if ( link.isValid() ) {
+	if ( link.fileKnown() ) {
 	    return file();
 	} else {
 	    return text(0);
@@ -334,7 +348,8 @@ PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
 {
     infoProcess = 0;
     committed = FALSE;
-
+    installedRootDict = 0;
+    
     connect( newserver, SIGNAL(clicked()), this, SLOT(newServer()) );
     connect( removeserver, SIGNAL(clicked()), this, SLOT(removeServer()) );
     connect( servers, SIGNAL(currentChanged(QListViewItem*)), this, SLOT(editServer(QListViewItem*)) );
@@ -348,23 +363,21 @@ PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
 	pm_uninstall = new QPixmap(Resource::loadPixmap("uninstall"));
     }
 
-    QFontMetrics fm = fontMetrics();
-    int w0 = fm.width(PackageWizardBase::tr("Package"))+30;
-    int w2 = fm.width("00000")+4;
-    packagelist->setColumnWidth(0,w0);
-    packagelist->setColumnWidth(1,228-w2-w0); // ### screen-biased
-    packagelist->setColumnWidth(2,w2);
     packagelist->setColumnWidthMode(0,QListView::Manual);
     packagelist->setColumnWidthMode(1,QListView::Manual);
     packagelist->setColumnWidthMode(2,QListView::Manual);
+    packagelist->setColumnAlignment(2,AlignRight);
     packagelist->setSelectionMode( QListView::Multi );
+    packagelist->setVScrollBarMode(QScrollView::AlwaysOn);
+    packagelist->installEventFilter(this);
+
     ipkg_old = 0;
     readSettings();
     updateServerSelection();
     progress_net->hide();
     progress_confirm->hide();
     QPEApplication::setStylusOperation(packagelist->viewport(),QPEApplication::RightOnHold);
-    package_description = new DetailsPopup(this);
+    //package_description = new DetailsPopup(this);
     mode_share->hide(); // ### Not implemented yet
 
     setHelpEnabled(page_mode,FALSE);
@@ -381,6 +394,7 @@ PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
  */
 PackageWizard::~PackageWizard()
 {
+    delete installedRootDict;
     // no need to delete child widgets, Qt does it all for us
 }
 
@@ -428,6 +442,7 @@ void PackageWizard::showDetails()
     PackageItem* cur = (PackageItem*)packagelist->currentItem();
     if ( cur ) {
 	QString d = cur->fullDescription();
+
 	if ( d.isEmpty() ) d = tr("No details.");
 	PackageDetails det(this,0,TRUE);
 	det.setCaption(tr("Package: %1").arg(cur->name()));
@@ -465,11 +480,10 @@ void PackageWizard::showPage( QWidget* w )
 	} else if ( w == page_packages ) {
 	    if ( currentPage() == page_mode
 	      || currentPage() == page_servers ) {
-		if ( mode_net->isChecked() ) {
-		    // Slow, show page now
-		    PackageWizardBase::showPage(w);
-		    qApp->processEvents();
-		}
+		// Slow, show page now
+		packagelist->clear();
+		PackageWizardBase::showPage(w);
+		qApp->processEvents();
 		updatePackageList();
 	    }
 	} else if ( w == page_share ) {
@@ -515,6 +529,21 @@ void PackageWizard::showPage( QWidget* w )
 	setAppropriates();
     }
     PackageWizardBase::showPage(w);
+}
+
+bool PackageWizard::eventFilter( QObject * o, QEvent *e )
+{
+    if ( o == packagelist && e->type()==QEvent::Resize ) {
+	QFontMetrics fm = packagelist->fontMetrics();
+	int w0 = fm.width("xxxxxx")+packagelist->width()/6;
+	int w2 = fm.width("0000000")+4;
+	int w1 = packagelist->width()-w2-w0-packagelist->frameWidth()*2-
+	    packagelist->verticalScrollBar()->width();
+	packagelist->setColumnWidth(0,w0);
+	packagelist->setColumnWidth(1,w1);
+	packagelist->setColumnWidth(2,w2);
+    }
+    return FALSE;
 }
 
 void PackageWizard::newServer()
@@ -645,11 +674,13 @@ void PackageWizard::updatePackageList()
 
 void PackageWizard::insertLocalPackageItems()
 {
+    QDict<void> installed = installedPackages();
     DocLnkSet docs;
     Global::findDocuments(&docs,"application/ipkg");
     for (QListIterator<DocLnk> it(docs.children()); it.current(); ++it) {
 	const DocLnk& lnk = **it;
-	PackageItem* item = new PackageItem(packagelist,lnk);
+	PackageItem* item = new PackageItem(packagelist,lnk,
+	    installed.find(packageId(lnk.file())));
 	if ( !item->parseInfo() ) {
 	    infoPending.append(item);
 	    if ( infoPending.count() == 1 )
@@ -698,27 +729,37 @@ void PackageWizard::infoDone()
     startInfoProcess();
 }
 
-void PackageWizard::insertPackageItems(bool installed_only)
+QDict<void> PackageWizard::installedPackages()
 {
     QDict<void> installed;
-
-    QRegExp separatorRegExp( ":[\t ]+" );
-
     QString status = ipkgStatusOutput();
+    delete installedRootDict;
+    installedRootDict = 0;
     if ( !status.isEmpty() ) {
+	QRegExp separatorRegExp( ":[\t ]+" );
 	QStringList lines = QStringList::split('\n',status,TRUE);
 	QString name;
 	QString status;
+	QString root;
 	for (QStringList::Iterator it = lines.begin(); it!=lines.end(); ++it) {
 	    QString line = *it;
 	    if ( line.length()<=1 ) {
 		// EOR
 		if ( !name.isEmpty() ) {
-		    if ( status.contains(" installed") ) // No tr
+		    if ( status.contains(" installed") ) { // No tr
 			installed.replace(name,(void*)1);
-		    name="";
+			if ( !root.isEmpty() && root != "/" ) {
+			    if ( !installedRootDict ) {
+				installedRootDict = new QDict<QString>;
+				installedRootDict->setAutoDelete( TRUE );
+			    }
+			    installedRootDict->replace( name, new QString(root) );
+			}
+		    }
+		    name=QString::null;
 		}
-		status="";
+		status=QString::null;
+		root=QString::null;
 	    } else if ( line[0] == ' ' || line[0] == '\t' ) {
 		// continuation
 	    } else {
@@ -729,11 +770,19 @@ void PackageWizard::insertPackageItems(bool installed_only)
 			name = line.mid(sep+2).simplifyWhiteSpace();
 		    } else if ( tag == "Status" ) { // No tr
 			status = line.mid(sep+1);
+		    } else if ( tag == "Root" )  { // No tr
+			root = line.mid(sep+2).simplifyWhiteSpace();
 		    }
 		}
 	    }
 	}
     }
+    return installed;
+}
+
+void PackageWizard::insertPackageItems(bool installed_only)
+{
+    QDict<void> installed = installedPackages();
 
     QString info = ipkgInfoOutput();
     if ( !info.isEmpty() ) {
@@ -774,10 +823,9 @@ void PackageWizard::revertFailedInstalls(QString& out)
 {
     QStringList failed;
 
-    QRegExp separatorRegExp( ":[\t ]+" );
-
     QString status = ipkgStatusOutput();
     if ( !status.isEmpty() ) {
+	QRegExp separatorRegExp( ":[\t ]+" );
 	QStringList lines = QStringList::split('\n',status,TRUE);
 	QString name;
 	QString status;
@@ -809,7 +857,7 @@ void PackageWizard::revertFailedInstalls(QString& out)
 
     for (QStringList::Iterator it = failed.begin(); it!=failed.end(); ++it) {
 	QString e;
-	runIpkg(QStringList() << "remove" << *it, e);
+	runIpkg(QStringList() << "remove" << *it, e); // No tr
 	out += e;
     }
 }
@@ -852,7 +900,7 @@ void PackageWizard::doCurrentDetails(bool multi)
     }
 }
  */
-
+/*
 QString PackageWizard::fullDetails(const QString& pk)
 {
     QString status;
@@ -888,15 +936,15 @@ QString PackageWizard::fullDetails(const QString& pk)
 
     return QString::null;
 }
-
+*/
 bool PackageWizard::readIpkgConfig(const QString& conffile)
 {
     QFile conf(conffile);
+    ServerListItem* currentserver=0;
     if ( conf.open(IO_ReadOnly) ) {
 	QTextStream s(&conf);
 	servers->clear();
 	ipkg_old=0;
-	ServerListItem* currentserver=0;
 	while ( !s.atEnd() ) {
 	    QString l = s.readLine();
 	    QStringList token = QStringList::split(' ', l);
@@ -958,21 +1006,24 @@ bool PackageWizard::readIpkgConfig(const QString& conffile)
 	    if ( currentserver )
 		currentserver->setOn(TRUE);
 	}
-	return TRUE;
-    } else {
-	return FALSE;
     }
+    if ( !currentserver ) {
+	currentserver = new ServerListItem(servers,tr("Trolltech Qtopia"));
+	currentserver->setText(1,"http://qtopia.net/packages/"+Global::architecture());
+	currentserver->setOn(TRUE);
+    }
+    return TRUE;
 }
 
 void PackageWizard::readSettings()
 {
     // read from config file(s)
-    readIpkgConfig("/etc/ipkg.conf");
+    readIpkgConfig(QPEApplication::qpeDir()+"/etc/ipkg.conf");
 }
 
 void PackageWizard::writeSettings()
 {
-    QFile conf("/etc/ipkg.conf");
+    QFile conf(QPEApplication::qpeDir()+"/etc/ipkg.conf");
     if ( conf.open(IO_WriteOnly) ) {
 	QTextStream s(&conf);
 	s << "# Written by Qtopia Package Manager\n"; // No tr
@@ -1014,7 +1065,7 @@ void PackageWizard::writeSettings()
 	}
 	conf.close();
     } else {
-	qWarning("Cannot write to /etc/ipkg.conf");
+	qWarning("Cannot write to $QPEDIR/etc/ipkg.conf");
     }
 }
 
@@ -1082,69 +1133,14 @@ bool PackageWizard::installIpkg( const QString &ipk, const QString &location, QS
     QStringList cmd;
     QStringList orig_packages;
     if ( !location.isEmpty() ) {
-        mkdir( location.ascii(), 0777 );
+        // ??????? mkdir( location.ascii(), 0777 );
 	cmd += "-d";
 	cmd += location;
-	// get list of *.list in location/usr/lib/ipkg/info/*.list
-	QDir dir(location + "/usr/lib/ipkg/info", "*.list",  // No tr
-		QDir::Name, QDir::Files);
-
-	orig_packages = dir.entryList();
     }
     cmd += "install"; // No tr
     cmd += ipk;
     bool r = runIpkg( cmd, out );
-    if ( !location.isEmpty() ) {
-	//symlink like crazy:
-	
-	QDir dir(location + "/usr/lib/ipkg/info", "*.list",  // No tr
-		QDir::Name, QDir::Files);
 
-	QStringList new_packages = dir.entryList();
-
-	// for each file in new_packages but not in orig_packages, 
-
-	for ( QStringList::Iterator it = orig_packages.begin()
-		; it != orig_packages.end(); ++it ) {
-	    if (new_packages.contains(*it)) {
-		new_packages.remove(*it);
-	    }
-	}
-
-	// for each of the new ones:
-	//    for each filename in the .list file:
-	//   	if filename ends with '/'
-	//	    mkdir -p filename
-	//	else
-	//	    ln -s location+filename filename
-	for ( QStringList::Iterator it = new_packages.begin()
-		; it != new_packages.end(); ++it ) {
-	    QFile f(location + "/usr/lib/ipkg/info/" + (*it));
-	    //make a copy so we can remove the symlinks later
-	    mkdir( (" /usr/lib/ipkg/info/"+location).ascii(), 0777 );
-	    system(("cp " + f.name() + " /usr/lib/ipkg/info/"+location).ascii());
-	    
-	    if ( f.open(IO_ReadOnly) ) {   
-		QTextStream ts(&f);
-
-		QString s;
-		while ( !ts.eof() ) {        // until end of file...
-		    s = ts.readLine();       // line of text excluding '\n'
-		    // for s, do link/mkdir.
-		    if ( s.right(1) == "/" ) {
-			qDebug("do mkdir for %s", s.ascii());
-			mkdir( s.ascii(), 0777 );
-			//possible optimization: symlink directories
-			//that don't exist already. -- Risky.
-		    } else {
-			qDebug("do symlink for %s", s.ascii());
-			symlink( (location+s).ascii(), s.ascii() );
-		    }
-		}
-		f.close();
-	    }
-	}
-    }
     return r;
 }
 
@@ -1170,15 +1166,27 @@ void PackageWizard::doIt()
 }
 */
 
-QStringList PackageWizard::linksInPackage(const QString pkg)
+QStringList PackageWizard::linksInPackage(const QString& pkg, const QString & root )
 {
     QString files;
-    Process ipkg_files(QStringList() << "ipkg" << "files" << pkg); // No tr
+    QStringList cmd;
+    cmd << "ipkg";
+    if ( root != "/" )
+	cmd << "-d" << root;
+    cmd << "files" << pkg;  // No tr
+    Process ipkg_files( cmd );
     QStringList r;
     if ( ipkg_files.exec("",files) ) {
 	QStringList lines = QStringList::split('\n',files,FALSE);
 	for (QStringList::Iterator it = lines.begin(); it!=lines.end(); ++it) {
 	    QString fn = *it;
+	    // Quickly weed out most of the files that do not end 
+	    // with ".desktop" (8 chars)
+	    if ( fn.length() < 8 || fn.constref(fn.length()-8) != '.' )
+		continue;
+	    if ( root != "/" && fn.startsWith( root ) )
+		fn = fn.mid( root.length() );
+	    
 	    if ( fn.startsWith("//") ) // a ipkg bug
 		fn = fn.mid(1);
 
@@ -1199,7 +1207,7 @@ QStringList PackageWizard::linksInPackage(const QString pkg)
 
 void PackageWizard::showError(const QString& err)
 {
-    QDialog dlg(this,"error",TRUE);
+    QDialog dlg(this,"error",TRUE); // No tr
     (new QVBoxLayout(&dlg,4,2))->setAutoAdd(TRUE);
     QLabel lbl(tr("Error"),&dlg);
     QMultiLineEdit e(&dlg);
@@ -1243,25 +1251,36 @@ bool PackageWizard::commitWithIpkg()
 
 	if ( mode_rm->isChecked() ) {
 	    for (QStringList::ConstIterator it=to_do.begin(); it!=to_do.end(); ++it) {
-		QStringList l = linksInPackage(*it);
 		QString out;
-		if ( !runIpkg(QStringList() << "remove" << *it, out) ) { // No tr
+		QStringList cmd;
+		QString *root = installedRootDict ? 
+				installedRootDict->take(*it) : 0;
+
+		QStringList l = linksInPackage(*it, root ? *root : QString("/"));
+
+		if ( root )
+		    cmd << "-d" << *root;
+		delete root;
+		cmd << "remove" << *it; // No tr
+
+		if ( !runIpkg( cmd, out) ) {
 		    ok = FALSE;
 		    errlog += out;
 		} else {
 		    linksChanged += l;
 		}
 	    }
+
 	}
 	if ( mode_doc->isChecked() || mode_net->isChecked() ) {
-	    QString loc = location->path();
+	    QString loc = location->installationPath();
 	    for (QStringList::ConstIterator it=to_do.begin(); it!=to_do.end(); ++it) {
 		QString out;
 		if ( !installIpkg( *it, loc, out ) ) {
 		    ok = FALSE;
 		    errlog += out;
 		} else {
-		    linksChanged += linksInPackage(*it);
+		    linksChanged += linksInPackage(packageId(*it), loc );
 		}
 	    }
 	    if ( !ok ) {
@@ -1271,6 +1290,13 @@ bool PackageWizard::commitWithIpkg()
 	    }
 	}
 
+
+	// We could be smarter about when we do this, and use the
+	// "create" or "remove" arguments to update only what's needed,
+	// but it doesn't take that long.
+	system( "qtopia-update-symlinks" );
+
+	
 	// ##### If we looked in the list of files, we could send out accurate
 	// ##### messages. But we don't bother yet, and just do an "all".
 #ifndef QT_NO_COP
@@ -1297,6 +1323,23 @@ QString PackageWizard::ipkgStatusOutput()
 	Process ipkg_status( QStringList() << "ipkg" << "status" ); // No tr
 	cachedIpkgStatusOutput.detach();
 	ipkg_status.exec( 0, cachedIpkgStatusOutput );
+	
+	StorageInfo storage;
+	const QList<FileSystem>& sifs(storage.fileSystems());
+	QListIterator<FileSystem> sit(sifs);
+	FileSystem* fs;
+	for ( ; (fs=sit.current()); ++sit ) {
+	    //qDebug( "looking at %s", fs->path().latin1() );
+	    if ( fs->path() != "/" && 
+		 QFile::exists( fs->path() + "/usr/lib/ipkg/status" ) ) {
+		QCString subOut;
+		Process ipkg2( QStringList() << "ipkg" << "-d" 
+			       << fs->path() << "status" ); // No tr
+		ipkg2.exec( 0, subOut );
+		//qDebug( "  result %s", subOut.data() );
+		cachedIpkgStatusOutput += subOut;
+	    }
+	}
     }
     return QString::fromLocal8Bit( cachedIpkgStatusOutput );
 }
@@ -1352,8 +1395,10 @@ bool PackageWizard::runIpkg(const QStringList& args, QString& out)
 	cmd += "-force-defaults";
     cmd += args;
     qApp->processEvents();
+    //qDebug( "RUNNING %s", cmd.join( "##" ).latin1() );
     Process ipkg_status(cmd);
     bool r = ipkg_status.exec("",out);
+    //qDebug( "RESULT %s", out.latin1() );
     progress()->setProgress(progress()->progress()+1);
     setCachedIpkgOutputDirty();
     if ( justone )
@@ -1399,7 +1444,9 @@ void PackageWizard::setDocument(const QString& fileref)
     setAppropriates();
     showPage(page_location);
     packagelist->clear();
-    PackageItem* item = new PackageItem(packagelist,doc);
+    QDict<void> installed = installedPackages();
+    bool inst = installed.find(packageId(doc.file()));
+    PackageItem* item = new PackageItem(packagelist,doc,inst);
     item->parseInfo();
     item->setSelected(TRUE);
 }

@@ -54,6 +54,7 @@ public:
 
     void addException( const QDate &d ) { mExceptions.append(d); }
     void addChildUid( const QUuid &u ) { mChildren.append(u); }
+    void removeChildUid( const QUuid &u ) { mChildren.remove(u); }
     void setParentUid( const QUuid &u ) { mParent = u; }
 };
 

@@ -33,7 +33,8 @@ void FormAdvanced::fontChange() {
 
 void FormAdvanced::updatePictures() {
     QFont big(font());
-    big.setPointSize(big.pointSize()*3/2);
+    if(big.pointSize() <= 1)
+	big.setPointSize(12);	// Correct for scaleable fonts.
     QColor bg = PBMPlus->backgroundColor();
 
     int fontSize = big.pixelSize();
@@ -120,8 +121,7 @@ void FormAdvanced::updatePictures() {
     delete PMSquareRoot;
 } 
 
-FormAdvanced::FormAdvanced(QWidget *parent,const char *name,WFlags fl)
-:QWidget(parent,name,fl) {
+FormAdvanced::FormAdvanced(QWidget *parent) :QWidget(parent) {
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
 
     QVBoxLayout *vbl = new QVBoxLayout(this);

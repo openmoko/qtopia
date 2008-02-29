@@ -21,22 +21,35 @@
 
 #include <qdatetime.h>
 
+/*! \class Calendar calendar.html
+
+  \brief The Calendar class provides programmers with an easy to calculate
+  and get information about dates, months and years.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+    Returns the name of the month for \a m.
+    Equivalent to QDate::monthName().
+*/
 QString Calendar::nameOfMonth( int m )
 {
     QDate d;
     return d.monthName( m );
 }
 
+/*!
+    Returns the name of the day for \a d.
+    Equivalent to QDate::dayName().
+*/
 QString Calendar::nameOfDay( int d )
 {
     QDate dt;
     return dt.dayName( d );
 }
 
-/*!
-  \obsolete
-  Don't use this function.
-*/
+/*! \obsolete */
 QValueList<Calendar::Day> Calendar::daysOfMonth( int year, int month,
 						 bool startWithMonday )
 {

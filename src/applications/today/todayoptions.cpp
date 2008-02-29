@@ -23,9 +23,11 @@
 
 #include <qtopia/resource.h>
 #include <qtopia/config.h>
+#include <qtopia/custom.h>
 
 #include <qlayout.h>
 #include <qtoolbutton.h>
+#include <qcheckbox.h>
 #include <qlistview.h>
 #include <qheader.h>
 #include <qlabel.h>
@@ -52,6 +54,13 @@ TodayOptions::TodayOptions(QWidget *parent, const char *name, WFlags fl)
 	    this, SLOT( addItemToView(QListViewItem *) ) );
     inactiveView->setAllColumnsShowFocus( TRUE );
     QWhatsThis::add(inactiveView, tr("Lists the plugins which are available but not enabled.  Tap a plugin to enable it.") );
+    Config config("today");
+    config.setGroup("Start");
+#ifndef QPE_DEFAULT_TODAY_MODE
+#define QPE_DEFAULT_TODAY_MODE "Never"
+#endif
+    bool as = config.readEntry("Mode",QPE_DEFAULT_TODAY_MODE) == "Daily";
+    autostart->setChecked(as);
 }
 
 void TodayOptions::accept()
@@ -64,6 +73,8 @@ void TodayOptions::accept()
 void TodayOptions::writeConfig()
 {
     Config config("today");
+    config.setGroup("Start");
+    config.writeEntry("Mode",autostart->isChecked() ? "Daily" : "Never");
     config.setGroup("view");
     config.clearGroup();
 

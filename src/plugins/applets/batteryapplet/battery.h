@@ -47,9 +47,11 @@ protected slots:
 protected:
     QGuardedPtr<BatteryStatus> batteryView;
     PowerStatus *ps;
+    QSize bvsz;
     QTimer *chargeTimer;
     int percent;
     bool charging;
+    bool updateBatteryViewGeometry();
 };
 
 #endif

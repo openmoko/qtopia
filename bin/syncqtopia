@@ -71,6 +71,17 @@ my $key;
 my $file;
 my $cmdLine;
 $isUnix = check_unix();
+
+if (! $showonly){
+    if ($isUnix){
+        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.cpp", $basedir. "/src/libraries/qtopia/custom.cpp");
+        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.h", $basedir. "/src/libraries/qtopia/custom..h");
+    }else{
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.cpp", $basedir . "/src/libraries/qtopia/custom.cpp");
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.h", $basedir . "/src/libraries/qtopia/custom.h");
+    }
+}
+
 for $key (keys %includeDirs){
     $destDir = $includeDirs{$key};
     @files = find_files( "src/libraries/". $key, "^[-a-z0-9]*(?:_[^p].*)?\\.h\$", 0);
@@ -140,17 +151,6 @@ if ($isUnix){
   print `"rmdir /Q /S $basedir\\include\\qpe\\"`;
   print `"xcopy /E /Y /S $basedir\\include\\qtopia\\*.* $basedir\\include\\qpe\\"`;
 }
-
-if (! $showonly){
-    if ($isUnix){
-        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.cpp", $basedir. "/src/libraries/qtopia/custom.cpp");
-        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.h", $basedir. "/src/libraries/qtopia/custom..h");
-    }else{
-	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.cpp", $basedir . "/src/libraries/qtopia/custom.cpp");
-	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.h", $basedir . "/src/libraries/qtopia/custom.h");
-    }
-}
-
 exit 0;
 
 

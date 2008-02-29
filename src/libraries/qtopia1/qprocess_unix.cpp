@@ -42,8 +42,6 @@
 
 // ### FOR Qt 2.3 compat
 #include <unistd.h>
-#include <sys/resource.h>
-#include <sys/time.h>
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -51,6 +49,8 @@
 #include <sys/fcntl.h>
 
 #include <errno.h>
+
+#include <sys/resource.h>
 
 #ifdef __MIPSEL__
 # ifndef SOCK_DGRAM

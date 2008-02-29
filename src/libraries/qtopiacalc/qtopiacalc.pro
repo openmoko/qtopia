@@ -6,7 +6,7 @@ win32:DEFINES += QTOPIA_MAKEDLL QT_DLL
 
 # library files
 HEADERS = calculator.h engine.h data.h instruction.h stdinputwidgets.h
-SOURCES = calculator.cpp engine.cpp instruction.cpp stdinputwidgets.cpp
+SOURCES = calculator.cpp engine.cpp data.cpp instruction.cpp stdinputwidgets.cpp
 
 # data types
 HEADERS += doubledata.h

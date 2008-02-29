@@ -18,8 +18,6 @@
 **
 **********************************************************************/
 
-#define QTOPIA_INTERNAL_CONFIG_BYTEARRAY
-
 #include "devicebutton.h"
 #include "devicebuttonmanager.h"
 
@@ -35,6 +33,21 @@
 
 DeviceButtonManager* DeviceButtonManager::m_Instance = 0L;
 
+/*!
+  \class DeviceButtonManager devicebuttonmanager.h
+  \brief The DeviceButtonManager class manages device button mappings.
+
+  The function buttons on a device may generate key presses and also
+  activate services.  DeviceButtonManager allows the role of the function
+  buttons to be accessed or modified.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  Returns an instance of the DeviceButtonManager.  DeviceButtonManager
+  should never be constructed explicitly.
+*/
 DeviceButtonManager& DeviceButtonManager::instance()
 {
     if (!m_Instance)
@@ -42,7 +55,9 @@ DeviceButtonManager& DeviceButtonManager::instance()
     return *m_Instance;
 }
 
-  
+/*!
+  \internal
+*/
 DeviceButtonManager::DeviceButtonManager() : QObject(0L)
 {
 #ifndef QT_NO_COP
@@ -53,6 +68,9 @@ DeviceButtonManager::DeviceButtonManager() : QObject(0L)
   loadButtons();
 }
 
+/*!
+  \internal
+*/
 DeviceButtonManager::~DeviceButtonManager()
 {
 }
@@ -83,7 +101,7 @@ const DeviceButton* DeviceButtonManager::buttonForKeycode(ushort keyCode)
 }
 
 /*!
- Reassigns the pressed action for \a button_index.
+ Reassigns the pressed action for \a button_index to \a action.
  */
 void DeviceButtonManager::remapPressedAction(int button_index, const ServiceRequest& action)
 {
@@ -100,7 +118,7 @@ void DeviceButtonManager::remapPressedAction(int button_index, const ServiceRequ
 }
 
 /*!
- Reassigns the held action for \a button_index. 
+ Reassigns the held action for \a button_index to \a action. 
  */
 void DeviceButtonManager::remapHeldAction(int button_index, const ServiceRequest& action)
 {
@@ -176,6 +194,9 @@ void DeviceButtonManager::received(const QCString& message, const QByteArray&)
 	loadButtons();
 }
 
+/*!
+  Reset the buttons back to the factory default settings.
+*/
 void DeviceButtonManager::factoryResetButtons()
 {
     loadButtons(TRUE);

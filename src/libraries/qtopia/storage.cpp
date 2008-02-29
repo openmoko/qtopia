@@ -46,6 +46,8 @@
 
 static bool isCF(const QString& m)
 {
+    // Actually finds PCMCIA cards.
+
     FILE* f = fopen("/var/run/stab", "r");
     if (!f) f = fopen("/var/state/pcmcia/stab", "r");
     if (!f) f = fopen("/var/lib/pcmcia/stab", "r");
@@ -174,7 +176,8 @@ void StorageInfo::update()
 	while ( (me = getmntent( mntfp )) != 0 ) {
 	    QString fs = me->mnt_fsname;
 	    if ( fs.left(7)=="/dev/hd" || fs.left(7)=="/dev/sd"
-		    || fs.left(8)=="/dev/mtd"
+		    || fs.left(8) == "/dev/ram"
+		    || fs.left(8) == "/dev/mtd"
 		    || fs.left(9) == "/dev/mmcd"
 			    // "which-qtopia" may be running off the SD card
 			    && (QString(me->mnt_dir)!="/home/QtPalmtop"
@@ -207,28 +210,29 @@ void StorageInfo::update()
 	for (; it!=curdisks.end(); ++it, ++fsit, ++optsIt) {
 	    QString opts = *optsIt;
 
-	    QString disk = *it;
-	    QString humanname;
+	    QString humanname=*it;
 	    bool removable = FALSE;
-	    if ( isCF(disk) ) {
+	    if ( isCF(humanname) ) {
 		humanname = tr("CF Card");
 		removable = TRUE;
-	    } else if ( disk == "/dev/hda1" ) {
+	    } else if ( humanname == "/dev/hda1" ) {
 		humanname = tr("Hard Disk");
-	    } else if ( disk.left(9) == "/dev/mmcd" ) {
+	    } else if ( humanname.left(9) == "/dev/mmcd" ) {
 		humanname = tr("SD Card");
 		removable = TRUE;
-	    } else if ( disk.left(7) == "/dev/hd" )
+	    } else if ( humanname.left(7) == "/dev/hd" )
 		humanname = tr("Hard Disk") + " " + humanname.mid(7);
-	    else if ( disk.left(7) == "/dev/sd" )
+	    else if ( humanname.left(7) == "/dev/sd" )
 		humanname = tr("SCSI Hard Disk") + " " + humanname.mid(7);
-	    else if ( disk == "/dev/mtdblock1" || humanname == "/dev/mtdblock/1" )
+	    else if ( humanname == "/dev/mtdblock1" || humanname == "/dev/mtdblock/1" )
 		humanname = tr("Internal Storage");
-	    else if ( disk.left(14) == "/dev/mtdblock/" )
+	    else if ( humanname.left(14) == "/dev/mtdblock/" )
 		humanname = tr("Internal Storage") + " " + humanname.mid(14);
-	    else if ( disk.left(13) == "/dev/mtdblock" )
+	    else if ( humanname.left(13) == "/dev/mtdblock" )
 		humanname = tr("Internal Storage") + " " + humanname.mid(13);
-	    FileSystem *fs = new FileSystem( disk, *fsit, humanname, removable, opts );
+	    else if ( humanname.left(8) == "/dev/ram" )
+		humanname = tr("RAM disk") + " " + humanname.mid(8);
+	    FileSystem *fs = new FileSystem( *it, *fsit, humanname, removable, opts );
 	    mFileSystems.append( fs );
 	}
 	emit disksChanged();
@@ -239,7 +243,7 @@ void StorageInfo::update()
     }
 #elif defined (Q_OS_WIN32)
     if (mFileSystems.count() == 0){
-	FileSystem *fs = new FileSystem( "/dev/hda1", QDir::homeDirPath(), "Hard Disk", FALSE, "");
+	FileSystem *fs = new FileSystem( "/dev/hda1", QDir::homeDirPath(), tr("Hard Disk"), FALSE, "");
 	mFileSystems.append( fs );    
 	emit disksChanged();
     }
@@ -330,6 +334,6 @@ void FileSystem::update()
   Returns FALSE if read-only, TRUE if read and write.
 */
 
-/*! \fn QStringList StorageInfo::fileSystemStrings() const
+/*! \fn QStringList StorageInfo::fileSystemNames() const
   Returns a list of filesystem names.
 */

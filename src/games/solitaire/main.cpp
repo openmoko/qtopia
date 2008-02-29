@@ -28,7 +28,6 @@ int main( int argc, char ** argv )
     QPEApplication a( argc, argv );
 
     CanvasCardWindow m;
-    m.setCaption( CanvasCardWindow::tr("Patience") );
     a.showMainWidget( &m );
 
     return a.exec();

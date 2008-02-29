@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/pim/todoaccess.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>todoaccess.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>todoaccess.h</h1>
+
+<p>This is the verbatim text of the todoaccess.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info\@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+#ifndef TODO_ACCESS_H
+#define TODO_ACCESS_H
+
+#include &lt;qobject.h&gt;
+#include "task.h"
+
+class TodoAccessPrivate;
+
+class TaskIO;
+class TodoAccess;
+class TaskIteratorMachine;
+
+class QTOPIAPIM_EXPORT TodoIterator
+{
+public:
+    // internal constructors
+    TodoIterator(const TaskIO &amp;);
+    TodoIterator(TaskIteratorMachine *);
+
+    // public constructors.
+    TodoIterator(const TodoAccess &amp;);
+    TodoIterator(const TodoIterator &amp;);
+
+    TodoIterator &amp;operator=(const TodoIterator &amp;);
+    ~TodoIterator();
+
+    bool atFirst() const;
+    bool atLast() const;
+    const PimTask *toFirst();
+    const PimTask *toLast();
+
+    const PimTask *operator++();
+    const PimTask *operator*() const;
+
+    const PimTask *current() const;
+
+private:
+    TaskIteratorMachine *machine;
+};
+
+class QTOPIAPIM_EXPORT TodoAccess : public QObject {
+  Q_OBJECT
+
+      friend class TodoIterator;
+  public:
+
+  TodoAccess();
+  
+  ~TodoAccess();
+
+  bool editSupported() const;
+  
+  void updateTask(const PimTask&amp; task);
+
+  void removeTask(const PimTask&amp; task);
+  
+  void addTask(const PimTask&amp; task);
+
+  PimTask taskForId(const QUuid &amp;, bool *ok = 0) const;
+
+ signals:
+  void todoListUpdated();
+
+ private:
+  TaskIO* taskio;
+};
+
+
+#endif
+
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

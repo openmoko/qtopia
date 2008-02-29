@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/nightly/qt-2.3.4/src/kernel/qwsmouse_qws.cpp:117 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QWSMouseHandler Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QWSMouseHandler Class Reference</h1>
+
+<p>Mouse driver/handler for Qt/Embedded.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qwsmouse_qws-h.html">qwsmouse_qws.h</a>&gt;</tt>
+<p>Inherits <a href="qobject.html">QObject</a>.
+<p><a href="qwsmousehandler-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#QWSMouseHandler"><b>QWSMouseHandler</b></a> ()</div></li>
+<li><div class=fn>virtual <a href="#~QWSMouseHandler"><b>~QWSMouseHandler</b></a> ()</div></li>
+<li><div class=fn>virtual void <b>clearCalibration</b> ()</div></li>
+<li><div class=fn>virtual void <b>calibrate</b> ( QWSPointerCalibrationData * )</div></li>
+<li><div class=fn>virtual void <b>getCalibration</b> ( QWSPointerCalibrationData * )</div></li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li><div class=fn>void <b>mouseChanged</b> ( const&nbsp;QPoint&nbsp;&amp;&nbsp;pos, int&nbsp;bstate )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+Mouse driver/handler for <a href="qt.html">Qt</a>/Embedded
+<p> The mouse driver/handler handles events from system devices and
+generates mouse events.
+<p> A QWSMouseHandler will usually open some system device in its
+constructor, create a <a href="qsocketnotifier.html">QSocketNotifier</a> on that opened device and when
+it receives data, it will call mouseChanged() to send the event
+to Qt/Embedded for relaying to clients.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QWSMouseHandler"></a>QWSMouseHandler::QWSMouseHandler ()
+</h3>
+Constructs a mouse handler. This becomes the primary mouse handler.
+<p> Note that once created, mouse handlers are controlled by the system
+and should not be deleted.
+
+<h3 class=fn><a name="~QWSMouseHandler"></a>QWSMouseHandler::~QWSMouseHandler ()<tt> [virtual]</tt>
+</h3>
+Destructs the mouse handler. You should not invoked this directly.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

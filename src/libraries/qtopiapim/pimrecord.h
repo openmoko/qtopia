@@ -63,43 +63,11 @@ public:
     bool operator==( const PimRecord &r ) const;
     bool operator!= ( const PimRecord &r ) const;
 
-    void setCategories( const QArray<int> &categories )
-    {
-	mCategories = categories;
-    }
-    void setCategories( int id )
-    {
-	mCategories.resize(1);
-	mCategories[0] = id;
-    }
-
-    void reassignCategoryId( int oldId, int newId )
-    {
-	int index = mCategories.find( oldId );
-	if ( index >= 0 )
-	    mCategories[index] = newId;
-    }
-
-    bool pruneDeadCategories(const QArray<int> &validCats)
-    {
-	QArray<int> newCats;
-
-	for (int i = 0; i < (int) mCategories.count(); i++ ) {
-	    if ( validCats.contains( mCategories[i] ) ) {
-		newCats.resize( newCats.count() + 1 );
-		newCats[(int)newCats.count() - 1] = mCategories[i];
-	    }
-	}
-
-	if ( newCats.count() != mCategories.count() ) {
-	    mCategories = newCats;
-	    return TRUE;
-	}
-
-	return FALSE;
-    }
-    
-    QArray<int> categories() const { return mCategories; }
+    void setCategories( const QArray<int> &categories );
+    void setCategories( int id );
+    void reassignCategoryId( int oldId, int newId );
+    bool pruneDeadCategories(const QArray<int> &validCats);
+    QArray<int> categories() const;
 
     virtual QString customField(const QString &) const;
     virtual void setCustomField(const QString &, const QString &);
@@ -142,8 +110,10 @@ private:
 
 
 #ifndef QT_NO_DATASTREAM
+#ifndef QTOPIA_DESKTOP
 QTOPIAPIM_EXPORT QDataStream &operator<<(QDataStream &s, const QUuid& df);
 QTOPIAPIM_EXPORT QDataStream &operator>>(QDataStream &s, QUuid&df);
+#endif
 QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimRecord & );
 QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimRecord & );
 #endif

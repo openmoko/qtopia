@@ -17,8 +17,10 @@
 ** not clear to you.
 **
 **********************************************************************/
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #include "filemanager.h"
 #include "applnk.h"
+#include "global.h"
 
 #include <qdir.h>
 #include <qfile.h>
@@ -67,7 +69,7 @@ FileManager::~FileManager()
 */
 bool FileManager::saveFile( const DocLnk &f, const QByteArray &data )
 {
-    QString fn = f.file() + ".new";
+    QString fn = qtopia_tempName( f.file() );
     ensurePathExists( fn );
     QFile fl( fn );
     if ( !fl.open( IO_WriteOnly|IO_Raw ) )
@@ -78,17 +80,7 @@ bool FileManager::saveFile( const DocLnk &f, const QByteArray &data )
 	QFile::remove( fn );
 	return FALSE;
     }
-    // else rename the file...
-    QDir dir;
-#ifdef Q_OS_WIN32
-    QFile::remove( f.file() );
-#endif
-    if (dir.rename( fn, f.file()) == FALSE ) {
-	qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
-		  f.file().latin1(), errno );
-	// remove the file...
-	QFile::remove( fn );
-    }
+    qtopia_renameFile( fn, f.file() );
     return TRUE;
 }
 
@@ -101,7 +93,7 @@ bool FileManager::saveFile( const DocLnk &f, const QByteArray &data )
 */
 bool FileManager::saveFile( const DocLnk &f, const QString &text )
 {
-    QString fn = f.file() + ".new";
+    QString fn = qtopia_tempName( f.file() );
     ensurePathExists( fn );
     QFile fl( fn );
     if ( !fl.open( IO_WriteOnly|IO_Raw ) ) {
@@ -118,16 +110,7 @@ bool FileManager::saveFile( const DocLnk &f, const QString &text )
 	return FALSE;
     }
     // okay now rename the file...
-    QDir dir;
-#ifdef Q_OS_WIN32
-    QFile::remove( f.file() );
-#endif
-    if ( dir.rename( fn, f.file() ) == FALSE) {
-	qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
-		  f.file().latin1(), errno );
-	// remove the tmp file, otherwise, it will just lay around...
-	QFile::remove( fn.latin1() );
-    }
+    qtopia_renameFile( fn, f.file() );
     return TRUE;
 }
 
@@ -189,7 +172,7 @@ bool FileManager::copyFile( const AppLnk &src, const AppLnk &dest )
     if ( !sf.open( IO_ReadOnly ) )
 	return FALSE;
 
-    QString fn = dest.file() + ".new";
+    QString fn = qtopia_tempName( dest.file() );
     ensurePathExists( fn );
     QFile df( fn );
     if ( !df.open( IO_WriteOnly|IO_Raw ) )
@@ -215,21 +198,8 @@ bool FileManager::copyFile( const AppLnk &src, const AppLnk &dest )
     if ( ok )
 	ok = dest.writeLink();
 
-    if ( ok ) {
-	// okay now rename the file...
-        QDir dir;
-#ifdef Q_OS_WIN32
-    	QFile::remove( dest.file() );
-#endif
-	if ( dir.rename( fn, dest.file()) == FALSE) {
-	    qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
-		      dest.file().latin1(), errno );
-	    // remove the tmp file, otherwise, it will just lay around...
-	    QFile::remove( fn.latin1() );
-	}
-    } else {
-	QFile::remove( fn.latin1() );
-    }
+    if ( ok )
+	qtopia_renameFile( fn, dest.file() );
 
     return ok;
 }

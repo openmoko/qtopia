@@ -25,14 +25,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;qt&gt;&lt;b&gt;%1&lt;/b&gt; was termimated</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> due to signal code %1&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Application terminated</source>
         <translation type="unfinished"></translation>
     </message>
@@ -54,6 +46,10 @@
     </message>
     <message>
         <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;&lt;b&gt;%1&lt;/b&gt; was terminated due to signal code %2&lt;/qt&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -213,6 +209,10 @@ Please charge the back-up battery.</source>
         <source>View as text</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Finding documents...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>LauncherView</name>
@@ -224,9 +224,6 @@ Please charge the back-up battery.</source>
         <source>Document View</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>RunningAppBar</name>
 </context>
 <context>
     <name>SafeMode</name>
@@ -320,9 +317,6 @@ These termination options are provided primarily for use while developing and te
         <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>SysTray</name>
 </context>
 <context>
     <name>TempScreenSaverMonitor</name>

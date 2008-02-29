@@ -40,7 +40,7 @@ public:
 
     virtual bool match( const QRegExp & ) const { return FALSE; }
 
-    void setCategories( const QArray<int> &v ) { mCats = v; mCats.sort(); }
+    void setCategories( const QArray<int> &v ) { mCats = v.copy(); mCats.sort(); }
     void setCategories( int single );
     const QArray<int> &categories() const { return mCats; }
 

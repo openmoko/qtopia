@@ -217,7 +217,7 @@ void WeekGroup::setDay(int i)
     }
 }
 
-QString RepeatEntry::trOrdinal(int n) const
+QString RepeatEntry::trSmallOrdinal(int n) const
 {
     if ( n == 1 ) return tr("first","eg. first Friday of month");
     else if ( n == 2 ) return tr("second");
@@ -341,7 +341,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
 	.arg(mEvent.start().date().day());
 
     strWeekDay = tr("the %1 %2.","eg. %1 %2 = 2nd Friday")
-	.arg(trOrdinal(
+	.arg(trSmallOrdinal(
 		    Calendar::weekInMonth(mEvent.start().date())))
 	.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long));
 
@@ -351,7 +351,7 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
 
     strEndWeekDay =
 	((fromEndOfWeek > 1)
-	    ? strEndWeekDay.arg( trOrdinal(fromEndOfWeek) )
+	    ? strEndWeekDay.arg( trSmallOrdinal(fromEndOfWeek) )
 	    : strEndWeekDay1)
 	.arg( TimeString::localDayOfWeek( mEvent.start().date(), TimeString::Long ) );
 
@@ -405,6 +405,8 @@ RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
 	    this, SLOT(setRepeatOnWeekDay(int,bool)));
     connect(monthGroup, SIGNAL(clicked(int)),
 	    this, SLOT(setSubRepeatType(int)));
+
+    resize(100,100);
 }
 
 RepeatEntry::~RepeatEntry() {}
@@ -525,23 +527,23 @@ void RepeatEntry::refreshLabels()
 			);
 	    else
 		descLabel->setText(
-			tr("Repeat every %1 months on the %2 of the month.", "eg. %1 = 4, %2 = 3rd")
+			tr("Repeat every %1 months on day %2 of the month.", "eg. %1 = 4, %2 = 3rd")
 			.arg(mEvent.frequency())
-			.arg(trOrdinal(mEvent.start().date().day()))
+			.arg(mEvent.start().date().day())
 			);
 	    type = tr("Every %1 month(s)");
 	    break;
 	case PimEvent::MonthlyDay:
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(tr("Repeat every month on the %1 %2 of the month.", "eg. %1 %2 = 2nd Friday")
-			.arg(trOrdinal(
+			.arg(trSmallOrdinal(
 				Calendar::weekInMonth(mEvent.start().date())))
 			.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 			);
 	    else
 		descLabel->setText(tr("Repeat every %1 months on the %2 %3 of the month.", "eg. %1 = 4, %2 %3 = 2nd Friday")
 			.arg(mEvent.frequency()) 
-			.arg(trOrdinal(
+			.arg(trSmallOrdinal(
 				Calendar::weekInMonth(mEvent.start().date())))
 			.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 			);
@@ -562,7 +564,7 @@ void RepeatEntry::refreshLabels()
 		    } else {
 			descLabel->setText(
 				tr("Repeat every month on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday")
-				.arg( trOrdinal(fromEndOfWeek) )
+				.arg( trSmallOrdinal(fromEndOfWeek) )
 				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				);
 		    }
@@ -576,7 +578,7 @@ void RepeatEntry::refreshLabels()
 		    } else {
 			descLabel->setText(
 				tr("Repeat every %3 months on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday, %3 = 4")
-				.arg( trOrdinal(fromEndOfWeek) )
+				.arg( trSmallOrdinal(fromEndOfWeek) )
 				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				.arg(mEvent.frequency()) 
 				);

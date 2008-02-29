@@ -25,8 +25,7 @@
 #include <qtopia/qpeglobal.h>
 
 #if (defined(Q_OS_WIN32) || defined(Q_OS_WIN64) ) 
-
-#  if defined(QTOPIAPIM_MAKEDLL)	/* create a Qt DLL library for qtopia */
+#  if defined(QTOPIAPIM_MAKEDLL)	/* create a Qtopia Pim DLL library */
 #    if defined(QTOPIAPIM_DLL)
 #      undef QTOPIAPIM_DLL
 #    endif
@@ -34,7 +33,7 @@
 #    define QTOPIAPIM_TEMPLATE_EXTERN
 #    define QTOPIAPIM_TEMPLATEDLL
 #    undef  QTOPIAPIM_DISABLE_COPY	/* avoid unresolved externals */
-#  elif defined(QTOPIAPIM_DLL) || defined (QT_DLL)		/* use a Qt DLL library */
+#  elif defined(QTOPIAPIM_DLL) || defined (QT_DLL)		/* use a Qtopia Pim DLL library */
 #    define QTOPIAPIM_EXPORT  __declspec(dllimport)
 #    define QTOPIAPIM_TEMPLATE_EXTERN /*extern*/
 #    define QTOPIAPIM_TEMPLATEDLL

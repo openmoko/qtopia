@@ -18,15 +18,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Todo Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Tasks due the next</source>
+        <comment>... 3 days</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source> days</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Todo Options</source>
+        <comment>Tasks due the next... 5 days</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

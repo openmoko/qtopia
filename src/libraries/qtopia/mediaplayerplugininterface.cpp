@@ -21,6 +21,7 @@
 
 /*!
     \class MediaPlayerDecoder <qtopia/mediaplayerplugininterface.h>
+
     \brief The MediaPlayerDecoder class provides an abstract base class for
     Qtopia MediaPlayer decoder plugins.
 
@@ -28,6 +29,8 @@
     reimplementing the pure virtual functions and exporting the class with
     the \c Q_EXPORT_PLUGIN macro. See the \link pluginintro.html Plugins
     documentation\endlink for details.
+
+    \ingroup qtopiaemb
 */
 
 /*!
@@ -120,12 +123,16 @@
     \endcode
 
     The internationalization is achieved inside the plugin using the
-    static QObject::tr() function around the translatable strings.
+    qApp->translate() function around the translatable strings.
 
-    For the above example, the code to generate the string will be written like this:
+    For the above example, the code to generate the string might be written like this:
     \code
-	QObject::tr("Format: ") + QObject::tr("MPEG1 Layer3") + QObject::tr(", Year: ") + "1998";
+	qApp->translate( "PluginName", "Format: MPEG1 Layer3" ) + ", " +
+	    qApp->translate( "PluginName", "Year: " + "1998";
     \endcode
+
+    Please refer to the Qt Internationalization documentation for more detailed
+    information on creating code which makes good translations possible.
 
     The translation files are loaded by the Qtopia MediaPlayer for the decoder
     plugin by searching the language directories for files matching
@@ -422,41 +429,44 @@
 
 /*!
     \class MediaPlayerDecoder_1_6 <qtopia/mediaplayerplugininterface.h>
+
     \brief The MediaPlayerDecoder_1_6 class provides an extension to the
     MediaPlayerDecoder class for Qtopia MediaPlayer decoder plugins.
+
+    \ingroup qtopiaemb
 */
 
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::supportsStreaming() = 0
 
-    Returns if the decoder supports streaming.
+    Returns TRUE if the decoder supports streaming.
 */
 
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::canStreamURL( const QUrl& url, const QString& mimetype ) = 0
 
-    Returns if the decoder can support the given /a mimetype with the /a url provided.
+    Returns TRUE if the decoder can support the given \a mimetype with the \a url provided.
 */
 
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::openURL( const QUrl& url, const QString& mimetype ) = 0
 
-    Opens the /a url of given /a mimetype. Typically this information is provided by a web
+    Opens the \a url of given \a mimetype. Typically this information is provided by a web
     server to a web browser which could pass this on directly to the plugin or indirectly to the
-    Qtopia Media Player through a QCop signal for this.
+    Qtopia Media Player through a QCop signal.
 */
 
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::streamed() = 0
 
-    Returns if the decoder is playing a streamed file opened using openURL(), or if the file was
+    Returns TRUE if the decoder is playing a streamed file opened using openURL(), or FALSE if the file was
     opened using the MediaPlayerDecoder::open() function used for files.
 */
 
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::syncAvailable() = 0
 
-    Returns if the decoder supports for the given stream syncing the audio and
+    Returns TRUE if the decoder supports for the given stream syncing the audio and
     video together with the sync() function.
 */
 
@@ -470,9 +480,9 @@
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::seekAvailable() = 0
 
-    Returns if the stream is seekable or not. For streamed media, it is possible
+    Returns TRUE if the stream is seekable or not. For streamed media, it is possible
     that seeking may not be able to be implemented in the plugin therefore
-    the plugin returns FALSE, otherwise if it can it returns TRUE.
+    the plugin returns FALSE, otherwise if it can, it returns TRUE.
 */
 
 /*!
@@ -484,7 +494,7 @@
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::tellAvailable() = 0
 
-    Returns if the decoder can support the tell() function for the given stream.
+    Returns TRUE if the decoder can support the tell() function for the given stream.
 */
 
 /*!
@@ -496,7 +506,7 @@
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::lengthAvailable() = 0
 
-    Returns if the decoder can support the length() function for the given stream.
+    Returns TRUE if the decoder can support the length() function for the given stream.
 */
 
 /*!
@@ -510,7 +520,7 @@
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::totalTimeAvailable() = 0
 
-    Returns if the decoder can support the totalTime() function for the given stream.
+    Returns TRUE if the decoder can support the totalTime() function for the given stream.
 */
 
 /*!
@@ -525,7 +535,7 @@
 /*!
     \fn virtual bool MediaPlayerDecoder_1_6::currentTimeAvailable() = 0
 
-    Returns if the decoder can support the currentTime() function for the given stream.
+    Returns TRUE if the decoder can support the currentTime() function for the given stream.
 */
 
 /*!
@@ -541,6 +551,7 @@
 
 /*!
     \class MediaPlayerPluginInterface <qtopia/mediaplayerplugininterface.h>
+
     \brief The MediaPlayerPluginInterface class is used to access MediaPlayerDecoder objects.
 */
 

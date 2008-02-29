@@ -32,6 +32,14 @@
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
+    <message>
+        <source>&lt;p&gt;There are no running network services.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This is the state of your running network services.</source>
+        <translation type="unfinished">&lt;p&gt;Dies ist der Status Ihrer aktiven Netzwerkverbindung.</translation>
+    </message>
 </context>
 <context>
     <name>NetworkSettingsBase</name>
@@ -45,7 +53,7 @@
     </message>
     <message>
         <source>&lt;p&gt;This is the state of your running network services.</source>
-        <translation>&lt;p&gt;Dies ist der Status Ihrer aktiven Netzwerkverbindung.</translation>
+        <translation type="unfinished">&lt;p&gt;Dies ist der Status Ihrer aktiven Netzwerkverbindung.</translation>
     </message>
     <message>
         <source>Services</source>

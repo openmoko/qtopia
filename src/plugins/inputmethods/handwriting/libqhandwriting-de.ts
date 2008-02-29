@@ -165,7 +165,7 @@
     </message>
     <message>
         <source>ms</source>
-        <translation>ms</translation>
+        <translation type="obsolete">ms</translation>
     </message>
     <message>
         <source>Input areas displayed</source>
@@ -204,7 +204,7 @@
     </message>
     <message>
         <source>%1 ms</source>
-        <translation>%1 ms</translation>
+        <translation type="obsolete">%1 ms</translation>
     </message>
     <message>
         <source>Out of space</source>
@@ -221,6 +221,11 @@ Free up some space
 and try again.
 
 Quit anyway?</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <comment>milliseconds</comment>
+        <translation type="unfinished">%1 ms</translation>
     </message>
 </context>
 </TS>

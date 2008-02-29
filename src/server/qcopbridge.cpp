@@ -25,15 +25,18 @@
 #include <qtopia/qcopenvelope_qws.h>
 #endif
 #include <qtopia/qpeapplication.h>
+#include <qtopia/global.h>
 #include <qtopia/version.h>
 
 #include <qdir.h>
 #include <qfile.h>
 #include <qtextstream.h>
 #include <qdatastream.h>
+#include <qcstring.h>
 #include <qstringlist.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
+#include <qtimer.h>
 #ifdef Q_WS_QWS
 #include <qcopchannel_qws.h>
 #endif
@@ -74,6 +77,7 @@ QCopBridge::QCopBridge( Q_UINT16 port, QObject *parent,
 #endif
     }
     sendSync = FALSE;
+    openConnections.setAutoDelete( TRUE );
 }
 
 QCopBridge::~QCopBridge()
@@ -83,11 +87,23 @@ QCopBridge::~QCopBridge()
 #endif
 }
 
+void QCopBridge::authorizeConnections()
+{
+    QListIterator<QCopBridgePI> it(openConnections);
+    while ( it.current() ) {
+	if ( !it.current()->verifyAuthorised() ) {
+	    disconnect ( it.current(), SIGNAL( connectionClosed( QCopBridgePI *) ), this, SLOT( closed( QCopBridgePI *) ) );
+	    openConnections.removeRef( it.current() );
+	} else
+	    ++it;
+    }
+}
+
 void QCopBridge::newConnection( int socket )
 {
     QCopBridgePI *pi = new QCopBridgePI( socket, this );
     openConnections.append( pi );
-    connect ( pi, SIGNAL( connectionClosed( QCopBridgePI *) ), this, SLOT( connectionClosed( QCopBridgePI *) ) );
+    connect ( pi, SIGNAL( connectionClosed( QCopBridgePI *) ), this, SLOT( closed( QCopBridgePI *) ) );
 
     QPEApplication::setTempScreenSaverMode( QPEApplication::DisableSuspend );
 
@@ -97,9 +113,10 @@ void QCopBridge::newConnection( int socket )
     }
 }
 
-void QCopBridge::connectionClosed( QCopBridgePI *pi )
+void QCopBridge::closed( QCopBridgePI *pi )
 {
-    openConnections.remove( pi );
+    emit connectionClosed( pi->peerAddress() );
+    openConnections.removeRef( pi );
     if ( openConnections.count() == 0 ) {
 	QPEApplication::setTempScreenSaverMode( QPEApplication::Enable );
     }
@@ -113,84 +130,18 @@ void QCopBridge::closeOpenConnections()
 }
 
 
-void QCopBridge::desktopMessage( const QCString &command, const QByteArray &args )
+void QCopBridge::desktopMessage( const QCString &command, const QByteArray &data )
 {
-    command.stripWhiteSpace();
-
-    int paren = command.find( "(" );
-    if ( paren <= 0 ) {
-	qDebug("DesktopMessage: bad qcop syntax");
-	return;
-    }
-
-    QString params = command.mid( paren + 1 );
-    if ( params[(int)params.length()-1] != ')' ) {
-	qDebug("DesktopMessage: bad qcop syntax");
-	return;
-    }
-
-    params.truncate( params.length()-1 );
-
-    QStringList paramList = QStringList::split( ",", params );
-    QString data;
-    if ( paramList.count() ) {
-	QDataStream stream( args, IO_ReadOnly );
-	for ( QStringList::Iterator it = paramList.begin(); it != paramList.end(); ++it ) {
-	    QString str;
-	    if ( *it == "QString" ) {
-		stream >> str;
-	    } else if ( *it == "QCString" ) {
-		QCString cstr;
-		stream >> cstr;
-		str = QString::fromLocal8Bit( cstr );
-	    } else if ( *it == "int" ) {
-		int i;
-		stream >> i;
-		str = QString::number( i );
-	    } else if ( *it == "bool" ) {
-		int i;
-		stream >> i;
-		str = QString::number( i );
-	    } else {
-		qDebug(" cannot route the argument type %s throught the qcop bridge", (*it).latin1() );
-		return;
-	    }
-	    QString estr;
-	    for (int i=0; i<(int)str.length(); i++) {
-		QChar ch = str[i];
-		if ( ch.row() )
-		    goto quick;
-		switch (ch.cell()) {
-		    case '&':
-			estr.append( "&amp;" );
-			break;
-		    case ' ':
-			estr.append( "&0x20;" );
-			break;
-		    case '\n':
-			estr.append( "&0x0d;" );
-			break;
-		    case '\r':
-			estr.append( "&0x0a;" );
-			break;
-		    default: quick:
-			estr.append(ch);
-		}
-	    }
-	    data += " " + estr;
-	}
-    }
-    QString sendCommand = QString(command.data()) + data;
-    // send the command to all open connections
     if ( command == "startSync()" ) {
 	// we need to buffer it a bit
 	sendSync = TRUE;
 	startTimer( 20000 );
     }
 
+    // send the command to all open connections
     QCopBridgePI *pi;
     for ( pi = openConnections.first(); pi != 0; pi = openConnections.next() ) {
-	pi->sendDesktopMessage( sendCommand );
+	pi->sendDesktopMessage( command, data );
     }
 }
 
@@ -230,8 +181,9 @@ QCopBridgePI::QCopBridgePI( int socket, QObject *parent, const char* name )
 	state = Wait_USER;
 
 	// idle timer to close connections when not used anymore
-	startTimer( 60000 );
-	connected = TRUE;
+	timer = new QTimer(this);
+	connect( timer, SIGNAL(timeout()), this, SLOT(connectionClosed()) );
+	timer->start( 300000, TRUE );
     }
 }
 
@@ -241,17 +193,35 @@ QCopBridgePI::~QCopBridgePI()
 
 }
 
+bool QCopBridgePI::verifyAuthorised()
+{
+    if ( !SyncAuthentication::isAuthorized(peerAddress()) ) {
+	state = Forbidden;
+	return FALSE;
+    }
+    return TRUE;
+}
+
 void QCopBridgePI::connectionClosed()
 {
     emit connectionClosed( this );
-    // qDebug( "Debug: Connection closed" );
-    delete this;
 }
 
 void QCopBridgePI::sendDesktopMessage( const QString &msg )
 {
     QString str = "CALL QPE/Desktop " + msg; // No tr
     send ( str );
+}
+
+void QCopBridgePI::sendDesktopMessage( const QCString &msg, const QByteArray& data )
+{
+    const char hdr[]="CALLB QPE/Desktop ";
+    writeBlock(hdr,sizeof(hdr)-1);
+    writeBlock(msg,msg.length());
+    writeBlock(" ",1);
+    QByteArray b64 = Global::encodeBase64(data);
+    writeBlock(b64.data(),b64.size());
+    writeBlock("\r\n",2);
 }
 
 
@@ -264,8 +234,10 @@ void QCopBridgePI::send( const QString& msg )
 
 void QCopBridgePI::read()
 {
-    while ( canReadLine() )
+    while ( canReadLine() ) {
+	timer->start( 300000, TRUE );
 	process( readLine().stripWhiteSpace() );
+    }
 }
 
 void QCopBridgePI::process( const QString& message )
@@ -287,7 +259,7 @@ void QCopBridgePI::process( const QString& message )
     // we always respond to QUIT, regardless of state
     if ( cmd == "QUIT" ) {
 	send( "211 Have a nice day!" ); // No tr
-	delete this;
+	close();
 	return;
     }
 
@@ -325,7 +297,6 @@ void QCopBridgePI::process( const QString& message )
 
     // noop (NOOP)
     else if ( cmd == "NOOP" ) {
-	connected = TRUE;
 	send( "200 Command okay" ); // No tr
     }
 
@@ -415,11 +386,3 @@ void QCopBridgePI::process( const QString& message )
 }
 
 
-
-void QCopBridgePI::timerEvent( QTimerEvent * )
-{
-    if ( connected )
-	connected = FALSE;
-    else
-	connectionClosed();
-}

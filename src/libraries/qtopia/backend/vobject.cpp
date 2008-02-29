@@ -46,6 +46,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #include <malloc.h>
 #endif
 
+#include <qtopia/config.h>
 #include "vobject_p.h"
 #include "qfiledirect_p.h"
 #include <string.h>
@@ -61,6 +62,10 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #define LONG_VALUE_OF(o)		o->val.l
 #define ANY_VALUE_OF(o)			o->val.any
 #define VOBJECT_VALUE_OF(o)		o->val.vobj
+
+static char vobj_cs[10];
+static enum { EightBit, QuotedPrintable, Base64 } vobj_enc=EightBit;
+static const char *vobj_enc_s=0;
 
 typedef union ValueItem {
     const char *strs;
@@ -953,6 +958,17 @@ static void appendsOFile(OFile *fp, const char *s)
 
 #endif
 
+static void appendsOFileEncCs(OFile *fp)
+{
+    if ( vobj_enc_s ) {
+	appendsOFile(fp, ";" VCEncodingProp "=");
+	appendsOFile(fp, vobj_enc_s);
+    }
+    appendsOFile(fp, ";" VCCharSetProp "=");
+    appendsOFile(fp, vobj_cs);
+}
+
+
 static void initOFile(OFile *fp, FILE *ofp)
 {
     fp->fp = ofp;
@@ -1005,26 +1021,16 @@ static int writeBase64(OFile *fp, unsigned char *s, long len)
     return 1;
 }
 
-static const char *replaceChar(unsigned char c) 
+static const char *qpReplaceChar(unsigned char c) 
 {
     if (c == '\n') {
 	return "=0A=\n";
     } else if (
-	    (c >= 'A' && c <= 'Z') 
+	    // RFC 1521
+	    (c >= 32 && c <= 60) // Note: " " not allowed at EOL
 	    ||
-	    (c >= 'a' && c <= 'z') 
-	    ||
-	    (c >= '0' && c <= '9') 
-	    ||
-	    (c >= '\'' && c <= ')') 
-	    ||
-	    (c >= '+' && c <= '-') 
-	    ||
-	    (c == '/')
-	    ||
-	    (c == '?') 
-	    ||
-	    (c == ' ')) 
+	    (c >= 62 && c <= 126)
+	)
     { 
 	return 0;
     }
@@ -1048,7 +1054,7 @@ static const char *replaceChar(unsigned char c)
     return trans;
 }
 
-static void writeQPString(OFile *fp, const char *s)
+static void writeEncString(OFile *fp, const char *s, bool nosemi)
 {
     /*
 	only A-Z, 0-9 and 
@@ -1067,13 +1073,35 @@ static void writeQPString(OFile *fp, const char *s)
 
      */
     const char *p = s;
-    while (*p) {
-	const char *rep = replaceChar(*p);
-	if (rep)
-	    appendsOFile(fp, rep);
-	else
-	    appendcOFile(fp, *p);
-	p++;
+    switch ( vobj_enc ) {
+	case EightBit:
+	    while (*p) {
+		if ( *p == '\n' || nosemi && ( *p == '\\' || *p == ';' ) )
+		    appendcOFile(fp, '\\');
+		appendcOFile(fp, *p);
+		p++;
+	    }
+	    break;
+	case QuotedPrintable:
+	    while (*p) {
+		const char *rep = qpReplaceChar(*p);
+		if (rep)
+		    appendsOFile(fp, rep);
+		else if ( *p == ';' && nosemi )
+		    appendsOFile(fp, "=3B");
+		else if ( *p == ' ' ) {
+		    if ( !p[1] || p[1] == '\n' ) // RFC 1521
+			appendsOFile(fp, "=20");
+		    else
+			appendcOFile(fp, *p);
+		} else
+		    appendcOFile(fp, *p);
+		p++;
+	    }
+	    break;
+	case Base64:
+	    writeBase64(fp, (unsigned char*)p, strlen(p));
+	    break;
     }
 }
 
@@ -1084,7 +1112,8 @@ static bool includesUnprintable(VObject *o)
 	    const char *p = STRINGZ_VALUE_OF(o);
 	    if (p) {
 		while (*p) {
-		    if (replaceChar(*p))
+		    if (*p==' ' && (!p[1] || p[1]=='\n') // RFC 1521: spaces at ends need quoting
+			     || qpReplaceChar(*p) )
 			return TRUE;
 		    p++;
 		}
@@ -1096,12 +1125,12 @@ static bool includesUnprintable(VObject *o)
 	    
 static void writeVObject_(OFile *fp, VObject *o);
 
-static void writeValue(OFile *fp, VObject *o, unsigned long size)
+static void writeValue(OFile *fp, VObject *o, unsigned long size, bool nosemi)
 {
     if (o == 0) return;
     switch (VALUE_TYPE(o)) {
 	case VCVT_STRINGZ: {
-	    writeQPString(fp, STRINGZ_VALUE_OF(o));
+	    writeEncString(fp, STRINGZ_VALUE_OF(o), nosemi);
 	    break;
 	    }
 	case VCVT_UINT: {
@@ -1134,19 +1163,17 @@ static void writeAttrValue(OFile *fp, VObject *o)
 	struct PreDefProp *pi;
 	pi = lookupPropInfo(NAME_OF(o));
 	if (pi && ((pi->flags & PD_INTERNAL) != 0)) return;
-	if ( includesUnprintable(o) ) {
-	    appendsOFile(fp, ";" VCEncodingProp "=" VCQuotedPrintableProp);
-	    appendsOFile(fp, ";" VCCharSetProp "=" "UTF-8");
-	}
+	if ( includesUnprintable(o) )
+	    appendsOFileEncCs(fp);
 	appendcOFile(fp,';');
 	appendsOFile(fp,NAME_OF(o));
-	}
-    else
+    } else {
 	appendcOFile(fp,';');
+    }
     if (VALUE_TYPE(o)) {
 	appendcOFile(fp,'=');
-	writeValue(fp,o,0);
-	}
+	writeValue(fp,o,0,TRUE);
+    }
 }
 
 static void writeGroup(OFile *fp, VObject *o)
@@ -1209,10 +1236,8 @@ static void writeProp(OFile *fp, VObject *o)
 		fields++;
 	    }
 	    fields = fields_;
-	    if (!printable) {
-		appendsOFile(fp, ";" VCEncodingProp "=" VCQuotedPrintableProp);
-		appendsOFile(fp, ";" VCCharSetProp "=" "UTF-8");
-	    }
+	    if (!printable)
+		appendsOFileEncCs(fp);
 	    appendcOFile(fp,':');
 	    while (*fields) {
 		VObject *t = isAPropertyOf(o,*fields);
@@ -1222,7 +1247,7 @@ static void writeProp(OFile *fp, VObject *o)
 	    }
 	    fields = fields_;
 	    for (i=0;i<n;i++) {
-		writeValue(fp,isAPropertyOf(o,*fields),0);
+		writeValue(fp,isAPropertyOf(o,*fields),0,TRUE);
 		fields++;
 		if (i<(n-1)) appendcOFile(fp,';');
 	    }
@@ -1231,15 +1256,13 @@ static void writeProp(OFile *fp, VObject *o)
 
 	
     if (VALUE_TYPE(o)) {
-	    if ( includesUnprintable(o) ) {
-	    appendsOFile(fp, ";" VCEncodingProp "=" VCQuotedPrintableProp);
-	    appendsOFile(fp, ";" VCCharSetProp "=" "UTF-8");
-	}
+	    if ( includesUnprintable(o) )
+			appendsOFileEncCs(fp);
 	unsigned long size = 0;
         VObject *p = isAPropertyOf(o,VCDataSizeProp);
 	if (p) size = LONG_VALUE_OF(p);
 	appendcOFile(fp,':');
-	writeValue(fp,o,size);
+	writeValue(fp,o,size,FALSE);
 	}
 
     appendcOFile(fp,'\n');
@@ -1269,8 +1292,35 @@ static void writeVObject_(OFile *fp, VObject *o)
 	}
 }
 
+static void initVObjectEncoding()
+{
+    Config pimConfig( "Beam" );
+    pimConfig.setGroup("Send");
+    Config devcfg(pimConfig.readEntry("DeviceConfig"),Config::File);
+    QString enc = "QP";
+    QString cs = "UTF-8";
+    if ( devcfg.isValid() ) {
+	devcfg.setGroup("Send");
+	enc = devcfg.readEntry("Encoding","QP"); 
+	cs = devcfg.readEntry("CharSet","UTF-8"); 
+    }
+    strncpy(vobj_cs,cs.latin1(),10);
+    if ( enc == "QP" ) {
+	vobj_enc = QuotedPrintable;
+	vobj_enc_s = VCQuotedPrintableProp;
+    } else if ( enc == "B64" ) {
+	vobj_enc = Base64;
+	vobj_enc_s = VCBase64Prop;
+    } else {
+	vobj_enc = EightBit;
+	vobj_enc_s = 0;
+    }
+}
+
 void writeVObject(FILE *fp, VObject *o)
 {
+    initVObjectEncoding();
+
     OFile ofp;
     // #####
     //_setmode(_fileno(fp), _O_BINARY);

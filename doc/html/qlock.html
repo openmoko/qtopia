@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/nightly/qt-2.3.4/src/kernel/qlock_qws.cpp:65 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QLock Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QLock Class Reference</h1>
+
+<p>A QLock is a wrapper round a System V shared semaphore;
+it is used by Qt/Embedded for synchronising access to the graphics
+card and shared memory region between processes.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qlock_qws-h.html">qlock_qws.h</a>&gt;</tt>
+<p><a href="qlock-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#QLock"><b>QLock</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, char&nbsp;id, bool&nbsp;create = FALSE )</div></li>
+<li><div class=fn><a href="#~QLock"><b>~QLock</b></a> ()</div></li>
+<li><div class=fn>enum <b>Type</b> { Read, Write }</div></li>
+<li><div class=fn>bool <a href="#isValid"><b>isValid</b></a> () const</div></li>
+<li><div class=fn>void <a href="#lock"><b>lock</b></a> ( Type&nbsp;t )</div></li>
+<li><div class=fn>void <a href="#unlock"><b>unlock</b></a> ()</div></li>
+<li><div class=fn>bool <a href="#locked"><b>locked</b></a> () const</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+A QLock is a wrapper round a System V shared semaphore;
+it is used by <a href="qt.html">Qt</a>/Embedded for synchronising access to the graphics
+card and shared memory region between processes.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QLock"></a>QLock::QLock ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;filename, char&nbsp;id, bool&nbsp;create = FALSE )
+</h3>
+
+Creates a lock. filename is the file path of the Unix-domain socket
+the <a href="qt.html">Qt</a>/Embedded client is using. Id is the name of the particular lock
+to be created on that socket. create is true if it is to be created
+(as the Qt/Embedded server does), false if it is expected to already
+exist (as the Qt/Embedded client does).
+
+<h3 class=fn><a name="~QLock"></a>QLock::~QLock ()
+</h3>
+
+Destroys a lock
+
+<h3 class=fn>bool <a name="isValid"></a>QLock::isValid () const
+</h3>
+
+Returns true if the lock constructor was succesful, false if the lock
+could not be created or was not available to connect to.
+
+<h3 class=fn>void <a name="lock"></a>QLock::lock ( Type&nbsp;t )
+</h3>
+Locks the semaphore. Locks can either be Read or Write. If a lock is
+Read, attempts to lock by other processes as Read will succeed, Write
+attempts will block until the lock is unlocked. If locked as Write,
+all attempts to lock by other processes will lock until the lock is
+unlocked. Locks are recursive; that is a given QLock can be locked
+multiple times by the same process without blocking, and will only be
+unlocked after a corresponding number of <a href="#unlock">unlock</a>() calls.
+
+<h3 class=fn>bool <a name="locked"></a>QLock::locked () const
+</h3>
+
+Returns true if the lock is currently held by the current process.
+
+<h3 class=fn>void <a name="unlock"></a>QLock::unlock ()
+</h3>
+
+Unlocks the semaphore. If other processes were blocking waiting to <a href="#lock">lock</a>()
+the semaphore, one of them will wake up and succeed in lock()ing.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

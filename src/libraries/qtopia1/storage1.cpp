@@ -22,7 +22,7 @@
 #include <qstringlist.h>
 
 // Useful for construction a QComboBox from the Storage Info list
-QStringList StorageInfo::fileSystemStrings() const
+QStringList StorageInfo::fileSystemNames() const
 {
     QListIterator<FileSystem> it( mFileSystems );
     QStringList strings;

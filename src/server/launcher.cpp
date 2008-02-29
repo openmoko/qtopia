@@ -32,6 +32,7 @@
 #include <qtopia/categories.h>
 #include <qtopia/services.h>
 #include <qtopia/version.h>
+#include <qtopia/custom.h>
 
 #include <qdir.h>
 #ifdef Q_WS_QWS
@@ -180,6 +181,12 @@ void CategoryTabWidget::addItem( const QString& linkfile )
 void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
 	AppLnkSet* docFolder, const QList<FileSystem> &fs)
 {
+    QString current;
+    if ( categoryBar ) {
+	int c = categoryBar->currentTab();
+	if ( c>=0 ) current = ids[c];
+    }
+
     delete categoryBar;
     categoryBar = new CategoryTabBar( this );
     QPalette pal = categoryBar->palette();
@@ -205,18 +212,25 @@ void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
     QListIterator<AppLnk> itapp( rootFolder->children() );
     AppLnk* l;
     while ( (l=itapp.current()) ) {
+	++itapp;
 	if ( l->type() == "Separator" ) { // No tr
 	    rootFolder->remove(l);
 	    delete l;
 	} else {
 	    int i=0;
+	    bool added = FALSE;
 	    for ( QStringList::Iterator itstring=types.begin(); itstring!=types.end(); ++itstring) {
-		if ( *itstring == l->type() )
+		if ( *itstring == l->type() ) {
 		    ((LauncherView*)stack->widget(i))->addItem(l,FALSE);
+		    added = TRUE;
+		}
 		i++;
 	    }
+	    if ( !added ) {
+		rootFolder->remove(l);
+		delete l;
+	    }
 	}
-	++itapp;
     }
     rootFolder->detachChildren();
     for (int i=0; i<tabs; i++)
@@ -238,8 +252,14 @@ void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
 
     ((LauncherView*)stack->widget(0))->setFocus();
 
+    if ( !current.isNull() ) {
+	showTab(current);
+    }
+
     categoryBar->show();
     stack->show();
+
+    QCopEnvelope e("QPE/TaskBar","reloadApps()");
 }
 
 void CategoryTabWidget::setTabAppearance( const QString &id, Config &cfg )
@@ -365,6 +385,11 @@ LauncherView *CategoryTabWidget::view( const QString &id )
 {
     int idx = ids.findIndex( id );
     return (LauncherView *)stack->widget(idx);
+}
+
+LauncherView *CategoryTabWidget::currentView(void)
+{
+    return (LauncherView*)stack->visibleWidget();
 }
 
 //===========================================================================
@@ -682,6 +707,15 @@ void Launcher::updateMimeTypes(AppLnkSet* folder)
 
 void Launcher::loadDocs()
 {
+    QVBox vb(0,0,WStyle_Customize | WStyle_NoBorder | WStyle_Tool);
+    vb.setFrameStyle(QFrame::WinPanel+QFrame::Raised);
+    QLabel l(tr("Finding documents..."),&vb);
+    l.setMargin(10);
+    vb.resize(vb.sizeHint());
+    QSize pos = (size()-vb.size())/2;
+    vb.move(pos.width(),pos.height());
+    vb.show();
+    qApp->processEvents(); // ###### not best way
     delete docsFolder;
     docsFolder = new DocLnkSet;
     Global::findDocuments(docsFolder);
@@ -784,26 +818,26 @@ typedef struct KeyOverride {
 
 
 static const KeyOverride jp109keys[] = {
-   { 0x03, {   Qt::Key_2,      '2'     , 0x22     , 0x0000  } },
-   { 0x07, {   Qt::Key_6,      '6'     , '&'     , 0x0000  } },
-   { 0x08, {   Qt::Key_7,      '7'     , '\''     , 0x0000  } },
-   { 0x09, {   Qt::Key_8,      '8'     , '('     , 0x0000  } },
-   { 0x0a, {   Qt::Key_9,      '9'     , ')'     , 0x0000  } },
-   { 0x0b, {   Qt::Key_0,      '0'     , 0x0000  , 0x0000  } },
-   { 0x0c, {   Qt::Key_Minus,      '-'     , '='     , 0x0000  } },
+   { 0x03, {   Qt::Key_2,      '2'     , 0x22     , 0xffff  } },
+   { 0x07, {   Qt::Key_6,      '6'     , '&'     , 0xffff  } },
+   { 0x08, {   Qt::Key_7,      '7'     , '\''     , 0xffff  } },
+   { 0x09, {   Qt::Key_8,      '8'     , '('     , 0xffff  } },
+   { 0x0a, {   Qt::Key_9,      '9'     , ')'     , 0xffff  } },
+   { 0x0b, {   Qt::Key_0,      '0'     , 0xffff  , 0xffff  } },
+   { 0x0c, {   Qt::Key_Minus,      '-'     , '='     , 0xffff  } },
    { 0x0d, {   Qt::Key_AsciiCircum,'^'     , '~'     , '^' - 64  } },
-   { 0x1a, {   Qt::Key_At,     '@'     , '`'     , 0x0000  } },
+   { 0x1a, {   Qt::Key_At,     '@'     , '`'     , 0xffff  } },
    { 0x1b, {   Qt::Key_BraceLeft, '['     , '{'  , '[' - 64  } },
-   { 0x27, {   Qt::Key_Semicolon,  ';'     , '+'     , 0x0000  } },
-   { 0x28, {   Qt::Key_Colon,  ':'    ,  '*'     , 0x0000  } },
-   { 0x29, {   Qt::Key_Zenkaku_Hankaku,  0x0000  , 0x0000     , 0x0000  } },
+   { 0x27, {   Qt::Key_Semicolon,  ';'     , '+'     , 0xffff  } },
+   { 0x28, {   Qt::Key_Colon,  ':'    ,  '*'     , 0xffff  } },
+   { 0x29, {   Qt::Key_Zenkaku_Hankaku,  0xffff  , 0xffff     , 0xffff  } },
    { 0x2b, {   Qt::Key_BraceRight,  ']'    , '}'     , ']'-64  } },
-   { 0x70, {   Qt::Key_Hiragana_Katakana,    0x0000  , 0x0000  , 0x0000  } },
-   { 0x73, {   Qt::Key_Backslash,  '\\'    , '_'  ,    0x0000  } },
-   { 0x79, {   Qt::Key_Henkan,     0x0000  , 0x0000  , 0x0000  } },
-   { 0x7b, {   Qt::Key_Muhenkan,   0x0000  , 0x0000  , 0x0000  } },
-   { 0x7d, {   Qt::Key_yen,        0x00a5  , '|'     , 0x0000  } },
-   { 0x00, {   0,          0x0000  , 0x0000  , 0x0000  } }
+   { 0x70, {   Qt::Key_Hiragana_Katakana,    0xffff  , 0xffff  , 0xffff  } },
+   { 0x73, {   Qt::Key_Backslash,  '\\'    , '_'  ,    0xffff  } },
+   { 0x79, {   Qt::Key_Henkan,     0xffff  , 0xffff  , 0xffff  } },
+   { 0x7b, {   Qt::Key_Muhenkan,   0xffff  , 0xffff  , 0xffff  } },
+   { 0x7d, {   Qt::Key_yen,        0x00a5  , '|'     , 0xffff  } },
+   { 0x00, {   0,          0xffff  , 0xffff  , 0xffff  } }
 };
 
 static void setKeyboardLayout( const QString &kb ) 
@@ -838,6 +872,8 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	} else {
 	    updateLink(link);
 	}
+    } else if ( msg == "serviceChanged(QString)" ) {
+	MimeType::updateApplications();
     } else if ( msg == "busy()" ) {
 	emit busy();
     } else if ( msg == "notBusy(QString)" ) {
@@ -888,44 +924,36 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 #endif
 
     } else if ( msg == "sendVersionInfo()" ) {
-	QCopEnvelope e( "QPE/Desktop", "versionInfo(QString)" );
+	QCopEnvelope e( "QPE/Desktop", "versionInfo(QString,QString)" );
 	QString v = QPE_VERSION;
-	QStringList l = QStringList::split( '.', v );
-	QString v2 = l[0] + '.' + l[1];
-	e << v2;
-	//qDebug("version %s\n", line.latin1());
+	e << Global::version() << Global::architecture();
     } else if ( msg == "sendCardInfo()" ) {
 #ifndef QT_NO_COP
 	QCopEnvelope e( "QPE/Desktop", "cardInfo(QString)" );
 #endif
+	storage->update();
 	const QList<FileSystem> &fs = storage->fileSystems();
 	QListIterator<FileSystem> it ( fs );
 	QString s;
 	QString homeDir = getenv("HOME");
-	QString hardDiskHome, hardDiskHomePath;
+	QString homeFs, homeFsPath;
 	for ( ; it.current(); ++it ) {
 	    int k4 = (*it)->blockSize()/256;
 	    if ( (*it)->isRemovable() ) {
 		s += (*it)->name() + "=" + (*it)->path() + "/Documents " // No tr
 		     + QString::number( (*it)->availBlocks() * k4/4 )
 		     + "K " + (*it)->options() + ";";
-	    } else if ( (*it)->disk() == "/dev/mtdblock1" ||
-		      (*it)->disk() == "/dev/mtdblock/1" ) {
-		s += (*it)->name() + "=" + homeDir + "/Documents " // No tr
-		     + QString::number( (*it)->availBlocks() * k4/4 )
-		     + "K " + (*it)->options() + ";";
-	    } else if ( (*it)->name().contains( "Hard Disk") &&
-		      homeDir.contains( (*it)->path() ) &&
-		      (*it)->path().length() > hardDiskHomePath.length() ) {
-		hardDiskHomePath = (*it)->path();
-		hardDiskHome =
+	    } else if ( homeDir.contains( (*it)->path() ) &&
+		      (*it)->path().length() > homeFsPath.length() ) {
+		homeFsPath = (*it)->path();
+		homeFs =
 		    (*it)->name() + "=" + homeDir + "/Documents " // No tr
 		    + QString::number( (*it)->availBlocks() * k4/4 )
 		    + "K " + (*it)->options() + ";";
 	    }
 	}
-	if ( !hardDiskHome.isEmpty() )
-	    s += hardDiskHome;
+	if ( !homeFs.isEmpty() )
+	    s += homeFs;
 
 #ifndef QT_NO_COP
 	e << s;
@@ -951,16 +979,13 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
     } else if ( msg == "startSync(QString)" ) {
 	QString what;
 	stream >> what;
-	delete syncDialog; syncDialog = 0;
-	syncDialog = new SyncDialog( this, "syncProgress", FALSE,
-				     WStyle_Tool | WStyle_Customize |
-				     Qt::WStyle_StaysOnTop );
-	syncDialog->showMaximized();
-	syncDialog->whatLabel->setText( "<b>" + what + "</b>" );
-	connect( syncDialog->buttonCancel, SIGNAL( clicked() ),
-		 SLOT( cancelSync() ) );	
+	delete syncDialog;
+	syncDialog = new SyncDialog( this, what );
+	syncDialog->show();
+	connect( syncDialog, SIGNAL(cancel()), SLOT(cancelSync()) );	
     } else if ( msg == "stopSync()") {
-	delete syncDialog; syncDialog = 0;
+	delete syncDialog;
+	syncDialog = 0;
     } else if ( msg == "getAllDocLinks()" ) {
 	loadDocs();
 
@@ -1031,6 +1056,10 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	stream >> kb;
 	setKeyboardLayout( kb );
 #endif
+#ifndef QT_NO_COP
+    } else if (msg == "applyStyle()") {
+	tabs->currentView()->relayout();
+#endif /* QT_NO_COP */
     }
 }
 
@@ -1041,6 +1070,8 @@ void Launcher::cancelSync()
 #ifndef QT_NO_COP
     QCopEnvelope e( "QPE/Desktop", "cancelSync()" );
 #endif
+    delete syncDialog;
+    syncDialog = 0;
 }
 
 void Launcher::launcherMessage( const QCString &msg, const QByteArray &data)
@@ -1093,6 +1124,7 @@ void Launcher::launcherMessage( const QCString &msg, const QByteArray &data)
 
 void Launcher::storageChanged()
 {
+    system( "qtopia-update-symlinks" );
     if ( in_lnk_props ) {
 	got_lnk_change = TRUE;
 	lnk_change = QString::null;
@@ -1157,4 +1189,10 @@ void Launcher::preloadApps()
 	QCopEnvelope e("QPE/Application/"+(*it).local8Bit(), "enablePreload()");
 #endif
     }
+}
+
+void Launcher::syncConnectionClosed()
+{
+    delete syncDialog;
+    syncDialog = 0;
 }

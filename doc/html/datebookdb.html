@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/libraries/qtopia/datebookdb.cpp:42 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DateBookDB Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>DateBookDB Class Reference<br><small>[obsolete]</small></h1>
+
+<p>The DateBookDB class is used to access event information in the
+Qtopia database.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="datebookdb-h.html">qtopia/datebookdb.h</a>&gt;</tt>
+<p><a href="datebookdb-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><b>DateBookDB</b> ()</div></li>
+<li><div class=fn><b>~DateBookDB</b> ()</div></li>
+<li><div class=fn>QValueList&lt;Event&gt; getEvents ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to ) &nbsp;<em>(obsolete)</em></div></li>
+<li><div class=fn>QValueList&lt;Event&gt; <b>getEvents</b> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;start )</div></li>
+<li><div class=fn>QValueList&lt;EffectiveEvent&gt; <b>getEffectiveEvents</b> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to )</div></li>
+<li><div class=fn>QValueList&lt;EffectiveEvent&gt; <b>getEffectiveEvents</b> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;start )</div></li>
+<li><div class=fn>QValueList&lt;Event&gt; <b>getRawRepeats</b> () const</div></li>
+<li><div class=fn>QValueList&lt;Event&gt; <b>getNonRepeatingEvents</b> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, const&nbsp;QDate&nbsp;&amp;&nbsp;to ) const</div></li>
+<li><div class=fn>void <b>addEvent</b> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )</div></li>
+<li><div class=fn>void <b>removeEvent</b> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )</div></li>
+<li><div class=fn>void <b>editEvent</b> ( const&nbsp;Event&nbsp;&amp;&nbsp;old, Event&nbsp;&amp;&nbsp;ev )</div></li>
+<li><div class=fn>void <b>addJFEvent</b> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev, bool&nbsp;doalarm = TRUE )</div></li>
+<li><div class=fn>void <b>removeJFEvent</b> ( const&nbsp;Event&nbsp;&amp;&nbsp;ev )</div></li>
+<li><div class=fn>bool <b>save</b> ()</div></li>
+<li><div class=fn>void <b>reload</b> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The DateBookDB class is used to access event information in the
+Qtopia database.
+<p> 
+<p> <b>This class is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+<p> <p>See also <a href="datebookiterator.html">DateBookIterator</a> and <a href="../classes.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>QValueList&lt;Event&gt; <a name="getEvents"></a>DateBookDB::getEvents ( const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;from, const&nbsp;<a href="qdate.html">QDate</a>&nbsp;&amp;&nbsp;to )
+</h3> <b>This function is obsolete.</b> It is provided to keep old source working. We strongly advise against using it in new code.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

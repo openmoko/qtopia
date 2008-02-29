@@ -147,7 +147,7 @@ void KRFBDecoder::sendClientInit()
   // Wait for server init
   qWarning( "Waiting for server init" );
 
-  static QString statusMsg = tr( "Waiting for server initialisation..." );
+  static QString statusMsg = tr( "Waiting for server initialization..." );
   emit status( statusMsg );
 
   currentState = AwaitingServerInit;

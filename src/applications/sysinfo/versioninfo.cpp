@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #include <qtopia/resource.h>
-#include <qtopia/version.h>
+#include <qtopia/global.h>
 
 #include <qlabel.h>
 #include <qpixmap.h>
@@ -52,13 +52,11 @@ VersionInfo::VersionInfo( QWidget *parent, const char *name, WFlags f )
     }
 
     QString palmtopVersionString;
-    palmtopVersionString = tr( "<b>Qtopia</b><p>Version: " ) + QPE_VERSION + "<p>";
-#ifdef QPE_VENDOR
-    QString builder = QPE_VENDOR;
-#else
-    QString builder = "Trolltech"; // No tr
-#endif    
-    palmtopVersionString += tr( "Compiled by: " ) + builder + "<p>";
+    palmtopVersionString = tr( "<b>Qtopia</b><p>Version: " ) + Global::version() + "<p>";
+    palmtopVersionString += tr( "Copyright &copy; %1 %2", "year, company" )
+			    .arg(2003)
+			    .arg("Trolltech&nbsp;AS")
+			    + "<p>";
     palmtopVersionString += tr( "Built on: " ) + __DATE__;
 
     

@@ -1,65 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-System Info Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>System InfoTest List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond 1-to-1 with features
-
-    Note: TITLEs may be used as identifiers in bug reports.
--->
-
-<h3>Memory</h3>
-<ol>
-<li>Start system info.
-<li>Confirm that the Memory tab is displayed.
-<li>Check that the Total memory displayed matches the device memory size.
-<li>Check that the graphical display matches the numertical values for 
-    Used, Buffers, Cached and Free.
-</ol>
-
-<h3>Storage</h3>
-<ol>
-<li>Start system info.
-<li>Click on the Storage tab.
-<li>Check that the top section reads "Internal Storage" 
-<li>Check that there is one section for each removable storage card
-    installed on the device.
-<li>For each section, check that the total/used/available information
-    matches what is actually installed on the device.
-</ol>
-
-<h3>CPU</h3>
-<ol>
-<li>Start system info.
-<li>Click on the CPU tab.
-<li>Check that the Type info matches the CPU type on the device.
-<li>Verify that the Application/CPU usage is shown as a graph.
-<li>Verify that the graph is scrolling slowly sideways.
-</ol>
-
-<h3>Version</h3>
-<ol>
-<li>Start system info.
-<li>Click on the Version tab.
-<li>Check that the Qtopia version info matches the version of Qtopia supposed
-    to be installed on the device.
-<li>Check that the Qtopia Compiled By info is correct, and not "Unknown".
-    It should be "Trolltech" if this is a version supplied directly by 
-    Trolltech, otherwise it should be the name of the vendor.
-<li>Check that the Qtopia "Built on" date is correct.
-<li>Check that the Linux Kernel info matches what is supposed to be 
-    installed on the device.
-<li>(If there is more info displayed) Check that any other information 
-    displayed matches what is supposed to be installed.
-</ol>
-
+<h1>Qtopia/Sys Info</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Memory</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that presented memory
+information is correct <br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Confirm that the Memory tab is displayed as the default. </li>
+        <li>Check that the Total memory displayed matches the device
+memory size. </li>
+        <li>Check that the graphical display matches the numertical
+values for     Used, Buffers, Cached and Free.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Storage</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the presented
+storage information is correct.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the Storage tab. </li>
+        <li>Check that the top section reads "Internal Storage" </li>
+        <li>Check that there is one section for each removable storage
+card installed on the device. </li>
+        <li>For each section, check that the total/used/available
+information  matches what is actually installed on the device.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;CPU</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the presented CPU
+usage is correct.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the CPU tab. </li>
+        <li>Check that the Type info matches the CPU type on the
+device. </li>
+        <li>Verify that the Application/CPU usage is shown as a graph. </li>
+        <li>Verify that the graph is scrolling slowly sideways.</li>
+        <li>Start media player and play a video.</li>
+        <li>Verify that the System CPU usage drops and the Application
+CPU usage rises.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Version</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that sys info is
+presenting the correct version information.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the Version tab. </li>
+        <li>Check that the Qtopia version info matches the version of
+Qtopia supposed     to be installed on the device. </li>
+        <li>Check that the Qtopia Compiled By info is correct, and not
+"Unknown". It should be "Trolltech" if this is a version supplied
+directly by     Trolltech, otherwise it should be the name of the
+vendor. </li>
+        <li>Check that the Qtopia "Built on" date is correct. </li>
+        <li>Check that the Linux Kernel info matches what is supposed
+to be installed on the device. </li>
+        <li>(If there is more info displayed) Check that any other
+information displayed matches what is supposed to be installed.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
 </body>
 </html>

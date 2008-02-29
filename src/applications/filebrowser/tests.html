@@ -1,101 +1,718 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-File Manager Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>File Manager Test List</h1>
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-
-<h3>File and Directory View</h3>
-<ol>
-<li>Start the <b>File Manager</b> from the <b>Applications</b> tab of the
-    launcher.  A list of files and directories will be displayed.
-</ol>
-
-<h3>Directory Traversal</h3>
-<ol>
-<li>Move up the directory tree by selecting <b>Dir</b>, followed by a
-    sub-directory, or click on the <b>Up</b> button on the toolbar.
-<li>Move to a previously viewed directory by clicking the <b>Left</b>
-    button on the toolbar.
-<li>Move down the directory tree by clicking on a directory.
-<li>The <b>size</b> of a file is displayed on the right of the listview, as
-    well as the <b>last date of modification</b>.
-<li>Directory contents can be sorted by clicking on the <b>Sort</b> menu,
-    followed by <b>by Name</b>, <b>by Size</b>, <b>by Date</b>, or
-    <b>by Type</b>.  Sort order can be changed by checking or unchecking
-    <b>Ascending</b>.  Note that a directories' contents are always displayed
-    with sub-directories before files.
-</ol>
-
-<h3>File Management</h3>
-<h4>Cut</h4>
-<ol>
-<li>Select the file(s) to be moved and click on the <b>Cut</b> button in the
-    toolbar.  Alternatively, select the file(s), click and hold, and select
-    <b>Cut</b> from the popup menu.  The file(s) will disappear from the
-    directory view.
-</ol>
-
-<h4>Copy</h4>
-<ol>
-<li>Select the file(s) to be copied and click on the <b>Copy</b> button in
-    the toolbar.  Alternatively, select the file(s), click and hold, and select
-    <b>Copy</b> from the popup menu.
-</ol>
-
-<h4>Delete</h4>
-<ol>
-<li>Select the file(s) to be copied, click and hold, and select <b>Delete</b>
-    from the popup menu.  The files will disappear from the directory view.
-</ol>
-
-<h4>Paste</h4>
-<ol>
-<li>Select the file(s) to be pasted and click on the <b>Cut</b> button in the
-    toolbar.  Alternatively, select the file(s), click and hold, and select
-    <b>Cut</b> from the popup menu.  The files will disappear from the
-    directory view.
-<li>Navigate to the required destination directory.  Click the <b>Paste</b>
-    button in the toolbar, or click and hold in the listview, and select
-    <b>Paste</b> from the popup menu.  The previously cut files appear in the
-    current directory.
-<li>Navigate to a different directory and try to paste.  An error message will
-    appear indicating that the paste was unsuccessful (no files were previously
-    cut).
-</ol>
-
-<h4>Rename</h4>
-<ol>
-<li>Click and hld the file to be renamed, and select <b>Rename</b> from the
-    popup list.  Type the new name.  Click on the listview to finish renaming.
-</ol>
-
-<h3>Application Launching</h3>
-<ol>
-<li>Navigate to a directory containing files of a mime-type handled by an
-    application in Qtopia (eg: navigate to a directory containing a text file
-    or JPEG image).  Double click on the file and the appropriate application
-    will be launched with the file as the default.
-<li>Alternatively, click and hold the file.  The popup menu will have an entry
-    <b>Open in <i>X</i></b>, where <i>X</i> is the default application for
-    that file type.
-</ol>
-
-<h3>Document Shortcut</h3>
-<ol>
-<li>Navigate to a directory containing files of a mime-type handled by an
-    application in Qtopia (eg: navigate to a directory containing a text file
-    or JPEG image).  Click and hold on the file, and select <b>Add to
-    Documents</b> from the popup menu.  Close the <b>File Manager</b> and
-    select the <b>Documents</b> tab to verify the file was added.  Clicking
-    on the new addition will launch the application associated with the file.
-</ol>
-
+<h1>Qtopia/Filebrowser</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Directory view</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the file browser
+shows the contents of a selected directory </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Start the <b>File Browser</b> from the <b>Applications</b>
+tab of the     launcher.&nbsp;</li>
+        <li>Verify that the specified list of directories for
+/home/root is displayed.</li>
+        <li>Click the 'up' button in the toolbar.</li>
+        <li>Verify that the specified list of directories for /home is
+displayed.</li>
+        <li>Click the 'up' button in the toolbar again.</li>
+        <li>Verify that the specified list of directories for / is
+displayed.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">The contents of /home/root/
+should show the following directories:<br>
+      <ul>
+        <li>Applications<br>
+        </li>
+        <li>Documents<br>
+        </li>
+        <li>modules<br>
+        </li>
+        <li>Settings</li>
+        <li>systeminfo</li>
+        <li>usr</li>
+      </ul>
+      <br>
+The contents of /home should show the following directories:<br>
+      <ul>
+        <li>etc</li>
+        <li>lost+found</li>
+        <li>QtPalmtop</li>
+        <li>root</li>
+        <li>sharp</li>
+        <li>system</li>
+        <li>tmp</li>
+        <li>userdata</li>
+      </ul>
+      <br>
+The contents of / should show the following directories:<br>
+      <ul>
+        <li>bin</li>
+        <li>boot</li>
+        <li>dev</li>
+        <li>etc</li>
+        <li>home</li>
+        <li>lib</li>
+        <li>mnt</li>
+        <li>opt</li>
+        <li>proc</li>
+        <li>root</li>
+        <li>sbin</li>
+        <li>tmp</li>
+        <li>usr</li>
+        <li>var<br>
+        </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Navigate</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can navigate
+through the directory structure<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap "Dir" + "/"</li>
+        <li>Verify that you are in the root directory. (Listed
+directories should be bin, boot, dev, etc, home, and more...).</li>
+        <li>Tap on the "lib" directory.</li>
+        <li>Verify that the contents of "lib" is shown and there is a
+combination of subdirectories and files.</li>
+        <li>Verify that you can navigate trough the directory structure
+by tapping on subdirectories to go deeper into the directory structure
+and by tapping on the "LEFT ARROW" button in the toolbar to go back to
+the previous step.</li>
+        <li>Verify that you can get back to the root directory level by
+pressing the "UP ARROW" button multiple times.</li>
+        <li>Verify that the "UP ARROW" is disabled if you are in root
+directory level.</li>
+        <li>Starting in the root directory verify that the "Dir" menu
+shows only one option: "/"</li>
+        <li>Select the "home" directory and verify that the "Dir" menu
+now shows two options: "/" and "home" and that "home" has a checkmark in
+front of it.</li>
+        <li>Select "QtPalmtop" and verify that the "Dir" menu now shows
+three options: "/", "home" and "QtPalmtop" and that "QtPalmtop" has a
+checkmark in front of it.</li>
+        <li>Select "/" in the "Dir" menu and verify that you are back
+in the root directory.</li>
+        <li>Open the "Dir" menu again and verify that only the "/"
+option is available and has a checkmark in front of it.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Sorting</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the presentation of
+a directory contents can be sorted. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>tap to /home/etc</li>
+        <li>Select sorting by Name from the menu and verify that the
+directories are shown first (sorted by name) and then the files are
+shown (sorted by name).</li>
+        <li>Select sorting by Size from the menu and verify that the
+files and directories are shown sorted by size (since all directories
+have the same size they should be grouped somewhere in the middle
+between smaller are larger files).</li>
+        <li>Select sorting by Date from the menu and verify that the
+files and directories are shown sorted by date. Oldest file/directory
+first.</li>
+        <li>Select the directory to /home/root/Applications/qtmail</li>
+        <li>If this directory doesn't contain files of different types
+(e.g. because you have not synced any mail yet) search for another
+directory that has files of multiple types (as identified by different
+file icons).<br>
+        </li>
+        <li>Select sorting by type from the menu and verify that the
+files and directories are sorted likewise. All directories together, all
+".dat" files together, all ".txt" files together, etc.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Creating a directory</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a new directory can
+be created.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Go to the root directory and tap the "Create folder" button</li>
+        <li>Verify that an error message is shown, because the root
+directory is part of the Read Only image.</li>
+        <li>Go to /home and tap the "Create folder" button again.</li>
+        <li>Verify that this time a folder is created.</li>
+        <li>Tap "Create folder" again and verify that a second folder
+named "New Folder (1)" is created.</li>
+        <li>Tap and hold the new folder until a popupmenu appears.</li>
+        <li>Select "rename" in the menu and enter a new name.</li>
+        <li>Select the <br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Renaming a directory</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a directory can be
+renamed.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Create a new directory and then tap and hold it.</li>
+        <li>In the popupmenu that appears select "rename".</li>
+        <li>Enter a new name that doesn't exist yet, e.g. "foo".</li>
+        <li>Create a second new directory.</li>
+        <li>Rename this new directory to the same name, e.g. "foo".</li>
+        <li>Verify that the new name isn't accepted as it exists
+already.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Cut and paste</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can cut a file
+from a directory and paste it in another directory.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the file(s) to be moved and click on the <b>Cut</b>
+button in the     toolbar. </li>
+        <li>Verify that the file(s) disappear from the     directory
+view.</li>
+        <li>Go up the directory three one level and select another
+directory.</li>
+        <li>Click the <span style="font-weight: bold;">Paste</span>
+button on the toolbar.</li>
+        <li>Verify that the previously cut files are inserted in the
+new directory.</li>
+        <li>Select the pasted files and Cut and Paste them back to
+their original directory.</li>
+        <li>Verify that the files are back again in their original
+directory.</li>
+        <li>Select a file and click on the <span
+ style="font-weight: bold;">Cut</span> button in the toolbar.</li>
+        <li>Click <span style="font-weight: bold;">Paste</span> in the
+same directory and verify that the file is pasted back to the same
+directory.</li>
+        <li>Click <span style="font-weight: bold;">Paste</span> again
+and verify that a file named "copy of x" is created where x is the name
+of the original file. <br>
+        </li>
+      </ol>
+      <br>
+Alternatively, select the file(s), click and hold, and select <b>Cut</b>
+from the popup menu. <br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Copy and paste</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can copy a file
+from a directory and paste it in another directory. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the file(s) to be copied and click on the <b>Copy</b>
+button in the     toolbar. </li>
+        <li>Verify that the file(s) no not disappear from the    
+directory view.</li>
+        <li>Go up the directory three one level and select another
+directory.</li>
+        <li>Click the <span style="font-weight: bold;">Paste</span>
+button on the toolbar.</li>
+        <li>Verify that the selected files are copied into the new
+directory.</li>
+        <li>Select a file and click on the <span
+ style="font-weight: bold;">Copy</span> button in the toolbar.</li>
+        <li>Click <span style="font-weight: bold;">Paste</span> and
+verify that a file named "copy of x" is created where x is the name of
+the original file. <br>
+        </li>
+      </ol>
+      <br>
+Alternatively, select the file(s), click and hold, and select <b>Copy</b>
+from the popup menu. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Delete</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a file or directory
+can be deleted.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">Hint: Don't try this test with
+important system files or directories, but rather create a test
+directory and test files first.
+      <ol>
+        <li>Select the file(s) to be deleted, click and hold, and
+select <b>Delete</b> from the popup menu. </li>
+        <li>Verify that a "verification dialog" pops up and click No.</li>
+        <li>Verify that the files are NOT removed from the directory
+view.</li>
+        <li>Repeat the same steps but this time click on Yes.<br>
+        </li>
+        <li> Verify that the files disappear from the directory view.</li>
+        <li>Repeat the same procedure for a directory.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Rename a file</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a file can be
+renamed.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Create a new file (using the text editor or upload from
+Desktop) and then tap and hold it.</li>
+        <li>In the popupmenu that appears select "rename".</li>
+        <li>Enter a new name that doesn't exist yet, e.g. "foo".</li>
+        <li>Verify that the selected file is renamed to "foo".<br>
+        </li>
+        <li>Create a second new file.</li>
+        <li>Rename this new file to the same name, e.g. "foo".</li>
+        <li>Verify that the new name isn't accepted as it exists
+already.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Application launching</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an application can
+be launched for files that are associated with that application.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Navigate to a directory containing files of a mime-type
+handled by an     application in Qtopia (eg: navigate to a directory
+containing a text file     or JPEG image).&nbsp;</li>
+        <li>Double click on the file.</li>
+        <li>Verify that the appropriate application is launched with
+the file as the default.</li>
+        <li>Close the application (the editor, jpeg player, etc).<br>
+        </li>
+        <li>Verify that you are back in the File Manager.</li>
+        <li>Click and hold the file.&nbsp;</li>
+        <li>Verify that a popup menu is opened that has an entry <b>Open
+in <i>X</i></b>, where <i>X</i> is the default application for    
+that file type.</li>
+        <li>Select the "Open in X" menu option and verify that the
+appropriate application is launched again.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Document shortcut</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a document can be
+added to the Document tab with a shortcut<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Navigate to a directory containing files of a mime-type
+handled by an     application in Qtopia (eg: navigate to a directory
+containing a text file     or JPEG image). </li>
+        <li>Click and hold on the file, and select <b>Add to    
+Documents</b> from the popup menu. </li>
+        <li>Close the <b>File Manager</b> and select the <b>Documents</b>
+tab to verify the file was added. </li>
+        <li>Clicking on the new addition will launch the application
+associated with the file. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p>&nbsp;</p>
 </body>
 </html>

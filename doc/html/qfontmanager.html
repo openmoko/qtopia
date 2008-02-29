@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/nightly/qt-2.3.4/src/kernel/qfontmanager_qws.cpp:73 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QFontManager Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QFontManager Class Reference</h1>
+
+<p>There is one and only one QFontManager per Qt/Embedded
+application (qt_fontmanager is a global variable that points to it).
+It keeps a list of font factories, a cache of rendered fonts and a list
+of fonts available on disk. QFontManager is called when a new font needs
+to be rendered from a Freetype-compatible or BDF font on disk; this
+only happens if there isn't an appropriate QPF font already available.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qfontmanager_qws-h.html">qfontmanager_qws.h</a>&gt;</tt>
+<p><a href="qfontmanager-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#QFontManager"><b>QFontManager</b></a> ()</div></li>
+<li><div class=fn><a href="#~QFontManager"><b>~QFontManager</b></a> ()</div></li>
+<li><div class=fn>QDiskFont * <a href="#get"><b>get</b></a> ( const&nbsp;QFontDef&nbsp;&amp;&nbsp;f )</div></li>
+</ul>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class=fn>int <b>cmpFontDef</b> ( const&nbsp;QFontDef&nbsp;&amp;&nbsp;goal, const&nbsp;QFontDef&nbsp;&amp;&nbsp;choice )</div></li>
+<li><div class=fn>void <a href="#initialize"><b>initialize</b></a> ()</div></li>
+<li><div class=fn>void <a href="#cleanup"><b>cleanup</b></a> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+There is one and only one QFontManager per <a href="qt.html">Qt</a>/Embedded
+application (qt_fontmanager is a global variable that points to it).
+It keeps a list of font factories, a cache of rendered fonts and a list
+of fonts available on disk. QFontManager is called when a new font needs
+to be rendered from a Freetype-compatible or BDF font on disk; this
+only happens if there isn't an appropriate QPF font already available.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QFontManager"></a>QFontManager::QFontManager ()
+</h3>
+
+Creates a font manager. This method reads in the font definition file
+from $QTDIR/lib/fonts/fontdir (or /usr/local/qt-embedded/lib/fonts/fontdir
+if QTDIR isn't defined) and creates a list of QDiskFonts to hold the 
+information in the file. It also constructs any defined font factories.
+
+<h3 class=fn><a name="~QFontManager"></a>QFontManager::~QFontManager ()
+</h3>
+
+Destroys the QFontManager and sets qt_fontmanager to 0.
+
+<h3 class=fn>void <a name="cleanup"></a>QFontManager::cleanup ()<tt> [static]</tt>
+</h3>
+
+Destroys the font manager
+
+<h3 class=fn>QDiskFont * <a name="get"></a>QFontManager::get ( const&nbsp;QFontDef&nbsp;&amp;&nbsp;f )
+</h3>
+Returns the QDiskFont that best matches <em>f</em>,
+based on family, weight, italicity and font size.
+
+<h3 class=fn>void <a name="initialize"></a>QFontManager::initialize ()<tt> [static]</tt>
+</h3>
+
+Creates a new QFontManager and points qt_fontmanager to it
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

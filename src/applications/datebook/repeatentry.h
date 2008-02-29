@@ -56,7 +56,7 @@ private slots:
 private:
 
     void refreshLabels();
-    QString trOrdinal(int n) const;
+    QString trSmallOrdinal(int n) const;
 
     QButtonGroup *typeSelector;
     QSpinBox *freqSelector;

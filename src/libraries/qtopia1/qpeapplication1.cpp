@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 
-#ifndef QT_NO_COP    
+#ifndef QT_NO_COP
 #include <qtopia/qcopenvelope_qws.h>
 #endif
 
@@ -45,9 +45,18 @@ int QPEApplication::execDialog( QDialog* d, bool nomax )
     return d->exec();
 }
 
+/*!
+
+  This method temporarily overrides the current global screen saver with
+  the screenSaverHint \a hint, allowing applications to control screensaver
+  activation during their execution.
+
+  \sa screenSaverHint
+*/
+
 void QPEApplication::setTempScreenSaverMode(screenSaverHint hint)
 {
-#ifndef QT_NO_COP    
+#ifndef QT_NO_COP
     int pid = ::getpid();
     QCopEnvelope("QPE/System", "setTempScreenSaverMode(int,int)") << hint << pid;
 #endif
@@ -55,7 +64,9 @@ void QPEApplication::setTempScreenSaverMode(screenSaverHint hint)
 
 #ifdef Q_OS_WIN32
 /*!
-  Provide minimal support for setting environment variables
+  \intern
+
+  Provides minimal support for setting environment variables
  */
 int setenv(const char* name, const char* value, int overwrite)
 {
@@ -66,8 +77,10 @@ int setenv(const char* name, const char* value, int overwrite)
   return _putenv(envValue);
 }
 
-/*
-  Provide minimal support for clearing environment variables
+/*!
+  \intern
+
+  Provides minimal support for clearing environment variables
  */
 void unsetenv(const char *name)
 {

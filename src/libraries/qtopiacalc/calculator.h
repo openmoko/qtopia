@@ -47,11 +47,7 @@ struct CalculatorPlugin {
 class QTOPIA_EXPORT Calculator:public QWidget {
 Q_OBJECT
 public:
-  Calculator (
-#ifdef QTEST
-	  int,char**,
-#endif
-	  QWidget * p = 0, const char *n = 0, WFlags fl=0);
+  Calculator ( QWidget * p = 0, const char *n = 0, WFlags fl=0);
    ~Calculator ();
 
    void keyPressEvent(QKeyEvent *e);
@@ -63,7 +59,11 @@ private:
    QComboBox *modeBox;
    QValueList<CalculatorPlugin> *pluginList;
 #endif
+#ifdef NEW_STYLE_DISPLAY
+   QLabel *LCD;
+#else
    QLineEdit *LCD;
+#endif
 };
 
 #endif

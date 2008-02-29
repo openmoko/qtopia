@@ -7,13 +7,17 @@
     </message>
     <message>
         <source>Qtopia Desktop ToDo List</source>
-        <translation>Qtopia Desktopのチェックリスト</translation>
+        <translation type="obsolete">Qtopia Desktopのチェックリスト</translation>
     </message>
     <message>
         <source>The start date must occur before the tasks due date.
 Please change the due date first.</source>
-        <translation>仕事の開始日は終了期限より前にしてください。
+        <translation type="obsolete">仕事の開始日は終了期限より前にしてください。
 終了期限を先に変更してください。</translation>
+    </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -300,16 +304,19 @@ Please change the due date first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Are you sure you want to delete the %1 selected tasks?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Are you sure you want to delete:
-%1?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>the %1 selected tasks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View the current task&apos;s details.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;Are you sure you want to delete the %1 selected tasks?&lt;/qt&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;Are you sure you want to delete:&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;?&lt;/qt&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

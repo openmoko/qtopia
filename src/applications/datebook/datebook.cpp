@@ -47,6 +47,7 @@
 #include <qtopia/pim/private/eventio_p.h>
 
 #include <qaction.h>
+#include <qtimer.h>
 #include <qdatetime.h>
 #include <qdialog.h>
 #include <qdir.h>
@@ -182,7 +183,16 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     a->addTo( eventMenu );
     */
 
-    a = new QAction( tr( "Day" ), Resource::loadIconSet( "day" ), QString::null, 0, g, 0 );
+    a = new QAction( tr( "Today" ), Resource::loadIconSet( "today" ), QString::null, 0, g, 0 );
+    connect( a, SIGNAL( activated() ), this, SLOT( slotToday() ) );
+    a->setWhatsThis( tr("Show today's events") );
+    a->addTo( sub_bar );
+    a->addTo( view );
+
+    view->insertSeparator();
+    sub_bar->addSeparator();
+
+    a = new QAction( tr( "Day", "day, not date" ), Resource::loadIconSet( "day" ), QString::null, 0, g, 0 );
     a->setWhatsThis( tr("Show selected day's events") );
     if (!thinScreen)
 	a->addTo( sub_bar );
@@ -201,7 +211,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     weekAction = a;
     a = new QAction( tr( "Month" ), Resource::loadIconSet( "month" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( viewMonth() ) );
-    a->setWhatsThis( tr("Show selected months's events") );
+    a->setWhatsThis( tr("Show selected month's events") );
     if (!thinScreen)
 	a->addTo( sub_bar );
     a->addTo( view );
@@ -212,12 +222,6 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     connect( a, SIGNAL(activated()), this, SLOT(slotFind()) );
     //a->addTo( sub_bar );
     a->addTo( eventMenu );
-
-    a = new QAction( tr( "Today" ), Resource::loadIconSet( "today" ), QString::null, 0, g, 0 );
-    connect( a, SIGNAL( activated() ), this, SLOT( slotToday() ) );
-    a->setWhatsThis( tr("Show today's events") );
-    a->addTo( sub_bar );
-    a->addTo( view );
 
     view->insertSeparator();
     a = new QAction( tr( "Settings..." ), QString::null, 0, g );
@@ -232,7 +236,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     monthView = 0;
 
     timingOther = t.elapsed();
-    viewDay();
+    viewToday();
     TimeString::connectChange(this, SLOT(changeClock()) );
     connect( qApp, SIGNAL(weekChanged(bool)),
              this, SLOT(changeWeek(bool)) );
@@ -241,13 +245,50 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
 	    this, SLOT( appMessage(const QCString &, const QByteArray &) ) );
 
     connect( qApp, SIGNAL( timeChanged() ), 
-	    this, SLOT( refreshWidgets() ) );
+	    this, SLOT( checkToday() ) );
+
+    connect( qApp, SIGNAL( timeChanged() ), 
+	    this, SLOT( updateAlarms() ) );
 
     connect( qApp, SIGNAL( flush() ), 
 	    this, SLOT( flush() ) );
 
     connect( qApp, SIGNAL( reload() ), 
 	    this, SLOT( reload() ) );
+
+    // start Timer
+    midnightTimer = new QTimer(this);
+    connect(midnightTimer, SIGNAL(timeout()), this, SLOT(checkToday()));
+    // 2 seconds after midnight
+    midnightTimer->start(
+	    (QTime::currentTime().secsTo(QTime(23,59,59)) + 3)
+	    * 1000 );
+}
+
+void DateBook::checkToday()
+{
+    if ( lastToday != QDate::currentDate() ) {
+	if ( lastToday == currentDate() )
+	    slotToday();
+	else
+	    lastToday = QDate::currentDate();
+    } else {
+	refreshWidgets();
+    }
+
+    midnightTimer->start(
+	    (QTime::currentTime().secsTo(QTime(23,59,59)) + 3)
+	    * 1000 );
+}
+
+void DateBook::updateAlarms()
+{
+    /* 
+       time may have gone backwards... but giving the same alarms 
+       again won't hurt (server will ignore) so send them all again,
+   */
+    // no real way to tell if forward or backward, so need to do the lot.
+    db->updateAlarms();
 }
 
 void DateBook::refreshWidgets()
@@ -255,13 +296,10 @@ void DateBook::refreshWidgets()
     // update active view!
     if ( dayAction->isOn() )
 	dayView->redraw();
-	//viewDay();
     else if ( weekAction->isOn() )
 	weekView->redraw();
-	//viewWeek();
     else if ( monthAction->isOn() )
 	monthView->updateOccurrences();
-	//viewMonth();
 }
 
 DateBook::~DateBook()
@@ -332,22 +370,21 @@ QString DateBook::checkEvent(const PimEvent &e)
 
 QDate DateBook::currentDate()
 {
-    QDate d = QDate::currentDate();
-
     if ( dayView && views->visibleWidget() == dayView ) {
-	d = dayView->currentDate();
+	return dayView->currentDate();
     } else if ( weekView && views->visibleWidget() == weekView ) {
-        d = weekView->currentDate();
+        return weekView->currentDate();
     } else if ( monthView && views->visibleWidget() == monthView ) {
-	d = monthView->selectedDate();
+	return monthView->selectedDate();
+    } else {
+	return QDate(); // invalid;
     }
-
-    return d;
 }
 
 void DateBook::viewToday()
 {
-    viewDay( QDate::currentDate() );
+    lastToday = QDate::currentDate();
+    viewDay( lastToday );
 }
 
 void DateBook::viewDay(const QDate& dt)
@@ -441,14 +478,25 @@ bool affectsExceptions(const PimEvent &ne, const PimEvent &oe)
     return FALSE;
 }
 
-void DateBook::editOccurrence( const Occurrence &ev )
+bool DateBook::checkSyncing()
 {
     if (syncing) {
-	QMessageBox::warning( this, tr("Calendar"),
-	                      tr( "Can not edit data, currently syncing") );
-	return;
+	if ( QMessageBox::warning(this, tr("Calendar"),
+	                     tr("Can not edit data, currently syncing"),
+			    QMessageBox::Ok, QMessageBox::Abort ) == QMessageBox::Abort )
+	{
+	    // Okay, if you say so (eg. Qtopia Desktop may have crashed)....
+	    syncing = FALSE;
+	} else
+	    return TRUE;
     }
+    return FALSE;
+}
 
+void DateBook::editOccurrence( const Occurrence &ev )
+{
+    if ( checkSyncing() )
+	return;
 
     // if this event is an exception, or has exceptions we may need to do somethign different.
     bool asException;
@@ -517,7 +565,7 @@ void DateBook::editOccurrence( const Occurrence &ev )
 	PimEvent newEv = entry->event();
 	QString error = checkEvent(newEv);
 	if (!error.isNull()) {
-	    if (QMessageBox::warning(this, "error box",
+	    if (QMessageBox::warning(this, "Error",
 			error, "Fix it", "Continue", 0, 0, 1) == 0)
 		continue;
 	}
@@ -553,12 +601,10 @@ void DateBook::editOccurrence( const Occurrence &ev )
 
 void DateBook::removeOccurrence( const Occurrence &o )
 {
-    PimEvent e = o.event();
-    if (syncing) {
-	QMessageBox::warning( this, tr("Calendar"),
-	                      tr( "Can not edit data, currently syncing") );
+    if ( checkSyncing() )
 	return;
-    }
+
+    PimEvent e = o.event();
 
     QString strName = e.description();
     if (e.isException() || e.hasRepeat()) {
@@ -704,7 +750,7 @@ void DateBook::initWeek()
 void DateBook::initMonth()
 {
     if ( !monthView ) {
-	monthView = new MonthView( db, views, "month view", FALSE ); // No tr
+	monthView = new MonthView( db, views, "month view" ); // No tr
 	views->addWidget( monthView, MONTH );
 	connect( monthView, SIGNAL( dateClicked( const QDate &) ),
              this, SLOT( showDay( const QDate &) ) );
@@ -750,60 +796,96 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	QDateTime when; int warn;
 	ds >> when >> warn;
 
-	// check to make it's okay to continue,
-	// this is the case that the time was set ahead, and
-	// we are forced given a stale alarm...
-	QDateTime current = QDateTime::currentDateTime();
-	if ( current.time().hour() != when.time().hour()
-	     && current.time().minute() != when.time().minute() )
-	    return;
+	// may be more than one item.
+	QValueList<Occurrence> items = db->getNextAlarm(when, warn);
+	QValueListIterator<Occurrence> it;
+	static bool skip_dialogs = FALSE;
 
-	bool ok;
-	Occurrence item = db->getNextAlarm(when.addSecs(warn*60), &ok);
-	if (ok) {
-	    QString msg;
-	    bool bSound = FALSE;
-	    int stopTimer = 0;
-	    msg += "<CENTER><B>" + item.event().description() + "</B>"
-		+ "<BR>" + item.event().location() + "<BR>";
+	for (it = items.begin(); it != items.end(); ++it) {
+	    Occurrence item = *it;
+	    // First Update the alarm for the event.
+	    db->updateAlarm(item.event());
 
-	    if (item.event().timeZone().isValid()) {
-		QString tzText = item.event().timeZone().id();
-		int i = tzText.find('/');
-		tzText = tzText.mid( i + 1 );
-		tzText = tzText.replace(QRegExp("_"), " ");
+	    QDateTime current = QDateTime::currentDateTime();
+	    // if we are told to skip and still getting a flood of messages,
+	    // continue.
+	    if (lastcall.addSecs(1) >= current 
+		    && lastcall.addSecs(-1) <= current
+		    && skip_dialogs)
+		continue;
 
-		msg += "<B>Time zone:</B> " + tzText + "<BR>";
+
+	    // if alarm in past, (or nearly in the past) go off.
+	    if (current.addSecs(60) >= when) {
+		QString msg;
+		bool bSound = FALSE;
+		int stopTimer = 0;
+		msg += "<CENTER><B>" + item.event().description() + "</B>"
+		    + "<BR>" + item.event().location() + "<BR>";
+
+		if (item.event().timeZone().isValid()) {
+		    QString tzText = item.event().timeZone().id();
+		    int i = tzText.find('/');
+		    tzText = tzText.mid( i + 1 );
+		    tzText = tzText.replace(QRegExp("_"), " ");
+
+		    msg += "<B>" + tr("Time zone: ") + "</B>" + tzText + "<BR>";
+		}
+
+
+		msg += TimeString::localYMDHMS(item.event().start())
+		    + (warn
+			    ? " " + tr("(in %1 minutes)").arg(warn)
+			    : QString(""))
+		    + "<BR>"
+		    + item.event().notes() + "</CENTER>";
+		if ( item.event().alarmSound() != PimEvent::Silent ) {
+		    bSound = TRUE;
+		    Sound::soundAlarm();
+		    stopTimer = startTimer( 5000 );
+		}
+
+		/*
+		QDialog dlg( this, 0, TRUE );
+		QVBoxLayout *vb = new QVBoxLayout( &dlg );
+		QScrollView *view = new QScrollView( &dlg, "scrollView");
+		view->setResizePolicy( QScrollView::AutoOneFit );
+		vb->addWidget( view );
+		QLabel *lblMsg = new QLabel( msg, &dlg );
+		view->addChild( lblMsg );
+		QPushButton *cmdOk = new QPushButton( tr("OK"), &dlg );
+		connect( cmdOk, SIGNAL(clicked()), &dlg, SLOT(accept()) );
+		vb->addWidget( cmdOk );
+
+		needShow = QPEApplication::execDialog(&dlg);
+		*/
+		//QMessageBox mb(tr("ALRARM"), msg, QMessageBox::NoIcon, QMessageBox::OkButton, 
+		switch (QMessageBox::information(this, tr("Alarm"), msg, tr("OK"), 
+			    (lastcall.addSecs(1) >= current && lastcall.addSecs(-1) <= current) 
+			    ? tr("Skip Remaining", 
+				"Skip dialogs for other alarms that are going off for current (or ealier) time")
+			    : QString::null))
+		{
+		    default:
+		    case -1:
+			// escape, don't need to show.
+			needShow = FALSE;
+			skip_dialogs = FALSE;
+			break;
+		    case 0:
+			needShow = TRUE;
+			skip_dialogs = FALSE;
+			break;
+		    case 1:
+			skip_dialogs = TRUE;
+			break;
+		}
+
+		if ( bSound )
+		    killTimer( stopTimer );
+
+		lastcall = QDateTime::currentDateTime();
 	    }
-
-
-	    msg += TimeString::localYMDHMS(item.event().start())
-		+ (warn
-			? " " + tr("(in %1 minutes)").arg(warn)
-			: QString(""))
-		+ "<BR>"
-		+ item.event().notes() + "</CENTER>";
-	    if ( item.event().alarmSound() != PimEvent::Silent ) {
-		bSound = TRUE;
-		Sound::soundAlarm();
-		stopTimer = startTimer( 5000 );
-	    }
-
-	    QDialog dlg( this, 0, TRUE );
-	    QVBoxLayout *vb = new QVBoxLayout( &dlg );
-	    QScrollView *view = new QScrollView( &dlg, "scrollView");
-	    view->setResizePolicy( QScrollView::AutoOneFit );
-	    vb->addWidget( view );
-	    QLabel *lblMsg = new QLabel( msg, &dlg );
-	    view->addChild( lblMsg );
-	    QPushButton *cmdOk = new QPushButton( tr("OK"), &dlg );
-	    connect( cmdOk, SIGNAL(clicked()), &dlg, SLOT(accept()) );
-	    vb->addWidget( cmdOk );
-
-	    needShow = QPEApplication::execDialog(&dlg);
-
-	    if ( bSound )
-		killTimer( stopTimer );
 	}
     } else if ( msg == "newEvent()" ) {
 	if ( newEvent(QDateTime(),QDateTime(),QString::null,QString::null) )
@@ -947,13 +1029,13 @@ void DateBook::changeWeek( bool m )
 void DateBook::slotToday()
 {
     // we need to view today
-    QDate dt = QDate::currentDate();
+    lastToday = QDate::currentDate();
     if ( views->visibleWidget() == dayView ) {
-	showDay( dt );
+	showDay( lastToday );
     } else if (views->visibleWidget() == weekView) {
-	weekView->selectDate( dt );
+	weekView->selectDate( lastToday );
     } else if (views->visibleWidget() == monthView){
-	monthView->setDate( dt );
+	monthView->setDate( lastToday );
     }
 }
 
@@ -1007,11 +1089,8 @@ void DateBook::newEvent( const QString &description )
 
 bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QString& description,const QString& notes)
 {
-    if (syncing) {
-	QMessageBox::warning( this, tr("Calendar"),
-	                      tr( "Can not edit data, currently syncing") );
+    if ( checkSyncing() )
 	return FALSE;
-    }
 
     QDateTime start=dstart, end=dend;
     QDateTime current = QDateTime::currentDateTime();

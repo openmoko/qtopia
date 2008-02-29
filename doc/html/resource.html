@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/libraries/qtopia/resource.cpp:39 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Resource Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>Resource Class Reference</h1>
+
+<p>The Resource class provides access to named resources.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="resource-h.html">qtopia/resource.h</a>&gt;</tt>
+<p><a href="resource-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class=fn>QImage <a href="#loadImage"><b>loadImage</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</div></li>
+<li><div class=fn>QPixmap <a href="#loadPixmap"><b>loadPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
+<li><div class=fn>QBitmap <a href="#loadBitmap"><b>loadBitmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
+<li><div class=fn>QString <a href="#findPixmap"><b>findPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
+<li><div class=fn>QIconSet <a href="#loadIconSet"><b>loadIconSet</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
+<li><div class=fn>QString <a href="#findSound"><b>findSound</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</div></li>
+<li><div class=fn>QStringList <a href="#allSounds"><b>allSounds</b></a> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+The Resource class provides access to named resources.
+<p> The resources may be provided from files or other sources.
+<p> The <a href="#allSounds">allSounds</a>() function returns a list of all the sounds available.
+A particular sound can be searched for using <a href="#findSound">findSound</a>().
+<p> Images can be loaded with <a href="#loadImage">loadImage</a>(), <a href="#loadPixmap">loadPixmap</a>(), <a href="#loadBitmap">loadBitmap</a>()
+and <a href="#loadIconSet">loadIconSet</a>().
+<p> 
+<p>See also <a href="../classes.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="allSounds"></a>Resource::allSounds ()<tt> [static]</tt>
+</h3>
+Returns a list of all sound names.
+
+<h3 class=fn><a href="qstring.html">QString</a> <a name="findPixmap"></a>Resource::findPixmap ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the filename of a pixmap called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+<p> Normally you will use <a href="#loadPixmap">loadPixmap</a>() rather than this function.
+
+<h3 class=fn><a href="qstring.html">QString</a> <a name="findSound"></a>Resource::findSound ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
+</h3>
+Returns a sound file for a sound called <em>name</em>.
+<p> You should avoid including any filename type extension (e.g. .wav),
+as the system will search for only those fileformats which are supported
+by the library.
+<p> Currently, only WAV files are supported.
+
+<h3 class=fn><a href="qbitmap.html">QBitmap</a> <a name="loadBitmap"></a>Resource::loadBitmap ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the <a href="qbitmap.html">QBitmap</a> called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+
+<h3 class=fn><a href="qiconset.html">QIconSet</a> <a name="loadIconSet"></a>Resource::loadIconSet ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns a <a href="qiconset.html">QIconSet</a> for the pixmap named <em>pix</em>.
+You should avoid including any filename type extension (eg. .png, .xpm).
+The icon size is determined by the Qtopia font setting.
+
+<h3 class=fn><a href="qimage.html">QImage</a> <a name="loadImage"></a>Resource::loadImage ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
+</h3>
+Returns the <a href="qimage.html">QImage</a> called <em>name</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+<p> For performance reasons, names ending in "_disabled" are only
+supported as XPM or PNG files.
+
+<h3 class=fn><a href="qpixmap.html">QPixmap</a> <a name="loadPixmap"></a>Resource::loadPixmap ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
+</h3>
+Returns the <a href="qpixmap.html">QPixmap</a> called <em>pix</em>. You should avoid including
+any filename type extension (e.g. .png, .xpm).
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

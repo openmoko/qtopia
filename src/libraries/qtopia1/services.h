@@ -76,7 +76,4 @@ inline bool operator==( const ServiceRequest &m1, const ServiceRequest &m2 )
 	    && m1.data() == m2.data();
 }
 
-QTOPIA_EXPORT QDataStream& operator<<( QDataStream&, const ServiceRequest & );
-QTOPIA_EXPORT QDataStream& operator>>( QDataStream&, ServiceRequest & );
-
 #endif

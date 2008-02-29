@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>269</width>
+            <width>261</width>
             <height>299</height>
         </rect>
     </property>
@@ -119,7 +119,7 @@
                 </property>
                 <attribute>
                     <name>title</name>
-                    <string>Windows</string>
+                    <string>Frame</string>
                 </attribute>
                 <vbox>
                     <property stdset="1">
@@ -214,4 +214,12 @@
         </widget>
     </vbox>
 </widget>
+<tabstops>
+    <tabstop>colorList</tabstop>
+    <tabstop>styleList</tabstop>
+    <tabstop>decorationList</tabstop>
+    <tabstop>fontList</tabstop>
+    <tabstop>fontSize</tabstop>
+    <tabstop>TabWidget2</tabstop>
+</tabstops>
 </UI>

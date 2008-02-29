@@ -31,6 +31,8 @@
 
 class CategoryGroup;
 
+QTOPIA_EXPORT QString categoryFileName();
+
 class QTOPIA_EXPORT CategoryGroup
 {
     friend class Categories;

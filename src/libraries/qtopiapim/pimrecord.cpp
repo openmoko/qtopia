@@ -19,9 +19,13 @@
 **********************************************************************/
 #include "pimrecord.h"
 #include <qtopia/pim/private/xmlio_p.h>
+#include <qtopia/private/vobject_p.h>
+#include <qtopia/categories.h>
 #include <qdatastream.h>
 #include <qtranslator.h>
+#include <qtextcodec.h>
 #include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
 #include <qobject.h>
 #include <stdlib.h>
 
@@ -64,7 +68,7 @@ PimRecord::PimRecord() : mCategories(0)
   Creates a clone of the record \a other.
 */
 PimRecord::PimRecord( const PimRecord &other )
-	: mUid(other.mUid), mCategories(other.mCategories),
+	: mUid(other.mUid), mCategories(other.mCategories.copy()),
 	customMap(other.customMap)
 { }
 
@@ -79,7 +83,7 @@ PimRecord::~PimRecord() { }
 PimRecord &PimRecord::operator=( const PimRecord &other )
 {
     mUid = other.mUid;
-    mCategories = other.mCategories;
+    mCategories = other.mCategories.copy();
     customMap = other.customMap;
     return *this;
 }
@@ -105,6 +109,53 @@ bool PimRecord::operator!=( const PimRecord &other ) const
 {
     return mUid != other.mUid;
 }
+
+void PimRecord::setCategories( const QArray<int> &categories )
+{
+    mCategories = categories.copy();
+}
+
+void PimRecord::setCategories( int id )
+{
+    mCategories.resize(1);
+    mCategories[0] = id;
+}
+
+void PimRecord::reassignCategoryId( int oldId, int newId )
+{
+    // workaround for qt bug which gives qWarnings on calling find on an empty array 
+    if ( !mCategories.count() )
+	return;
+
+    int index = mCategories.find( oldId );
+    if ( index >= 0 )
+	mCategories[index] = newId;
+}
+
+bool PimRecord::pruneDeadCategories(const QArray<int> &validCats)
+{
+    QArray<int> newCats;
+
+    for (int i = 0; i < (int) mCategories.count(); i++ ) {
+	if ( validCats.contains( mCategories[i] ) ) {
+	    newCats.resize( newCats.count() + 1 );
+	    newCats[(int)newCats.count() - 1] = mCategories[i];
+	}
+    }
+
+    if ( newCats.count() != mCategories.count() ) {
+	mCategories = newCats;
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+QArray<int> PimRecord::categories() const
+{
+    return mCategories;
+}
+
 
 /*!
   \fn void PimRecord::setCategories( const QArray<int> &categories )
@@ -231,7 +282,8 @@ QString PimRecord::field(int key) const
     if ( key == Categories ) {
 	return PimXmlIO::idsToString( mCategories );
     } else if ( key == UID_ID ) {
-	return QString::number( PimXmlIO::uuidToInt( mUid ) );
+	return mUid.isNull() ? QString::null :
+	    QString::number( PimXmlIO::uuidToInt( mUid ) );
     }
 
     qWarning("PimRecord::field() Did not get passed a valid key %d", key);
@@ -286,7 +338,6 @@ void PimRecord::initMaps(const char* trclass, const QtopiaPimMapEntry *entries, 
 	QString lang = getenv("LANG");
 	QTranslator * trans = new QTranslator(qApp);
 	QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/libqpepim.qm";
-qDebug("Load %s",tfn.latin1());
 	if ( trans->load( tfn ))
 	    qApp->installTranslator( trans );
 	else
@@ -310,10 +361,129 @@ qDebug("Load %s",tfn.latin1());
     }
 }
 
+static QTextCodec* vobj_codec=0;
+static Categories* cats=0;
+static QStringList* comps=0;
+static int catschanged=0;
+static void startCats()
+{
+    cats = new Categories;
+    cats->load(categoryFileName());
+    catschanged = 0;
+}
+static void endCats()
+{
+    if ( catschanged )
+	cats->save(categoryFileName());
+    delete cats;
+    cats = 0;
+}
+
+void qpe_startVObjectInput()
+{
+    startCats();
+}
+
+void qpe_startVObjectOutput()
+{
+    Config pimConfig( "Beam" );
+    pimConfig.setGroup("Send");
+    QString cs = "UTF-8";
+    QString dc = pimConfig.readEntry("DeviceConfig");
+    if ( !dc.isEmpty() ) {
+	Config devcfg(pimConfig.readEntry("DeviceConfig"),Config::File);
+	if ( devcfg.isValid() ) {
+	    devcfg.setGroup("Send");
+	    cs = devcfg.readEntry("CharSet","UTF-8");
+	    QString comp = devcfg.readEntry("Compatibility");
+	    comps = new QStringList(QStringList::split(' ',comp));
+	}
+    }
+    vobj_codec = QTextCodec::codecForName(cs.latin1());
+    startCats();
+}
+
+bool qpe_vobjectCompatibility(const char* misfeature)
+{
+    return comps && comps->contains(misfeature);
+}
+
+void qpe_setVObjectProperty(const QString& name, const QString& value, const char* type, PimRecord* r)
+{
+    if ( name == VCCategoriesProp ) {
+	QStringList cl = QStringList::split(';',value);
+	QArray<int> ca(cl.count());
+	int nid=0;
+	for (QStringList::ConstIterator it=cl.begin(); it!=cl.end(); ++it) {
+	    QString cname = *it;
+	    if ( cname.left(2) == "X-" )
+		cname = cname.mid(2);
+	    int id = cats->id(type,cname);
+	    if ( !id ) {
+		QString cnamel = cname.lower();
+		if ( cnamel != cname ) {
+		    // Try case-insensitive for global categories
+		    QStringList gc = cats->globalCategories();
+		    for (QStringList::ConstIterator git=gc.begin(); git!=gc.end(); ++git) {
+			if ( (*git).lower() == cnamel ) {
+			    cname = *git;
+			    id = cats->id(type,cname);
+			    break;
+			}
+		    }
+		}
+	    }
+	    if ( !id && cname != "Unfiled" ) { // No tr
+		if ( !cats->exists(cname) ) { // Same category, different app - ignore
+		    id = cats->addCategory(type,cname);
+		    catschanged++;
+		}
+	    }
+	    if ( id )
+		ca[nid++] = id;
+	}
+	ca.resize(nid);
+	r->setCategories(ca);
+    }
+}
+
+VObject *qpe_safeAddPropValue( VObject *o, const char *prop, const QString &value )
+{
+    VObject *ret = 0;
+    if ( o && !value.isEmpty() ) {
+	if ( vobj_codec )
+	    ret = addPropValue( o, prop, vobj_codec->fromUnicode(value) );
+	else
+	    ret = addPropValue( o, prop, value.latin1() ); // NOT UTF-8, that is by codec
+    }
+    return ret;
+}
+
+VObject *qpe_safeAddProp( VObject *o, const char *prop)
+{
+    VObject *ret = 0;
+    if ( o )
+	ret = addProp( o, prop );
+    return ret;
+}
+
+void qpe_endVObjectInput()
+{
+    endCats();
+}
+
+void qpe_endVObjectOutput(VObject *o, const char* type, const PimRecord* r)
+{
+    QStringList c = cats->labels(type,r->categories());
+    qpe_safeAddPropValue( o, VCCategoriesProp, c.join(";") );
+    delete comps;
+    comps = 0;
+    endCats();
+}
 
 #ifndef QT_NO_DATASTREAM
 
-
+#ifndef QTOPIA_DESKTOP
 QDataStream &operator<<(QDataStream &s, const QUuid& df)
 {
     s << df.data1;
@@ -334,6 +504,7 @@ QDataStream &operator>>(QDataStream &s, QUuid&df)
 
     return s;
 }
+#endif
 
 QDataStream &operator<<( QDataStream &s, const PimRecord &r )
 {

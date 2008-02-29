@@ -1,4 +1,4 @@
-Files: bin/pluginmanager apps/Settings/PluginManager.desktop
+Files: bin/pluginmanager apps/Settings/PluginManager.desktop pics/PluginManager.png
 Priority: optional
 Section: qpe/settings
 Maintainer: Trolltech (www.trolltech.com)

@@ -130,12 +130,13 @@ private:
 
     QAction *actionNew, *actionList, *actionEdit, *actionTrash, *actionFind,
 	*actionBeam, *actionPersonal, *actionMail, *actionDuplicate,
-	*actionSetPersonal;
+	*actionSetPersonal, *actionDetails;
 
 
     bool bAbEditFirstTime;
     int viewMargin;
 
+    bool checkSyncing();
     bool syncing;
     bool showingPersonal;
     QMap<int,int> contactMap;

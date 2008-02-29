@@ -39,6 +39,7 @@ HEADERS =	accessory.h \
 SOURCES =	applnk1.cpp \
 		categories1.cpp \
 		categoryselect1.cpp \
+		config1.cpp \
 		qpeapplication1.cpp \
 		storage1.cpp \
 		accessory.cpp \
@@ -61,10 +62,12 @@ SOURCES =	applnk1.cpp \
 		docproperties.cpp \
 		pluginloader.cpp \
 		pluginloaderlib.cpp \
-		qprocess_unix.cpp
+		qprocess_unix.cpp \
+		quuid1.cpp
 OBJECTS =	$(OBJECTS_DIR)/applnk1.o \
 		$(OBJECTS_DIR)/categories1.o \
 		$(OBJECTS_DIR)/categoryselect1.o \
+		$(OBJECTS_DIR)/config1.o \
 		$(OBJECTS_DIR)/qpeapplication1.o \
 		$(OBJECTS_DIR)/storage1.o \
 		$(OBJECTS_DIR)/accessory.o \
@@ -87,7 +90,8 @@ OBJECTS =	$(OBJECTS_DIR)/applnk1.o \
 		$(OBJECTS_DIR)/docproperties.o \
 		$(OBJECTS_DIR)/pluginloader.o \
 		$(OBJECTS_DIR)/pluginloaderlib.o \
-		$(OBJECTS_DIR)/qprocess_unix.o
+		$(OBJECTS_DIR)/qprocess_unix.o \
+		$(OBJECTS_DIR)/quuid1.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
@@ -187,6 +191,9 @@ $(OBJECTS_DIR)/categories1.o: categories1.cpp
 $(OBJECTS_DIR)/categoryselect1.o: categoryselect1.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryselect1.o categoryselect1.cpp
 
+$(OBJECTS_DIR)/config1.o: config1.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/config1.o config1.cpp
+
 $(OBJECTS_DIR)/qpeapplication1.o: qpeapplication1.cpp \
 		qpe_show_dialog.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpeapplication1.o qpeapplication1.cpp
@@ -277,6 +284,9 @@ $(OBJECTS_DIR)/qprocess_unix.o: qprocess_unix.cpp \
 		$(MOC_DIR)/qprocess_unix.moc \
 		qprocess.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess_unix.o qprocess_unix.cpp
+
+$(OBJECTS_DIR)/quuid1.o: quuid1.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/quuid1.o quuid1.cpp
 
 $(OBJECTS_DIR)/moc_accessory.o: $(MOC_DIR)/moc_accessory.cpp \
 		accessory.h

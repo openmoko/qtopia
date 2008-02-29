@@ -49,6 +49,7 @@ private:
     void readTabSettings();
     void applyTabSettings();
     void populateFontSizes( const QString &name );
+    void setBackgroundControls(void);
 
 private:
     enum ViewMode { Icon, List };

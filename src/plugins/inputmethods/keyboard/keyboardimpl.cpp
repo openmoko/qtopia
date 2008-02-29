@@ -58,7 +58,7 @@ KeyboardImpl::~KeyboardImpl()
 QWidget *KeyboardImpl::inputMethod( QWidget *parent, Qt::WFlags f )
 {
     if ( !input )
-	input = new Keyboard( parent, "Keyboard", f );
+	input = new Keyboard( parent, "Keyboard", f ); // No tr
     return input;
 }
 

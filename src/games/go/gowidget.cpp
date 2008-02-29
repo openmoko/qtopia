@@ -355,14 +355,27 @@ void GoWidget::newGame()
 
 void GoWidget::endGame()
 {
+    int	    w = 0;
+    int	    b = 0;
+
     gameActive = FALSE;
 
-    int w,b;
-    CountUp( &w, &b);
+    //
+    // Only find the score if there's something on the board.
+    //
+    for (int i = 0; i < 19; i++) {
+	for (int j = 0; j < 19; j++) {
+	    if (board[i][j] != -1) {
+		CountUp(&w, &b);
+		break;
+	    }
+	}
+    }
+    
     scoreString = tr("White %1, Black %2. ").arg(w).arg(b);
-    if ( w > b )
+    if ( w > b  || (w == 0 && b == 0 && currentPlayer == BLACK))
 	scoreString += tr("White wins.");
-    else if ( w < b )
+    else if ( w < b  || (w == 0 && b == 0 && currentPlayer == WHITE))
 	scoreString += tr("Black wins.");
     else
 	scoreString += tr("A draw.");

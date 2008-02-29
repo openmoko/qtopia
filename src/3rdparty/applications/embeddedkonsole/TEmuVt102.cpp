@@ -33,6 +33,8 @@
 #include <qkeycode.h>
 #include <qtextcodec.h>
 
+#include <qtopia/qpemenubar.h>
+
 
 /* VT102 Terminal Emulation
 
@@ -710,6 +712,13 @@ void TEmuVt102::onMouse( int cb, int cx, int cy )
 void TEmuVt102::onKeyPress( QKeyEvent* ev )
 {
   if (!connected) return; // someone else gets the keys
+
+  if (ev->key() == Key_F11)
+  {
+    QPEMenuToolFocusManager *manager = QPEMenuToolFocusManager::manager();
+    manager->setActive( !manager->isActive() );
+    return;
+  }
 
 //printf("State/Key: 0x%04x 0x%04x (%d,%d)\n",ev->state(),ev->key(),ev->text().length(),ev->text().length()?ev->text().ascii()[0]:0);
 

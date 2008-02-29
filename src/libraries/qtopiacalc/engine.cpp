@@ -46,13 +46,16 @@ public:
 
 BraceOpen::BraceOpen():InstructionDescription() {
     instructionName = "Open brace"; // No tr
-    typeOne = typeTwo = type = "NONE";
+    typeOne = typeTwo = type = "NONE"; // No tr
     precedence = 50;
 };
 BraceOpen::~BraceOpen(){};
 void Engine::closeBrace () {
     braceCount++;
-    acc = evalStack(acc,TRUE);
+    Data *accPtr = acc;
+    acc = evalStack(accPtr,TRUE);
+    if (accPtr != acc)
+	delete accPtr;
     updateDisplay();
 }
 Data *iBraceOpen::eval(Data *d) {
@@ -69,10 +72,13 @@ Engine::Engine() {
     emptyDataCache = mem = acc = k = 0;
     kDesc = 0;
     lcd = 0;
+#ifdef NEW_STYLE_DISPLAY
+    lcdPainter = 0;
+#endif
     memMark = kMark = 0;
-    braceCount = decimalPlaces = previousInstructionsPrecedence = 0;
+    braceCount = previousInstructionsPrecedence = 0;
     secondaryReset = FALSE;
-    currentType = "NONE";
+    currentType = "NONE"; // No tr
 
     list.setAutoDelete(TRUE);
 
@@ -150,11 +156,18 @@ Engine::Engine() {
     da = new BraceOpen();
     registerInstruction(da);
 }
-Engine::~Engine() {};
+Engine::~Engine() {
+    stack.clear();
+    iStack.clear();
+    dStack.clear();
+    delete acc;
+    if (mem != acc)
+	delete mem;
+};
 
 void Engine::registerInstruction(InstructionDescription *d) { 
 #ifdef QTEST
-qDebug("registerInstruction - %s for %s",d->instructionName.latin1(),d->type.latin1());
+qDebug("registerInstruction - %s for %s",d->instructionName.latin1(),d->type.latin1()); // No tr
 #endif
     InstructionDescription *tmp;
     for (uint it = 0; it < list.count(); it++) {
@@ -169,7 +182,7 @@ qDebug("registerInstruction - %s for %s",d->instructionName.latin1(),d->type.lat
 Instruction * Engine::resolveInstruction(QString name) {
     QString type = currentType;
 #ifdef QTEST
-qDebug("resolveInstruction(%s)",name.latin1());
+qDebug("resolveInstruction(%s)",name.latin1()); // No tr
 #endif
     InstructionDescription *id = resolveDescription(name);
     if (!id)
@@ -180,7 +193,7 @@ Instruction * Engine::resolveInstruction(InstructionDescription *d) {
     if (!d)
 	return 0;
 #ifdef QTEST
-qDebug("Searching for %s %s %s in %d",
+qDebug("Searching for %s %s %s in %d", // No tr
 	d->instructionName.latin1(),
 	d->typeOne.latin1(),
 	d->typeTwo.latin1(),
@@ -199,7 +212,7 @@ qDebug("Searching for %s %s %s in %d",
     // No instructions by that name have been found
     if (!shortList.count()) {
 #ifdef QTEST
-qDebug("None found by that name");
+qDebug("None found by that name"); // No tr
 #endif
 	return new Instruction();
     }
@@ -212,7 +225,7 @@ qDebug("None found by that name");
 	if (tmp->typeOne == d->typeOne &&
 		tmp->typeTwo == d->typeTwo) {
 #ifdef QTEST
-qDebug("Matched %s %s %s",tmp->instructionName.latin1(),
+qDebug("Matched %s %s %s",tmp->instructionName.latin1(), // No tr
 	tmp->typeOne.latin1(),
 	tmp->typeTwo.latin1());
 #endif
@@ -222,7 +235,7 @@ qDebug("Matched %s %s %s",tmp->instructionName.latin1(),
 	}
     }
 #ifdef QTEST
-qDebug("No match found");
+qDebug("No match found"); // No tr
 #endif
     // Search for conversions that will let what we have work
     // Eventually weighting should be here as well...
@@ -231,10 +244,11 @@ qDebug("No match found");
 	InstructionDescription *tmp2;
 	// Search for ops that only require one side to be converted
 	for (uint it2 = 0; it < list.count(); it2++) {
-	    tmp2 = shortList.at(it2);
+	    tmp2 = list.at(it2);
 	    if ( tmp->typeTwo == currentType &&
 		    tmp2->typeOne == currentType &&
-		    tmp2->typeTwo == tmp->typeOne ) {
+		    tmp2->typeTwo == tmp->typeOne && 
+		    tmp2->instructionName == "Convert" ) { // No tr
 		// Convert
 		ret = tmp2->getInstruction();
 		ret->num = d->num;
@@ -248,11 +262,15 @@ qDebug("No match found");
 		return ret;
 	    } else if ( tmp->typeOne == currentType &&
 		    tmp->typeOne == currentType &&
-		    tmp2->type == tmp->typeTwo) {
+		    tmp2->type == tmp->typeTwo &&
+		    tmp2->instructionName == "Convert" ) { // No tr
 		// Convert
 		ret = tmp2->getInstruction();
 		ret->num = d->num;
-		acc = ret->eval(acc);
+		Data *accPtr = acc;
+		acc = ret->eval(accPtr);
+		if ( accPtr != acc )
+		    delete accPtr;
 		delete ret;
 
 		// Now return the actual instruction
@@ -262,11 +280,111 @@ qDebug("No match found");
 	    }
 	}
     }
+
     return new Instruction();
 }
+
+
+
+
+#ifdef NEW_CONVERT
+int cheapestTotal;
+IMP *cheapestOne = 0;
+IMP *cheapestTwo = 0;
+
+    for (c in shortList) {
+	QList<instructionAndPath> allOfThem;
+
+	IMP *one = calcShortestPath(c.typeOne,tmp.typeOne);
+	IMP *two = calcShortestPath(c.typeTwo,tmp.typeTwo);
+	int totalcost = one->cost + two->cost;
+	if (totalcost < cheapestTotal || !cheapestOne || !cheapestTwo) {
+	    delete cheapestOne;
+	    delete cheapestTwo;
+	    cheapestTotal = totalcost;
+	    cheapestOne = one;
+	    cheapestTwo = two;
+	} else {
+	    delete one;
+	    delete two;
+	}
+}
+
+struct INP {
+    QList<InstructionDescription> path;
+    int cost;
+};
+
+QList<QList<InstructionDescription>> successfulPaths;
+	
+INP *calcShortestPath(QString,QString) {
+	// this wont work, gotta do it twice and add them remember!!!!
+	int cheapestCost;
+	QList<InstructionDescription> cheapestPath;
+
+	successfulPaths.clear();
+
+	if (birth doesnt exist) {
+	    InstructionDescription birth;
+	    birth->typeOne = "WOMB"; // No tr
+	    birth->typeTwo = tmp->typeOne;
+	    register(birth);
+	}
+
+	QList<InstructionDescription> life = birth;
+
+	getAPath(life);
+
+	for (i in successfulPaths) {
+	    if (i.cost() < cheapest) {
+		cheapestCost = i.cost();
+		cheapestPath = i;
+	    }
+	}
+	if (cheapestPath.isEmpty())
+	    return NULL;
+	IMP *ret = new IMP;
+	ret->path = cheapestPath;
+	ret->cost = cheapestCost;
+	return ret;
+    }
+
+QString destination;
+
+void getAPath(QList<InstructionDescription> stepsIveTaken) {
+    QList<InstructionDescription> exits = getAllExits(stepsIveTaken);
+
+    if (!exits.isEmpty() ) {
+	for (i in exits) {
+	    if (i->typeTwo == destination) {
+		successfulPaths += (stepsIveTaken + i);
+	    } else {
+		getAPath(stepsIveTaken + i);
+	    }
+	}
+    }
+}
+
+QList<InstructionDescription> Engine::getAllExits(QList<InstructionDescription> stepsIveTaken) P
+    QList<InstructionDescription> exits;
+    InstructionDescription lastStep = stepsIveTaken.last();
+    QString thisPlace = lastStep.typeTwo;
+    for (i in list) {
+	if ( i->typeOne == thisPlace &&
+		!stepsIveTaken.contains (i) ) {
+	    exits += i;
+	}
+    }
+    return exits;
+}
+#endif
+
 // Stack
 void Engine::evaluate() {
-    acc = evalStack(acc,FALSE);
+    Data *accPtr = acc;
+    acc = evalStack(accPtr,FALSE);
+    if (accPtr != acc)
+	delete accPtr;
     updateDisplay();
     if ( state != sError )
 	state = sStart;
@@ -287,21 +405,33 @@ Data *Engine::evalStack(Data *intermediate,bool inbrace,int p) {
 	    if (!stack.isEmpty ()) {
 		// Recurse into next instruction if necessary
 		if (p) {
-		    if (p <= stack.top()->precedence)
-			id->num = evalStack(id->num,inbrace,p);
+		    if (p <= stack.top()->precedence) {
+			Data *numPtr = id->num;
+			id->num = evalStack(numPtr,inbrace,p);
+			if (numPtr != id->num)
+			    delete numPtr;
+		    }
 		} else if (id->precedence <= stack.top()->precedence) {
-		    id->num = evalStack(id->num,inbrace,id->precedence);
+		    Data *numPtr = id->num;
+		    id->num = evalStack(numPtr,inbrace,id->precedence);
+		    if (numPtr != id->num)
+			delete numPtr;
 		}
 	    }
-	    // Evaluate 
+
 	    i = resolveInstruction(id);
 	    i->num = id->num;
-	    Data *tmp = i->eval(intermediate);
 
-	    // Clean up
-	    if (intermediate != tmp)
-		delete intermediate;
-	    intermediate = tmp;
+	    // Evaluate 
+	    Data *ptr = intermediate;
+	    intermediate = i->eval(ptr);
+
+	    if (ptr != intermediate) {
+		delete ptr;
+	    }
+	    if (i->num != intermediate && i->num != ptr) {
+		delete i->num;
+	    }
 	    delete i;
 	    delete id;
 	}
@@ -318,13 +448,12 @@ void Engine::dualReset() {
 	secondaryReset = TRUE;
     }
 }
-void Engine::softReset() {
-    decimalPlaces = -1;
+void Engine::softReset(bool update) {
 #ifdef NEW_STYLE_STACK
     if (dStack.isEmpty())
 	executeInstructionOnStack("Factory",dStack); // No tr
     if (dStack.isEmpty())
-	qDebug("factory didnt work");
+	qDebug("factory didnt work"); // No tr
     dStack.top()->clear();
 #else
     if (acc)
@@ -333,7 +462,8 @@ void Engine::softReset() {
 	executeInstructionOnStack("Factory",stack); // No tr
 #endif
     state = sStart;
-    updateDisplay();
+    if (update)
+	updateDisplay();
 }
 void Engine::hardReset() {
     stack.clear();
@@ -348,13 +478,13 @@ void Engine::hardReset() {
 InstructionDescription *Engine::resolveDescription(QString name) {
     QString type = currentType;
 #ifdef QTEST
-qDebug("resolveDescription(%s, %s)",name.latin1(),type.latin1());
+qDebug("resolveDescription(%s, %s)",name.latin1(),type.latin1()); // No tr
 #endif
     InstructionDescription *id;
     for (uint i = 0;i < list.count();i++) {
 	id = list.at(i);
 #ifdef QTEST
-qDebug("  - comparing %s for %s",id->instructionName.latin1(),id->type.latin1());
+qDebug("  - comparing %s for %s",id->instructionName.latin1(),id->type.latin1()); // No tr
 #endif
 	if (id->instructionName == name &&
 		id->type == type)
@@ -365,7 +495,7 @@ qDebug("  - comparing %s for %s",id->instructionName.latin1(),id->type.latin1())
 #ifdef NEW_STYLE_STACK
 void Engine::immediateInstruction(QString name) {
 #ifdef QTEST
-qDebug("immediateInstruction(%s)",name.latin1());
+qDebug("immediateInstruction(%s)",name.latin1()); // No tr
 #endif
     if (state == sError || name.isEmpty())
 	return;
@@ -401,7 +531,10 @@ void Engine::pushInstruction(QString name) {
     if (!iStack.isEmpty()) {
 	InstructionDescription *top = resolveDescription(*(iStack.top()));
 	if (id->precedence <= top->precedence) {
-	    acc = evalStack(acc,FALSE,top->precedence);
+	    Data *accPtr = acc;
+	    acc = evalStack(accPtr,FALSE,top->precedence);
+	    if (accPtr != acc)
+		delete accPtr;
 	    updateDisplay();
 	}
     }
@@ -418,42 +551,48 @@ void Engine::pushInstruction(QString name) {
 }
 #else
 void Engine::pushInstruction(InstructionDescription *i) {
-    if (state == sError)
-	return;
-    previousInstructionsPrecedence = i->precedence;
-    secondaryReset = FALSE;
-    if (!i->precedence) {
-	executeInstructionOnStack(i->instructionName,stack);
-	updateDisplay();
-	delete i;
-	state = sStart;
-	return;
-    }
-    if (!stack.isEmpty()
-	    && state == sStart
-	    && i->precedence
-	    && previousInstructionsPrecedence) {
-	stack.pop();
-    }
-    if (!stack.isEmpty()) {
-	if (i->precedence <= stack.top()->precedence) {
-	    acc = evalStack(acc,FALSE,stack.top()->precedence);
+    if (state != sError) {
+	secondaryReset = FALSE;
+	if (!i->precedence) {
+	    executeInstructionOnStack(i->instructionName,stack);
 	    updateDisplay();
+	    state = sStart;
+	} else {
+	    if (!stack.isEmpty()
+		    && state == sStart
+		    && i->precedence
+		    && previousInstructionsPrecedence) {
+		delete stack.pop();
+	    }
+	    if (!stack.isEmpty()) {
+		if (i->precedence <= stack.top()->precedence) {
+		    Data *accPtr = acc;
+		    acc = evalStack(accPtr,FALSE,stack.top()->precedence);
+		    if (accPtr != acc)
+			delete accPtr;
+		    updateDisplay();
+		}
+	    }
+
+	    InstructionDescription *id = resolveDescription(i->instructionName);
+	    if (id) {
+		Instruction *copy = resolveInstruction("Copy"); // No tr
+		if (copy) {
+		    i->num = copy->eval(acc);
+		    delete copy;
+		    if ( state != sError ) {
+			stack.push(i);
+			state = sStart;
+			previousInstructionsPrecedence = i->precedence;
+			return;
+		    } else if (i->num != acc)
+			delete i->num;
+		}
+	    }
 	}
     }
-
-    InstructionDescription *id = resolveDescription(i->instructionName);
-    if (!id)
-	return;
-    Instruction *copy = resolveInstruction("Copy"); // No tr
-    if (!copy)
-	return;
-    i->num = copy->eval(acc);
-    delete copy;
-    if ( state == sError )
-	return;
-    stack.push(i);
-    state = sStart;
+    previousInstructionsPrecedence = i->precedence;
+    delete i;
 }
 #endif
 #ifdef NEW_STYLE_STACK
@@ -466,8 +605,10 @@ void Engine::pushChar(char c) {
 	setError(eNoDataFactory);
 	return;
     }
+    if (!dStack.top()->push(c, FALSE))
+	return;
     if (state == sStart) {
-	softReset();
+	softReset(FALSE);
 	state = sAppend;
     }
     dStack.top()->push(c);
@@ -478,8 +619,32 @@ void Engine::pushChar(char c) {
 void Engine::pushChar(char c) {
     if (!checkState())
 	return;
+
     if (state == sStart) {
-	softReset();
+	Instruction *copy = resolveInstruction("Copy"); // No tr
+	if (copy) {
+	    Data *num = copy->eval(acc);
+	    delete copy;
+	    if (num == acc) {
+		state = sError;
+		return;
+	    }
+	    if ( state != sError ) {
+		num->clear();
+		if (!num->push(c, FALSE)) {
+		    delete num;
+		    return;
+		}
+	    }
+	    delete num;
+	}
+    } else {
+	if (!acc->push(c, FALSE))
+	    return;
+    }
+
+    if (state == sStart) {
+	softReset(FALSE);
 	state = sAppend;
     }
     acc->push(c);
@@ -493,27 +658,37 @@ void Engine::delChar() {
     acc->del();
     updateDisplay();
 }
-#ifdef NEW_STYLE_STACK
 void Engine::updateDisplay() {
-    if (state == sError)
+    if (state == sError || !lcd)
 	return;
+#ifdef NEW_STYLE_STACK
     if (dStack.isEmpty())
 	executeInstructionOnStack("Factory",dStack); // No tr
     if (dStack.isEmpty())
 	qDebug("still empty, type = %s, state = %d,stack size = %d",currentType.latin1(),state,dStack.count());
-    if (lcd) 
-	lcd->setText(dStack.top()->getFormattedOutput());
-}
+    Data *d = dStack.top();
 #else
-void Engine::updateDisplay() {
-    if (state == sError)
-	return;
     if (!acc)
 	executeInstructionOnStack("Factory",stack); // No tr
-    if (lcd)
-	lcd->setText(acc->getFormattedOutput());
-}
+    Data *d = acc;
 #endif
+#ifdef NEW_STYLE_DISPLAY
+    if (!lcdPainter) {
+	lcdPainter = new QPainter();
+    }
+    QPixmap lcdPixmap(300,100);
+    lcdPixmap.fill();
+
+    lcdPainter->begin(&lcdPixmap);
+    lcdPainter->setPen(Qt::black);
+    d->draw(lcdPainter);
+    lcdPainter->end();
+
+    lcd->setPixmap(lcdPixmap);
+#else
+    lcd->setText(d->getFormattedOutput());
+#endif
+}
 bool Engine::checkState() {
     if (state == sError)
 	return FALSE;
@@ -583,6 +758,7 @@ qDebug("adding the new memory data to the old at %p, value = %s" ,mem,mem->getFo
 	delete factory;
     }
     state = sStart;
+    qApp->processEvents();
 }
 #endif
 void Engine::memoryRecall() {
@@ -658,7 +834,11 @@ void Engine::setError(QString s) {
     state = sError;
     lcd->setText(s);
 }
+#ifdef NEW_STYLE_DISPLAY
+void Engine::setDisplay(QLabel *l) {
+#else
 void Engine::setDisplay(QLineEdit *l) {
+#endif
     lcd = l;
     memMark = new QLabel( "m", lcd );
     memMark->setBackgroundMode( QWidget::PaletteBase );
@@ -674,6 +854,7 @@ void Engine::setDisplay(QLineEdit *l) {
     kMark->move( 4, 14 );
     kMark->hide();
 }
+
 #ifdef NEW_STYLE_STACK
 void Engine::executeInstructionOnStack(QString name,QStack<Data> ds) {
     InstructionDescription *id = resolveDescription(name);
@@ -751,8 +932,11 @@ void Engine::executeInstructionOnStack(QString name,QStack<InstructionDescriptio
 		id->num = acc;
 		stack.push(id);
 	    }
-	    acc = i->eval(new Data());
+	    Data *tmpData = new Data();
+	    acc = i->eval(tmpData);
 	    delete i;
+	    if (tmpData != acc)
+		delete tmpData;
 	}
 	return;
     }
@@ -762,8 +946,11 @@ void Engine::executeInstructionOnStack(QString name,QStack<InstructionDescriptio
     if (state == sError)
 	return;
 
-    acc = i->eval(acc);
+    Data *accPtr = acc;
+    acc = i->eval(accPtr);
     delete i;
+    if ( accPtr != acc )
+	delete accPtr;
 }
 #endif
 #ifdef NEW_STYLE_STACK

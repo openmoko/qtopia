@@ -87,6 +87,8 @@ public:
 private:
     FlatStylePrivate *d;
     bool revItem;
+    bool fillBtnBorder;
+    QColor btnBg;
     // Disabled copy constructor and operator=
 #if defined(Q_DISABLE_COPY)
     FlatStyle( const FlatStyle & );

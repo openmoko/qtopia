@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/libraries/qtopiapim/datebookaccess.cpp:40 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>DateBookAccess Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>DateBookAccess Class Reference<br><small>[<a href="qpepim.html">qpepim module</a>]</small></h1>
+
+<p>The DateBookAccess class provides a safe API for accessing PimEvents.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="datebookaccess-h.html">qtopia/pim/datebookaccess.h</a>&gt;</tt>
+<p>Inherits <a href="qobject.html">QObject</a>.
+<p><a href="datebookaccess-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#DateBookAccess"><b>DateBookAccess</b></a> ()</div></li>
+<li><div class=fn><a href="#~DateBookAccess"><b>~DateBookAccess</b></a> ()</div></li>
+<li><div class=fn>bool <a href="#editSupported"><b>editSupported</b></a> () const</div></li>
+<li><div class=fn>void <a href="#updateEvent"><b>updateEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;event )</div></li>
+<li><div class=fn>void <a href="#removeEvent"><b>removeEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;ev )</div></li>
+<li><div class=fn>void <a href="#addEvent"><b>addEvent</b></a> ( const&nbsp;PimEvent&nbsp;&amp;&nbsp;ev )</div></li>
+<li><div class=fn>PimEvent <a href="#eventForId"><b>eventForId</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const</div></li>
+</ul>
+<h2>Signals</h2>
+<ul>
+<li><div class=fn>void <a href="#dateBookUpdated"><b>dateBookUpdated</b></a> ()</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+
+
+The DateBookAccess class provides a safe API for accessing PimEvents.
+<p> DateBookAccess provides a safe API for accessing PimEvents stored by
+Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook
+application in sync with modifications, and alerts the user of
+the library when modifications ahve been made by other applications.
+<p>See also <a href="qpepim.html">QPEPIM Library</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="DateBookAccess"></a>DateBookAccess::DateBookAccess ()
+</h3>
+Constructor.
+
+<h3 class=fn><a name="~DateBookAccess"></a>DateBookAccess::~DateBookAccess ()
+</h3>
+Cleans up the the DataBookAccess.
+
+<h3 class=fn>void <a name="addEvent"></a>DateBookAccess::addEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
+</h3>
+If supported will assign a new unique ID to <em>ev</em> and add the event to
+the pim data.
+<p> Adding event requires the Events service to be available.
+
+<h3 class=fn>void <a name="dateBookUpdated"></a>DateBookAccess::dateBookUpdated ()<tt> [signal]</tt>
+</h3> 
+Emitted whenever the datebook is updated.
+
+<h3 class=fn>bool <a name="editSupported"></a>DateBookAccess::editSupported () const
+</h3>
+Returns TRUE if it is possible to add, remove and update events in
+the pim data.  Otherwise returns FALSE.
+<p> Adding, removing and updating events requires the Events service to be
+available
+
+<h3 class=fn><a href="pimevent.html">PimEvent</a> <a name="eventForId"></a>DateBookAccess::eventForId ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const
+</h3>
+If there exists an event with the uid <em>u</em>, return that event.
+Returns a null event if otherwise.
+<p> If <em>ok</em> is non-null, *ok is set to TRUE if the event is
+found, and FALSE if the event is not found.
+
+<h3 class=fn>void <a name="removeEvent"></a>DateBookAccess::removeEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
+</h3>
+If supported will remove event <em>ev</em> from the pim data.
+<p> Removing events requires the Events service to be available.
+
+<h3 class=fn>void <a name="updateEvent"></a>DateBookAccess::updateEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event )
+</h3>
+If supported will update <em>event</em> in the pim data.
+<p> Updating events requires the Events service to be available.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

@@ -29,6 +29,7 @@
 #include <qtopia/config.h>
 
 #include <qmainwindow.h>
+#include <qmessagebox.h>
 #include <qtopia/qpemenubar.h>
 #include <qpainter.h>
 
@@ -203,6 +204,9 @@ void CanvasCardGame::gameWon() {
 	    ((CanvasCard *)*it)->animatedMove( x, y, 400 );
 	}
     }
+
+    QMessageBox::information(this, tr("Game Complete"),
+	tr("Congratulations!\nYou won the game!"));
 }
 
 

@@ -31,6 +31,7 @@
 #include <qtopia/pim/private/xmlio_p.h>
 
 #include <qobject.h>
+#include <qapplication.h>
 #include <qregexp.h>
 #include <qstylesheet.h>
 #include <qfileinfo.h>
@@ -106,7 +107,10 @@ QString PimContact::toRichText() const
 	text += "<b>" + Qtopia::escapeString(value) + "</b><br>";
     // also part of name is how to pronounce it.
 
-    if ( !(value = pronunciation()).isEmpty() )
+    if ( !(value = firstNamePronunciation()).isEmpty() )
+	text += "<b>( " + Qtopia::escapeString(value) + " )</br><br>";
+
+    if ( !(value = lastNamePronunciation()).isEmpty() )
 	text += "<b>( " + Qtopia::escapeString(value) + " )</br><br>";
 
     if ( !(value = jobTitle()).isEmpty() )
@@ -122,12 +126,15 @@ QString PimContact::toRichText() const
     }
     if ( !comp.isEmpty() )
 	text += Qtopia::escapeString(comp) + "<br>";
+    if ( !(value = companyPronunciation()).isEmpty() )
+	text += "<b>( " + Qtopia::escapeString(value) + " )</br><br>";
+
 
     // business address
     if ( !businessStreet().isEmpty() || !businessCity().isEmpty() ||
 	 !businessZip().isEmpty() || !businessCountry().isEmpty() ) {
 	text += "<br>";
-	text += QObject::tr( "<b>Work Address:</b>" );
+	text += "<b>" + qApp->translate( "QtopiaPim",  "Work Address: " ) + "</b>";
 	text +=  "<br>";
     }
 
@@ -150,7 +157,7 @@ QString PimContact::toRichText() const
     if ( !homeStreet().isEmpty() || !homeCity().isEmpty() ||
 	 !homeZip().isEmpty() || !homeCountry().isEmpty() ) {
 	text += "<br>";
-	text += QObject::tr( "<b>Home Address:</b>" );
+	text += "<b>" + qApp->translate( "QtopiaPim",  "Home Address: " ) + "</b>";
 	text +=  "<br>";
     }
 
@@ -173,96 +180,94 @@ QString PimContact::toRichText() const
     QString str;
     str = emailList().join(", ");
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Email Addresses: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim", "Email Addresses: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homePhone();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Phone: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Home Phone: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeFax();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Fax: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Home Fax: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeMobile();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Mobile: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Home Mobile: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeWebpage();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Web Page: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Home Web Page: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessWebpage();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Web Page: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Business Web Page: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = office();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Office: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Office: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessPhone();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Phone: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Business Phone: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessFax();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Fax: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Business Fax: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessMobile();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Mobile: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Business Mobile: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessPager();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Pager: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Business Pager: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = profession();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Profession: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Profession: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = assistant();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Assistant: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Assistant: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = manager();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Manager: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Manager: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = gender();
     if ( !str.isEmpty() && str.toInt() != 0 ) {
 	if ( str.toInt() == 1 )
-	    str = QObject::tr( "Male" );
+	    str = qApp->translate( "QtopiaPim", "Male" );
 	else if ( str.toInt() == 2 )
-	    str = QObject::tr( "Female" );
-	text += "<b>" + QObject::tr("Gender: ") + "</b>" + str + "<br>";
+	    str = qApp->translate( "QtopiaPim", "Female" );
+	text += "<b>" + qApp->translate( "QtopiaPim","Gender: ") + "</b>" + str + "<br>";
     }
     str = spouse();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Spouse: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Spouse: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     if ( birthday().isValid() ) {
 	str = TimeString::localYMD( birthday() );
 	if ( !str.isEmpty() )
-	    text += "<b>" + QObject::tr("Birthday: ") + "</b>"
+	    text += "<b>" + qApp->translate( "QtopiaPim","Birthday: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     }
     if ( anniversary().isValid() ) {
 	str = TimeString::localYMD( anniversary() );
 	if ( !str.isEmpty() )
-	    text += "<b>" + QObject::tr("Anniversary: ") + "</b>"
+	    text += "<b>" + qApp->translate( "QtopiaPim","Anniversary: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     }
     str = nickname();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Nickname: ") + "</b>"
+	text += "<b>" + qApp->translate( "QtopiaPim","Nickname: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
 
     // notes last
     if ( (value = notes()) ) {
 	QRegExp reg("\n");
 
-	//QString tmp = Qtopia::escapeString(value);
 	QString tmp = QStyleSheet::convertFromPlainText(value);
-	//tmp.replace( reg, "<br>" );
 	text += "<br>" + tmp + "<br>";
     }
     return text;
@@ -327,7 +332,7 @@ QMap<int, QString> PimContact::fields() const
     if (!keyToIdentifierMapPtr)
 	initMaps();
     QMap<int, QCString>::Iterator it;
-    for (it = keyToIdentifierMapPtr->begin(); 
+    for (it = keyToIdentifierMapPtr->begin();
 	    it != keyToIdentifierMapPtr->end(); ++it) {
 	int i = it.key();
 	QString str = field(i);
@@ -401,6 +406,45 @@ QString PimContact::displayHomeAddress() const
     return displayAddress( homeStreet(), homeCity(),
 			   homeState(), homeZip(),
 			   homeCountry() );
+}
+
+/*!
+  Sets the persons gender to the enum value specified in \a g.
+*/
+void PimContact::setGender( GenderType g )
+{
+    switch( g ) {
+    case Male: replace( Gender, QString::number( 1 ) );	break;
+    case Female: replace( Gender, QString::number( 2 ) ); break;
+    case UnspecifiedGender:
+    default:
+	mMap.remove( Gender );
+	break;
+    }
+}
+
+/*! \enum PimContact::GenderType
+  This enum describes the three possible choices for gender.
+
+  \value UnspecifiedGender
+  \value Male
+  \value Female
+*/
+
+/*!
+  Returns the gender of the contact as type GenderType.
+*/
+PimContact::GenderType PimContact::gender() const
+{
+    QString genderStr = find( Gender );
+
+    switch( genderStr.toInt() ) {
+    case 1: return Male;
+    case 2: return Female;
+    case 0:
+    default:
+	return UnspecifiedGender;
+    }
 }
 
 /*!
@@ -529,14 +573,6 @@ QString PimContact::fullName(const PimContact &cnt)
     }
 #endif
     return name.simplifyWhiteSpace();
-}
-
-/*!
-  Returns the list of children of the contact.
-*/
-QStringList PimContact::childrenList() const
-{
-    return QStringList::split( " ", find( Children ) );
 }
 
 /*!
@@ -684,21 +720,33 @@ void PimContact::setChildren( const QString &children )
     replace( Children, children );
 }
 
-// vcard conversion code
+// In pimrecord.cpp
+void qpe_startVObjectInput();
+void qpe_endVObjectInput();
+void qpe_startVObjectOutput();
+void qpe_setVObjectProperty(const QString&, const QString&, const char* type, PimRecord*);
+void qpe_endVObjectOutput(VObject *,const char* type,const PimRecord*);
+VObject *qpe_safeAddPropValue( VObject *o, const char *prop, const QString &value );
 static inline VObject *safeAddPropValue( VObject *o, const char *prop, const QString &value )
-{
-    VObject *ret = 0;
-    if ( o && !value.isEmpty() )
-	ret = addPropValue( o, prop, value.utf8() );
-    return ret;
-}
-
+{ return qpe_safeAddPropValue(o,prop,value); }
+VObject *qpe_safeAddProp( VObject *o, const char *prop);
 static inline VObject *safeAddProp( VObject *o, const char *prop)
+{ return qpe_safeAddProp(o,prop); }
+
+
+static void safeAddAddress( VObject* vcard, const char* prop, const QString& bs, const QString& bc,
+    const QString& bst, const QString& bz, const QString& bco)
 {
-    VObject *ret = 0;
-    if ( o )
-	ret = addProp( o, prop );
-    return ret;
+    // Not really needed now, since parse handles empty values
+    if ( !!bs || !!bc || !!bst || !!bz || !!bco ) {
+	VObject *adr= safeAddProp( vcard, VCAdrProp );
+	safeAddProp( adr, prop );
+	safeAddPropValue( adr, VCStreetAddressProp, bs );
+	safeAddPropValue( adr, VCCityProp, bc );
+	safeAddPropValue( adr, VCRegionProp, bst );
+	safeAddPropValue( adr, VCPostalCodeProp, bz );
+	safeAddPropValue( adr, VCCountryNameProp, bco );
+    }
 }
 
 /*!
@@ -706,6 +754,8 @@ static inline VObject *safeAddProp( VObject *o, const char *prop)
 */
 VObject *PimContact::createVObject( const PimContact &c )
 {
+    qpe_startVObjectOutput();
+
     VObject *vcard = newVObject( VCCardProp );
     safeAddPropValue( vcard, VCVersionProp, "2.1" );
     safeAddPropValue( vcard, VCLastRevisedProp, TimeConversion::toISO8601( QDateTime::currentDateTime() ) );
@@ -721,16 +771,13 @@ VObject *PimContact::createVObject( const PimContact &c )
     safeAddPropValue( name, VCAdditionalNamesProp, c.middleName() );
     safeAddPropValue( name, VCNamePrefixesProp, c.nameTitle() );
     safeAddPropValue( name, VCNameSuffixesProp, c.suffix() );
-    safeAddPropValue( name, VCPronunciationProp, c.pronunciation() );
+
+    safeAddPropValue( vcard, VCPronunciationProp, c.firstNamePronunciation() );
+    safeAddPropValue( vcard, "X-Qtopia-LNSOUND", c.lastNamePronunciation() );
 
     // home properties
-    VObject *home_adr= safeAddProp( vcard, VCAdrProp );
-    safeAddProp( home_adr, VCHomeProp );
-    safeAddPropValue( home_adr, VCStreetAddressProp, c.homeStreet() );
-    safeAddPropValue( home_adr, VCCityProp, c.homeCity() );
-    safeAddPropValue( home_adr, VCRegionProp, c.homeState() );
-    safeAddPropValue( home_adr, VCPostalCodeProp, c.homeZip() );
-    safeAddPropValue( home_adr, VCCountryNameProp, c.homeCountry() );
+    safeAddAddress( vcard, VCHomeProp, c.homeStreet(), c.homeCity(),
+        c.homeState(), c.homeZip(), c.homeCountry() );
 
     VObject *home_phone = safeAddPropValue( vcard, VCTelephoneProp, c.homePhone() );
     safeAddProp( home_phone, VCHomeProp );
@@ -745,13 +792,8 @@ VObject *PimContact::createVObject( const PimContact &c )
     safeAddProp( url, VCHomeProp );
 
     // work properties
-    VObject *work_adr= safeAddProp( vcard, VCAdrProp );
-    safeAddProp( work_adr, VCWorkProp );
-    safeAddPropValue( work_adr, VCStreetAddressProp, c.businessStreet() );
-    safeAddPropValue( work_adr, VCCityProp, c.businessCity() );
-    safeAddPropValue( work_adr, VCRegionProp, c.businessState() );
-    safeAddPropValue( work_adr, VCPostalCodeProp, c.businessZip() );
-    safeAddPropValue( work_adr, VCCountryNameProp, c.businessCountry() );
+    safeAddAddress( vcard, VCWorkProp, c.businessStreet(), c.businessCity(),
+        c.businessState(), c.businessZip(), c.businessCountry() );
 
     VObject *work_phone = safeAddPropValue( vcard, VCTelephoneProp, c.businessPhone() );
     safeAddProp( work_phone, VCWorkProp );
@@ -791,6 +833,7 @@ VObject *PimContact::createVObject( const PimContact &c )
 	safeAddPropValue( org, VCOrgUnitProp, c.department() );
 	safeAddPropValue( org, VCOrgUnit2Prop, c.office() );
     }
+    safeAddPropValue( vcard, "X-Qtopia-CSOUND", c.companyPronunciation() );
 
     // some values we have to export as custom fields
     safeAddPropValue( vcard, "X-Qtopia-Profession", c.profession() );
@@ -798,14 +841,16 @@ VObject *PimContact::createVObject( const PimContact &c )
     safeAddPropValue( vcard, "X-Qtopia-Assistant", c.assistant() );
 
     safeAddPropValue( vcard, "X-Qtopia-Spouse", c.spouse() );
-    safeAddPropValue( vcard, "X-Qtopia-Gender", c.gender() );
+    if ( c.gender() != PimContact::UnspecifiedGender )
+	safeAddPropValue( vcard, "X-Qtopia-Gender", QString::number( (int)c.gender() ) );
     safeAddPropValue( vcard, "X-Qtopia-Anniversary", PimXmlIO::dateToXml( c.anniversary() ) );
     safeAddPropValue( vcard, "X-Qtopia-Nickname", c.nickname() );
     safeAddPropValue( vcard, "X-Qtopia-Children", c.children() );
 
+    qpe_endVObjectOutput(vcard,"Address Book",&c); // No tr
+
     return vcard;
 }
-
 
 static PimContact parseVObject( VObject *obj )
 {
@@ -852,16 +897,18 @@ static PimContact parseVObject( VObject *obj )
 		    c.setNameTitle( value );
 		else if ( name == VCNameSuffixesProp )
 		    c.setSuffix( value );
-		else if ( name == VCFamilyNameProp )
+		else if ( name == VCFamilyNameProp ) {
 		    c.setLastName( value );
-		else if ( name == VCGivenNameProp )
+		} else if ( name == VCGivenNameProp ) {
 		    c.setFirstName( value );
-		else if ( name == VCAdditionalNamesProp )
+		} else if ( name == VCAdditionalNamesProp )
 		    c.setMiddleName( value );
-		else if ( name == VCPronunciationProp )
-		    c.setPronunciation( value );
 	    }
 	}
+	else if ( name == VCPronunciationProp )
+	    c.setFirstNamePronunciation( value );
+	else if ( name == "X-Qtopia-LNSOUND" )
+	    c.setLastNamePronunciation( value );
 	else if ( name == VCAdrProp ) {
 	    bool work = TRUE; // default address is work address
 	    QString street;
@@ -1014,15 +1061,16 @@ static PimContact parseVObject( VObject *obj )
 		    value = tc->toUnicode( vObjectStringZValue( o ) );
 		else
 		    value = vObjectStringZValue( o );
-		//QString value = vObjectStringZValue( o );
-		if ( name == VCOrgNameProp )
+		if ( name == VCOrgNameProp ) {
 		    c.setCompany( value );
-		else if ( name == VCOrgUnitProp )
+		} else if ( name == VCOrgUnitProp )
 		    c.setDepartment( value );
 		else if ( name == VCOrgUnit2Prop )
 		    c.setOffice( value );
 	    }
 	}
+	else if ( name == "X-Qtopia-CSOUND" )
+	    c.setCompanyPronunciation( value );
 	else if ( name == VCTitleProp ) {
 	    c.setJobTitle( value );
 	}
@@ -1045,7 +1093,7 @@ static PimContact parseVObject( VObject *obj )
 	    c.setSpouse( value );
 	}
 	else if ( name == "X-Qtopia-Gender" ) {
-	    c.setGender( value );
+	    c.setGender( (PimContact::GenderType) value.toInt() );
 	}
 	else if ( name == "X-Qtopia-Anniversary" ) {
 	    c.setAnniversary( PimXmlIO::xmlToDate( value ) );
@@ -1055,6 +1103,8 @@ static PimContact parseVObject( VObject *obj )
 	}
 	else if ( name == "X-Qtopia-Children" ) {
 	    c.setChildren( value );
+	} else {
+	    qpe_setVObjectProperty(name,value,"Address Book",&c); // No tr
 	}
 
 
@@ -1136,6 +1186,7 @@ QValueList<PimContact> PimContact::readVCard( const QString &filename )
 
     QValueList<PimContact> contacts;
 
+    qpe_startVObjectInput();
     while ( obj ) {
 	contacts.append( parseVObject( obj ) );
 
@@ -1143,6 +1194,7 @@ QValueList<PimContact> PimContact::readVCard( const QString &filename )
 	obj = nextVObjectInList(obj);
 	cleanVObject( t );
     }
+    qpe_endVObjectInput();
 
     return contacts;
 }
@@ -1277,7 +1329,9 @@ static const QtopiaPimMapEntry addressbookentries[] = {
     { "Notes", QT_TRANSLATE_NOOP("PimContact",  "Notes" ), PimContact::Notes, 0 },
 
     // Added in Qtopia 1.6
-    { "Pronunciation", QT_TRANSLATE_NOOP("PimContact",  "Pronunciation" ), PimContact::Pronunciation, 0 },
+    { "LastNamePronunciation", QT_TRANSLATE_NOOP("PimContact",  "  Pronunciation" ), PimContact::LastNamePronunciation, 0 },
+    { "FirstNamePronunciation", QT_TRANSLATE_NOOP("PimContact",  "  Pronunciation" ), PimContact::FirstNamePronunciation, 0 },
+    { "CompanyPronunciation", QT_TRANSLATE_NOOP("PimContact",  "  Pronunciation" ), PimContact::CompanyPronunciation, 0 },
 
     { 0, 0, 0, 0 }
 };
@@ -1356,13 +1410,31 @@ const QMap<int,int> & PimContact::uniquenessMap()
   Sets the last name of the contact to \a str.
 */
 
-/*! \fn void PimContact::setPronunciation( const QString &str )
-  Sets the pronunciation of the contacts name to \a str.
+/*! \fn void PimContact::setFirstNamePronunciation( const QString &str )
+  Sets the pronunciation of the contacts first name to \a str.
 */
 
 /*!
-  \fn QString PimContact::pronunciation() const
-  returns the pronunciation of the contacts name.
+  \fn QString PimContact::firstNamePronunciation() const
+  Returns the pronunciation of the contacts first name.
+*/
+
+/*! \fn void PimContact::setLastNamePronunciation( const QString &str )
+  Sets the pronunciation of the contacts last name to \a str.
+*/
+
+/*!
+  \fn QString PimContact::lastNamePronunciation() const
+  Returns the pronunciation of the contacts last name.
+*/
+
+/*! \fn void PimContact::setCompanyPronunciation( const QString &str )
+  Sets the pronunciation of the contacts company name to \a str.
+*/
+
+/*!
+  \fn QString PimContact::companyPronunciation() const
+  Returns the pronunciation of the contacts company name.
 */
 
 /*! \fn void PimContact::setSuffix( const QString &str )
@@ -1479,10 +1551,6 @@ const QMap<int,int> & PimContact::uniquenessMap()
 
 /*! \fn void PimContact::setSpouse( const QString &str )
   Sets the spouse of the contact to \a str.
-*/
-
-/*! \fn void PimContact::setGender( const QString &str )
-  Sets the gender of the contact to \a str.
 */
 
 /*! \fn void PimContact::setNickname( const QString &str )
@@ -1627,10 +1695,6 @@ const QMap<int,int> & PimContact::uniquenessMap()
 
 /*! \fn QString PimContact::spouse() const
   Returns the spouse of the contact.
-*/
-
-/*! \fn QString PimContact::gender() const
-  Returns the gender of the contact.
 */
 
 /*! \fn QString PimContact::nickname() const

@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/pim/task.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>task.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>task.h</h1>
+
+<p>This is the verbatim text of the task.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef QTOPIAPIM_TASK_H__
+#define QTOPIAPIM_TASK_H__
+
+#include &lt;qtopia/stringutil.h&gt;
+#include &lt;qtopia/pim/pimrecord.h&gt;
+
+#include &lt;qvaluelist.h&gt;
+#include &lt;qdatetime.h&gt;
+
+class PimTaskPrivate;
+class TodoAccessPrivate;
+
+class QTOPIAPIM_EXPORT PimTask : public PimRecord
+{
+    friend class TodoAccessPrivate;
+public:
+    enum TaskStatus {
+	NotStarted = 0,
+	InProgress,
+	Completed,
+	Waiting,
+	Deferred
+    };
+    
+    enum TaskFields {
+	HasDate = CommonFieldsEnd,
+	Description,
+	Priority,
+	CompletedField,
+	PercentCompleted,
+	DueDateYear,
+	DueDateMonth,
+	DueDateDay,
+	Status,
+	StartedDate,
+	CompletedDate,
+	Notes,
+	
+	TaskFieldsEnd = 100
+    };
+    
+    enum PriorityValue { VeryHigh=1, High, Normal, Low, VeryLow };
+
+    PimTask();
+    void fromMap( const QMap&lt;int,QString&gt; &amp;);
+
+    virtual ~PimTask();
+
+    static void writeVCalendar( const QString &amp;filename, const QValueList&lt;PimTask&gt; &amp;tasks);
+    static void writeVCalendar( const QString &amp;filename, const PimTask &amp;task);
+    static QValueList&lt;PimTask&gt; readVCalendar( const QString &amp;filename );
+
+    void setPriority( PriorityValue priority ) { mPriority = priority; }
+    PriorityValue priority() const { return mPriority; }
+
+    void setDescription( const QString&amp; description )
+    { mDesc = description; }
+    QString description() const { return mDesc; }
+
+    void setDueDate( const QDate&amp; date);
+    void clearDueDate() { mDue = FALSE; }
+    
+    const QDate &amp;dueDate() const { return mDueDate; }
+    bool hasDueDate() const { return mDue; }
+    
+    const QDate &amp;startedDate() const { return mStartedDate; }
+    void setStartedDate(const QDate &amp;date) { mStartedDate = date; }
+    bool hasStartedDate() const;
+    
+    const QDate &amp;completedDate() const { return mCompletedDate; }
+    void setCompletedDate(const QDate &amp;date) { mCompletedDate = date; }
+    
+    TaskStatus status() const; 
+    void setStatus(TaskStatus s);
+    
+    bool isCompleted() const { return mCompleted; }
+    void setCompleted( bool b ) { mCompleted = b; }
+
+    uint percentCompleted() const;
+    void setPercentCompleted( uint u );
+    
+    QString notes() const { return mNotes; }
+    void setNotes(const QString &amp;s) { mNotes = s; }
+
+    bool match( const QRegExp &amp;r ) const;
+
+    QString toRichText() const;
+
+    virtual void setFields(const QMap&lt;int,QString&gt; &amp;);
+    
+    virtual void setField(int,const QString &amp;);
+    virtual QString field(int) const;
+    virtual QMap&lt;int, QString&gt; fields() const;
+    
+    static const QMap&lt;int, QCString&gt; &amp;keyToIdentifierMap();
+    static const QMap&lt;QCString,int&gt; &amp;identifierToKeyMap();
+    static const QMap&lt;int, QString&gt; &amp; trFieldsMap();
+    // needed for Qtopia Desktop synchronization
+    static const QMap&lt;int,int&gt; &amp;uniquenessMap();
+
+#ifndef QT_NO_DATASTREAM
+    friend QTOPIAPIM_EXPORT QDataStream &amp;operator&gt;&gt;( QDataStream &amp;, PimTask &amp; );
+    friend QTOPIAPIM_EXPORT QDataStream &amp;operator&lt;&lt;( QDataStream &amp;, const PimTask &amp; );
+#endif
+
+//protected:
+    //virtual int endFieldMarker() const {return TaskFieldCount; }
+
+private:
+    static TaskStatus xmlToStatus(const QString &amp;s);
+    static QString statusToXml(TaskStatus);
+    static void initMaps();
+    
+private:
+    bool mDue;
+    QDate mDueDate;
+    bool mCompleted;
+    PriorityValue mPriority;
+    QString mDesc;
+    
+    TaskStatus mStatus;
+    QDate mStartedDate, mCompletedDate;
+    QString mNotes;
+    uint mPercentCompleted;
+    
+    PimTaskPrivate *d;
+};
+
+
+#ifndef QT_NO_DATASTREAM
+QTOPIAPIM_EXPORT QDataStream &amp;operator&gt;&gt;( QDataStream &amp;, PimTask &amp; );
+QTOPIAPIM_EXPORT QDataStream &amp;operator&lt;&lt;( QDataStream &amp;, const PimTask &amp; );
+#endif
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

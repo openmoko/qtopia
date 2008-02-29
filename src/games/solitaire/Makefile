@@ -181,8 +181,10 @@ INTERFACES =
 UICDECLS =      
 UICIMPLS =      
 SRCMOC	=	$(MOC_DIR)/moc_canvasitemtimer.cpp \
+		$(MOC_DIR)/moc_canvascardgame.cpp \
 		$(MOC_DIR)/moc_canvascardwindow.cpp
 OBJMOC	=	$(OBJECTS_DIR)/moc_canvasitemtimer.o \
+		$(OBJECTS_DIR)/moc_canvascardgame.o \
 		$(OBJECTS_DIR)/moc_canvascardwindow.o
 
 
@@ -367,12 +369,27 @@ $(OBJECTS_DIR)/moc_canvasitemtimer.o: $(MOC_DIR)/moc_canvasitemtimer.cpp \
 		canvasitemtimer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvasitemtimer.o $(MOC_DIR)/moc_canvasitemtimer.cpp
 
+$(OBJECTS_DIR)/moc_canvascardgame.o: $(MOC_DIR)/moc_canvascardgame.cpp \
+		canvascardgame.h \
+		cardgame.h \
+		card.h \
+		cardpile.h \
+		carddeck.h \
+		cardgamelayout.h \
+		canvasshapes.h \
+		canvascard.h \
+		canvasitemtimer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvascardgame.o $(MOC_DIR)/moc_canvascardgame.cpp
+
 $(OBJECTS_DIR)/moc_canvascardwindow.o: $(MOC_DIR)/moc_canvascardwindow.cpp \
 		canvascardwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvascardwindow.o $(MOC_DIR)/moc_canvascardwindow.cpp
 
 $(MOC_DIR)/moc_canvasitemtimer.cpp: canvasitemtimer.h
 	$(MOC) canvasitemtimer.h -o $(MOC_DIR)/moc_canvasitemtimer.cpp
+
+$(MOC_DIR)/moc_canvascardgame.cpp: canvascardgame.h
+	$(MOC) canvascardgame.h -o $(MOC_DIR)/moc_canvascardgame.cpp
 
 $(MOC_DIR)/moc_canvascardwindow.cpp: canvascardwindow.h
 	$(MOC) canvascardwindow.h -o $(MOC_DIR)/moc_canvascardwindow.cpp

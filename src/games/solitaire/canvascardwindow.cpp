@@ -43,6 +43,8 @@ CanvasCardWindow::CanvasCardWindow(QWidget* parent, const char* name, WFlags f) 
     QMainWindow(parent, name, f), resizeTimeout( this, "resizeTimeout" ), canvas(1, 1),
     snapOn(TRUE), cardBack(0), gameType(0), drawThree(TRUE), cardGame(0) , resizing( false )
 {
+    setCaption( tr("Patience") );
+
     setIcon( Resource::loadPixmap( "cards" ) );
 
     connect( &resizeTimeout, SIGNAL( timeout() ), this, SLOT( doResize() ) );
@@ -89,6 +91,8 @@ CanvasCardWindow::CanvasCardWindow(QWidget* parent, const char* name, WFlags f) 
 
     // Temporary initial QCanvasView until a game is loaded or a new game started
     canvasView = new QCanvasView( &canvas, this );
+    canvasView->setHScrollBarMode(QScrollView::AlwaysOff);
+    canvasView->setVScrollBarMode(QScrollView::AlwaysOff);
     setCentralWidget( canvasView );
 }
 
@@ -135,6 +139,7 @@ void CanvasCardWindow::closeGame()
 	cfg.writeEntry( "CardBack", cardBack );
 	cardGame->writeConfig( cfg );
 	delete cardGame;
+	cardGame = 0;
 	setCentralWidget( canvasView );
     }
 }
@@ -220,6 +225,9 @@ void CanvasCardWindow::initGame( bool newGame, int type )
         cardGame = new PatienceCardGame( &canvas, snapOn, this );
     else
 	cardGame = new FreecellCardGame( &canvas, snapOn, this );
+
+    cardGame->setHScrollBarMode(QScrollView::AlwaysOff);
+    cardGame->setVScrollBarMode(QScrollView::AlwaysOff);
 
     cardGame->setNumberToDraw(drawThree ? 3 : 1);
     gameType = type;

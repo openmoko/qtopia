@@ -26,8 +26,8 @@ int main( int argc, char *argv[] )
 {
     QPEApplication a( argc, argv );
 
-    SystemInfo *si = new SystemInfo();
-    a.showMainWidget( si );
+    SystemInfo si;
+    a.showMainWidget( &si );
 
     return a.exec();
 }

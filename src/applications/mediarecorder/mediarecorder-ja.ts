@@ -211,5 +211,9 @@ record in the selected format.</source>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

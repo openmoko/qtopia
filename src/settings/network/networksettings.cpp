@@ -49,6 +49,8 @@
 NetworkSettings::NetworkSettings( QWidget* parent,  const char* name, WFlags fl )
     : NetworkSettingsBase( parent, name, fl )
 {
+    emptyString = tr("<p>There are no running network services.");
+    notEmptyString = tr("<p>This is the state of your running network services.");
     loadSettings();
 
     connect(add, SIGNAL(clicked()), this, SLOT(addSetting()));
@@ -109,6 +111,7 @@ void NetworkSettings::addSetting()
 	bool ok = TRUE;
 	{
 	    Config cfg(filename, Config::File);
+	    QFile::remove(filename);
 	    cfg.setGroup("Help");
 	    cfg.clearGroup();
 	    cfg.setGroup("Info");
@@ -138,6 +141,8 @@ void NetworkSettings::addSetting()
 	    } else {
 		ok = FALSE;
 	    }
+	    if ( ok )
+		cfg.write(); // since we delete it after load
 	}
 	if ( ok ) {
 	    loadSettings();

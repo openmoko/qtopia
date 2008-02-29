@@ -39,6 +39,7 @@ private slots:
 private:
     void drawWait(bool on);
     AppLnkSet* allapps;
+    bool changed;
 };
 
 #endif // APPSERVICES_H

@@ -78,7 +78,10 @@ public:
 	if ( card->isFacing() && ( card->getCardPile()->cardInfront(card) == NULL ) &&
 	   ( ( ( cardOnTop() == NULL ) && ( card->getValue() == ace ) ) ||
 	     ( ( cardOnTop() != NULL ) &&
+//#define CHEAT_TEST_MODE
+#ifndef CHEAT_TEST_MODE
 	       ( (int)card->getValue() == (int)cardOnTop()->getValue() + 1 ) &&
+#endif
 	       ( card->getSuit() == cardOnTop()->getSuit() ) ) ) )
 	    return TRUE;
         return FALSE;	
@@ -100,7 +103,9 @@ public:
 	if ( card->isFacing() &&
 	     ( ( ( cardOnTop() == NULL ) && (card->getValue() == king) ) ||
 	       ( ( cardOnTop() != NULL ) &&
+#ifndef CHEAT_TEST_MODE
  	         ( (int)card->getValue() + 1 == (int)cardOnTop()->getValue() ) &&
+#endif
 	         ( card->isRed() != cardOnTop()->isRed() ) ) ) )
 	    return TRUE;
         return FALSE;	

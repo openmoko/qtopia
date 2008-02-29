@@ -1,5 +1,18 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>AlarmServer</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished">空き容量がありません</translation>
+    </message>
+    <message>
+        <source>Unable to schedule alarm.
+Free some memory and try again.</source>
+        <translation type="unfinished">アラームを設定できません。
+空き容量を確保してからやり直してください。</translation>
+    </message>
+</context>
+<context>
     <name>Categories</name>
     <message>
         <source>All</source>
@@ -48,6 +61,33 @@
         <source>New Category </source>
         <translation>新規のカテゴリ</translation>
     </message>
+    <message>
+        <source>Duplicate categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is already a category named
+%1.
+Please choose another name, or delete
+the duplicate.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removing Category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Making a global category local will delete it from all other applications that may use it. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a local category will make all items in this category unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CategoryEditBase</name>
@@ -77,7 +117,7 @@
     </message>
     <message>
         <source>Add</source>
-        <translation>追加</translation>
+        <translation type="obsolete">追加</translation>
     </message>
     <message>
         <source>Enter a new category to the left and press to add it to the list.</source>
@@ -95,6 +135,10 @@
         <source>Check to make this property available to all applications.</source>
         <translation>チェックしてこのプロパティをすべてのアプリケーションに対し有効にします。</translation>
     </message>
+    <message>
+        <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CategoryMenu</name>
@@ -111,12 +155,12 @@
     <name>CategorySelect</name>
     <message>
         <source>Error</source>
-        <translation>エラー</translation>
+        <translation type="obsolete">エラー</translation>
     </message>
     <message>
         <source>Sorry, another application is
 editing categories.</source>
-        <translation>別のアプリケーションが
+        <translation type="obsolete">別のアプリケーションが
 カテゴリを編集中です。</translation>
     </message>
     <message>
@@ -130,6 +174,305 @@ editing categories.</source>
     <message>
         <source>Categories</source>
         <translation type="unfinished">カテゴリ</translation>
+    </message>
+</context>
+<context>
+    <name>Config</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished">空き容量がありません</translation>
+    </message>
+    <message>
+        <source>There was a problem creating
+Configuration Information 
+for this program.
+
+Please free up some space and
+try again.</source>
+        <translation type="unfinished">このプログラム用の
+設定情報の作成に問題が
+ありました。
+
+空き容量を確保してから
+やり直してください。</translation>
+    </message>
+</context>
+<context>
+    <name>Contact</name>
+    <message>
+        <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
+        <translation type="unfinished">&lt;b&gt;勤務先所在地:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
+        <translation type="unfinished">&lt;b&gt;自宅住所:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Email Addresses: </source>
+        <translation type="unfinished">電子メールアドレス:</translation>
+    </message>
+    <message>
+        <source>Home Phone: </source>
+        <translation type="unfinished">自宅電話番号:</translation>
+    </message>
+    <message>
+        <source>Home Fax: </source>
+        <translation type="unfinished">自宅ファックス番号:</translation>
+    </message>
+    <message>
+        <source>Home Mobile: </source>
+        <translation type="unfinished">個人用携帯電話:</translation>
+    </message>
+    <message>
+        <source>Home Web Page: </source>
+        <translation type="unfinished">個人ウェブページ:</translation>
+    </message>
+    <message>
+        <source>Business Web Page: </source>
+        <translation type="unfinished">ビジネスウェブページ:</translation>
+    </message>
+    <message>
+        <source>Office: </source>
+        <translation type="unfinished">オフィス:</translation>
+    </message>
+    <message>
+        <source>Business Phone: </source>
+        <translation type="unfinished">勤務先電話番号:</translation>
+    </message>
+    <message>
+        <source>Business Fax: </source>
+        <translation type="unfinished">勤務先ファックス番号:</translation>
+    </message>
+    <message>
+        <source>Business Mobile: </source>
+        <translation type="unfinished">ビジネス用携帯電話:</translation>
+    </message>
+    <message>
+        <source>Business Pager: </source>
+        <translation type="unfinished">ビジネス用ポケベル:</translation>
+    </message>
+    <message>
+        <source>Profession: </source>
+        <translation type="unfinished">職業:</translation>
+    </message>
+    <message>
+        <source>Assistant: </source>
+        <translation type="unfinished">アシスタント:</translation>
+    </message>
+    <message>
+        <source>Manager: </source>
+        <translation type="unfinished">マネージャ:</translation>
+    </message>
+    <message>
+        <source>Male</source>
+        <translation type="unfinished">男性</translation>
+    </message>
+    <message>
+        <source>Female</source>
+        <translation type="unfinished">女性</translation>
+    </message>
+    <message>
+        <source>Gender: </source>
+        <translation type="unfinished">性別:</translation>
+    </message>
+    <message>
+        <source>Spouse: </source>
+        <translation type="unfinished">配偶者:</translation>
+    </message>
+    <message>
+        <source>Birthday: </source>
+        <translation type="unfinished">誕生日:</translation>
+    </message>
+    <message>
+        <source>Anniversary: </source>
+        <translation type="unfinished">記念日:</translation>
+    </message>
+    <message>
+        <source>Nickname: </source>
+        <translation type="unfinished">ニックネーム:</translation>
+    </message>
+    <message>
+        <source>Name Title</source>
+        <translation type="unfinished">名前タイトル</translation>
+    </message>
+    <message>
+        <source>First Name</source>
+        <translation type="unfinished">名</translation>
+    </message>
+    <message>
+        <source>Middle Name</source>
+        <translation type="unfinished">ミドルネーム</translation>
+    </message>
+    <message>
+        <source>Last Name</source>
+        <translation type="unfinished">姓</translation>
+    </message>
+    <message>
+        <source>Suffix</source>
+        <translation type="unfinished">接尾語</translation>
+    </message>
+    <message>
+        <source>File As</source>
+        <translation type="unfinished">ファイル名</translation>
+    </message>
+    <message>
+        <source>Job Title</source>
+        <translation type="unfinished">役職</translation>
+    </message>
+    <message>
+        <source>Department</source>
+        <translation type="unfinished">部署</translation>
+    </message>
+    <message>
+        <source>Company</source>
+        <translation type="unfinished">会社</translation>
+    </message>
+    <message>
+        <source>Business Phone</source>
+        <translation type="unfinished">勤務先電話番号</translation>
+    </message>
+    <message>
+        <source>Business Fax</source>
+        <translation type="unfinished">勤務先ファックス番号</translation>
+    </message>
+    <message>
+        <source>Business Mobile</source>
+        <translation type="unfinished">ビジネス用携帯番号</translation>
+    </message>
+    <message>
+        <source>Default Email</source>
+        <translation type="unfinished">デフォルト電子メール</translation>
+    </message>
+    <message>
+        <source>Emails</source>
+        <translation type="unfinished">電子メール</translation>
+    </message>
+    <message>
+        <source>Home Phone</source>
+        <translation type="unfinished">自宅電話番号</translation>
+    </message>
+    <message>
+        <source>Home Fax</source>
+        <translation type="unfinished">自宅ファックス番号</translation>
+    </message>
+    <message>
+        <source>Home Mobile</source>
+        <translation type="unfinished">個人用携帯番号</translation>
+    </message>
+    <message>
+        <source>Business Street</source>
+        <translation type="unfinished">勤務先 番地</translation>
+    </message>
+    <message>
+        <source>Business City</source>
+        <translation type="unfinished">勤務先 市町村</translation>
+    </message>
+    <message>
+        <source>Business State</source>
+        <translation type="unfinished">勤務先 都道府県</translation>
+    </message>
+    <message>
+        <source>Business Zip</source>
+        <translation type="unfinished">勤務先 郵便番号</translation>
+    </message>
+    <message>
+        <source>Business Country</source>
+        <translation type="unfinished">勤務先 国</translation>
+    </message>
+    <message>
+        <source>Business Pager</source>
+        <translation type="unfinished">勤務先ポケベル</translation>
+    </message>
+    <message>
+        <source>Business WebPage</source>
+        <translation type="unfinished">ビジネスウェブページ</translation>
+    </message>
+    <message>
+        <source>Office</source>
+        <translation type="unfinished">オフィス</translation>
+    </message>
+    <message>
+        <source>Profession</source>
+        <translation type="unfinished">職業</translation>
+    </message>
+    <message>
+        <source>Assistant</source>
+        <translation type="unfinished">アシスタント</translation>
+    </message>
+    <message>
+        <source>Manager</source>
+        <translation type="unfinished">マネージャ</translation>
+    </message>
+    <message>
+        <source>Home Street</source>
+        <translation type="unfinished">自宅 番地</translation>
+    </message>
+    <message>
+        <source>Home City</source>
+        <translation type="unfinished">自宅 市町村</translation>
+    </message>
+    <message>
+        <source>Home State</source>
+        <translation type="unfinished">自宅 都道府県</translation>
+    </message>
+    <message>
+        <source>Home Zip</source>
+        <translation type="unfinished">自宅 郵便番号</translation>
+    </message>
+    <message>
+        <source>Home Country</source>
+        <translation type="unfinished">自宅 国</translation>
+    </message>
+    <message>
+        <source>Home Web Page</source>
+        <translation type="unfinished">個人用ウェブページ</translation>
+    </message>
+    <message>
+        <source>Spouse</source>
+        <translation type="unfinished">配偶者</translation>
+    </message>
+    <message>
+        <source>Gender</source>
+        <translation type="unfinished">性別</translation>
+    </message>
+    <message>
+        <source>Birthday</source>
+        <translation type="unfinished">誕生日</translation>
+    </message>
+    <message>
+        <source>Anniversary</source>
+        <translation type="unfinished">記念日</translation>
+    </message>
+    <message>
+        <source>Nickname</source>
+        <translation type="unfinished">ニックネーム</translation>
+    </message>
+    <message>
+        <source>Children</source>
+        <translation type="unfinished">子供</translation>
+    </message>
+    <message>
+        <source>Notes</source>
+        <translation type="unfinished">メモ</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">グループ</translation>
+    </message>
+</context>
+<context>
+    <name>DateBookDB</name>
+    <message>
+        <source>Out of Space</source>
+        <translation type="unfinished">空き容量がありません</translation>
+    </message>
+    <message>
+        <source>Unable to create start up files
+Please free up some space
+before entering data</source>
+        <translation type="unfinished">スタートアップファイルを作成できません
+データを入力する前に空き容量を
+確保してください</translation>
     </message>
 </context>
 <context>
@@ -184,6 +527,10 @@ editing categories.</source>
     <message>
         <source>Delete</source>
         <translation>削除</translation>
+    </message>
+    <message>
+        <source>New Document</source>
+        <translation type="unfinished">新規のドキュメント</translation>
     </message>
 </context>
 <context>
@@ -259,31 +606,31 @@ editing categories.</source>
     <name>QObject</name>
     <message>
         <source>New Document</source>
-        <translation>新規のドキュメント</translation>
+        <translation type="obsolete">新規のドキュメント</translation>
     </message>
     <message>
         <source>Restore</source>
-        <translation>復元</translation>
+        <translation type="obsolete">復元</translation>
     </message>
     <message>
         <source>Move</source>
-        <translation>移動</translation>
+        <translation type="obsolete">移動</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation>サイズ</translation>
+        <translation type="obsolete">サイズ</translation>
     </message>
     <message>
         <source>Maximize</source>
-        <translation>最大化</translation>
+        <translation type="obsolete">最大化</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation>閉じる</translation>
+        <translation type="obsolete">閉じる</translation>
     </message>
     <message>
         <source>Out of Space</source>
-        <translation>空き容量がありません</translation>
+        <translation type="obsolete">空き容量がありません</translation>
     </message>
     <message>
         <source>There was a problem creating
@@ -292,7 +639,7 @@ for this program.
 
 Please free up some space and
 try again.</source>
-        <translation>このプログラム用の
+        <translation type="obsolete">このプログラム用の
 設定情報の作成に問題が
 ありました。
 
@@ -303,14 +650,14 @@ try again.</source>
         <source>Unable to create start up files
 Please free up some space
 before entering data</source>
-        <translation>スタートアップファイルを作成できません
+        <translation type="obsolete">スタートアップファイルを作成できません
 データを入力する前に空き容量を
 確保してください</translation>
     </message>
     <message>
         <source>Unable to schedule alarm.
 Free some memory and try again.</source>
-        <translation>アラームを設定できません。
+        <translation type="obsolete">アラームを設定できません。
 空き容量を確保してからやり直してください。</translation>
     </message>
     <message>
@@ -375,275 +722,275 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>&lt;qt&gt;Are you sure you want to delete: %1?&lt;/qt&gt;</source>
-        <translation>&lt;qt&gt;本当に削除してもいいですか：%1?&lt;/qt&gt;</translation>
+        <translation type="obsolete">&lt;qt&gt;本当に削除してもいいですか：%1?&lt;/qt&gt;</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>すべて</translation>
+        <translation type="obsolete">すべて</translation>
     </message>
     <message>
         <source>Unfiled</source>
-        <translation>ファイルになし</translation>
+        <translation type="obsolete">ファイルになし</translation>
     </message>
     <message>
         <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;勤務先所在地:&lt;/b&gt;</translation>
+        <translation type="obsolete">&lt;b&gt;勤務先所在地:&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;自宅住所:&lt;/b&gt;</translation>
+        <translation type="obsolete">&lt;b&gt;自宅住所:&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Email Addresses: </source>
-        <translation>電子メールアドレス:</translation>
+        <translation type="obsolete">電子メールアドレス:</translation>
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation>自宅電話番号:</translation>
+        <translation type="obsolete">自宅電話番号:</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation>自宅ファックス番号:</translation>
+        <translation type="obsolete">自宅ファックス番号:</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
-        <translation>個人用携帯電話:</translation>
+        <translation type="obsolete">個人用携帯電話:</translation>
     </message>
     <message>
         <source>Home Web Page: </source>
-        <translation>個人ウェブページ:</translation>
+        <translation type="obsolete">個人ウェブページ:</translation>
     </message>
     <message>
         <source>Business Web Page: </source>
-        <translation>ビジネスウェブページ:</translation>
+        <translation type="obsolete">ビジネスウェブページ:</translation>
     </message>
     <message>
         <source>Office: </source>
-        <translation>オフィス:</translation>
+        <translation type="obsolete">オフィス:</translation>
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation>勤務先電話番号:</translation>
+        <translation type="obsolete">勤務先電話番号:</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation>勤務先ファックス番号:</translation>
+        <translation type="obsolete">勤務先ファックス番号:</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
-        <translation>ビジネス用携帯電話:</translation>
+        <translation type="obsolete">ビジネス用携帯電話:</translation>
     </message>
     <message>
         <source>Business Pager: </source>
-        <translation>ビジネス用ポケベル:</translation>
+        <translation type="obsolete">ビジネス用ポケベル:</translation>
     </message>
     <message>
         <source>Profession: </source>
-        <translation>職業:</translation>
+        <translation type="obsolete">職業:</translation>
     </message>
     <message>
         <source>Assistant: </source>
-        <translation>アシスタント:</translation>
+        <translation type="obsolete">アシスタント:</translation>
     </message>
     <message>
         <source>Manager: </source>
-        <translation>マネージャ:</translation>
+        <translation type="obsolete">マネージャ:</translation>
     </message>
     <message>
         <source>Male</source>
-        <translation>男性</translation>
+        <translation type="obsolete">男性</translation>
     </message>
     <message>
         <source>Female</source>
-        <translation>女性</translation>
+        <translation type="obsolete">女性</translation>
     </message>
     <message>
         <source>Gender: </source>
-        <translation>性別:</translation>
+        <translation type="obsolete">性別:</translation>
     </message>
     <message>
         <source>Spouse: </source>
-        <translation>配偶者:</translation>
+        <translation type="obsolete">配偶者:</translation>
     </message>
     <message>
         <source>Birthday: </source>
-        <translation>誕生日:</translation>
+        <translation type="obsolete">誕生日:</translation>
     </message>
     <message>
         <source>Anniversary: </source>
-        <translation>記念日:</translation>
+        <translation type="obsolete">記念日:</translation>
     </message>
     <message>
         <source>Nickname: </source>
-        <translation>ニックネーム:</translation>
+        <translation type="obsolete">ニックネーム:</translation>
     </message>
     <message>
         <source>Name Title</source>
-        <translation>名前タイトル</translation>
+        <translation type="obsolete">名前タイトル</translation>
     </message>
     <message>
         <source>First Name</source>
-        <translation>名</translation>
+        <translation type="obsolete">名</translation>
     </message>
     <message>
         <source>Middle Name</source>
-        <translation>ミドルネーム</translation>
+        <translation type="obsolete">ミドルネーム</translation>
     </message>
     <message>
         <source>Last Name</source>
-        <translation>姓</translation>
+        <translation type="obsolete">姓</translation>
     </message>
     <message>
         <source>Suffix</source>
-        <translation>接尾語</translation>
+        <translation type="obsolete">接尾語</translation>
     </message>
     <message>
         <source>File As</source>
-        <translation>ファイル名</translation>
+        <translation type="obsolete">ファイル名</translation>
     </message>
     <message>
         <source>Job Title</source>
-        <translation>役職</translation>
+        <translation type="obsolete">役職</translation>
     </message>
     <message>
         <source>Department</source>
-        <translation>部署</translation>
+        <translation type="obsolete">部署</translation>
     </message>
     <message>
         <source>Company</source>
-        <translation>会社</translation>
+        <translation type="obsolete">会社</translation>
     </message>
     <message>
         <source>Business Phone</source>
-        <translation>勤務先電話番号</translation>
+        <translation type="obsolete">勤務先電話番号</translation>
     </message>
     <message>
         <source>Business Fax</source>
-        <translation>勤務先ファックス番号</translation>
+        <translation type="obsolete">勤務先ファックス番号</translation>
     </message>
     <message>
         <source>Business Mobile</source>
-        <translation>ビジネス用携帯番号</translation>
+        <translation type="obsolete">ビジネス用携帯番号</translation>
     </message>
     <message>
         <source>Default Email</source>
-        <translation>デフォルト電子メール</translation>
+        <translation type="obsolete">デフォルト電子メール</translation>
     </message>
     <message>
         <source>Emails</source>
-        <translation>電子メール</translation>
+        <translation type="obsolete">電子メール</translation>
     </message>
     <message>
         <source>Home Phone</source>
-        <translation>自宅電話番号</translation>
+        <translation type="obsolete">自宅電話番号</translation>
     </message>
     <message>
         <source>Home Fax</source>
-        <translation>自宅ファックス番号</translation>
+        <translation type="obsolete">自宅ファックス番号</translation>
     </message>
     <message>
         <source>Home Mobile</source>
-        <translation>個人用携帯番号</translation>
+        <translation type="obsolete">個人用携帯番号</translation>
     </message>
     <message>
         <source>Business Street</source>
-        <translation>勤務先 番地</translation>
+        <translation type="obsolete">勤務先 番地</translation>
     </message>
     <message>
         <source>Business City</source>
-        <translation>勤務先 市町村</translation>
+        <translation type="obsolete">勤務先 市町村</translation>
     </message>
     <message>
         <source>Business State</source>
-        <translation>勤務先 都道府県</translation>
+        <translation type="obsolete">勤務先 都道府県</translation>
     </message>
     <message>
         <source>Business Zip</source>
-        <translation>勤務先 郵便番号</translation>
+        <translation type="obsolete">勤務先 郵便番号</translation>
     </message>
     <message>
         <source>Business Country</source>
-        <translation>勤務先 国</translation>
+        <translation type="obsolete">勤務先 国</translation>
     </message>
     <message>
         <source>Business Pager</source>
-        <translation>勤務先ポケベル</translation>
+        <translation type="obsolete">勤務先ポケベル</translation>
     </message>
     <message>
         <source>Business WebPage</source>
-        <translation>ビジネスウェブページ</translation>
+        <translation type="obsolete">ビジネスウェブページ</translation>
     </message>
     <message>
         <source>Office</source>
-        <translation>オフィス</translation>
+        <translation type="obsolete">オフィス</translation>
     </message>
     <message>
         <source>Profession</source>
-        <translation>職業</translation>
+        <translation type="obsolete">職業</translation>
     </message>
     <message>
         <source>Assistant</source>
-        <translation>アシスタント</translation>
+        <translation type="obsolete">アシスタント</translation>
     </message>
     <message>
         <source>Manager</source>
-        <translation>マネージャ</translation>
+        <translation type="obsolete">マネージャ</translation>
     </message>
     <message>
         <source>Home Street</source>
-        <translation>自宅 番地</translation>
+        <translation type="obsolete">自宅 番地</translation>
     </message>
     <message>
         <source>Home City</source>
-        <translation>自宅 市町村</translation>
+        <translation type="obsolete">自宅 市町村</translation>
     </message>
     <message>
         <source>Home State</source>
-        <translation>自宅 都道府県</translation>
+        <translation type="obsolete">自宅 都道府県</translation>
     </message>
     <message>
         <source>Home Zip</source>
-        <translation>自宅 郵便番号</translation>
+        <translation type="obsolete">自宅 郵便番号</translation>
     </message>
     <message>
         <source>Home Country</source>
-        <translation>自宅 国</translation>
+        <translation type="obsolete">自宅 国</translation>
     </message>
     <message>
         <source>Home Web Page</source>
-        <translation>個人用ウェブページ</translation>
+        <translation type="obsolete">個人用ウェブページ</translation>
     </message>
     <message>
         <source>Spouse</source>
-        <translation>配偶者</translation>
+        <translation type="obsolete">配偶者</translation>
     </message>
     <message>
         <source>Gender</source>
-        <translation>性別</translation>
+        <translation type="obsolete">性別</translation>
     </message>
     <message>
         <source>Birthday</source>
-        <translation>誕生日</translation>
+        <translation type="obsolete">誕生日</translation>
     </message>
     <message>
         <source>Anniversary</source>
-        <translation>記念日</translation>
+        <translation type="obsolete">記念日</translation>
     </message>
     <message>
         <source>Nickname</source>
-        <translation>ニックネーム</translation>
+        <translation type="obsolete">ニックネーム</translation>
     </message>
     <message>
         <source>Children</source>
-        <translation>子供</translation>
+        <translation type="obsolete">子供</translation>
     </message>
     <message>
         <source>Notes</source>
-        <translation>メモ</translation>
+        <translation type="obsolete">メモ</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation>グループ</translation>
+        <translation type="obsolete">グループ</translation>
     </message>
 </context>
 <context>
@@ -686,6 +1033,33 @@ Free some memory and try again.</source>
     <message>
         <source>Click to make this window movable.</source>
         <translation>クリックしてこのウィンドウを移動可能にします。</translation>
+    </message>
+    <message>
+        <source>Restore</source>
+        <translation type="unfinished">復元</translation>
+    </message>
+    <message>
+        <source>Move</source>
+        <translation type="unfinished">移動</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished">サイズ</translation>
+    </message>
+    <message>
+        <source>Maximize</source>
+        <translation type="unfinished">最大化</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished">閉じる</translation>
+    </message>
+</context>
+<context>
+    <name>QPEMessageBox</name>
+    <message>
+        <source>Are you sure you want to delete: %1?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -830,6 +1204,14 @@ Please free up space and try again</source>
     <message>
         <source>All files</source>
         <translation>すべてのファイル</translation>
+    </message>
+</context>
+<context>
+    <name>WindowDecoration</name>
+    <message>
+        <source>Default</source>
+        <comment>List box text for default window decoration</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

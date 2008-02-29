@@ -185,7 +185,7 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(typeChanged()));
     imageList = fileSelector->fileList();
 
-    QPopupMenu *edit = new QPopupMenu( menubar );
+    edit = new QPopupMenu( menubar );
     QPopupMenu *view = new QPopupMenu( menubar );
 
     menubar->insertItem( tr("Image"), edit );
@@ -199,19 +199,18 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     openAction->addTo( edit );
 
     edit->insertSeparator();
-    edit->insertItem(tr("Horizontal flip"), this, SLOT(hFlip()), 0);
-    edit->insertItem(tr("Vertical flip"), this, SLOT(vFlip()), 0);
+    hflip_id = edit->insertItem(tr("Horizontal flip"), this, SLOT(hFlip()), 0);
+    vflip_id = edit->insertItem(tr("Vertical flip"), this, SLOT(vFlip()), 0);
 
-    QAction *a;
-    a = new QAction( tr( "Rotate 180" ), Resource::loadIconSet( "repeat" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL( activated() ), this, SLOT( rot180() ) );
-    a->addTo( toolBar );
-    a->addTo( edit );
+    flipAction = new QAction( tr( "Rotate 180" ), Resource::loadIconSet( "repeat" ), QString::null, 0, this, 0 );
+    connect( flipAction, SIGNAL( activated() ), this, SLOT( rot180() ) );
+    flipAction->addTo( toolBar );
+    flipAction->addTo( edit );
 
-    a = new QAction( tr( "Rotate 90"), Resource::loadIconSet( "rotate90" ), QString::null, 0, this, 0);
-    connect( a, SIGNAL( activated() ), this, SLOT( rot90() ) );
-    a->addTo( toolBar );
-    a->addTo( edit );
+    rotateAction = new QAction( tr( "Rotate 90"), Resource::loadIconSet( "rotate90" ), QString::null, 0, this, 0);
+    connect( rotateAction, SIGNAL( activated() ), this, SLOT( rot90() ) );
+    rotateAction->addTo( toolBar );
+    rotateAction->addTo( edit );
 
     edit->insertSeparator();
     propAction = new QAction(tr("Properties..."), QIconSet(), QString::null, 0, this, 0);
@@ -219,10 +218,10 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     propAction->addTo(edit);
     //edit->insertItem(tr("Properties..."), this, SLOT(properties()), 0);
 
-    a = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
-    a->addTo( toolBar );
-    a->addTo( view);
+    fullscreenAction = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
+    connect( fullscreenAction, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
+    fullscreenAction->addTo( toolBar );
+    fullscreenAction->addTo( view);
 
     slideAction = new QAction( tr( "Slide show" ), Resource::loadIconSet( "slideshow" ), QString::null, 0, this, 0 );
     slideAction->setToggleAction( TRUE );
@@ -262,10 +261,12 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     slideReverse = config.readBoolEntry("Reverse", FALSE);
 
     config.setGroup("Default");
-    rotateOnLoad = config.readBoolEntry("Rotate", TRUE);
+    rotateOnLoad = config.readBoolEntry("Rotate", FALSE);
     rotateClockwise = config.readBoolEntry("Clockwise", TRUE);
     fastLoad = config.readBoolEntry("FastLoad", TRUE);
     smallScale = config.readBoolEntry("SmallScale", FALSE);
+
+    setControls(TRUE, !imageList.isEmpty());
 }
 
 ImageViewer::~ImageViewer()
@@ -307,6 +308,8 @@ ImageViewer::properties(void)
 	fileSelector->reread();
 	imageList = fileSelector->fileList();
 
+	setControls(TRUE, !imageList.isEmpty());
+
 	if (imageIndex() == -1)
 	{
 	    if (imageList.count() > 0) {
@@ -330,12 +333,14 @@ void ImageViewer::categoryChanged(void)
 {
     imageList.clear();
     imageList = fileSelector->fileList();
+    setControls(TRUE, !imageList.isEmpty());
 }
 
 void ImageViewer::typeChanged(void)
 {
     imageList.clear();
     imageList = fileSelector->fileList();
+    setControls(TRUE, !imageList.isEmpty());
 }
 
 void ImageViewer::settings()
@@ -369,6 +374,13 @@ void ImageViewer::settings()
 	config.writeEntry("Rotate", rotateOnLoad);
 	config.writeEntry("FastLoad", fastLoad);
 	config.writeEntry("SmallScale", smallScale);
+    }
+
+    //
+    // Reload current image in case viewing options have changed.
+    //
+    if (stack->visibleWidget() != fileSelector) {
+	loadFilename(filename);
     }
 }
 
@@ -409,6 +421,7 @@ void ImageViewer::openFile( const QString &name, const QString &file )
     closeFileSelector();
     updateCaption( name );
     loadFilename( file );
+    setControls();
 
     if (slideTimer->isActive()) {
 	slideTimer->start(slideDelay * 1000, FALSE);
@@ -444,7 +457,7 @@ void ImageViewer::updateCaption( QString name )
 }
 
 void ImageViewer::loadFilename( const QString &file ) {
-    if ( file && file != filename ) {
+    if ( file ) {
 	filename = file;
 	if ( !slideTimer->isActive() )
 	    imagePanel->showBusy();
@@ -462,8 +475,10 @@ void ImageViewer::loadFilename( const QString &file ) {
 	    image.reset();
 	    imagePanel->statusLabel()->setText(tr("Image load failed"));
 	    imagePanel->setPixmap(QPixmap());
+
 	    return;
 	}
+
 	imagewidth = iio.image().width();
 	imageheight = iio.image().height();
 	if ( !iio.image().bits() ) {
@@ -515,8 +530,21 @@ void ImageViewer::loadFilename( const QString &file ) {
 	}
 	scale( TRUE );
     } else {
-	imagePanel->setPixmap( scaledPixmap( FALSE ) );
+	image.reset();
     }
+}
+
+void ImageViewer::setControls(bool force, bool valid)
+{
+    bool valid_picture = force ? valid : !image.isNull();
+
+    propAction->setEnabled(valid_picture);
+    rotateAction->setEnabled(valid_picture);
+    flipAction->setEnabled(valid_picture);
+    fullscreenAction->setEnabled(valid_picture);
+
+    edit->setItemEnabled(hflip_id, valid_picture);
+    edit->setItemEnabled(vflip_id, valid_picture);
 }
 
 bool ImageViewer::loadSelected()

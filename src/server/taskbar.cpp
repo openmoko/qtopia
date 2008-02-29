@@ -262,7 +262,6 @@ TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOn
     connect( waitTimer, SIGNAL( timeout() ), this, SLOT( stopWait() ) );
     clearer = new QTimer( this );
     QObject::connect(clearer, SIGNAL(timeout()), SLOT(clearStatusBar()));
-    QObject::connect(clearer, SIGNAL(timeout()), sysTray, SLOT(show()));
 }
 
 void TaskBar::setStatusMessage( const QString &text )
@@ -282,6 +281,8 @@ void TaskBar::clearStatusBar()
 {
     label->clear();
     stack->raiseWidget(runningAppBar);
+    if ( sysTray )
+	sysTray->show();
     //     stack->raiseWidget( mru );
 }
 

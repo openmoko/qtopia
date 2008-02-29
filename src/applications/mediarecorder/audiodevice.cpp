@@ -207,19 +207,21 @@ AudioDevice::AudioDevice( unsigned int f, unsigned int chs, unsigned int bps ) {
     formatData.nSamplesPerSec = f;
     formatData.wBitsPerSample = bps * 8;
     // Open a waveform device for output
+// BEGIN no tr
     if (result = waveOutOpen((LPHWAVEOUT)&d->handle, WAVE_MAPPER, &formatData, 0L, 0L, CALLBACK_NULL)) {
-	QString errorMsg = "error opening audio device.\nReason: %i - ";
+	QString errorMsg = "error opening audio device.\nReason: %i - "; // No tr
 	switch (result) {
-	    case MMSYSERR_ALLOCATED:	errorMsg += "Specified resource is already allocated."; break;
-	    case MMSYSERR_BADDEVICEID:	errorMsg += "Specified device identifier is out of range."; break;
-	    case MMSYSERR_NODRIVER:	errorMsg += "No device driver is present."; break;
-	    case MMSYSERR_NOMEM:	errorMsg += "Unable to allocate or lock memory."; break;
-	    case WAVERR_BADFORMAT:	errorMsg += "Attempted to open with an unsupported waveform-audio format."; break;
-	    case WAVERR_SYNC:		errorMsg += "The device is synchronous but waveOutOpen was called without using the WAVE_ALLOWSYNC flag."; break;
-	    default:			errorMsg += "Undefined error"; break;
+	    case MMSYSERR_ALLOCATED:	errorMsg += "Specified resource is already allocated."; break; // No tr
+	    case MMSYSERR_BADDEVICEID:	errorMsg += "Specified device identifier is out of range."; break; // No tr
+	    case MMSYSERR_NODRIVER:	errorMsg += "No device driver is present."; break; // No tr
+	    case MMSYSERR_NOMEM:	errorMsg += "Unable to allocate or lock memory."; break; // No tr
+	    case WAVERR_BADFORMAT:	errorMsg += "Attempted to open with an unsupported waveform-audio format."; break; // No tr
+	    case WAVERR_SYNC:		errorMsg += "The device is synchronous but waveOutOpen was called without using the WAVE_ALLOWSYNC flag."; break; // No tr
+	    default:			errorMsg += "Undefined error"; break; // No tr
 	}
 	qDebug( errorMsg, result );
     }
+// END no tr
 
     d->bufferSize = sound_fragment_bytes;
 #else
@@ -231,7 +233,7 @@ AudioDevice::AudioDevice( unsigned int f, unsigned int chs, unsigned int bps ) {
 #ifdef KEEP_DEVICE_OPEN
     if ( AudioDevicePrivate::dspFd == 0 ) {
 #endif
-    if ( ( d->handle = ::open( "/dev/dsp", O_WRONLY | O_NONBLOCK ) ) < 0 ) {
+    if ( ( d->handle = ::open( "/dev/dsp", O_WRONLY ) ) < 0 ) {
 	qDebug( "error opening audio device /dev/dsp, sending data to /dev/null instead" );
 	d->handle = ::open( "/dev/null", O_WRONLY );
     }
@@ -276,13 +278,11 @@ AudioDevice::~AudioDevice() {
     waveOutClose( (HWAVEOUT)d->handle );
 #else
 # ifndef KEEP_DEVICE_OPEN 
+    delete d->notifier;
     close( d->handle );			// Now it should be safe to shut the handle
 # endif
     delete [] d->unwrittenBuffer;
     delete d;
-    // TODO - the following line causes a SIGSEGV for
-    // a currently unknown reason - Rhys.
-    //delete d->notifier;
 #endif
 }
 

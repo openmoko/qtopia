@@ -97,6 +97,7 @@ VideoOutput::~VideoOutput()
 {
     if ( currentFrame )
         delete currentFrame;
+    delete rotatedFrame;
 }
 
 
@@ -234,6 +235,11 @@ void VideoWidget::setView( View view )
 	makeVisible();
     } else {
 	videoOutput.hide();
+	if ( screenMode == Fullscreen ) {
+	    videoOutput.reparent( this, innerMovieArea.topLeft() );
+	    videoOutput.resize( innerMovieArea.size() );
+	    videoOutput.unsetCursor();
+	}
 	canPaint = FALSE;
     }
     resetButtons();
@@ -457,38 +463,41 @@ bool VideoOutput::playVideo()
 #ifdef USE_DIRECT_PAINTER
     QDirectPainter dp( this );
 
-    // area we will decode in to in global untransformed coordinates
-    QRect drawRect = QRect( mapToGlobal( QPoint( x1, y1 ) ), QSize( scaleWidth, scaleHeight ) );
-    // area transformed in to device coordinates
-    QRect deviceRect = qt_screen->mapToDevice( drawRect, QSize( qt_screen->width(), qt_screen->height() ) );
-    // The top corner point of this area
-    QPoint offset = deviceRect.topLeft();
+    // Don't use direct painter if there are no regions returned
+    if ( dp.numRects() != 0 ) {
+	// area we will decode in to in global untransformed coordinates
+	QRect drawRect = QRect( mapToGlobal( QPoint( x1, y1 ) ), QSize( scaleWidth, scaleHeight ) );
+	// area transformed in to device coordinates
+	QRect deviceRect = qt_screen->mapToDevice( drawRect, QSize( qt_screen->width(), qt_screen->height() ) );
+	// The top corner point of this area
+	QPoint offset = deviceRect.topLeft();
 
-    //qDebug("rect = %i %i %i %i", drawRect.x(), drawRect.y(), drawRect.width(), drawRect.height() );
-    //qDebug("x: %i  y: %i", offset.x(),  offset.y() );
-    directFb.create( dp.frameBuffer(), dp.lineStep(), offset.x(), offset.y(), dp.width(), dp.height() );
+	//qDebug("rect = %i %i %i %i", drawRect.x(), drawRect.y(), drawRect.width(), drawRect.height() );
+	//qDebug("x: %i  y: %i", offset.x(),  offset.y() );
+	directFb.create( dp.frameBuffer(), dp.lineStep(), offset.x(), offset.y(), dp.width(), dp.height() );
 
-    QSize deviceSize = qt_screen->mapToDevice( QSize( qt_screen->width(), qt_screen->height() ) );
-    if (( dd == 16 || dd == 32 )) {
-	QRegion imageRegion;
+	QSize deviceSize = qt_screen->mapToDevice( QSize( qt_screen->width(), qt_screen->height() ) );
+	if (( dd == 16 || dd == 32 )) {
+	    QRegion imageRegion;
 
-	// global untransformed coordinates
-	imageRegion = drawRect;
+	    // global untransformed coordinates
+	    imageRegion = drawRect;
 
-	for ( int i = 0; i < dp.numRects(); i++ ) {
-	    // map from device coordinates and subtract from our output region
-	    imageRegion -= qt_screen->mapFromDevice( dp.rect(i), deviceSize );
-	    //qDebug("dp.rect(%i) = %i %i %i %i", i, dp.rect(i).x(), dp.rect(i).y(), dp.rect(i).width(), dp.rect(i).height() );
+	    for ( int i = 0; i < dp.numRects(); i++ ) {
+		// map from device coordinates and subtract from our output region
+		imageRegion -= qt_screen->mapFromDevice( dp.rect(i), deviceSize );
+		//qDebug("dp.rect(%i) = %i %i %i %i", i, dp.rect(i).x(), dp.rect(i).y(), dp.rect(i).width(), dp.rect(i).height() );
+	    }
+
+	    // if we have completely subtracted everything from our output region,
+	    // there is no clipping needed against the draw region so we use direct painting
+	    useDirectFrameBuffer = imageRegion.isEmpty();
+	    //useDirectFrameBuffer = FALSE; // Uncomment to test the non useDirectFrameBuffer case
 	}
 
-	// if we have completely subtracted everything from our output region,
-	// there is no clipping needed against the draw region so we use direct painting
-	useDirectFrameBuffer = imageRegion.isEmpty();
-	//useDirectFrameBuffer = FALSE; // Uncomment to test the non useDirectFrameBuffer case
+	if ( useDirectFrameBuffer && !needRotationWithScreen )
+	    fb = &directFb;
     }
-
-    if ( useDirectFrameBuffer && !needRotationWithScreen )
-	fb = &directFb;
 #endif
 
 /*

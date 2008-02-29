@@ -30,6 +30,7 @@
 class QFileInfo;
 class QCopBridgePI;
 class QCopChannel;
+class QTimer;
 
 class QCopBridge : public QServerSocket
 {
@@ -41,10 +42,14 @@ public:
 
     void newConnection( int socket );
     void closeOpenConnections();
+    void authorizeConnections();
 
 public slots:
-    void connectionClosed( QCopBridgePI *pi );
+    void closed( QCopBridgePI *pi );
     void desktopMessage( const QCString &call, const QByteArray & );
+
+signals:
+    void connectionClosed( const QHostAddress & );
     
 protected:
     void timerEvent( QTimerEvent * );
@@ -68,8 +73,10 @@ public:
     virtual ~QCopBridgePI();
 
     void sendDesktopMessage( const QString &msg );
+    void sendDesktopMessage( const QCString &msg, const QByteArray& );
     void startSync() { sendSync = TRUE; }
-    
+    bool verifyAuthorised();
+
 signals:
     void connectionClosed( QCopBridgePI *);
     
@@ -79,15 +86,12 @@ protected slots:
     void process( const QString& command );
     void connectionClosed();
 
-protected:
-    void timerEvent( QTimerEvent *e );
-
 private:
     State state;
     Q_UINT16 peerport;
     QHostAddress peeraddress;
-    bool connected;
     bool sendSync;
+    QTimer *timer;
 };
 
 #endif

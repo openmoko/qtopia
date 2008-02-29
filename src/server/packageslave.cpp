@@ -105,8 +105,10 @@ void PackageHandler::installPackage( const QString &package )
     currentProcess = new QProcess( QStringList() << "ipkg" << "install" << package ); // No tr
     connect( currentProcess, SIGNAL( processExited() ), SLOT( iProcessExited() ) );
     connect( currentProcess, SIGNAL( readyReadStdout() ), SLOT( readyReadStdout() ) );
+    connect( currentProcess, SIGNAL( readyReadStderr() ), SLOT( readyReadStderr() ) );
     currentPackage = package;
 
+    currentProcessError="";
     sendReply( "installStarted(QString)", package );
     currentProcess->start();
 }
@@ -116,8 +118,10 @@ void PackageHandler::removePackage( const QString &package )
     currentProcess = new QProcess( QStringList() << "ipkg" << "remove" << package ); // No tr
     connect( currentProcess, SIGNAL( processExited() ), SLOT( rmProcessExited() ) );
     connect( currentProcess, SIGNAL( readyReadStdout() ), SLOT( readyReadStdout() ) );
+    connect( currentProcess, SIGNAL( readyReadStderr() ), SLOT( readyReadStderr() ) );
     currentPackage = package;
 
+    currentProcessError="";
     sendReply( "removeStarted(QString)", package );
     currentProcess->start();
 }
@@ -272,8 +276,13 @@ void PackageHandler::iProcessExited()
 {
     if ( currentProcess->normalExit() && currentProcess->exitStatus() == 0 )
 	sendReply( "installDone(QString)", currentPackage );
-    else
-	sendReply( "installFailed(QString)", currentPackage );
+    else {
+#ifndef QT_NO_COP
+	QCopEnvelope e( "QPE/Desktop", "installFailed(QString,int,QString)" );
+	e << currentPackage << currentProcess->exitStatus()
+	    << currentProcessError;
+#endif
+    }
     
     delete currentProcess;
     currentProcess = 0;
@@ -304,10 +313,19 @@ void PackageHandler::readyReadStdout()
 {
     while ( currentProcess->canReadLineStdout() ) {
 	QString line = currentProcess->readLineStdout();
+	currentProcessError.append("OUT:"+line);
 	if ( line.contains( "Unpacking" ) ) // No tr
 	    sendReply( "installStep(QString)", "one" ); // No tr
 	else if ( line.contains( "Configuring" ) ) // No tr
 	    sendReply( "installStep(QString)", "two" ); // No tr
+    }
+}
+
+void PackageHandler::readyReadStderr()
+{
+    while ( currentProcess->canReadLineStderr() ) {
+	QString line = currentProcess->readLineStderr();
+	currentProcessError.append("ERR:"+line);
     }
 }
 

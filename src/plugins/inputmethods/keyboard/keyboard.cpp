@@ -410,12 +410,12 @@ typedef struct SpecialMap {
 
 static const SpecialMap specialM[] = {
     {	Qt::Key_Backspace,	8,	"<",     backspace_xpm },
-    {	Qt::Key_Tab,		9,	"Tab",   NULL },
-    {	Qt::Key_CapsLock,	0xffff,	"Caps",  NULL },
-    {	Qt::Key_Return,		13,	"Ret",   NULL },
-    {	Qt::Key_Shift,		0xffff,	"Shift", NULL },
-    {	Qt::Key_Control,	0xffff,	"Ctrl",  NULL },
-    {	Qt::Key_Alt,		0xffff,	"Alt",   NULL },
+    {	Qt::Key_Tab,		9,	"Tab",   NULL }, // No tr
+    {	Qt::Key_CapsLock,	0xffff,	"Caps",  NULL }, // No tr
+    {	Qt::Key_Return,		13,	"Ret",   NULL }, // No tr
+    {	Qt::Key_Shift,		0xffff,	"Shift", NULL }, // No tr
+    {	Qt::Key_Control,	0xffff,	"Ctrl",  NULL }, // No tr
+    {	Qt::Key_Alt,		0xffff,	"Alt",   NULL }, // No tr
     {	Qt::Key_Space,		' ',	"",      NULL },
     {	BackSlash,		43,	"\\",    NULL },
 
@@ -682,8 +682,8 @@ void Keyboard::mousePressEvent(QMouseEvent *e)
     } else {
 	//due to the way the keyboard is defined, we know that
 	//k is within the ASCII range, and can be directly mapped to 
-	//a qkeycode
-	qkeycode = k;
+	//a qkeycode; except letters, which are all uppercase
+	qkeycode = toupper(k);
 	if ( shift^lock ) {
 	    if ( !isalpha( k ) ) {
 	    for ( unsigned i = 0; i < sizeof(shiftMap)/sizeof(ShiftMap); i++ )

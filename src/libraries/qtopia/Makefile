@@ -188,7 +188,7 @@ HEADERS =	calendar.h \
 		process.h \
 		fontmanager.h \
 		fontdatabase.h \
-		qpedecoration_qws.h \
+		qpedecoration_p.h \
 		network.h \
 		networkinterface.h \
 		qcopenvelope_qws.h \
@@ -339,12 +339,14 @@ SRCMOC	=	$(MOC_DIR)/moc_menubutton.cpp \
 		$(MOC_DIR)/moc_categoryselect.cpp \
 		$(MOC_DIR)/moc_qlibrary_p.cpp \
 		$(MOC_DIR)/moc_process.cpp \
-		$(MOC_DIR)/moc_qpedecoration_qws.cpp \
+		$(MOC_DIR)/moc_qpedecoration_p.cpp \
 		$(MOC_DIR)/moc_ir.cpp \
 		$(MOC_DIR)/moc_passwordbase_p.cpp \
 		$(MOC_DIR)/moc_categoryeditbase_p.cpp \
 		$(MOC_DIR)/global.moc \
 		$(MOC_DIR)/fileselector.moc \
+		$(MOC_DIR)/applnk.moc \
+		$(MOC_DIR)/tzselect.moc \
 		$(MOC_DIR)/alarmserver.moc \
 		$(MOC_DIR)/password.moc \
 		$(MOC_DIR)/timestring.moc \
@@ -368,7 +370,7 @@ OBJMOC	=	$(OBJECTS_DIR)/moc_menubutton.o \
 		$(OBJECTS_DIR)/moc_categoryselect.o \
 		$(OBJECTS_DIR)/moc_qlibrary_p.o \
 		$(OBJECTS_DIR)/moc_process.o \
-		$(OBJECTS_DIR)/moc_qpedecoration_qws.o \
+		$(OBJECTS_DIR)/moc_qpedecoration_p.o \
 		$(OBJECTS_DIR)/moc_ir.o \
 		$(OBJECTS_DIR)/moc_passwordbase_p.o \
 		$(OBJECTS_DIR)/moc_categoryeditbase_p.o
@@ -458,8 +460,6 @@ $(OBJECTS_DIR)/mimetype.o: mimetype.cpp \
 		applnk.h \
 		resource.h \
 		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mimetype.o mimetype.cpp
 
@@ -469,7 +469,8 @@ $(OBJECTS_DIR)/menubutton.o: menubutton.cpp \
 
 $(OBJECTS_DIR)/filemanager.o: filemanager.cpp \
 		filemanager.h \
-		applnk.h
+		applnk.h \
+		global.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/filemanager.o filemanager.cpp
 
 $(OBJECTS_DIR)/datebookmonth.o: datebookmonth.cpp \
@@ -479,9 +480,7 @@ $(OBJECTS_DIR)/datebookmonth.o: datebookmonth.cpp \
 		timestring.h \
 		datebookdb.h \
 		resource.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h
+		qpeapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookmonth.o datebookmonth.cpp
 
 $(OBJECTS_DIR)/fileselector.o: fileselector.cpp \
@@ -496,8 +495,6 @@ $(OBJECTS_DIR)/fileselector.o: fileselector.cpp \
 		storage.h \
 		qpemenubar.h \
 		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		categorymenu.h \
 		categoryselect.h \
 		mimetype.h \
@@ -514,17 +511,13 @@ $(OBJECTS_DIR)/resource.o: resource.cpp \
 		config.h \
 		mimetype.h \
 		inlinepics_p.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h
+		qpeapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/resource.o resource.cpp
 
 $(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
 		custom.h \
 		qcopenvelope_qws.h \
 		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		global.h \
 		config.h \
 		network.h \
@@ -538,6 +531,8 @@ $(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
 		styleinterface.h \
 		resource.h \
 		qpestyle.h \
+		qpedecoration_p.h \
+		windowdecorationinterface.h \
 		alarmserver.h \
 		pluginloader_p.h \
 		../qtopia1/pluginloader.h \
@@ -546,16 +541,12 @@ $(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
 
 $(OBJECTS_DIR)/qpestyle.o: qpestyle.cpp \
 		qpestyle.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h
+		qpeapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpestyle.o qpestyle.cpp
 
 $(OBJECTS_DIR)/qpedialog.o: qpedialog.cpp \
 		qpedialog.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h
+		qpeapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpedialog.o qpedialog.cpp
 
 $(OBJECTS_DIR)/config.o: config.cpp \
@@ -564,6 +555,7 @@ $(OBJECTS_DIR)/config.o: config.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/config.o config.cpp
 
 $(OBJECTS_DIR)/applnk.o: applnk.cpp \
+		$(MOC_DIR)/applnk.moc \
 		applnk.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/applnk.o applnk.cpp
 
@@ -571,6 +563,7 @@ $(OBJECTS_DIR)/sound.o: sound.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sound.o sound.cpp
 
 $(OBJECTS_DIR)/tzselect.o: tzselect.cpp \
+		$(MOC_DIR)/tzselect.moc \
 		tzselect.h \
 		resource.h \
 		global.h \
@@ -589,8 +582,6 @@ $(OBJECTS_DIR)/alarmserver.o: alarmserver.cpp \
 		$(MOC_DIR)/alarmserver.moc \
 		qlibrary.h \
 		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		global.h \
 		resource.h \
 		qcopenvelope_qws.h \
@@ -604,6 +595,7 @@ $(OBJECTS_DIR)/password.o: password.cpp \
 		config.h \
 		global.h \
 		backend/contact.h \
+		qpeapplication.h \
 		passwordbase_p.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/password.o password.cpp
 
@@ -676,7 +668,8 @@ $(OBJECTS_DIR)/categoryedit_p.o: categoryedit_p.cpp \
 
 $(OBJECTS_DIR)/categoryselect.o: categoryselect.cpp \
 		$(MOC_DIR)/categoryselect.moc \
-		categorywidget.h \
+		categoryedit_p.h \
+		categoryeditbase_p.h \
 		categoryselect.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryselect.o categoryselect.cpp
 
@@ -732,15 +725,13 @@ $(OBJECTS_DIR)/fontdatabase.o: fontdatabase.cpp \
 		pluginloader_p.h \
 		../qtopia1/pluginloader.h \
 		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		fontfactoryinterface.h \
 		fontdatabase.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fontdatabase.o fontdatabase.cpp
 
 $(OBJECTS_DIR)/qpedecoration_qws.o: qpedecoration_qws.cpp \
 		qcopenvelope_qws.h \
-		qpedecoration_qws.h \
+		qpedecoration_p.h \
 		windowdecorationinterface.h \
 		qpeapplication.h \
 		resource.h \
@@ -835,9 +826,7 @@ $(OBJECTS_DIR)/moc_imageedit.o: $(MOC_DIR)/moc_imageedit.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_imageedit.o $(MOC_DIR)/moc_imageedit.cpp
 
 $(OBJECTS_DIR)/moc_qpeapplication.o: $(MOC_DIR)/moc_qpeapplication.cpp \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h
+		qpeapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpeapplication.o $(MOC_DIR)/moc_qpeapplication.cpp
 
 $(OBJECTS_DIR)/moc_qpedialog.o: $(MOC_DIR)/moc_qpedialog.cpp \
@@ -885,10 +874,10 @@ $(OBJECTS_DIR)/moc_process.o: $(MOC_DIR)/moc_process.cpp \
 		process.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_process.o $(MOC_DIR)/moc_process.cpp
 
-$(OBJECTS_DIR)/moc_qpedecoration_qws.o: $(MOC_DIR)/moc_qpedecoration_qws.cpp \
-		qpedecoration_qws.h \
+$(OBJECTS_DIR)/moc_qpedecoration_p.o: $(MOC_DIR)/moc_qpedecoration_p.cpp \
+		qpedecoration_p.h \
 		windowdecorationinterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpedecoration_qws.o $(MOC_DIR)/moc_qpedecoration_qws.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpedecoration_p.o $(MOC_DIR)/moc_qpedecoration_p.cpp
 
 $(OBJECTS_DIR)/moc_ir.o: $(MOC_DIR)/moc_ir.cpp \
 		ir.h
@@ -953,8 +942,8 @@ $(MOC_DIR)/moc_qlibrary_p.cpp: qlibrary_p.h
 $(MOC_DIR)/moc_process.cpp: process.h
 	$(MOC) process.h -o $(MOC_DIR)/moc_process.cpp
 
-$(MOC_DIR)/moc_qpedecoration_qws.cpp: qpedecoration_qws.h
-	$(MOC) qpedecoration_qws.h -o $(MOC_DIR)/moc_qpedecoration_qws.cpp
+$(MOC_DIR)/moc_qpedecoration_p.cpp: qpedecoration_p.h
+	$(MOC) qpedecoration_p.h -o $(MOC_DIR)/moc_qpedecoration_p.cpp
 
 $(MOC_DIR)/moc_ir.cpp: ir.h
 	$(MOC) ir.h -o $(MOC_DIR)/moc_ir.cpp
@@ -964,6 +953,12 @@ $(MOC_DIR)/global.moc: global.cpp
 
 $(MOC_DIR)/fileselector.moc: fileselector.cpp
 	$(MOC) fileselector.cpp -o $(MOC_DIR)/fileselector.moc
+
+$(MOC_DIR)/applnk.moc: applnk.cpp
+	$(MOC) applnk.cpp -o $(MOC_DIR)/applnk.moc
+
+$(MOC_DIR)/tzselect.moc: tzselect.cpp
+	$(MOC) tzselect.cpp -o $(MOC_DIR)/tzselect.moc
 
 $(MOC_DIR)/alarmserver.moc: alarmserver.cpp
 	$(MOC) alarmserver.cpp -o $(MOC_DIR)/alarmserver.moc

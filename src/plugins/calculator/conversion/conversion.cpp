@@ -32,7 +32,7 @@
 FormConversion::FormConversion(QWidget *parent,const char *name,WFlags fl)
 :QWidget(parent,name,fl) {
     if ( !name )
-	setName( "Conversion" );
+	setName( "Conversion" ); // No tr
     resize( 384, 476 );
     setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)7, (QSizePolicy::SizeType)7, sizePolicy().hasHeightForWidth() ) );
 

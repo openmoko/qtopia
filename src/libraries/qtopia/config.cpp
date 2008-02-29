@@ -18,6 +18,7 @@
 **
 **********************************************************************/
 
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
@@ -33,12 +34,14 @@
 #include <stdlib.h>
 #ifndef Q_OS_WIN32
 #include <unistd.h>
+#include <qfileinfo.h>
 #endif
 
 #define QTOPIA_INTERNAL_LANGLIST
-#define QTOPIA_INTERNAL_CONFIG_BYTEARRAY
 #include "config.h"
 #include "global.h"
+
+#include <qapplication.h> //for translate
 
 /*!
   \internal
@@ -136,8 +139,7 @@ Config::Config( const QString &name, Domain domain )
 }
 
 #ifdef QTOPIA_DESKTOP
-Config::Config( QTextStream &s, const QString &name, Domain domain )
-    : filename( configFilename(name,domain) )
+Config::Config( QTextStream &s, Domain domain )
 {
     git = groups.end();
     read( s );
@@ -322,14 +324,6 @@ void Config::writeEntry( const QString &key, const QStringList &lst, const QChar
 }
 
 /*!
-  Writes a (\a key, \a byteArray) entry to the current group.  The byteArray is stored as
-  a base64 encoded string.
-*/
-void Config::writeEntry( const QString &key, const QByteArray byteArray) {
-  writeEntry(key, encodeBase64(byteArray));
-}
-
-/*!
   Removes the \a key entry from the current group. Does nothing if
   there is no such entry.
 
@@ -461,61 +455,6 @@ int Config::readNumEntry( const QString &key, int deflt )
 }
 
 /*!
-  Returns the QByteArray stored using \a key.  Returns an empty array if
-  no matching key is found.
-*/
-QByteArray Config::readByteArrayEntry(const QString& key) {
-  QByteArray empty;
-  return readByteArrayEntry(key, empty);
-}
-
-/*!
-  Returns the QByteArray stored using \a key.  Returns \a dflt if
-  no matching key is found.
-*/
-QByteArray Config::readByteArrayEntry(const QString& key, const QByteArray dflt) {
-  QString s = readEntry(key);
-  if (s.isEmpty())
-    return dflt;
-  return decodeBase64(s);
-}
-
-/*!
-  \internal
-  Decodes base64 encoded \a encoded and returns a QByteArray containing
-  the decoded data.
-*/
-QByteArray Config::decodeBase64( const QString &encoded ) const
-{
-  QByteArray buffer;
-  int len = encoded.length();
-  buffer.resize( len * 3 / 4 + 2);
-  uint bufCount = 0;
-  int pos = 0, decodedCount = 0;
-  char src[4];
-  char *destPtr = buffer.data();
-
-  while (pos < len ) {
-    decodedCount = 4;
-    int x = 0;
-    while ( (x < 4) && (pos < len ) ) {
-      src[x] = encoded[pos];
-      pos++;
-      if (src[x] == '\r' || src[x] == '\n' || src[x] == ' ')
-	x--;
-      x++;
-    }
-    if (x > 1) {
-      decodedCount = parse64base(src, destPtr);
-      destPtr += decodedCount;
-      bufCount += decodedCount;
-    }
-  }
-
-  return buffer;
-}
-
-/*!
   \fn bool Config::readBoolEntry( const QString &key, bool deflt ) const
 
   Returns the boolean entry stored (as an integer) using \a key,
@@ -587,8 +526,7 @@ void Config::write( const QString &fn )
     QString strNewFile;
     if ( !fn.isEmpty() )
 	filename = fn;
-    strNewFile = filename + ".new";
-
+    strNewFile = qtopia_tempName( filename );
     QFile f( strNewFile );
     if ( !f.open( IO_WriteOnly|IO_Raw ) ) {
 	qWarning( "could not open for writing `%s'", strNewFile.latin1() );
@@ -611,24 +549,15 @@ void Config::write( const QString &fn )
     int total_length;
     total_length = f.writeBlock( cstr.data(), cstr.length() );
     if ( total_length != int(cstr.length()) ) {
-	QMessageBox::critical( 0, QObject::tr("Out of Space"),
-			       QObject::tr("There was a problem creating\nConfiguration Information \nfor this program.\n\nPlease free up some space and\ntry again.") );
+	QMessageBox::critical( 0, qApp->translate( "Config", "Out of Space"),
+			       qApp->translate( "Config", "There was a problem creating\nConfiguration Information \nfor this program.\n\nPlease free up some space and\ntry again.") );
 	f.close();
 	QFile::remove( strNewFile );
 	return;
     }
 
     f.close();
-    // now rename the file...
-    QDir dir;
-#ifdef Q_OS_WIN32
-   dir.remove(filename); // Windows will fail rename if file already exists
-#endif
-    if ( dir.rename( strNewFile, filename ) == FALSE ) {
-	qWarning( "problem renaming the file %s to %s", strNewFile.latin1(),
-		  filename.latin1() );
-	QFile::remove( strNewFile );
-    }
+    qtopia_renameFile( strNewFile, filename );
     changed = FALSE;
 }
 
@@ -695,98 +624,3 @@ bool Config::parse( const QString &l )
     return TRUE;
 }
 
-/*!
- \internal
- Encodes \a origData using base64 mapping and returns a QString containing the
- encoded form.
-*/
-QString Config::encodeBase64(const QByteArray origData) {
-  // follows simple algorithm from rsync code
-  uchar *in = (uchar*)origData.data();
-
-  int inbytes = origData.size();
-  int outbytes = ((inbytes * 8) + 5) / 6;
-//   int spacing = (outbytes-1)/76;
-  int padding = 4-outbytes%4; if ( padding == 4 ) padding = 0;
-
-//   QByteArray outbuf(outbytes+spacing+padding);
-  QByteArray outbuf(outbytes+padding);
-  uchar* out = (uchar*)outbuf.data();
-
-  const char *b64 =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-  for (int i = 0; i < outbytes; i++) {
-//     if ( i && i%76==0 )
-//       *out++ = '\n';
-    int byte = (i * 6) / 8;
-    int bit = (i * 6) % 8;
-    if (bit < 3) {
-      if (byte >= inbytes)
-	abort();
-      *out = (b64[(in[byte] >> (2 - bit)) & 0x3F]);
-    } else {
-      if (byte + 1 == inbytes) {
-	*out = (b64[(in[byte] << (bit - 2)) & 0x3F]);
-      } else {
-	*out = (b64[(in[byte] << (bit - 2) |
-		     in[byte + 1] >> (10 - bit)) & 0x3F]);
-      }
-    }
-    ++out;
-  }
-  ASSERT(out == (uchar*)outbuf.data() + outbuf.size() - padding);
-  while ( padding-- )
-    *out++='=';
-
-  return QString(outbuf);
-}
-
-/*!
- \internal
-*/
-int Config::parse64base(char *src, char *bufOut) const
-{
-  char c, z;
-  char li[4];
-  int processed;
-
-  //conversion table without table...
-  for (int x = 0; x < 4; x++) {
-    c = src[x];
-
-    if ( (int) c >= 'A' && (int) c <= 'Z')
-      li[x] = (int) c - (int) 'A';
-    if ( (int) c >= 'a' && (int) c <= 'z')
-      li[x] = (int) c - (int) 'a' + 26;
-    if ( (int) c >= '0' && (int) c <= '9')
-      li[x] = (int) c - (int) '0' + 52;
-    if (c == '+')
-      li[x] = 62;
-    if (c == '/')
-      li[x] = 63;
-  }
-
-  processed = 1;
-  bufOut[0] = (char) li[0] & (32+16+8+4+2+1);	//mask out top 2 bits
-  bufOut[0] <<= 2;
-  z = li[1] >> 4;
-  bufOut[0] = bufOut[0] | z;		//first byte retrived
-
-  if (src[2] != '=') {
-    bufOut[1] = (char) li[1] & (8+4+2+1);	//mask out top 4 bits
-    bufOut[1] <<= 4;
-    z = li[2] >> 2;
-    bufOut[1] = bufOut[1] | z;		//second byte retrived
-    processed++;
-
-    if (src[3] != '=') {
-      bufOut[2] = (char) li[2] & (2+1);	//mask out top 6 bits
-      bufOut[2] <<= 6;
-      z = li[3];
-      bufOut[2] = bufOut[2] | z;	//third byte retrieved
-      processed++;
-    }
-  }
-  return processed;
-}

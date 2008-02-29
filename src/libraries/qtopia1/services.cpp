@@ -42,6 +42,43 @@ static QStringList serviceList_p(const QString& d, const QString n)
     return r;
 }
 
+/*!
+  \class Service qtopia1/services.h
+
+  \brief The Service class allows applications to provide services for other
+  applications to use.
+
+  \ingroup qtopiaemb
+
+  A Service is a named collection of features that an application
+  may choose to provide. For example, web browsers might each provide
+  the feature of displaying a web page given a URL.
+
+  Services allow the providers of a service (eg. a web browser) from the
+  consumers of the service (eg. a mail reader that wanted the user to
+  view a URL).
+
+  \sa ServiceRequest
+*/
+
+/*!
+  \class ServiceRequest qtopia1/services.h
+
+  \brief The ServiceRequest class allows applications to request services from
+  other applications.
+
+  \ingroup qtopiaemb
+
+  A ServiceRequest encapsulates a Service and the message to be sent to
+  that service. It is similar to a QCopEnvelope, but uses service names
+  rather than direct application names.
+
+  Since ServiceRequest inherits QDataStream, you can write data to the
+  request before sending it with send().
+
+  \sa Service
+*/
+
 
 /*!
   Returns a list of available services.
@@ -52,8 +89,8 @@ QStringList Service::list()
 }
 
 /*!
-  Returns the Config file defining the bindings which the user has
-  selected for the \a service.
+  Returns the name of the Config file defining the bindings which the
+  user has selected for the \a service.
 */
 QString Service::binding(const QString& service)
 {
@@ -65,7 +102,7 @@ QString Service::binding(const QString& service)
 
 
 /*!
-  Returns the Config file defining the facilities that are provided by
+  Returns the name of the Config file defining the facilities that are provided by
   all applications that provide the \a service, or
   a null string if there is no such service.
 
@@ -95,7 +132,7 @@ QString Service::config(const QString& service)
 
   If \a automatics is TRUE (the default), and the service is not otherwise
   defined, the MimeType database and application executables are also
-  searched for a service provider. The application executables is solely
+  searched for a service provider. The search of application executables is solely
   for backward compatibility.
 */
 QString Service::appConfig(const QString& service, const QString& appname, bool automatics)
@@ -113,7 +150,7 @@ QString Service::appConfig(const QString& service, const QString& appname, bool 
 
   If \a automatics is TRUE (the default),
   the MimeType database and application executables are also
-  searched for service providers. The application executables is solely
+  searched for service providers. The search of application executables is solely
   for backward compatibility.
 */
 QStringList Service::apps(const QString& service, bool automatics)
@@ -128,9 +165,12 @@ QStringList Service::apps(const QString& service, bool automatics)
 	if ( svmaj == "View/" || svmaj == "Open/" ) {
 	    // Automatic MIME-type specification services
 	    MimeType m(service.mid(5));
+	    /* Sorry, not available in 1.5.0
 	    QList<AppLnk> l = m.applications();
 	    for ( QListIterator<AppLnk> i(l); i.current(); ++i) {
 		const AppLnk* a = *i;
+	    */{
+		const AppLnk* a = m.application();
 		if ( a )
 		    all.append(a->exec());
 	    }
@@ -152,16 +192,19 @@ QStringList Service::apps(const QString& service, bool automatics)
 
   If \a automatics is TRUE (the default), and the service is not otherwise
   defined, the MimeType database and application executables are also
-  searched for a service provider. The application executables is solely
+  searched for a service provider. The search of application executables is solely
   for backward compatibility.
 */
 QString Service::app(const QString& service, const QString& appname, bool automatics)
 {
     Config cfg(binding(service));
-    cfg.setGroup("Service");
-    QString r = cfg.readEntry(appname);
-    if ( r.isNull() )
-	r = cfg.readEntry("default");
+    QString r;
+    if ( cfg.isValid() ) {
+	cfg.setGroup("Service");
+	r = cfg.readEntry(appname);
+	if ( r.isNull() )
+	    r = cfg.readEntry("default");
+    }
     if ( r.isNull() ) {
 	// None defined, use any...
 	QDir dir(QPEApplication::qpeDir()+"services/"+service, QString::null,
@@ -191,7 +234,7 @@ QString Service::app(const QString& service, const QString& appname, bool automa
 
   If \a automatics is TRUE (the default), and the service is not otherwise
   defined, the MimeType database and application executables are also
-  searched for a service provider. The application executables is solely
+  searched for a service provider. The search of application executables is solely
   for backward compatibility.
 */
 QStrList Service::channels(const QString& service, bool automatics)
@@ -212,7 +255,7 @@ QStrList Service::channels(const QString& service, bool automatics)
 
   If \a automatics is TRUE (the default), and the service is not otherwise
   defined, the MimeType database and application executables are also
-  searched for a service provider. The application executables is solely
+  searched for a service provider. The search of application executables is solely
   for backward compatibility.
 */
 QCString Service::channel(const QString& service, const QString& appname, bool automatics)
@@ -221,6 +264,16 @@ QCString Service::channel(const QString& service, const QString& appname, bool a
     return r.isNull() ? r : "QPE/Application/"+r;
 }
 
+/*!
+  Returns an AppLnk to an application providing the \a service.
+  If \a appname is provided, a specific binding to that application may
+  be used rather than the global binding.
+  
+  If \a automatics is TRUE (the default),
+  the MimeType database and application executables are also
+  searched for service providers. The search of application executables is solely
+  for backward compatibility.
+*/
 AppLnk Service::appLnk( const QString& service, const QString& appname, bool automatics)
 {
     QString r = app(service,appname,automatics);
@@ -233,17 +286,31 @@ AppLnk Service::appLnk( const QString& service, const QString& appname, bool aut
 
 #include <qtopia/qcopenvelope_qws.h>
 
+/*!
+  Construct a null service request. You will need to call
+  setService() and setMessage() before send(), but you
+  may write to the service beforehand.
+*/
 ServiceRequest::ServiceRequest() : QDataStream(new QBuffer())
 {
     device()->open(IO_WriteOnly);
 }
 
+/*!
+  Construct a service request that will send \a message to
+  a \a service when you call send(). You
+  may write to the service beforehand.
+*/
 ServiceRequest::ServiceRequest(const QString& service, const QCString& message) 
   : QDataStream(new QBuffer()), m_Service(service), m_Message(message)
 {
     device()->open(IO_WriteOnly);
 }
 
+/*!
+  Copy constructor. Any data previously written to the \a orig
+  service will be in the copy.
+*/
 ServiceRequest::ServiceRequest(const ServiceRequest& orig) : QDataStream()
 {
     // The QBuffer is going to share the byte array, so it will keep the
@@ -257,11 +324,19 @@ ServiceRequest::ServiceRequest(const ServiceRequest& orig) : QDataStream()
     m_Message = orig.message();
 }
 
+/*!
+  Returns TRUE if either the service or message is not set.
+*/
 bool ServiceRequest::isNull() const
 {
     return m_Service.isNull() || m_Message.isNull();
 }
 
+/*!
+  Assignment operator.
+  Any data previously written to the \a orig
+  service will be in the copy.
+*/
 ServiceRequest& ServiceRequest::operator=(const ServiceRequest& orig)
 {
     if (device()) {
@@ -282,11 +357,19 @@ ServiceRequest& ServiceRequest::operator=(const ServiceRequest& orig)
     return *this;
 }
 
+/*!
+  Returns the current stored data. Before you modify the returned value,
+  you must call QArray::detach().
+*/
 const QByteArray ServiceRequest::data() const
 {
     return ((QBuffer*)device())->buffer();
 }
 
+/*!
+  Destructs the service request. Unlike QCopEnvelope, the
+  request is NOT automatically sent.
+*/
 ServiceRequest::~ServiceRequest()
 {
     // If we still have our QBuffer, clean it up...
@@ -295,6 +378,9 @@ ServiceRequest::~ServiceRequest()
     unsetDevice();
 }
 
+/*!
+  Sends the request. Returns FALSE if the request was null.
+*/
 bool ServiceRequest::send() const
 {
     if ( isNull() )
@@ -316,51 +402,50 @@ bool ServiceRequest::send() const
 	return FALSE;
 }
  
+/*!
+  Sets the service to which the request will be sent.
+*/
 void ServiceRequest::setService(const QString& service)
 {
     m_Service = service;
 }
 
+/*!
+  Sets the message to be sent to the service.
+*/
 void ServiceRequest::setMessage(const QCString& message)
 {
     m_Message = message;
 }
 
-// convenience function
+/*!
+  See Service::channels().
+*/
 QStrList ServiceRequest::channels(bool automatics) const
 {
     return Service::channels(m_Service, automatics);
 }
 
-// convenience function
+/*!
+  See Service::channel().
+*/
 QCString ServiceRequest::channel(const QString& appname, bool automatics) const
 {
     return Service::channel(m_Service, appname, automatics);
 }
 
-// convenience function
+/*!
+  See Service::apps().
+*/
 QStringList ServiceRequest::apps(bool automatics) const
 {
     return Service::apps(m_Service, automatics);
 }
 
-// convenience function
+/*!
+  See Service::app().
+*/
 QString ServiceRequest::app(const QString& appname, bool automatics) const
 {
     return Service::app(m_Service, appname, automatics);
 }
-
-QDataStream& operator<<( QDataStream& s, const ServiceRequest &r )
-{
-    return s << r.service() << r.message();
-}
-
-QDataStream& operator>>( QDataStream& s, ServiceRequest &r )
-{
-    QString sr; QCString m;
-    s >> sr >> m;
-    r.setService(sr);
-    r.setMessage(m);
-    return s;
-}
-

@@ -1,0 +1,11 @@
+Files: i18n/en_GB/.directory i18n/en_GB/*.qm
+Priority: optional
+Section: qpe/i18n
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-9
+Depends: 
+Description: i18n: English (British)
+ British UI texts for Qtopia environment.
+ (just a few small changes in language)

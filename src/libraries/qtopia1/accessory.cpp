@@ -132,20 +132,29 @@ public:
   Accessories are particularly useful when using real estate on the taskbar
   would be wasteful.
 
+  \ingroup qtopiaemb
   \sa TaskbarAppletInterface
 */
 
 /*!
-  \fn void Accessory::activated(int)
+  \fn void Accessory::activated()
 
   This signal is emitted when the menu item is activated.
 */
 
 /*!
-  Consturcts an Accessory object.
+  \fn void Accessory::activated(int)
 
-  This constructor places a menu entry in the Q menu.  The activated()
-  signal will be emitted when the user selects the item.
+  This signal is emitted when a menu item in the submenu is activated.
+*/
+
+/*!
+  Constructs an Accessory object with parent \a parent.
+
+  This constructor places a new menu entry in the Q menu, with the name \a text
+  and using the iconset \a icon.
+
+  The activated() signal will be emitted when the user selects this item.
 */
 Accessory::Accessory(const QIconSet& icon, const QString& text, QWidget* parent) :
     QObject(parent),
@@ -154,11 +163,13 @@ Accessory::Accessory(const QIconSet& icon, const QString& text, QWidget* parent)
 }
 
 /*!
-  Consturcts an Accessory object.
+  Constructs an Accessory object with parent \a parent.
 
-  This constructor places an item in the Q menu. The \a submenu, if non-zero,
-  must have no parent object. The activated(int) signal will be emitted when
-  the user selects an item from the submenu.
+  This constructor places a new menu entry in the Q menu, with the name \a text
+  and using the iconset \a icon.
+  
+  The \a submenu, if non-zero, must have no parent object. The activated(int) signal
+  will be emitted when the user selects an item from the submenu.
 */
 Accessory::Accessory(const QIconSet& icon, const QString& text, QPopupMenu* submenu, QWidget* parent) :
     QObject(parent),

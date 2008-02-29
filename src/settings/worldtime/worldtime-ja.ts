@@ -11,11 +11,11 @@
     </message>
     <message>
         <source>Restore Time Zone</source>
-        <translation>タイムゾーンの復元</translation>
+        <translation type="obsolete">タイムゾーンの復元</translation>
     </message>
     <message>
         <source>There was a problem setting your timezone.Your time may be wrong now...</source>
-        <translation>タイムゾーンの設定に問題がありました。時間が誤っている可能性があります...</translation>
+        <translation type="obsolete">タイムゾーンの設定に問題がありました。時間が誤っている可能性があります...</translation>
     </message>
 </context>
 <context>
@@ -93,11 +93,11 @@
     </message>
     <message>
         <source>Unable to Find Timezone Info</source>
-        <translation>タイムゾーン情報が見つかりません</translation>
+        <translation type="obsolete">タイムゾーン情報が見つかりません</translation>
     </message>
     <message>
         <source>&lt;p&gt;Unable to find any timezone information in %1</source>
-        <translation>&lt;p&gt;%1には何のタイムゾーン情報も見つかりません</translation>
+        <translation type="obsolete">&lt;p&gt;%1には何のタイムゾーン情報も見つかりません</translation>
     </message>
     <message>
         <source>Couldn&apos;t Find Map</source>

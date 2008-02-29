@@ -72,10 +72,10 @@
                                 <vsizetype>1</vsizetype>
                             </sizepolicy>
                         </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>&lt;p&gt;This is the state of your running network services.</string>
-                        </property>
+			<property stdset="1">
+			    <name>text</name>
+			    <string>&lt;p&gt;This is the state of your running network services.</string>
+			</property>
                     </widget>
                     <widget>
                         <class>QFrame</class>

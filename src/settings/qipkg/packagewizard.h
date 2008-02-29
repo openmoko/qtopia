@@ -22,6 +22,7 @@
 #include "pkwizard.h"
 #include <qlistview.h>
 #include <qlist.h>
+#include <qdict.h>
 
 class PackageItem;
 class QProcess;
@@ -56,6 +57,7 @@ private slots:
     void updateServerSelection();
 
 private:
+    bool eventFilter( QObject * o, QEvent *e );
     void done(int);
 
     void startRun();
@@ -64,7 +66,7 @@ private:
     void startMultiRun(int jobs);
     bool runIpkg(const QStringList& args, QString& out);
     bool installIpkg( const QString &ipk, const QString &location, QString& out );
-    QStringList linksInPackage(const QString pkg);
+    QStringList linksInPackage(const QString& pkg, const QString &root );
     void revertFailedInstalls(QString& out);
 
     void showError(const QString& err);
@@ -77,9 +79,10 @@ private:
 
     void insertLocalPackageItems();
     void insertPackageItems(bool installed_only);
+    QDict<void> installedPackages();
 
-    QString fullDetails(const QString& pk);
-    DetailsPopup* package_description;
+    //QString fullDetails(const QString& pk);
+    //DetailsPopup* package_description;
 
     bool readIpkgConfig(const QString& conffile);
 
@@ -101,6 +104,8 @@ private:
     void writeSettings();
     void readSettings();
 
+    QDict<QString> *installedRootDict;
+    
     QCString cachedIpkgStatusOutput;
     QCString cachedIpkgInfoOutput;
 };

@@ -24,19 +24,20 @@
 #include <qtopia/qlibrary.h>
 #include <qtopia/qcom.h>
 
+#ifdef PLUGINLOADER_INTERN
+# define PluginLoader PluginLoaderIntern
+# define PLUGINLOADER_EXPORT
+#else
+# define PLUGINLOADER_EXPORT QTOPIA_EXPORT
+#endif
+
 class PluginLoaderPrivate;
 
-#ifdef PLUGINLOADER_INTERN
-#define PLUGINLOADER PluginLoaderIntern
-class PLUGINLOADER
-#else
-#define PLUGINLOADER PluginLoader
-class QTOPIA_EXPORT PLUGINLOADER
-#endif
+class PLUGINLOADER_EXPORT PluginLoader
 {
 public:
-    PLUGINLOADER( const QString &type );
-    ~PLUGINLOADER();
+    PluginLoader( const QString &type );
+    ~PluginLoader();
 
     void clear();
 

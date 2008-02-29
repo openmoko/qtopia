@@ -74,6 +74,10 @@
         <source>Internal Storage</source>
         <translation>内蔵ストレージ</translation>
     </message>
+    <message>
+        <source>RAM disk</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SystemInfo</name>

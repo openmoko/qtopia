@@ -121,6 +121,26 @@ public:
     }
 };
 
+
+/*!
+  \class QPETimeEdit datetimeedit.h
+  \brief The QPETimeEdit class provides a compact widget for selecting a time.
+
+  QPETimeEdit extends QSpinBox to validate times as they are entered.
+  It handles 12 hour and 24 hour time formats.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  \fn QPETimeEdit::valueChanged( const QTime &t );
+
+  This signal is emitted when the time is changed.
+*/
+
+/*!
+  Constructs a QPETimeEdit with the time set to 00:00.
+*/
 QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
     : QSpinBox(parent, name)
 {
@@ -140,6 +160,9 @@ QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
     TimeString::connectChange(this,SLOT(clockChanged()) );
 }
 
+/*!
+  Constructs a QPETimeEdit with the time set to \a dt.
+*/
 QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
 	const char *name ) : QSpinBox(parent, name)
 {
@@ -159,15 +182,24 @@ QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
     setValidator(tv);
 }
 
+/*!
+  \internal
+*/
 void QPETimeEdit::clockChanged()
 {
     updateDisplay();
 }
 
+/*!
+  Destructs QPETimeEdit.
+*/
 QPETimeEdit::~QPETimeEdit()
 {
 }
 
+/*!
+  Reimplemented to validate the time entered.
+*/
 // minutes only;
 QString QPETimeEdit::mapValueToText(int v)
 {
@@ -179,6 +211,9 @@ QString QPETimeEdit::mapValueToText(int v)
     return TimeString::localHM(t);
 }
 
+/*!
+  Reimplemented to validate the time entered.
+*/
 int QPETimeEdit::mapTextToValue(bool *ok)
 {
     QTime res;
@@ -197,18 +232,29 @@ int QPETimeEdit::mapTextToValue(bool *ok)
     return v;
 }
 
+/*!
+  \internal
+*/
 QTime QPETimeEdit::mapValueToTime(int v) const
 {
     QTime tm(v / 60, v % 60,0);
     return tm;
 }
 
+/*!
+  \internal
+*/
 void QPETimeEdit::changeTimeUsingValue(int v)
 {
     QTime tm = mapValueToTime(v);
     emit valueChanged(tm);
 }
 
+/*!
+  Sets displayed time to \a tm.
+
+  \sa time()
+*/
 void QPETimeEdit::setTime( const QTime &tm )
 {
     if (tm == time())
@@ -216,12 +262,20 @@ void QPETimeEdit::setTime( const QTime &tm )
     setValue(tm.hour() * 60 + tm.minute());
 }
 
+/*!
+  Returns the time selected.
+
+  \sa setTime()
+*/
 QTime QPETimeEdit::time( ) const
 {
     QTime tm = mapValueToTime(value());
     return tm;
 }
 
+/*!
+  Increases the time by 15 minutes.
+*/
 void QPETimeEdit::stepUp()
 {
     int tmp = value();
@@ -232,6 +286,9 @@ void QPETimeEdit::stepUp()
     setValue(tmp);
 }
 
+/*!
+  Decreases the time by 15 minutes.
+*/
 void QPETimeEdit::stepDown()
 {
     int tmp = value();
@@ -248,7 +305,44 @@ void QPETimeEdit::stepDown()
 
 /*=====================================*/
 
+/*!
+  \class QPEDateEdit datetimeedit.h
+  \brief The QPEDateEdit class provides a compact widget for selecting
+  a date.
 
+  QPEDateEdit displays a QPushButton with the selected date displayed.
+  When clicked, a QPEDatePicker is popped up and a new date can be
+  selected.
+
+  The button can display the date in either long or short format.
+
+  It is also possible to allow no to date selected.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  \fn QPEDateEdit::valueChanged( const QDate &t );
+
+  This signal is emitted when the date is changed.
+*/
+
+/*!
+  \fn bool QPEDateEdit::longFormat() const;
+
+  Returns TRUE if dates are displayed in long format.
+
+  \sa setLongFormat(), setDateFormat()
+*/
+
+/*!
+  Constructs QPEDateEdit with the current date selected.
+
+  If \a longDate is TRUE the push button will show the selected date in
+  long format.
+
+  If \a allowNullDate is TRUE it is possible to select no date.
+*/
 QPEDateEdit::QPEDateEdit( QWidget *parent, const char * name, bool longDate,
 			      bool allowNullDate )
     :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
@@ -259,6 +353,15 @@ QPEDateEdit::QPEDateEdit( QWidget *parent, const char * name, bool longDate,
     setLongFormat(longDate);
 }
 
+
+/*!
+  Constructs QPEDateEdit with the date \a dt.
+
+  If \a longDate is TRUE the push button will show the selected date in
+  long format.
+
+  If \a allowNullDate is TRUE it is possible to select no date.
+*/
 QPEDateEdit::QPEDateEdit( const QDate &dt, QWidget *parent, const char * name, bool longDate,
 			      bool allowNullDate )
     :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
@@ -269,12 +372,20 @@ QPEDateEdit::QPEDateEdit( const QDate &dt, QWidget *parent, const char * name, b
     setLongFormat(longDate);
 }
 
+/*!
+  \internal
+*/
 void QPEDateEdit::clockChanged()
 {
     df = TimeString::currentDateFormat();
     updateButtonText();
 }
 
+/*!
+  If \a l is TRUE, display the date in long format.
+
+  \sa longFormat(), setDateFormat()
+*/
 void QPEDateEdit::setLongFormat( bool l )
 {
     longFmt = l;
@@ -284,7 +395,8 @@ void QPEDateEdit::setLongFormat( bool l )
 void QPEDateEdit::init()
 {
     QPopupMenu *popup = new QPopupMenu( this );
-    monthView = new QPEDatePicker( popup, 0, TRUE);
+    monthView = new QPEDatePicker( popup );
+    connect( monthView, SIGNAL(dateClicked(const QDate&)), popup, SLOT(close()) );
 
     // XXX WARNING DO NOT CHANGE THIS UNLESS....
     // you test VERY carefully.  There has been
@@ -330,14 +442,21 @@ void QPEDateEdit::init()
     setSizePolicy( QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed) );
 }
 
+/*!
+  Returns TRUE if it is possible to select a null date.
+*/
 bool QPEDateEdit::allowNullDate() const
 {
     return mAllowNullButton;
 }
 
-void QPEDateEdit::setWeekStartsMonday( bool b )
+/*!
+  Display the calendar with weeks starting on Monday if \a startMonday is
+  TRUE, otherwise weeks start with Sunday.
+*/
+void QPEDateEdit::setWeekStartsMonday( bool startMonday )
 {
-    weekStartsMonday = b;
+    weekStartsMonday = startMonday;
     monthView->setWeekStartsMonday( weekStartsMonday );
 }
 
@@ -364,11 +483,17 @@ void QPEDateEdit::updateButtonText()
     }
 }
 
+/*!
+  Return the currently selected date.
+*/
 QDate QPEDateEdit::date() const
 {
     return currDate;
 }
 
+/*!
+  Set the current date to \a d.
+*/
 void QPEDateEdit::setDate( const QDate &d )
 {
     if ( d != currDate ) {
@@ -377,14 +502,39 @@ void QPEDateEdit::setDate( const QDate &d )
     }
 }
 
-void QPEDateEdit::setDateFormat( DateFormat f )
+/*!
+  Set the long date format to \a format.
+
+  \sa setLongFormat()
+*/
+void QPEDateEdit::setDateFormat( DateFormat format )
 {
-    df = f;
+    df = format;
     updateButtonText();
 }
 
 /*=====================================*/
 
+/*!
+  \class QPEDateTimeEdit datetimeedit.h
+  \brief The QPEDateTimeEdit class provides a compact widget for selecting
+  a date and time.
+
+  QPEDateTimeEdit displays a QPEDateEdit and QPETimeEdit side-by-side.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  \fn QPEDateTimeEdit::valueChanged( const QDateTime &t );
+
+  This signal is emitted when the date or time is changed.
+*/
+
+/*!
+  Constructs a QPEDateTimeEdit with the date set to today and the time
+  set to 00:00.
+*/
 
 QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
     : QHBox(parent, name)
@@ -397,6 +547,9 @@ QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
 	    this, SLOT(setTime( const QTime &)));
 }
 
+/*!
+  Constructs QPEDateTimeEdit with the date and time \a dt.
+*/
 QPEDateTimeEdit::QPEDateTimeEdit( const QDateTime &dt, QWidget *parent,
 	const char *name ) : QHBox(parent, name)
 {
@@ -408,20 +561,38 @@ QPEDateTimeEdit::QPEDateTimeEdit( const QDateTime &dt, QWidget *parent,
 	    this, SLOT(setTime( const QTime &)));
 }
 
+/*!
+  Destructs QPEDateTimeEdit.
+*/
 QPEDateTimeEdit::~QPEDateTimeEdit() {}
 
+/*!
+  Sets the current date to \a dt.
+
+  \sa setDateTime()
+*/
 void QPEDateTimeEdit::setDate( const QDate &dt )
 {
     de->setDate(dt);
     emit valueChanged(dateTime());
 }
 
+/*!
+  Sets the current time to \a dt.
+
+  \sa setDateTime()
+*/
 void QPEDateTimeEdit::setTime( const QTime &dt )
 {
     te->setTime(dt);
     emit valueChanged(dateTime());
 }
 
+/*!
+  Sets the current date and time to \a dt.
+
+  \sa setDate(), setTime()
+*/
 void QPEDateTimeEdit::setDateTime( const QDateTime &dt )
 {
     de->setDate(dt.date());
@@ -429,36 +600,68 @@ void QPEDateTimeEdit::setDateTime( const QDateTime &dt )
     emit valueChanged(dateTime());
 }
 
+/*!
+  Returns the currently selected date.
+*/
 QDate QPEDateTimeEdit::date() const
 {
     return de->date();
 }
 
+/*!
+  Returns the currently selected time.
+*/
 QTime QPEDateTimeEdit::time() const
 {
     return te->time();
 }
 
+/*!
+  Returns the currently selected date and time.
+*/
 QDateTime QPEDateTimeEdit::dateTime() const
 {
     return QDateTime(de->date(), te->time());
 }
 
+/*!
+  Enables changing the date if \a b is TRUE, otherwise disables
+  input.
+
+  \sa dateIsEnabled(), setTimeEnabled()
+*/
 void QPEDateTimeEdit::setDateEnabled(bool b)
 {
     de->setEnabled(b);
 }
 
+/*!
+  Enables changing the time if \a b is TRUE, otherwise disables
+  input.
+
+  \sa timeIsEnabled(), setDateEnabled()
+*/
 void QPEDateTimeEdit::setTimeEnabled(bool b)
 {
     te->setEnabled(b);
 }
 
+/*!
+  Returns TRUE if changing the date is enabled, otherwise FALSE.
+
+  \sa setDateEnabled()
+*/
 bool QPEDateTimeEdit::dateIsEnabled() const
 {
     return de->isEnabled();
 }
 
+
+/*!
+  Returns TRUE if changing the time is enabled, otherwise FALSE.
+
+  \sa setTimeEnabled()
+*/
 bool QPEDateTimeEdit::timeIsEnabled() const
 {
     return te->isEnabled();

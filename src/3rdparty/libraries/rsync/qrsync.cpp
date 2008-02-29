@@ -7,10 +7,24 @@ extern "C" {
 
 #include <qfile.h>
 
+/*! \class QRsync
+  \brief The QRsync class provides an interface to librsync.
+
+  \legalese
+  QRsync links with librsync, which is distributed under the terms of the
+  GNU Lesser General Public License. The primary copyright holders and
+  and authors are Martin Pool \<mbp@samba.org\> and Andrew Tridgell 
+  \<tridge@samba.org\>.
+*/
+
+
 static const char *rdiffNewFile = "/tmp/rdiff/result";
 static size_t block_len = RS_DEFAULT_BLOCK_LEN;
 static size_t strong_len = RS_DEFAULT_STRONG_LEN;
 
+/*!
+  Takes \a baseFile and generates a signature for it in \a sigFile.
+*/
 
 void QRsync::generateSignature( QString baseFile, QString sigFile )
 {
@@ -30,7 +44,6 @@ void QRsync::generateSignature( QString baseFile, QString sigFile )
 	    printf("error in rdiffGenSig: %d", result );
     }
 }
-
 
 void QRsync::generateDiff( QString baseFile, QString sigFile, QString deltaFile )
 {
@@ -66,6 +79,10 @@ void QRsync::generateDiff( QString baseFile, QString sigFile, QString deltaFile 
 
     }
 }
+
+/*!
+  Applys the diff in \a deltaFile to \a baseFile.
+*/
 
 void QRsync::applyDiff( QString baseFile, QString deltaFile )
 {

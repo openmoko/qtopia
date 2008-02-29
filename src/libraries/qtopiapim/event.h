@@ -122,6 +122,7 @@ public:
     // Use these functions carefully.
     void setSeriesUid( const QUuid &u );
     void addException( const QDate &d, const QUuid &u );
+    bool isValid() const;
     void clearExceptions();
     void removeException( const QDate &d ); // and the appropriate child.
     void removeException( const QUuid &u ); // and the appropriate date.

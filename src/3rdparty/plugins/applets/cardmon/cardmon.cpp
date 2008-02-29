@@ -28,6 +28,13 @@
 #include <string.h>
 #include <fcntl.h>
 
+/*! \class CardMonitor
+  \brief The CardMonitor class provides a widget to monitor CF cards.
+
+  \legalese
+  The author and primary copyright holder of the CardMonitor applet is Devin Butterfield \<dbutter@wireless.net\>.
+*/
+
 CardMonitor::CardMonitor( QWidget *parent ) : QWidget( parent ),
 	pm( Resource::loadPixmap( "cardmon/pcmcia" ) ), cardIn( FALSE )
 {

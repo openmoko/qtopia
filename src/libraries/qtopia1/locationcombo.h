@@ -34,7 +34,8 @@ class DocLnk;
 class FileSystem;
 class StorageInfo;
 
-class DocPropertiesWidgetPrivate;
+
+class LocationComboPrivate;
 
 class QTOPIA_EXPORT LocationCombo : public QComboBox
 {
@@ -47,7 +48,7 @@ public:
 
     void setLocation( const AppLnk * );
 
-    QString path() const;
+    QString installationPath() const;
     QString documentPath() const;
     const FileSystem *fileSystem() const;
 
@@ -62,10 +63,8 @@ private slots:
 private:
     void setupCombo();
     QStringList locations;
-    int currentLocation;
-    int originalLocation;
-    int fileSize;
     StorageInfo *storage;
+    LocationComboPrivate *d;
 };
 
 

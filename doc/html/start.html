@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/start.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<p> 
+<p> <h2> Qtopia - Getting Started
+</h2>
+<a name="1"></a><p> <h3> Qtopia - The <a href="qt.html">Qt</a> palmtop environment
+</h3>
+<a name="1-1"></a><p> <em>Qtopia</em> is a windowing system for handheld devices. It offers
+developers the powerful Qt API, and provides users with fast and
+intuitive interaction.
+<p> <h4> Developing for Qtopia
+</h4>
+<a name="1-1-1"></a><p> Since <em>Qtopia</em> offers the complete Qt API, you can do much of your
+development on any of the other platforms for which Qt is available:
+Windows, Unix/X11, or Mac OS X. However, for optimal tailoring of your
+application to the smaller screen and other limitations of a small
+device, we recommend that you use the <em>Qtopia SDK</em>.
+<p> The <em>Qtopia SDK</em> allows you to develop <em>Qtopia</em> applications under
+the Linux desktop environment using the Qt Virtual Framebuffer, which
+completely emulates the handheld <em>Qtopia</em> environment. It also
+includes cross-compiler software so that you can compile your
+application to run on the target device. If you do not already have
+the <em>Qtopia SDK</em> (this document is normally part of the SDK),
+contact <a href="mailto:info@trolltech.com">info@trolltech.com</a>, or
+see the <a href="http://www.trolltech.com">Trolltech web site</a>.
+<p> To build applications for the SHARP SL5000 or similar StrongARM-based
+devices, you will also need a StrongARM cross compiler. 
+
+<p> The SDK includes an example application. We recommend that you compile and
+run this example to learn how things work, before tackling your own
+projects.
+<p> Here are the steps necessary to compile and run the example program on
+the Linux desktop:
+<p> <ol type=1>
+<li> Check the environment is correct:
+<pre>
+   export QPEDIR=/opt/Qtopia
+   export QTDIR=/opt/Qtopia
+   export PATH=$QTDIR/bin:$PATH
+   export TMAKEPATH=/opt/Qtopia/tmake/lib/qws/linux-generic-g++
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+</pre>
+ 
+<p> <li> Make a copy of the example:
+<pre>
+   cd somewhere
+   cp -r $QPEDIR/examples/application .
+   cd application
+</pre>
+ 
+<p> <li> Generate a Makefile:
+<pre>
+   tmake -o Makefile example.pro
+</pre>
+ 
+<p> <li> Build the example:
+<pre>
+   make
+</pre>
+ 
+<p> <li> Install it:
+<pre>
+   su # root privileges required to install
+   cp example.desktop $QPEDIR/apps/Applications/
+   cp Example.png $QPEDIR/pics/
+   cp example $QPEDIR/bin/
+   cp example.html $QPEDIR/help/html/
+   exit # no need to be root anymore
+</pre>
+ 
+<p> <li> To run it, first run the <a href="qt.html">Qt</a> Virtual Framebuffer:
+<pre>
+   qvfb &amp;
+</pre>
+ 
+<p> <li> Then run the <em>Qtopia</em> environment:
+<pre>
+   qpe
+</pre>
+ 
+Your application should be available in the Applications tab visible
+inside the Qt Virtual Framebuffer window.
+<p> <li> If you want to distribute your applications to others, build an RPM
+package, e.g.:
+<pre>
+   mkipks -rpm -arch i386 example.control
+</pre>
+ 
+</ol>
+<p> To make your own application, use the example program as a model. Make sure that
+when you add files to your project, you also add them
+to your project file (i.e. to <tt>example.pro</tt>) and rerun the <tt>tmake</tt>
+command to update the <tt>Makefile</tt> whenever you update the <tt>.pro</tt>
+file.
+<p> To build you application for the SHARP SL5000 rather than just running
+on the desktop, the process is similar.  The example below assumes
+you have installed the cross compiler in /usr/local/arm.
+<p> <ol type=1>
+<li> Check the environment is correctly set for the SHARP SL5000:
+<pre>
+   export QPEDIR=/opt/Qtopia/sharp
+   export QTDIR=/opt/Qtopia/sharp
+   export PATH=$QTDIR/bin:/usr/local/arm/bin:$PATH
+   export TMAKEPATH=/opt/Qtopia/tmake/lib/qws/linux-sharp-g++
+</pre>
+ 
+<p> <li> Rebuild the makefile (<tt>$TMAKEPATH</tt> has changed) above:
+<pre>
+   make clean
+   tmake -o Makefile example.pro
+</pre>
+ 
+<p> <li> Build it:
+<pre>
+   make
+</pre>
+ 
+<p> <li> Install it (note that this is now going into the <tt>/opt/Qtopia/sharp/</tt> directory):
+<pre>
+   su # root privileges required to install
+   cp example.desktop $QPEDIR/apps/Applications
+   cp Example.png $QPEDIR/pics
+   cp example $QPEDIR/bin
+   cp example.html $QPEDIR/help/html/
+   exit # no need to be root anymore
+</pre>
+ 
+<p> <li> To install it on a device, build an <tt>ipk</tt> package file:
+<pre>
+   su # root privileges required to strip the executable
+   mkipks example.control
+   exit # no need to be root anymore
+</pre>
+ 
+</ol>
+<p> The resulting <tt>example-1.0.0.ipk</tt> can be installed on the SL5000 
+using <em>Qtopia Desktop</em>.
+<p> <h4> Building Your Own Applications
+</h4>
+<a name="1-1-2"></a><p> Once you have built the example, you can proceed with writing your own
+applicatons. If you are not familiar with <a href="qt.html">Qt</a>, you should consult the
+Qt documentation by pointing your web browser at <a href="file:/opt/Qtopia/doc/index.html">/opt/Qtopia/doc/index.html</a> when you have installed the
+SDK, or use the online <a href="http://doc.trolltech.com/">Trolltech
+Documentation Site</a>. The <a href="http://www.trolltech.com/products/qt/whitepaper.html">Qt
+Whitepaper</a> provides a good overview of, and introduction to,
+the Qt API.
+<p> When you add more files to your application, just edit the project
+file (e.g. <tt>example.pro</tt>) and rerun <tt>tmake</tt>.
+<p> The <tt>.ui</tt> files are <em>Qt Designer</em> user interface files.
+You can create and edit these using <em>Qt Designer</em>:
+<pre>
+   designer example.ui
+</pre>
+ 
+<p> <em>Qt Designer</em>'s online documentation (accessible from the links
+mentioned above) includes a complete tutorial.
+<p> 
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

@@ -47,6 +47,16 @@ public:
     PimTask todoEntry();
     void setCurrentCategory(int);
 
+    void show();
+
+#ifdef QTOPIA_DESKTOP
+    void updateCategories();
+    CategorySelect *categorySelect();
+
+#endif
+ signals:
+    void categoriesChanged();
+
 protected slots:
     void dueDateChanged( const QDate& );
     void startDateChanged( const QDate& );
@@ -56,12 +66,14 @@ protected slots:
     void statusChanged();
 
 protected:
+    void closeEvent(QCloseEvent *);
     virtual void accept();
     virtual void reject();
 
 private:
     void init();
     PimTask todo;
+    bool buttonclose;
 
     NewTaskDialogBase *s;
 };

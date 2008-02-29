@@ -42,7 +42,7 @@ public:
     QValueList<Occurrence> getOccurrences( const QDate &from,
 	    const QDate &to ) const;
 
-    Occurrence getNextAlarm( const QDateTime &from, bool *ok = 0) const;
+    QValueList<Occurrence> getNextAlarm( const QDateTime &from, int warn) const;
     Occurrence find(const QRegExp &, int, const QDate &, bool, bool *ok = 0) const;
     Occurrence find(const QUuid &u, const QDate &, bool *ok = 0) const;
     PimEvent find(const QUuid &u, bool *ok = 0) const;
@@ -54,6 +54,8 @@ public:
     void removeEvent( const PimEvent &uid );
 
     void updateEvent( const PimEvent &event );
+    void updateAlarm(const PimEvent &e);
+    void updateAlarms();
 
     // This is needed for synchronization
     EventXmlIO &eventsIO() { return *dba; }

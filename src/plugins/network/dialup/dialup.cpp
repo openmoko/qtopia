@@ -330,7 +330,10 @@ protected:
 	    log.replace(QRegExp("\r"),"");
 	    switch (state) {
 	      case Initialize:
-		if ( demand ) {
+		if ( log.find(QRegExp("\nFailed"))>=start ) { // No tr
+		    progress(tr("Connection failed"),0);
+		    state = Disappearing;
+		} else if ( demand ) {
 		    int ns;
 		    if ( (ns=log.find(QRegExp("Starting link\n")))>=start ) { // No tr
 			progress(tr("Connecting"),5);
@@ -446,6 +449,7 @@ bool DialupImpl::start( Config& cfg, const QString& password )
     if ( !password.isNull() )
 	cmd += " password " + Global::shellQuote(password); // No tr
     cmd += " >" + QString(logfile) + " 2>&1 &";
+    system("cardctl resume");
     system(cmd.latin1());
     cfg.setGroup("Properties");
     int dialmode = cfg.readNumEntry("dialmode",0);
@@ -465,6 +469,7 @@ bool DialupImpl::stop( Config& cfg )
 	int p = s.toInt();
 	if ( p ) {
 	    kill(p,SIGTERM); // SIGHUP not enough for demand dialing pppd
+	    system("cardctl suspend");
 	    return TRUE;
 	}
     }

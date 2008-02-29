@@ -20,35 +20,42 @@
 #include "fractiondata.h"
 
 // Data type functions
-void FractionData::push(char c) {
+bool FractionData::push(char c, bool commit) {
     if (c == '/') {
 	if (dEdited) 
-	    return;
-	denominator = 0;
-	dEdited = TRUE;
-	buildFormattedString();
-	return;
+	    return TRUE;
+	if (commit) {
+	    denominator = 0;
+	    dEdited = TRUE;
+	    buildFormattedString();
+	}
+	return TRUE;
     }
 
     // append char and test result
     bool ok = FALSE;
     QString tmpString;
+    int den, num;
     if (dEdited) {
 	tmpString = dString;
 	tmpString.append(c);
-	denominator = tmpString.toInt(&ok);
-	if (ok) {
+	den = tmpString.toInt(&ok);
+	if (ok && commit) {
 	    dString = tmpString;
+	    denominator = den;
 	}
     } else {
 	tmpString = nString;
 	tmpString.append(c);
-	numerator = tmpString.toInt(&ok);
-	if (ok) {
+	num = tmpString.toInt(&ok);
+	if (ok && commit) {
 	    nString = tmpString;
+	    numerator = num;
 	}
     }
-    buildFormattedString();
+    if (commit)
+	buildFormattedString();
+    return ok;
 }
 // puts dString and nString together
 void FractionData::buildFormattedString() {

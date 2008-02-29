@@ -20,6 +20,7 @@
 #define _XOPEN_SOURCE
 
 #include <qtopia/qpeglobal.h>
+#include <qtopia/qpeapplication.h>
 
 #ifndef Q_OS_WIN32
 #include <pwd.h>
@@ -72,18 +73,37 @@ TransferServer::TransferServer( Q_UINT16 port, QObject *parent,
         const char* name)
     : QServerSocket( port, 1, parent, name )
 {
+    connections.setAutoDelete( TRUE );
     if ( !ok() )
 	qWarning( "Failed to bind to port %d", port );
 }
 
+void TransferServer::authorizeConnections()
+{
+    QListIterator<ServerPI> it(connections);
+    while ( it.current() ) {
+	if ( !it.current()->verifyAuthorised() ) {
+	    disconnect( it.current(), SIGNAL(connectionClosed(ServerPI *)), this, SLOT( closed(ServerPI *)) );
+	    connections.removeRef( it.current() );
+	} else
+	    ++it;
+    }
+}
+
+void TransferServer::closed(ServerPI *item)
+{
+    connections.removeRef(item);
+}
+
 TransferServer::~TransferServer()
 {
-
 }
 
 void TransferServer::newConnection( int socket )
 {
-    (void) new ServerPI( socket, this );
+    ServerPI *ptr = new ServerPI( socket, this );
+    connect( ptr, SIGNAL(connectionClosed(ServerPI *)), this, SLOT( closed(ServerPI *)) );
+    connections.append( ptr );
 }
 
 QString SyncAuthentication::serverId()
@@ -119,7 +139,7 @@ QString SyncAuthentication::loginName()
 
 int SyncAuthentication::isAuthorized(QHostAddress peeraddress)
 {
-    Config cfg("Security");
+    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
     cfg.setGroup("Sync");
     QString allowedstr = cfg.readEntry("auth_peer","192.168.0.0");
     QHostAddress allowed;
@@ -166,11 +186,17 @@ bool SyncAuthentication::checkPassword( const QString& password )
     // Detect old Qtopia Desktop (no password)
     if ( password.isEmpty() ) {
 	if ( denials < 1 || now > lastdenial+600 ) {
-	    QMessageBox::warning( 0,tr("Sync Connection"),
+	    QMessageBox unauth(
+		tr("Sync Connection"),
 		tr("<p>An unauthorized system is requesting access to this device."
 		    "<p>If you are using a version of Qtopia Desktop older than 1.5.1, "
 		    "please upgrade."),
-		tr("Deny") );
+		QMessageBox::Warning,
+		QMessageBox::Cancel, QMessageBox::NoButton, QMessageBox::NoButton,
+		0, QString::null, TRUE, WStyle_StaysOnTop);
+	    unauth.setButtonText(QMessageBox::Cancel, tr("Deny"));
+	    unauth.exec();
+
 	    denials++;
 	    lastdenial=now;
 	}
@@ -184,7 +210,7 @@ bool SyncAuthentication::checkPassword( const QString& password )
 
     ++lock;
     if ( password.left(6) == "Qtopia" ) {
-	Config cfg("Security");
+	Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File );
 	cfg.setGroup("Sync");
 	QStringList pwds = cfg.readListEntry("Passwords",' ');
 	for (QStringList::ConstIterator it=pwds.begin(); it!=pwds.end(); ++it) {
@@ -202,12 +228,18 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	}
 
 	// Unrecognized system. Be careful...
+	QMessageBox unrecbox(
+	    tr("Sync Connection"),
+	    tr(	"<p>An unrecognized system is requesting access to this device."
+		"<p>If you have just initiated a Sync for the first time, this is normal."),
+		QMessageBox::Warning,
+		QMessageBox::Cancel, QMessageBox::Yes, QMessageBox::NoButton,
+		0, QString::null, TRUE, WStyle_StaysOnTop);
+	unrecbox.setButtonText(QMessageBox::Cancel, tr("Deny"));
+	unrecbox.setButtonText(QMessageBox::Yes, tr("Allow"));
 
 	if ( (denials > 2 && now < lastdenial+600)
-	    || QMessageBox::warning(0,tr("Sync Connection"),
-		tr("<p>An unrecognized system is requesting access to this device."
-		    "<p>If you have just initiated a Sync for the first time, this is normal."),
-		tr("Deny"),tr("Allow"),QString::null)!=1 )
+	    || unrecbox.exec() != QMessageBox::Yes)
 	{
 	    denials++;
 	    lastdenial=now;
@@ -286,13 +318,25 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 
 ServerPI::~ServerPI()
 {
+    close();
+    dtp->close();
+    delete dtp;
+    delete serversocket;
+}
 
+bool ServerPI::verifyAuthorised()
+{
+    if ( !SyncAuthentication::isAuthorized(peerAddress()) ) {
+	state = Forbidden;
+	return FALSE;
+    }
+    return TRUE;
 }
 
 void ServerPI::connectionClosed()
 {
     // qDebug( "Debug: Connection closed" );
-    delete this;
+    emit connectionClosed(this);
 }
 
 void ServerPI::send( const QString& msg )
@@ -369,7 +413,7 @@ void ServerPI::process( const QString& message )
     // we always respond to QUIT, regardless of state
     if ( cmd == "QUIT" ) {
 	send( "211 Good bye!" ); // No tr
-	delete this;
+	close();
 	return;
     }
 
@@ -877,10 +921,16 @@ QString ServerPI::fileListing( QFileInfo *info )
     s += QString::number( subdirs ).rightJustify( 3, ' ', TRUE ) + " ";
 
     // owner
-    s += info->owner().leftJustify( 8, ' ', TRUE ) + " ";
+    QString o = info->owner();
+    if ( o.isEmpty() )
+	o = QString::number(info->ownerId());
+    s += o.leftJustify( 8, ' ', TRUE ) + " ";
 
     // group
-    s += info->group().leftJustify( 8, ' ', TRUE ) + " ";
+    QString g = info->group();
+    if ( g.isEmpty() )
+	g = QString::number(info->groupId());
+    s += g.leftJustify( 8, ' ', TRUE ) + " ";
 
     // file size in bytes
     s += QString::number( info->size() ).rightJustify( 9, ' ', TRUE ) + " ";
@@ -989,7 +1039,7 @@ void ServerPI::timerEvent( QTimerEvent * )
 
 ServerDTP::ServerDTP( QObject *parent, const char* name)
   : QSocket( parent, name ), mode( Idle ), createTargzProc( 0 ),
-    retrieveTargzProc( 0 ), gzipProc( 0 )
+    retrieveTargzProc( 0 )
 {
 
   connect( this, SIGNAL( connected() ), SLOT( connected() ) );
@@ -997,17 +1047,12 @@ ServerDTP::ServerDTP( QObject *parent, const char* name)
   connect( this, SIGNAL( bytesWritten( int ) ), SLOT( bytesWritten( int ) ) );
   connect( this, SIGNAL( readyRead() ), SLOT( readyRead() ) );
 
-  gzipProc = new QProcess( this, "gzipProc" );
-  gzipProc->setCommunication( QProcess::Stdin | QProcess::Stdout );
-
   createTargzProc = new QProcess( QString("tar"), this, "createTargzProc"); // No tr
   createTargzProc->setCommunication( QProcess::Stdout );
   createTargzProc->setWorkingDirectory( QDir::rootDirPath() );
   connect( createTargzProc, SIGNAL( processExited() ), SLOT( targzDone() ) );
 
-  QStringList args = "tar"; // No tr
-  args += "-xv";
-  retrieveTargzProc = new QProcess( args, this, "retrieveTargzProc" );
+  retrieveTargzProc = new QProcess( this, "retrieveTargzProc" );
   retrieveTargzProc->setCommunication( QProcess::Stdin );
   retrieveTargzProc->setWorkingDirectory( QDir::rootDirPath() );
   connect( retrieveTargzProc, SIGNAL( processExited() ),
@@ -1148,8 +1193,8 @@ void ServerDTP::connectionClosed()
 
     else if ( RetrieveGzipFile == mode ) {
 	qDebug("Done writing ungzip file; closing input");
-	gzipProc->flushStdin();
-	gzipProc->closeStdin();
+	retrieveTargzProc->flushStdin();
+	retrieveTargzProc->closeStdin();
     }
 
     // retrieve buffer mode
@@ -1203,13 +1248,13 @@ void ServerDTP::readyRead()
 	file.writeBlock( s.data(), s.size() );
     }
     else if ( RetrieveGzipFile == mode ) {
-	if ( !gzipProc->isRunning() )
-	    gzipProc->start();
+	if ( !retrieveTargzProc->isRunning() )
+	    retrieveTargzProc->start();
 
       	QByteArray s;
 	s.resize( bytesAvailable() );
 	readBlock( s.data(), bytesAvailable() );
-	gzipProc->writeToStdin( s );
+	retrieveTargzProc->writeToStdin( s );
 	qDebug("wrote %d bytes to ungzip ", s.size() );
     }
     // retrieve buffer mode
@@ -1273,28 +1318,6 @@ void ServerDTP::sendGzipFile( const QString &fn,
 	     SIGNAL( readyReadStdout() ), SLOT( writeTargzBlock() ) );
 }
 
-void ServerDTP::gunzipDone()
-{
-    qDebug("gunzipDone");
-    disconnect( gzipProc, SIGNAL( processExited() ),
-		this, SLOT( gunzipDone() ) );
-    retrieveTargzProc->closeStdin();
-    disconnect( gzipProc, SIGNAL( readyReadStdout() ),
-		    this, SLOT( tarExtractBlock() ) );
-}
-
-void ServerDTP::tarExtractBlock()
-{
-    qDebug("ungzipTarBlock");
-    if ( !retrieveTargzProc->isRunning() ) {
-	qDebug("auto start ungzip proc");
-	if ( !retrieveTargzProc->start() )
-	    qWarning(" failed to start tar -x process");
-    }
-    retrieveTargzProc->writeToStdin( gzipProc->readStdout() );
-}
-
-
 void ServerDTP::retrieveFile( const QString fn, const QHostAddress& host, Q_UINT16 port )
 {
     file.setName( fn );
@@ -1314,11 +1337,9 @@ void ServerDTP::retrieveGzipFile( const QString &fn )
     file.setName( fn );
     mode = RetrieveGzipFile;
 
-    gzipProc->setArguments( "gunzip" );
-    connect( gzipProc, SIGNAL( readyReadStdout() ),
-	     SLOT( tarExtractBlock() ) );
-    connect( gzipProc, SIGNAL( processExited() ),
-	     SLOT( gunzipDone() ) );
+    retrieveTargzProc->setArguments( "targunzip" );
+    connect( retrieveTargzProc, SIGNAL( processExited() ),
+	     SLOT( extractTarDone() ) );
 }
 
 void ServerDTP::retrieveGzipFile( const QString &fn, const QHostAddress& host, Q_UINT16 port )

@@ -60,6 +60,7 @@ private slots:
     void received(const QCString& msg, const QByteArray& data);
     void applicationLaunched(int, const QString &);
     void applicationTerminated(int, const QString &);
+    void applicationConnected(const QString &);
 
 private:
     AppLnkSet* m_AppLnkSet;

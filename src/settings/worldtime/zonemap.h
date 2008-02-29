@@ -27,6 +27,7 @@
 #include <qlist.h>
 #include <qscrollview.h>
 #include <qstring.h>
+#include <qvector.h>
 
 extern const int iCITYOFFSET;
 
@@ -36,6 +37,12 @@ class QLabel;
 class QTimer;
 class QToolButton;
 
+struct CityPos
+{
+    int lat;
+    int lon;
+    QCString id;
+};
 
 class ZoneMap : public QScrollView
 {
@@ -67,6 +74,9 @@ protected:
     virtual void resizeEvent( QResizeEvent *);
     virtual void drawContents( QPainter *p, int cx, int cy, int cw, int ch );
 
+private slots:
+    void initCities();
+
 private:
     const TimeZone findCityNear( const TimeZone &city, int key );
     void showCity( const TimeZone &city );
@@ -97,6 +107,9 @@ private:
     bool bIllum;    // flag to indicat that illumination is active
 
     TimeZone m_cursor;
+
+    QVector<CityPos> cities;
+    bool citiesInit;
 };
 
 inline bool ZoneMap::zoneToWin( int zoneX, int zoneY,

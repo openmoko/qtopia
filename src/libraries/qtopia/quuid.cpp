@@ -25,6 +25,8 @@
   \brief The QUuid class defines a Universally Unique Identifier (UUID).
 
   This class is temporarily copied from Qt 3.0.
+
+  \ingroup qtopiaemb
 */
 
 /*!

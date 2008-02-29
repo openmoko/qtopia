@@ -1,4 +1,4 @@
-Files: bin/patience apps/Games/patience.desktop pics/cards
+Files: bin/patience apps/Games/patience.desktop pics/cards/micro pics/cards/small pics/cards/normal pics/cards/circle.png pics/cards/cross.png
 Priority: optional
 Section: qpe/games
 Maintainer: Trolltech (www.trolltech.com)

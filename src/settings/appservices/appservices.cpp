@@ -26,6 +26,7 @@
 #include <qtopia/applnk.h>
 #include <qtopia/mimetype.h>
 #include <qtopia/qpeapplication.h>
+#include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/config.h>
 #include <qtopia/services.h>
 
@@ -40,16 +41,16 @@ public:
     ASCheckListItem(QListView *parent, const QString &sv, const AppLnk* lnk) :
 	QCheckListItem(parent,QString::null,Controller), link(lnk), svr(sv)
     {
-	QString svdir=QPEApplication::qpeDir()+"services/"+sv;
-	Config service(svdir+".service",Config::File);
+	Config service(Service::config(sv),Config::File);
 	QString icon;
 	if ( service.isValid() ) {
+	    service.setGroup("Service");
 	    QString nm = service.readEntry("Name");
 	    if ( nm.isEmpty() || service.readNumEntry("Multiple",0) ) {
 		// Not presented to users
 		svr = QString::null;
 	    } else {
-		setText(0,service.readEntry("Name"));
+		setText(0,nm);
 		icon = service.readEntry("Icon");
 	    }
 	} else if ( lnk ) {
@@ -61,7 +62,9 @@ public:
 		name = ap;//AppServices::tr("%1 (%2)").arg(lnk->name()).arg(ap);
 	    } else if ( name.find('/')>0 ) {
 		MimeType mt(name);
-		name = mt.extension().upper();
+		QString ext = mt.extension().upper();
+		if ( !ext.isEmpty() )
+		    name = ext;
 	    } // else not translated
 	    setText(0,AppServices::tr("Open %1").arg(name));
 	    icon = lnk->icon();
@@ -140,6 +143,7 @@ private:
 AppServices::AppServices( QWidget* parent,  const char* name, bool modal, WFlags fl )
     : AppServicesBase( parent, name, modal, fl )
 {
+    changed=FALSE;
     allapps=0;
     connect(lv,SIGNAL(clicked(QListViewItem*)),this,SLOT(check(QListViewItem*)));
     QTimer::singleShot(1,this,SLOT(loadState()));
@@ -149,7 +153,11 @@ void AppServices::check(QListViewItem* i)
 {
     if ( i && i->parent() ) {
 	// must be checkbox
-	((QCheckListItem*)i)->setOn(TRUE);
+	QCheckListItem* cli = (QCheckListItem*)i;
+	if ( !cli->isOn() ) {
+	    ((QCheckListItem*)i)->setOn(TRUE);
+	    changed = TRUE;
+	}
     }
 }
 
@@ -177,11 +185,9 @@ void AppServices::loadState()
 
     int max=-1;
     QDict<ASCheckListItem> servicedict;
-    QDict<ASCheckListItem> appdict;
 
 #define ADDAPP(si,lnk,ver) \
     ASCheckListItem* ai = new ASCheckListItem(si,lnk); \
-    appdict.insert(lnk->exec(),ai); \
     /*ai->setText(1,ver);*/ \
     ai->setPixmap(0,lnk->pixmap()); \
     if ( def == lnk->exec() ) { \
@@ -194,12 +200,15 @@ void AppServices::loadState()
 	QString sv=QPEApplication::qpeDir()+"services/"+(*it);
 	QDir dir(sv,QString::null,QDir::Name | QDir::IgnoreCase,QDir::Files);
 	QStringList apps = dir.entryList();
-	Config binding(Service::config(*it), Config::File);
-	binding.setGroup("Service");
 	ASCheckListItem* si = new ASCheckListItem(lv,(*it),0);
 	if ( si->isValid() ) {
+	    QString def;
+	    Config binding(Service::binding(*it));
+	    if ( binding.isValid() ) {
+		binding.setGroup("Service");
+		def = binding.readEntry("default");
+	    }
 	    servicedict.insert(*it,si);
-	    QString def = binding.readEntry("default");
 	    for (QStringList::ConstIterator ait = apps.begin(); ait!=apps.end(); ++ait) {
 		const AppLnk* lnk = allapps->findExec(*ait);
 		if ( lnk ) {
@@ -221,25 +230,25 @@ void AppServices::loadState()
     const QList<AppLnk> &c = allapps->children();
     const AppLnk* lnk;
     for (QListIterator<AppLnk> ai(c); (lnk=ai.current()); ++ai) {
-	if ( !appdict.find(lnk->exec()) ) {
-	    // Not a service-aware application
-	    QStringList types = lnk->mimeTypes();
-	    for (QStringList::ConstIterator ti=types.begin(); ti!=types.end(); ++ti) {
-		QString mt = *ti;
-		if ( mt.right(2)=="/*" )
-		    mt.truncate(mt.length()-2);
-		QString sv = "Open/"+mt;
-		ASCheckListItem* s = servicedict.find(sv);
-		if ( !s ) {
-		    s = new ASCheckListItem(lv,sv,lnk);
-		    servicedict.insert(sv,s);
-		    s->setOpen(TRUE);
-		}
-		Config binding(Service::config(sv), Config::File);
-		binding.setGroup("Service");
-		QString def = binding.readEntry("default");
-		ADDAPP(s,lnk,"1.00");
+	QStringList types = lnk->mimeTypes();
+	for (QStringList::ConstIterator ti=types.begin(); ti!=types.end(); ++ti) {
+	    QString mt = *ti;
+	    if ( mt.right(2)=="/*" )
+		mt.truncate(mt.length()-2);
+	    QString sv = "Open/"+mt;
+	    ASCheckListItem* s = servicedict.find(sv);
+	    if ( !s ) {
+		s = new ASCheckListItem(lv,sv,lnk);
+		servicedict.insert(sv,s);
+		s->setOpen(TRUE);
 	    }
+	    Config binding(Service::binding(sv));
+	    QString def;
+	    if ( binding.isValid() ) {
+		binding.setGroup("Service");
+		def = binding.readEntry("default");
+	    }
+	    ADDAPP(s,lnk,"1.00");
 	}
     }
 
@@ -301,20 +310,25 @@ AppServices::~AppServices()
 void AppServices::done(int y)
 {
     if ( y ) {
-	QListViewItem* s = lv->firstChild();
-	while ( s ) {
-	    ASCheckListItem* sv=(ASCheckListItem*)s;
-	    Config binding("Service-"+sv->service());
-	    binding.setGroup("Service");
-	    for (QListViewItem* a = s->firstChild(); a; a = a->nextSibling()) {
-		ASCheckListItem* ap=(ASCheckListItem*)a;
-		if ( ap->isOn() ) {
-		    binding.writeEntry("default",ap->application());
-		    break;
+	if ( changed ) {
+	    QListViewItem* s = lv->firstChild();
+	    while ( s ) {
+		ASCheckListItem* sv=(ASCheckListItem*)s;
+		for (QListViewItem* a = s->firstChild(); a; a = a->nextSibling()) {
+		    ASCheckListItem* ap=(ASCheckListItem*)a;
+		    if ( ap->isOn() && sv->childCount()>1 ) {
+			Config binding(Service::binding(sv->service()));
+			binding.setGroup("Service");
+			binding.writeEntry("default",ap->application());
+			break;
+		    }
 		}
+		s = s->nextSibling();
 	    }
-	    s = s->nextSibling();
 	}
+	// Could list, but server ignores at the moment
+	QCopEnvelope e("QPE/System","serviceChanged(QString)");
+	e << QString::null;
     }
     AppServicesBase::done(y);
     close();

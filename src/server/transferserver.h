@@ -22,9 +22,12 @@
 #include <qdir.h>
 #include <qfile.h>
 #include <qbuffer.h>
+#include <qlist.h>
 
 class QFileInfo;
 class QProcess;
+class ServerPI;
+
 class TransferServer : public QServerSocket
 {
     Q_OBJECT
@@ -34,6 +37,13 @@ public:
     virtual ~TransferServer();
 
     void newConnection( int socket );
+    void authorizeConnections();
+
+protected slots:
+    void closed(ServerPI *);
+
+private:
+    QList<ServerPI> connections;
 };
 
 class SyncAuthentication : QObject
@@ -94,9 +104,6 @@ private slots:
     void readyRead();
     void writeTargzBlock();
     void targzDone();
-
-    void tarExtractBlock();
-    void gunzipDone();
     void extractTarDone();
 
 private:
@@ -107,7 +114,6 @@ private:
     QBuffer buf;
     QProcess *createTargzProc;
     QProcess *retrieveTargzProc;
-    QProcess *gzipProc;
 };
 
 class ServerSocket : public QServerSocket
@@ -133,6 +139,11 @@ class ServerPI : public QSocket
 public:
     ServerPI( int socket, QObject *parent = 0, const char* name = 0 );
     virtual ~ServerPI();
+
+    bool verifyAuthorised();
+
+signals:
+    void connectionClosed(ServerPI *);
 
 protected slots:
     void read();

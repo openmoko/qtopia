@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/3rdparty/libraries/rsync/qrsync.cpp:10 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QRsync Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QRsync Class Reference</h1>
+
+<p>The QRsync class provides an interface to librsync.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qrsync-h.html">qrsync.h</a>&gt;</tt>
+<p><a href="qrsync-members.html">List of all member functions.</a>
+<h2>Static Public Members</h2>
+<ul>
+<li><div class=fn>void <a href="#generateSignature"><b>generateSignature</b></a> ( QString&nbsp;baseFile, QString&nbsp;sigFile )</div></li>
+<li><div class=fn>void <b>generateDiff</b> ( QString&nbsp;baseFile, QString&nbsp;sigFile, QString&nbsp;diffFile )</div></li>
+<li><div class=fn>void <a href="#applyDiff"><b>applyDiff</b></a> ( QString&nbsp;baseFile, QString&nbsp;deltaFile )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+ 
+The QRsync class provides an interface to librsync.
+<p> 
+QRsync links with librsync, which is distributed under the terms of the
+GNU Lesser General Public License. The primary copyright holders and
+and authors are Martin Pool &lt;mbp@samba.org&gt; and Andrew Tridgell 
+&lt;tridge@samba.org&gt;.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>void <a name="applyDiff"></a>QRsync::applyDiff ( <a href="qstring.html">QString</a>&nbsp;baseFile, <a href="qstring.html">QString</a>&nbsp;deltaFile )<tt> [static]</tt>
+</h3>
+Applys the diff in <em>deltaFile</em> to <em>baseFile</em>.
+
+<h3 class=fn>void <a name="generateSignature"></a>QRsync::generateSignature ( <a href="qstring.html">QString</a>&nbsp;baseFile, <a href="qstring.html">QString</a>&nbsp;sigFile )<tt> [static]</tt>
+</h3>
+Takes <em>baseFile</em> and generates a signature for it in <em>sigFile</em>.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

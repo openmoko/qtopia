@@ -95,16 +95,9 @@ struct QTOPIA_EXPORT QUuid
 	return !( *this == orig );
     }
 
-    inline bool operator<(const QUuid &orig) const
-    {
-	return ( memcmp(this, &orig, sizeof(QUuid)) < 0);
-    }
-    
-    inline bool operator>(const QUuid &orig) const
-    {
-	return ( memcmp(this, &orig, sizeof(QUuid) ) > 0);
-    }
-    
+    bool operator<(const QUuid &orig) const;
+    bool operator>(const QUuid &orig) const;
+
 #ifdef Q_OS_WIN32
     // On Windows we have a type GUID that is used by the platform API, so we
     // provide convenience operators to cast from and to this type.
@@ -137,16 +130,8 @@ struct QTOPIA_EXPORT QUuid
     
 #endif
 #if defined (Q_WS_QWS) && !defined(Q_OS_WIN32) 
-    QUuid( uuid_t uuid ) 
-    {
-	memcpy( this, uuid, sizeof(uuid_t) );
-    }
-
-    QUuid &operator=(const uuid_t &orig )
-    {
-	memcpy( this, &orig, sizeof(uuid_t) );
-	return *this;
-    }
+    QUuid( uuid_t uuid );
+    QUuid &operator=(const uuid_t &orig );
 #endif
     
     ulong   data1;

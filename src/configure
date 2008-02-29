@@ -39,6 +39,34 @@ then
 fi
 rm .test.qtopia.
 
+#other checks
+#TMAKE_VERSION=$(tmake -v 2>&1 | sed -n -e 's/^tmake: (Version [^\s]+)/$1/p');
+TMAKE_VERSION=$(tmake -v 2>&1 | sed -n -e 's/^tmake: Version//p' | sed 's/ (run.*$//')
+QMAKE_VERSION=$(qmake -v 2>&1 | sed -n -e 's/^Qmake version: //p' | sed 's/ (Qt.*$//')
+
+#check tmake version
+TMAKE_MAJ_VER=$(echo $TMAKE_VERSION | sed -e 's/\..*$//')
+TMAKE_MIN_VER=$(echo $TMAKE_VERSION | sed -e 's/^.*\.//')
+
+if [ -n "$TMAKE_MAJ_VER" ] ;
+then
+    if [ "$TMAKE_MAJ_VER" -lt 1 ] ; 
+    then
+	echo "tmake version needs to be at least 1.11"
+	exit -1;
+    fi
+    if [ -n "$TMAKE_MIN_VEa"] ;
+    then
+	if [ "$TMAKE_MIN_VER" -lt 11 ] ; 
+	then
+	    echo "tmake version needs to be at least 1.11"
+	    exit -1;
+	fi
+    fi 
+fi
+
+DEFAULTBUILD="dynamic"
+
 VERSION_MAJ=$(sed -n -e 's/.*QPE_VERSION "\([0-9]*\)\.[0-9]*\.[0-9]*.*".*/\1/p' <libraries/qtopia/version.h)
 VERSION_MIN=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.\([0-9]\)\.[0-9]*.*".*/\1/p' <libraries/qtopia/version.h)
 VERSION_PAT=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.[0-9]*\.\([0-9]*\).*".*/\1/p' <libraries/qtopia/version.h)
@@ -94,9 +122,24 @@ while [ -n "$1" ]; do
 	lupdateargs="$lupdateargs -noobsolete"
 	;;
    -qtopiadesktop)
+	# can only do this with both qmake and tmake
+	if [[ -z "$QMAKE_VERSION" || -z "$TMAKE_VERSION" ]]
+	then	
+	    echo "Both qmake and tmake are required to configure Qtopia Desktop."
+	    exit -1;
+	fi
 	QDESKTOP="/qdesktop"
 	ECONFIG="CONFIG+=qdesktop"
+	DEFAULTBUILD=desktop
         QT3=yes
+	V=$(awk '/define.QT_VERSION.*"/ { print $3 }' $QTDIR/include/qglobal.h)
+	case "$V" in
+	  \"3.*)
+	    true;
+	;; *)
+	    echo >&2 "\$QTDIR does not appear to be Qt 3 ($QTDIR - $V)"
+	    exit 1
+	esac
 	;;
    -qconfig)
 	# optional way to specify the qconfig-qtopia.h is to pass -qconfig qtopia
@@ -149,19 +192,21 @@ fi
 # Next, emit a usage message if something failed.
 
 if [ "$HELP" = "yes" ]; then
-    cat <<EOF
-Usage: $0 [-debug] [-release] [-shared] [-static] [-platform ...]
+	cat <<EOF
+	Usage: $0 [-debug] [-release] [-shared] [-static] [-platform ...]
 
-The defaults (*) are usually acceptable.  Here is a short explanation of
-each option:
+	The defaults (*) are usually acceptable.  Here is a short explanation of
+	each option:
 
- *  -release ........... Compile and link Qtopia with optimization turned on.
-    -debug ............. Compile and link Qtopia with debugging turned on.
+	 *  -release ........... Compile and link Qtopia with optimization turned on.
+	    -debug ............. Compile and link Qtopia with debugging turned on.
 
- *  -shared ............ Create and use shared Qtopia libraries.
-    -static ............ Create and use static Qtopia libraries.
+	 *  -shared ............ Create and use shared Qtopia libraries.
+	    -static ............ Create and use static Qtopia libraries.
 
-    -platform target ... The platform you are building on ($PLATFORM)
+	    -platform target ... The platform you are building on ($PLATFORM)
+
+	    -qtopiadesktop ..... Configure for Qtopia Desktop, not device Qtopia.
 EOF
    exit 0
 fi
@@ -200,11 +245,27 @@ mkdir -p ../include/qtopia/private
 # (Library order may change
 rm -f ../include/qtopia/*.h
 
+cat > Makefile <<EOF
+default: $DEFAULTBUILD
+
+EOF
+
+if [ -f ${QPEDIR}/src/Makefile.local ]
+then
+    cat ${QPEDIR}/src/Makefile.local >> Makefile
+fi
+
+cat Makefile.linux >> Makefile
+
 for LIBRARY in $(make showlibraries | grep -v '^make[^ ]*:')
 do
+    SRCDIR=../../src
     case $LIBRARY in
+     3rdparty/libraries/libavcodec)
+	;;
+     3rdparty/libraries/libavformat)
+	;;
      libraries/qtopia1)
-	SRCDIR=../../src
         ( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; \
 	for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;done )
 	;;
@@ -219,11 +280,11 @@ do
 	mkdir -p ../include/qtopia/$B
 	if [ -z "$B" ]
 	then
-	    ( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; \
-	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done )
+	    ( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; \
+	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done ; rm -f *_p.h )
 	else
-	    ( cd ../include/qtopia/$B && rm -f *.h; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; \
-	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done )
+	    ( cd ../include/qtopia/$B && rm -f *.h; ln -s $SRCDIR/$LIBRARY/*.h .; \
+	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done ; rm -f *_p.h )
 	fi
 	;;
     3rdparty/libraries/freetype)
@@ -234,11 +295,12 @@ do
 	for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $SRCDIR/$LIBRARY/$j .;done )
     esac
 done
-( cd ../include/qtopia/private && rm -f *.h; ln -s ../../../src/libraries/qtopia/*_p.h .; ln -s ../../../src/libraries/qtopia/backend/*.h .;)
+( cd ../include/qtopia/private && rm -f *.h; ln -s ../../../src/libraries/qtopia/*_p.h .; ln -s ../../../src/libraries/qtopia/backend/*.h .; \
+	for i in `ls ../../../src/libraries/qtopia/*_p.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done ; )
 if [ -d ../include/qtopia/pim ]
 then
     mkdir -p ../include/qtopia/pim/private
-    ( cd ../include/qtopia/pim/private && rm -f *.h; ln -s ../../../../src/libraries/qtopiapim/*_p.h .;)
+    ( cd ../include/qtopia/pim/private && rm -f *.h; ln -s ../../../../src/libraries/qtopiapim/*_p.h .; )
 fi
 
 
@@ -341,6 +403,8 @@ for a in $TOMAKE server; do
 		    # Qt dependancies, plugins, applications, libraries
 		    EXTRALIBS="-ljpeg -Wl,-Bstatic -Wl,-whole-archive $SERVERPLUGINS -Wl,-no-whole-archive -Wl,-Bdynamic $SERVERLIBS $EXTRALIBS"
 		fi
+		MOC_DIR=.moc
+		OBJECTS_DIR=.obj
 		tmake $MAGICPATH $STATIC $SINGLE $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
 		OBJECTS_DIR="\$(OBJECTS_DIR)" MOC_DIR="\$(MOC_DIR)" INCLUDEPATH+="\$(MOC_DIR)" \
 		    -t $H/qt/tmake/propagate.t $f.pro |
@@ -461,7 +525,14 @@ EOF
 		# Ignore for now. Some alpha optimizations exist, but we have no hardware to test against :(
 		PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
 		echo There are alpha optimizations for libffmpeg, but they have not been configured.
-	    ;;*powerpc*|*ppc*|*altivec*)
+	    ;;*powerpc*|*ppc*)
+		# For PowerPC without AltiVec optimizations
+		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -DHAVE_ALTIVEC=0"
+		SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_ppc.c ppc\\/mpegvideo_ppc.c \ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+	    ;;*altivec*)
 		# For PowerPC try to compile the AltiVec optimizations
 		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -faltivec -DHAVE_ALTIVEC=1"
 		SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_altivec.c ppc\\/dsputil_ppc.c ppc\\/idct_altivec.c ppc\\/mpegvideo_altivec.c ppc\\/mpegvideo_ppc.c \ /;"
@@ -616,8 +687,14 @@ EOF
 
 done
 
+if [ -n "$QDESKTOP" ]
+then
+    rm -f ../lib/libfreetype.so.6*  # It may get in the way if it exists
+    ( cd qtopiadesktop; ./configure -quiet; )
+fi
+
 MAKE=make
 echo
-echo "QPE is now configured for building. Just run $MAKE."
+echo "QPE is now configured for building. Just run \"$MAKE\"."
 echo "To reconfigure, run $MAKE clean and configure."
 echo

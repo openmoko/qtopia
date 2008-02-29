@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/calendar.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>calendar.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>calendar.h</h1>
+
+<p>This is the verbatim text of the calendar.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef CALENDAR_H
+#define CALENDAR_H
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qstring.h&gt;
+#include &lt;qvaluelist.h&gt;
+#include &lt;qdatetime.h&gt;
+
+class  QTOPIA_EXPORT Calendar
+{
+public:
+    // obsolete
+    struct Day
+    {
+	enum Type { PrevMonth, ThisMonth, NextMonth };
+	
+	Day() : date( 0 ), type( ThisMonth ), holiday( FALSE ) {}
+	Day( int d, Type t, bool h ) : date( d ), type( t ), holiday( h ) {}
+	
+	int date;
+	Type type;
+	bool holiday;
+    };
+    // obsolete
+    static QValueList&lt;Day&gt; daysOfMonth( int year, int month, bool startWithMonday = FALSE );
+
+    static QString nameOfMonth( int m );
+    static QString nameOfDay( int d );
+
+    // New functions
+    static QValueList&lt;QDate&gt; datesOfMonth( int year, int month, bool startWithMonday = FALSE ); // libqtopia
+
+    static QDate dateAtIndex( int year, int month, int index, 
+	    bool startWithMonday = FALSE); // libqtopia
+
+    static QDate dateAtCoord( int year, int month, int row, int col,
+	    bool startWithMonday = FALSE); // libqtopia
+
+    static void coordForDate( int year, int month, const QDate &amp;date, 
+	    int &amp;row, int &amp;col,
+	    bool startWithMonday = FALSE); // libqtopia
+
+    static int indexForDate( int year, int month, const QDate &amp;date,
+	    bool startWithMonday = FALSE); // libqtopia
+
+    static int weekInMonth(const QDate &amp;d); // libqtopia
+
+    static QDate addMonths(int nmonths, const QDate &amp;orig); // libqtopia
+    static QDate addYears(int nyears, const QDate &amp;orig); // libqtopia
+};
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

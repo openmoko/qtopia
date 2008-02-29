@@ -29,6 +29,7 @@
 #include <qdir.h>
 #include <stdlib.h>
 
+#ifdef Q_OS_WIN32
 /*
     Takes an absolute path which needs to exist.
     Creates all the intermediate paths up to that path as required.
@@ -63,6 +64,7 @@ static bool mkdirRecursive( QString path )
 
     return TRUE;
 }
+#endif
 
 class AppLnkPrivate
 {
@@ -109,7 +111,9 @@ static bool prepareDirectories(const QString& lf)
     return TRUE;
 }
 
-
+/*!
+  This function sets the location for an AppLnk to \a docPath.
+*/
 
 bool AppLnk::setLocation( const QString& docPath )
 {
@@ -168,6 +172,10 @@ bool AppLnk::setLocation( const QString& docPath )
     return success;
 }
 
+/*!
+  Returns an AppLnk that is a deep copy of \a copy.
+*/
+
 AppLnk& AppLnk::operator=(const AppLnk &copy)
 {
     if ( mId )
@@ -188,11 +196,14 @@ AppLnk& AppLnk::operator=(const AppLnk &copy)
     mMimeTypeIcons = copy.mMimeTypeIcons;
     mId = 0;
     d = new AppLnkPrivate();
-    d->mCat = copy.d->mCat;
+    d->mCat = copy.d->mCat.copy();
     d->mCatList = copy.d->mCatList;
     return *this;
 }
 
+/*!
+  Returns a DocLnk that is a deep copy of \a other.
+*/
 
 DocLnk & DocLnk::operator=(const DocLnk &other)
 {
@@ -200,7 +211,24 @@ DocLnk & DocLnk::operator=(const DocLnk &other)
     return *this;
 }
 
+/*!
+  Returns TRUE if the AppLnk is a DocLnk.
+*/
+
 bool AppLnk::isDocLnk() const
 {
     return type().contains('/'); // ###### need better predicate
+}
+
+void AppLnkSet::clear()
+{
+    QListIterator<AppLnk> it( mApps );
+    for ( ; it.current(); ) {
+	AppLnk* a = *it;
+	++it;
+	a->mId = 0;
+	delete a;
+    }
+    mApps.clear();
+    typs.clear();
 }

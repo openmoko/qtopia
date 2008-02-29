@@ -70,7 +70,6 @@ void ClipboardApplet::action(int i)
     ushort unicode=0;
     int scan=0;
 
-qDebug("%d",i);
     if ( i == 0 )
 	{ unicode='X'-'@'; scan=Key_X; } // Cut
     else if ( i == 1 )
@@ -79,7 +78,6 @@ qDebug("%d",i);
 	{ unicode='V'-'@'; scan=Key_V; } // Paste
 
     if ( scan ) {
-qDebug("U%04d %d %d",unicode, scan, ControlButton);
 	qwsServer->processKeyEvent( unicode, scan, ControlButton, TRUE, FALSE );
 	qwsServer->processKeyEvent( unicode, scan, ControlButton, FALSE, FALSE );
     }

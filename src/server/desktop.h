@@ -124,6 +124,7 @@ public:
 
 public slots:
     void appMessage(const QCString& message, const QByteArray& data);
+    void systemMsg(const QCString &, const QByteArray &);
     void raiseMenu();
     void raiseLauncher();
     void togglePower();
@@ -138,6 +139,7 @@ public slots:
 
 private slots:
     void activate(const DeviceButton*,bool);
+    void syncConnectionClosed( const QHostAddress & );
 
 protected:
     void styleChange( QStyle & );
@@ -155,6 +157,9 @@ private:
     QCopBridge *qcopBridge;
     TransferServer *transferServer;
     PackageHandler *packageHandler;
+    QDate last_today_show;
+    int tid_xfer;
+    int tid_today;
 
     bool keyclick,touchclick;
 };

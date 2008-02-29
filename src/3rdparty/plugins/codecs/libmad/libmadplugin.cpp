@@ -51,6 +51,17 @@ extern "C" {
 //#define debugMsg(a)	    qDebug(a)
 #define debugMsg(a)
 
+/*!
+  \class LibMadPlugin libmadplugin.h
+  \brief The LibMadPlugin class is a wrapper for the libmad library.
+
+  \legalese
+
+  The libmad library is distributed under the terms of the GNU General Public License,
+  Version 2.
+  The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
+  More information about the Mad library can be found at http://www.mars.org/home/rob/proj/mpeg/
+*/
 
 class Input {
 public:

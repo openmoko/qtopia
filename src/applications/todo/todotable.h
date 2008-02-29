@@ -43,7 +43,7 @@ class TodoTable : public QTable
     Q_OBJECT
 
 public:
-    TodoTable( const SortedTasks &tasks, QWidget *parent = 0, const char * name = 0, const char *appPath=0 );
+    TodoTable( TodoXmlIO *tasks, QWidget *parent = 0, const char * name = 0, const char *appPath=0 );
     ~TodoTable();
 
     void clearFindRow() { currFindRow = -2; }
@@ -85,7 +85,7 @@ public:
 
 public slots:
     void slotDoFind( const QString &findString, int category );
-    void reload(const SortedTasks &tasks);
+    void reload();
     void fitHeadersToWidth();
 
 signals:
@@ -111,6 +111,7 @@ protected:
     void contentsMousePressEvent( QMouseEvent *e );
     void contentsMouseReleaseEvent( QMouseEvent *e );
     void resizeEvent( QResizeEvent *e );
+    void showEvent( QShowEvent *e);
 
     int rowHeight( int ) const;
     int rowPos( int row ) const;
@@ -147,7 +148,7 @@ private:
     Categories mCat;
     int currFindRow;
     
-    SortedTasks mTasks;
+    TodoXmlIO *mTasks;
     QStringList categoryList;
     QTimer *menuTimer;
     QString currFindString;
@@ -158,6 +159,7 @@ private:
 
     TablePrivate *d;
     int mSortColumn;
+    bool ascSort;
 };
 
 #endif

@@ -39,6 +39,7 @@
 #include <qtimer.h>
 #include <qwindowsystem_qws.h>
 #include <qmessagebox.h>
+#include <qfile.h>
 
 #include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/applnk.h>
@@ -49,8 +50,21 @@
 #include "applauncher.h"
 
 static AppLauncher* appLauncherPtr;
-static int sigStatus = 0;
-static int sigPid = 0;
+
+const int appStopEventID = 1290;
+
+class AppStoppedEvent : public QCustomEvent
+{
+public:
+    AppStoppedEvent(int pid, int status)
+	: QCustomEvent( appStopEventID ), mPid(pid), mStatus(status) { }
+    
+    int pid() { return mPid; }
+    int status() { return mStatus; }
+
+private:
+    int mPid, mStatus;
+};
 
 AppLauncher::AppLauncher(const AppLnkSet *as, QObject *parent, const char *name)
     : QObject(parent, name), appLnkSet(as)
@@ -84,6 +98,7 @@ void AppLauncher::newQcopChannel(const QString& channelName)
     QString prefix("QPE/Application/");
     if (channelName.startsWith(prefix)) {
 	QString appName = channelName.mid(prefix.length());
+	emit connected( appName );
 	QCopEnvelope e("QPE/System", "notBusy(QString)");
 	e << appName;
     }
@@ -103,6 +118,13 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 	stream >> t >> d;
 	if ( !executeBuiltin( t, d ) )
 	    execute( t, d );
+    } else if ( msg == "sendRunningApps()" ) {
+	QStringList apps;
+	QMap<int,QString>::Iterator it;
+        for( it = runningApps.begin(); it != runningApps.end(); ++it )
+	    apps.append( *it );
+	QCopEnvelope e( "QPE/Desktop", "runningApps(QStringList)" );
+	e << apps;
     }
 }
 
@@ -110,18 +132,25 @@ void AppLauncher::signalHandler(int)
 {
     int status;
     pid_t pid = waitpid(-1, &status, WNOHANG);
-    if (pid == 0 || &status == 0 ) {
+/*    if (pid == 0 || &status == 0 ) {
 	qDebug("hmm, could not get return value from signal");
     }
-    
-    sigPid = pid;
-    sigStatus = status;
-
-    if ( appLauncherPtr )
-	QTimer::singleShot(0, appLauncherPtr, SLOT(sigStopped()) );
+*/
+    QApplication::postEvent(appLauncherPtr, new AppStoppedEvent(pid, status) );
 }
 
-void AppLauncher::sigStopped()
+bool AppLauncher::event(QEvent *e)
+{
+    if ( e->type() == appStopEventID ) {
+	AppStoppedEvent *ae = (AppStoppedEvent *) e;
+	sigStopped(ae->pid(), ae->status() );
+	return TRUE;
+    }
+    
+    return QObject::event(e);
+}
+
+void AppLauncher::sigStopped(int sigPid, int sigStatus)
 {
     int exitStatus = 0;
     
@@ -135,14 +164,20 @@ void AppLauncher::sigStopped()
 
     QMap<int,QString>::Iterator it = runningApps.find( sigPid );
     if ( it == runningApps.end() ) {
+/*
 	if ( sigPid == -1 )
 	    qDebug("non-qtopia application exited (disregarded)");
 	else
 	    qDebug("==== no pid matching %d in list, definite bug", sigPid);
-
+*/
 	return;
     }
     QString appName = *it;
+    runningApps.remove(it);
+
+    // Remove any unprocessed QCop input, as that would otherwise
+    // prevernt QCopEnvelope from starting the app.
+    QFile::remove("/tmp/qcop-msg-" + appName);
 
     /* we must disable preload for an app that crashes as the system logic relies on preloaded apps
        actually being loaded.  If eg. the crash happened in the constructor, we can't automatically reload
@@ -163,7 +198,6 @@ void AppLauncher::sigStopped()
     }
 
     // clean up 
-    runningApps.remove(it);
     if ( exitStatus ) {
 	QCopEnvelope e("QPE/System", "notBusy(QString)");
 	e << app->exec();
@@ -196,7 +230,7 @@ void AppLauncher::sigStopped()
 	if ( preloadDisabled )
 	    sig += tr("<qt><p>Fast loading has been disabled for this application.  Tap and hold the application icon to reenable it.</qt>");
 	
-	QString str = tr("<qt><b>%1</b> was termimated due to signal code %2</qt>").arg( app->name() ).arg( sig );
+	QString str = tr("<qt><b>%1</b> was terminated due to signal code %2</qt>").arg( app->name() ).arg( sig );
 	QMessageBox::information(0, tr("Application terminated"), str );
     } else {
 	if ( exitStatus == 255 ) {  //could not find app (because global returns -1)
@@ -214,8 +248,17 @@ void AppLauncher::sigStopped()
 bool AppLauncher::isRunning(const QString &app)
 {
     for (QMap<int,QString>::ConstIterator it = runningApps.begin(); it != runningApps.end(); ++it) {
-	if ( *it == app )
+	if ( *it == app ) {
+#ifdef Q_OS_UNIX
+	    pid_t t = ::__getpgid( it.key() );
+	    if ( t == -1 ) {
+		qDebug("appLauncher bug, %s believed running, but pid %d is not existing", app.data(), it.key() );
+		runningApps.remove( it.key() );
+		return FALSE;
+	    }
+#endif
 	    return TRUE;
+	}
     }
 
     return FALSE;
@@ -315,7 +358,7 @@ void AppLauncher::execute(const QString &c, const QString &docParam)
 	    ::execvp( args[0], (char * const *)args );
 	    _exit( -1 );
 	}
-	
+
 	runningApps[pid] = QString(args[0]);
 	emit launched(pid, QString(args[0]));
     }

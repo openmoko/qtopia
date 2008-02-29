@@ -1,0 +1,5 @@
+class GSM
+{
+public:
+    GSM();
+}

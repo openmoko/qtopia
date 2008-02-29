@@ -313,9 +313,30 @@ void DatePickerTable::setupLabels()
 
 
 //---------------------------------------------------------------------------
-QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name, bool ac)
-    : QVBox( parent, name ),
-      autoClose( ac )
+
+/*!
+  \class QPEDatePicker datepicker.h
+  \brief The QPEDatePicker class allows a date to be selected from a
+  calendar view.
+
+  QPEDatePicker comprises a header to select month and year and a
+  calendar view to select the date.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  \fn void QPEDatePicker::dateClicked( const QDate &date );
+
+  This signal is emitted when a date in the calendar is clicked.
+  \a date contains the date that was clicked 
+*/
+
+/*!
+  Constructs a QPEDatePicker.
+*/
+QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name)
+    : QVBox( parent, name )
 {
     year = 1970;		// Default to epoch.
     month = 1;
@@ -340,6 +361,9 @@ QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name, bool ac)
     setFocus();
 }
 
+/*!
+  Destructs QPEDatePicker.
+*/
 QPEDatePicker::~QPEDatePicker()
 {
 
@@ -354,6 +378,13 @@ void QPEDatePicker::paintCell(int row, int col, QPainter * p,
     paintDay(cDay, p, cr, cg);
 }
 
+/*!
+  Paints a single day \a cDay in the calendar using \a p.  The cell
+  geometry is \a cr.
+
+  The default implementation draws the day of the month in the top left
+  corner of the cell.
+*/
 void QPEDatePicker::paintDay(const QDate &cDay, QPainter *p, const QRect &cr,
 	const QColorGroup &cg)
 {
@@ -394,6 +425,12 @@ void QPEDatePicker::paintDay(const QDate &cDay, QPainter *p, const QRect &cr,
     p->restore();
 }
 
+/*!
+  Paints the background of a single day in the calendar using \a p.
+  The cell geometry is \a cr.
+
+  The default implementation fills with the base color.
+*/
 void QPEDatePicker::paintDayBackground(const QDate &, QPainter *p,
 	const QRect &cr, const QColorGroup &cg)
 {
@@ -401,16 +438,28 @@ void QPEDatePicker::paintDayBackground(const QDate &, QPainter *p,
 	    cg.brush( QColorGroup::Base ) );
 }
 
+/*!
+  Returns TRUE if the beginning of the week is Monday.
+
+  \sa setWeekStartsMonday()
+*/
 bool QPEDatePicker::weekStartsMonday() const
 {
     return table->weekStartsMonday();
 }
 
+/*! \internal
+*/
 void QPEDatePicker::updateContents()
 {
     table->updateContents();
 }
 
+/*!
+  Sets the selected date to year \a y and month \a m.  The current day of
+  the month is retained unless it falls outside the number of days in the
+  selected date.
+*/
 void QPEDatePicker::setDate( int y, int m )
 {
     /* only change the date if this is a different date,
@@ -424,6 +473,9 @@ void QPEDatePicker::setDate( int y, int m )
     }
 }
 
+/*!
+  Sets the current date to year \a y, month \a m and day \a d.
+*/
 void QPEDatePicker::setDate( int y, int m, int d )
 {
     setDate(QDate(y, m, d));
@@ -435,9 +487,6 @@ void QPEDatePicker::calendarClicked(int r, int c)
     calendarChanged(r, c);
 
     emit dateClicked(QDate(year, month, day));
-
-    if ( autoClose && parentWidget() )
-	parentWidget()->close();
 }
 
 void QPEDatePicker::calendarChanged(int r, int c)
@@ -445,6 +494,9 @@ void QPEDatePicker::calendarChanged(int r, int c)
     setDate( Calendar::dateAtCoord(year, month, r, c, table->weekStartsMonday()) );
 }
 
+/*!
+  Sets the selected date to \a d.
+*/
 void QPEDatePicker::setDate( const QDate &d )
 {
     if (year != d.year() || month != d.month()) {
@@ -461,6 +513,9 @@ void QPEDatePicker::setDate( const QDate &d )
     table->setCurrentCell(r,c);
 }
 
+/*!
+  Returns the selected date.
+*/
 QDate  QPEDatePicker::selectedDate() const
 {
     if ( !table )
@@ -468,11 +523,20 @@ QDate  QPEDatePicker::selectedDate() const
     return QDate( year, month, day );
 }
 
+/*!
+  Display the calendar with weeks starting on Monday if \a startMonday is
+  TRUE, otherwise weeks start with Sunday.
+
+  \sa weekStartsMonday()
+*/
 void QPEDatePicker::setWeekStartsMonday( bool startMonday )
 {
     table->setWeekStartsMonday( startMonday );
 }
 
+/*!
+  \internal
+*/
 void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 {
     switch(e->key()) {
@@ -491,8 +555,6 @@ void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 	case Key_Space:
 	    qWarning("space");
 	    emit dateClicked(QDate(year, month, day));
-	    if ( autoClose && parentWidget() )
-		parentWidget()->close();
 	    break;
 	default:
 	    qWarning("ignore");

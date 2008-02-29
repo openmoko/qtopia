@@ -41,7 +41,8 @@ HEADERS		+= desktop.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
-	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
+	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
+		  syncdialog.h
 #		  quicklauncher.h \
 
 SOURCES		+= desktop.cpp \
@@ -89,10 +90,10 @@ SOURCES		+= desktop.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
-	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
+	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
+		  syncdialog.cpp
 
-INTERFACES	+= shutdown.ui \
-		syncdialog.ui
+INTERFACES	+= shutdown.ui
 
 INCLUDEPATH += $(QPEDIR)/src/settings/calibrate
 DEPENDPATH	+= $(QPEDIR)/src/settings/calibrate

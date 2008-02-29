@@ -21,10 +21,24 @@
 #include "qpemessagebox.h"
 #include <qmessagebox.h>
 
+#include <qapplication.h>
+
+/*!
+  \class QPEMessageBox qpemessagebox.h
+  \brief A message box that provides yes, no and cancel options.
+
+  \ingroup qtopiaemb
+ */
+
+/*!
+  Displays a QMessageBox with parent \a parent and caption \a caption.
+  The message displayed is "Are you sure you want to delete: ",
+  followed by \a object.  
+ */
 bool QPEMessageBox::confirmDelete( QWidget *parent, const QString & caption,
 			       const QString & object )
 {
-    QString msg = QObject::tr("<qt>Are you sure you want to delete: %1?</qt>").arg( object );
+    QString msg = "<qt>" + qApp->translate( "QPEMessageBox", "Are you sure you want to delete: %1?").arg( object ) + "</qt>";
     int r = QMessageBox::warning( parent, caption, msg, QMessageBox::Yes,
 				  QMessageBox::No|QMessageBox::Default|
 				  QMessageBox::Escape, 0 );

@@ -42,6 +42,7 @@
 #include <qtabwidget.h>
 #include <qregexp.h>
 #include <qwhatsthis.h>
+#include <qmessagebox.h>
 
 #ifdef QTOPIA_DESKTOP
 #include <qtextedit.h>
@@ -365,6 +366,7 @@ void AbEditor::setCategory(int id)
 
 void AbEditor::init()
 {
+    quitExplicitly = FALSE;
     // setup which fields go in which tabs and in which order; this is done first since it is
     // most likely to change and we can calculate the QGridLayout num rows for each tab
 
@@ -372,10 +374,11 @@ void AbEditor::init()
     QValueList<int> personalTabKeys;
     personalTabKeys.append( PimContact::NameTitle );
     personalTabKeys.append( PimContact::FirstName );
+    personalTabKeys.append( PimContact::FirstNamePronunciation );
     personalTabKeys.append( PimContact::MiddleName );
     personalTabKeys.append( PimContact::LastName );
+    personalTabKeys.append( PimContact::LastNamePronunciation );
     personalTabKeys.append( PimContact::Suffix );
-    personalTabKeys.append( PimContact::Pronunciation );
     personalTabKeys.append( PimContact::Nickname );
     personalTabKeys.append( PimContact::FileAs );
     personalTabKeys.append( PimContact::Categories );
@@ -386,6 +389,7 @@ void AbEditor::init()
     // business tab keys
     QValueList<int> businessTabKeys;
     businessTabKeys.append( PimContact::Company );
+    businessTabKeys.append( PimContact::CompanyPronunciation );
     businessTabKeys.append( PimContact::JobTitle );
     businessTabKeys.append( PimContact::BusinessPhone );
     businessTabKeys.append( PimContact::BusinessFax );
@@ -481,7 +485,7 @@ void AbEditor::init()
     bottomBox->addWidget( cancelButton );
 #endif
 
-    QWhatsThis::add(lineEdits[PimContact::Pronunciation],
+    QWhatsThis::add(lineEdits[PimContact::FirstNamePronunciation],
 	tr("Describes the spoken name phonetically."));
     QWhatsThis::add(lineEdits[PimContact::Spouse],
 	tr("e.g. Husband or Wife."));
@@ -651,6 +655,28 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 	    // this is taken care of later; don't want to create a line edit for it
 	    editor = 0;
 	    break;
+	case PimContact::HomeStreet:
+	    {
+	    homeStreetEdit = new QMultiLineEdit( container );
+	    homeStreetEdit->setWordWrap(QMultiLineEdit::WidgetWidth);
+	    int fontSize = homeStreetEdit->font().pixelSize();
+	    if (fontSize <= 1)
+		fontSize = 10;
+	    homeStreetEdit->setMaximumHeight(fontSize*4);
+	    editor = homeStreetEdit;
+	    }
+	    break;
+	case PimContact::BusinessStreet:
+	    {
+	    businessStreetEdit = new QMultiLineEdit( container );
+	    businessStreetEdit->setWordWrap(QMultiLineEdit::WidgetWidth);
+	    int fontSize = businessStreetEdit->font().pixelSize();
+	    if (fontSize <= 1)
+		fontSize = 10;
+	    businessStreetEdit->setMaximumHeight(fontSize*4);
+	    editor = businessStreetEdit;
+	    }
+	    break;
 	default:
 	{
 	    QLineEdit *lineedit = new QLineEdit( container );
@@ -659,7 +685,7 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 		     fileAsCombo, SLOT( autoUpdate() ) );
 	    editor = lineedit;
 	}
-	break;
+	    break;
 	};
 
 	if ( editor ) {
@@ -689,6 +715,7 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 
 void AbEditor::setEntry( const PimContact &entry )
 {
+    quitExplicitly = FALSE;
     ent = entry;
 
     // do this first, so then we can ignore the rest of the line edits change events
@@ -715,8 +742,17 @@ void AbEditor::setEntry( const PimContact &entry )
 	    break;
 	case PimContact::Gender:
 	{
-	    QString gender = ent.gender();
-	    genderCombo->setCurrentItem( gender.toInt() );
+	    switch ( ent.gender() ) {
+	    case PimContact::UnspecifiedGender :
+		genderCombo->setCurrentItem( 0 );
+		break;
+	    case PimContact::Male:
+		genderCombo->setCurrentItem( 1 );
+		break;
+	    case PimContact::Female:
+		genderCombo->setCurrentItem( 2 );
+		break;
+	    }
 	}
 	    break;
 	case PimContact::NameTitle:
@@ -733,6 +769,12 @@ void AbEditor::setEntry( const PimContact &entry )
 	    break;
 	case PimContact::Notes:
 	    txtNote->setText( ent.notes() );
+	    break;
+	case PimContact::HomeStreet:
+	    homeStreetEdit->setText( ent.homeStreet() );
+	    break;
+	case PimContact::BusinessStreet:
+	    businessStreetEdit->setText( ent.businessStreet() );
 	    break;
 	case PimContact::Birthday:
 	    bdayButton->setDate( ent.birthday() );
@@ -781,13 +823,13 @@ void AbEditor::setEntry( const PimContact &entry )
 	    case PimContact::Suffix:
 		le->setText( ent.suffix() );
 		break;
-	    case PimContact::Pronunciation:
-		le->setText( ent.pronunciation() );
+	    case PimContact::FirstNamePronunciation:
+		le->setText( ent.firstNamePronunciation() );
+		break;
+	    case PimContact::LastNamePronunciation:
+		le->setText( ent.lastNamePronunciation() );
 		break;
             // home
-	    case PimContact::HomeStreet:
-		le->setText(ent.homeStreet() );
-		break;
 	    case PimContact::HomeCity:
 		le->setText( ent.homeCity() );
 		break;
@@ -817,8 +859,8 @@ void AbEditor::setEntry( const PimContact &entry )
 	    case PimContact::Company:
 		le->setText( ent.company() );
 		break;
-	    case PimContact::BusinessStreet:
-		le->setText( ent.businessStreet() );
+	    case PimContact::CompanyPronunciation:
+		le->setText( ent.companyPronunciation() );
 		break;
 	    case PimContact::BusinessCity:
 		le->setText( ent.businessCity() );
@@ -883,15 +925,43 @@ void AbEditor::setEntry( const PimContact &entry )
     fileAsCombo->reload();
 }
 
+void AbEditor::closeEvent(QCloseEvent *e)
+{
+#ifdef QTOPIA_DESKTOP
+    PimContact current;
+    contactFromFields(current);
+    if ( !quitExplicitly && ent.toRichText() != current.toRichText() 
+	 && QMessageBox::warning(this, tr("Contacts"), 
+				 tr("Discard changes?"),
+				 QMessageBox::Yes, 
+				 QMessageBox::No) == QMessageBox::No )
+
+	e->ignore();
+    else
+	QDialog::closeEvent(e);
+#else 
+    QDialog::closeEvent(e);
+#endif
+    quitExplicitly = FALSE;
+}
+
 void AbEditor::accept()
 {
-    if ( isEmpty() )
+    quitExplicitly = TRUE;
+    if ( isEmpty() ) {
 	reject();
-    else {
+    } else {
 	contactFromFields(ent);
 	QDialog::accept();
     }
 }
+
+void AbEditor::reject()
+{
+    quitExplicitly = TRUE;    
+    QDialog::reject();
+}
+
 
 bool AbEditor::isEmpty()
 {
@@ -916,15 +986,25 @@ void AbEditor::contactFromFields(PimContact &e)
 {
 
     int gender = genderCombo->currentItem();
-    e.setGender( QString::number( gender ) );
+    switch( gender ) {
+    case 0: e.setGender( PimContact::UnspecifiedGender ); break;
+    case 1: e.setGender( PimContact::Male ); break;
+    case 2: e.setGender( PimContact::Female ); break;
+    }
 
     e.setNameTitle( titleCombo->currentText() );
     e.setSuffix( suffixCombo->currentText() );
-    e.setFileAs( fileAsCombo->currentText() );
+    QString tmpFileAs = fileAsCombo->currentText();
+    if (tmpFileAs.isEmpty()) {
+	tmpFileAs = fileAsCombo->text(0);
+    }
+    e.setFileAs( tmpFileAs );
     e.setBirthday( bdayButton->date() );
     e.setAnniversary( anniversaryButton->date() );
     e.setCategories( cmbCat->currentCategories() );
     e.setNotes( txtNote->text() );
+    e.setHomeStreet (homeStreetEdit->text());
+    e.setBusinessStreet (businessStreetEdit->text());
 
     QString strDefaultEmail;
     QStringList emails;
@@ -947,13 +1027,13 @@ void AbEditor::contactFromFields(PimContact &e)
 	case PimContact::LastName:
 	    e.setLastName( str );
 	    break;
-	case PimContact::Pronunciation:
-	    e.setPronunciation( str );
+	case PimContact::FirstNamePronunciation:
+	    e.setFirstNamePronunciation( str );
+	    break;
+	case PimContact::LastNamePronunciation:
+	    e.setLastNamePronunciation( str );
 	    break;
 	    // home
-	case PimContact::HomeStreet:
-	    e.setHomeStreet( str );
-	    break;
 	case PimContact::HomeCity:
 	    e.setHomeCity( str );
 	    break;
@@ -983,8 +1063,8 @@ void AbEditor::contactFromFields(PimContact &e)
 	case PimContact::Company:
 	    e.setCompany( str );
 	    break;
-	case PimContact::BusinessStreet:
-	    e.setBusinessStreet( str );
+	case PimContact::CompanyPronunciation:
+	    e.setCompanyPronunciation( str );
 	    break;
 	case PimContact::BusinessCity:
 	    e.setBusinessCity( str );
@@ -1060,6 +1140,7 @@ void AbEditor::setNameFocus()
 void parseEmailFrom( const QString &txt, QString &strDefaultEmail,
 		     QStringList &all )
 {
+    //qDebug( "parseEmailFrom <%s> def <%s>", txt.latin1(), strDefaultEmail.latin1() );
     all.clear();
     strDefaultEmail = "";
 
@@ -1087,6 +1168,12 @@ void parseEmailTo( const QString &strDefaultEmail,
 	return ;
     }
 
+    if ( !strDefaultEmail.isEmpty() && strDefaultEmail == allEmails.join( " " ) ) {
+	//handle imported single addresses with spaces in them:
+	strBack = strDefaultEmail;
+	return; 
+    }
+
     QStringList emails = allEmails;
     // make sure the default email is first
 
@@ -1110,5 +1197,18 @@ void parseEmailTo( const QString &strDefaultEmail,
     strBack = emails.join(", ");
 }
 
+#ifdef QTOPIA_DESKTOP
+void AbEditor::updateCategories()
+{
+    if ( !cmbCat )
+	return;
+
+    connect( this, SIGNAL( categoriesChanged() ),
+	     cmbCat, SLOT( categoriesChanged() ) );
+    emit categoriesChanged();
+    disconnect( this, SIGNAL( categoriesChanged() ),
+		cmbCat, SLOT( categoriesChanged() ) );
+}
+#endif
 
 #include "abeditor.moc"

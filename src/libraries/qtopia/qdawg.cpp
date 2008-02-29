@@ -221,6 +221,7 @@ class QDawgPrivate {
 public:
     QDawgPrivate(QIODevice* dev)
     {
+	memoryFile = 0;
 	QDataStream ds(dev);
 	char sig[8];
 	ds.readRawBytes(sig,8);
@@ -270,6 +271,7 @@ public:
 
     QDawgPrivate(QTrie* t) // destroys the QTrie.
     {
+	memoryFile = 0;
 	TrieClubDirectory directory(9973);
 	t->distributeKeys(directory);
 	QTrie* l = t->clubLeader(directory);
@@ -555,6 +557,12 @@ bool QDawg::read(QIODevice* dev)
 
 /*!
   Writes the DAWG to \a dev, in a custom QDAWG format.
+
+  \warning QDawg memory maps DAWG files.
+  The safe method for writing to DAWG files is to
+  write the data to a new file and move the new
+  file to the old file name. QDawgs using the old
+  file will continue using that file.
 */
 bool QDawg::write(QIODevice* dev) const
 {

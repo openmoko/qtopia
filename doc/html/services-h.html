@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/services.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>services.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>services.h</h1>
+
+<p>This is the verbatim text of the services.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#ifndef SERVICES_H
+#define SERVICES_H
+
+#include &lt;qtopia/applnk.h&gt;
+#include &lt;qdatastream.h&gt;
+#include &lt;qbuffer.h&gt;
+
+class QTOPIA_EXPORT Service {
+public:
+    static QStringList list();
+    static QString binding(const QString&amp; service);
+    static QStringList apps(const QString&amp; service, bool automatics=TRUE);
+    static QString app(const QString&amp; service, const QString&amp; appname=QString::null,
+		bool automatics=TRUE);
+    static QString appConfig(const QString&amp; service, const QString&amp; appname=QString::null,
+		bool automatics=TRUE);
+    static QString config(const QString&amp; service);
+    static QStrList channels(const QString&amp; service, bool automatics=TRUE);
+    static QCString channel(const QString&amp; service, const QString&amp; appname=QString::null,
+		bool automatics=TRUE);
+    static AppLnk appLnk( const QString&amp; service, const QString&amp; appname=QString::null,
+		bool automatics=TRUE);
+};
+
+class QTOPIA_EXPORT ServiceRequest : public QDataStream {
+public:
+    ServiceRequest();
+    ServiceRequest(const QString&amp; service, const QCString&amp; message);
+    ServiceRequest(const ServiceRequest&amp; orig);
+    ~ServiceRequest();
+
+    bool send() const;
+    bool isNull() const;
+
+    void setService(const QString&amp; service);
+    QString service() const { return m_Service; }
+    QStrList channels(bool automatics=TRUE) const;
+    QCString channel(const QString&amp; appname=QString::null,
+                bool automatics=TRUE) const;
+    QStringList apps(bool automatics=TRUE) const;
+    QString app(const QString&amp; appname=QString::null,
+                bool automatics=TRUE) const;
+    void setMessage(const QCString&amp; message);
+    QCString message() const { return m_Message; }
+    const QByteArray data() const;
+
+    ServiceRequest&amp; operator=(const ServiceRequest&amp; orig);
+
+private:
+    QString m_Service;
+    QCString m_Message;
+};
+
+inline bool operator==( const ServiceRequest &amp;m1, const ServiceRequest &amp;m2 )
+{
+    return m1.service() == m2.service() &amp;&amp; m1.message() == m2.message()
+	    &amp;&amp; m1.data() == m2.data();
+}
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

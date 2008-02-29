@@ -479,4 +479,12 @@
         <translation>ヘルプ</translation>
     </message>
 </context>
+<context>
+    <name>TimeStringFormat1</name>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=12:45</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

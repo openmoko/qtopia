@@ -1,129 +1,1363 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Address Book Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Address Book Test List</h1>
-
-<p>
-When testing, it is important to check that changes are
-recorded not just when the change is made, but also that it
-persists after stopping and restarting the application. Check
-that the application is not fast-loaded prior to testing storage.
-
-<p>
-Non-ASCII and non-Latin-1 characters should be tested.
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond 1-to-1 with features
-
-    Note: TITLEs may be used as identifiers in bug reports.
--->
-
-<h3>Add Contact</h3>
-<ol>
- <li>Click <img src=pics/new>.
- <li>Type in First and Last name. Check to see the File As field is getting
-	automatically set appropriately.
- <li>Enter in something for every field. Confirm every field is being loaded
-	and saved correctly.
- <li>Click OK.
- <li>Check that item is added.
-</ol>
-
-<h3>Edit File As </h3>
-<ol>
- <li>Click <img src=pics/edit> for an existing contact.
- <li>Edit the file as to be something different, such as "My file as".
- <li>Edit any name field. The file as should <i>not</i> get updated.
- <li>Use the chooser and select the first field in the combo chooser for the
-	  file as. 
- <li>Enter the name. The file as should auto update.
- <li>Check that item is edited correctly.
-</ol>
-
-<h3>Add Contact - Empty</h3>
-<ol>
- <li>Click <img src=pics/new>.
- <li>Enter details, but no description.
- <li>Click OK.
- <li>Check that item is <i>not</i> added.
-</ol>
-
-
-<h3>Delete Contact</h3>
-<ol>
- <li>Click <img src=pics/trash>.
- <li>Check that prompt is correct.
- <li>Click OK.
- <li>Check that item is gone.
-</ol>
-
-<h3>Categories</h3>
-<ol>
- <li>Optionally, click on a contact.
- <li>Click on <img src=pics/edit>.
- <li>Choose a category from the combobox.
- <li>Click OK.
- <li>Check that item is now recorded as having chosen category.
-</ol>
-
-<h3>Categories - Multiple</h3>
-<ol>
- <li>Optionally, click on a contact.
- <li>Click on <img src=pics/edit>.
- <li>Choose "..." to right of category combobox.
- <li>Choose multiple categories by clicking checkboxes.
- <li>Click OK.
- <li>Check that item is now recorded as having chosen categories,
-	showing "&lt;first category&gt; (Multi.)" in combobox.
-</ol>
-
-<h3>Date fields</h3>
-<ol>
- <li> Check to make sure that you can select both none for information dates
-	and that setting a date works correctly (the same date is seen after
-	reloading). Note that the dates do <i>not</i> show up in the Calendar
-	application yet.
-</ol>
-
-<h3>Beam</h3>
-<ol>
- <li>Check beaming to other Qtopia device.
-</ol>
-
-<h3>Beam - Palm OS</h3>
-<ol>
- <li>Check beaming from Palm OS device.
- <li>Check beaming to Palm OS device.
-</ol>
-
-<h3>Beam - Pocket PC</h3>
-<ol>
- <li>Check beaming from Pocket PC device.
- <li>Check beaming to Pocket PC device.
-</ol>
-
-<h3>Find</h3>
-<ol>
- <li>Click find
- <li>Typing text should immediately select match,
-	or show "Find: not found" in status (tool) bar.
-</ol>
-
-<h3>Filter by category</h3>
-<ol>
- <li>Check that filtering works for tasks in no category:
-	should only be visible in All and Unfiled categories.
- <li>Check that filtering works for tasks in one category:
-	should only be visible in that one category, and All.
- <li>Check that filtering works for tasks in more than one category:
-	should only be visible in those categories, and All.
-</ol>
-
+<h1>Qtopia/Contacts</h1>
+<h2>Test cases&nbsp;</h2>
+Following are the use case tests for Contact application on a PDA
+device. <br>
+<br>
+When testing, it is important to check that changes are recorded not
+just when the change is made, but also that it persists after stopping
+and restarting the application. Check that the application is not
+fast-loaded prior to testing storage.<br>
+First check whether a new contact gets added successfully. Then before
+performing tests enter all Contacts Testdata tables except "Tony
+Windsor", "Pamela Brown" and "Martin Cook". <br>
+<br>
+<h3>&nbsp;Meeting attendees</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can add new
+contacts.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;"></span>Click
+on &#8220;Contacts&#8221; menu.&nbsp;</li>
+        <li>Select &#8220;new&#8221; menu item.&nbsp;</li>
+        <li>Verify that you get a dialog for adding new contact.</li>
+        <li>Enter the contacts data for "Tony Windsor" and press OK
+button.</li>
+        <li>While typing in First and Last name verify to see the File
+As field is getting automatically set appropriately.</li>
+        <li>Verify that new contact is added successfully.</li>
+        <li>Carry out the step 2 - 6 for "Pamela Brown".</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Party invitations</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that contacts can be
+filtered by a category<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select appropriate category (&#8220;Close Relatives&#8221;) from
+category combo box. (It is located at bottom right corner)</li>
+        <li>It shall list contacts "Daniel Santillo" and "Edward Ford"
+(belonging to that particular category).</li>
+        <li>See whether contact numbers are being displayed. </li>
+        <li>If not then go to &#8220;View&#8221; menu, select &#8220;Configure header&#8221;
+option. This will show &#8220;Configure columns to display dialog<span style="">&nbsp;</span></li>
+        <li>Select desired columns (Home Phone etc) and press OK
+button. </li>
+        <li>Verify whether desired information has been displayed
+successfully and correctly.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Modifying contact information</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+modified<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;"></span>Select
+appropriate category view or select &#8220;all&#8221; category.</li>
+        <li>Type the name of the friend (John Foglin) in the search
+field. This will highlight the corresponding contact file.</li>
+        <li>Click on it. This will show the dialog with all information
+attributes for John Foglin.</li>
+        <li>Modify changed information (contact numbers, Home street,
+Home city etc).</li>
+        <li>Click on &#8220;OK&#8221; button to save.</li>
+      </ol>
+	</td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;New Category</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a new category can
+be created<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Launch &#8220;Edit Address&#8221; dialog by clicking &#8220;New&#8221; menu item
+from contact menu </li>
+        <li>Click on the button just beside category selection combo
+box. This will display &#8220;Edit Categories&#8221; dialog box.</li>
+        <li>Click on Add button from &#8220;Edit Categories&#8221; dialog box.</li>
+        <li>Create new category with the name &#8220;Bottle Manufacturing&#8221;.
+(You can use hard keyboard or soft keyboard for this)</li>
+        <li>Select global option, if you want this category to be
+available for other applications.</li>
+        <li>Press &#8220;OK&#8221; button.</li>
+        <li>Verify that this category is added into Categories combo
+box.</li>
+        <li>Enter all test data for "Martin Cook". </li>
+        <li>For confirming its globalization check that whether that
+category becomes available from any other application.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Moving existing contact into other category</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+associated with a new category<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;">&nbsp;</span>Create
+new category with the name &#8220;Excellent Player&#8221;.</li>
+        <li>Press &#8220;OK&#8221; button.</li>
+        <li>Select the corresponding (Timothy) contact file.&nbsp;</li>
+        <li>Click on &#8220;edit&#8221; button. This will show &#8220;Edit Contact
+Details&#8221; dialog for adding with the existing information details.</li>
+        <li>Modify category value by selecting desired (Excellent
+Player) category from combo box</li>
+        <li>Press &#8220;OK&#8221;.</li>
+        <li>Verify it by selecting that particular (Excellent Player)
+category view.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Deleting contact</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+deleted<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;">&nbsp;</span>Select
+a contact (John Kennedy) and click on the DELETE icon</li>
+        <li>A warning dialog should pop up to prompt you if it is ok to
+delete the contact</li>
+        <li>Check that the name of the contact is shown in the dialog
+correctly<br>
+        </li>
+        <li>Press CANCEL</li>
+        <li>Verify that the contact is still there.</li>
+        <li>click on DELETE again and this time click on "No"</li>
+        <li>Verify that the contact is still there.</li>
+        <li>click on DELETE again and this time click on "Yes" in the
+verify dialog.</li>
+        <li>Verify that the contact is gone.</li>
+        <li>Create a new (valid) contact and click OK.</li>
+        <li>Select the new contact and click on the DELETE icon.</li>
+        <li>Press OK when the verify dialog is shown.</li>
+        <li>Verify that the new contact is gone.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Duplicating contact</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+copied<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the contact &#8211; Sushmita Sen to be duplicated.</li>
+        <li>Click on Contact menu. And click on duplicate menu item OR
+click on duplication shortcut icon provided.</li>
+        <li>By visual inspection Verify that desired contact has been
+duplicated.</li>
+        <li>Select it and click on &#8220;Edit&#8221; menu item from &#8220;Contact&#8221; menu
+(or click on edit shortcut icon). It will show dialog with information
+detail.</li>
+        <li>Change the desired field information.</li>
+        <li>Press &#8220;OK&#8221; to save.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Summary look</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a summary can be
+shown for a contact<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select &#8220;All&#8221; category from category combo box. </li>
+        <li>Search for the doctor&#8217;s (Mathew Gibbons) name. It will
+highlight the appropriate contact.</li>
+        <li>Click on it to view its summary. </li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Displaying desired information</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the information to
+be shown in the list overview can be configured <br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select the desired (Students) category from category combo
+box.&nbsp;</li>
+        <li>Verify that it shows all the students contacts ("Hillary
+Tison test data).</li>
+        <li>Check whether the desired field information has been
+displayed.</li>
+        <li>If not, click on &#8220;View&#8221; menu and click on &#8220;Configure
+headers&#8221; menu item. This will show &#8220;Configure columns to display&#8221; dialog.</li>
+        <li>Select the desired fields from left hand side list box and
+add them into right hand side list box.</li>
+        <li>If required reset their order in right-hand side list box
+by using &#8220;Move up&#8221; and &#8220;Move down&#8221; buttons.</li>
+        <li>Press &#8220;OK&#8221;</li>
+        <li>Verify that the desired information has been displayed
+successfully.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Setting business card</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+shown as a business card.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;">&nbsp;</span>Select
+appropriate category (or &#8220;All&#8221; category) to display desired contact.</li>
+        <li>Select the desired contact.</li>
+        <li>Click on &#8220;Contact&#8221; menu. It will show all menu items.</li>
+        <li>Click on &#8220;Set as Business Card&#8221; menu item to set desired
+contact as business card.</li>
+        <li>Verify it by clicking on &#8220;Show Business Card&#8221; option,
+validate the entire information and confirm that the desired contact has
+been set as business card.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Exchanging Business cards</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that business cards can
+be send to other PDA devices<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;">&nbsp;</span>Select
+&#8220;Show Business Card&#8221; option.</li>
+        <li>It displays the details and confirms that contact details
+to be transferred.</li>
+        <li>Select &#8220;IR Receiver&#8221; from startup menu and turn it on.</li>
+        <li>Click on &#8220;Contact&#8221; menu and click on &#8220;Beam Entry&#8221; menu
+item. OR click on Beam Entry short cut icon. By this a dialog box
+&#8220;Infrared send&#8221; will be displayed, it will show the details of
+transmission.</li>
+        <li>After actual data transmission, a confirmatory dialog will
+get popped on the other PDA to which data is being transferred. It will
+show three options: Open, Store, And Cancel.</li>
+        <li>On selecting &#8220;Store&#8221;, incoming data gets stored in
+Documents tab page. &#8220;Open&#8221; stores and add the data in Contact list and
+selecting &#8220;Cancel&#8221; the incoming data gets rejected.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Receiving multiple Business cards</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that business cards canbe
+received from other PDA devices<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;">&nbsp;</span>Select
+&#8220;IR Receiver&#8221; from startup menu and turn it on.</li>
+        <li>Wait for the beamed entry, after the actual data
+transmission, a confirmatory dialog will get popped on Zaurus. It shows
+three options: Open, Store, And Cancel.</li>
+        <li>On selecting &#8220;Store&#8221;, incoming data gets stored in
+Documents tab page. &#8220;Open&#8221; stores and add the data in Contact list and
+selecting &#8220;Cancel&#8221; the incoming data gets rejected</li>
+        <li>Verify that a few new contacts have been added in Contacts
+list.</li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Running late to work</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an e-mail can be
+send using the contact information<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select appropriate category (or &#8220;All&#8221; category) to display
+desired contact.</li>
+        <li>Select the desired contact.</li>
+        <li>Click on &#8220;Contact&#8221; menu and click on &#8220;Write Mail To&#8221; menu
+item. OR click on &#8220;Write Mail To&#8221; short cut icon. By this a dialog box
+&#8220;Write Mail&#8221; will be displayed, it will show the selected contact
+mail-id in &#8220;To&#8221; field. </li>
+        <li>Write the other details and send the mail</li>
+      </ol>
+      <p class="MsoBodyText"><b>Note: To send and receive e-mail
+messages, you must:</b></p>
+      <ul type="disc">
+        <li class="MsoNormal" style="">Set up the communication method
+(modem card, LAN card) and network preferences</li>
+        <li class="MsoNormal" style="">Set up an e-mail account in the
+Email application</li>
+      </ul>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Find</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+found by entering a search phrase<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click on the FIND icon.</li>
+        <li>Check that the find lineeditor is shown above the contacts
+list.</li>
+        <li>Type some related words (&#8220;bad little naughty&#8221;) in search
+field.&nbsp;</li>
+        <li>Verify that the appropriate contact (Linda Jacob) is
+highlighted and Click on it to view its details.</li>
+        <li>Click on the "List" icon to switch back to "normal"
+presentation.</li>
+        <li>Enter some more search strings and verify the highlighted
+contact.</li>
+      </ol>
+      <br>
+Enter search strings for the following circumstances:<br>
+      <ol>
+        <li>a string that is somewhere in the middle of a contact name</li>
+        <li>a string that is part of a first name</li>
+        <li>a string that is part of a last name</li>
+        <li>a string that should match multiple contacts -&gt; the
+first should be highlighted.</li>
+        <li>an 'impossible' string, e.g. something like qqxxyyzz&nbsp;</li>
+        <li>a string using 'strange' characters like: @, #, $ and space.</li>
+      </ol>
+Also use the editor commands like BACKSPACE and DEL (in other words,
+make some deliberate mistakes and then correct them) when entering
+search strings and observe the search result after each keypress.<br>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      <ul>
+        <li>If no valid search result is available the lower bar in the
+screen should show "Find: not found".</li>
+        <li>If a valid search result is available the first contact
+that matches the search result will be highlighted.</li>
+      </ul>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Edit File As</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the way a contact is
+shown in the 'File As' field can be configured<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td align="left" valign="top">
+      <ol>
+        <li>Create a new contact and enter at least a string in the
+First Name and Last Name fields.</li>
+        <li>Select the File As field and vary between the different
+modes (e.g. first_name_only, last_name_only, first_last_name,
+last_first_name).</li>
+        <li>Change the entries in the First Name and Last Name fields
+and verify that the File As field is automatically updated.<br>
+        </li>
+        <li>Click OK to go back to the 'normal' list view mode.</li>
+        <li>Verify that the name is displayed using the same mode as
+selected for <span style="font-weight: bold;">File As</span> in the edit
+dialog.</li>
+        <li>Click the EDIT icon again for the same contact</li>
+        <li>Observe the File As field and check that the same mode is
+shown as was selected before.</li>
+        <li>Close the edit dialog using CANCEL to go back to the
+'normal' list view.</li>
+        <li>Click on the "File As" header to change the sorting order
+and check that the displayed contacts are sorted correctly
+(upwards/downwards).</li>
+        <li>Repeat 9 for all offered <span style="font-weight: bold;">File
+As</span> modes.<br>
+        </li>
+      </ol>
+      </td>
+      <td style="vertical-align: top;">
+      <ol>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+The File As field can be varied between 4 different modes:<br>
+      <ol>
+        <li>"Firstname" only,</li>
+        <li>"Lastname" only,</li>
+        <li>"Lastname, Firstname" (mind the comma!)</li>
+        <li>"Firstname Lastname" (no comma!)</li>
+      </ol>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Add contact - Empty</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that nothing happens if
+you add an empty contact or if the record doesn't contain valid
+information. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Make shure the 'normal' list shows at least the columns for
+"File As" and "Contacts".</li>
+        <li>Click on &#8220;New&#8221;. </li>
+        <li>Don't enter any data, just press OK</li>
+        <li>Verify that no new record is added to the list.</li>
+        <li>Click NEW again</li>
+        <li>Enter some data into one of the 'less used fields' e.g.
+Pronunciation, Spouse and press OK</li>
+        <li>Verify that a record is added to the list and that both the
+File As and Contact fields are empty.</li>
+        <li>Verify that you can edit the new contact (oops i forgot the
+name)</li>
+        <li>Delete the new contact</li>
+      </ol>
+      <ol>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Add contact - Unusual characters</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can add a new
+contact with unusual characters in the fields.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click the NEW icon.</li>
+        <li>Type in First and Last name.&nbsp;</li>
+        <li>Check to see the File As field is getting 	automatically
+set appropriately. </li>
+        <li>Click OK icon. </li>
+        <li>Check that item is added.</li>
+        <li>Close the app and open it again.</li>
+        <li>Check that the new contact is shown again.</li>
+        <li>Select the contact and click on EDIT.</li>
+        <li>Verify that every field is being loaded correctly again.</li>
+      </ol>
+      <br>
+For and exhaustive test enter a value for each and every field.
+Consider using 'normal' values (A,B,C,a,b,c,space,etc), but also
+numericals (0,1,2,etc) and special characters ( {, [, :, ~, etc).</td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Date fields</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a date can be
+assigned to some 'date' fields in a contact like Birthday and
+Anniversary.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select a contact</li>
+        <li>Click on the EDIT icon</li>
+        <li>Click on the Birthday button</li>
+        <li>Check that a calendar dialog opens that allows you to
+select a date.</li>
+        <li>Select a date and check that the contact shows the selected
+date in the Birthday field.</li>
+        <li>Close the application and open it again</li>
+        <li>Select the same contact and check that the entered birthday
+is still correct</li>
+        <li>Go into edit mode again, click on the Birthday button and
+this time select "None" at the bottom of the dialog.</li>
+        <li>Check that the birthday button for the contact is updated
+to "none".</li>
+        <li>Check again after closing and re-opening the application. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Filter by Category</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that contacts can be
+filtered by categories<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td align="left" valign="top">
+      <ol>
+        <li>Select a contact and click on the EDIT icon</li>
+        <li>Select the 'Categories' field and check that you can change
+the value to Unfiled, Business, Personal and any additional custom
+created category.</li>
+        <li>Finally select the Category to be 'Personal'.</li>
+        <li> Press OK to go back to the 'normal' list view.</li>
+        <li>Select 'Personal' as the Category filter that is to be used
+for the presentation of &nbsp;the contacts.</li>
+        <li>Check that the last edited contact is shown.</li>
+        <li> Select 'Business' as the Category filter that is to be used
+for the presentation of &nbsp;the contacts.</li>
+        <li>Check that the last edited contact is NOT shown.</li>
+        <li> Edit the 'Category' of the contact to be 'Business' and
+when back in the 'normal' view list check that the last edited contact
+is shown.</li>
+        <li> Select 'All' for the category.</li>
+        <li>Check that the contact is shown.</li>
+        <li>Open the contact again in EDIT mode.</li>
+        <li>Create a new category and select this category for the
+contact.</li>
+        <li>Check that the new category is available in the Category
+filter combobox of the 'normal' view.</li>
+        <li>Check that the contact is shown only when 'All' or your
+custom category is selected in the combobox.</li>
+      </ol>
+      </td>
+      <td style="vertical-align: top;">
+      <ol>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Categories - Multiple</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a contact can be
+associated with multiple categories<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li><span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;"></span>Optionally,
+click on a contact. </li>
+        <li>Select a contact and Click on &#8220;edit&#8221; button. </li>
+        <li>Choose "..." to right of category Combo box. </li>
+        <li>Choose multiple categories by clicking checkboxes. </li>
+        <li>Click OK. </li>
+        <li>Check that item is now recorded as having chosen
+categories, showing "&lt;first category&gt; (Multi.)" in Combo box. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Beam - Palm OS</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that contacts can be
+beamed to and from Palm OS device<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;"> <span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;"></span>
+      <ol>
+        <li>Select a contact</li>
+        <li>Get a Palm OS device and point the infra red cells to each
+other.</li>
+        <li>Prepare the Palm OS device for receiving (if neccessery).<br>
+        </li>
+        <li>Click on the BEAM icon and observe the process in the lower
+status bar.</li>
+        <li>Verify that the Palm OS device has received the contact and
+show the information in the appropriate application (i.e. contacts on a
+Qtopia device).</li>
+        <li>Open the Qt menu on the PDA, select "IR Receiver" and then
+"On for 5 minutes"</li>
+        <li>Select a contact on the Palm OS device and beam it to the
+Qtopia PDA.</li>
+        <li>Verify that the contact is shown in the documents tab.</li>
+        <li>Click on the contact and allow it to be imported in the
+Contacts application.<br>
+        </li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+The lower bar shows the status of the beaming process. If a failure
+occurs the beam attempt will be retried up to a maximum of 20 times.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Beam - Pocket PC</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that contacts can be
+beamed to and from a Pocket PC device<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;"> <span
+ style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-stretch: normal; font-size-adjust: none;"></span>
+      <ol>
+        <li>Select a contact</li>
+        <li>Get a Pocket PC device and point the infra red cells to
+each other.</li>
+        <li>Prepare the Pocket PC device for receiving (if neccessery).<br>
+        </li>
+        <li>Click on the BEAM icon and observe the process in the lower
+status bar.</li>
+        <li>Verify that the Pocket PC device has received the contact
+and show the information in the appropriate application (i.e. contacts
+on a Qtopia device).</li>
+        <li>Open the Qt menu on the PDA, select "IR Receiver" and then
+"On for 5 minutes"</li>
+        <li>Select a contact on the Pocket PC device and beam it to the
+Qtopia PDA.</li>
+        <li>Verify that the contact is shown in the documents tab.</li>
+        <li>Click on the contact and allow it to be imported in the
+Contacts application.<br>
+        </li>
+      </ol>
+	 </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+The lower bar shows the status of the beaming process. If a failure
+occurs the beam attempt will be retried up to a maximum of 20 times.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </body>
 </html>

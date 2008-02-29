@@ -168,9 +168,20 @@ void SnakeGame::levelUp()
 
 void SnakeGame::createTargets()
 {  
-   for (int i = 0; i < targetamount; i++)
-       (void)new Target(&canvas);
-   notargets = targetamount;
+    Target  *foo;
+    int	    new_target_count = 0;
+
+    for (int i = 0; i < targetamount; i++) {
+	foo = new Target(&canvas);
+	if(foo->position() == FALSE) {
+	    delete foo;		// ran out of room for targets
+	} else {
+	    foo->show();
+	    new_target_count++;
+	}
+    }
+
+    notargets = targetamount = new_target_count;
 }
 
 void SnakeGame::clear()

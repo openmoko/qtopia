@@ -46,17 +46,11 @@ struct Plugin {
 
 // BASE CLASS FOR PLUGIN INTERFACE
 struct QTOPIA_EXPORT CalculatorInterface:public QUnknownInterface {
-    // the ignoble past
     virtual QWidget * create (QWidget *) = 0;
+    virtual QString pluginName() const = 0;
 
-    // the glorious future!
-    virtual Instruction * createInstruction(QString /* name */,
-	QString /* type */)
-    {
-	return 0;
-    };
-
-//    virtual QList<Plugin> * getUIPlugins () { return 0; };
+    // not used yet
+//    virtual Instruction * createInstruction(QString /* name */, QString /* type */) { return 0; };
 };
 
 #endif

@@ -64,9 +64,9 @@ int WavRecorderPlugin::pluginNumFormats() const
 QString WavRecorderPlugin::pluginFormatName( int format ) const
 {
     if (format == 1)
-	return "GSM Wav";
+	return "GSM WAV"; // No tr
     else
-	return "Wav Format";
+	return "PCM WAV"; // No tr
 }
 
 
@@ -322,7 +322,7 @@ bool WavRecorderPlugin::writeHeader()
 	write_long( header + 28, frequency * channels * 2 ); // nAvgBytesPerSec
 	write_short( header + 32, channels * 2 );            // nBlockAlign
 	write_short( header + 34, 16 );                      // nBitsPerSample
-	strncpy( header + 36, "data", 4 ); // no tr
+	strncpy( header + 36, "data", 4 ); // No tr
 	write_long( header + 40, totalBytes );
 	headerLen = WAV_PCM_HEADER_LEN;
 
@@ -341,10 +341,10 @@ bool WavRecorderPlugin::writeHeader()
 	write_short( header + 34, 0 );                       // nBitsPerSample
 	write_short( header + 36, 2 );                       // wExtSize
 	write_short( header + 38, 320 );                     // wSampsPerBlock
-	strncpy( header + 40, "fact", 4 ); // no tr
+	strncpy( header + 40, "fact", 4 ); // No tr
 	write_long( header + 44, 4 );                        // size of "fact"
 	write_long( header + 48, totalSamples );             // dwSamplesWritten
-	strncpy( header + 52, "data", 4 ); // no tr
+	strncpy( header + 52, "data", 4 ); // No tr
 	write_long( header + 56, totalBytes );
 	headerLen = WAV_GSM_HEADER_LEN;
 

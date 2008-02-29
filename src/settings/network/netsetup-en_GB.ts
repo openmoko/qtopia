@@ -32,6 +32,14 @@
         <source>Network</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&lt;p&gt;There are no running network services.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This is the state of your running network services.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NetworkSettingsBase</name>
@@ -41,10 +49,6 @@
     </message>
     <message>
         <source>Current</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;This is the state of your running network services.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -65,6 +69,10 @@
     </message>
     <message>
         <source>Properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This is the state of your running network services.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -38,6 +38,8 @@
   communicate with them.
 
   This is a temporary class. This will be replaced by Qt 3's QProcess class.
+
+  \ingroup qtopiaemb
 */
 
 /*!

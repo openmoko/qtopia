@@ -99,6 +99,10 @@
         <source>Launcher</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>TextLabel2</source>
+        <translation type="unfinished">テキストラベル2</translation>
+    </message>
 </context>
 <context>
     <name>WallpaperSelectorBase</name>

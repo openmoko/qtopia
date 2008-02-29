@@ -37,6 +37,20 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include <qapplication.h> // for translate
+
+/*!
+  \class DateBookDB
+
+  \brief The DateBookDB class is used to access event information in the
+  Qtopia database.
+
+  \ingroup qtopiaemb
+
+  \obsolete
+
+  \sa DateBookIterator
+*/
 
 class DateBookDBPrivate
 {
@@ -403,6 +417,8 @@ DateBookDB::~DateBookDB()
 
 //#### Why is this code duplicated in getEffectiveEvents ?????
 //#### Addendum.  Don't use this function, lets faze it out if we can.
+
+/*! \obsolete */
 QValueList<Event> DateBookDB::getEvents( const QDate &from, const QDate &to )
 {
     QValueList<Event> tmpList;
@@ -929,10 +945,11 @@ void DateBookDB::init()
     d->clean = false;
     QString str = dateBookFilename();
     if ( str.isNull() ) {
-	QMessageBox::warning( 0, QObject::tr("Out of Space"),
-			      QObject::tr("Unable to create start up files\n"
-					  "Please free up some space\n"
-					  "before entering data") );
+	QMessageBox::warning( 0, qApp->translate( "DateBookDB", "Out of Space"),
+			      qApp->translate( "DateBookDB", 
+					       "Unable to create start up files\n"
+					       "Please free up some space\n"
+					       "before entering data") );
     }
     // continuing along, we call this datebook filename again,
     // because they may fix it before continuing, though it seems

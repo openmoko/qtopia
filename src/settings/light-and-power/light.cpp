@@ -152,7 +152,7 @@ void LightSettings::accept()
 	config.write();
     }
 
-    set_fl( currentMode->initbright );
+    initbright = currentMode->initbright;
     
     int i_dim =      (currentMode->dim ? currentMode->intervalDim : 0);
     int i_lightoff = (currentMode->lightoff ? currentMode->intervalLightOff : 0);
@@ -220,16 +220,6 @@ void LightSettings::powerTypeClicked(int id)
     currentMode->suspend = screensaver_suspend->isChecked();
     currentMode->networkedsuspend = !notnetworkedsuspend->isChecked();
 
-    QString tmp = screensaver_suspend->text();
-    if ( tmp.isEmpty() ) tmp = suspend_phony->text();
-    if ( selected == externalButton ) {
-	suspend_phony->setText("");
-	screensaver_suspend->setText(tmp);
-    } else {
-	screensaver_suspend->setText("");
-	suspend_phony->setText(tmp);
-    }
-    
     /*	Radio buttons toggled	*/
     if ( newMode != currentMode ) {
 	currentMode = newMode;

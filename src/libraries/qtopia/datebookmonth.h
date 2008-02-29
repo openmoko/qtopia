@@ -189,8 +189,6 @@ public:
     DateButton( bool longDate, QWidget *parent, const char * name = 0 );
     QDate date() const { return currDate; }
 
-    bool customWhatsThis() const;
-
 signals:
     void dateSelected( int year, int month, int day );
 
@@ -205,6 +203,7 @@ private slots:
     void gotHide();
 
 private:
+    bool customWhatsThis() const; // do not call directly
     bool longFormat;
     bool weekStartsMonday;
     QDate currDate;

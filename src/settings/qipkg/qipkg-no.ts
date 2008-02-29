@@ -15,9 +15,6 @@
     </message>
 </context>
 <context>
-    <name>PackageManagerSettings</name>
-</context>
-<context>
     <name>PackageWizard</name>
     <message>
         <source>Installing on %1</source>
@@ -63,10 +60,6 @@
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;&lt;tt&gt;ipkg&lt;/tt&gt; says something went wrong. Sorry.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -165,15 +158,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Package</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Show Details...</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>Search</name>
 </context>
 </TS>

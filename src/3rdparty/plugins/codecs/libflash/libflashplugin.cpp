@@ -29,7 +29,7 @@
   The primary copyright holders are
     Olivier Debon &lt;odebon@club-internet.fr&gt; and
     Fabrice Bellard &lt;fabrice.bellard@netgem.com&gt;.
-  A weg page about the Flash library is at http://www.swift-tools.com/Flash.
+  More information about the Flash library can be found at http://www.swift-tools.com/Flash
 */
 /*!
     \fn virtual LibFlashPlugin::LibFlashPlugin()

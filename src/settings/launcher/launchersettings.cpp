@@ -36,6 +36,7 @@
 #include <qradiobutton.h>
 #include <qheader.h>
 #include <qlayout.h>
+#include <qlabel.h>
 
 // Copied from QtMail editaccount.cpp DO NOT EDIT HERE - PUT IT IN A LIBRARY, I FORGOT TO
 class AutoTabLayout : QObject {
@@ -176,8 +177,6 @@ void LauncherSettings::showTabSettings( const QString &id )
 	textColorButton->setColor( ts.textColor );
     else
 	textColorButton->setColor( colorGroup().text() );
-    selectButton->setEnabled( ts.bgType == Image );
-    colorButton->setEnabled( ts.bgType == SolidColor );
     if ( ts.customFont ) {
 	for ( int i = 1; i < fontFamily->count(); i++ ) {
 	    if ( ts.fontFamily.lower() == fontFamily->text(i).lower() ) {
@@ -190,6 +189,31 @@ void LauncherSettings::showTabSettings( const QString &id )
     } else {
 	fontFamily->setCurrentItem( 0 );
 	fontSize->setEnabled( FALSE );
+    }
+
+    setBackgroundControls();
+}
+
+void LauncherSettings::setBackgroundControls(void)
+{
+    TabSettings &ts = tabSettings[currentTab];
+
+    colorButton->show();
+    selectButton->show();
+    selectName->show();
+
+    if (ts.bgType == SolidColor) {
+	selectButton->hide();
+	selectName->hide();
+    } else if (ts.bgType == Image) {
+	QString title = ts.bgImage.left(ts.bgImage.findRev('.'));
+	title = title.right(title.length() - title.findRev('/') - 1);
+	selectName->setText(title);
+	colorButton->hide();
+    } else {
+	selectName->hide();
+	selectButton->hide();
+	colorButton->hide();
     }
 }
 
@@ -229,8 +253,8 @@ void LauncherSettings::setBackgroundType( int t )
     TabSettings &ts = tabSettings[currentTab];
     ts.bgType = (BackgroundType)t;
     ts.changed = TRUE;
-    selectButton->setEnabled( ts.bgType == Image );
-    colorButton->setEnabled( ts.bgType == SolidColor );
+
+    setBackgroundControls();
 }
 
 void LauncherSettings::selectWallpaper()
@@ -238,9 +262,15 @@ void LauncherSettings::selectWallpaper()
     TabSettings &ts = tabSettings[currentTab];
     WallpaperSelector base( ts.bgImage, this );
     base.showMaximized();
-    base.exec();
-    ts.bgImage = base.filename();
-    ts.changed = TRUE;
+    if (base.exec() == QDialog::Accepted) {
+	ts.bgImage = base.filename();
+	ts.changed = TRUE;
+
+	QString title = ts.bgImage.left(ts.bgImage.findRev('.'));
+	title = title.right(title.length() - title.findRev('/') - 1);
+	selectName->setText(title);
+	selectName->show();
+    }
 }
 
 void LauncherSettings::selectColor( const QColor &c )
@@ -279,7 +309,7 @@ void LauncherSettings::readTabSettings()
 	    ts.bgType = SolidColor;
 	else if ( bgType == "Image" ) // No tr
 	    ts.bgType = Image;
-	ts.bgImage = cfg.readEntry( "BackgroundImage", "wallpaper/marble" );
+	ts.bgImage = cfg.readEntry( "BackgroundImage", "" );
 	ts.bgColor = cfg.readEntry( "BackgroundColor" );
 	ts.textColor = cfg.readEntry( "TextColor" );
 	ts.customFont = cfg.readBoolEntry( "CustomFont", FALSE );

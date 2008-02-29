@@ -46,6 +46,7 @@
 #include <qtimer.h>
 #include <qlayout.h>
 #include <qhbox.h>
+#include <qlineedit.h>
 
 static const int sw_prec = 2;
 static const int magic_daily = 2292922;
@@ -55,6 +56,14 @@ static void toggleScreenSaver( bool on )
 {
     QPEApplication::setTempScreenSaverMode(on ? QPEApplication::Enable : QPEApplication::DisableSuspend);  
 }
+
+class MySpinBox : public QSpinBox
+{
+public:
+    QLineEdit *lineEdit() const {
+	return editor();
+    }
+};
 
 Clock::Clock( QWidget * parent, const char *, WFlags f )
     : ClockBase( parent, "clock", f ), swatch_splitms(99), init(FALSE) // No tr
@@ -96,6 +105,10 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     connect( t, SIGNAL(timeout()), SLOT(updateClock()) );
     t->start( 1000 );
 
+    applyAlarmTimer = new QTimer( this );
+    connect( applyAlarmTimer, SIGNAL(timeout()),
+	this, SLOT(applyDailyAlarm()) );
+
     alarmt = new QTimer( this );
     connect( alarmt, SIGNAL(timeout()), SLOT(alarmTimeout()) );
 
@@ -122,6 +135,8 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     prevLapBtn->setEnabled( FALSE );
     nextLapBtn->setEnabled( FALSE );
 
+    reset->setEnabled( FALSE );
+
     lapLcd->setNumDigits( 8+1+sw_prec );
     lapLcd->display( "00:00:00.00" );
 
@@ -140,11 +155,13 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
 
     cdGroup->hide(); // XXX implement countdown timer.
 
-    connect( dailyHour, SIGNAL(valueChanged(int)), this, SLOT(applyDailyAlarm()) );
+    connect( dailyHour, SIGNAL(valueChanged(int)), this, SLOT(scheduleApplyDailyAlarm()) );
     connect( dailyMinute, SIGNAL(valueChanged(int)), this, SLOT(setDailyMinute(int)) );
     connect( dailyAmPm, SIGNAL(activated(int)), this, SLOT(setDailyAmPm(int)) );
     connect( dailyEnabled, SIGNAL(toggled(bool)), this, SLOT(enableDaily(bool)) );
     cdLcd->display( "00:00" );
+
+    dailyMinute->setValidator(0);
 
     Config cConfig( "Clock" ); // No tr
     cConfig.setGroup( "Daily Alarm" );
@@ -166,7 +183,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
 	dayBtn[i]->setToggleButton( TRUE );
 	dayBtn[i]->setOn( TRUE );
 	dayBtn[i]->setFocusPolicy( StrongFocus );
-	connect( dayBtn[i], SIGNAL(toggled(bool)), this, SLOT(applyDailyAlarm()) );
+	connect( dayBtn[i], SIGNAL(toggled(bool)), this, SLOT(scheduleApplyDailyAlarm()) );
     }
 
     for ( i = 0; i < 7; i++ )
@@ -184,6 +201,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     dailyEnabled->setChecked( alarm );
     int m = cConfig.readNumEntry( "Minute", 0 );
     dailyMinute->setValue( m );
+//    dailyMinute->setPrefix( m <= 9 ? "0" : "" );
     int h = cConfig.readNumEntry( "Hour", 7 );
     if ( ampm ) {
 	if (h > 12) {
@@ -197,6 +215,11 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
 	dailyAmPm->hide();
     }
     dailyHour->setValue( h );
+
+    connect( ((MySpinBox*)dailyHour)->lineEdit(), SIGNAL(textChanged(const QString&)),
+	    this, SLOT(dailyEdited()) );
+    connect( ((MySpinBox*)dailyMinute)->lineEdit(), SIGNAL(textChanged(const QString&)),
+	    this, SLOT(dailyEdited()) );
 
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
     connect( qApp, SIGNAL(appMessage(const QCString&, const QByteArray&)),
@@ -251,9 +274,7 @@ void Clock::updateClock()
 	    updateLap();
 	}
     } else if ( tabs->currentPageIndex() == 2 ) {
-	// Ensure they emit, even if edited by keyboard
-	dailyHour->value();
-	dailyMinute->value();
+	// nothing.
     }
 }
 
@@ -294,6 +315,7 @@ void Clock::stopStartStopWatch()
 	swatch_splitms[swatch_currLap] = swatch_totalms;
 	stopStart->setText( tr("Start") );
 	reset->setText( tr("Reset") );
+	reset->setEnabled( TRUE );
 	t->stop();
 	swatch_running = FALSE;
 	toggleScreenSaver( TRUE );
@@ -302,6 +324,7 @@ void Clock::stopStartStopWatch()
 	swatch_start.start();
 	stopStart->setText( tr("Stop") );
 	reset->setText( tr("Lap/Split") );
+	reset->setEnabled( swatch_currLap < 98 );
         t->start( 1000 );
 	swatch_running = TRUE;
 	// disable screensaver while stop watch is running
@@ -321,6 +344,7 @@ void Clock::resetStopWatch()
 	swatch_dispLap = swatch_currLap;
 	if ( swatch_currLap < 98 )  // allow up to 99 laps
 	    swatch_currLap++;
+	reset->setEnabled( swatch_currLap < 98 );
 	updateLap();
 	lapTimer->start( 2000, TRUE );
     } else {
@@ -333,6 +357,7 @@ void Clock::resetStopWatch()
 	updateLap();
 	updateClock();
 	reset->setText( tr("Lap/Split") );
+	reset->setEnabled( FALSE );
     }
     prevLapBtn->setEnabled( swatch_dispLap );
     nextLapBtn->setEnabled( swatch_dispLap < swatch_currLap );
@@ -427,21 +452,25 @@ void Clock::tabChanged( QWidget * )
 
 void Clock::setDailyAmPm(int)
 {
-    applyDailyAlarm();
+    scheduleApplyDailyAlarm();
 }
 
 void Clock::setDailyMinute( int m )
 {
-    if ( m <= 9 )
-	dailyMinute->setPrefix( "0" );
+    dailyMinute->setPrefix( m <= 9 ? "0" : "" );
+}
+
+void Clock::dailyEdited()
+{
+    if ( spinBoxValid(dailyMinute) && spinBoxValid(dailyHour) )
+	scheduleApplyDailyAlarm();
     else
-	dailyMinute->setPrefix( "" );
-    applyDailyAlarm();
+	applyAlarmTimer->stop();
 }
 
 void Clock::enableDaily( bool )
 {
-    applyDailyAlarm();
+    scheduleApplyDailyAlarm();
 }
 
 void Clock::appMessage( const QCString &msg, const QByteArray &data )
@@ -552,10 +581,16 @@ int Clock::dayBtnIdx( int d ) const
 	return d;
 }
 
+void Clock::scheduleApplyDailyAlarm()
+{
+    applyAlarmTimer->start( 5000, TRUE );
+}
+
 void Clock::applyDailyAlarm()
 {
     if ( !init )
 	return;
+    applyAlarmTimer->stop();
     int minute = dailyMinute->value();
     int hour = dailyHour->value();
     if ( ampm ) {
@@ -594,9 +629,44 @@ void Clock::applyDailyAlarm()
     }
 }
 
+bool Clock::validDaysSelected(void)
+{
+    for ( int i = 1; i <= 7; i++ ) {
+	if ( dayBtn[dayBtnIdx(i)]->isOn() ) {
+	    return TRUE;
+	}
+    }
+    return FALSE;
+}
+
 void Clock::closeEvent( QCloseEvent *e )
 {
+    if (dailyEnabled->isChecked()) {
+	if (!validDaysSelected()) {
+	    QMessageBox::warning(this, tr("Select Day"),
+		tr("Daily alarm requires at least\none day to be selected."));
+	    return;
+	}
+    }
+
     applyDailyAlarm();
     ClockBase::closeEvent(e);
 }
 
+bool Clock::spinBoxValid( QSpinBox *sb )
+{
+    bool valid = TRUE;
+    QString tv = sb->text();
+    for ( uint i = 0; i < tv.length(); i++ ) {
+	if ( !tv[0].isDigit() )
+	    valid = FALSE;
+    }
+    bool ok = FALSE;
+    int v = tv.toInt( &ok );
+    if ( !ok )
+	valid = FALSE;
+    if ( v < sb->minValue() || v > sb->maxValue() )
+	valid = FALSE;
+
+    return valid;
+}

@@ -19,15 +19,25 @@
     </message>
     <message>
         <source>Tasks due the next</source>
-        <translation>次の期限の仕事</translation>
+        <translation type="obsolete">次の期限の仕事</translation>
     </message>
     <message>
         <source> days</source>
-        <translation type="unfinished">日数 [Days or number of days?]</translation>
+        <translation type="obsolete">日数 [Days or number of days?]</translation>
     </message>
     <message>
         <source>Todo Options</source>
         <translation>チェックリストオプション</translation>
+    </message>
+    <message>
+        <source>Tasks due the next</source>
+        <comment>... 3 days</comment>
+        <translation type="unfinished">次の期限の仕事</translation>
+    </message>
+    <message>
+        <source> days</source>
+        <comment>Tasks due the next... 5 days</comment>
+        <translation type="unfinished">日数 [Days or number of days?]</translation>
     </message>
 </context>
 <context>

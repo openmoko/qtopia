@@ -24,7 +24,7 @@
 #include <qtopia/qpeglobal.h>
 #include <qfile.h>
 
-class QTOPIA_EXPORT QFileDirect : public QFile
+class QFileDirect : public QFile
 {
 public:
     QFileDirect() : QFile() { }

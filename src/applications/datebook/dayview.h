@@ -77,6 +77,8 @@ public:
     DayItem *previousItem( bool show=TRUE );
     DayItem *currentItem() const;
     void setCurrentItem(DayItem *, bool show=TRUE);
+    void moveSelection( DayItem *, DayItem * );
+    void setMetrics( const QFontMetrics &);
 
 public slots:
     void startAtTime(int);
@@ -115,7 +117,6 @@ private:
     DayViewLayout *itemList;
     int hourAtPos(int) const;
     int posOfHour(int) const;
-    void moveSelection( DayItem *, DayItem * );
     //QList<DayItem> itemList;
     //DayViewWidget *intersects( const DayViewWidget *item, const QRect &geom );
 
@@ -174,6 +175,7 @@ private slots:
     void slotColWidthChanged() { relayoutPage(); };
 
 private:
+    void fontChange( const QFont &);
     void getEvents();
     void relayoutPage( bool fromResize = false );
     DayViewContents *view;

@@ -9,14 +9,6 @@
         <source>There was a problem setting timezone %1</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Restore Time Zone</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>There was a problem setting your timezone.Your time may be wrong now...</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>WorldTimeBase</name>
@@ -89,14 +81,6 @@
     </message>
     <message>
         <source>CITY</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unable to Find Timezone Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;Unable to find any timezone information in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

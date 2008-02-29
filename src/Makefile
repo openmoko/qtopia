@@ -1,5 +1,135 @@
-default:  dynamic
+default: dynamic
 
+#Sections are
+#
+# Core (Used in/by server)
+# Supported ( Known high quality )
+# Unsupported ( Unknown quality )
+# Commercial ( Only available for certain licensces )
+# 
+# Use a wrapping Makefile that defines LOCALCOMPONENTS/APPS/LIBS to include extra targets.
+
+#Core/Misc
+CORELIBS1=\
+	libraries/qtopia \
+	3rdparty/libraries/freetype
+
+CORELIBS2=\
+	libraries/qtopia1
+
+# this depenedency is needed due to ui files in libraries/qtopia
+$(CORELIBS2): $(CORELIBS1)
+
+CORELIBS=\
+	$(CORELIBS1) \
+	$(CORELIBS2)
+
+CORECOMPONENTS=\
+	plugins/inputmethods/keyboard \
+	plugins/inputmethods/handwriting \
+	plugins/inputmethods/unikeyboard \
+	3rdparty/plugins/obex/openobex \
+	3rdparty/plugins/obex \
+	plugins/applets/irreceiver \
+	plugins/fontfactories/freetype
+
+COREAPPS=server
+
+$(COREAPPS): $(CORELIBS)
+
+$(CORECOMPONENTS): $(CORELIBS)
+
+#Supported
+SUPPORTEDLIBS=\
+	libraries/qtopiapim \
+	libraries/qtopiacalc \
+	3rdparty/libraries/gsm \
+	3rdparty/libraries/libavformat \
+	3rdparty/libraries/libavcodec
+
+
+SUPPORTEDCOMPONENTS=\
+	3rdparty/plugins/codecs/libffmpeg \
+	3rdparty/plugins/inputmethods/pickboard \
+	3rdparty/plugins/applets/cardmon \
+	3rdparty/plugins/textcodecs/jp \
+	plugins/applets/batteryapplet \
+	plugins/applets/brightness \
+	plugins/applets/volumeapplet \
+	plugins/applets/clockapplet \
+	plugins/applets/clipboardapplet \
+	plugins/applets/netmonapplet \
+	plugins/imagecodecs/notepad \
+	plugins/codecs/wavplugin \
+	plugins/codecs/wavrecord \
+	plugins/textcodecs/simple8 \
+	plugins/calculator/simple \
+	plugins/calculator/advanced \
+	plugins/today/todo \
+	plugins/today/datebook \
+	plugins/network/dialup \
+	plugins/network/lan \
+	plugins/styles/fresh \
+	plugins/styles/flat \
+	plugins/decorations/polished \
+	plugins/decorations/flat
+
+SUPPORTEDAPPS=\
+	3rdparty/tools/atd \
+	applications/addressbook \
+	applications/calculator \
+	applications/clock \
+	applications/datebook \
+	applications/helpbrowser \
+	applications/imageviewer \
+	applications/mediaplayer \
+	applications/mediarecorder \
+	applications/sysinfo \
+	applications/textedit \
+	applications/todo \
+	applications/today \
+	games/fifteen \
+	games/minesweep \
+	games/wordgame \
+	games/mindbreaker \
+	games/parashoot \
+	games/qasteroids \
+	games/snake \
+	games/solitaire \
+	settings/appearance \
+	settings/appservices \
+	settings/light-and-power \
+	settings/rotation \
+	settings/security \
+	settings/sound \
+	settings/systemtime \
+	settings/network \
+	settings/qipkg \
+	settings/pluginmgr \
+	settings/worldtime \
+	settings/launcher \
+	settings/language \
+	tools/quickexec \
+	tools/qcop \
+	tools/symlinker
+
+$(SUPPORTEDLIBS): $(CORELIBS)
+
+$(SUPPORTEDAPPS): $(SUPPORTEDLIBS) $(CORELIBS)
+
+$(SUPPORTEDCOMPONENTS): $(SUPPORTEDLIBS) $(CORELIBS)
+
+#Unsupported
+
+UNSUPPORTEDAPPS=\
+	applications/filebrowser \
+	3rdparty/applications/embeddedkonsole \
+	3rdparty/applications/keypebble \
+	games/go
+
+$(UNSUPPORTEDAPPS): $(CORELIBS) $(SUPPORTEDLIBS)
+
+#Commercial
 COMMERCIALLIBS=\
 	libraries/qtopiamail
 
@@ -12,101 +142,13 @@ COMMERCIALAPPS=\
 	settings/backuprestore \
 	settings/buttoneditor
 
-LIBS3=$(LOCALLIBS) \
-	libraries/qtopiapim \
-	libraries/qtopiacalc \
+$(COMMERCIALLIBS): $(SUPPORTEDLIBS) $(CORELIBS)
 
-LIBS2=\
-	libraries/qtopia1
+$(COMMERCIALAPPS): $(COMMERCIALLIBS) $(CORELIBS) $(SUPPORTEDLIBS)
 
-LIBS1=\
-	libraries/qtopia \
-	3rdparty/libraries/gsm \
-	3rdparty/libraries/freetype \
-	3rdparty/libraries/libavformat \
-	3rdparty/libraries/libavcodec
+$(COMMERCIALCOMPONENTS): $(COMMERCIALLIBS) $(CORELIBS)
 
-$(LIBS2): $(LIBS1)
-
-$(LIBS3): $(LIBS2)
-
-LIBS=$(LIBS1) $(LIBS2) $(LIBS3)
-
-COMPONENTS=$(LOCALCOMPONENTS) \
-	3rdparty/plugins/codecs/libffmpeg \
-	3rdparty/plugins/inputmethods/pickboard \
-	3rdparty/plugins/obex/openobex \
-	3rdparty/plugins/obex \
-	3rdparty/plugins/applets/cardmon \
-	3rdparty/plugins/textcodecs/jp \
-	plugins/applets/batteryapplet \
-	plugins/applets/brightness \
-	plugins/applets/volumeapplet \
-	plugins/applets/clockapplet \
-	plugins/applets/clipboardapplet \
-	plugins/applets/netmonapplet \
-	plugins/applets/irreceiver \
-	plugins/imagecodecs/notepad \
-	plugins/codecs/wavplugin \
-	plugins/codecs/wavrecord \
-	plugins/textcodecs/simple8 \
-	plugins/inputmethods/keyboard \
-	plugins/inputmethods/handwriting \
-	plugins/inputmethods/unikeyboard \
-	plugins/calculator/simple \
-	plugins/calculator/advanced \
-	plugins/today/todo \
-	plugins/today/datebook \
-	plugins/network/dialup \
-	plugins/network/lan \
-	plugins/styles/fresh \
-	plugins/styles/flat \
-	plugins/decorations/polished \
-	plugins/decorations/flat \
-	plugins/fontfactories/freetype
-
-APPS=$(LOCALAPPS) \
-	3rdparty/applications/embeddedkonsole \
-	3rdparty/applications/keypebble \
-	3rdparty/tools/atd \
-	applications/addressbook \
-	applications/calculator \
-	applications/clock \
-	applications/datebook \
-	applications/filebrowser \
-	applications/helpbrowser \
-	applications/imageviewer \
-	applications/mediaplayer \
-	applications/mediarecorder \
-	applications/sysinfo \
-	applications/textedit \
-	applications/todo \
-	applications/today \
-	games/fifteen \
-	games/go \
-	games/mindbreaker \
-	games/minesweep \
-	games/parashoot \
-	games/qasteroids \
-	games/snake \
-	games/solitaire \
-	games/wordgame \
-	settings/appearance \
-	settings/appservices \
-	settings/light-and-power \
-	settings/language \
-	settings/rotation \
-	settings/security \
-	settings/sound \
-	settings/systemtime \
-	settings/network \
-	settings/qipkg \
-	settings/launcher \
-	settings/pluginmgr \
-	tools/qcop \
-	tools/quickexec \
-	settings/worldtime
-
+#Packages, may later split as above.
 EXTRAPACKAGES=\
 		$(QPEDIR)/src/qt/qpe-babelfish-font.control \
 		$(QPEDIR)/src/qt/qt-embedded-jpeg.control \
@@ -117,6 +159,10 @@ EXTRAPACKAGES=\
 		$(QPEDIR)/src/qt/qt-embedded-fonts-t15.control \
 		$(QPEDIR)/src/qt/qt-embedded.control \
 		$(QPEDIR)/src/qt/qpf-unifont-160-50-t10.control \
+		$(QPEDIR)/src/qt/qpf-japanese-230-50-t0.control \
+		$(QPEDIR)/src/qt/qpf-japanese-230-50-t5.control \
+		$(QPEDIR)/src/qt/qpf-japanese-230-50-t10.control \
+		$(QPEDIR)/src/qt/qpf-japanese-230-50-t15.control \
 		$(QPEDIR)/pics/mediaplayer/skins/techno/qpe-mediaplayer-techno-skin.control \
 		$(QPEDIR)/pics/qpe-pics.control \
 		$(QPEDIR)/sounds/qpe-sounds.control \
@@ -126,6 +172,7 @@ EXTRAPACKAGES=\
 		$(QPEDIR)/services/qpe-service-Contacts.control \
 		$(QPEDIR)/services/qpe-service-Email.control \
 		$(QPEDIR)/services/qpe-service-TimeMonitor.control \
+		$(QPEDIR)/i18n/qpe-i18n-en_GB.control \
 		$(QPEDIR)/i18n/qpe-i18n-de.control \
 		$(QPEDIR)/i18n/qpe-i18n-en.control \
 		$(QPEDIR)/i18n/qpe-i18n-hu.control \
@@ -136,16 +183,60 @@ EXTRAPACKAGES=\
 		$(QPEDIR)/i18n/qpe-i18n-zh-TW.control \
 		$(LOCALEXTRAPACKAGES) \
 	
-dynamic: server $(APPS) $(COMPONENTS)
 
-$(COMPONENTS): $(LIBS)
+# Deps for locals, (prepended)
+$(LOCALLIBS): $(SUPPORTEDLIBS) $(CORELIBS)
 
-$(APPS): $(LIBS)
+$(LOCALAPPS): $(LOCALLIBS) $(CORELIBS) $(SUPPORTEDLIBS)
 
-server: $(APPS)
+$(LOCALCOMPONENTS): $(LOCALLIBS) $(CORELIBS)
 
-$(LIBS) $(COMPONENTS) server $(APPS):
+#Targets.
+# These three are to aid build rules, not grouping or config.
+LIBS=$(CORELIBS) \
+	$(LOCALLIBS) \
+	$(SUPPORTEDLIBS) \
+	$(UNSUPPORTEDLIBS)
+
+COMPONENTS=$(CORECOMPONENTS) \
+	$(LOCALCOMPONENTS) \
+	$(SUPPORTEDCOMPONENTS) \
+	$(UNSUPPORTEDCOMPONENTS)
+
+APPS=$(COREAPPS) \
+	$(LOCALAPPS) \
+	$(SUPPORTEDAPPS) \
+	$(UNSUPPORTEDAPPS)
+
+
+$(LIBS) $(COMPONENTS) $(APPS):
 	$(MAKE) -C $@
+
+#Targets.
+dynamic: $(COREAPPS) \
+	$(CORECOMPONENTS) \
+	$(SUPPORTEDAPPS) \
+	$(SUPPORTEDCOMPONENTS) \
+	$(UNSUPPORTEDAPPS) \
+	$(LOCALAPPS) \
+	$(LOCALCOMPONENTS)
+
+unsupported: $(UNSUPPORTEDAPPS) $(UNSUPPORTEDCOMPONENTS)
+
+libraries: $(CORELIBS) \
+	$(SUPPORTEDLIBS) \
+	$(LOCALLIBS)
+
+components: $(CORECOMPONENTS) \
+	$(SUPPORTEDCOMPONENTS) \
+	$(LOCALCOMPONENTS)
+
+desktop: 
+	$(MAKE) -C libraries/qtopia
+	$(MAKE) -C libraries/qtopia1
+	$(MAKE) -C libraries/qtopiapim
+	$(MAKE) -C settings/worldtime worldtimebase.h worldtimebase.cpp
+	$(MAKE) -C qtopiadesktop
 
 showcomponents:
 	@echo $(APPS) $(COMPONENTS) $(LIBS)
@@ -156,33 +247,37 @@ showdesktopcomponents:
 showwin32desktopcomponents:
 	@echo libraries/qtopia libraries/qtopiapim
 
-desktop: 
-	$(MAKE) -C libraries/qtopia
-	$(MAKE) -C libraries/qtopia1
-	$(MAKE) -C libraries/qtopiapim
-
 showwin32components:
 	@echo $(LIBS)
 	@echo $(APPS)
 	@echo $(COMPONENTS)
-	@echo server
 
 showlibraries:
 	@echo $(LIBS)
 
+#libs, server and plugins only
+showlinksource:
+	@echo server
+	@echo $(CORELIBS)
+	@echo $(CORECOMPONENTS)
+	@echo $(SUPPORTEDLIBS)
+	@echo $(SUPPORTEDCOMPONENTS)
+	@echo $(COMMERCIALLIBS)
+	@echo $(COMMERCIALCOMPONENTS)
+
 clean:
-	for dir in server $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
+	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
 
 lupdate:
-	for dir in server $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
+	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
 
 lrelease:
-	for dir in server $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
+	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
 
 packages:
 	mkdir -p $(QPEDIR)/ipkg
-	for dir in server $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir ipkg || exit 1; done
+	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir ipkg || exit 1; done
 	for ctrl in $(EXTRAPACKAGES); do cd $(QPEDIR)/ipkg; ../bin/mkipks $$ctrl; done
 	cd $(QPEDIR)/ipkg; ../scripts/mkPackages
 
-.PHONY: default dynamic desktop server $(LIBS) $(APPS) $(COMPONENTS) showcomponents clean
+.PHONY: default dynamic desktop libraries components $(LIBS) $(APPS) $(COMPONENTS) showcomponents showlinksource clean

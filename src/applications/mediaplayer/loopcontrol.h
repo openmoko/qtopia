@@ -39,6 +39,9 @@ public:
     
     long totalPlaytime();
 
+    enum AudioPriority { Normal, High };
+    void setPriority( AudioPriority );
+
     // These are public to run them from global functions needed to start threads
     // Otherwise they would be private
     void startAudio();

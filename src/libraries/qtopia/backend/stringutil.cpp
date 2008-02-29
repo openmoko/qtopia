@@ -379,6 +379,7 @@ QString escapeString( const QString& plain )
 	    tmp.replace( pos, 1, "&gt;" );
 	else if ( ch == '\"' )
 	    tmp.replace( pos, 1, "&quot;" );
+	// DON'T escape newlines here
     }
     return tmp;
 }

@@ -47,6 +47,7 @@
 #endif
 
 static QStringList checkingApps;
+static QStringList launchingApps;
 
 RunningAppBar::RunningAppBar(QWidget* parent) 
   : QFrame(parent), m_AppLnkSet(0L), m_SelectedAppIndex(-1)
@@ -65,6 +66,7 @@ RunningAppBar::RunningAppBar(QWidget* parent)
     appLauncher = new AppLauncher(m_AppLnkSet, this);
     connect(appLauncher, SIGNAL(launched(int, const QString &)), this, SLOT(applicationLaunched(int, const QString &)) );
     connect(appLauncher, SIGNAL(terminated(int, const QString &)), this, SLOT(applicationTerminated(int, const QString &)) );
+    connect(appLauncher, SIGNAL(connected(const QString &)), this, SLOT(applicationConnected(const QString &)) );
 }
 
 RunningAppBar::~RunningAppBar() 
@@ -160,16 +162,20 @@ void RunningAppBar::mouseReleaseEvent(QMouseEvent *e)
 	
 	// it might be started but not yet opened a qcop channel.  Test for both
 	if ( appLauncher->isRunning(app) ) {
+	    // qDebug("%s is running!", app.latin1() );
 	    if ( QCopChannel::isRegistered(channel.latin1()) ) {
-		//qDebug("%s is running!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
+		// qDebug("%s is registered!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
 		if ( checkingApps.find(app) == checkingApps.end() ) {
 		    checkingApps.append( app );
 		    QCopEnvelope e(channel.latin1(), "raise()");
 		    // This class will delete itself after hearing from the app or the timer expiring
 		    (void)new AppMonitor(*m_AppList.at(m_SelectedAppIndex), *this);
 		} else {
-		  //  qDebug("already quering %s", app.data() );
+		    // qDebug("already quering %s", app.data() );
 		}
+	    } else {
+		if ( launchingApps.find( app ) == launchingApps.end() )
+		    launchingApps.append( app );
 	    }
 	} else {
 	    // this should never happen with the new implementation
@@ -230,8 +236,20 @@ void RunningAppBar::applicationTerminated(int pid, const QString &app)
     }
 }
 
+void RunningAppBar::applicationConnected( const QString &app )
+{
+    QStringList::Iterator it = launchingApps.find( app );
+    if ( it != launchingApps.end() ) {
+	launchingApps.remove( it );
+	if ( checkingApps.find(app) == checkingApps.end() ) {
+	    QString channel = QString("QPE/Application/") + app;
+	    QCopEnvelope e(channel.latin1(), "raise()");
+	}
+    }
+}
+
 /*	App Monitor	*/
-const int AppMonitor::RAISE_TIMEOUT_MS = 500;
+const int AppMonitor::RAISE_TIMEOUT_MS = 2000;
 
 AppMonitor::AppMonitor(const AppLnk& app, RunningAppBar& owner) 
   : QObject(0L), m_Owner(owner), m_App(app), m_PsProc(0L), m_AppKillerBox(0L) {
@@ -258,7 +276,7 @@ void AppMonitor::received(const QCString& msg, const QByteArray& data) {
     QString appName;
     stream >> appName;
     if (appName == m_App.exec()) {
-      // qDebug("Got a heartbeat from %s", appName.latin1());
+      qDebug("Got a heartbeat from %s", appName.latin1());
       m_Timer.stop();
       // Check to make sure we're not waiting on user input...
       if (m_AppKillerBox) {
@@ -385,7 +403,10 @@ void TempScreenSaverMonitor::updateAll()
 	    if ( tid )
 		timerId = startTimer( tid * 1000 );
 	} else if ( mode == QPEApplication::Enable ) {
-	    killTimer(timerId);
+	    if ( timerId ) {
+		killTimer(timerId);
+		timerId = 0;
+	    }
 	}
 #endif
 	currentMode = mode;
@@ -433,6 +454,7 @@ void TempScreenSaverMonitor::timerEvent(QTimerEvent *t)
 	
 	/*  Clean up	*/
 	killTimer(timerId);
+	timerId = 0;
 	currentMode = QPEApplication::Enable;
 	QCopEnvelope("QPE/System", "setScreenSaverMode(int)") << currentMode;
 	

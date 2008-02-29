@@ -28,6 +28,7 @@ class Load : public QWidget {
     Q_OBJECT
 public:
     Load( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
+    ~Load();
 
 protected:
     void paintEvent( QPaintEvent *ev );

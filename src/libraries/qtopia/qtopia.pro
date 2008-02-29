@@ -1,5 +1,4 @@
 singleprocess:singleprocess=true
-#include <h.h>
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
 win32:CONFIG	+= dll
@@ -114,7 +113,7 @@ notqt2unix:SOURCES += process_win.cpp qlibrary_win.cpp
 
 embedded:HEADERS +=	fontmanager.h \
 			fontdatabase.h \
-			qpedecoration_qws.h \
+			qpedecoration_p.h \
 			network.h \
 			networkinterface.h \
 			qcopenvelope_qws.h \
@@ -187,6 +186,7 @@ win32:HEADERS	+=  $$QTOPIA1DIR/accessory.h \
 		    $$QTOPIA1DIR/timezone.h 
 
 win32:SOURCES	+=  $$QTOPIA1DIR/applnk1.cpp \
+		    $$QTOPIA1DIR/config1.cpp \
 		    $$QTOPIA1DIR/categories1.cpp \
 		    $$QTOPIA1DIR/categoryselect1.cpp \
 		    $$QTOPIA1DIR/fileselector1.cpp \

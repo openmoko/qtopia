@@ -171,6 +171,8 @@ NetMonitorApplet::NetMonitorApplet( QWidget *parent ) : QWidget( parent )
     setFixedHeight( 18 );
     setFixedWidth( 14 );
     hide();
+    // get current state
+    QCopEnvelope( "QPE/Network", "announceChoices()" );
 }
 
 NetMonitorApplet::~NetMonitorApplet()

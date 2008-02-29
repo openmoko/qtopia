@@ -46,10 +46,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Day</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Show selected day&apos;s events</source>
         <translation type="unfinished"></translation>
     </message>
@@ -63,10 +59,6 @@
     </message>
     <message>
         <source>Month</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show selected months&apos;s events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -157,6 +149,15 @@ Quit anyway?</source>
     <message>
         <source>Single</source>
         <comment>1 event, not all</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show selected month&apos;s events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <comment>day, not date</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -325,6 +326,15 @@ Quit anyway?</source>
         <source>Calendar</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Office</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <comment>ie. not work</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DateEntryBase</name>
@@ -362,14 +372,6 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Description:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Office</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -524,25 +526,6 @@ Quit anyway?</source>
         <source>Case Sensitive</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Search Backwards</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>End</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All day</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>RepeatEntry</name>
@@ -645,11 +628,6 @@ Quit anyway?</source>
     <message>
         <source>Repeat every %1 weeks from %2 to %3.</source>
         <comment>e.g. %1 = 3, %2 = Monday, %3 = Sunday.  Describes an event that occurs each day of the week for a full week, starting on %2 and ending on %3, every %1 weeks.</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Repeat every %1 months on the %2 of the month.</source>
-        <comment>eg. %1 = 4, %2 = 3rd</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -761,6 +739,26 @@ Quit anyway?</source>
         <source>fifth</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Repeat every %1 months on day %2 of the month.</source>
+        <comment>eg. %1 = 4, %2 = 3rd</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WeekView</name>
+    <message>
+        <source>Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>End</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All day</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WeekViewContents</name>
@@ -809,6 +807,17 @@ Quit anyway?</source>
     <message>
         <source>%1-%2</source>
         <comment>2 dates</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WorldTimeDialog</name>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

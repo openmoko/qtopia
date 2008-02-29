@@ -33,7 +33,7 @@
   Pontus Fuchs.
 
   The version of OpenOBEX included here includes some functions
-  of GLIB, which is distributed until the terms of the GNU Library General Public
+  of GLIB, which is distributed under the terms of the GNU Library General Public
   License (LGPL). The primary copyright holders of GLIB are Peter Mattis,
   Spencer Kimball and Josh MacDonald.
 */

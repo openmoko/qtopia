@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/devices.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<p> 
+<p> <h2> Qtopia - Customizing Qtopia for a Device
+</h2>
+<a name="1"></a><p> This document provides some recommendations for installing Qtopia on a device.
+<p> There are a number of aspects to customizing Qtopia for a specific
+device which must be considered.
+<p> <ul>
+<li> If the device has a touch screen, Qtopia will need to enable calibration.
+<li> If the device runs off batteries, Qtopia may be required to call APM functions for power saving.
+<li> If the device has special hardware buttons, they may need to be mapped to
+applications and have associated images displayed in the user interface.
+<li> If the device has a buzzer for alarms and other beeps, Qtopia will need to know how to use this hardware
+and enable it for the associated events.
+<li> If the device has a LCD screen with a back light or front light, Qtopia will need to know how to adjust
+the brightness for it.
+<li> If the device has any special LEDs to indicate status to the user, Qtopia will need to know how to
+set the LEDs.
+</ul>
+<p> Fortunately all of the changes required to add those device specific customizations are centralized in Qtopia 
+to just a few files which are described below. This document should make it easy for OEMs and system integrators
+to understand how to make Qtopia aware of any special hardware that a device might have.
+<p> <h3> Device-Specific Code
+</h3>
+<a name="1-1"></a><p> During configure, the <tt>-platform</tt> option is used to
+select which custom-&lt;platform-spec&gt;.h file will be used when compiling Qtopia.
+The following macros can be defined or undefined in a custom.h file to
+customize Qtopia for the specific hardware. The associated custom-&lt;platform-spec&gt;.cpp
+file will be compiled and linked to provide any custom functions that are also required.
+<p> <ul>
+<li> QPE_USE_MALLOC_FOR_NEW - #define this to have memory alloced using malloc() instead of the default C++ new implementation (this is faster in some cases).
+<li> QPE_NEED_CALIBRATION - #define this if there is a touch screen which requires calibration.
+<li> QPE_OWNAPM - #define this if the device has existing APM settings which must be disabled first by qtopia via ioctls to /dev/apm_bios.
+<li> QPE_HAVE_TOGGLELIGHT - #define this if the device has a hardware button for turning on and off an LCD backlight if applicable.
+<li> QPE_HAVE_MEMALERTER - #define this if the device needs Qtopia to alert the user of low memory conditions, a function called initMemalerter() must be implemented.
+<li> QPE_MEMALERTER_IMPL - #define this as a macro which implements any functions required to implement the MEMALERTER functionality (including initMemalerter()).
+<li> QPE_INITIAL_NUMLOCK_STATE  - #define this as a macro which implements any device specific methods used to initialize the numlock state.
+<li> QPE_ARCHITECTURE - #define this with a string that contains the manufacturer and model that uniquely identifies the device, for example "SHARP/SL5500".
+<li> QPE_DEFAULT_TODAY_MODE - #define this as "Daily" or "Never" (including the quotes) to tell Qtopia if by default it should run the today program daily or never.
+<li> QPE_FONT_HEIGHT_TO_ICONSIZE(x) - #define this as a macro to provide a mapping from a font height to an icon size in pixels.
+<li> CUSTOM_SOUND_INIT - #define this to call a function to initialize any custom sound devices like buzzers.
+<li> CUSTOM_SOUND_IMPL - #define this as a macro to define any custom functions required to be used by the other CUSTOM_SOUND macros.
+<li> CUSTOM_SOUND_ALARM - #define this as a macro which implements the device specific code to sound an alarm (perhaps using a buzzer).
+<li> CUSTOM_LEDS( led, status )  - #define this as a macro which can set an LED to a given status if applicable. The first argument specifies which LED, and the status is an integer with device specific meaning.
+<li> CUSTOM_SOUND_TOUCH( press ) - #define this as a macro which implements a given sound to be associated with taps to the screen if applicable.
+<li> CUSTOM_SOUND_KEYCLICK( k, p, r ) - #define this as a macro which implements a given sound to be associated with keyboard key presses if applicable.
+</ul>
+<p> In addition to the above macros and defines, the following three functions must be implemented in the custom-&lt;platform-spec&gt;.cpp file.
+<p> <ul>
+<li> int qpe_sysBrightnessSteps(); - This function is called by qtopia to query the number of graduations the device's LCD backlight/frontlight has.
+<li> void qpe_setBrightness(int); - This function must be implemented with any device specifc code used to set the backlight/frontlight brightness to the specified level.
+<li> void PowerStatusManager::getStatus(); - This function must be implemented to query the power status. The PowerStatus class in qtopia/power.h defines the power status abstraction. See the custom-linux-generic-g++.cpp file for details of a default implementation.
+</ul>
+<p> For reference implementations of the device specific code, the existing <tt>custom-*.*</tt> files found in src/libraries/qtopia/ may be of guidance.
+<p> <h3> Device-Specific Files
+</h3>
+<a name="1-2"></a><p> The default hardware button mappings for a device are defined
+by the etc/defaultbuttons-&lt;platform-spec&gt;.conf files.
+<p> The format of the file is as follows:
+<p> <pre>
+[Button]
+Count=\&lt;number of button records below\&gt;
+[Button\&lt;button number counting from 0\&gt;]
+Name=\&lt;name of the button (in english)\&gt;
+Name[ja]=\&lt;japanese translations of the button name\&gt;
+Name[\&lt;lang\&gt;]=\&lt;other lang translations of the button name etc\&gt;
+Key=\&lt;associated key code emitted by the button eg. F9\&gt;
+PressedActionService=\&lt;name of default service associated with press\&gt;
+PressedActionMessage=\&lt;message to send to service (refer to \a services for details)\&gt;
+HeldActionService=\&lt;name of default service associated with press\&gt;
+HeldActionMessage=\&lt;message to send to service (refer to \a services for details)\&gt;
+</pre>
+ 
+<p> An example of what this may look like in a real example is:
+<p> <pre>
+[Button]
+Count=2
+[Button0]
+Name=Calendar Button
+Name[ja]=???
+Key=F9
+PressedActionService=Calendar
+PressedActionMessage=raiseToday()
+HeldActionService=Calendar
+HeldActionMessage=raise()
+[Button1]
+Name=Contacts Button
+Name[ja]=???
+Key=F10
+PressedActionService=Contacts
+PressedActionMessage=raise()
+HeldActionService=Contacts
+HeldActionMessage=beamBusinessCard()
+</pre>
+ 
+<p> Images of the buttons, which should correspond
+to the appearance of the device hardware, are in pics/Button/<i>n</i>.png, with
+<i>n</i> corresponding to the button number in the configuration file.
+<p> See the existing files, especially the generic file, for guidance.
+<p> <h3> Non-installed Components
+</h3>
+<a name="1-3"></a><p> There are a number of applications/features supplied with Qtopia that are
+not intended to be shipped with production devices:
+<p> <ul>
+<li> Rotation Setting - This is provided to test and demonstrate Qtopia's ability
+to display in different orientations. This may be helpful during development
+if the device uses the transformation display driver.
+<li> Shutdown Setting - This is provided as a development tool.  It should
+not be necessary on a production device.  It can be removed by deleting
+apps/Settings/quit.desktop, on most devices it is expected that there is
+a physical power button, therefore the user is not expected to ever manually
+run or shutdown Qtopia.
+<li> screensize applet - allows changing the maximum window size for testing
+different screensizes quickly during development. This is a
+development tool only which is also not intended for end users. 
+<li> Terminal - This is provided as a development tool. It may be reasonable to
+provide this as a seperate installable package for advanced users who are
+familiar with Linux however it is not expected that the majority of users will
+find this tool at all useful, only confusing. Therefore it is recommended this
+program is not included.
+<li> File Manager - Provided as a development tool. Qtopia is functional without
+it using just Qtopia's document model. Files from external devices such as SD and CF cards
+are automatically scanned on insertion and supported documents are mapped in to Qtopia's
+document view. Files can also be transfered back and forth from a PC via Qtopia
+Desktop which also maps the documents to Qtopia's document view and model. Adding
+the File Browser can make it possible for users to add and remove files from the
+device in a way which does not correspond to Qtopia's document model which can break the
+interface. We therefore do not recommend this program should be included on a device
+to ensure a consistent document model in addition to protecting critical user and system
+files and settings.
+</ul>
+<p> <h3> Unsupported Components
+</h3>
+<a name="1-4"></a><p> The following applications are unsupported 3rd party applications/ports
+intended purely to demonstrate the flexibility of Qtopia:
+<p> <ul>
+<li> Go
+<li> VNC Viewer
+</ul>
+<p> <h3> Required Plugins
+</h3>
+<a name="1-5"></a><p> If Qtopia crashes twice in quick succession "Safe Mode" will be entered and
+no plugins will be loaded in case the crash was caused by a misbehaving
+plugin.  In some cases there are plugins that are required for correct
+operation of the device.  These plugins can be specified in the .directory
+file in $QPEDIR/plugins/&lt;type&gt;/.directory.  For example, if the simple8
+text codec is always required:
+<p> <pre>
+[Desktop Entry]
+Name=Text Codecs
+Comment=Provides support for various international languages.
+Required=simple8
+Apply=QPE/System restart()
+</pre>
+ 
+
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

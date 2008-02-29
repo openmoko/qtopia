@@ -84,6 +84,10 @@ void AbSettings::setCurrentFields(const QValueList<int> &f)
 {
     QMap<int,QString> m = PimContact::trFieldsMap();
     m.remove( PimRecord::Categories );
+    m.remove( PimContact::LastNamePronunciation );
+    m.remove( PimContact::FirstNamePronunciation );
+    m.remove( PimContact::CompanyPronunciation );
+
     m.insert( AbTable::FREQ_CONTACT_FIELD, tr("Contact") );
     map->setFields( m, f);
 }
@@ -115,13 +119,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     QPopupMenu *edit = new QPopupMenu( this );
     mbList->insertItem( tr( "Contact" ), edit );
 
-    viewmenu = new QPopupMenu( this );
-    mbList->insertItem( tr( "View" ), viewmenu );
-    
-    viewmenu->insertItem( tr("Select All"), this, SLOT( selectAll() ) );
-
-    viewmenu->insertSeparator();
-    viewmenu->insertItem( tr("Configure headers"), this, SLOT(configure()) );
     listTools = new QPEToolBar( this );
 
 
@@ -132,15 +129,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     a->setWhatsThis( tr("Enter a new contact.") );
     a->addTo( edit );
     a->addTo( listTools );
-
-    a = new QAction( tr( "List" ), Resource::loadIconSet( "list" ), QString::null,
-			      0, this, 0 );
-    actionList = a;
-    connect( a, SIGNAL( activated() ), this, SLOT( slotListView() ) );
-    a->setWhatsThis( tr("View list of Contacts.") );
-    a->addTo( edit );
-    a->addTo( listTools );
-    a->setEnabled( FALSE );
 
     a = new QAction( tr( "Edit" ), Resource::loadIconSet( "edit" ), QString::null,
 				  0, this, 0 );
@@ -184,7 +172,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     actionMail = a;
     connect( a, SIGNAL( activated() ), this, SLOT( writeMail() ) );
     a->addTo( edit );
-    a->addTo( listTools );
 
     if ( Ir::supported() ) {
 	a = new QAction( tr ("Beam Entry" ), Resource::loadIconSet( "beam" ),
@@ -193,7 +180,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
 	connect( a, SIGNAL( activated() ), this, SLOT( slotBeam() ) );
 	a->setWhatsThis( tr("Beam the selected contacts to another device.") );
 	a->addTo( edit );
-	a->addTo( listTools );
     }else
       actionBeam = 0L;
 
@@ -211,6 +197,35 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     connect( a, SIGNAL( activated() ), this, SLOT( markCurrentAsPersonal() ) );
     a->addTo( edit );
 
+    listTools->addSeparator();
+
+    // View menu
+    viewmenu = new QPopupMenu( this );
+    mbList->insertItem( tr( "View" ), viewmenu );
+
+    a = new QAction( tr( "Contact List" ), Resource::loadIconSet( "list" ), QString::null,
+			      0, this, 0 );
+    connect( a, SIGNAL( activated() ), this, SLOT( slotListView() ) );
+    a->setWhatsThis( tr("View list of Contacts.") );
+    a->setToggleAction( TRUE );
+    a->setOn(TRUE);
+    a->addTo( listTools );
+    a->addTo( viewmenu );
+    actionList = a;
+
+    a = new QAction( tr( "Contact Details" ), Resource::loadIconSet( "details" ), QString::null,
+			      0, this, 0 );
+    connect( a, SIGNAL( activated() ), this, SLOT( slotDetailView() ) );
+    a->setWhatsThis( tr("View Contact details.") );
+    a->setToggleAction( TRUE );
+    a->addTo( listTools );
+    a->addTo( viewmenu );
+    actionDetails = a;
+
+    viewmenu->insertSeparator();
+    viewmenu->insertItem( tr("Select All"), this, SLOT( selectAll() ) );
+    viewmenu->insertSeparator();
+    viewmenu->insertItem( tr("Configure headers"), this, SLOT(configure()) );
 
     // Search bar
     searchBar = new QPEToolBar(this);
@@ -235,11 +250,11 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
 
     listView = new QVBox( this );
 
-    abList = new AbTable( contacts.sortedContacts(), listView );
+    abList = new AbTable( &contacts, listView );
     
     // can create this item now
     viewmenu->insertItem( tr("Fit to width"), abList, SLOT(fitHeadersToWidth()) );
-    
+
     abList->setSelectionMode( AbTable::Extended );
 //    abList->setFrameStyle( QFrame::NoFrame );
     connect( abList, SIGNAL( clicked() ),
@@ -256,12 +271,16 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
 
     QComboBox *contactCombo = new QComboBox( hb );
     connect( contactCombo, SIGNAL(activated(int)), this, SLOT(contactFilterSelected(int)) );
-    contactCombo->insertItem( tr("Email") );
-    contactMap[0]=PimContact::DefaultEmail;
-    contactCombo->insertItem( tr("Business Phone") );
-    contactMap[1]=PimContact::BusinessPhone;
-    contactCombo->insertItem( tr("Home Phone") );
-    contactMap[2]=PimContact::HomePhone;
+    contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::BusinessMobile] );
+    contactMap[0]=PimContact::BusinessMobile;
+    contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::HomeMobile] );
+    contactMap[1]=PimContact::HomeMobile;
+    contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::BusinessPhone] );
+    contactMap[2]=PimContact::BusinessPhone;
+    contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::HomePhone] );
+    contactMap[3]=PimContact::HomePhone;
+    contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::DefaultEmail] );
+    contactMap[4]=PimContact::DefaultEmail;
     contactCombo->setCurrentItem(0);
     contactFilterSelected( 0 );
     QWhatsThis::add( contactCombo, tr("Show this contact information in the Contact column, if available.") );
@@ -283,7 +302,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
 
 //    slotSetCategory(-2);
     contacts.setFilter( catSelect->currentCategory() );
-    abList->reload( contacts.sortedContacts() );
+    abList->reload();
     setCaption( tr("Contacts") + " - " + categoryLabel( catSelect->currentCategory() ) );
     
     constructorDone = TRUE;
@@ -347,7 +366,7 @@ void AddressbookWindow::receiveFile( const QString &filename )
 	    for ( QValueList<PimContact>::Iterator it = newContacts.begin(); it != newContacts.end(); ++it) {
 		contacts.addContact( *it );
 	    }
-	    abList->reload( contacts.sortedContacts() );
+	    abList->reload();
 	}
     } else if ( oldContacts.count() > 0 ) {
 	QString list = "";
@@ -381,7 +400,9 @@ void AddressbookWindow::reload()
 	tr("Address Book") );
     catSelect->setAllCategories( TRUE );
     contacts.ensureDataCurrent(TRUE);
-    abList->reload( contacts.sortedContacts() );
+    abList->reload();
+    if ( centralWidget() == mView )
+	slotDetailView();
 }
 
 void AddressbookWindow::resizeEvent( QResizeEvent *e )
@@ -436,8 +457,10 @@ void AddressbookWindow::updateIcons()
 	actionMail->setEnabled(!ce.defaultEmail().isEmpty());
 	if ( abList->selectedContacts().count() == 1 ) {
 	    actionSetPersonal->setEnabled(TRUE);
+	    actionDetails->setEnabled(TRUE);
 	} else {
 	    actionSetPersonal->setEnabled(FALSE);
+	    actionDetails->setEnabled(FALSE);
 	}
 	if (actionBeam) {
 	    actionBeam->setEnabled(TRUE);
@@ -453,6 +476,7 @@ void AddressbookWindow::updateIcons()
 	actionFind->setEnabled(FALSE);
 	actionMail->setEnabled(FALSE);
 	actionSetPersonal->setEnabled(FALSE);
+	actionDetails->setEnabled(FALSE);
 	if (actionBeam) {
 	    actionBeam->setEnabled(FALSE);
 	}
@@ -466,7 +490,7 @@ void AddressbookWindow::setViewOptions(bool enabled)
     int	id;
     int	i = 0;
 
-    for (i = 0; (id = viewmenu->idAt(i)) != -1; i++) {
+    for (i = 2; (id = viewmenu->idAt(i)) != -1; i++) {
 	viewmenu->setItemEnabled(id, enabled);
     }
 }
@@ -479,21 +503,35 @@ void AddressbookWindow::showView()
     mView->setFocus();
     updateIcons();
     setCaption( tr("Contact Details") );
-    actionList->setEnabled( TRUE );
+    actionList->setOn( FALSE );
+    actionDetails->setOn( TRUE );
     setViewOptions(FALSE);
 }
+
+bool AddressbookWindow::checkSyncing()
+{
+    if (syncing) {
+	if ( QMessageBox::warning(this, tr("Contacts"),
+			     tr("Can not edit data, currently syncing"),
+			    QMessageBox::Ok, QMessageBox::Abort ) == QMessageBox::Abort )
+	{
+	    // Okay, if you say so (eg. Qtopia Desktop may have crashed)....
+	    syncing = FALSE;
+	} else
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 
 void AddressbookWindow::slotListNew()
 {
     PimContact cnt;
-    if( !syncing ) {
+    if( !checkSyncing() ) {
 	if ( abEditor )
 	    abEditor->setEntry( cnt );
 	abView()->init( cnt );
 	editEntry( NewEntry );
-    } else {
-	QMessageBox::warning(this, tr("Contacts"),
-			     tr("Can not edit data, currently syncing"));
     }
 }
 
@@ -510,13 +548,14 @@ void AddressbookWindow::slotDetailView()
 
 void AddressbookWindow::slotListView()
 {
+    actionList->setOn( TRUE );
+    actionDetails->setOn( FALSE );
     if ( !abList->isVisible() ) {
 	abView()->hide();
 	setCentralWidget( listView );
 	listView->show();
 	abList->setFocus();
 	setCaption( tr("Contacts") );
-	actionList->setEnabled( FALSE );
 	setViewOptions(TRUE);
     }
     
@@ -524,12 +563,9 @@ void AddressbookWindow::slotListView()
 
 void AddressbookWindow::slotListDelete()
 {
-    if ( syncing ) {
-	QMessageBox::warning( this, tr("Contacts"),
-			      tr("Can not edit data, currently syncing") );
+    if ( checkSyncing() )
 	return;
-    }
-    
+
     if ( abList->selectionMode() == AbTable::Extended ) {
 	QValueList<QUuid> t = abList->selectedContacts();
 	
@@ -577,7 +613,7 @@ void AddressbookWindow::slotListDelete()
 	if ( QPEMessageBox::confirmDelete( this, tr( "Contacts" ),
 					   strName ) ) {
 	    contacts.removeContact( abList->currentEntry() );
-	    abList->reload( contacts.sortedContacts() );
+	    abList->reload();
 	    slotListView();
 	}
     }
@@ -591,7 +627,7 @@ void AddressbookWindow::deleteContacts(QValueList<QUuid> &t)
 	contacts.removeContact(t);
     }
     
-    abList->reload( contacts.sortedContacts() );
+    abList->reload();
 }
 
 
@@ -602,23 +638,17 @@ void AddressbookWindow::slotViewBack()
 
 void AddressbookWindow::slotViewEdit()
 {
-    if(!syncing) {
+    if( !checkSyncing()) {
 	if ( !bAbEditFirstTime )
 	    abEditor->setEntry( abList->currentEntry() );
 	editEntry( EditEntry );
-    } else {
-	QMessageBox::warning( this, tr("Contacts"),
-			      tr("Can not edit data, currently syncing") );
     }
 }
 
 void AddressbookWindow::slotViewDuplicate(void)
 {
-    if (!syncing) {
+    if( !checkSyncing()) {
 	duplicateEntry();
-    } else {
-	QMessageBox::warning( this, tr("Contacts"),
-			      tr("Can not edit data, currently syncing") );
     }
 }
 
@@ -728,20 +758,20 @@ void AddressbookWindow::appMessage(const QCString &msg, const QByteArray &data)
 	PimContact c;
 	stream >> c;
 	contacts.addContact( c );
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
 
     } else if ( msg == "removeContact(PimContact)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimContact c;
 	stream >> c;
 	contacts.removeContact( c );
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
     } else if ( msg == "updateContact(PimContact)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimContact c;
 	stream >> c;
 	contacts.updateContact( c );
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
     } else if ( msg == "addAndEditContact(PimContact)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimContact c;
@@ -808,7 +838,8 @@ void AddressbookWindow::slotPersonalView()
     setCentralWidget( abView() );
     mView->show();
     mView->setFocus();
-    actionList->setEnabled( TRUE );
+    actionList->setOn( FALSE );
+    actionDetails->setOn( TRUE );
 }
 
 // hacky static bool
@@ -819,7 +850,7 @@ void AddressbookWindow::editPersonal()
     if (contacts.hasPersonal()) {
 	PrContact me(contacts.personal());
 	if ( bAbEditFirstTime ) {
-	    abEditor = new AbEditor( this );
+	    abEditor = new AbEditor( isVisible() ? this : 0 );
 	    bAbEditFirstTime = FALSE;
 	}
 	abEditor->setEntry( me );
@@ -843,7 +874,7 @@ void AddressbookWindow::markCurrentAsPersonal()
     if ( abList->selectedContacts().count() == 1 ) {
 	PimContact c = abList->currentEntry();
 	contacts.setAsPersonal(c.uid());
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
 	updateIcons();
     }
 }
@@ -876,7 +907,7 @@ void AddressbookWindow::editEntry( EntryMode entryMode )
 {
     PimContact entry;
     if ( bAbEditFirstTime ) {
-	abEditor = new AbEditor( this );
+	abEditor = new AbEditor( isVisible() ? this : 0 );
 	abEditor->setEntry( entry );
 	bAbEditFirstTime = FALSE;
 	if ( entryMode == EditEntry )
@@ -892,12 +923,14 @@ void AddressbookWindow::editEntry( EntryMode entryMode )
 	    QUuid ui = contacts.addContact( insertEntry );
 	    if (newPersonal)
 		contacts.setAsPersonal(ui);
-	    abList->reload( contacts.sortedContacts() );
+	    abList->reload();
 	    updateIcons();
+	    abList->setCurrentEntry(ui);
 	} else {
 	    PimContact replaceEntry = abEditor->entry();
 	    contacts.updateContact( replaceEntry );
-	    abList->reload( contacts.sortedContacts() );
+	    abList->reload();
+	    abList->setCurrentEntry(replaceEntry.uid());
 	}
     }
     if ( centralWidget() == abView() )
@@ -916,7 +949,7 @@ void AddressbookWindow::duplicateEntry(void)
 	duplicate.setFileAs();
 
 	contacts.addContact( duplicate );
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
 	slotListView();
     }
 }
@@ -980,7 +1013,7 @@ void AddressbookWindow::slotSetCategory( int c )
 {
     //abList->setPaintingEnabled( false );
     contacts.setFilter( c );
-    abList->reload( contacts.sortedContacts() );
+    abList->reload();
     //abList->setPaintingEnabled( true );
     setCaption( tr("Contacts") + " - " + categoryLabel( c ) );
 }
@@ -1003,7 +1036,7 @@ void AddressbookWindow::catChanged()
     }
     
     if ( changed )
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
 }
 
 
@@ -1024,12 +1057,13 @@ void AddressbookWindow::contactFilterSelected( int idx )
 {
     int cid = contactMap[idx];
     abList->setPreferredField( cid );
-    abList->reload( contacts.sortedContacts() );
+    abList->reload();
 }
 
 void AddressbookWindow::selectAll()
 {
     abList->selectAll();
+    updateIcons();
 }
 
 void AddressbookWindow::configure()
@@ -1038,7 +1072,7 @@ void AddressbookWindow::configure()
     settings.setCurrentFields( abList->fields() );
     if ( QPEApplication::execDialog(&settings) == QDialog::Accepted ) {
 	abList->setFields( settings.fields() );
-	abList->reload( contacts.sortedContacts() );
+	abList->reload();
     }
 }
 

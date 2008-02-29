@@ -74,13 +74,13 @@ public:
     {
     }
 
-    static void changeScheme(const QString& sc)
+    static void changeLanScheme(const QString& lan_or_scheme)
     {
 #ifdef USE_SCHEMES	
 	Config c("Network");
 	c.setGroup("Lan");
-	c.writeEntry("Scheme",sc);
-	QString s = toSchemeId(sc);
+	QString s = toSchemeId(lan_or_scheme);
+	c.writeEntry("Scheme",s);
 	system("cardctl scheme " + s);
 #else	
 	QStringList srv = Network::choices();
@@ -90,7 +90,7 @@ public:
 		Config cfg(*it,Config::File);
 		cfg.setGroup("Info");
 		QString n = cfg.readEntry("Name");
-		if ( n == sc ) {
+		if ( n == lan_or_scheme ) {
 		    Lan::writeNetworkOpts( cfg );
 		}
 	    }
@@ -102,7 +102,10 @@ public:
     }
 
 public slots:
-    void changeSchemeSlot(const QString& sc) { changeScheme(sc); }
+    void changeLanSchemeSlot(const QString& lan_or_scheme)
+    {
+	changeLanScheme(lan_or_scheme);
+    }
 };
 
 class WepKeyValidator : public QValidator {
@@ -164,7 +167,7 @@ Lan::Lan(Config& cfg, QWidget* parent) :
     connect(wep_key1, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
     connect(wep_key2, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
     connect(wep_key3, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_type, SIGNAL(activated(int)), this, SLOT(chooseWepType(int)));
+    connect(wep_type, SIGNAL(activated(int)), this, SLOT(wepTypeChanged(int)));
     QValidator* key = new WepKeyValidator(this);
     wep_key0->setValidator(key);
     wep_key1->setValidator(key);
@@ -174,7 +177,7 @@ Lan::Lan(Config& cfg, QWidget* parent) :
     readConfig();
 }
 
-void Lan::chooseWepType(int i)
+void Lan::wepTypeChanged(int i)
 {
     wep_choice->setEnabled(i>0);
 }
@@ -243,6 +246,7 @@ void Lan::readConfig()
     else
 	weptype=0;
     wep_type->setCurrentItem(weptype);
+    wepTypeChanged(weptype);
 
     config.setGroup("Proxy");
     proxies->readConfig( config );
@@ -260,7 +264,12 @@ bool Lan::writeConfig()
 	    Config cfg(*it,Config::File);
 	    cfg.setGroup("Info");
 	    QString n = cfg.readEntry("Name");
-	    if ( n == nm && cfg != config ) {
+	    if ( (n == nm
+#ifdef USE_SCHEMES
+		|| toSchemeId(n) == toSchemeId(nm)
+#endif
+		) && cfg != config
+	    ) {
 		QMessageBox::warning(0, tr("LAN Setup"), 
 				     tr( "This name already\nexists. Please choose a\ndifferent name.") );
 		return FALSE;
@@ -383,6 +392,8 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 			QString v = config.readEntry(k);
 			if ( dhcp && eq > 0 && k.left(4) != "DHCP" )
 			    v = "";
+			if ( s == "=" )
+			    v = Global::shellQuote(v);
 			line = "    " + k + s + v;
 		    }
 		}
@@ -410,7 +421,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		    const char** f = txtfields;
 		    while (*f) {
 			out << "    " << *f << "=" 
-			    << (dhcp ? QString("") : config.readEntry(*f,""))
+			    << Global::shellQuote(dhcp ? QString("") : config.readEntry(*f,""))
 			    << "\n";
 			++f;
 		    }
@@ -450,14 +461,13 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		    done = TRUE;
 		} else {
 		    int eq=wline.find("=");
-		    QString k,s,v;
+		    QString k,v;
 		    if ( eq > 0 ) {
 			k = wline.left(eq);
-			s = "=";
 		    }
 		    if ( !k.isNull() ) {
 			QString v = config.readEntry(k);
-			line = "    " + k + s + "\"" + v + "\"";
+			line = "    " + k + "=" + Global::shellQuote(v);
 		    }
 		}
 	    } else {
@@ -481,7 +491,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		    const char** f = txtfields;
 		    while (*f) {
 			wout << "    " << *f << "=" 
-			    << config.readEntry(*f,"")
+			    << Global::shellQuote(config.readEntry(*f,""))
 			    << "\n";
 			++f;
 		    }
@@ -505,7 +515,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 	retval = FALSE;
 #ifdef USE_SCHEMES
     if ( retval )
-	SchemeChanger::changeScheme(scheme);
+	SchemeChanger::changeLanScheme(scheme);
 #endif
 
     //system("cardctl resume");
@@ -546,15 +556,20 @@ static QString findScheme(const QStringList& lans)
 	    c.setGroup("Lan");
 	    scheme = c.readEntry("Scheme");
 	}
-	if ( !lans.contains(scheme) )
-	    SchemeChanger::changeScheme( lans[0] );
+	bool found=FALSE;
+	for (QStringList::ConstIterator it=lans.begin(); !found && it!=lans.end(); ++it) {
+	    if ( toSchemeId(*it) == scheme )
+		found = TRUE;
+	}
+	if ( !found )
+	    SchemeChanger::changeLanScheme( lans[0] );
     } else {
 	{
 	    Config c("Network");
 	    c.setGroup("Lan");
 	    c.writeEntry("Scheme","default"); // No tr
 	}
-	SchemeChanger::changeScheme( "default" ); // No tr
+	SchemeChanger::changeLanScheme( "default" ); // No tr
     }
     return scheme;
 }
@@ -594,9 +609,15 @@ bool LanImpl::doProperties( QWidget *parent, Config& cfg )
     return dialog.exec();
 }
 
-bool LanImpl::create( Config& )
+bool LanImpl::create( Config& cfg )
 {
-    // nothing special
+    QStringList lans = findLans();
+    QString nm = cfg.readEntry("Name");
+    int n=1;
+    while ( lans.contains(nm) ) {
+	nm = "LAN " + QString::number(++n);
+    }
+    cfg.writeEntry("Name",nm);
     return TRUE;
 }
 
@@ -641,7 +662,7 @@ public:
 	    services->setCurrentItem(lans.findIndex(scheme));
 	    SchemeChanger* sc = new SchemeChanger(this);
 	    QObject::connect(services,SIGNAL(activated(const QString&)),
-		sc,SLOT(changeSchemeSlot(const QString&)));
+		sc,SLOT(changeLanSchemeSlot(const QString&)));
 	} else {
 	    services->hide();
 	    services_label->hide();
@@ -700,14 +721,14 @@ bool LanImpl::isActive( Config& cfg ) const
 	QString n,s;
 	{
 	    cfg.setGroup("Info");
-	    n = cfg.readEntry("Name");
+	    n = toSchemeId(cfg.readEntry("Name"));
 	    Config c("Network");
 	    c.setGroup("Lan");
 	    s = c.readEntry("Scheme");
 	}
 	if ( s.isNull() ) {
 	    s=n;
-	    SchemeChanger::changeScheme( s );
+	    SchemeChanger::changeLanScheme( s );
 	}
 	if ( s==n )
 	    return TRUE;

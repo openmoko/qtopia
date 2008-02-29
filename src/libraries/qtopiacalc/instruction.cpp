@@ -20,11 +20,14 @@
 #include "instruction.h"
 
 Instruction::Instruction(){num=0;}
+Instruction::~Instruction(){};
 Data *Instruction::eval(Data *d){return d;}
 
 InstructionDescription::InstructionDescription() {
+    num = 0;
     precedence = 0;
     instructionName = typeOne = typeTwo = "NULL";
     argCount = 2;
 }
+InstructionDescription::~InstructionDescription(){};
 Instruction *InstructionDescription::getInstruction(){return new Instruction();}

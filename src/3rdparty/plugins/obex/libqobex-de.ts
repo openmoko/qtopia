@@ -19,19 +19,6 @@
     </message>
 </context>
 <context>
-    <name>QObject</name>
-    <message>
-        <source>You received an event for:
-</source>
-        <translation>Termin empfangen:</translation>
-    </message>
-    <message>
-        <source>You received a todo item:
-</source>
-        <translation>Todo item empfangenÖ</translation>
-    </message>
-</context>
-<context>
     <name>ReceiveDialog</name>
     <message>
         <source>unknown</source>
@@ -44,6 +31,16 @@
     <message>
         <source>Failed</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You received an event for:
+</source>
+        <translation>Termin empfangen:</translation>
+    </message>
+    <message>
+        <source>You received a todo item:
+</source>
+        <translation>Todo item empfangenÖ</translation>
     </message>
 </context>
 <context>

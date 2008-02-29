@@ -40,11 +40,15 @@ public:
 signals:
     void launched(int pid, const QString &app);
     void terminated(int pid, const QString &app);
+    void connected(const QString &app);
     
 protected slots:
-    void sigStopped();
+    void sigStopped(int sigPid, int sigStatus);
     void received(const QCString& msg, const QByteArray& data);
     void newQcopChannel(const QString& channel);
+
+protected:
+    bool event(QEvent *);
 
 private:
     static void signalHandler(int sig);

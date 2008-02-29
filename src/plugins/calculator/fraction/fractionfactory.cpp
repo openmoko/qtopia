@@ -23,9 +23,10 @@
 #include "fractionfactory.h"
 #include "fraction.h"
 #include <qstringlist.h>
+#include <qapplication.h>
 
 QWidget * FractionInterface::create (QWidget *parent) {
-    return new FormFraction(parent,"Fraction",0);
+    return new FormFraction(parent,pluginName(),0);
 }
 
 #ifndef QT_NO_COMPONENT
@@ -48,3 +49,5 @@ Q_EXPORT_INTERFACE()
     Q_CREATE_INSTANCE( FractionInterface )
 }
 #endif
+
+const char * FractionInterface::pluginName() { return qApp->tr("Fraction"); }

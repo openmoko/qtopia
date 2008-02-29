@@ -75,7 +75,7 @@ int CardMetrics::ssw;
 int CardMetrics::ssh; 
 int CardMetrics::rw; 
 int CardMetrics::rh; 
-int CardMetrics::od; 
+int CardMetrics::od;
 int CardMetrics::spw; 
 int CardMetrics::sph; 
 int CardMetrics::cardBack = 0; 
@@ -96,7 +96,7 @@ QPixmap *CardMetrics::cardsSuitsUpsideDown = NULL;
 QPixmap *CardMetrics::cardsSuitsSmallUpsideDown = NULL;
 
 
-static const char *cardSizePaths[] = { "micro", "small", "normal", "large" }; // No tr
+static const char *cardSizePaths[] = { "micro", "small", "normal" }; // No tr
 
 /*
 void CardMetrics::drawSuitShape( QPainter &p, int x, int y, int suit, bool inverted ) {
@@ -119,39 +119,44 @@ void CardMetrics::setCardBack( int b )
     }
 }
 
-void CardMetrics::loadMetrics( int width, int ) {
+void CardMetrics::loadMetrics( int width, int height ) {
    
     int oldSize = cardSizes;
  
-    cardSizes = ( width < 220 ) ? micro :
-		    ( width < 500 ) ? small :
-			( width < 1000 ) ? normal :
-			    large;
+    cardSizes = ( width < 230 ) ? micro :
+		    ( width < 450 ) ? small : normal;
 
     if ( cardsFaces == NULL || cardSizes != oldSize ) {
 
-	int cardSizesGaps[] = { 2, 7, 10, 30 };
+	int cardSizesGaps[] = { 2, 7, 10 };
 	g = cardSizesGaps[cardSizes];
     
 	QString cardImagePath = QString("cards/") + CardMetrics::path() + "/";
 
+	delete cardsFaces;
 	cardsFaces = new QPixmap( Resource::loadPixmap( cardImagePath + "face" ) );
 	QString back;
+	delete cardsBacks;
 	cardsBacks = new QPixmap( Resource::loadPixmap( cardImagePath + back.sprintf( "back%02i", cardBack + 1 ) ) );
+	delete cardsJoker;
 	cardsJoker = new QPixmap( Resource::loadPixmap( cardImagePath + "joker" ) );
 
+	delete cardsPictures;
 	cardsPictures = new QPixmap( Resource::loadPixmap( cardImagePath + "pictures" ) );
 	cardsPicturesUpsideDown = Create180RotatedPixmap( cardsPictures );
 
 	QBitmap *tCardsSpade = new QBitmap( Resource::loadBitmap( cardImagePath + "spade" ) );
+	delete cardsSpade;
 	cardsSpade = new QPixmap( *tCardsSpade );
 	cardsSpade->setMask( *tCardsSpade );
 	delete tCardsSpade;
 
 	QBitmap *tCardsChars = new QBitmap( Resource::loadBitmap( cardImagePath + "ranks" ) ); // No tr
 	QBitmap *tCardsCharsUpsideDown = Create180RotatedBitmap( tCardsChars );
+	delete cardsChars;
 	cardsChars = new QPixmap( *tCardsChars );
 	cardsChars->setMask( *tCardsChars );
+	delete cardsCharsUpsideDown;
 	cardsCharsUpsideDown = new QPixmap( *tCardsCharsUpsideDown );
 	cardsCharsUpsideDown->setMask( *tCardsCharsUpsideDown );
 	delete tCardsChars;
@@ -159,8 +164,10 @@ void CardMetrics::loadMetrics( int width, int ) {
 
 	QBitmap *tCardsSuitsSmall = new QBitmap( Resource::loadBitmap( cardImagePath + "suits01" ) ); // No tr
 	QBitmap *tCardsSuitsSmallUpsideDown = Create180RotatedBitmap( tCardsSuitsSmall );
+	delete cardsSuitsSmall;
 	cardsSuitsSmall = new QPixmap( *tCardsSuitsSmall );
 	cardsSuitsSmall->setMask( *tCardsSuitsSmall );
+	delete cardsSuitsSmallUpsideDown;
 	cardsSuitsSmallUpsideDown = new QPixmap( *tCardsSuitsSmallUpsideDown );
 	cardsSuitsSmallUpsideDown->setMask( *tCardsSuitsSmallUpsideDown );
 	delete tCardsSuitsSmall;
@@ -168,8 +175,10 @@ void CardMetrics::loadMetrics( int width, int ) {
 
 	QBitmap *tCardsSuits = new QBitmap( Resource::loadBitmap( cardImagePath + "suits02" ) ); // No tr
 	QBitmap *tCardsSuitsUpsideDown = Create180RotatedBitmap( tCardsSuits );
+	delete cardsSuits;
 	cardsSuits = new QPixmap( *tCardsSuits );
 	cardsSuits->setMask( *tCardsSuits );
+	delete cardsSuitsUpsideDown;
 	cardsSuitsUpsideDown = new QPixmap( *tCardsSuitsUpsideDown );
 	cardsSuitsUpsideDown->setMask( *tCardsSuitsUpsideDown );
 	delete tCardsSuits;
@@ -183,7 +192,6 @@ void CardMetrics::loadMetrics( int width, int ) {
 	ssh = cardsSuitsSmall->height(); 
 	rw = cardsChars->width() / 13; 
 	rh = cardsChars->height(); 
-	od = cardsChars->height() + ssh / 2 + 4;
 	spw = cardsSpade->width(); 
 	sph = cardsSpade->height();
 
@@ -202,6 +210,10 @@ void CardMetrics::loadMetrics( int width, int ) {
 
 	cardsSuits->setOptimization( QPixmap::BestOptim );
 	cardsSuitsUpsideDown->setOptimization( QPixmap::BestOptim );
+    }
+    od = rh + ssh / 2 + 4;
+    while (od > rh+2 && h*2+od*16 > height ) {
+	od--;
     }
  
     int totalWidth = 7 * w + 6 * g;

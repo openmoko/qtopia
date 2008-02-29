@@ -18,13 +18,14 @@
 **
 **********************************************************************/
 
-#define QTOPIA_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #include <qfile.h>
 #include <qasciidict.h>
 #include <qtopia/pim/pimrecord.h>
 #include <qtopia/stringutil.h>
 #include <qtopia/config.h>
 #include <qfileinfo.h>
+#include <qdir.h>
 #include <qstringlist.h>
 #include <errno.h>
 #ifndef Q_WS_WIN32
@@ -58,7 +59,7 @@ char *strstrlen(const char *haystack, int hLen, const char* needle, int nLen)
 		    return (0);
 	    } while (haystackChar != needleChar);
 	} while (strncmp(hsearch, needle, QMIN(hLen - (hsearch - haystack), nLen)) != 0);
-	hsearch--; 
+	hsearch--;
     }
     return ((char *)hsearch);
 }
@@ -91,7 +92,7 @@ int PimVector::compareItems(Item d1, Item d2)
 void PimVector::remove(PimRecord *i)
 {
     uint pos = findRef(i);
-    if ((int)pos != -1) {
+    if ((int)pos != -1 && pos < nextindex ) {
 	dirty = TRUE;
 	nextindex--;
 	if (pos != nextindex) {
@@ -108,7 +109,7 @@ void PimVector::remove(PimRecord *i)
 void PimVector::append(PimRecord *i)
 {
     if (nextindex == size()) {
-	resize(size() << 1);
+	resize((size()+1) << 1);
     }
     insert(nextindex, i);
     nextindex++;
@@ -119,7 +120,6 @@ void PimVector::clear()
 {
     QVector<PimRecord>::clear(); // 0 out elements.
     nextindex = 0;
-    resize(smallestSize);
     dirty = FALSE;
 }
 
@@ -321,7 +321,7 @@ bool PimXmlIO::saveData(const QList<PimRecord> &m_Records) {
 	return FALSE;
     }
 
-    QString strNewFile = dataFilename() + ".new";
+    QString strNewFile = Global::tempName( dataFilename() );
     QFile f( strNewFile );
     if ( !f.open( IO_WriteOnly|IO_Raw ) )
 	return FALSE;
@@ -369,13 +369,7 @@ bool PimXmlIO::saveData(const QList<PimRecord> &m_Records) {
     unlockDataFile(masterFile);
     masterFile.close();
 
-    // now do the rename
-#ifdef Q_OS_WIN32
-    QFile::remove( dataFilename() );
-#endif
-    if ( ::rename( strNewFile, dataFilename() ) < 0 )
-	qWarning( "problem renaming file %s to %s errno %d",
-		strNewFile.latin1(), dataFilename().latin1(), errno );
+    Global::renameFile( strNewFile, dataFilename() );
 
     // remove the journal
     QFile::remove( journalFilename() );
@@ -405,12 +399,12 @@ void PimXmlIO::updateJournal(const PimRecord &rec, journal_action action)
 bool PimXmlIO::isDataCurrent() const
 {
   QFileInfo fileInfo(dataFilename());
-  if (fileInfo.exists() && lastDataReadTime() < fileInfo.lastModified())
+  if (fileInfo.exists() && lastDataReadTime() != fileInfo.lastModified())
       return FALSE;
 
   // Don't  Check journal file, would have got this data from QCop.
   //QFileInfo fileInfoJ(journalFilename());
-  //if (fileInfoJ.exists() && lastDataReadTime() < fileInfoJ.lastModified())
+  //if (fileInfoJ.exists() && lastDataReadTime() != fileInfoJ.lastModified())
       //return FALSE;
   return TRUE;
 }
@@ -436,14 +430,14 @@ QString PimXmlIO::recordToXml(const PimRecord *p)
 }
 
 static int nextId = 0;
-
-int PimXmlIO::generateUid()
-{
 #ifdef QTOPIA_DESKTOP
     static int sign = 1;
 #else
     static int sign = -1;
 #endif
+
+int PimXmlIO::generateUid()
+{
 
     Config pimConfig( "pim" );
     pimConfig.setGroup("uid");
@@ -469,10 +463,14 @@ void PimXmlIO::assignNewUid( PimRecord *r) const
 void PimXmlIO::setUid( PimRecord &r, const QUuid &u) const
 {
     int id = uuidToInt(u);
-    if (nextId == 0) 
-	generateUid(); // init uid.  
-    if (id >= nextId) {
-	nextId = id + 1;
+    if (nextId == 0)
+	generateUid(); // init uid.
+#ifdef QTOPIA_DESKTOP
+    if (id >= nextId && id > 0) {
+#else
+    if (id <= nextId && id < 0) {
+#endif
+	nextId = id + sign;
 	Config pimConfig( "pim" );
 	pimConfig.setGroup("uid");
 	pimConfig.writeEntry( "nextId", nextId );

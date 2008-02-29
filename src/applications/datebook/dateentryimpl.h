@@ -43,12 +43,20 @@ public:
     PimEvent event();
     void setAlarmEnabled( bool alarmPreset, int presetTime, PimEvent::SoundTypeChoice );
 
+#ifdef QTOPIA_DESKTOP
+    void updateCategories();
+#endif
+
+signals:
+    void categoriesChanged();
+
 public slots:
     void endDateTimeChanged( const QDateTime & );
     void startDateTimeChanged( const QDateTime & );
     void slotRepeat();
     void setWeekStartsMonday( bool );
     void allDayToggled(bool);
+    void configureTimeZones();
 
     void turnOnAlarm();
     void checkAlarmSpin(int);

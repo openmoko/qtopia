@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/include/qtopia/categoryselect.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>categoryselect.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>categoryselect.h</h1>
+
+<p>This is the verbatim text of the categoryselect.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+#ifndef __CATEGORYCOMBO_H__
+#define __CATEGORYCOMBO_H__
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qcombobox.h&gt;
+#include &lt;qtoolbutton.h&gt;
+#include &lt;qhbox.h&gt;
+#include &lt;qstring.h&gt;
+#include &lt;qarray.h&gt;
+
+QTOPIA_EXPORT extern QString categoryFileName();
+
+class CategoryComboPrivate;
+class QTOPIA_EXPORT CategoryCombo : public QComboBox
+{
+    Q_OBJECT
+
+public:
+    CategoryCombo( QWidget *parent, const char* name = 0, int width=0);
+
+    ~CategoryCombo();
+
+    int currentCategory() const;
+    void setCurrentCategory( int id );
+    // depreciated.
+    void initCombo( const QArray&lt;int&gt; &amp;recCats, const QString &amp;appName );
+    void initCombo( const QArray&lt;int&gt; &amp;recCats, const QString &amp;appName,
+		    const QString &amp;visibleName /* = appName */ );
+
+    QArray&lt;int&gt; initComboWithRefind( const QArray&lt;int&gt; &amp;recCats, const QString &amp;appName );
+
+signals:
+    void sigCatChanged( int newUid );
+
+private slots:
+    void slotValueChanged( int );
+
+private:
+    void setCurrentText( const QString &amp;str );
+    CategoryComboPrivate *d;
+};
+
+class CategorySelectPrivate;
+class QTOPIA_EXPORT CategorySelect : public QHBox
+{
+    Q_OBJECT
+public:
+    // we need two constructors, the first gets around designer limitations
+
+    CategorySelect( QWidget *parent = 0, const char *name = 0, int width = 0 );
+
+    CategorySelect( const QArray&lt;int&gt; &amp;vlCats, const QString &amp;appName,
+		    QWidget *parent = 0, const char *name = 0,
+		    int width = 0);
+    CategorySelect( const QArray&lt;int&gt; &amp;vlCats, const QString &amp;appName,
+		    const QString &amp;visibleName, QWidget *parent = 0,
+		    const char *name = 0 , int width = 0);
+    CategorySelect( const QArray&lt;int&gt; &amp;vlCats, const QString &amp;appName,
+		    const QString &amp;visibleName, bool allCategories, QWidget *parent = 0,
+		    const char *name = 0 , int width = 0); // libqtopia
+
+    ~CategorySelect();
+
+    enum SelectorWidget { ComboBox, ListView };
+    SelectorWidget widgetType() const; // libqtopia
+
+    bool containsCategory( const QArray&lt;int&gt;&amp; categories ); // libqtopia
+
+    // these were added for find dialog.
+    void setRemoveCategoryEdit( bool remove );
+    void setAllCategories( bool add );
+    void setCurrentCategory( int newCatUid );
+    int currentCategory() const;
+
+    const QArray&lt;int&gt; &amp;currentCategories() const;
+
+    // pretty much if you don't set it the constructor, you need to
+    // call it here ASAP!
+    // however this call is depreciated...
+
+    QString setCategories( const QArray&lt;int&gt; &amp;vlCats, const QString &amp;appName );
+    QString setCategories( const QArray&lt;int&gt; &amp;vlCats, const QString &amp;appName,
+			const QString &amp;visibleName );
+
+    void setFixedWidth(int width);
+signals:
+    void signalSelected( int );
+    void editCategoriesClicked(); // added in qtopia 1.6
+
+private slots:
+    void slotDialog();
+    void categoriesChanged();
+
+public slots:
+    void slotNewCat( int id );
+
+private:
+#ifdef QTOPIA_DESKTOP
+    void init(int width, bool usingAll = FALSE );
+#else
+    void init(int width);
+#endif
+    QString mStrAppName;
+    CategoryCombo *cmbCat;
+    QToolButton *cmdCat;
+    CategorySelectPrivate *d;
+};
+
+
+#define ALL_CATEGORIES_VALUE	    -2
+#define UNFILED_CATEGORIES_VALUE    -1
+
+#endif
+
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

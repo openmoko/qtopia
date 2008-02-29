@@ -15,11 +15,11 @@
     </message>
     <message>
         <source>Events the next</source>
-        <translation type="unfinished">次の行事 [=next event?]</translation>
+        <translation type="obsolete">次の行事 [=next event?]</translation>
     </message>
     <message>
         <source> days</source>
-        <translation type="unfinished">日 [&apos;date&apos; or &apos;day&apos;?]</translation>
+        <translation type="obsolete">日 [&apos;date&apos; or &apos;day&apos;?]</translation>
     </message>
     <message>
         <source>Datebook Options</source>
@@ -28,6 +28,16 @@
     <message>
         <source>Calendar Options</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the next</source>
+        <comment>... 3 days</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> days</source>
+        <comment>&quot;Show the next 3&quot; days</comment>
+        <translation type="unfinished">日 [&apos;date&apos; or &apos;day&apos;?]</translation>
     </message>
 </context>
 <context>

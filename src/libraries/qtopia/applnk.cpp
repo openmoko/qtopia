@@ -121,19 +121,61 @@ static bool prepareDirectories(const QString& lf)
     return TRUE;
 }
 
+class ReloadingCategories : public Categories {
+    Q_OBJECT
+public:
+    ReloadingCategories(QObject* parent=0) : Categories(parent)
+    {
+	saveId=0;
+	load();
+	connect(qApp,SIGNAL(categoriesChanged()),this,SLOT(load()));
+    }
+
+    void saveSoon()
+    {
+	if ( !saveId )
+	    saveId = startTimer(5);
+    }
+
+protected:
+    void timerEvent(QTimerEvent* e)
+    {
+	if ( e->timerId() == saveId ) {
+	    save(categoryFileName());
+	    killTimer(saveId);
+	    saveId = 0;
+	}
+    }
+
+private slots:
+    void load()
+    {
+	Categories::load( categoryFileName() );
+    }
+
+private:
+    int saveId;
+};
+
 class AppLnkPrivate
 {
 public:
     // A CUT DOWN COPY OF THIS IS IN  applnk1.cpp
     QStringList mCatList; // always correct
     QArray<int> mCat; // cached value; correct if not empty
+    static ReloadingCategories* sCat;
+
+    static void ensureSCat()
+    {
+	if ( !sCat )
+	    sCat = new ReloadingCategories;
+    }
 
     void updateCatListFromArray()
     {
-	Categories cat( 0 );
-	cat.load( categoryFileName() );
-	mCatList = cat.globalGroup().labels( mCat );
-	mCatList += cat.appGroupMap()["Document View"].labels( mCat ); // No tr
+	ensureSCat();
+	mCatList = sCat->globalGroup().labels( mCat );
+	mCatList += sCat->appGroupMap()["Document View"].labels( mCat ); // No tr
     }
 
     void setCatArrayDirty()
@@ -146,25 +188,27 @@ public:
 	if ( mCat.count() > 0 || mCatList.count()==0 )
 	    return;
 
-	Categories cat( 0 );
-	cat.load( categoryFileName() );
 	mCat.resize( mCatList.count() );
 	int i;
 	QStringList::ConstIterator it;
+	ensureSCat();
 	for ( i = 0, it = mCatList.begin(); it != mCatList.end();
 	      ++it, i++ ) {
 
 	    bool number;
 	    int id = (*it).toInt( &number );
 	    if ( !number ) {
-		id = cat.id( "Document View", *it ); // No tr
-		if ( id == 0 )
-		    id = cat.addCategory( "Document View", *it ); // No tr
+		id = sCat->id( "Document View", *it ); // No tr
+		if ( id == 0 ) {
+		    id = sCat->addCategory( "Document View", *it ); // No tr
+		    sCat->saveSoon();
+		}
 	    }
 	    mCat[i] = id;
 	}
     }
 };
+ReloadingCategories* AppLnkPrivate::sCat=0;
 
 /*!
   \class AppLnk applnk.h
@@ -344,7 +388,7 @@ int AppLnk::bigIconSize()
 /*!
     \fn const QArray<int>& AppLnk::categories() const
 
-  Returns the Categories property.
+  Returns a shallow copy of the Categories property.
 
   See the CategoryWidget for more details.
 
@@ -628,7 +672,7 @@ AppLnk::AppLnk( const AppLnk &copy )
     mMimeTypeIcons = copy.mMimeTypeIcons;
     mId = 0;
     d = new AppLnkPrivate();
-    d->mCat = copy.d->mCat;
+    d->mCat = copy.d->mCat.copy();
     d->mCatList = copy.d->mCatList;
 }
 
@@ -676,7 +720,7 @@ void AppLnk::execute(const QStringList& args) const
 	invoke(args);
 	setenv("QWS_DISPLAY", old.data(), 1);
 #else
-	QString	rotationEvn("QWS_DISPLAY="); 
+	QString	rotationEvn("QWS_DISPLAY=");
 	_putenv((rotationEvn + QString("Transformed:Rot%1:0").arg(rot)).latin1());
 	invoke(args);
 	_putenv((rotationEvn + old.data()).latin1());
@@ -798,7 +842,7 @@ void AppLnk::setIcon( const QString& iconname )
 */
 void AppLnk::setCategories( const QArray<int>& c )
 {
-    d->mCat = c;
+    d->mCat = c.copy();
     d->updateCatListFromArray();
 }
 
@@ -851,12 +895,12 @@ void AppLnk::storeLink() const
     if ( !mComment.isNull() ) config.writeEntry("Comment",mComment);
     QString f = file();
     int i = 0;
-    while ( i < (int)f.length() && i < (int)mLinkFile.length() && f[i] == mLinkFile[i] ) 
+    while ( i < (int)f.length() && i < (int)mLinkFile.length() && f[i] == mLinkFile[i] )
 	i++;
     while ( i && f[i] != '/' )
 	i--;
     // simple case where in the same directory
-    if ( mLinkFile.find( '/', i + 1 ) < 0 ) 
+    if ( mLinkFile.find( '/', i + 1 ) < 0 )
 	f = f.mid(i+1);
     // ### could do relative ie ../../otherDocs/file.doc
     config.writeEntry("File",f);
@@ -990,6 +1034,8 @@ public:
 /*!
   \class AppLnkSet applnk.h
   \brief The AppLnkSet class is a set of AppLnk objects.
+
+  \ingroup qtopiaemb
 */
 
 /*!
@@ -1155,7 +1201,7 @@ void AppLnkSet::add( AppLnk *f )
 */
 bool AppLnkSet::remove( AppLnk *f )
 {
-    if ( mApps.remove( f ) ) {
+    if ( mApps.removeRef( f ) ) {
 	f->mId = 0;
 	return TRUE;
     }
@@ -1234,6 +1280,8 @@ const AppLnk *AppLnkSet::findExec( const QString& exec ) const
 /*!
   \class DocLnkSet applnk.h
   \brief The DocLnkSet class is a set of DocLnk objects.
+
+  \ingroup qtopiaemb
 */
 
 /*!
@@ -1332,7 +1380,7 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 
     if ( dir.exists( ".Qtopia-ignore" ) )
 	return;
-   
+
     const QFileInfoList *list = dir.entryInfoList();
     if ( list ) {
 	QFileInfo* fi;
@@ -1377,6 +1425,8 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 /*!
   \class DocLnk applnk.h
   \brief The DocLnk class represents loaded document references.
+
+  \ingroup qtopiaemb
 */
 
 /*!
@@ -1503,3 +1553,5 @@ void DocLnk::invoke(const QStringList& args) const
 
     Deletes all AppLnks in the set.
 */
+
+#include "applnk.moc"

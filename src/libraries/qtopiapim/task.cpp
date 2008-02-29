@@ -19,16 +19,19 @@
 **********************************************************************/
 
 #include "task.h"
-#include <qregexp.h>
-#include <qstring.h>
-#include <qtextcodec.h>
+
 #include <qtopia/private/recordfields.h>
 #include <qtopia/private/vobject_p.h>
 #include <qtopia/timeconversion.h>
 #include <qtopia/private/qfiledirect_p.h>
-
 #include <qtopia/pim/private/xmlio_p.h>
 #include <qtopia/pim/private/todoxmlio_p.h>
+
+#include <qregexp.h>
+#include <qstring.h>
+#include <qtextcodec.h>
+#include <qstylesheet.h>
+#include <qapplication.h>
 
 #include <stdio.h>
 
@@ -304,7 +307,18 @@ void PimTask::setPercentCompleted( uint percent )
 
 bool PimTask::hasStartedDate() const
 {
-    return mStatus != NotStarted || hasDueDate();
+    return !mStartedDate.isNull() && ( mStatus != NotStarted || hasDueDate() );
+}
+
+static QString statusToTrString(PimTask::TaskStatus s)
+{
+    switch( s ) {
+	case PimTask::NotStarted: return qApp->translate("QtopiaPim", "Not yet started"); break;
+	case PimTask::InProgress: return qApp->translate("QtopiaPim", "In progress"); break;
+	case PimTask::Waiting: return qApp->translate("QtopiaPim", "Waiting"); break;
+	case PimTask::Deferred: return qApp->translate("QtopiaPim", "Deferred"); break;
+	default: return qApp->translate("QtopiaPim", "Completed"); break;
+    }
 }
 
 /*!
@@ -313,43 +327,52 @@ bool PimTask::hasStartedDate() const
 bool PimTask::match ( const QRegExp &r ) const
 {
     // match on priority, description on due date...
-    bool match;
-    match = false;
+    bool match = FALSE;
     if ( QString::number( mPriority ).find( r ) > -1 )
-	match = true;
+	match = TRUE;
     else if ( mDue && mDueDate.toString().find( r ) > -1 )
-	match = true;
+	match = TRUE;
     else if ( mDesc.find( r ) > -1 )
-	match = true;
+	match = TRUE;
+    else if ( mStatus != NotStarted && mStartedDate.toString().find(r) > -1 )
+	match = TRUE;
+    else if ( mStatus == Completed && mCompletedDate.toString().find(r) > -1 )
+	match = TRUE;
+    else if ( mStatus != NotStarted && mStatus != Completed && 
+		QString::number(mPercentCompleted).find(r) > - 1 )
+	match = TRUE;
+    else if ( mNotes.find(r) > -1 )
+	match = TRUE;
+    else if ( statusToTrString( status() ).find(r) > -1 ) 
+	match = TRUE;
+
     return match;
 }
 
+// In pimrecord.cpp
+void qpe_startVObjectInput();
+bool qpe_vobjectCompatibility(const char* misfeature);
+void qpe_endVObjectInput();
+void qpe_startVObjectOutput();
+void qpe_endVObjectOutput(VObject *,const char* type,const PimRecord*);
+void qpe_setVObjectProperty(const QString&, const QString&, const char* type, PimRecord*);
+VObject *qpe_safeAddPropValue( VObject *o, const char *prop, const QString &value );
 static inline VObject *safeAddPropValue( VObject *o, const char *prop, const QString &value )
-{
-    VObject *ret = 0;
-    if ( o && !value.isEmpty() )
-	ret = addPropValue( o, prop, value.latin1() );
-    return ret;
-}
-
+{ return qpe_safeAddPropValue(o,prop,value); }
+VObject *qpe_safeAddProp( VObject *o, const char *prop);
 static inline VObject *safeAddProp( VObject *o, const char *prop)
-{
-    VObject *ret = 0;
-    if ( o )
-	ret = addProp( o, prop );
-    return ret;
-}
-
+{ return qpe_safeAddProp(o,prop); }
 
 static VObject *createVObject( const PimTask &t )
 {
+    qpe_startVObjectOutput();
+
     VObject *vcal = newVObject( VCCalProp );
     safeAddPropValue( vcal, VCVersionProp, "1.0" );
     VObject *task = safeAddProp( vcal, VCTodoProp );
 
     if ( t.hasDueDate() )
 	safeAddPropValue( task, VCDueProp, TimeConversion::toISO8601( t.dueDate(), FALSE ) );
-    safeAddPropValue( task, VCDescriptionProp, t.description() );
     if ( t.isCompleted() ) {
 	// if we say its completed, then we have a completed date.
 	safeAddPropValue( task, VCStatusProp, "COMPLETED" );
@@ -372,10 +395,19 @@ static VObject *createVObject( const PimTask &t )
 		TimeConversion::toISO8601( t.startedDate(), FALSE ) );
     }
 
-    safeAddPropValue( task, VCAttachProp, t.notes());
+    // vCal spec: VCSummaryProp is required
+    // Palm m100:     No (violates spec)
+    // Ericsson T39m: Yes
+    if ( qpe_vobjectCompatibility("Palm-Task-DN") ) {
+	safeAddPropValue( task, VCSummaryProp, t.description() );
+	safeAddPropValue( task, VCDescriptionProp, t.description() );
+	safeAddPropValue( task, VCAttachProp, t.notes() );
+    } else {
+	safeAddPropValue( task, VCSummaryProp, t.description() );
+	safeAddPropValue( task, VCDescriptionProp, t.notes() );
+    }
 
-    // category missing XXX. 
-    // as list of ; separated strings, VCCategoriesProp.
+    qpe_endVObjectOutput(task,"Todo List",&t); // No tr
 
     return vcal;
 }
@@ -387,6 +419,7 @@ static PimTask parseVObject( VObject *obj )
 
     VObjectIterator it;
     initPropIterator( &it, obj );
+    QString summary, description, attach; // vCal properties, not Qtopias
     while( moreIteration( &it ) ) {
 	VObject *o = nextVObject( &it );
 	QCString name = vObjectName( o );
@@ -411,8 +444,14 @@ static PimTask parseVObject( VObject *obj )
 	if ( name == VCDueProp ) {
 	    t.setDueDate( TimeConversion::fromISO8601( QCString(value) ).date() );
 	}
+	else if ( name == VCSummaryProp ) {
+	    summary = value;
+	}
 	else if ( name == VCDescriptionProp ) {
-	    t.setDescription( value );
+	    description = value;
+	}
+	else if (name == VCAttachProp ) { 
+	    attach = value;
 	}
 	else if ( name == VCStatusProp ) {
 	    if ( value == "COMPLETED" )
@@ -425,19 +464,32 @@ static PimTask parseVObject( VObject *obj )
 	else if ( name == VCPriorityProp ) {
 	    t.setPriority( (PimTask::PriorityValue) value.toInt() );
 	}
-	else if (name == VCAttachProp ) { 
-	    t.setNotes(value);
-	}
 	else if (name == "X-Qtopia-STATUS" ) { 
 	    t.setStatus( (PimTask::TaskStatus) value.toInt() );
 	}
-	else if (name == "X-Qtopia-PRECOMP" ) { 
+	else if (name == "X-Qtopia-PERCOMP" ) { 
 	    t.setPercentCompleted( value.toInt() );
 	}
 	else if (name == "X-Qtopia-STARTED" ) { 
 	    t.setStartedDate(
 		    TimeConversion::fromISO8601( QCString(value) ).date() );
+	} else {
+	    qpe_setVObjectProperty(name,value,"Todo List",&t); // No tr
 	}
+    }
+
+    // Find best mapping from (Summary,Description,Attach) to our (Description,Notes)
+    // Similar code in event.cpp
+    if ( !!summary && !!description && summary != description ) {
+	t.setDescription( summary );
+	t.setNotes( description );
+	// all 3 - drop attach
+    } else if ( !!summary ) {
+	t.setDescription( summary );
+	t.setNotes( attach );
+    } else {
+	t.setDescription( description );
+	t.setNotes( attach );
     }
 
     return t;
@@ -499,6 +551,7 @@ QValueList<PimTask> PimTask::readVCalendar( const QString &filename )
 
     QValueList<PimTask> tasks;
 
+    qpe_startVObjectInput();
     while ( obj ) {
 	QCString name = vObjectName( obj );
 	if ( name == VCCalProp ) {
@@ -518,6 +571,7 @@ QValueList<PimTask> PimTask::readVCalendar( const QString &filename )
 	obj = nextVObjectInList(obj);
 	cleanVObject( t );
     }
+    qpe_endVObjectInput();
 
     return tasks;
 }
@@ -529,35 +583,28 @@ QString PimTask::toRichText() const
 {
     QString text;
 
-    text = "<b><center>" + Qtopia::escapeString(mDesc) + "</b></center><br>";
+    text = "<center><b>" + Qtopia::escapeString(mDesc) + "</b></center><br>"; // No tr
     if ( mDue )
-	text += "<b> Due: </b>" + mDueDate.toString() + "<br>";
+	text += "<b>" + qApp->translate("QtopiaPim", "Due: ") + "</b>" + mDueDate.toString() + "<br>";
     if ( !mStartedDate.isNull() && mStatus != NotStarted)
-	text += "<b> Started: </b>" + mStartedDate.toString() + "<br>";
+	text += "<b>" + qApp->translate("QtopiaPim", "Started: ") + "</b>" + mStartedDate.toString() + "<br>";
     if ( !mCompletedDate.isNull() && isCompleted() )
-	text += "<b> Completed: </b>" + mCompletedDate.toString() + "<br>";
+	text += "<b>" + qApp->translate("QtopiaPim", "Completed: ") + "</b>" + mCompletedDate.toString() + "<br>";
 
-    QString status;
-    if ( !isCompleted() ) { //We remember old status and treat completed separately
-	switch( mStatus ) {
-	    case NotStarted: status = "Not yet started"; break;
-	    case InProgress: status = "In progress"; break;
-	    case Waiting: status = "Waiting"; break;
-	    case Deferred: status = "Deferred"; break;
-	    default: status = "Completed"; break;
-	}
-    } else {
-	status = "Completed";
-    }
+    //if ( !isCompleted() ) { //We remember old status and treat completed separately
+    // such remembering is already done by, status();
+    
+    QString statusString = statusToTrString( status() );
+    text += "<b>" + qApp->translate("QtopiaPim", "Status: ") + "</b> " + statusString + "<br>";
+    text +="<b>" + qApp->translate("QtopiaPim", "Priority: ") + "</b>" + QString::number( mPriority ) + "<br>";
 
-    text += "<b>Status: </b> " + status + "<br>";
-    text +="<b>Priority: </b>" + QString::number( mPriority ) + "<br>";
-
-    if ( mPercentCompleted && (mStatus != NotStarted && !isCompleted() ) )
-	text += "<b>Completed: </b>" + QString::number(mPercentCompleted) + " percent <br>";
+    if ( (mStatus != NotStarted && !isCompleted() ) )
+	text += "<b>" + qApp->translate("QtopiaPim", "Completed: ") + "</b>" + QString::number(mPercentCompleted) + 
+	    qApp->translate("QtopiaPim", " percent", "Word or symbol after numbers for percentage") + "<br>";
 
     if ( !mNotes.isEmpty() )
-	text += "<br> <b> Notes </b> <br> " + Qtopia::escapeString(mNotes) + "<br>";
+	text += "<br> <b> " + qApp->translate("QtopiaPim", "Notes: ") + "</b>"
+	    + QStyleSheet::convertFromPlainText(mNotes);
 
     return text;
 }

@@ -1,114 +1,487 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Text Editor Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Text Editor Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond n-to-1 with features.
-
-    Note: TITLEs may be used as identifiers in bug reports.
-	Tests of different facets of the same feature should
-	have " - [Qualifier]" appended.
-
-    (eg.
-	Add Task
-	Blah Blah.
-
-	Add Task - Empty
-	Blah Blah Blah.
-    )
--->
-
-
-<h3>Create new text file</h3>
-<ol>
-        <li>Start Text editor from the launcher</li>
+<h1>Qtopia/Text edit</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;New File</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a new file can be
+created<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
         <li>Click the <b>New file</b> button</li>
         <li>Verify that an empty file is display with the name "Unnamed"</li>
         <li>Enter some text eg: "1234 test"</li>
-        <li>Click the <b>OK</b> button. This </li>
-        <li>Rename the created file by clicking and holding the stylus on the last
-             file listed. Enter an unique file name in the "Name" field</li>
-</ol>
-
-<h3>Edit an existing text file</h3>
-<ol>
-        <li>Start Text editor from the launcher</li>
-        <li>Select a existing file from the list of file, as named in previous step</li>
-        <li>Verify that the file contains "1234 test"</li>
-        <li>Change the text in the file and click  <b>OK</b> button</li>
-        <li>Verify that the changes made have been saved</li>
-        <li>An alternate path from step 2 is to make changes to the file click
-                the <b>Close</b> button And verify that the changes made
-                were not saved</li>
-</ol>
-
-<h3>Find text</h3>
-<ol>
-        <li>Start Text editor from the launcher</li>
-        <li>Select a existing file from the list of file, as named in previous step</li>
+        <li>Click the <b>Properties</b> button.</li>
+        <li>Enter an unique file name in the "Name" field and click OK</li>
+        <li>Click on the File Open button and verify that the new
+created file is in the list.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Edit File</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an existing file can
+be edited<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select an existing file from the list of files</li>
+        <li>Edit the text in the file and click <b>OK</b> button</li>
+        <li>Reopen the file and verify that the changes made have been
+saved</li>
+        <li>Edit the file again and click                 the <b>Close</b>
+button.</li>
+        <li>Reopen the file and verify that the changes made           
+were not saved</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Find text</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that you can search for
+text in a file<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select a existing file from the list of files</li>
         <li>Click <b>Find</b> button</li>
-        <li>Enter "t" in the topmost edit field</li>
-        <li>Verify that the first "t" is now displayed in highlighted font</li>
-</ol>
-<h3>Repeat last text find</h3>
-<ol>
-        <li>Followimg on from previous test case</li>
-        <li>Click the <b>Find next</b>Button and verify that the
-                second "t" is now displayed in highlighted font</li>
-</ol>
-
-
-<h3>Copy text</h3>
-<ol>
-        <li>Start Text editor from the launcher</li>
-        <li>Select a existing file from the list of file, as named in previous step</li>
-        <li>Select the first line text by in the file draging stylus across from left to right</li>
+        <li>Enter a string in the topmost edit field that occurs
+somewhere in the text</li>
+        <li>Verify that the first occurence is now displayed in
+highlighted font</li>
+        <li>Click the <b>Find next</b> Button and verify that the      
+second occurence is now displayed in highlighted font</li>
+        <li>Repeat clicking the <span style="font-weight: bold;">Find
+next</span> button until all occurences are shown.</li>
+        <li>Verify that after the last successfull search the status
+bar at the bottom says: "Find: reached end".</li>
+        <li>Repeat the test with several strings (long and short) until
+you are convinced that the search option works.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Copy and Paste</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that text can be copied
+to another location or another file<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select a existing file from the list of files</li>
+        <li>Select a word or a line of text in the file by dragging the
+stylus across from left to right</li>
         <li>Click the <b>Copy</b> button</li>
-</ol>
-
-<h3>Paste text</h3>
-<ol>
-        <li>Following on from previous test case, click the <b>Paste</b> button</li>
-        <li>Verify the text previously copied has now been pasted into where the text
-                cursor is postioned</li>
-</ol>
-
-<h3>Cut text</h3>
-<ol>
-        <li>Following on from previous test case, select the first line text by in the file
-                draging stylus across from left to right</li>
+        <li>Verify that the <span style="font-weight: bold;">Paste</span>
+button gets enabled.</li>
+        <li>Tap the stylus on another line in the file and click the <span
+ style="font-weight: bold;">Paste</span> button.</li>
+        <li>Verify that the copied text is inserted at the selected
+position.</li>
+        <li>Click <span style="font-weight: bold;">Paste</span> again
+and verify that the copied text is inserted once more, directly after
+the previous paste.</li>
+        <li>Open another text file.</li>
+        <li>Tap the stylus somewhere in the text and click <span
+ style="font-weight: bold;">Paste</span></li>
+        <li>Verify that the selected text is also pasted in the newly
+opened document.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Cut and Paste</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that text can be cut and
+pasted at a new location<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Select a existing file from the list of files</li>
+        <li>Select a word or a line of text in the file by dragging the
+stylus across from left to right</li>
         <li>Click the <b>Cut</b> button</li>
-        <li>Verify that the select text has been removed from the file</li>
-</ol>
-
-<h3>Line Wrapping</h3>
-<ol>
-<li>Click and drag the entire line of text.  Click <b>Copy</b> from the toolbar
-    or select <b>Copy</b> from the <b>Edit</b> menu.
-<li>Place the cursor at the end of the line, and click <b>Paste</b> from the
-    toolbar or select <b>Paste</b> from the <b>Edit</b> menu.  Repeat until
-    text appears on the second line.
-<li>Uncheck <b>Wrap lines</b> from the <b>View</b> menu.  The second line
-    disappears, and it's contents are placed back on the first line.
-</ol>
-
-<h3>Variable Level Zoom</h3>
-<ol>
-<li>Select <b>Zoom in</b> from the <b>View</b> menu.  The text will appear
-    slightly larger.  Repeatedly selecting <b>Zoom in</b> from the <b>View</b>
-    menu will cause the text to increase in size.
-<li>Select <b>Zoom out</b> from the <b>View</b> menu.  The text will appear
-    slightly smaller.  Repeatedly selecting <b>Zoom out</b> from the
-    <b>View</b> menu will cause the text to decrease in size.
-</ol>
-
+        <li>Verify that the <span style="font-weight: bold;">Paste</span>
+button gets enabled.</li>
+        <li>Verify that the selected text is removed.<br>
+        </li>
+        <li>Tap the stylus on another line in the file and click the <span
+ style="font-weight: bold;">Paste</span> button.</li>
+        <li>Verify that the cut text is inserted at the selected
+position.</li>
+        <li>Open another text file.</li>
+        <li>Tap the stylus somewhere in the text and click <span
+ style="font-weight: bold;">Paste</span></li>
+        <li>Verify that the selected text is also pasted in the newly
+opened document.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Line wrapping</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that text on a line can
+be wrapped.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new document.</li>
+        <li>Check <span style="font-weight: bold;">Wrap lines</span> in
+the <span style="font-weight: bold;">View</span> menu.<br>
+        </li>
+        <li>Enter text until text appears on the second line.</li>
+        <li>Uncheck <b>Wrap lines</b> from the <b>View</b> menu.&nbsp;</li>
+        <li>Verify that the second line     disappears, and it's
+contents are placed back on the first line.</li>
+        <li>Verify that a scroll bar is shown at the bottom to enable
+you to see all text.</li>
+        <li>Check <span style="font-weight: bold;">Wrap lines</span>
+again in the <span style="font-weight: bold;">View</span> menu.<br>
+        </li>
+        <li>Verify that the scroll bar dissappears again and the text
+is wrapped over two lines.</li>
+        <li>Enter a "carriage return" and enter a long string of
+"rrrrrrrrrrrr" that fills more that the screen width.</li>
+        <li>Verify that a scroll bar appears at the bottom and the line
+is not wrapped.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Variable level zoom</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the zoom level can
+be adjusted<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open a text document.</li>
+        <li>Select <b>Zoom in</b> from the <b>View</b> menu.&nbsp;</li>
+        <li>Verify that the text will appear     slightly larger.&nbsp;</li>
+        <li>Repeatedly select <b>Zoom in</b> from the <b>View</b> menu
+and verify that each time the text increases in size.</li>
+        <li>Verify that maximum 5 times can be zoomed.</li>
+        <li>Verify that after 5 attempts the <span
+ style="font-weight: bold;">Zoom in</span> menu option is disabled.</li>
+        <li>Select <b>Zoom out</b> from the <b>View</b> menu.&nbsp;</li>
+        <li>Verify that the <span style="font-weight: bold;">Zoom in</span>
+menu option is enabled again.</li>
+        <li>Verify that the text appears     slightly smaller.&nbsp;</li>
+        <li>Repeatedly select <b>Zoom out</b> and verify that each time
+the text is decreased in size.</li>
+        <li>Verify that the text can be zoomed out maximally 5 times.</li>
+        <li>Verify that after the 5th attempt the <span
+ style="font-weight: bold;">Zoom out</span> menu option is disabled.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Fixed width font</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the used font can be
+changed to a fixed with font.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open a text file.</li>
+        <li>Check the <span style="font-weight: bold;">Fixed-width</span>
+menu option from the <span style="font-weight: bold;">View</span> menu.</li>
+        <li>Verify that the text is now shown with a fixed width font.</li>
+        <li>Uncheck the <span style="font-weight: bold;">Fixed-width</span>
+menu option from the <span style="font-weight: bold;">View</span> menu.</li>
+        <li>Verify that the text is shown again with the font as
+selected in the Appearance settings.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
 </body>
 </html>

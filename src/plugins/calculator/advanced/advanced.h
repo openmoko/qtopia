@@ -29,7 +29,7 @@
 class FormAdvanced:public QWidget {
     Q_OBJECT
 public:
-	FormAdvanced(QWidget *,const char*,WFlags);
+	FormAdvanced(QWidget *);
 	~FormAdvanced();
 
 public slots:

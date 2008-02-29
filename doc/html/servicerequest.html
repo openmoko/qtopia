@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/libraries/qtopia1/services.cpp:64 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>ServiceRequest Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>ServiceRequest Class Reference</h1>
+
+<p>The ServiceRequest class allows applications to request services from
+other applications.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="services-h.html">qtopia/services.h</a>&gt;</tt>
+<p>Inherits <a href="qdatastream.html">QDataStream</a>.
+<p><a href="servicerequest-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#ServiceRequest"><b>ServiceRequest</b></a> ()</div></li>
+<li><div class=fn><a href="#ServiceRequest-2"><b>ServiceRequest</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service, const&nbsp;QCString&nbsp;&amp;&nbsp;message )</div></li>
+<li><div class=fn><a href="#ServiceRequest-3"><b>ServiceRequest</b></a> ( const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;orig )</div></li>
+<li><div class=fn><a href="#~ServiceRequest"><b>~ServiceRequest</b></a> ()</div></li>
+<li><div class=fn>bool <a href="#send"><b>send</b></a> () const</div></li>
+<li><div class=fn>bool <a href="#isNull"><b>isNull</b></a> () const</div></li>
+<li><div class=fn>void <a href="#setService"><b>setService</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;service )</div></li>
+<li><div class=fn>QString <b>service</b> () const</div></li>
+<li><div class=fn>QStrList <a href="#channels"><b>channels</b></a> ( bool&nbsp;automatics = TRUE ) const</div></li>
+<li><div class=fn>QCString <a href="#channel"><b>channel</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE ) const</div></li>
+<li><div class=fn>QStringList <a href="#apps"><b>apps</b></a> ( bool&nbsp;automatics = TRUE ) const</div></li>
+<li><div class=fn>QString <a href="#app"><b>app</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE ) const</div></li>
+<li><div class=fn>void <a href="#setMessage"><b>setMessage</b></a> ( const&nbsp;QCString&nbsp;&amp;&nbsp;message )</div></li>
+<li><div class=fn>QCString <b>message</b> () const</div></li>
+<li><div class=fn>const QByteArray <a href="#data"><b>data</b></a> () const</div></li>
+<li><div class=fn>ServiceRequest &amp; <a href="#operator-eq"><b>operator=</b></a> ( const&nbsp;ServiceRequest&nbsp;&amp;&nbsp;orig )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+<p> The ServiceRequest class allows applications to request services from
+other applications.
+<p> 
+<p> A ServiceRequest encapsulates a <a href="service.html">Service</a> and the message to be sent to
+that service. It is similar to a <a href="qcopenvelope.html">QCopEnvelope</a>, but uses service names
+rather than direct application names.
+<p> Since ServiceRequest inherits <a href="qdatastream.html">QDataStream</a>, you can write data to the
+request before sending it with <a href="#send">send</a>().
+<p> <p>See also <a href="service.html">Service</a> and <a href="../classes.html">Qtopia Classes</a>.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="ServiceRequest"></a>ServiceRequest::ServiceRequest ()
+</h3>
+Construct a null service request. You will need to call
+<a href="#setService">setService</a>() and <a href="#setMessage">setMessage</a>() before <a href="#send">send</a>(), but you
+may write to the service beforehand.
+
+<h3 class=fn><a name="ServiceRequest-2"></a>ServiceRequest::ServiceRequest ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;service, const&nbsp;<a href="qcstring.html">QCString</a>&nbsp;&amp;&nbsp;message )
+</h3>
+Construct a service request that will send <em>message</em> to
+a <em>service</em> when you call <a href="#send">send</a>(). You
+may write to the service beforehand.
+
+<h3 class=fn><a name="ServiceRequest-3"></a>ServiceRequest::ServiceRequest ( const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;orig )
+</h3>
+Copy constructor. Any data previously written to the <em>orig</em>
+service will be in the copy.
+
+<h3 class=fn><a name="~ServiceRequest"></a>ServiceRequest::~ServiceRequest ()
+</h3>
+Destructs the service request. Unlike <a href="qcopenvelope.html">QCopEnvelope</a>, the
+request is NOT automatically sent.
+
+<h3 class=fn><a href="qstring.html">QString</a> <a name="app"></a>ServiceRequest::app ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE ) const
+</h3>
+See <a href="service.html#app">Service::app</a>().
+
+<h3 class=fn><a href="qstringlist.html">QStringList</a> <a name="apps"></a>ServiceRequest::apps ( bool&nbsp;automatics = TRUE ) const
+</h3>
+See <a href="service.html#apps">Service::apps</a>().
+
+<h3 class=fn><a href="qcstring.html">QCString</a> <a name="channel"></a>ServiceRequest::channel ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;appname = QString::null, bool&nbsp;automatics = TRUE ) const
+</h3>
+See <a href="service.html#channel">Service::channel</a>().
+
+<h3 class=fn>QStrList <a name="channels"></a>ServiceRequest::channels ( bool&nbsp;automatics = TRUE ) const
+</h3>
+See <a href="service.html#channels">Service::channels</a>().
+
+<h3 class=fn>const QByteArray <a name="data"></a>ServiceRequest::data () const
+</h3>
+Returns the current stored data. Before you modify the returned value,
+you must call QArray::detach().
+
+<h3 class=fn>bool <a name="isNull"></a>ServiceRequest::isNull () const
+</h3>
+Returns TRUE if either the service or message is not set.
+
+<h3 class=fn><a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp; <a name="operator-eq"></a>ServiceRequest::operator= ( const&nbsp;<a href="servicerequest.html">ServiceRequest</a>&nbsp;&amp;&nbsp;orig )
+</h3>
+Assignment operator.
+Any data previously written to the <em>orig</em>
+service will be in the copy.
+
+<h3 class=fn>bool <a name="send"></a>ServiceRequest::send () const
+</h3>
+Sends the request. Returns FALSE if the request was null.
+
+<h3 class=fn>void <a name="setMessage"></a>ServiceRequest::setMessage ( const&nbsp;<a href="qcstring.html">QCString</a>&nbsp;&amp;&nbsp;message )
+</h3>
+Sets the message to be sent to the service.
+
+<h3 class=fn>void <a name="setService"></a>ServiceRequest::setService ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;service )
+</h3>
+Sets the service to which the request will be sent.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

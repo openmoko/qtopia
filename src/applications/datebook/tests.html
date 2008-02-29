@@ -1,52 +1,1298 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Calendar Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Calendar Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond 1-to-1 with features
-
-    Note: TITLEs may be used as identifiers in bug reports.
--->
-
-<h3>Each repeat pattern is correct at a frequency of 1, 2, and 3.</h3>
-For each repeat type (or repeat type combination) should test that the pattern is
-correct in each view for a frequency of 1, 2, or 3.  This includes the
-"Gray" area of the month view.
-
-<h3>Weekly repeat pattern</h3>
-Weekly repeat patterns need to be tested starting on Saturdays, Sundays,
-and some other day of the week.  For each of these should also test on
-the combination of Saturdays, Sundays and some other day of the week.
-
-<h3>Alarms should work with respect to timezone and repeats</h3>
-Alarm testing should include both timezone shifted events and
-recurring events on the initial occurrance and following occurances.
-
-<h3>Beaming of an event</h3>
-Beaming of events should both send and recieve all corresponding fields
-as well as result in a sensible representation on the destination device.
-
-Because of various feature patterns, not all recurring patterns should be
-expected to match excactly on a send or receive.
-
-<h3>AllDay events time-zone independent</h3>
-All day events should not change date when changing the locale of the device,
-and should have different representations in the views from events which are not
-all day events.
-
-<h3>Midnight events</h3>
-Events should be tested over end of day, end of week and end of month boundries.
-This includes events that cross boundries in their local timezone and ones that
-only cross boundries in alturnate timezones.  Testing should be done with
-both allday and non-allday events.
-
+<h1>Qtopia/Calendar</h1>
+<h2>Test cases</h2>
+<br>
+<br>
+<h3>&nbsp;Single Event</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that a single event is
+shown correctly. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event (repeat: none)</li>
+        <li>Enter a description: "myevent 1"<br>
+        </li>
+        <li>Verify that the event is shown correctly in the day, week
+and month view. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ul>
+        <li>In the day view an event is shown as a colored block with
+the description in it. The block is positioned at the time interval in
+which the event should take place.</li>
+        <li>In the week view the event is shown as a colored block on
+the day and time interval in which the event should take place. No
+information is written inside the block.</li>
+        <li>In the month view the event is shown as a small block on
+the day on which the event should take place. No information is written
+inside the block. The position of the block is a rough indication of the
+time interval. When presented left on the day this means it's happening
+early on the day, and most right means late in the evening.</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Weekly repeating events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that the weekly repeating
+patterns work correctly </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event on the <span style="font-weight: bold;">wednesday</span>
+in the current week</li>
+        <li>Make it repeating: "Every week" and press OK</li>
+        <li>Verify that the event is shown on wednesday of every week
+starting at the current week and verify at least the next 12 months.</li>
+        <li>Verify also that the event is not shown in at least the
+three months before the current week.</li>
+        <li>Tap and hold the event and select "Edit" in the popupmenu
+that should appear.</li>
+        <li>Select "All" to edit all occurences of the event.</li>
+        <li>Enter an <span style="font-weight: bold;">End Date</span>
+that lies two months in the future.</li>
+        <li>Verify that the event is shown on wednesday of every week
+starting at the current week and that it not shown anymore after the
+entered <span style="font-weight: bold;">End Date</span>.</li>
+        <li>Next enter an <span style="font-weight: bold;">End Date</span>
+that lies _before_ the start date.</li>
+        <li>Verify that the <span style="font-weight: bold;">End Date</span>
+is adjusted to the start date.</li>
+        <li>Delete the event.</li>
+        <li>Verify that every instance of the event is gone.</li>
+        <li> Repeat the same test for events on a <span
+ style="font-weight: bold;">saturday</span> and on a <span
+ style="font-weight: bold;">sunday</span>. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+See also the Expected Testresult description in Single Event.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Daily repeating events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that daily repeating
+patterns work correctly<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event on the wednesday in the current week.</li>
+        <li>Make it repeating "Every day" and press OK</li>
+        <li>Verify that the event is shown on every day starting at the
+wednesday of the current week and verify at least the next 12 months.</li>
+        <li>Verify also that the event is not shown in at least the
+three months before the start of the event.</li>
+        <li>Next enter an <span style="font-weight: bold;">End Date</span>
+that lies two months in the future.</li>
+        <li>Verify that the event is shown every day from the <span
+ style="font-weight: bold;">Start Date</span> until the <span
+ style="font-weight: bold;">End Date</span>.</li>
+        <li>Next enter an <span style="font-weight: bold;">End Date</span>
+that lies 6 days in the future.</li>
+        <li>Verify that the recurring event is shown for exactly 7 days
+starting at the wednesday of the current week.</li>
+        <li>Repeat the same test for events starting on <span
+ style="font-weight: bold;">saturday</span> and <span
+ style="font-weight: bold;">sunday</span>. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+See also the Expected Testresult description in Single Event.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Yearly repeating events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that yearly repeating
+patterns work correctly </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event on the wednesday in the current week.</li>
+        <li>Make it repeating "Every year" and press OK</li>
+        <li>Verify that the event is shown on the same date every year
+starting at the wednesday of the current week and verify at least the5
+next years</li>
+        <li>Verify also that the event is not shown in at least the
+three years before the start of the event.</li>
+        <li>Next enter an <span style="font-weight: bold;">End Date</span>
+that lies two years in the future.</li>
+        <li>Verify that the event is shown every year from the <span
+ style="font-weight: bold;">Start Date</span> until the <span
+ style="font-weight: bold;">End Date</span>.</li>
+        <li>Repeat the same test for events starting on <span
+ style="font-weight: bold;">saturday</span> and <span
+ style="font-weight: bold;">sunday</span>. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+See also the Expected Testresult description in Single Event.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Events repeating every x days</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an event can be
+repeated every x days.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click the <span style="font-weight: bold;">today</span>
+button.</li>
+        <li>Create a new event.</li>
+        <li>Select "<span style="font-weight: bold;">Repeat other...</span>".</li>
+        <li>In the dialog click on the "<span style="font-weight: bold;">Day</span>"
+button and enter "Every 3 days".</li>
+        <li>Click OK and OK.</li>
+        <li>Verify in the month view that the event is shown every
+third day (so two days it's not, one day it is).</li>
+        <li>Verify multiple months.</li>
+        <li>Jump forward to the first leap year and verify that the
+events are also show correct near the end of Februari.</li>
+        <li>Open the event again for editing and enter an <span
+ style="font-weight: bold;">End date</span> somewhere in the future.</li>
+        <li>Verify that the events are not shown past the end date..</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+See also the Expected Testresult description in Single Event.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Events repeating several days per week with an x week interval</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an event can be
+repeated on multiple days per week or with x weeks interval.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event.</li>
+        <li>Select "<span style="font-weight: bold;">Repeat other...</span>"</li>
+        <li>In the dialog click on the "<span style="font-weight: bold;">Week</span>"
+button and enter "Every 1 weeks".</li>
+        <li>Verify that todays day is already selected and select two
+other days from the week.</li>
+        <li>Click OK and OK again.</li>
+        <li>Verify in the day, week and month view that the events are
+shown on the correct days of the week.</li>
+        <li>Go to the day view for a day with an event.</li>
+        <li>Tap and hold the event and select "edit" from the popupmenu.</li>
+        <li>Select "all" and edit the repeat setting so that it repeats
+the event every other week, e.g. "Every 2 weeks".</li>
+        <li><span style="font-weight: bold;"></span><span
+ style="font-weight: bold;"></span>Click OK and OK again.</li>
+        <li>Verify in the day, week and month view that the events are
+shown on the correct days of the week and are shown every second week</li>
+        <li>Open the event again for editing and enter an <span
+ style="font-weight: bold;">End date</span> somewhere in the future.</li>
+        <li>Verify that the events are not shown past the end date..</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+See also the Expected Testresult description in Single Event.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;All day events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that all day events are
+presented correctly.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event and make it an "<span
+ style="font-weight: bold;">all day</span>" event.</li>
+        <li>Verify that the event is shown in the day, week and month
+view.</li>
+        <li>Edit the event and make it a repeating event that repeats
+two days a week.</li>
+        <li>Verify that the event is shown accordingly.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      <ul>
+        <li>In the day view the event is shown at the top of the page,
+e.g. no reference is made to a time interval.</li>
+        <li>In the week event a similar approach is taken. The event is
+shown at the top of the day column, and again no reference to a time
+interval.</li>
+        <li>In the month view the event fills the whole day.</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Close Match </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Deleting events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that events can be
+deleted.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event</li>
+        <li>Verify that it is shown in the day, week and month view.</li>
+        <li>Tap and hold on the event in the day view until the popup
+menu appears.</li>
+        <li>Select "<span style="font-weight: bold;">Delete</span>"
+from the menu</li>
+        <li>Click "<span style="font-weight: bold;">All</span>"</li>
+        <li>Verify that the event is removed from the day, week and
+month view.</li>
+        <li>Create a new event and make it a daily repeating event.</li>
+        <li>Verify that it is shown each day in the day, week and month
+view.</li>
+        <li>Go to the day view for an arbitrary day (on which the event
+is shown) and tap and hold the stylus on the event.</li>
+        <li>Select "<span style="font-weight: bold;">Delete</span>" and
+select "<span style="font-weight: bold;">Single</span>" in the next
+dialog.</li>
+        <li>Verify that only the event for _<span
+ style="font-weight: bold;">that_</span> day is removed. All other
+events should still be visible in the day, week and month views.</li>
+        <li>Repeat the same procedure (deleting a single event) for
+another day.</li>
+        <li>Go to the day view for an arbitrary day (on which the event
+is shown) and tap and hold the stylus on the event.</li>
+        <li>Select "<span style="font-weight: bold;">Edit</span>" and
+select "<span style="font-weight: bold;">Single</span>" in the next
+dialog.</li>
+        <li>Edit some of the information like the location and click OK.</li>
+        <li>Verify that the deleted events are not re-inserted again.</li>
+        <li>Verify that the last edited event indeed has the changes
+you made.</li>
+        <li>Finally, tap and hold on an event in the day view and
+select "<span style="font-weight: bold;">Delete</span>" in the popup
+menu.</li>
+        <li>Click "<span style="font-weight: bold;">Cancel</span>" in
+the confirmation dialog.</li>
+        <li>Verify that none of the events are removed.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Event with an audible alarms</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an event can sound
+an alarm<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create an event for today, 2 minutes in the future.</li>
+        <li>Set the event to have an audible alarm.</li>
+        <li>Click OK.</li>
+        <li>Wait until the time has passed.</li>
+        <li>Verify that at the event time a dialog pops up and an alarm
+beep sounds.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Multiple events with an audible alarm</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that there can be
+multiple events with audible alarm at the same time </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create two events for today, 2 minutes in the future (e.g.
+the same start time)</li>
+        <li>Set the events to have an audible alarm.</li>
+        <li>Click OK.</li>
+        <li>Wait until the time has passed.</li>
+        <li>Verify that at the specified event time an alarm sound is
+given and both events will be reported in dialogs, one after the other.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;System time changes</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that events are still
+handled correctly after the system time is changed.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event with an audible alarm and set it's start
+time 10 minutes in the future.</li>
+        <li>Open <span style="font-weight: bold;">Settings &gt; Clock</span>,
+set the system time 8 minutes in future and click OK.</li>
+        <li>Wait until the event start time has passed.</li>
+        <li>Verify that the event alarm sounds at the expected time.</li>
+        <li>Open <span style="font-weight: bold;">Settings &gt; Clock</span>
+again and set the system time 2 minutes back and click OK. (e.g. the
+system clock is now two minutes before the event start time again)</li>
+        <li>Wait until the event start time has passed.</li>
+        <li>Verify that the event alarm sounds at the expected time.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Event alarms with no Calendar active</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that an alarm is also
+given if Calendar is not running<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Close Calendar if it is running</li>
+        <li>Go to the applications tab and open the application
+properties for Calendar (tap and hold stylus on Calendar icon.</li>
+        <li>Uncheck the "Fast load" checkmark (if applicable).</li>
+        <li>Run Calendar and create an event with an audible alarm 2
+minutes in the future.</li>
+        <li>Click OK and close Calendar.</li>
+        <li>Wait until the time has passed.</li>
+        <li>Verify that a dialog pops up for the event and an alarm
+sound is audible.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Sounding alarms before the event start time</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that event alarms can be
+sounded _before_ the event start time.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create a new event for tomorrow, event start time at
+00:03:00.</li>
+        <li>Specify the event to have an audible alarm and give it a
+pre-warning time of 5 minutes.</li>
+        <li>Set the system time to today, 23:56:00</li>
+        <li>Verify that the alarm sounds at today, 23:58:00<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Events in different timezones</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that events can be
+entered for different timezones </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Set the current timezone to Brisbane.</li>
+        <li>Create a new event with audible alarm (at 0 minutes) and
+enter it in the Oslo timezone.</li>
+        <li>Verify that the created event is shown in the day view at
+the correct local time.&nbsp;</li>
+        <li>Open the event again for editing and verify that it is
+still presented in the edit dialog in the Oslo timezone and time
+settings.</li>
+        <li>Adjust the event start time so that it should sound an
+alarm in the Brisbane timezone within 2 minutes.<br>
+Example: <br>
+Current timezone: Brisbane, event timezone: Oslo, timezone difference:
+9 hours<br>
+Current Brisbane time 15:23, so enter an event time of 06:25.<br>
+Event should be presented in the day view at 15:25 and should sound the
+alarm at 15:25 Brisbane time.<br>
+        </li>
+        <li>Repeat the test for a Los Angeles timezone (make shure you
+set the correct date!)</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Configuring new events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that new events can be
+configured with a preset warning time<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Click the "<span style="font-weight: bold;">View</span>"
+menu</li>
+        <li>Click "<span style="font-weight: bold;">Settings</span>"</li>
+        <li>Check the "Preset" checkbox, select 10 minutes and click OK.</li>
+        <li>Create a new event.</li>
+        <li>Verify that <span style="font-weight: bold;">Audible Alarm</span>
+is selected and set to 10 minutes pre warning time.</li>
+        <li>Repeat the same procedure with a time of 30 minutes in the
+settings dialog.</li>
+        <li>Repeat the same procedure again but uncheck the <span
+ style="font-weight: bold;">Preset</span> in the settings dialog.</li>
+        <li>Create a new event.</li>
+        <li>Verify that the alarm mode is now set to <span
+ style="font-weight: bold;">No Alarm, 0 minutes</span>.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Configuring day view</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the presentation of
+the day view can be configured<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open <span style="font-weight: bold;">View &gt; Settings</span>.</li>
+        <li>Enter a <span style="font-weight: bold;">Start viewing
+events time</span> of 03:00 and click OK.<br>
+        </li>
+        <li>Verify that the days view is adjusted and now starts at
+03:00.</li>
+        <li>Repeat the same procedure for a second start time.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Beaming</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Beaming of an event </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create an event and enter sensible information in all
+fields.</li>
+        <li>Beam the event to another Qtopia device.</li>
+        <li>Verify that the receiver has the same information in all
+fields as the original event.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match for Qtopia
+&lt;--&gt; Qtopia.<br>
+Close Match for other brands. Because of various feature patterns, not
+all recurring patterns should be expected to match excactly on a send or
+receive. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;All day events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that all-day events are
+time-zone independent </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open Date/Time and ensure that the current used timezone is
+set to Brisbane.</li>
+        <li>Create a new event for today, make it an all-day event and
+set it to a Brisbane timezone.</li>
+        <li>Verify that the event is shown as an all day event vor
+today.<br>
+        </li>
+        <li>Open Date/Time and change the timezone to Los Angeles.</li>
+        <li>Verify that the event is still shown on the same date as it
+was before.</li>
+        <li>Open Date/Time and change the timezone to Oslo.</li>
+        <li>Verify that the event is still shown on the same date as it
+was before.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Midnight events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that midnight events are
+handled correctly for different timezones. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Open Date/Time and switch the current timezone to Brisbane.</li>
+        <li>Create a new event with a timezone "None" and give it a
+start date/time of today: 23:00:00 and an end date/time of tomorrow:
+02:00:00</li>
+        <li>In the day view verify that the event is shown at the end
+of today and also at the beginning of tomorrow.</li>
+        <li>In the week view verify that the event is shown at the end
+of today and also at the beginning of tomorrow.</li>
+        <li>In the month view verify that the event is shown as one
+block that starts at the end of today and stops at the beginning of
+tomorrow.</li>
+        <li>Open Date/Time and switch the timezone to Los Angeles.</li>
+        <li>Repeat steps 3, 4 and 5 and verify that the event is shown
+exactly the same.</li>
+        <li>Edit the event and set the timezone for the event to
+"Brisbane".</li>
+        <li>Verify that the presentation of the events has changed
+(Event is in Brisbane timezone, current timezone is Los Angeles).</li>
+        <li>Edit the event and set the timezone for the event to "Los
+Angeles".</li>
+        <li>Repeat steps 3, 4 and 5 and verify that the event is shown
+exactly the same.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Today</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the today button
+switches the view to "today"<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Go to the month view and click on an arbitrary day other
+than today.</li>
+        <li>Click on the <span style="font-weight: bold;">Today</span>
+button.</li>
+        <li>Verify that the day/week/month view have switched to the
+current date.</li>
+        <li>Verify that the date picker button also presents the
+current date.</li>
+        <li>Repeat the same test for multiple arbitrary dates in the
+past and future and starting from day/week and month view.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Find</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the search function
+works<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Create several events on the same and different dates.</li>
+        <li>Enter some events:<br>
+          <ul>
+            <li>Event 1: "My Event", date: today, category: Personal</li>
+            <li>Event 2: "My second Event", date: tomorrow, Category:
+Business</li>
+            <li>Event 3: "Another Event", date: tomorrow, Category:
+Personal</li>
+            <li>Event 4: "Something totally different", date: somewhere
+next week, Category: Business</li>
+          </ul>
+        </li>
+        <li>Start the search option (<span style="font-weight: bold;">Event
+&gt; Find Event</span>)&nbsp;</li>
+        <li>Enter "My" and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that Event 1 is shown.</li>
+        <li>Enter "second" and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that Event 2 is shown</li>
+        <li>Enter "bla" and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that the status bar shows a message that "nothing is
+found".</li>
+        <li>Check <span style="font-weight: bold;">Case sensitive</span>,
+enter "Second" and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that again no search result is shown.</li>
+        <li><span style="font-weight: bold;"></span>Enter "totally",
+select a <span style="font-weight: bold;">Start Search at</span> on the
+day before the event date and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that Event 4 is found.<span
+ style="font-weight: bold;"></span></li>
+        <li>Repeat step 12 and 13 for a <span
+ style="font-weight: bold;">Start Search at</span> on the event date.</li>
+        <li>Repeat step 12 for a <span style="font-weight: bold;">Start
+Search at</span> on the day after the event date.</li>
+        <li>Verify that Event 4 is not found.</li>
+        <li>Reset the <span style="font-weight: bold;">Start Search at</span>
+to todays date.</li>
+        <li>Enter "Event" as the search string and select Business as
+the category and click <span style="font-weight: bold;">Find</span>&nbsp;</li>
+        <li>Verify that Event 2 is found.</li>
+        <li>Enter Personal as the category and click <span
+ style="font-weight: bold;">Find</span> again.</li>
+        <li>Verify that Event 1 is found.</li>
+        <li>Enter "totally" as the search string and "Personal" as the
+category and click <span style="font-weight: bold;">Find</span>.</li>
+        <li>Verify that nothing is found.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p>&nbsp;</p>
 </body>
 </html>

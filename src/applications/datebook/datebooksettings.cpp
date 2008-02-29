@@ -29,7 +29,7 @@
 DateBookSettings::DateBookSettings( bool whichClock, QWidget *parent,
                                     const char *name, bool modal, WFlags fl )
     : DateBookSettingsBase( parent, name, modal, fl ),
-      ampm( whichClock )
+      ampm( whichClock ), oldtime(0)
 {
     init();
     QObject::connect( qApp, SIGNAL( clockChanged( bool ) ),

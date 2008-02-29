@@ -129,11 +129,9 @@ void AudioDevice::getVolume( unsigned int& leftVolume, unsigned int& rightVolume
 #endif
 }
 
-bool tempMute = FALSE;
 
 void AudioDevice::setVolume( unsigned int leftVolume, unsigned int rightVolume, bool muted ) {
     AudioDevicePrivate::muted = muted;
-    tempMute = ( rightVolume == 0 && leftVolume == 0 );
     if ( muted ) {
 	AudioDevicePrivate::leftVolume = leftVolume;
 	AudioDevicePrivate::rightVolume = rightVolume;
@@ -166,7 +164,7 @@ void AudioDevice::setVolume( unsigned int leftVolume, unsigned int rightVolume, 
     unsigned int lV = (leftVolume  * 101) >> 16;
     unsigned int volume = ((rV << 8) & 0xFF00) | (lV & 0x00FF);
     int mixerHandle = 0;
-    if ( ( mixerHandle = open( "/dev/mixer", O_RDWR ) ) >= 0 ) {
+    if ( ( mixerHandle = open( "/dev/mixer", O_RDONLY ) ) >= 0 ) {
         ioctl( mixerHandle, MIXER_WRITE(0), &volume );
         close( mixerHandle );
     } else
@@ -295,8 +293,6 @@ void AudioDevice::volumeChanged( bool muted )
 
 void AudioDevice::write( char *buffer, unsigned int length )
 {
-    if ( tempMute )
-	return;
 #ifdef Q_OS_WIN32
     // returns immediately and (to be implemented) emits completedIO() when finished writing
     WAVEHDR *lpWaveHdr = (WAVEHDR *)malloc( sizeof(WAVEHDR) );

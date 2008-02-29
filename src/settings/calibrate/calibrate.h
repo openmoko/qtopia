@@ -40,6 +40,7 @@ public:
 private:
     QPoint fromDevice( const QPoint &p );
     bool sanityCheck();
+    bool checkTouch();
     void moveCrosshair( QPoint pt );
     void paintEvent( QPaintEvent * );
     void keyPressEvent( QKeyEvent *);
@@ -50,6 +51,7 @@ private:
 
 private slots:
     void timeout();
+    void doGrab();
 
 private:
     void store();
@@ -64,6 +66,7 @@ private:
     int dx;
     int dy;
     bool showCross;
+    bool pressed;
 };
 
 #endif // _WS_QWS_

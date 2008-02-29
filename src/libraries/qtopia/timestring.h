@@ -22,43 +22,13 @@
 #define _TIMESTRING_H_
 #include <qdatetime.h>
 #include <qstring.h>
+#include <qarray.h>
 
 #if (QT_VERSION-0 >= 0x030000)
 #define DateFormat QPEDateFormat
 #endif
 
 #include <qtopia/qpeglobal.h>
-
-/*
-13rd January, 1934
-
-12:20pm
-
-12pm
-23
-09
-
-12h50m
-
-12h50
-
-2002y12m25d
-
-y%1m%2d%3
-
-y2002m12d25
-25/12/2002
-25 Dec 2002
-
-"%1 %2 %3"
-"%1/%2/%3"
-
-25 Dec 02
-
-25 Dec
-25/12
-
-*/
 
 class QObject;
 
@@ -153,6 +123,8 @@ public:
     static QString localH( int hour );
     static QString localHM( const QTime & );
     static QString localHMS( const QTime & );
+    static QString localHMDayOfWeek( const QDateTime &t );
+    static QString localHMSDayOfWeek( const QDateTime &t );
     static QString localMD( const QDate &, Length=Medium );
     static QString localYMD( const QDate &, Length=Medium );
     static QString localYMDHMS( const QDateTime &, Length=Medium );
@@ -162,6 +134,7 @@ public:
     static QString hourString( int hour, bool ampm );
     static bool currentAMPM();
     static DateFormat currentDateFormat();
+    static QArray<DateFormat> formatOptions(); // qtopia 1.6.0
 
     static void connectChange(QObject*,const char* member);
     static void disconnectChange(QObject*,const char* member);

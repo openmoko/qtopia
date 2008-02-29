@@ -55,7 +55,6 @@
 #include <stdlib.h>
 
 
-
 class DocPropertiesWidgetPrivate 
 {
 public:
@@ -73,6 +72,23 @@ public:
 };
 
 
+/*!
+  \class DocPropertiesWidget docproperties.h
+  \brief The DocPropertiesWidget class provides controls for modifying an
+         AppLnks properties.
+
+  The DocPropertiesWidget and allows modification of the name, location,
+  and category of a file associated with a particular AppLnk.  The file can
+  also be deleted, copied and beamed from the DocPropertiesWidget.
+
+  \ingroup qtopiaemb
+  \sa DocPropertiesDialog
+*/
+
+/*!
+  Constructs a DocPropertiesWidget with parent \a parent and name \a name.
+  \a l is a pointer to an existing AppLnk.
+ */
 DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char *name )
     : QWidget( parent, name ), lnk( l )
 {
@@ -179,11 +195,17 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char
     }
 }
 
+/*!
+  Destroys the widget.
+ */
 DocPropertiesWidget::~DocPropertiesWidget()
 {
     delete d;
 }
 
+/*!
+  Applys any changes made on the DocPropertiesWidget.
+ */
 void DocPropertiesWidget::applyChanges()
 {
     bool changed=FALSE;
@@ -228,7 +250,9 @@ void DocPropertiesWidget::applyChanges()
     }
 }
 
-
+/*!
+  Performs a copy operation.
+ */
 void DocPropertiesWidget::duplicateLnk()
 {
     // The duplicate takes the new properties.
@@ -245,6 +269,9 @@ void DocPropertiesWidget::duplicateLnk()
     emit done();
 }
 
+/*!
+  \internal
+ */
 bool DocPropertiesWidget::moveLnk()
 {
     DocLnk newdoc( *((DocLnk *)lnk) );
@@ -260,6 +287,9 @@ bool DocPropertiesWidget::moveLnk()
     return TRUE;
 }
 
+/*!
+  Beams the associated document.
+ */
 void DocPropertiesWidget::beamLnk()
 {
     Ir ir;
@@ -269,6 +299,9 @@ void DocPropertiesWidget::beamLnk()
     ir.send( doc, tr("\"%1\"").arg(doc.name()) );
 }
 
+/*!
+  \internal
+ */
 bool DocPropertiesWidget::copyFile( DocLnk &newdoc )
 {
     const char *linkExtn = ".desktop";
@@ -280,7 +313,7 @@ bool DocPropertiesWidget::copyFile( DocLnk &newdoc )
     QString safename = newdoc.name();
     safename.replace(QRegExp("/"),"_");
 
-    QString fn = d->locationCombo->path() + "/Documents/" + newdoc.type() + "/" + safename;
+    QString fn = d->locationCombo->documentPath() + newdoc.type() + "/" + safename;
     if ( QFile::exists(fn + fileExtn) || QFile::exists(fn + linkExtn) ) {
 	int n=1;
 	QString nn = fn + "_" + QString::number(n);
@@ -300,9 +333,9 @@ bool DocPropertiesWidget::copyFile( DocLnk &newdoc )
     return TRUE;
 }
 
-
-
-
+/*!
+  Deletes the file associated with this link.
+ */
 void DocPropertiesWidget::unlinkLnk()
 {
     if ( QPEMessageBox::confirmDelete( this, tr("Delete"), lnk->name() ) ) {
@@ -315,8 +348,35 @@ void DocPropertiesWidget::unlinkLnk()
     }
 }
 
+/*!
+  \fn void DocPropertiesWidget::done()
+
+  This signal is emitted when a file is deleted, copied or beamed from the
+  DocPropertiesWidget.
+ */
+
+/*!
+  \fn void DocPropertiesWidget::deleted()
+  \internal
+*/
+
+/*!
+  \class DocPropertiesDialog docproperties.h
+  \brief The DocPropertiesDialog class allows the user to examine attributes
+         associated with a AppLnk object.
+
+  The DocPropertiesDialog uses a DocPropertiesWidget to allow the user to
+  examine and modify attributes associated with a file.
+
+  \ingroup qtopiaemb
+  \sa DocPropertiesWidget
+*/
 
 
+/*!
+  Constructs a DocPropertiesDialog with parent \a parent and name \a name.
+  \a l is a pointer to an existing AppLnk.
+ */
 DocPropertiesDialog::DocPropertiesDialog( AppLnk* l, QWidget* parent, const char *name )
     : QDialog( parent, name, TRUE )
 {
@@ -328,16 +388,21 @@ DocPropertiesDialog::DocPropertiesDialog( AppLnk* l, QWidget* parent, const char
     connect( d, SIGNAL(done()), this, SLOT(reject()) );
 }
 
-
+/*!
+  Destroys the dialog.
+ */
 DocPropertiesDialog::~DocPropertiesDialog()
 {
 }
 
-
-
+/*!
+  If \a ok is TRUE, any modifications done in the dialog are applied to the
+  associated AppLnk.
+ */
 void DocPropertiesDialog::done(int ok)
 {
     if ( ok ) 
 	d->applyChanges();
     QDialog::done( ok );
 }
+

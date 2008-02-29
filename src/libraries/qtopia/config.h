@@ -43,7 +43,7 @@ public:
     enum Domain { File, User };
     Config( const QString &name, Domain domain=User );
 #ifdef QTOPIA_DESKTOP
-    Config( QTextStream &s, const QString &saveName, Domain domain=User );
+    Config( QTextStream &s, Domain domain=User );
 #endif
     ~Config();
 
@@ -62,33 +62,27 @@ public:
     void writeEntry( const QString &key, bool b );
 #endif
     void writeEntry( const QString &key, const QStringList &lst, const QChar &sep );
-#ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
-    void writeEntry( const QString &key, const QByteArray byteArray);
-#endif
+    void writeEntry( const QString &key, const QByteArray& byteArray); // libqtopia
     void removeEntry( const QString &key );
 
+    // libqtopia...
     QString readEntry( const QString &key, const QString &deflt = QString::null ) const;
     QString readEntryCrypt( const QString &key, const QString &deflt = QString::null ) const;
     QString readEntryDirect( const QString &key, const QString &deflt = QString::null ) const;
     int readNumEntry( const QString &key, int deflt = -1 ) const;
     bool readBoolEntry( const QString &key, bool deflt = FALSE ) const;
     QStringList readListEntry( const QString &key, const QChar &sep ) const;
-#ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
     QByteArray readByteArrayEntry(const QString& key) const;
-    QByteArray readByteArrayEntry(const QString& key, const QByteArray deflt) const;
-#endif
+    QByteArray readByteArrayEntry(const QString& key, const QByteArray& deflt) const;
+    // ... end.
 
     // For compatibility, non-const versions.
-    QString readEntry( const QString &key, const QString &deflt );
-    QString readEntryCrypt( const QString &key, const QString &deflt );
-    QString readEntryDirect( const QString &key, const QString &deflt );
-    int readNumEntry( const QString &key, int deflt );
-    bool readBoolEntry( const QString &key, bool deflt );
+    QString readEntry( const QString &key, const QString &deflt = QString::null );
+    QString readEntryCrypt( const QString &key, const QString &deflt = QString::null );
+    QString readEntryDirect( const QString &key, const QString &deflt = QString::null );
+    int readNumEntry( const QString &key, int deflt = -1 );
+    bool readBoolEntry( const QString &key, bool deflt = FALSE );
     QStringList readListEntry( const QString &key, const QChar &sep );
-#ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
-    QByteArray readByteArrayEntry(const QString& key);
-    QByteArray readByteArrayEntry(const QString& key, const QByteArray deflt);
-#endif
     void clearGroup();
 
     void write( const QString &fn = QString::null );
@@ -96,9 +90,6 @@ public:
 protected:
     void read();
     bool parse( const QString &line );
-    QString encodeBase64(const QByteArray origData);
-    QByteArray decodeBase64(const QString& encoded) const;
-    int parse64base(char* src, char* bufOut) const;
 
     QMap< QString, ConfigGroup > groups;
     ConfigGroupMap::Iterator git;
@@ -113,25 +104,5 @@ private:
     /* This cannot be made public or protected because of binary compat issues */
     void read( QTextStream &s );
 };
-
-inline QString Config::readEntry( const QString &key, const QString &deflt ) const
-{ return ((Config*)this)->readEntry(key,deflt); }
-inline QString Config::readEntryCrypt( const QString &key, const QString &deflt ) const
-{ return ((Config*)this)->readEntryCrypt(key,deflt); }
-inline QString Config::readEntryDirect( const QString &key, const QString &deflt ) const
-{ return ((Config*)this)->readEntryDirect(key,deflt); }
-inline int Config::readNumEntry( const QString &key, int deflt ) const
-{ return ((Config*)this)->readNumEntry(key,deflt); }
-inline bool Config::readBoolEntry( const QString &key, bool deflt ) const
-{ return ((Config*)this)->readBoolEntry(key,deflt); }
-inline QStringList Config::readListEntry( const QString &key, const QChar &sep ) const
-{ return ((Config*)this)->readListEntry(key,sep); }
-
-#ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
-inline QByteArray Config::readByteArrayEntry(const QString& key) const
-{ return ((Config*)this)->readByteArrayEntry(key); }
-inline QByteArray Config::readByteArrayEntry(const QString& key, const QByteArray deflt) const
-{ return ((Config*)this)->readByteArrayEntry(key, deflt); }
-#endif
 
 #endif

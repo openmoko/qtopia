@@ -38,8 +38,8 @@ public:
     WavPlugin();
     ~WavPlugin();
 
-    const char *pluginName() { return "WavPlugin"; }
-    const char *pluginComment() { return "This is a simple plugin for playing wav files"; }
+    const char *pluginName() { return "WavPlugin"; } // No tr
+    const char *pluginComment() { return "This is a simple plugin for playing wav files"; } // No tr
     double pluginVersion() { return 1.0; }
 
     bool isFileSupported( const QString& );

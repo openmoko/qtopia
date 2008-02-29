@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
+<body>
+<h1>Qtopia/Network</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Adding a service using DHCP</h3>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a network service
+can be add and configured for DHCP<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Insert an Ethernet LAN card in the CF slot and hook up to a
+network.</li>
+        <li>Go to the services tab and remove all services (if any
+available).</li>
+        <li>Tap the "Add" button.</li>
+        <li>Select LAN -TCP/IP</li>
+        <li>Tap "Add" again</li>
+        <li>Verify that a LAN account has been created.</li>
+        <li>Enter a new name, e.g. LAN-TEST</li>
+        <li>Verify that DHCP has been selected by default.</li>
+        <li>Verify that the IP tab is disabled.</li>
+        <li>Tap "OK".</li>
+        <li>Verify that the list of available services now reports a
+"LAN-TEST".</li>
+        <li>Go to the Current tab.</li>
+        <li>Verify that a IP address is mentioned in your network
+domain.</li>
+        <li>Start Terminal in the applications tab (if available) and
+verify that you can ping to a host that should be accessible.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Adding a service for manual IP</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a network service
+can be add and configured for manual IP&nbsp; </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Insert an Ethernet LAN card in the CF slot and hook up to a
+network.</li>
+        <li>Go to the services tab and remove all services (if any
+available).</li>
+        <li>Tap the "Add" button.</li>
+        <li>Select LAN -TCP/IP</li>
+        <li>Tap "Add" again</li>
+        <li>Verify that a LAN account has been created.</li>
+        <li>Enter a new name, e.g. LAN-TEST</li>
+        <li>Select "Configure IP manually".<br>
+        </li>
+        <li>Verify that the IP tab gets enabled.</li>
+        <li>Verify that the IP address field is empty and tap OK.</li>
+        <li>Verify that the list of available services reports a
+"LAN-TEST".</li>
+        <li>Go to the Current tab and verify that the IP address shows
+"eth0".</li>
+        <li>Go to the Services tab again.</li>
+        <li>Select the LAN-TEST account and tap "Properties"</li>
+        <li>Go to the IP tab and enter valid settings for the IP
+address, Broadcast, Gateway and DNS.<br>
+        </li>
+        <li>Tap "OK".</li>
+        <li>Go to the Current tab.</li>
+        <li>Verify that a IP address is mentioned in your network
+domain.</li>
+        <li>Start Terminal in the applications tab (if available) and
+verify that you can ping to a host that should be accessible.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Dial up modem</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a network service
+can be installed for a dial up modem.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Insert a dial up modem card into the CF slot.</li>
+        <li>Go to the services tab of the Network application.</li>
+        <li>tap "Add" and select "Dial-up - PPP" + "Add" again.</li>
+        <li>Enter valid information in the Username, Password and Phone
+fields.</li>
+        <li>Verify that the settings in the Modem, Network and Proxies
+tab are according to the ISP settings.</li>
+        <li>Select "Manual connect and disconnect" in the Modem tab and
+tap OK.</li>
+        <li>Close the network application.</li>
+        <li>Verify that a PPP connect icon is shown in the task bar
+with a red cross (no connection).</li>
+        <li>Connect the modem to a phone line.<br>
+        </li>
+        <li>Tap on the PPP connect icon and tap "Connect".</li>
+        <li>Verify that the plugin shows the progress of the connection
+and finally shows connected.</li>
+        <li>Start Terminal in the applications tab (if available) and
+verify that you can ping to a host that should be accessible.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+</body>
+</html>

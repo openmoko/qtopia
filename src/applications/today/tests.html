@@ -1,76 +1,365 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Today Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Today Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-
-<h3>Default Plugins</h3>
-<ol>
-<li>Start the <b>Today</b> application from the <b>Applications</b> tab.
-<li>The application will be broken up into 4 parts:
-    <ul>
-    <li>The current date will be displayed at the top.
-    <li>The default plugins (<b>Calendar</b>, <b>Email</b> and <b>Todo</b>)
-	will provide summaries, each in their own section.  Summaries
-	will be shown only for those applications that have any relevant
-	information.
-    </ul>
-<li>Clicking on the date at the top of the screen will show display the
-    current month as a popup.
-</ol>
-
-<h3>Dynamic Plugin Loading</h3>
-<ol>
-<li>Select <b>Edit Today View</b> from the corner box in the bottom right
-    of the <b>Today</b> screen.
-<li>Click on the <b>Calendar</b> plugin, followed by the <b>Down</b> arrow
-    on the right of the screen.  This will move the <b>Calendar</b> summary
-    below the <b>Email</b> summary.  Click <b>OK</b> in the top right of
-    the window.  The <b>Email</b> summary will now appear before the
-    <b>Calendar</b> summary.
-<li>Return the <b>Calendar</b> plugin to the top of the list.
-</ol>
-
-<h3>Plugin Configuration</h3>
-<ol>
-<li>Select <b>Calendar plugin...</b> from the corner box in the bottom right
-    of the <b>Today</b> screen.
-<li>Modify how many days over which events should be shown (<b>Events the
-    next...</b>) and the maximum number of events (<b>Maximum listing</b>).
-    Click <b>Ok</b> in the top right of the window.
-<li>Depending on the number of events in the <b>Calendar</b>, the contents
-    of the <b>Calendar</b> summary may or may not change.
-<li>Other plugins have different options, but are all accessed in the same
-    fashion.
-</ol>
-
-<h3>Application Launcher</h3>
-<ol>
-<li>Clicking on the icon representing each plugin will launch that application.
-    (eg: clicking on the <b>Calendar</b> icon will launch the <b>Calendar</b>
-    application).
-<li>Clicking on an entry in a summary list will also launch the owner
-    application (eg: clicking on an entry in the <b>Calendar</b> list will
-    launch the <b>Calendar</b> application, with a day view of the date
-    of the entry).
-</ol>
-
-<h3>Event Reloading</h3>
-<ol>
-<li>Click on the <b>Calendar</b> icon on the <b>Today</b> screen to launch
-    the <b>Calendar</b>.
-<li>Enter a new event in the current day view.  Close the <b>Calendar</b>.
-<li>The <b>Today</b> application will update the <b>Calendar</b> summary with
-    the new event.
-</ol>
-
+<h1>Qtopia/Today</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Default plugins</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the default plugins
+are shown<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Verify that:
+          <ul>
+            <li>The current date is displayed at the top, </li>
+            <li>A summary is presented for todays Calendar events,</li>
+            <li>A summary is presented for the unread and unsent mail,</li>
+            <li>A summary is presented of open Todo tasks.</li>
+          </ul>
+        </li>
+        <li>Clicking on the Today icon at the top of the screen</li>
+        <li>In the popupmenu select &nbsp;<span
+ style="font-weight: bold;">Edit Today View</span>&nbsp;</li>
+        <li>Change the order of the active plugins and click <span
+ style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the order in which the information is presented
+matches the selections made in the dialog.</li>
+        <li>Open the <span style="font-weight: bold;">Edit Today View</span>
+dialog again.</li>
+        <li>Select one of the active plugins and click on the <span
+ style="font-weight: bold;">cut</span> button.</li>
+        <li>Verify that the selected plugin is moved to the Inactive
+Plugin area.</li>
+        <li>Click OK</li>
+        <li>Verify that Today only shows information for the remaining
+active plugins.</li>
+        <li>Open the <span style="font-weight: bold;">Edit Today View</span>
+dialog again.</li>
+        <li>Move all remaing active plugins to the inactive area and
+click <span style="font-weight: bold;">OK</span></li>
+        <li><span style="font-weight: bold;"></span>Verify that Today
+presents a message that no plugins are selected for display.</li>
+        <li>Click on the "here" link.</li>
+        <li>Verify that the <span style="font-weight: bold;">Edit
+Today View</span> dialog is opened.</li>
+        <li>Click on all inactive plugins and verify that they are
+moved again to the active plugin area.</li>
+        <li>Verify that the plugins are appended to the active area in
+the sequence in which you tapped them.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Calendar events</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that Calendar events are
+shown<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">Calendar</span>
+icon (in the Today app)</li>
+        <li>Verify that <span style="font-weight: bold;">Calendar</span>
+is opened.</li>
+        <li>Create the following events in <span
+ style="font-weight: bold;">Calendar</span>:<br>
+          <ul>
+            <li>name: "Today 12:00", date: today, event start time:
+12:00</li>
+            <li>name: "Today 14:00", date: today, event start time:
+14:00</li>
+            <li>name: "Today 16:00", date: today, event start time:
+16:00</li>
+            <li>name: "Tomorrow 10:00", date: tomorrow, event start
+time: 10:00</li>
+            <li>name: "Day after 10:00", date the day after tomorrow,
+event start time: 10:00</li>
+          </ul>
+        </li>
+        <li>Ensure that no other events are entered for today, tomorrow
+and the day after tomorrow.</li>
+        <li>Close <span style="font-weight: bold;">Calendar</span>.</li>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon on top of the page.</li>
+        <li>Select <span style="font-weight: bold;">Calendar...</span>
+and set <span style="font-weight: bold;">Show the next</span> to 1 and <span
+ style="font-weight: bold;">Maximum listing</span> to 1</li>
+        <li>Verify that the <span style="font-weight: bold;">Calendar</span>
+part shows: "You have 3 events today" and that "Today 14:00" is shown.</li>
+        <li>Open the <span style="font-weight: bold;">Calendar...</span>
+settings again and set <span style="font-weight: bold;">Show the next</span>
+to 2 and <span style="font-weight: bold;">Maximum listing</span> to 1</li>
+        <li>Verify that the <span style="font-weight: bold;">Calendar</span>
+part shows: "You have 4 events over the next 2 days" and that "Today
+14:00" is shown.</li>
+        <li>Open the <span style="font-weight: bold;">Calendar...</span>
+settings again and set <span style="font-weight: bold;">Show the next</span>
+to 2 and <span style="font-weight: bold;">Maximum listing</span> to 4</li>
+        <li>Verify that the <span style="font-weight: bold;">Calendar</span>
+part shows: "You have 4 events over the next 2 days" and that "Today
+14:00", "Today 16:00", "Today 18:00" and "Tomorrow 10:00" are shown.</li>
+        <li>Open the <span style="font-weight: bold;">Calendar...</span>
+settings again and set <span style="font-weight: bold;">Show the next</span>
+to 3 and <span style="font-weight: bold;">Maximum listing</span> to 10</li>
+        <li>Verify that the <span style="font-weight: bold;">Calendar</span>
+part shows: "You have 5 events over the next 3 days" and that "Today
+14:00", "Today 16:00", "Today 18:00", "Tomorrow 10:00" and "Day after
+10:00" are shown.</li>
+        <li>Verify that the todays events show the start and end time,
+and the events for future days show the start date.</li>
+        <li>Create a new event in <span style="font-weight: bold;">Calendar</span>:<br>
+          <ul>
+            <li>name: "Extra", date: today, event start time: 10:00</li>
+          </ul>
+        </li>
+        <li>Verify that the new event is shown in Today.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;E-mail messages</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that unread and unsent
+e-mail messages are shown in Today<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon on the top and select <span style="font-weight: bold;">Email...</span>&nbsp;</li>
+        <li>Check <span style="font-weight: bold;">Summary only</span>
+and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Click on the e-mail icon to open the e-mail app.</li>
+        <li>Setup an e-mail account to an existing mail server (if not
+done yet).</li>
+        <li>Sync the account.</li>
+        <li>Send some new messages to the account so that after syncing
+3 new messages are available.</li>
+        <li>Verify that the new messages are mentioned in <span
+ style="font-weight: bold;">Today</span> as "3 new, no unsent"</li>
+        <li>Click on the e-mail icon to open the e-mail app again.</li>
+        <li>Create a new message and place it in the out queue of the
+e-mail app.</li>
+        <li>Verify that <span style="font-weight: bold;">Today</span>
+now mentiones "3 new, 1 unsent".</li>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon on the top and select <span style="font-weight: bold;">Email...</span>&nbsp;</li>
+        <li>Check <span style="font-weight: bold;">Include details</span>
+and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the Today application now also shows the
+details of the unread messages.</li>
+        <li>Tap on a message and verify that the message is shown.</li>
+        <li>Close the message.</li>
+        <li>Verify that the message is removed from the list of open
+messages in <span style="font-weight: bold;">Todo</span> </li>
+        <li>Click on the e-mail icon to open the e-mail app and send
+the queued message.</li>
+        <li>Verify that <span style="font-weight: bold;">Today</span>
+now mentiones "2 new, no unsent".</li>
+        <li>Click on the e-mail icon to open the e-mail app and read
+the e-mail messages in the inbox.</li>
+        <li>Verify that <span style="font-weight: bold;">Today</span>
+now mentiones "No new, no unsent".</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Todo tasks</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that open tasks from the
+Todo list are shown in Today<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Tap on the <span style="font-weight: bold;">Todo</span>
+icon (in the Today app)</li>
+        <li>Verify that the <span style="font-weight: bold;">Todo</span>
+app is opened and shown.<br>
+        </li>
+        <li>Create the following tasks in <span
+ style="font-weight: bold;">Todo:<br>
+          </span>
+          <ul>
+            <li>name: "Task 1", due: today, priority: 1</li>
+            <li>name: "Task 2", due: tomorrow, priority: 3</li>
+            <li>name: "Task 3", due: not set, priority: 2</li>
+          </ul>
+        </li>
+        <li>Close the <span style="font-weight: bold;">Todo</span> app.<br>
+        </li>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon and select <span style="font-weight: bold;">Todo list...</span>
+from the menu</li>
+        <li>Check <span style="font-weight: bold;">Tasks due in th
+next 2 days</span> and <span style="font-weight: bold;">Maximum listing
+10 tasks</span> and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that "Task 1" and "Task 2" are shown and that the
+summary mentiones: "You have 2 tasks due in the next 2 days".</li>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon and select <span style="font-weight: bold;">Todo list...</span>
+from the menu</li>
+        <li>Check <span style="font-weight: bold;">Tasks due in th
+next 1 day </span>and <span style="font-weight: bold;">Maximum
+listing 10 tasks</span> and click <span style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that "Task 1" is shown and that the summary
+mentiones: "You have 1 task due today".</li>
+        <li>Verify that the date shown behind "Task 1" is todays date.</li>
+        <li>Tap on the <span style="font-weight: bold;">Today</span>
+icon and select <span style="font-weight: bold;">Todo list...</span>
+from the menu</li>
+        <li>Check <span style="font-weight: bold;">All open tasks </span>and<span
+ style="font-weight: bold;">Maximum listing 10 tasks</span> and click <span
+ style="font-weight: bold;">OK</span>&nbsp;</li>
+        <li>Verify that the tasks are shown in order of &nbsp;priority:
+"Task 1", "Task 3" and then "Task 2".</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
 </body>
 </html>

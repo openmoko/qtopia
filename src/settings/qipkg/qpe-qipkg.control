@@ -1,4 +1,4 @@
-Files: bin/qipkg apps/Settings/qipkg.desktop
+Files: bin/qipkg apps/Settings/qipkg.desktop bin/qipkg-info-file
 Priority: optional
 Section: qpe/settings
 Maintainer: Trolltech (www.trolltech.com)

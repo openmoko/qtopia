@@ -34,6 +34,8 @@
 
 #include <stdio.h>
 
+#include <qapplication.h> //for translate
+
 /*
   \class Contact contact.h
   \internal
@@ -473,7 +475,7 @@ QString Contact::toRichText() const
     if ( !businessStreet().isEmpty() || !businessCity().isEmpty() ||
 	 !businessZip().isEmpty() || !businessCountry().isEmpty() ) {
 	text += "<br>";
-	text += QObject::tr( "<b>Work Address:</b>" );
+	text += qApp->translate( "Contact",  "<b>Work Address:</b>" );
 	text +=  "<br>";
     }
 
@@ -496,7 +498,7 @@ QString Contact::toRichText() const
     if ( !homeStreet().isEmpty() || !homeCity().isEmpty() ||
 	 !homeZip().isEmpty() || !homeCountry().isEmpty() ) {
 	text += "<br>";
-	text += QObject::tr( "<b>Home Address:</b>" );
+	text += qApp->translate( "Contact",  "<b>Home Address:</b>" );
 	text +=  "<br>";
     }
 
@@ -519,83 +521,83 @@ QString Contact::toRichText() const
     QString str;
     str = emails();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Email Addresses: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Email Addresses: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homePhone();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Phone: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Home Phone: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeFax();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Fax: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Home Fax: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeMobile();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Mobile: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Home Mobile: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = homeWebpage();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Home Web Page: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Home Web Page: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessWebpage();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Web Page: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Business Web Page: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = office();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Office: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Office: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessPhone();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Phone: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Business Phone: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessFax();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Fax: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Business Fax: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessMobile();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Mobile: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Business Mobile: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = businessPager();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Business Pager: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Business Pager: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = profession();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Profession: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Profession: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = assistant();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Assistant: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Assistant: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = manager();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Manager: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Manager: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = gender();
     if ( !str.isEmpty() && str.toInt() != 0 ) {
 	if ( str.toInt() == 1 )
-	    str = QObject::tr( "Male" );
+	    str = qApp->translate( "Contact",  "Male" );
 	else if ( str.toInt() == 2 )
-	    str = QObject::tr( "Female" );
-	text += "<b>" + QObject::tr("Gender: ") + "</b>" + str + "<br>";
+	    str = qApp->translate( "Contact",  "Female" );
+	text += "<b>" + qApp->translate( "Contact", "Gender: ") + "</b>" + str + "<br>";
     }
     str = spouse();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Spouse: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Spouse: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = birthday();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Birthday: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Birthday: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = anniversary();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Anniversary: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Anniversary: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
     str = nickname();
     if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Nickname: ") + "</b>"
+	text += "<b>" + qApp->translate( "Contact", "Nickname: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
 
     // notes last
@@ -897,56 +899,56 @@ QStringList Contact::trfields()
 {
     QStringList list;
 
-    list.append( QObject::tr( "Name Title") );
-    list.append( QObject::tr( "First Name" ) );
-    list.append( QObject::tr( "Middle Name" ) );
-    list.append( QObject::tr( "Last Name" ) );
-    list.append( QObject::tr( "Suffix" ) );
-    list.append( QObject::tr( "File As" ) );
+    list.append( qApp->translate( "Contact",  "Name Title") );
+    list.append( qApp->translate( "Contact",  "First Name" ) );
+    list.append( qApp->translate( "Contact",  "Middle Name" ) );
+    list.append( qApp->translate( "Contact",  "Last Name" ) );
+    list.append( qApp->translate( "Contact",  "Suffix" ) );
+    list.append( qApp->translate( "Contact",  "File As" ) );
 
-    list.append( QObject::tr( "Job Title" ) );
-    list.append( QObject::tr( "Department" ) );
-    list.append( QObject::tr( "Company" ) );
-    list.append( QObject::tr( "Business Phone" ) );
-    list.append( QObject::tr( "Business Fax" ) );
-    list.append( QObject::tr( "Business Mobile" ) );
+    list.append( qApp->translate( "Contact",  "Job Title" ) );
+    list.append( qApp->translate( "Contact",  "Department" ) );
+    list.append( qApp->translate( "Contact",  "Company" ) );
+    list.append( qApp->translate( "Contact",  "Business Phone" ) );
+    list.append( qApp->translate( "Contact",  "Business Fax" ) );
+    list.append( qApp->translate( "Contact",  "Business Mobile" ) );
 
-    list.append( QObject::tr( "Default Email" ) );
-    list.append( QObject::tr( "Emails" ) );
+    list.append( qApp->translate( "Contact",  "Default Email" ) );
+    list.append( qApp->translate( "Contact",  "Emails" ) );
 
-    list.append( QObject::tr( "Home Phone" ) );
-    list.append( QObject::tr( "Home Fax" ) );
-    list.append( QObject::tr( "Home Mobile" ) );
+    list.append( qApp->translate( "Contact",  "Home Phone" ) );
+    list.append( qApp->translate( "Contact",  "Home Fax" ) );
+    list.append( qApp->translate( "Contact",  "Home Mobile" ) );
 
-    list.append( QObject::tr( "Business Street" ) );
-    list.append( QObject::tr( "Business City" ) );
-    list.append( QObject::tr( "Business State" ) );
-    list.append( QObject::tr( "Business Zip" ) );
-    list.append( QObject::tr( "Business Country" ) );
-    list.append( QObject::tr( "Business Pager" ) );
-    list.append( QObject::tr( "Business WebPage" ) );
+    list.append( qApp->translate( "Contact",  "Business Street" ) );
+    list.append( qApp->translate( "Contact",  "Business City" ) );
+    list.append( qApp->translate( "Contact",  "Business State" ) );
+    list.append( qApp->translate( "Contact",  "Business Zip" ) );
+    list.append( qApp->translate( "Contact",  "Business Country" ) );
+    list.append( qApp->translate( "Contact",  "Business Pager" ) );
+    list.append( qApp->translate( "Contact",  "Business WebPage" ) );
 
-    list.append( QObject::tr( "Office" ) );
-    list.append( QObject::tr( "Profession" ) );
-    list.append( QObject::tr( "Assistant" ) );
-    list.append( QObject::tr( "Manager" ) );
+    list.append( qApp->translate( "Contact",  "Office" ) );
+    list.append( qApp->translate( "Contact",  "Profession" ) );
+    list.append( qApp->translate( "Contact",  "Assistant" ) );
+    list.append( qApp->translate( "Contact",  "Manager" ) );
 
-    list.append( QObject::tr( "Home Street" ) );
-    list.append( QObject::tr( "Home City" ) );
-    list.append( QObject::tr( "Home State" ) );
-    list.append( QObject::tr( "Home Zip" ) );
-    list.append( QObject::tr( "Home Country" ) );
-    list.append( QObject::tr( "Home Web Page" ) );
+    list.append( qApp->translate( "Contact",  "Home Street" ) );
+    list.append( qApp->translate( "Contact",  "Home City" ) );
+    list.append( qApp->translate( "Contact",  "Home State" ) );
+    list.append( qApp->translate( "Contact",  "Home Zip" ) );
+    list.append( qApp->translate( "Contact",  "Home Country" ) );
+    list.append( qApp->translate( "Contact",  "Home Web Page" ) );
 
-    list.append( QObject::tr( "Spouse" ) );
-    list.append( QObject::tr( "Gender" ) );
-    list.append( QObject::tr( "Birthday" ) );
-    list.append( QObject::tr( "Anniversary" ) );
-    list.append( QObject::tr( "Nickname" ) );
-    list.append( QObject::tr( "Children" ) );
+    list.append( qApp->translate( "Contact",  "Spouse" ) );
+    list.append( qApp->translate( "Contact",  "Gender" ) );
+    list.append( qApp->translate( "Contact",  "Birthday" ) );
+    list.append( qApp->translate( "Contact",  "Anniversary" ) );
+    list.append( qApp->translate( "Contact",  "Nickname" ) );
+    list.append( qApp->translate( "Contact",  "Children" ) );
 
-    list.append( QObject::tr( "Notes" ) );
-    list.append( QObject::tr( "Groups" ) );
+    list.append( qApp->translate( "Contact",  "Notes" ) );
+    list.append( qApp->translate( "Contact",  "Groups" ) );
 
     return list;
 }

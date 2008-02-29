@@ -21,7 +21,7 @@
 #include "framebuffer.h"
 
 
-FrameBuffer::FrameBuffer()
+FrameBuffer::FrameBuffer() :x(0), y(0), w(0), h(0), bits(0), lineStep(0)
 {
     jt = new uchar*[1];
 }

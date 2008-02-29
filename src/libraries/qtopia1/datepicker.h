@@ -42,7 +42,7 @@ class QTOPIA_EXPORT QPEDatePicker : public QVBox
     Q_OBJECT
 
 public:
-    QPEDatePicker( QWidget *parent = 0, const char *name = 0, bool ac = FALSE);
+    QPEDatePicker( QWidget *parent = 0, const char *name = 0);
     virtual ~QPEDatePicker();
     QDate  selectedDate() const;
 
@@ -59,10 +59,8 @@ public slots:
 
     void setWeekStartsMonday( bool );
 
-protected slots:
-    virtual void keyPressEvent(QKeyEvent *e);
-
 protected:
+    virtual void keyPressEvent(QKeyEvent *e);
     virtual void paintDay(const QDate &, QPainter *p, const QRect &cr,
 	    const QColorGroup &cg);
 
@@ -85,7 +83,6 @@ private:
     DatePickerHeader *header;
     DatePickerTable *table;
     int year, month, day;
-    bool autoClose;
     class DatePickerPrivate *d;
 };
 

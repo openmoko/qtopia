@@ -56,7 +56,7 @@ public:
     static QDateTime setUtcTime( uint t )
 {
     QDateTime r;
-#if QT_VERSION >= 310
+#if QT_VERSION >= 0x030100
     r.setTime_t( t, Qt::UTC );
 #else
     tm *tM = gmtime( &(time_t)t );
@@ -103,8 +103,14 @@ QCString TimeZonePrivate::zonePath()
 #ifdef Q_OS_UNIX
 	sZonePath = "/usr/share/zoneinfo/";
 #else
-	QCString qpedir = getenv( "QPEDIR" );
-	sZonePath = qpedir + "\\etc\\zoneinfo\\";
+	sZonePath = QPEApplication::qpeDir() + "\\etc\\zoneinfo\\";
+	QDir zoneDir(sZonePath);
+	if ( !zoneDir.exists() ) {
+	    // probably developing for Qtopia Deskop; try in it's etc directory
+	    sZonePath = QPEApplication::qpeDir() + "\\..\\..\\etc\\zoneinfo\\";
+	    zoneDir = sZonePath;
+	    sZonePath = zoneDir.absPath() + "\\";
+	}
 #endif
     }
     return sZonePath;
@@ -117,8 +123,7 @@ QCString TimeZonePrivate::zoneFile()
 #ifdef Q_OS_UNIX
 	sZoneFile = "/usr/share/zoneinfo/zone.tab";
 #else
-	QCString qpedir = getenv( "QPEDIR" );
-	sZoneFile = qpedir + "\\etc\\zoneinfo\\zone.tab";
+	sZoneFile = zonePath() + "zone.tab";
 #endif
     }
     return sZoneFile;
@@ -195,9 +200,7 @@ bool TimeZoneData::match( const QDateTime &c,
 
     ttinfo transInfo = timeTypes[ findTimeTypeIndex( c, FALSE ) ];
 
-#ifdef Q_OS_UNIX
     utcOffset *= -1;
-#endif
 
     if ( (utcOffset == transInfo.utcOffset) && (hasDst == mDstRule) ) {
 	// if not given abbreviation string to match, then matching
@@ -399,8 +402,8 @@ TimeZoneData::TimeZoneData( const QCString & loc ) : mId( loc ), mDstRule( FALSE
 	    maxAbbrevIndex = offsetInfo.abbreviationIndex;
     }
 
-    char abbrev[4];
-    abbrev[3] = 0;
+    char abbrev[5];
+    abbrev[4] = 0;
     nbytes = 4;
     for ( uint index = 0; index <= maxAbbrevIndex; index += 4 ) {
 	ds.readRawBytes( abbrev, nbytes );
@@ -614,7 +617,7 @@ QString TimeZoneLocation::description() const
 QString TimeZoneLocation::area() const
 {
     QCString displayArea = mArea;
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     displayArea.replace( QRegExp("_"), " ");
 #else
     displayArea.replace( '_', ' ' );
@@ -625,7 +628,7 @@ QString TimeZoneLocation::area() const
 QString TimeZoneLocation::city() const
 {
     QCString displayCity = mCity;
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     displayCity.replace( QRegExp("_"), " ");
 #else
     displayCity.replace( '_', ' ' );
@@ -646,9 +649,13 @@ QCString TimeZoneLocation::id() const
 
 void TimeZoneLocation::dump() const
 {
+    if (!this) {
+	return;
+    }
     qDebug("%s at [%s,%s] [%d,%d]: %s",
 	   id().data(), mLatStr.data(), mLonStr.data(),
 	   lat(), lon(), mDescription );
+    qDebug("City :%s, Area: %s, Country Code %s", city().latin1(), area().data(), countryCode().data());
 }
 
 
@@ -790,103 +797,175 @@ QStrList TzCache::ids()
  *
  *******************************************************************/
 
+/*!
+  \class TimeZone timezone.h
+  \brief The TimeZone class provides access to time zone data.
+
+  TimeZone provides access to timezone data and conversion between
+  times in different time zones and formats.
+
+  \ingroup qtopiaemb
+*/
+
+/*!
+  Construct an invalid time zone.
+*/
 TimeZone::TimeZone() : d( new TimeZonePrivate( 0 ) )
 {
 }
 
+/*!
+  Construct a TimeZone for location \a locId.
+*/
 TimeZone::TimeZone( const char * locId ) : d( new TimeZonePrivate( locId ) )
 {
 }
 
+/*!
+  Copy constructor.
+*/
 TimeZone::TimeZone( const TimeZone & copyFrom ) :
     d( new TimeZonePrivate( copyFrom.d->id ) )
 {
 }
 
+/*!
+  Destruct TimeZone.
+*/
 TimeZone::~TimeZone()
 {
     delete d; d = 0;
 }
 
+/*!
+  Sets the current time zone id to \a id.
+*/
 void TimeZone::setId( const char *id )
 {
     d->id = id;
 }
 
+/*!
+  Assign \a from to this.
+*/
 TimeZone &TimeZone::operator=( const TimeZone &from)
 {
     d->id = from.d->id;
     return *this;
 }
 
+/*!
+  Returns TRUE if \c is equal to this, otherwise FALSE.
+*/
 bool TimeZone::operator==( const TimeZone &c) const
 {
     return (d->id == c.d->id);
 }
 
+/*!
+  Returns TRUE if \c is not equal to this, otherwise FALSE.
+*/
 bool TimeZone::operator!=( const TimeZone &c) const
 {
     return (d->id != c.d->id);
 }
 
+/*!
+  \internal
+*/
 void TimeZone::dump() const
 {
     TzCache::instance().data( d->id )->dump();
+    TzCache::instance().location( d->id )->dump();
 }
 
+/*!
+  Return a time zone located at the UTC reference.
+*/
 TimeZone TimeZone::utc()
 {
     return TimeZone("Europe/London");
 }
 
+/*!
+  Return the UTC date and time.
+*/
 QDateTime TimeZone::utcDateTime()
 {
     return TimeZonePrivate::setUtcTime( time(0) );
 }
 
-/*! returns QDateTime in this timezone */
+/*!
+  Returns the date and time in this time zone from the number of seconds
+  since 1 January 1970.
+*/
 QDateTime TimeZone::fromTime_t( uint secs ) const
 {
     QDateTime utc = TimeZonePrivate::setUtcTime( secs );
     return fromUtc( utc );
 }
 
+/*!
+  Returns the date and time \a thisT as the number of seconds
+  since 1 January 1970.
+*/
 uint TimeZone::toTime_t( const QDateTime &thisT ) const
 {
     QDateTime utc = toUtc( thisT );
     return TimeZonePrivate::toTime_t( utc );
 }
 
+/*!
+  Returns the date and time \a thisT in this time zone as UTC.
+*/
 QDateTime TimeZone::toUtc( const QDateTime &thisT ) const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
     return data->toUtc( thisT );
 }
 
+/*!
+  Returns the UTC date and time \a utc as the date and time in this time zone.
+*/
 QDateTime TimeZone::fromUtc( const QDateTime &utc ) const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
     return data->fromUtc( utc );
 }
 
+/*!
+  Returns the date and time \a thisT in this time zone as the date and time
+  in the current time zone.
+*/
 QDateTime TimeZone::toCurrent( const QDateTime &thisT ) const
 {
     TimeZone curTz = current();
     return curTz.convert( thisT, *this );
 }
 
+/*!
+  Returns the date and time \a curT in the current time zone as the
+  date and time in this time zone.
+*/
 QDateTime TimeZone::fromCurrent( const QDateTime &curT ) const
 {
     TimeZone curTz = current();
     return convert( curT, curTz );
 }
 
+/*!
+  Return the date and time \a dt in time zone \a dtTz as the date and time
+  int this time zone.
+*/
 QDateTime TimeZone::convert( const QDateTime &dt, const TimeZone &dtTz ) const
 {
     QDateTime utc = dtTz.toUtc( dt );
     return fromUtc( utc );
 }
 
+/*!
+  Returns the current system time zone.
+*/
 TimeZone TimeZone::current()
 {
     Config lconfig("locale");
@@ -926,11 +1005,17 @@ TimeZone TimeZone::current()
     return TimeZone();
 }
 
+/*!
+  Return the time zone identifier, e.g. Europe/London
+*/
 QCString TimeZone::id() const
 {
     return d->id;
 }
 
+/*!
+  Returns TRUE if this is a valid time zone, otherwise FALSE.
+*/
 bool TimeZone::isValid() const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
@@ -946,23 +1031,35 @@ bool TimeZone::isValid() const
     return data->isValid() && loc && loc->isValid();
 }
 
+/*!
+  Returns the Daylight Savings Time (DST) time zone abbreviation.
+*/
 QCString TimeZone::dstAbbreviation() const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
     return data->dstAbbreviation();
 }
 
+/*!
+  Returns the time zone abbreviation, e.g. EST
+*/
 QCString TimeZone::standardAbbreviation() const
 {
     TimeZoneData *data = TzCache::instance().data( d->id );
     return data->dstAbbreviation();
 }
 
+/*!
+  Returns a list of the time zone ids.
+*/
 QStrList TimeZone::ids()
 {
     return TzCache::instance().ids();
 }
 
+/*!
+  Returns the latitude in seconds.
+*/
 int TimeZone::lat() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -971,6 +1068,10 @@ int TimeZone::lat() const
     return 0;
 }
 
+
+/*!
+  Returns the longitude in seconds.
+*/
 int TimeZone::lon() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -979,6 +1080,11 @@ int TimeZone::lon() const
     return 0;
 }
 
+/*!
+  Returns the latitude as a string.
+
+  The format is: +-DDMM[SS]
+*/
 QCString TimeZone::latStr() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -987,6 +1093,12 @@ QCString TimeZone::latStr() const
 
     return "";
 }
+
+/*!
+  Returns the longitude as a string.
+
+  The format is: +-DDMM[SS]
+*/
 QCString TimeZone::lonStr() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -995,6 +1107,9 @@ QCString TimeZone::lonStr() const
     return "";
 }
 
+/*!
+  Returns the translated description of this time zone.
+*/
 QString TimeZone::description() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -1002,6 +1117,10 @@ QString TimeZone::description() const
 	return loc->description();
     return QString::null;
 }
+
+/*!
+  Returns the translated area of this time zone, e.g. Europe.
+*/
 QString TimeZone::area() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -1009,6 +1128,10 @@ QString TimeZone::area() const
 	return loc->area();
     return QString::null;
 }
+
+/*!
+  Returns the translated city of this time zone, e.g. Oslo.
+*/
 QString TimeZone::city() const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -1016,6 +1139,10 @@ QString TimeZone::city() const
 	return loc->city();
     return QString::null;
 }
+
+/*!
+  Returns the ISO 3166 2-character country code.
+*/
 QCString TimeZone::countryCode()
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );
@@ -1024,6 +1151,9 @@ QCString TimeZone::countryCode()
     return "";
 }
 
+/*!
+  \internal
+*/
 int TimeZone::distance( const TimeZone &e ) const
 {
     TimeZoneLocation *loc = TzCache::instance().location( d->id );

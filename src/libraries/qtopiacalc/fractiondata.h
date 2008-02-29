@@ -28,7 +28,7 @@ public:
     ~FractionData(){};
     QString getType(){return "FRACTION";};
 
-    void push(char);
+    bool push(char,bool);
     void del();
     void clear();
 

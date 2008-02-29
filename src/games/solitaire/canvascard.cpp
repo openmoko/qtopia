@@ -30,7 +30,7 @@
 #include <qpaintdevice.h>
 #include <math.h>
 
-/*
+
 QPixmap *CreateScaledPixmap(QPixmap *srcPixmap, double scaleX, double scaleY)
 {
 #ifdef QT_NO_TRANSFORMATIONS
@@ -39,19 +39,23 @@ QPixmap *CreateScaledPixmap(QPixmap *srcPixmap, double scaleX, double scaleY)
     int newW = (int)(w * scaleX);
     int newH = (int)(h * scaleY);
     QPixmap *dstPixmap = new QPixmap( newW, newH );
+    if ( newH == 0 || newW == 0 )
+	return dstPixmap;
+    QPainter p( dstPixmap );
     // ### this is very poorly implemented and probably could be much faster
     for (int i = 0; i < newW; i++) {
        int srcX = w * i / newW;
        if (newH == h) {
            // Optimise for scaling in the X-axis only
-           bitBlt( dstPixmap, i, 0, srcPixmap, srcX, 0, 1, h );
+           p.drawPixmap( i, 0, *srcPixmap, srcX, 0, 1, h );
        } else {
            for (int j = 0; j < newH; j++) {
                int srcY = h * j / newH;
-               bitBlt( dstPixmap, i, j, srcPixmap, srcX, srcY, 1, 1 );
+               p.drawPixmap( i, j, *srcPixmap, srcX, srcY, 1, 1 );
            }
         }
     }
+    p.end();
     return dstPixmap;
 #else
     QWMatrix s;
@@ -59,7 +63,7 @@ QPixmap *CreateScaledPixmap(QPixmap *srcPixmap, double scaleX, double scaleY)
     return new QPixmap( srcPixmap->xForm( s ) );
 #endif
 }
-*/
+
 
 CanvasCard::CanvasCard( eValue v, eSuit s, bool f, QCanvas *canvas ) :
 	Card(v, s, f), AnimatedCanvasItem(), QCanvasRectangle( 0, 0, 1, 1, canvas ), scaleX(1.0), scaleY(1.0)
@@ -138,7 +142,7 @@ void CanvasCard::draw(QPainter &painter)
 		r2x = w - r1x - rankW - 1;
 		r2y = h - r1y - rankH;
 
-		if ( CardMetrics::offsetDown() <= 15 ) {
+		if ( CardMetrics::offsetDown() <= 15 || rank==1 ) {
 		    s2x = (hmarg - suitSmlW) / 2 + 1;
 		    s2y = r2y - 1;
 		    s1x = w - s2x - suitSmlW - 1;
@@ -218,6 +222,7 @@ void CanvasCard::draw(QPainter &painter)
 
     if ((scaleX <= 0.98) || (scaleY <= 0.98)) 
     {
+/*
 	int newW = int(w * scaleX);
 	int newH = int(h * scaleY);
 	int xoff = newW / 2;
@@ -226,13 +231,12 @@ void CanvasCard::draw(QPainter &painter)
 	if ( newW && newH )
 	    scaledCard.convertFromImage( drawPixmap->convertToImage().smoothScale( newW, newH ) );
 	painter.drawPixmap( (int)x() + xOff - xoff, (int)y() + yOff - yoff, scaledCard );
-/*
+*/
        QPixmap *scaledCard = CreateScaledPixmap( drawPixmap, scaleX, scaleY );
        int xoff = scaledCard->width() / 2;
        int yoff = scaledCard->height() / 2;
        painter.drawPixmap( (int)x() + xOff - xoff, (int)y() + yOff - yoff, *scaledCard );
        delete scaledCard;
-*/
 
     } else {
 

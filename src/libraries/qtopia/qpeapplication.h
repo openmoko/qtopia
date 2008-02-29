@@ -24,7 +24,6 @@
 #include <qtopia/qpeglobal.h>
 #include <qapplication.h>
 #include <qdialog.h>
-#include "qpedecoration_qws.h"
 #include <qtopia/timestring.h>
 
 class QCopChannel;
@@ -76,7 +75,7 @@ public:
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
     static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
     static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
-    static void setTempScreenSaverMode(screenSaverHint);
+    static void setTempScreenSaverMode(screenSaverHint);    // libqtopia
 
     static void setKeepRunning();
     bool keepRunning() const;
@@ -130,30 +129,6 @@ private:
 
 
 };
-
-/*
-inline void QPEApplication::showDialog( QDialog* d, bool nomax )
-{
-    QSize sh = d->sizeHint();
-    int w = QMAX(sh.width(),d->width());
-    int h = QMAX(sh.height(),d->height());
-    if ( !nomax
-	&& ( w > qApp->desktop()->width()*3/4
-	    || h > qApp->desktop()->height()*3/4 ) )
-    {
-	d->showMaximized();
-    } else {
-	d->resize(w,h);
-	d->show();
-    }
-}
-
-inline int QPEApplication::execDialog( QDialog* d, bool nomax )
-{
-    showDialog(d,nomax);
-    return d->exec();
-}
-*/
 
 #ifdef Q_OS_WIN32
 #include <stdlib.h>

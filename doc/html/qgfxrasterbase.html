@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/nightly/qt-2.3.4/src/kernel/qgfxraster_qws.cpp:805 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QGfxRasterBase Class</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QGfxRasterBase Class Reference</h1>
+
+<p>This class is the base class of the QGfxRaster<depth> template
+and contains the non-depth-dependent code. The QGfxRaster class
+is used for drawing in software on raw framebuffers of varying depths and 
+is subclassed by hardware drivers. It handles clipping and a movable origin
+in order to support subwindows. It is available <em>only</em> in Qt/Embedded.
+QWidget and QPixmap both return a QGfxRaster via their respective
+graphicsContext() methods, already initialised with the appropriate origin,
+framebuffer and clip region. QGfxRasterBase and its template subclasses
+should effectively be considered as one class; a raw QGfxRasterBase is
+never used, it's simply a handy place to put some of the functionality.
+<a href="#details">More...</a>
+<p><tt>#include &lt;<a href="qgfxraster_qws-h.html">qgfxraster_qws.h</a>&gt;</tt>
+<p><a href="qgfxrasterbase-members.html">List of all member functions.</a>
+<h2>Public Members</h2>
+<ul>
+<li><div class=fn><a href="#QGfxRasterBase"><b>QGfxRasterBase</b></a> ( unsigned&nbsp;char&nbsp;*&nbsp;b, int&nbsp;w, int&nbsp;h )</div></li>
+<li><div class=fn><a href="#~QGfxRasterBase"><b>~QGfxRasterBase</b></a> ()</div></li>
+<li><div class=fn>virtual void <a href="#setPen"><b>setPen</b></a> ( const&nbsp;QPen&nbsp;&amp;&nbsp;p )</div></li>
+<li><div class=fn>virtual void <a href="#setFont"><b>setFont</b></a> ( const&nbsp;QFont&nbsp;&amp;&nbsp;f )</div></li>
+<li><div class=fn>virtual void <b>setBrushPixmap</b> ( const&nbsp;QPixmap&nbsp;*&nbsp;p )</div></li>
+<li><div class=fn>virtual void <a href="#setBrushOffset"><b>setBrushOffset</b></a> ( int&nbsp;x, int&nbsp;y )</div></li>
+<li><div class=fn>virtual void <a href="#setBrush"><b>setBrush</b></a> ( const&nbsp;QBrush&nbsp;&amp;&nbsp;b )</div></li>
+<li><div class=fn>virtual void <a href="#setClipRect"><b>setClipRect</b></a> ( int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h )</div></li>
+<li><div class=fn>virtual void <a href="#setClipRegion"><b>setClipRegion</b></a> ( const&nbsp;QRegion&nbsp;&amp;&nbsp;r )</div></li>
+<li><div class=fn>virtual void <b>setClipDeviceRegion</b> ( const QRegion &amp; )</div></li>
+<li><div class=fn>virtual void <a href="#setClipping"><b>setClipping</b></a> ( bool&nbsp;b )</div></li>
+<li><div class=fn>virtual void <a href="#setOffset"><b>setOffset</b></a> ( int&nbsp;x, int&nbsp;y )</div></li>
+<li><div class=fn>virtual void <a href="#setWidgetRect"><b>setWidgetRect</b></a> ( int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h )</div></li>
+<li><div class=fn>virtual void <a href="#setWidgetRegion"><b>setWidgetRegion</b></a> ( const&nbsp;QRegion&nbsp;&amp;&nbsp;r )</div></li>
+<li><div class=fn>virtual void <b>setWidgetDeviceRegion</b> ( const QRegion &amp; )</div></li>
+<li><div class=fn>virtual void <b>setGlobalRegionIndex</b> ( int&nbsp;idx )</div></li>
+<li><div class=fn>virtual void <a href="#setDashedLines"><b>setDashedLines</b></a> ( bool&nbsp;d )</div></li>
+<li><div class=fn>virtual void <a href="#setDashes"><b>setDashes</b></a> ( char&nbsp;*&nbsp;dashList, int&nbsp;n )</div></li>
+<li><div class=fn>virtual void <a href="#moveTo"><b>moveTo</b></a> ( int&nbsp;x, int&nbsp;y )</div></li>
+<li><div class=fn>virtual void <a href="#lineTo"><b>lineTo</b></a> ( int&nbsp;x, int&nbsp;y )</div></li>
+<li><div class=fn>virtual void <b>setOpaqueBackground</b> ( bool&nbsp;b )</div></li>
+<li><div class=fn>virtual void <b>setBackgroundColor</b> ( QColor&nbsp;c )</div></li>
+<li><div class=fn>virtual void <a href="#setAlphaType"><b>setAlphaType</b></a> ( AlphaType&nbsp;a )</div></li>
+<li><div class=fn>virtual void <a href="#setAlphaSource"><b>setAlphaSource</b></a> ( unsigned&nbsp;char&nbsp;*&nbsp;b, int&nbsp;l )</div></li>
+<li><div class=fn>virtual void <b>setAlphaSource</b> ( int, int = -1, int = -1, int = -1 )</div></li>
+<li><div class=fn>virtual void <a href="#drawText"><b>drawText</b></a> ( int&nbsp;x, int&nbsp;y, const&nbsp;QString&nbsp;&amp;&nbsp;s )</div></li>
+<li><div class=fn>virtual void <a href="#sync"><b>sync</b></a> ()</div></li>
+<li><div class=fn>virtual void <b>setLineStep</b> ( int&nbsp;i )</div></li>
+<li><div class=fn>int <b>linestep</b> () const</div></li>
+<li><div class=fn>int <b>pixelWidth</b> () const</div></li>
+<li><div class=fn>int <b>pixelHeight</b> () const</div></li>
+<li><div class=fn>virtual int <b>bitDepth</b> () = 0</div></li>
+<li><div class=fn>virtual void <a href="#save"><b>save</b></a> ()</div></li>
+<li><div class=fn>virtual void <a href="#restore"><b>restore</b></a> ()</div></li>
+<li><div class=fn>virtual void <b>setRop</b> ( RasterOp&nbsp;r )</div></li>
+<li><div class=fn>virtual void <b>setClut</b> ( QRgb&nbsp;*&nbsp;cols, int&nbsp;numcols )</div></li>
+</ul>
+<h2>Protected Members</h2>
+<ul>
+<li><div class=fn>void * <b>beginTransaction</b> ( const QRect &amp; )</div></li>
+<li><div class=fn>void <b>endTransaction</b> ( void * )</div></li>
+<li><div class=fn>void <b>beginDraw</b> ()</div></li>
+<li><div class=fn>void <b>endDraw</b> ()</div></li>
+<li><div class=fn>void <b>fixClip</b> ()</div></li>
+<li><div class=fn>void <a href="#update_clip"><b>update_clip</b></a> ()</div></li>
+<li><div class=fn>bool <a href="#inClip"><b>inClip</b></a> ( int&nbsp;x, int&nbsp;y, QRect&nbsp;*&nbsp;cr = 0, bool&nbsp;known_to_be_outside = FALSE )</div></li>
+<li><div class=fn>virtual void <a href="#setSourceWidgetOffset"><b>setSourceWidgetOffset</b></a> ( int&nbsp;x, int&nbsp;y )</div></li>
+<li><div class=fn>void <a href="#useBrush"><b>useBrush</b></a> ()</div></li>
+<li><div class=fn>void <a href="#usePen"><b>usePen</b></a> ()</div></li>
+<li><div class=fn>virtual void <a href="#setSourcePen"><b>setSourcePen</b></a> ()</div></li>
+<li><div class=fn>unsigned char * <b>scanLine</b> ( int&nbsp;i )</div></li>
+<li><div class=fn>unsigned char * <b>srcScanLine</b> ( int&nbsp;i )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_32"><b>get_value_32</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_24"><b>get_value_24</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_16"><b>get_value_16</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <b>get_value_15</b> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_8"><b>get_value_8</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_4"><b>get_value_4</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+<li><div class=fn>unsigned int <a href="#get_value_1"><b>get_value_1</b></a> ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )</div></li>
+</ul>
+<hr><a name="details"></a><h2>Detailed Description</h2>
+
+
+This class is the base class of the QGfxRaster<depth> template
+and contains the non-depth-dependent code. The QGfxRaster class
+is used for drawing in software on raw framebuffers of varying depths and 
+is subclassed by hardware drivers. It handles clipping and a movable origin
+in order to support subwindows. It is available <em>only</em> in <a href="qt.html">Qt</a>/Embedded.
+<a href="qwidget.html">QWidget</a> and <a href="qpixmap.html">QPixmap</a> both return a QGfxRaster via their respective
+graphicsContext() methods, already initialised with the appropriate origin,
+framebuffer and clip region. QGfxRasterBase and its template subclasses
+should effectively be considered as one class; a raw QGfxRasterBase is
+never used, it's simply a handy place to put some of the functionality.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn><a name="QGfxRasterBase"></a>QGfxRasterBase::QGfxRasterBase ( unsigned&nbsp;char&nbsp;*&nbsp;b, int&nbsp;w, int&nbsp;h )
+</h3>
+
+This constructed a QGfxRasterBase. b is the data buffer pointed to,
+w and h its width and height in pixels
+
+<h3 class=fn><a name="~QGfxRasterBase"></a>QGfxRasterBase::~QGfxRasterBase ()
+</h3>
+
+Destroys a QGfxRaster
+
+<h3 class=fn>void <a name="drawText"></a>QGfxRasterBase::drawText ( int&nbsp;x, int&nbsp;y, const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;s )<tt> [virtual]</tt>
+</h3>
+
+Draws a line of Unicode text using the font set by <a href="qfont.html">QFont</a>.
+It performs a series of blt's using a pen source in the current
+pen colour and either an 8-bit alpha channel (for anti-aliased text)
+or a big-endian mask provided by the font subsystem.
+
+<h3 class=fn>unsigned int <a name="get_value_1"></a>QGfxRasterBase::get_value_1 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This is similar to get_value_8, but returns 1-bit values. The number of depths
+that can be blt'd to a monochrome destination are limited - only monochrome
+or 32-bit sources are permitted.
+
+<h3 class=fn>unsigned int <a name="get_value_16"></a>QGfxRasterBase::get_value_16 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This is similar to get_value_32, but returns 16-bit values
+
+<h3 class=fn>unsigned int <a name="get_value_24"></a>QGfxRasterBase::get_value_24 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This is similar to get_value_32, but returns packed 24-bit values
+
+<h3 class=fn>unsigned int <a name="get_value_32"></a>QGfxRasterBase::get_value_32 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This converts a pixel in an arbitrary source depth (specified by sdepth,
+stored at *(*srcdata) to a 32 bit value; it's used by blt() where the
+source depth is less than 32 bits and the destination depth is 32 bits.
+*srcdata (the pointer to the data) is auto-incremented by the appropriate
+number of bytes, or decremented if reverse is true. If the source has
+a pixel size of less than a byte then auto-incrementing or decrementing 
+will happen as necessary; the current position within the byte is stored in
+monobitcount (bit within the byte) and monobitval (value of the current
+byte). In the case of 8-bit source data lookups on the source's colour
+table are performed.
+
+<h3 class=fn>unsigned int <a name="get_value_4"></a>QGfxRasterBase::get_value_4 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This is similar to get_value_8, but returns 4-bit values.
+
+<h3 class=fn>unsigned int <a name="get_value_8"></a>QGfxRasterBase::get_value_8 ( int&nbsp;sdepth, unsigned&nbsp;char&nbsp;**&nbsp;srcdata, bool&nbsp;reverse = FALSE )<tt> [protected]</tt>
+</h3>
+
+This is similar to get_value_32, but returns 8-bit values. Translation
+between different colour palettes and from 32/24/16 bit data to the nearest
+match in the destination's colour palette is performed.
+
+<h3 class=fn>bool <a name="inClip"></a>QGfxRasterBase::inClip ( int&nbsp;x, int&nbsp;y, <a href="qrect.html">QRect</a>&nbsp;*&nbsp;cr = 0, bool&nbsp;known_to_be_outside = FALSE )<tt> [protected]</tt>
+</h3>
+Returns whether the point (<em>x</em>, <em>y</em>) is in the clip region.
+<p> If <em>cr</em> is not null, <t>*cr</t> is set to a rectangle containing
+the point, and within all of which the result does not change.
+If the result is TRUE, <em>cr</em> is the widest rectangle for which
+the result remains TRUE (so any point immediately to the left or
+right of <em>cr</em> will not be part of the clip region).
+<p> Passing TRUE for the <em>known_to_be_outside</em> allows optimizations,
+but the results are not defined it (<em>x</em>, <em>y</em>) is in the clip region.
+<p> Using this, you can efficiently iterator over the clip region
+using:
+<p> <pre>
+    bool inside = <a href="#inClip">inClip</a>(x,y,&amp;cr);
+    while (change y, preferably by +1) {
+        while (change x by +1 or -1) {
+            if ( !cr.contains(x,y) )
+                inside = <a href="#inClip">inClip</a>(x,y,&amp;cr,inside);
+            if ( inside ) {
+                draw stuff
+            }
+        }
+    }
+  </pre>
+ 
+
+<h3 class=fn>void <a name="lineTo"></a>QGfxRasterBase::lineTo ( int&nbsp;x, int&nbsp;y )<tt> [virtual]</tt>
+</h3>
+
+This draws a line from the last values passed to moveTo
+to the values passed to lineTo. It calls drawLine so there
+is no need to reimplement it in an accelerated driver.
+
+<h3 class=fn>void <a name="moveTo"></a>QGfxRasterBase::moveTo ( int&nbsp;x, int&nbsp;y )<tt> [virtual]</tt>
+</h3>
+
+This is the counterpart to QPainter::moveTo. It simply stores the
+x and y values passed to it until a lineTo.
+
+<h3 class=fn>void <a name="restore"></a>QGfxRasterBase::restore ()<tt> [virtual]</tt>
+</h3>
+
+Restores the brush and pen from a previous <a href="#save">save</a>().
+
+<h3 class=fn>void <a name="save"></a>QGfxRasterBase::save ()<tt> [virtual]</tt>
+</h3>
+
+This saves the current brush and pen state to temporary variables.
+This is used internally in QGfxRaster when a temporary pen or brush
+is needed for something. This is not a stack; a <a href="#save">save</a>() followed by
+a save() will obliterate the previously saved brush and pen.
+
+<h3 class=fn>void <a name="setAlphaSource"></a>QGfxRasterBase::setAlphaSource ( unsigned&nbsp;char&nbsp;*&nbsp;b, int&nbsp;l )<tt> [virtual]</tt>
+</h3>
+
+This is used in conjunction with LittleEndianMask,BigEndianMask
+or SeparateAlpha alpha channels. b is a pointer to the bytes
+containing the alpha values, l is the linestep (length in bytes
+per horizontal line of data)
+
+<h3 class=fn>void <a name="setAlphaType"></a>QGfxRasterBase::setAlphaType ( AlphaType&nbsp;a )<tt> [virtual]</tt>
+</h3>
+
+This sets one of several alpha channel types for the next
+blt operation:
+<p> IgnoreAlpha:           Always draw source pixels as-is
+InlineAlpha:           An 8-bit alpha value is in the highest byte of the
+(32-bit) source data
+SeparateAlpha:         A separate 8-bit alpha channel buffer is provided
+(used for anti-aliased text)
+LittleEndianMask:      A separate little-bit-endian mask is provided
+BigEndianMask:         A separate big-bit-endian mask is provided
+SolidAlpha:            A single 8-bit alpha channel value is to be applied to
+all pixels
+<p> The alpha channel buffer/value is provided by setAlphaSource
+
+<h3 class=fn>void <a name="setBrush"></a>QGfxRasterBase::setBrush ( const&nbsp;<a href="qbrush.html">QBrush</a>&nbsp;&amp;&nbsp;b )<tt> [virtual]</tt>
+</h3>
+
+This corresponds to QPainter::setBrush.
+
+<h3 class=fn>void <a name="setBrushOffset"></a>QGfxRasterBase::setBrushOffset ( int&nbsp;x, int&nbsp;y )<tt> [virtual]</tt>
+</h3>
+
+This sets the offset of a pattern when drawing with a patterned brush -
+needed when clipping means the start position for drawing doesn't correspond
+with the start position requested by <a href="qpainter.html">QPainter</a>, for example.
+
+<h3 class=fn>void <a name="setClipRect"></a>QGfxRasterBase::setClipRect ( int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h )<tt> [virtual]</tt>
+</h3>
+
+This is a simplified case of setClipRegion, setting a clip region consisting
+of one rectangle.
+
+<h3 class=fn>void <a name="setClipRegion"></a>QGfxRasterBase::setClipRegion ( const&nbsp;<a href="qregion.html">QRegion</a>&nbsp;&amp;&nbsp;r )<tt> [virtual]</tt>
+</h3>
+
+This sets the clipping region for the QGfx. All drawing outside of the region
+is not displayed. The clip region is defined relative to the QGfx's
+origin at the time the clip region is set, and consists of an array of 
+rectangles stored in the array cliprect. Note that changing the origin
+after the clip region is set will not change the position of the clip region
+within the buffer. Hardware drivers should use this to set their clipping 
+scissors when drawing. Note also that this is the user clip region as set by
+<a href="qpainter.html">QPainter</a>; it is combined (via an intersection) with the widget clip region
+to provide the actual clipping region.
+
+<h3 class=fn>void <a name="setClipping"></a>QGfxRasterBase::setClipping ( bool&nbsp;b )<tt> [virtual]</tt>
+</h3>
+
+Defines whether to clip or not. If clipping is not enabled then
+drawing will access the whole buffer. This will be reflected in
+the cliprect array, which will consist of one rectangle of buffer
+width and height. The variable regionClip defines whether to clip
+or not.
+
+<h3 class=fn>void <a name="setDashedLines"></a>QGfxRasterBase::setDashedLines ( bool&nbsp;d )<tt> [virtual]</tt>
+</h3>
+
+This defines whether the gfx should draw with dashed or solid
+lines. It's called by setPen so there is no need to call it directly.
+
+<h3 class=fn>void <a name="setDashes"></a>QGfxRasterBase::setDashes ( char&nbsp;*&nbsp;dashList, int&nbsp;n )<tt> [virtual]</tt>
+</h3>
+
+This defines the pattern for dashed lines. It's called by setPen
+so there is no need to call it directly.
+
+<h3 class=fn>void <a name="setFont"></a>QGfxRasterBase::setFont ( const&nbsp;<a href="qfont.html">QFont</a>&nbsp;&amp;&nbsp;f )<tt> [virtual]</tt>
+</h3>
+
+This corresponds to QPainter::setFont and defines what font <a href="#drawText">drawText</a>()
+will use.
+
+<h3 class=fn>void <a name="setOffset"></a>QGfxRasterBase::setOffset ( int&nbsp;x, int&nbsp;y )<tt> [virtual]</tt>
+</h3>
+
+This defines the origin of the gfx. For instance, if the origin is set
+to 100,100 and a line is then drawn from 0,0 to 10,10 the line will be
+(relative to the top left of the buffer) from 100,100 to 110,110. This
+is used to support windows within the buffer.
+
+<h3 class=fn>void <a name="setPen"></a>QGfxRasterBase::setPen ( const&nbsp;<a href="qpen.html">QPen</a>&nbsp;&amp;&nbsp;p )<tt> [virtual]</tt>
+</h3>
+
+This corresponds to QPainter::setPen - it tells QGfxRaster
+what line colour and style to use.
+
+<h3 class=fn>void <a name="setSourcePen"></a>QGfxRasterBase::setSourcePen ()<tt> [virtual protected]</tt>
+</h3>
+
+This tells blt()s that instead of image data a single solid value
+should be used as the source, taken from the current pen color.
+You could reproduce a fillRect() using a pen source and the IgnoreAlpha
+alpha type, but this would be both pointless and slower than fillRect;
+its normal use is for anti-aliased text, where the text colour is
+that of the pen and a separate alpha channel produces the shape of
+the glyphs.
+
+<h3 class=fn>void <a name="setSourceWidgetOffset"></a>QGfxRasterBase::setSourceWidgetOffset ( int&nbsp;x, int&nbsp;y )<tt> [virtual protected]</tt>
+</h3>
+
+This stores the offset from the screen framebuffer of the widget
+from which a blt() is being performed - this is added to the
+source x and y coordinates from a bitBlt to produce the source screen
+position of the blt
+
+<h3 class=fn>void <a name="setWidgetRect"></a>QGfxRasterBase::setWidgetRect ( int&nbsp;x, int&nbsp;y, int&nbsp;w, int&nbsp;h )<tt> [virtual]</tt>
+</h3>
+
+This is a special case of setWidgetRegion for widgets which are not shaped
+and not occluded by any other widgets.
+
+<h3 class=fn>void <a name="setWidgetRegion"></a>QGfxRasterBase::setWidgetRegion ( const&nbsp;<a href="qregion.html">QRegion</a>&nbsp;&amp;&nbsp;r )<tt> [virtual]</tt>
+</h3>
+
+This sets the widget's region clip, which is combined with the user
+clip to determine the widget's drawable region onscreen. It's a combination
+of the widget's shape (if it's a shaped widget) and the area not obscured
+by windows on top of it.
+
+<h3 class=fn>void <a name="sync"></a>QGfxRasterBase::sync ()<tt> [virtual]</tt>
+</h3>
+
+This does very little in a purely-software QGfxRasterBase (simply
+records that the last operation was a software one). Hardware drivers
+should reimplement this to wait for graphics engine idle in order to
+allow software and hardware drawing to synchronize properly.
+
+<h3 class=fn>void <a name="update_clip"></a>QGfxRasterBase::update_clip ()<tt> [protected]</tt>
+</h3>
+
+This combines the currently set widget and user clips
+and caches the result in an array of QRects, cliprect,
+the size of which is stored in ncliprect. It's called whenever
+the widget or user clips are changed.
+
+<h3 class=fn>void <a name="useBrush"></a>QGfxRasterBase::useBrush ()<tt> [protected]</tt>
+</h3>
+
+This takes the currently-set brush and stores its color value in the
+variable pixel for drawing points, lines and rectangles.
+
+<h3 class=fn>void <a name="usePen"></a>QGfxRasterBase::usePen ()<tt> [protected]</tt>
+</h3>
+
+This takes the currently-set pen and stores its color value in the
+variable pixel for drawing points, lines and rectangles.
+
+<!-- eof -->
+<hr><p>
+This file is part of the <a href="../index.html">Qtopia </a>,
+copyright &copy; 1995-2002
+<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

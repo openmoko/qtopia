@@ -27,6 +27,7 @@
 
 class QToolButton;
 class TimeZoneSelector;
+class TimeZoneSelectorPrivate;
 
 // a function to load defaults in case there is no file
 QTOPIA_EXPORT QStringList timezoneDefaults( void );
@@ -42,6 +43,9 @@ public:
     void setCurrZone( const QString& id );
 
 protected:
+#ifdef QTOPIA_DESKTOP
+    friend class TimeZoneSelectorPrivate;
+#endif
     friend class TimeZoneSelector;
     void keyPressEvent( QKeyEvent *e );
     void mousePressEvent(QMouseEvent*e);
@@ -55,7 +59,6 @@ private:
     QStringList extras;
 };
 
-class TimeZoneSelectorPrivate;
 class QTOPIA_EXPORT TimeZoneSelector : public QHBox
 {
     Q_OBJECT
@@ -69,21 +72,21 @@ public:
     void setLocalIncluded(bool);
     bool localIncluded() const;
 #endif
-
-    
     QString currentZone() const;
     void setCurrentZone( const QString& id );
 
 signals:
     void signalNewTz( const QString& id );
-
 private slots:
     void slotTzActive( int index );
     void slotExecute( void );
 
 private:
-    TZCombo *cmbTz;
     QToolButton *cmdTz;
+#ifdef QTOPIA_DESKTOP
+    public:
+#endif
+    TZCombo *cmbTz;
     TimeZoneSelectorPrivate *d;
 };
 

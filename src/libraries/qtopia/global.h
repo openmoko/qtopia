@@ -35,14 +35,17 @@ class QFile;
 class QTOPIA_EXPORT Global
 {
 public:
-    static QUuid generateUuid();
+    static QUuid generateUuid(); // libqtopia
 
-    static QString homeDirPath();
-    static QString journalFileName(const QString &filename);
+    static QString homeDirPath(); // libqtopia
+    static bool renameFile( QString from, QString to ); // libqtopia
+    static QString tempName(const QString &filename); // libqtopia
+    static QString journalFileName(const QString &filename); // libqtopia
+
     static QString applicationFileName(const QString& appname, const QString& filename);
     static void findDocuments(DocLnkSet* folder, const QString &mimefilter=QString::null);
-    static bool isDocumentFileName(const QString& file);
-    static bool isAppLnkFileName(const QString& file);
+    static bool isDocumentFileName(const QString& file); // libqtopia
+    static bool isAppLnkFileName(const QString& file); // libqtopia
 
 #ifdef QTOPIA_INTERNAL_LANGLIST
     static QStringList languageList();
@@ -50,6 +53,14 @@ public:
 #endif
 
     static void statusMessage(const QString&);
+
+    static QString shellQuote(const QString& s);
+    static QString stringQuote(const QString& s);
+
+    static QByteArray encodeBase64(const QByteArray& origData); // libqtopia
+    static QByteArray decodeBase64(const QByteArray& encoded); // libqtopia
+    static bool weekStartsOnMonday(); // libqtopia
+    static void setWeekStartsMonday(bool ); // libqtopia
 
 #ifdef Q_WS_QWS
 
@@ -66,8 +77,10 @@ public:
 
     static void createDocDir();
 
-    static QString deviceId();
-    static QString ownerName();
+    static QString version(); // libqtopia
+    static QString architecture(); // libqtopia
+    static QString deviceId(); // libqtopia
+    static QString ownerName(); // libqtopia
 
     struct Command {
 	const char *file;
@@ -95,10 +108,7 @@ public:
 
     static void writeHWClock();
 
-    static QString shellQuote(const QString& s);
-    static QString stringQuote(const QString& s);
-
-#ifdef QTOPIA_FILEOPERATIONS
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
     static bool truncateFile(QFile &f, int size);
 
     enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
@@ -114,5 +124,9 @@ private:
 #endif
 };
 
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
+QString qtopia_tempName( const QString &fname );
+bool qtopia_renameFile( QString from, QString to );
+#endif
 
 #endif

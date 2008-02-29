@@ -21,6 +21,7 @@
 #include "config.h"
 #include "global.h"
 #include "backend/contact.h"
+#include "qpeapplication.h"
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qtextview.h>
@@ -41,6 +42,7 @@
 #include <winbase.h>
 #endif
 #include "passwordbase_p.h"
+
 
 class PasswordDialog : public PasswordBase
 {
@@ -82,15 +84,15 @@ static QString qcrypt(const QString& k, const char *salt)
     const QCString c_str = k.utf8();
     int		len = k.length();
     QString	result;
-    const char	*ptr;
+    const char	*ptr = c_str;
 
     for (; len > 8; len -= 8) {
 	result += QString::fromUtf8(crypt(ptr, salt));
 	ptr += 8;
     }
 
-    if (*c_str) {
-	result += QString::fromUtf8(crypt(c_str, salt));
+    if (len) {
+	result += QString::fromUtf8(crypt(ptr, salt));
     }
 
     return result;
@@ -325,7 +327,7 @@ QString Password::getPassword( const QString& prompt )
 
 void Password::authenticate(bool at_poweron)
 {
-    Config cfg("Security");
+    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File);
     cfg.setGroup("Passcode");
     QString passcode = cfg.readEntry("passcode");
     if ( !passcode.isEmpty()

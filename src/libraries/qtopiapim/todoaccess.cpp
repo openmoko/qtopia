@@ -141,7 +141,7 @@ bool TodoAccess::editSupported() const
 
 /*!
  \fn void TodoAccess::todoListUpdated()
- Emitted whenever the addressbook is updated.
+ Emitted whenever the todo list is updated.
 */
 
 /*! \class TodoIterator

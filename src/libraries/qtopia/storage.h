@@ -44,7 +44,7 @@ public:
 
     const QList<FileSystem> &fileSystems() const { return mFileSystems; }
     const FileSystem *fileSystemOf( const QString &filename );
-    QStringList fileSystemStrings() const; // libqtopia
+    QStringList fileSystemNames() const; // libqtopia
 
 signals:
     void disksChanged();
@@ -89,17 +89,5 @@ private:
     QString opts;
 };
 
-
-// Useful for construction a QComboBox from the Storage Info list
-/*
-inline QStringList StorageInfo::fileSystemStrings() const
-{
-    QListIterator<FileSystem> it( mFileSystems );
-    QStringList strings;
-    for ( ; it.current(); ++it ) 
-	strings << (*it)->name();
-    return strings;
-}
-*/
 
 #endif

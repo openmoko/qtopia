@@ -152,7 +152,7 @@ private:
     int editCol, editRow;
 };
 
-TodoTable::TodoTable(const SortedTasks &tasks, QWidget *parent, const char *name, const char *appPath )
+TodoTable::TodoTable(TodoXmlIO *tasks, QWidget *parent, const char *name, const char *appPath )
     : QTable( 0, 3, parent, name ),
       mCat( 0 ),
       currFindRow( -2 )
@@ -184,11 +184,14 @@ TodoTable::TodoTable(const SortedTasks &tasks, QWidget *parent, const char *name
     QTable::setSelectionMode( QTable::NoSelection );
 
     setLeftMargin( 0 );
+#ifndef QTOPIA_DESKTOP
     setFrameStyle( NoFrame );
+#endif
     verticalHeader()->hide();
 
     connect(horizontalHeader(), SIGNAL(clicked(int)), this, SLOT(headerClicked(int)) );
     mSortColumn = -1;
+    ascSort = FALSE;
 
     connect( this, SIGNAL( clicked( int, int, int, const QPoint & ) ),
 	     this, SLOT( slotClicked( int, int, int, const QPoint & ) ) );
@@ -204,6 +207,7 @@ TodoTable::TodoTable(const SortedTasks &tasks, QWidget *parent, const char *name
 
     menuTimer = new QTimer( this );
     connect( menuTimer, SIGNAL(timeout()), this, SIGNAL(pressed()) );
+
     constructorDone = TRUE;
 }
 
@@ -250,7 +254,7 @@ QValueList<PimTask> TodoTable::selected()
 	for ( QValueList<QUuid>::Iterator it = mSelected.begin(); it != mSelected.end(); ++it) {
 	    int i = pos( *it );
 	    if ( i > -1 )
-		list.append( *mTasks.at(i) );
+		list.append( *mTasks->sortedTasks().at(i) );
 	}
 	
 	// set current entry as selected when none is selected
@@ -269,8 +273,8 @@ void TodoTable::selectAll()
 
     selectionBeginRow = -1;
     mSelected.clear();
-    for ( uint u = 0; u < mTasks.count(); u++ ) {
-	mSelected.append( mTasks.at(u)->uid() );
+    for ( uint u = 0; u < mTasks->sortedTasks().count(); u++ ) {
+	mSelected.append( mTasks->sortedTasks().at(u)->uid() );
     }
     refresh();
 }
@@ -320,12 +324,12 @@ void TodoTable::setSelection(int fromRow, int toRow)
     int row = fromRow;
     mSelected.clear();
     while ( row <= toRow ) {
-	mSelected.append( mTasks.at(row)->uid() );
+	mSelected.append( mTasks->sortedTasks().at(row)->uid() );
 	row++;
     }
 }
 
-void TodoTable::reload(const SortedTasks &tasks)
+void TodoTable::reload()
 {
     // If the user applies outside filters we have to clear our internal state
     if ( d->editorWidget() ) {
@@ -333,12 +337,11 @@ void TodoTable::reload(const SortedTasks &tasks)
 	d->clearEditorWidget();
     }
 
-    mTasks = tasks;
     mSelected.clear();
 
     if ( mSortColumn > -1 ) {
-	mTasks.setSorting( headerKeyFields[ mSortColumn ] , FALSE );
-	mTasks.sort();
+	mTasks->setSorting( headerKeyFields[ mSortColumn ] , ascSort );
+//	mTasks->sort();
     }
 
     refresh();
@@ -347,8 +350,8 @@ void TodoTable::reload(const SortedTasks &tasks)
 
 int TodoTable::pos(const QUuid &id)
 {
-    for ( uint u = 0; u < mTasks.count(); u++ ) {
-	if ( mTasks.at(u)->uid() == id )
+    for ( uint u = 0; u < mTasks->sortedTasks().count(); u++ ) {
+	if ( mTasks->sortedTasks().at(u)->uid() == id )
 	    return u;
     }
 
@@ -364,10 +367,10 @@ void TodoTable::slotClicked( int row, int col, int , const QPoint &pos )
 
     if ( !cellGeometry( row, col ).contains(pos) )
 	return;
-    if (row < 0 || row >= (int)mTasks.count())
+    if (row < 0 || row >= (int)mTasks->sortedTasks().count())
 	return;
 
-    PimTask task(*mTasks.at(row));
+    PimTask task(*mTasks->sortedTasks().at(row));
 
     int field = headerKeyFields[ currentColumn() ];
     switch ( field )
@@ -415,7 +418,7 @@ void TodoTable::keyPressEvent( QKeyEvent *e )
     int col  = currentColumn();
     int row = currentRow();
 
-    if (row < 0 || row >= (int)mTasks.count())
+    if (row < 0 || row >= (int)mTasks->sortedTasks().count())
 	return;
 
     if ( e->key() == Key_Space || e->key() == Key_Return ) {
@@ -423,7 +426,7 @@ void TodoTable::keyPressEvent( QKeyEvent *e )
 	switch ( field ) {
 	    case PimTask::CompletedField:
 		{
-		    PimTask task(*(mTasks.at(row)));
+		    PimTask task(*(mTasks->sortedTasks().at(row)));
 		    task.setCompleted(!task.isCompleted());
 		    task.setCompletedDate( QDate::currentDate() );
 		    d->setModifiedTask( task.uid(), PimTask::CompletedField);
@@ -490,19 +493,19 @@ void TodoTable::slotCurrentChanged( int row, int )
 
 bool TodoTable::hasCurrentEntry()
 {
-    return mTasks.count() != 0;
+    return mTasks->sortedTasks().count() != 0;
 }
 
 PimTask TodoTable::currentEntry()
 {
-    if (mTasks.count() == 0)
+    if (mTasks->sortedTasks().count() == 0)
 	return PimTask();
-    if (currentRow() >= (int)mTasks.count()) {
-	setCurrentCell(mTasks.count() - 1, currentColumn());
+    if (currentRow() >= (int)mTasks->sortedTasks().count()) {
+	setCurrentCell(mTasks->sortedTasks().count() - 1, currentColumn());
     } else if (currentRow() < 0) {
 	setCurrentCell(0, currentColumn());
     }
-    return PimTask(*(mTasks.at(currentRow())));
+    return PimTask(*(mTasks->sortedTasks().at(currentRow())));
 }
 
 void TodoTable::setCurrentEntry(const QUuid &u)
@@ -511,7 +514,7 @@ void TodoTable::setCurrentEntry(const QUuid &u)
     rows = numRows();
 
     for ( row = 0; row < rows; row++ ) {
-	if ( mTasks.at(row)->uid() == u) {
+	if ( mTasks->sortedTasks().at(row)->uid() == u) {
 	    setCurrentCell(row, currentColumn());
 	    break;
 	}
@@ -578,30 +581,35 @@ void TodoTable::contentsMouseReleaseEvent( QMouseEvent *e )
     QTable::contentsMouseReleaseEvent( e );
 }
 
+static bool needColumnResize = TRUE;
+
 void TodoTable::resizeEvent( QResizeEvent *e )
 {
+    QTable::resizeEvent( e );
+    
     // we receive a resize event from qtable in the middle of the constrution, since
     // QTable::columnwidth does qApp->processEvents.  Ignore this event as it causes
     // all sorts of init problems for us
-    if ( !constructorDone ) {
-	QTable::resizeEvent( e );
+    if ( !constructorDone )
 	return;
+}
+
+void TodoTable::showEvent( QShowEvent *e)
+{
+    QTable::showEvent(e);
+    if ( needColumnResize ) {
+	needColumnResize = FALSE;
+	fitHeadersToWidth();
     }
-    
-    QTable::resizeEvent( e );
-
-/*  Disabled for now, mixing automatic/manual resizing creates a few problems
-
-    // yet another hack to avoid repaint problems
-    oldSize = e->oldSize();
-    newSize = e->size();
-    QTimer::singleShot( 0, this, SLOT( delayedCalc() ) );
-*/
 }
 
 void TodoTable::fitHeadersToWidth()
 {
-    calcFieldSizes( 0, width() );
+    int w = width() - frameWidth();
+    if (contentsHeight() >= (height() - horizontalHeader()->height()) )
+	w -= (style().scrollBarExtent().width());
+    
+    calcFieldSizes( 0, w );
 }
 
 void TodoTable::calcFieldSizes(int oldSize, int size)
@@ -629,7 +637,7 @@ void TodoTable::calcFieldSizes(int oldSize, int size)
 	    newColLen =  min;
 
 	// make sure we fill out the space if there's some integer rounding leftover
-	if ( i == col - 1 )
+	if ( i == col - 1 && size - accumulated - 2 > min )
 	   newColLen = size - accumulated - 2;
 	else
 	    accumulated += newColLen;
@@ -668,7 +676,7 @@ void TodoTable::refresh()
     if ( d->hasModifiedTask() ) {
 	// we might have an invalid uid at this point.  Check row within bounds
 	// just to be sure
-	if ( currentRow() < (int) mTasks.count() && mTasks.at(currentRow())->uid() == d->modifiedTask() ) {
+	if ( currentRow() < (int) mTasks->sortedTasks().count() && mTasks->sortedTasks().at(currentRow())->uid() == d->modifiedTask() ) {
 	    d->clearModifiedTask();
 	} else  {
 	    // Our modified task can have been filtered out
@@ -678,7 +686,7 @@ void TodoTable::refresh()
 	}
     }
 
-    setNumRows(mTasks.count());
+    setNumRows(mTasks->sortedTasks().count());
 }
 
 void TodoTable::slotDoFind( const QString &findString, int category )
@@ -700,7 +708,7 @@ void TodoTable::slotDoFind( const QString &findString, int category )
     int rows = numRows();
     int row;
     for ( row = currFindRow + 1; row < rows; row++ ) {
-	if ( taskCompare( *(mTasks.at(row)), r, category) )
+	if ( taskCompare( *(mTasks->sortedTasks().at(row)), r, category) )
 	    break;
     }
     if ( row >= rows ) {
@@ -778,7 +786,7 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
 
     p->save();
 
-    PimTask task(*(mTasks.at(row)));
+    PimTask task(*(mTasks->sortedTasks().at(row)));
     
     bool selected = FALSE;
     if ( mSel != NoSelection  && mSelected.find(task.uid()) != mSelected.end() )
@@ -866,7 +874,9 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
 	    }
 	    break;
 	case PimTask::Notes:
-		p->drawText(2,2 + fm.ascent(), task.notes() ); break;
+		//must remove any crlf from the text
+		p->drawText(2,2 + fm.ascent(), task.notes().simplifyWhiteSpace() ); 
+		break;
 	case PimTask::StartedDate:
 	    {
 		if ( task.hasStartedDate() )
@@ -932,7 +942,7 @@ QWidget *TodoTable::createEditor(int row, int col, bool ) const
 		cb->insertItem( "3" );
 		cb->insertItem( "4" );
 		cb->insertItem( "5" );
-		cb->setCurrentItem( mTasks.at(row)->priority() - 1 );
+		cb->setCurrentItem( mTasks->sortedTasks().at(row)->priority() - 1 );
 
 		connect( cb, SIGNAL(activated(int)), this, SLOT(priorityChanged(int)) );
 		return cb;
@@ -952,7 +962,7 @@ void TodoTable::setCellContentFromEditor(int row, int col)
 {
     QWidget *w = cellWidget(row,col);
 
-    PimTask task(*(mTasks.at(row)));
+    PimTask task(*(mTasks->sortedTasks().at(row)));
     if (w->inherits("QComboBox") ) {
 	int res = ((QComboBox *)w)->currentItem() + 1;
 	if (task.priority() != res) {
@@ -977,23 +987,27 @@ void TodoTable::readSettings()
 {
     QStringList selectedFields, sizeList;
 
+    {
 #ifdef QTOPIA_DESKTOP
-    QSettings settings;
-    settings.insertSearchPath( QSettings::Unix, applicationPath );
-    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+	QSettings settings;
+	settings.insertSearchPath( QSettings::Unix, applicationPath );
+	settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
 
-    selectedFields = settings.readListEntry("/palmtopcenter/todolist/fields" );
-    sizeList = settings.readListEntry("/palmtopcenter/todolist/colwidths" );
+	selectedFields = settings.readListEntry("/palmtopcenter/todolist/fields" );
+	sizeList = settings.readListEntry("/palmtopcenter/todolist/colwidths" );
 
-    mSortColumn = settings.readNumEntry("/palmtopcenter/todolist/sortcolumn", 0);
+	mSortColumn = settings.readNumEntry("/palmtopcenter/todolist/sortcolumn", 0);
+	ascSort = settings.readBoolEntry("/palmtopcenter/todolist/ascsort", FALSE);
 #else
-    Config config( "todo" );
-    config.setGroup( "View" );
+	Config config( "todo" );
+	config.setGroup( "View" );
 
-    selectedFields = config.readListEntry("fields", ',');
-    sizeList = config.readListEntry("colwidths",',');
-    mSortColumn = config.readNumEntry("sortcolumn", 0 );
+	selectedFields = config.readListEntry("fields", ',');
+	sizeList = config.readListEntry("colwidths",',');
+	mSortColumn = config.readNumEntry("sortcolumn", 0 );
+	ascSort = config.readBoolEntry("ascsort", 0 );
 #endif
+    }
 
     if ( !selectedFields.count() ) {
 	setFields( defaultFields() );
@@ -1007,8 +1021,10 @@ void TodoTable::readSettings()
 	setFields( headerKeyFields, sizeList );
     }
 
-    if ( mSortColumn > -1 )
-	reload( mTasks );
+    if ( mSortColumn > -1 ) {
+	reload(); 
+	horizontalHeader()->setSortIndicator(mSortColumn,!ascSort);
+    }
 }
 
 void TodoTable::saveSettings()
@@ -1029,12 +1045,14 @@ void TodoTable::saveSettings()
     settings.writeEntry( "/palmtopcenter/todolist/fields", fieldList );
     settings.writeEntry( "/palmtopcenter/todolist/colwidths", sizeList );
     settings.writeEntry( "/palmtopcenter/todolist/sortcolumn", mSortColumn );
+    settings.writeEntry( "/palmtopcenter/todolist/ascsort", ascSort );
 #else
     Config config( "todo" );
     config.setGroup( "View" );
     config.writeEntry("fields", fieldList, ',' );
     config.writeEntry("colwidths", sizeList, ',' );
     config.writeEntry("sortcolumn", mSortColumn );
+    config.writeEntry("ascsort", ascSort );
 #endif
 
 }
@@ -1061,7 +1079,9 @@ void TodoTable::setFields(QValueList<int> f)
     
     setFields(f, sizes);
 
-    saveSettings();
+    needColumnResize = TRUE;
+    if ( isVisible() )
+	fitHeadersToWidth();
 }
 
 void TodoTable::setFields(QValueList<int> f, QStringList sizes)
@@ -1153,8 +1173,11 @@ void TodoTable::headerClicked(int h)
 {
     if ( h != mSortColumn ) {
 	mSortColumn = h;
-	reload( mTasks );
-    }
+	ascSort = FALSE;
+    } else
+	ascSort = !ascSort;
+    horizontalHeader()->setSortIndicator(mSortColumn,!ascSort);
+    reload();
 }
 
 QString TodoTable::statusToText(PimTask::TaskStatus s)

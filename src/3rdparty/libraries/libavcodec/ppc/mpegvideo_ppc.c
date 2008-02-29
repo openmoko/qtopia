@@ -17,7 +17,7 @@
  */
  
 #include <time.h>
-#include "../../config.h"
+#include "../libavformat/config.h"
 #include "../dsputil.h"
 #include "../mpegvideo.h"
 

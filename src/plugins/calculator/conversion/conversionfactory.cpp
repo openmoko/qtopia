@@ -21,9 +21,10 @@
 #include "conversionfactory.h"
 #include "conversion.h"
 #include <qstringlist.h>
+#include <qapplication.h>
 
 QWidget * ConversionInterface::create (QWidget *parent) {
-    return new FormConversion(parent,"Conversion",0);
+    return new FormConversion(parent,pluginName(),0);
 }
 
 #ifndef QT_NO_COMPONENT
@@ -46,3 +47,6 @@ Q_EXPORT_INTERFACE()
     Q_CREATE_INSTANCE( ConversionInterface )
 }
 #endif
+
+const char * ConversionInterface::pluginName() { return qApp->tr("Conversion"); }
+

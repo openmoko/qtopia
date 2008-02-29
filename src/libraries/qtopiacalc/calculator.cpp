@@ -39,30 +39,30 @@
 QTOPIA_EXPORT Engine *systemEngine;
 
 // Calculator class
-Calculator::Calculator(
-#ifdef QTEST
-	int argc,char **argv,
-#endif
-	QWidget * p, const char *n,WFlags fl) : QWidget (p, n, fl),
+Calculator::Calculator( QWidget * p, const char *n,WFlags fl) : QWidget (p, n, fl),
 	pluginWidgetStack(NULL)
 {
     pluginList = new QValueList<CalculatorPlugin>();
     modeBox = 0;
     systemEngine = new Engine();
     calculatorLayout = new QVBoxLayout(this);
+#ifdef NEW_STYLE_DISPLAY
+    LCD = new QLabel(this);
+#else
     LCD = new QLineEdit(this);
     LCD->setFocusPolicy(QWidget::NoFocus);
     QFont f = LCD->font();
     f.setPointSize(f.pointSize()*2);
     LCD->setFont(f);
     LCD->setReadOnly(TRUE);
+#endif
     calculatorLayout->addWidget(LCD);
     systemEngine->setDisplay(LCD);
 
     // Load plugins
 #ifndef QT_NO_COMPONENT
     if ( !pluginList->count() ) {
-	PluginLoader loader( "calculator" );
+	PluginLoader loader( "calculator" ); // No tr
 	QStringList list = loader.list();
 	QStringList::Iterator it;
 	for (it = list.begin(); it != list.end(); ++it) {
@@ -94,18 +94,8 @@ Calculator::Calculator(
 	    for (uint it2 = 0; it2 < pluginList->count(); it2++) {
 		current = pluginList->at(it2);
 		(*current).widget = (*current).interface->create(this);
-#ifdef QTEST
-		QString tmp((*current).widget->name());
-		for (int c=1;c<argc;c++) {
-		    if (argv[c] == tmp) {
-#endif
-			modeBox->insertItem((*current).widget->name());
-			pluginWidgetStack->addWidget((*current).widget,it2);
-#ifdef QTEST
-		    } else
-		    delete (*current).widget;
-		}
-#endif
+		modeBox->insertItem((*current).interface->pluginName());
+		pluginWidgetStack->addWidget((*current).widget,it2);
 	    }
 	    calculatorLayout->addWidget(pluginWidgetStack);
 	    connect (modeBox, SIGNAL(activated(int)), pluginWidgetStack, SLOT(raiseWidget(int)));
@@ -133,13 +123,12 @@ Calculator::~Calculator()
 	config.setGroup("View");
 	config.writeEntry("lastView", modeBox->currentItem() );
 	delete modeBox;
+	delete pluginWidgetStack;
     }
+    delete pluginList;
     delete LCD;
     delete systemEngine;
-    if (pluginWidgetStack)
-	delete pluginWidgetStack;
     delete calculatorLayout;
-    delete pluginList;
 }
 
 void Calculator::keyPressEvent(QKeyEvent *e) {

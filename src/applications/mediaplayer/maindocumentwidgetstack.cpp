@@ -36,8 +36,10 @@ MainDocumentWidgetStack *mainDocumentWindow = 0;
 
 
 MainDocumentWidgetStack::MainDocumentWidgetStack( QWidget *parent, const char *name, WFlags /* fl */)
-    : QWidgetStack( parent, name )
+    : QWidgetStack( parent, name ), waiting(FALSE)
 {
+    qDebug( "Thread fixed version" );
+
     loading = TRUE;
     setCaption( tr("Media Player") );
     setMinimumSize( 128, 128 );
@@ -107,7 +109,7 @@ void MainDocumentWidgetStack::setWaiting( bool w )
 	waiting = w;
 	if ( waiting ) {	
 	    QPainter p( this );
-	    QPixmap waitPix = Resource::loadPixmap( "wait" );
+	    QPixmap waitPix = Resource::loadPixmap( "bigwait" );
 	    p.drawPixmap( (width() - waitPix.width()) / 2, (height() - waitPix.height()) / 2, waitPix );
 //	    a.processEvents(); // (show hourglass icon while loading)
 	} else {

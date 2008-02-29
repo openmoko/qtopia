@@ -2,10 +2,6 @@
 <context>
     <name>KAstTopLevel</name>
     <message>
-        <source>Asteroids</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Score</source>
         <translation type="unfinished"></translation>
     </message>
@@ -34,6 +30,10 @@ Press %1</source>
         <source>GAME OVER
 Press %1
 for a new game.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Asteroids</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

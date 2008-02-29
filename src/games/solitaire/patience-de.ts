@@ -1,5 +1,17 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>CanvasCardGame</name>
+    <message>
+        <source>Game Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Congratulations!
+You won the game!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CanvasCardWindow</name>
     <message>
         <source>&amp;Help</source>

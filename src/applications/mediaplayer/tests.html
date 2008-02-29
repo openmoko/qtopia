@@ -1,89 +1,489 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<title>
-Qtopia Media Player Test List
-</title>
-
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
 <body>
-
-<h1>Qtopia Media Player Test List</h1>
-
-
-<a name=features>
-<h2>Feature Tests</h2>
-</a>
-<!-- feature tests correspond 1-to-1 with features
-
-    Note: TITLEs may be used as identifiers in bug reports.
--->
-<h3>Play Music</h3>
-Run Qtopia Media Player<br>
-Select music file to play<br>
-Click on play button<br>
-Ensure music plays correctly<br>
-Test with files of different output bit rates (48kHz, 44kHz, 22kHz etc)<br>
-Test with files of different volumes (classical, jazz, rock etc)<br>
-Test with files of different number of channels (stereo and mono)<br>
-
-<h3>Play Video Clips</h3>
-Run Qtopia Media Player<br>
-Select video file to play<br>
-Click on play button<br>
-Ensure video plays correctly<br>
-Test with files which have different audio settings, bitrate, channels etc.<br>
-Test with files with different video characteristics, highly compressed,
-small image files, high quality larger image files etc.<br>
-
-<h3>Key Operation</h3>
-Run Qtopia Media Player<br>
-Use just hard keys to navigate the user interface<br>
-Ensure that all essential functionality is accessible<br>
-Can play music and video files, adjust volume, navigate playlists etc.<br>
-
-<h3>Fullscreen Playback</h3>
-Run Qtopia Media Player<br>
-Select video file to play<br>
-Click on play button<br>
-Click on the video output view and ensure you can enter fullscreen mode to maximize
-viewing of the video<br>
-Tap on video image again to return from fullscreen mode<br>
-Ensure that if home key is pressed or another application is run while video is playing
-in fullscreen that you can click on the media player icon in the taskbar and it
-correctly restores to fullscreen mode.<br>
-Ensure the same as above happens when in normal mode that it restores to normal mode.<br>
-
-<h3>Rotation</h3>
-Run Qtopia Media Player<br>
-Select video file to play<br>
-Click on play button<br>
-Ensure the video clip is always rotated appropriately for the current playback area.<br>
-Test in normal mode and fullscreen mode.<br>
-If appropriate test on both devices which have a landscape orientation screen and
-a portrait orientation screen.<br>
-If possible also test on screens which have different QWS_DISPLAY rotation settings for
-the rotated driver cases.<br>
-
-<h3>Playlist</h3>
-Run Qtopia Media Player<br>
-In the file selection area for audio files click on the add icon in the toolbar.<br>
-Ensure the file is added to the playlist.<br>
-Repeat for video files.<br>
-Ensure it is easy to add a series of files.<br>
-Ensure that the menu items to clear, add all files, add all music or video files do as
-they suggest to the playlist.<br>
-From the playlist tab, ensure the remove icon when clicked in the toolbar removes the currently
-selected item.<br>
-Quit the media player and open it again and ensure the play list is reloaded as it was
-before quitting.<br>
-Test that the location and categories correctly filter the list of audio and video files.<br>
-
-<h3>ID3 Tags</h3>
-Select an MP3 file<br>
-Click on the info icon from the toolbar<br>
-Ensure that the ID3 tag fields attached to the MP3 files are displayed correctly
-in the details tab.<br>
-Edit the tags and close the dialog by clicking on 'ok' and reopen the information dialog.<br>
-Ensure the changes were changed and saved.<br>
-Repeat but click on the 'x' in the titlebar instead of 'ok' and ensure the changes are discarded.<br>
-
+<h1>Qtopia/Media player</h1>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Play music</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that music files can be
+played.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Select music file to play.</li>
+        <li> Click on play button.</li>
+        <li>Verify that music plays correctly.</li>
+        <li> Test with files of different output bit rates (48kHz,
+44kHz, 22kHz etc).</li>
+        <li> Test with files of different volumes (classical, jazz, rock
+etc).</li>
+        <li> Test with files of different number of channels (stereo and
+mono). </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Play Video</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that video files can be
+played.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Select video file to play</li>
+        <li> Click on play button</li>
+        <li> Ensure video plays correctly</li>
+        <li> Test with files which have different audio settings,
+bitrate, channels etc.</li>
+        <li> Test with files with different video characteristics,
+highly compressed, small image files, high quality larger image files
+etc. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Hard keys</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the essential
+functions can be controlled using hard keys.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Left</span> and <span
+ style="font-weight: bold;">Right</span> hardkeys to toggle between the <span
+ style="font-weight: bold;">Audio</span>, <span
+ style="font-weight: bold;">Video</span> and <span
+ style="font-weight: bold;">Playlist</span> tab pages.</li>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Up</span> and <span
+ style="font-weight: bold;">Down</span> hardkeys to select a file inside
+a tab page.</li>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Centre</span> hardkey to start the selected
+file.</li>
+        <li>Verify that after the <span style="font-weight: bold;">Centre</span>
+hardkey is pressed (start play) the media player starts playing the
+selected file. The GUI that is applied depends on whether an audio file
+or a video file is selected.<br>
+        </li>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Up</span> and <span
+ style="font-weight: bold;">Down</span> hardkeys to control the volume.</li>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Left</span> and <span
+ style="font-weight: bold;">Right</span> hardkeys to select the
+previous/next music or video file.</li>
+        <li>Verify that you can use the <span
+ style="font-weight: bold;">Centre</span> hardkey to start/stop the
+current music or video file.</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Full screen video</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a video file can be
+played in full screen mode.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Select a video file to play</li>
+        <li> Click on <span style="font-weight: bold;">play</span> button</li>
+        <li> Click on the video output view e.g. somewhere on the video
+screen.</li>
+        <li>Verify that the video is played in fullscreen mode, e.g.
+not title bar, no menu bar, no status bar and the video as large as
+possible.</li>
+        <li>Click on the <span style="font-weight: bold;">Home</span>
+button and start another application.</li>
+        <li>Tap on the Video player icon on the taskbar.</li>
+        <li>Verify that the media player is restored again in full
+screen mode.<br>
+        </li>
+        <li> Tap on video image again to return from fullscreen mode</li>
+        <li> Verify the same as above happens when in normal mode that
+it restores to normal mode. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Optimal rotation</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that a video is always
+played at the optimal rotation<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Select video file to play</li>
+        <li> Click on play button</li>
+        <li> Ensure the video clip is rotated appropriately for the
+current playback area.</li>
+        <li>Tap on the video view area to switch to fullscreen mode.</li>
+        <li>Verify that the video clip is rotated to best utilize the
+larger screen area.</li>
+        <li>Tap the screen again and verify that the clip is rotated
+back to best fit the smaller available screen area.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Editing the playlist</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Go to the <span style="font-weight: bold;">Audio</span> tab
+in the file selection view of media player.</li>
+        <li>Select a file and click on the <span
+ style="font-weight: bold;">add</span> icon in the toolbar.</li>
+        <li>Go to the <span style="font-weight: bold;">Playlist</span>
+tab and verify that the file is added to the playlist.</li>
+        <li> Repeat for a video file and verify that the playlist now
+shows the audio and video file.</li>
+        <li>Click on <span style="font-weight: bold;">Playlist &gt;
+Clear </span>&nbsp;and verify that the playlist is empty again</li>
+        <li>Click on <span style="font-weight: bold;">Playlist &gt;
+Add all audio</span> and verify that the playlist contains all files
+mentioned in the Audio tab.</li>
+        <li>Clear the playlist again.</li>
+        <li>Click on <span style="font-weight: bold;">Playlist &gt;
+Add all Videos</span> and verify that the playlist contains all files
+mentioned in the Video tab.</li>
+        <li>Clear the playlist again.</li>
+        <li>Click on <span style="font-weight: bold;">Playlist &gt;
+Add all</span> and verify that all audio and video files are add to the
+playlist.<br>
+        </li>
+        <li>Go to the <span style="font-weight: bold;">Playlist</span>
+tab and select a file.</li>
+        <li>Click on the <span style="font-weight: bold;">Remove from
+playlist</span> button and verify that the selected file is removed from
+the playlist.</li>
+        <li>Quit the media player and open it again and ensure the play
+list is reloaded as it was before quitting.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;Multimedia categories</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that the audio and video
+tabs present the correct files<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Upload some audio and video files.</li>
+        <li>Verify that all audio files are presented in the audio tab.</li>
+        <li>Verify that all video files are presented in the video tab.<br>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<h3>&nbsp;MP3 information</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;">Verify that ID3 information for
+MP3 files is shown correctly<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li> Select an MP3 file</li>
+        <li> Click on the info icon from the toolbar</li>
+        <li> Ensure that the ID3 tag fields attached to the MP3 files
+are displayed correctly in the details tab.</li>
+        <li> Edit the tags and close the dialog by clicking on <span
+ style="font-weight: bold;">OK</span></li>
+        <li>Reopen the information dialog.</li>
+        <li> Verify the changes were saved.</li>
+        <li> Repeat but click on the 'x'&nbsp;<span
+ style="font-weight: bold;"></span>and verify the changes are
+discarded. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </body>
 </html>

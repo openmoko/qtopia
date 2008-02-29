@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>229</width>
+            <width>225</width>
             <height>222</height>
         </rect>
     </property>
@@ -352,4 +352,14 @@
         </spacer>
     </grid>
 </widget>
+<tabstops>
+    <tabstop>player0</tabstop>
+    <tabstop>player1</tabstop>
+    <tabstop>player2</tabstop>
+    <tabstop>player3</tabstop>
+    <tabstop>player4</tabstop>
+    <tabstop>player5</tabstop>
+    <tabstop>rules</tabstop>
+    <tabstop>buttonOk</tabstop>
+</tabstops>
 </UI>

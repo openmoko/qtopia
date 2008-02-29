@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Qtopia test</title>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta content="Ed Baak" name="Author">
+</head>
+<body>
+<h1>Qtopia/Button Editor</h1>
+There are four hw buttons that can be configured in this app.<br>
+We'll name them "Notes", "Person", "Envelop" and "House" from top to
+bottom.<br>
+Each hw button can be configured for two modes: a normal mode and a
+hold mode.<br>
+The following testcases will refer to "Notes", "Person", ... and
+"Normal" and "Hold" all the time.<br>
+<br>
+<h2>Test cases&nbsp;</h2>
+<br>
+<br>
+<h3>&nbsp;Assigning applications</h3>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; width: 20%;">Test Purpose<br>
+      </th>
+      <td style="vertical-align: top;"> Verify that applications can be
+assigned to the special hardware keys and are opened when the keys are
+pressed. </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Description<br>
+      </th>
+      <td style="vertical-align: top;">
+      <ol>
+        <li>Assign "File Manager" to "Notes/Normal"&nbsp;</li>
+        <li>Assign "Todo list" to "Notes/Hold"</li>
+        <li>Assign "Contacts" to "Person/Normal"</li>
+        <li>Assign "Calculator" to "Person/Hold"</li>
+        <li>Assign "EMail" to "Envelope/Normal"</li>
+        <li>Assign "New EMail" to "Envelope/Hold"</li>
+        <li>Assign "System Info" to "House/Hold"</li>
+        <li>Press OK</li>
+        <li> Press the "Notes" hw button and verify that "File Manager"
+is opened.</li>
+        <li>Press the "Person" hw button and verify that "Contacts" is
+opened.</li>
+        <li>Press and hold for a little while the "Envelope" button and
+verify that the "New E-mail" dialog is opened.</li>
+        <li>Do similar checks for all buttons/modes</li>
+        <li> Start Buttons again</li>
+        <li>Assign "Calendar" to "Notes/Normal" and press OK</li>
+        <li>Press the "Notes" hw button and verify that "Calendar" is
+opened. </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Expected
+TestResult<br>
+      </th>
+      <td style="vertical-align: top;">All the verification steps as
+described in the Test Description must be met.<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Testnorm/Criteria<br>
+      </th>
+      <td style="vertical-align: top;">Exact Match<br>
+      </td>
+    </tr>
+    <tr>
+      <th style="vertical-align: top; width: 15%;" width="20%">Test
+Suitability<br>
+      </th>
+      <td style="vertical-align: top;">Manual test<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+</body>
+</html>

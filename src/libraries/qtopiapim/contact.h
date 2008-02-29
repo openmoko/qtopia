@@ -91,8 +91,10 @@ public:
 	// other
 	Notes,
 
-	// maps to Furigana, or is at least intended to.
-	Pronunciation,
+	// maps to YomiLastName, or is at least intended to  
+	LastNamePronunciation,
+	FirstNamePronunciation,
+	CompanyPronunciation,
 
 	// DisplayFieldsCount should always be last and is not supposed to 
 	// be relied on.  If you need to iteratate, get a map.
@@ -116,7 +118,9 @@ public:
     void setSuffix( const QString &v ) { replace( Suffix, v ); }
     void setFileAs( const QString &v ) { replace( FileAs, v ); }
     void setFileAs();
-    void setPronunciation( const QString &v ) { replace( Pronunciation, v ); }
+    void setFirstNamePronunciation( const QString &v ) { replace( FirstNamePronunciation, v ); }
+    void setLastNamePronunciation( const QString &v ) { replace( LastNamePronunciation, v ); }
+    void setCompanyPronunciation( const QString &v ) { replace( CompanyPronunciation, v ); }
 
     // default email address
     void setDefaultEmail( const QString &v );
@@ -158,7 +162,8 @@ public:
 
     // personal
     void setSpouse( const QString &v ) { replace( Spouse, v ); }
-    void setGender( const QString &v ) { replace( Gender, v ); }
+    enum GenderType { UnspecifiedGender=0, Male, Female };
+    void setGender( GenderType g );
     void setBirthday( const QDate &d );
     void setAnniversary( const QDate &v );
     void setNickname( const QString &v ) { replace( Nickname, v ); }
@@ -182,7 +187,9 @@ public:
     QString lastName() const { return find( LastName ); }
     QString suffix() const { return find( Suffix ); }
     QString fileAs() const { return find( FileAs ); }
-    QString pronunciation() const { return find( Pronunciation ); }
+    QString lastNamePronunciation() const { return find( LastNamePronunciation ); }
+    QString firstNamePronunciation() const { return find( FirstNamePronunciation ); }
+    QString companyPronunciation() const { return find( CompanyPronunciation ); }
 
     // helper function.  Attempts to find a string to use
     // as a one line representation for the contact.
@@ -236,12 +243,11 @@ public:
 
     //personal
     QString spouse() const { return find( Spouse ); }
-    QString gender() const { return find( Gender ); }
+    GenderType gender() const;
     QDate birthday() const;
     QDate anniversary() const;
     QString nickname() const { return find( Nickname ); }
     QString children() const { return find( Children ); }
-    QStringList childrenList() const;
 
     // other
     QString notes() const { return find( Notes ); }

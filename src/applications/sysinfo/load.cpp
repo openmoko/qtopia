@@ -102,7 +102,7 @@ QString LoadInfo::getCpuInfo()
 }
 
 Load::Load( QWidget *parent, const char *name, WFlags f )
-    : QWidget( parent, name, f )
+    : QWidget( parent, name, f ), lastUser(0), lastSys(0)
 {
     setMinimumHeight( 30 );
     setBackgroundColor( black );
@@ -121,6 +121,12 @@ Load::Load( QWidget *parent, const char *name, WFlags f )
     gettimeofday( &last, 0 );
     first = TRUE;
     timeout();
+}
+
+Load::~Load()
+{
+    delete [] userLoad;
+    delete [] systemLoad;
 }
 
 void Load::paintEvent( QPaintEvent * )

@@ -31,8 +31,7 @@ class CardMetrics {
 	enum CardSize {
 	    micro,
 	    small,
-	    normal,
-	    large
+	    normal
 	};
 
 	static void loadMetrics( int width, int height );

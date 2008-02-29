@@ -33,7 +33,7 @@ public:
 
     void set(double);
     double get(){return dbl;};
-    void push(char);
+    bool push(char,bool);
     void del();
     void clear();
 private:

@@ -28,60 +28,47 @@ class Graph;
 class GraphLegend;
 class FileSystem;
 class MountInfo;
-class QVBoxLayout;
+class StorageInfo;
+class QVBox;
 
 
-class StorageInfo : public QWidget
+class StorageInfoView : public QWidget
 {
     Q_OBJECT
 public:
-    StorageInfo( QWidget *parent=0, const char *name=0 );
+    StorageInfoView( QWidget *parent=0, const char *name=0 );
 
 protected:
     void timerEvent(QTimerEvent*);
+    void resizeEvent(QResizeEvent*);
+
+signals:
+    void updated();
+
+private slots:
+    void updateMounts();
 
 private:
-    void updateMounts();
-    QDict<MountInfo> disks;
-    QList<QFrame> lines;
-    QVBoxLayout *vb;
+    void setVBGeom();
+    StorageInfo *sinfo;
+    QVBox *vb;
 };
 
 class MountInfo : public QWidget
 {
     Q_OBJECT
 public:
-    MountInfo( const QString &path, const QString &ttl, QWidget *parent=0, const char *name=0 );
+    MountInfo( const FileSystem*, QWidget *parent=0, const char *name=0 );
     ~MountInfo();
 
-    void updateData();
+public slots:
+    void refresh();
 
 private:
     QString title;
-    FileSystem *fs;
+    const FileSystem *fs;
     QLabel *totalSize;
     GraphData *data;
     Graph *graph;
     GraphLegend *legend;
 };
-
-class FileSystem
-{
-public:
-    FileSystem( const QString &p );
-
-    void update();
-
-    const QString &path() const { return fspath; }
-    long blockSize() const { return blkSize; }
-    long totalBlocks() const { return totalBlks; }
-    long availBlocks() const { return availBlks; }
-
-private:
-    QString fspath;
-    long blkSize;
-    long totalBlks;
-    long availBlks;
-};
-
-

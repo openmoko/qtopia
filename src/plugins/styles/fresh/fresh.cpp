@@ -87,7 +87,7 @@ void FreshStyle::unPolish( QWidget *w )
 
 int FreshStyle::defaultFrameWidth() const
 {
-    return 1;
+    return 2;
 }
 
 void FreshStyle::drawPanel ( QPainter * p, int x, int y, int w, int h,
@@ -831,7 +831,7 @@ QStyle *FreshStyleImpl::style()
 
 QString FreshStyleImpl::name() const
 {
-    return QString("Fresh");
+    return qApp->translate("FreshStyle", "Fresh", "Name of the style Fresh");
 }
 
 QRESULT FreshStyleImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )

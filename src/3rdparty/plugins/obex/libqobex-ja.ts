@@ -31,13 +31,13 @@
     <message>
         <source>You received an event for:
 </source>
-        <translation>行事を受信しました:
+        <translation type="obsolete">行事を受信しました:
 </translation>
     </message>
     <message>
         <source>You received a todo item:
 </source>
-        <translation>チェックリストのアイテムを受信しました:
+        <translation type="obsolete">チェックリストのアイテムを受信しました:
 </translation>
     </message>
 </context>
@@ -54,6 +54,18 @@
     <message>
         <source>Failed</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You received an event for:
+</source>
+        <translation>行事を受信しました:
+</translation>
+    </message>
+    <message>
+        <source>You received a todo item:
+</source>
+        <translation>チェックリストのアイテムを受信しました:
+</translation>
     </message>
 </context>
 <context>

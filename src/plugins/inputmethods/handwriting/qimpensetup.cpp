@@ -164,7 +164,7 @@ void QIMPenSetup::styleClicked( int id )
 void QIMPenSetup::multiTimeoutChanged( int v )
 {
     multiTimeout = v;
-    pref->multiStrokeLabel->setText( tr("%1 ms").arg(v) );
+    pref->multiStrokeLabel->setText( tr("%1 ms","milliseconds").arg(v) );
 }
 
 void QIMPenSetup::selectProfile( const QString &p )
@@ -315,7 +315,7 @@ int QIMPenEdit::lastCh = 0;
 
 QIMPenEdit::QIMPenEdit( QIMPenProfile *p, QWidget *parent,
                 const char *name )
-    : QWidget( parent, name ), profile(p)
+    : QWidget( parent, name ), profile(p), currentSet(0)
 {
     currentChar = 0;
     currentCode = 0;

@@ -32,7 +32,7 @@
 class FormSimple:public QWidget {
 Q_OBJECT
 public:
-    FormSimple(QWidget *,const char*,WFlags);
+    FormSimple(QWidget *);
     ~FormSimple(){};
 
 public slots:

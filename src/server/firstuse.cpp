@@ -40,6 +40,7 @@
 #include <qtopia/config.h>
 #include <qtopia/applnk.h>
 #include <qtopia/mimetype.h>
+#include <qtopia/fontmanager.h>
 
 #include <qapplication.h>
 #include <qfile.h>
@@ -50,6 +51,7 @@
 #include <qpushbutton.h>
 #include <qhbox.h>
 #include <qlabel.h>
+#include <qtimer.h>
 
 #if defined( Q_WS_QWS )
 #include <qwsdisplay_qws.h>
@@ -72,10 +74,12 @@ struct {
 }
 settingsTable [] =
 {
-    { FALSE, "language", "raise()", "accept()", QT_TR_NOOP("Language") },
-    { FALSE, "systemtime", "raise()", "accept()", QT_TR_NOOP("Time and Date") },
-    { FALSE, "addressbook", "editPersonalAndClose()", "accept()", QT_TR_NOOP("Personal Information") },
-    { FALSE, "security", "raise()", "accept()", QT_TR_NOOP("Security") },
+    { FALSE, "language", "raise()", "accept()", // No tr
+	QT_TR_NOOP("Language") },
+    { FALSE, "systemtime", "raise()", "accept()", // No tr
+	QT_TR_NOOP("Time and Date") },
+    { FALSE, "addressbook", "editPersonalAndClose()", "accept()", // No tr
+	QT_TR_NOOP("Personal Information") },
     { FALSE, 0, 0, 0, 0 }
 };
 
@@ -167,6 +171,16 @@ FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
     Config config("locale");
     config.setGroup( "Language");
     lang = config.readEntry( "Language", "en");
+
+    defaultFont = font();
+
+    //###language/font hack; should look it up somewhere
+#ifdef Q_WS_QWS
+    if ( lang == "ja" || lang == "zh_CN" || lang == "zh_TW" || lang == "ko" ) {
+	QFont fn = FontManager::unicodeFont( FontManager::Proportional );
+	qApp->setFont( fn, TRUE );
+    }
+#endif
 }
 
 FirstUse::~FirstUse()
@@ -217,17 +231,19 @@ void FirstUse::nextDialog()
 			settingsTable[prevApp].stop );
 	    }
 	    QPixmap pix = Resource::loadPixmap("bigwait");
-	    QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize |
-		    QWidget::WStyle_NoBorder | QWidget::WStyle_Tool | QWidget::WStyle_StaysOnTop);
+	    QLabel *lblWait = new QLabel(0, "wait hack!", // No tr
+		    QWidget::WStyle_Customize | QWidget::WDestructiveClose |
+		    QWidget::WStyle_NoBorder | QWidget::WStyle_Tool |
+		    QWidget::WStyle_StaysOnTop);
 	    lblWait->setPixmap( pix );
 	    lblWait->setAlignment( QWidget::AlignCenter );
 	    lblWait->setGeometry( qApp->desktop()->geometry() );
 	    lblWait->show();
 	    qApp->processEvents();
-	    sleep(1);
-	    delete lblWait;
+	    QTimer::singleShot( 1000, lblWait, SLOT(close()) );
 	    repaint();
 	    close();
+	    DesktopApplication::allowRestart = TRUE;
 	    return;
 	}
     } while ( !settingsTable[currApp].enabled );
@@ -300,7 +316,7 @@ void FirstUse::terminated( int, const QString &app )
     qDebug( "--- terminated: %s", app.latin1() );
     if ( waitForExit != -1 && settingsTable[waitForExit].app == app ) {
 	qDebug( "Startup: %s", settingsTable[currApp].app );
-	if ( settingsTable[waitForExit].app == "language" ) {
+	if ( settingsTable[waitForExit].app == "language" ) { // No tr
 	    Config config("locale");
 	    config.setGroup( "Language");
 	    QString l = config.readEntry( "Language", "en");
@@ -314,8 +330,12 @@ void FirstUse::terminated( int, const QString &app )
 		settingsTable[currApp].start );
 	waitingForLaunch = TRUE;
 	updateButtons();
+	repaint();
     } else if ( settingsTable[currApp].app == app ) {
 	nextDialog();
+    } else {
+	back->setEnabled(TRUE);
+	next->setEnabled(TRUE);
     }
 }
 
@@ -329,6 +349,10 @@ void FirstUse::newQcopChannel(const QString& channelName)
 	    qDebug( "Application: %s started", settingsTable[currApp].app );
 	    waitingForLaunch = FALSE;
 	    updateButtons();
+	    repaint();
+	} else {
+	    back->setEnabled(FALSE);
+	    next->setEnabled(FALSE);
 	}
     }
 }
@@ -381,8 +405,16 @@ void FirstUse::reloadLanguages()
 	delete transLib;
 	transLib = 0;
     }
-    updateButtons();
-    repaint();
+    loadPixmaps();
+    //###language/font hack; should look it up somewhere
+#ifdef Q_WS_QWS
+    if ( l == "ja" || l == "zh_CN" || l == "zh_TW" || l == "ko" ) {
+	QFont fn = FontManager::unicodeFont( FontManager::Proportional );
+	qApp->setFont( fn, TRUE );
+    } else {
+	qApp->setFont( defaultFont, TRUE );
+    }
+#endif
 #endif
 }
 
@@ -401,7 +433,8 @@ void FirstUse::paintEvent( QPaintEvent * )
     if ( currApp < 0 ) {
 	drawText(p, tr( "Tap anywhere on the screen to continue." ));
     } else if ( settingsTable[currApp].app ) {
-	drawText(p, tr("Please wait, loading %1 settings.").arg(tr(settingsTable[currApp].desc)) );
+	if ( waitingForLaunch )
+	    drawText(p, tr("Please wait, loading %1 settings.").arg(tr(settingsTable[currApp].desc)) );
     } else {
 	drawText(p, tr("Please wait..."));
     }
@@ -432,7 +465,6 @@ void FirstUse::drawText(QPainter &p, const QString &text)
 
 void FirstUse::updateButtons()
 {
-    loadPixmaps();
     if ( currApp >= 0 ) {
 	taskBar->show();
     }

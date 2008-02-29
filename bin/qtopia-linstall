@@ -1,10 +1,16 @@
 #!/usr/bin/perl
 
+$basedir="$ENV{QPEDIR}/";
+if ( $ARGV[0] eq "-d" ) {
+    shift;
+    $basedir="$ENV{QPEDIR}/src/qtopiadesktop";
+}
+
 while (<>) {
     if ( /^TRANSLATIONS\s*=\s*(.*)/ ) {
 	for $ts ( split " ", $1 ) {
 	    ($target,$locale) = $ts =~ /^(.*)-(.*)\.ts$/;
-	    $dir = "$ENV{QPEDIR}/i18n/$locale";
+	    $dir = "$basedir/i18n/$locale";
 	    mkdir $dir,0700 if ! -d $dir;
 	    system("cp $target-$locale.qm $dir/$target.qm") && exit 1;
 	}

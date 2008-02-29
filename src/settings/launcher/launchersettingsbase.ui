@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>246</width>
+            <width>238</width>
             <height>270</height>
         </rect>
     </property>
@@ -218,6 +218,27 @@
                         <name>spacing</name>
                         <number>6</number>
                     </property>
+                    <spacer row="1"  column="0" >
+                        <property>
+                            <name>name</name>
+                            <cstring>Spacer4_2</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Vertical</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>sizeType</name>
+                            <enum>Expanding</enum>
+                        </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
+                    </spacer>
                     <widget row="0"  column="0" >
                         <class>QGroupBox</class>
                         <property stdset="1">
@@ -247,6 +268,52 @@
                                 <name>spacing</name>
                                 <number>6</number>
                             </property>
+                            <widget row="1"  column="0" >
+                                <class>QLayoutWidget</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>selectGroup</cstring>
+                                </property>
+                                <vbox>
+                                    <property stdset="1">
+                                        <name>margin</name>
+                                        <number>0</number>
+                                    </property>
+                                    <property stdset="1">
+                                        <name>spacing</name>
+                                        <number>6</number>
+                                    </property>
+                                    <widget>
+                                        <class>QPushButton</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>selectButton</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Select Image...</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QLabel</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>selectName</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>TextLabel2</string>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>alignment</name>
+                                            <set>AlignCenter</set>
+                                        </property>
+                                        <property>
+                                            <name>hAlign</name>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
                             <widget row="0"  column="0" >
                                 <class>QComboBox</class>
                                 <item>
@@ -286,64 +353,15 @@
                                     </size>
                                 </property>
                             </widget>
-                            <widget row="1"  column="0" >
-                                <class>QLayoutWidget</class>
+                            <widget row="2"  column="0" >
+                                <class>ColorButton</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>Layout2</cstring>
+                                    <cstring>colorButton</cstring>
                                 </property>
-                                <hbox>
-                                    <property stdset="1">
-                                        <name>margin</name>
-                                        <number>0</number>
-                                    </property>
-                                    <property stdset="1">
-                                        <name>spacing</name>
-                                        <number>6</number>
-                                    </property>
-                                    <widget>
-                                        <class>QPushButton</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>selectButton</cstring>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>text</name>
-                                            <string>Select Image...</string>
-                                        </property>
-                                    </widget>
-                                    <widget>
-                                        <class>ColorButton</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>colorButton</cstring>
-                                        </property>
-                                    </widget>
-                                </hbox>
                             </widget>
                         </grid>
                     </widget>
-                    <spacer row="1"  column="0" >
-                        <property>
-                            <name>name</name>
-                            <cstring>Spacer3</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>orientation</name>
-                            <enum>Vertical</enum>
-                        </property>
-                        <property stdset="1">
-                            <name>sizeType</name>
-                            <enum>Expanding</enum>
-                        </property>
-                        <property>
-                            <name>sizeHint</name>
-                            <size>
-                                <width>20</width>
-                                <height>20</height>
-                            </size>
-                        </property>
-                    </spacer>
                 </grid>
             </widget>
             <widget>
@@ -561,6 +579,7 @@
 </images>
 <tabstops>
     <tabstop>categoryCombo</tabstop>
+    <tabstop>group</tabstop>
     <tabstop>smallRadio</tabstop>
     <tabstop>largeRadio</tabstop>
     <tabstop>backgroundCombo</tabstop>

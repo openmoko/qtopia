@@ -3,7 +3,7 @@
     <name>DateBook</name>
     <message>
         <source>Day</source>
-        <translation>Tag</translation>
+        <translation type="obsolete">Tag</translation>
     </message>
     <message>
         <source>View</source>
@@ -112,10 +112,6 @@ Trotzdem beenden?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show selected months&apos;s events</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Find Event</source>
         <translation type="unfinished"></translation>
     </message>
@@ -163,6 +159,15 @@ Trotzdem beenden?</translation>
         <source>Single</source>
         <comment>1 event, not all</comment>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show selected month&apos;s events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <comment>day, not date</comment>
+        <translation type="unfinished">Tag</translation>
     </message>
 </context>
 <context>
@@ -330,12 +335,21 @@ Trotzdem beenden?</translation>
         <source>Calendar</source>
         <translation>Kalendar</translation>
     </message>
+    <message>
+        <source>Office</source>
+        <translation type="unfinished">Büro</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <comment>ie. not work</comment>
+        <translation type="unfinished">zu Hause</translation>
+    </message>
 </context>
 <context>
     <name>DateEntryBase</name>
     <message>
         <source>Home</source>
-        <translation>zu Hause</translation>
+        <translation type="obsolete">zu Hause</translation>
     </message>
     <message>
         <source>Lunch</source>
@@ -383,7 +397,7 @@ Trotzdem beenden?</translation>
     </message>
     <message>
         <source>Office</source>
-        <translation>Büro</translation>
+        <translation type="obsolete">Büro</translation>
     </message>
     <message>
         <source>All day</source>
@@ -533,25 +547,6 @@ Trotzdem beenden?</translation>
         <source>Case Sensitive</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Search Backwards</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Start</source>
-        <translation>Start</translation>
-    </message>
-    <message>
-        <source>End</source>
-        <translation>Ende</translation>
-    </message>
-    <message>
-        <source>All day</source>
-        <translation type="unfinished">Ganztags</translation>
-    </message>
 </context>
 <context>
     <name>RepeatEntry</name>
@@ -577,15 +572,15 @@ Trotzdem beenden?</translation>
     </message>
     <message>
         <source>Week</source>
-        <translation type="unfinished">Woche</translation>
+        <translation>Woche</translation>
     </message>
     <message>
         <source>Month</source>
-        <translation type="unfinished">Monat</translation>
+        <translation>Monat</translation>
     </message>
     <message>
         <source>Year</source>
-        <translation type="unfinished">Jahr</translation>
+        <translation>Jahr</translation>
     </message>
     <message>
         <source>Every:</source>
@@ -678,11 +673,6 @@ Trotzdem beenden?</translation>
     <message>
         <source>Repeat every %1 weeks from %2 to %3.</source>
         <comment>e.g. %1 = 3, %2 = Monday, %3 = Sunday.  Describes an event that occurs each day of the week for a full week, starting on %2 and ending on %3, every %1 weeks.</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Repeat every %1 months on the %2 of the month.</source>
-        <comment>eg. %1 = 4, %2 = 3rd</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -794,6 +784,26 @@ Trotzdem beenden?</translation>
         <source>fifth</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Repeat every %1 months on day %2 of the month.</source>
+        <comment>eg. %1 = 4, %2 = 3rd</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WeekView</name>
+    <message>
+        <source>Start</source>
+        <translation>Start</translation>
+    </message>
+    <message>
+        <source>End</source>
+        <translation>Ende</translation>
+    </message>
+    <message>
+        <source>All day</source>
+        <translation>Ganztags</translation>
+    </message>
 </context>
 <context>
     <name>WeekViewContents</name>
@@ -846,6 +856,17 @@ Trotzdem beenden?</translation>
     <message>
         <source>%1-%2</source>
         <comment>2 dates</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WorldTimeDialog</name>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished">OK</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

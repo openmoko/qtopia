@@ -6,12 +6,7 @@
         <translation type="unfinished">Aufgabenliste</translation>
     </message>
     <message>
-        <source>Qtopia Desktop ToDo List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The start date must occur before the tasks due date.
-Please change the due date first.</source>
+        <source>Discard changes?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -299,16 +294,19 @@ Please change the due date first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Are you sure you want to delete the %1 selected tasks?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Are you sure you want to delete:
-%1?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>the %1 selected tasks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View the current task&apos;s details.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;Are you sure you want to delete the %1 selected tasks?&lt;/qt&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;Are you sure you want to delete:&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;?&lt;/qt&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

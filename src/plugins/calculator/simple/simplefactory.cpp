@@ -21,9 +21,10 @@
 #include "simplefactory.h"
 #include "simple.h"
 #include <qstringlist.h>
+#include <qapplication.h>
 
 QWidget * SimpleInterface::create (QWidget *parent) {
-    return new FormSimple(parent,pluginName(),0);
+    return new FormSimple(parent);
 }
 
 #ifndef QT_NO_COMPONENT
@@ -45,4 +46,6 @@ Q_EXPORT_INTERFACE()
 {
     Q_CREATE_INSTANCE( SimpleInterface )
 }
+
+QString SimpleInterface::pluginName() const { return qApp->translate("Simple","Simple"); }
 #endif

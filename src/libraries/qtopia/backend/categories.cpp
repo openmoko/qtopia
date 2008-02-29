@@ -17,9 +17,13 @@
 ** not clear to you.
 **
 **********************************************************************/
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #include <qtopia/categories.h>
 #include <qtopia/stringutil.h>
+#include <qtopia/global.h>
 #include <qfile.h>
+#include <qdir.h>
+#include <qfileinfo.h>
 #include <qcstring.h>
 #include <qtextstream.h>
 #ifdef Q_WS_QWS
@@ -48,10 +52,13 @@ UidGen CategoryGroup::sUidGen( UidGen::Qtopia );
   category labels and category labels to ids. Lookups can be done with
   labels or unique idenifiers.
 
+  This is mainly an internal class used by Categories. Categories
+  does return this class in it's Categories::appGroupMap() and
+  Categories::globalGroup().
+
   \ingroup qtopiaemb
   \ingroup qtopiadesktop
-  \warning Categories API will likely change between Qtopia 1.5 and Qtopia 3
-  \sa Categories::appGroupMap(), Categories::globalGroup(), Categories
+  \warning Categories API will likely change for Qtopia 2.
  */
 
 /*! Add \a label and return the UID. If failure, then 0 is returned. Note
@@ -60,7 +67,7 @@ UidGen CategoryGroup::sUidGen( UidGen::Qtopia );
 */
 int CategoryGroup::add( const QString &label )
 {
-    if ( label == QObject::tr("All") || label == QObject::tr("Unfiled") )
+    if ( label == Categories::tr("All") || label == Categories::tr("Unfiled") )
 	return 0;
 
     QMap<QString,int>::Iterator findIt = mLabelIdMap.find( label );
@@ -82,7 +89,7 @@ void CategoryGroup::insert( int uid, const QString &label )
  */
 bool CategoryGroup::add( int uid, const QString &label )
 {
-    if ( label == QObject::tr("All") || label == QObject::tr("Unfiled") )
+    if ( label == Categories::tr("All") || label == Categories::tr("Unfiled") )
 	return FALSE;
 
     QMap<QString,int>::ConstIterator labelIt = mLabelIdMap.find( label );
@@ -129,12 +136,19 @@ bool CategoryGroup::remove( int uid )
  */
 bool CategoryGroup::rename( int uid, const QString &newLabel )
 {
-    if ( newLabel == QObject::tr("All") || newLabel == QObject::tr("Unfiled") )
+    if ( newLabel == Categories::tr("All") || newLabel == Categories::tr("Unfiled") )
 	return FALSE;
 
     QMap<int, QString>::Iterator idIt = mIdLabelMap.find( uid );
     if ( idIt == mIdLabelMap.end() )
 	return FALSE;
+
+    // check for name conflict
+    for ( QMap<int, QString>::Iterator it = mIdLabelMap.begin(); it != mIdLabelMap.end(); ++it) {
+	if ( it != idIt && (*it) == newLabel )
+	    return FALSE;
+    }
+
 
     mLabelIdMap.remove( *idIt );
     mLabelIdMap[newLabel] = uid;
@@ -231,9 +245,9 @@ Qtopia::UidGen & CategoryGroup::uidGen()
   categories. Categories can be created for an individual application
   such as Todo List or to be used for all applications. Categories
   that can be used by all applications are called global
-  categories. Each PalmtopRecord subclass stores categories as an
-  QArray<int> using PalmtopRecord::setCategories() and
-  PalmtopRecord::categories(). This allows each record to be assigned
+  categories. Each PimRecord subclass stores categories as an
+  QArray<int> using PimRecord::setCategories() and
+  PimRecord::categories(). This allows each record to be assigned
   to multiple categories. This also allows the user to rename a
   category and for it to update automatically in all records.
 
@@ -251,9 +265,30 @@ Qtopia::UidGen & CategoryGroup::uidGen()
 
   \ingroup qtopiaemb
   \ingroup qtopiadesktop
-  \warning Categories API will likely change between Qtopia 1.5 and Qtopia 3
-  \sa CategoryGroup, CategoryMenu
+  \warning Categories API will likely change after Qtopia 2.
+  \sa CategoryGroup, CategoryMenu, PimRecord
 */
+
+/*!
+    Only unique names allowed for categories.  Returns false if the name exists
+    in any category
+
+    \internal
+*/
+static bool contains(const Categories *c, const QString &label)
+{
+    if ( c->globalGroup().contains(label) )
+	return TRUE;
+
+    for ( QMap<QString, CategoryGroup>::ConstIterator it = c->appGroupMap().begin();
+	    it != c->appGroupMap().end(); ++it ) {
+
+	if ( (*it).contains(label) )
+	    return TRUE;
+    }
+
+    return FALSE;
+}
 
 
 /*!
@@ -267,7 +302,7 @@ int Categories::addCategory( const QString &appname,
 			     const QString &catname,
 			     int uid )
 {
-    if ( mGlobalCats.contains(catname) )
+    if ( contains(this, catname) )
 	return 0;
 
     QMap< QString, CategoryGroup >::Iterator
@@ -290,13 +325,13 @@ int Categories::addCategory( const QString &appname,
 /*!
   Add the category name \a catname for the application \a appname.
   Return UID if added, 0 if the category already exists locally
-  for that application or globally.
+  for any application or globally.
 */
 
 int Categories::addCategory( const QString &appname,
 			     const QString &catname )
 {
-     if ( mGlobalCats.contains(catname) )
+    if ( contains(this, catname) )
 	return 0;
 
     QMap< QString, CategoryGroup >::Iterator
@@ -336,6 +371,9 @@ int Categories::addGlobalCategory( const QString &catname, int uid )
  */
 int Categories::addGlobalCategory( const QString &catname )
 {
+    if ( contains(this, catname) )
+	return 0;
+
     int uid = mGlobalCats.add( catname );
     if ( !uid )
 	return 0;
@@ -542,19 +580,19 @@ int Categories::id( const QString &app, const QString &cat ) const
     return mAppCats[app].id( cat );
 }
 
-
 /*!
   Return TRUE if renaming succeeded; FALSE if \a appname or \a oldName
   is not found, or if \a newName conflicts with an existing category
-  in the CategoryGroup.
-
-  It will first search the CategoryGroup associated with \a appname
-  and if not found it will try to replace in global CategoryGroup.
+  name in any CategoryGroup.
  */
 bool Categories::renameCategory( const QString &appname,
 				 const QString &oldName,
 				 const QString &newName )
 {
+    // renaming to a non unique name is not allowed
+    if ( contains(this, newName) )
+	return FALSE;
+
     QMap< QString, CategoryGroup >::Iterator
 	appIt = mAppCats.find( appname );
 
@@ -572,12 +610,16 @@ bool Categories::renameCategory( const QString &appname,
 /*!
   Return TRUE if renaming succeeded; FALSE if \a oldName or \a newName
   is not found, or if \a newName conflicts with an existing category
-  in the CategoryGroup. This function will only rename categories found
+  in any CategoryGroup. This function will only rename categories found
   in the global CategoryGroup.
  */
 bool Categories::renameGlobalCategory( const QString &oldName,
 				       const QString &newName )
 {
+    // renaming to a non unique name is not allowed
+    if ( contains(this, newName) )
+	return FALSE;
+
     int uid = mGlobalCats.id( oldName );
     if ( uid != 0 && mGlobalCats.rename( uid, newName ) ) {
 	emit categoryRenamed( *this, QString::null, uid );
@@ -604,8 +646,13 @@ void Categories::setGlobal( const QString &appname,
     // if in app and should be in global, then move it
     if ( !global )
 	return;
-    if ( removeCategory( appname, catname, FALSE ) )
-	addGlobalCategory( catname );
+
+    // moved from local to global, need to maintain the uid, otherwise
+    // the records belonging to the local will lose their categorization
+    int oldId = id(appname, catname);
+    if ( removeCategory( appname, catname, FALSE ) ) {
+	addGlobalCategory( catname, oldId );
+    }
 }
 
 /*!
@@ -657,13 +704,14 @@ bool Categories::exists( const QString &appname,
  */
 bool Categories::save( const QString &fname ) const
 {
-    QString strNewFile = fname + ".new";
-    QFile f( strNewFile );
+    QString tempFile;
+    tempFile = qtopia_tempName( fname );
+    QFile f( tempFile );
     QString out;
     int total_written;
 
     if ( !f.open( IO_WriteOnly|IO_Raw ) ) {
-	qWarning("Unable to write to %s", fname.latin1());
+	qWarning("Unable to write to %s", f.name().latin1());
 	return FALSE;
     }
 
@@ -693,20 +741,13 @@ bool Categories::save( const QString &fname ) const
     total_written = f.writeBlock( cstr.data(), cstr.length() );
     if ( total_written != int(cstr.length()) ) {
 	f.close();
- 	QFile::remove( strNewFile );
+ 	QFile::remove( tempFile );
+	qDebug("Failure while writing %s", f.name().latin1() );
  	return FALSE;
     }
     f.close();
 
-#ifdef Q_OS_WIN32
-    QFile::remove( fname );
-#endif
-    if ( ::rename( strNewFile.latin1(), fname.latin1() ) < 0 ) {
-	qWarning( "problem renaming file %s to %s",
-		  strNewFile.latin1(), fname.latin1());
-	// remove the tmp file...
-	QFile::remove( strNewFile );
-    }
+    qtopia_renameFile( tempFile, fname );
 
 #ifndef QT_NO_COP
     {

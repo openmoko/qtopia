@@ -22,27 +22,24 @@
 #include <qstring.h>
 
 // Data type
-DoubleData::DoubleData(): Data() {
-    set(0);edited = FALSE;
-};
+DoubleData::DoubleData(): Data() {};
 
 void DoubleData::set(double d) {
     dbl = d;
     edited = FALSE;
     formattedOutput.setNum(dbl,'g',16);
-
     if (!strcmp(formattedOutput.latin1(),"nan")) { // No tr
 	systemEngine->setError(eNotANumber);
 	return;
-    } else if (!strcmp(formattedOutput.latin1(),"inf")) {
+    } else if (!strcmp(formattedOutput.latin1(),"inf")) { // No tr
 	systemEngine->setError(eInf);
 	return;
     }
 }
-void DoubleData::push(char c) {
+bool DoubleData::push(char c, bool commit) {
     if (formattedOutput.length() > 15 || 
 	    (formattedOutput == "0" && c == '0'))
-	return;
+	return FALSE;
     QString tmpString = formattedOutput;
     if (!edited) {
 	if (c == '.') 
@@ -55,10 +52,13 @@ void DoubleData::push(char c) {
     bool ok;
     double tmp = tmpString.toDouble(&ok);
     if (ok) {
-	formattedOutput = tmpString;
-	dbl = tmp;
+	if (commit) {
+	    formattedOutput = tmpString;
+	    dbl = tmp;
+	}
     } else
 	qDebug("Wrong character pushed");
+    return ok;
 }
 void DoubleData::del() {
     if (!edited)
@@ -81,6 +81,7 @@ void DoubleData::del() {
 }
 void DoubleData::clear() {
     dbl = 0;
-    Data::clear();
+    formattedOutput.truncate(0);
+    formattedOutput.append("0");
     edited = FALSE;
 }

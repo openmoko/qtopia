@@ -115,6 +115,10 @@
         <source>Occupation or job description.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AbSettings</name>
@@ -136,22 +140,22 @@
     <message>
         <source>H</source>
         <comment>Home phone</comment>
-        <translation>自</translation>
+        <translation type="obsolete">自</translation>
     </message>
     <message>
         <source>B</source>
         <comment>Business phone</comment>
-        <translation>勤</translation>
+        <translation type="obsolete">勤</translation>
     </message>
     <message>
         <source>HM</source>
         <comment>Home mobile</comment>
-        <translation>個人 携帯</translation>
+        <translation type="obsolete">個人 携帯</translation>
     </message>
     <message>
         <source>BM</source>
         <comment>Business mobile</comment>
-        <translation>ビジネス 携帯</translation>
+        <translation type="obsolete">ビジネス 携帯</translation>
     </message>
     <message>
         <source>Male</source>
@@ -160,6 +164,26 @@
     <message>
         <source>Female</source>
         <translation type="unfinished">女性</translation>
+    </message>
+    <message>
+        <source>H: </source>
+        <comment>Short title for Home phone</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>B: </source>
+        <comment>Short title for Business phone</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HM: </source>
+        <comment>Short title for Home mobile</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BM: </source>
+        <comment>Short title for Business mobile</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -235,15 +259,15 @@
     </message>
     <message>
         <source>Email</source>
-        <translation>電子メール</translation>
+        <translation type="obsolete">電子メール</translation>
     </message>
     <message>
         <source>Business Phone</source>
-        <translation>勤務先電話番号</translation>
+        <translation type="obsolete">勤務先電話番号</translation>
     </message>
     <message>
         <source>Home Phone</source>
-        <translation>自宅電話番号</translation>
+        <translation type="obsolete">自宅電話番号</translation>
     </message>
     <message>
         <source>Show this contact information in the Contact column, if available.</source>
@@ -383,15 +407,19 @@ VCards already in your addressbook</source>
         <translation>現在のエントリを自分のビジネスカードとして設定します。</translation>
     </message>
     <message>
-        <source>List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>View list of Contacts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Contact details.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

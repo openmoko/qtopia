@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #ifndef QT_NO_COP
-#define QTOPIA_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
 #include "qcopenvelope_qws.h"
 #endif
 #include "global.h"
@@ -79,6 +79,8 @@
   \endcode
 
   See also, the \link qcop.html list of Qtopia messages\endlink.
+
+  \ingroup qtopiaemb
 */
 
 /*!

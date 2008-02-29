@@ -112,7 +112,7 @@ WorldTime::WorldTime( QWidget *parent, const char* name,
     readInTimes();
     changed = FALSE;
     QObject::connect( qApp, SIGNAL( clockChanged(bool) ),
-                      this, SLOT( showClock() ) );
+                      this, SLOT( showTime() ) );
     // now start the timer so we can update the time quickly every second
     timerEvent( 0 );
 }
@@ -124,33 +124,62 @@ WorldTime::~WorldTime()
     }
 }
 
+void WorldTime::saveChanges()
+{
+    if (changed)
+	writeTimezoneChanges();
+
+    changed = FALSE;	
+}
+
+void WorldTime::cancelChanges()
+{
+    changed = FALSE;
+}
+
 void WorldTime::writeTimezoneChanges(void)
 {
-    Config cfg("WorldTime");
-    cfg.setGroup("Timezones");
+    qDebug("Writing changes");
+    Config *cfg = new Config("WorldTime");
+    if (!cfg){
+	qDebug("Unable to Write WorldTime configuration");
+	return;
+    }
+
     QListIterator<QPushButton> itCity( listCities );
-    QString s;
+    cfg->setGroup("TimeZones");
+
     int i;
     bool realTzWritten = FALSE;
     for ( i = 0, itCity.toFirst();  itCity.current(); i++, ++itCity ) {
 	if ( !strCityTz[i].isNull() ) {
-	    cfg.writeEntry("Zone"+QString::number(i), strCityTz[i]);
+	    cfg->writeEntry("Zone"+QString::number(i), strCityTz[i]);
+	    cfg->writeEntry("ZoneName"+QString::number(i), itCity.current()->text());
 	    if ( strCityTz[i] == strRealTz )
 		realTzWritten = TRUE;
 	}
     }
     if ( realTzWritten ) {
-	cfg.removeEntry("Zone"+QString::number(listCities.count()));
+	cfg->removeEntry("Zone"+QString::number(listCities.count()));
+	cfg->removeEntry("ZoneName"+QString::number(listCities.count()));
     } else {
-	cfg.writeEntry("Zone"+QString::number(listCities.count()),
+	cfg->writeEntry("Zone"+QString::number(listCities.count()),
 	    strRealTz);
 	if ( nameRealTz.isEmpty() ) {
 	    int i =  strRealTz.find( '/' );
 	    nameRealTz = strRealTz.mid( i+1 );
 	}
+	cfg->writeEntry("ZoneName"+QString::number(listCities.count()),
+	    nameRealTz);
     }
+
+    delete cfg; // ensure that config file is written immediately
+#ifndef QTOPIA_DESKTOP
 #ifndef QT_NO_COP
     QCopEnvelope ( "QPE/System", "timeZoneListChange()" );
+#endif
+#else
+    emit timeZoneListChange();
 #endif
 
     changed = FALSE;
@@ -178,14 +207,14 @@ void WorldTime::showTime( void )
     QListIterator<QLabel> itTime(listTimes);
     TimeZone curZone;
     QDateTime curUtcTime = TimeZone::utcDateTime(), cityTime;
-    
+
     // traverse the list...
     for ( i = 0, itTime.toFirst(); itTime.current(); i++, ++itTime) {
         if ( !strCityTz[i].isNull() ) {
 	    curZone = TimeZone( strCityTz[i] );
 	    if ( curZone.isValid() ){
 		cityTime = curZone.fromUtc( curUtcTime );
-                itTime.current()->setText( TimeString::localHM(cityTime.time()) );
+                itTime.current()->setText( TimeString::localHMDayOfWeek( cityTime ) );
 	    }else{
                 QMessageBox::critical( this, tr( "Time Changing" ),
                 tr( "There was a problem setting timezone %1" )
@@ -226,62 +255,47 @@ void WorldTime::slotNewTz( const QCString & zoneID)
     showTime();
 }
 
-static QStringList timezoneDefaults_( void )
-{
-    QStringList tzs;
-    // load up the list just like the file format (citytime.cpp)
-    tzs.append( "America/New_York" );
-    tzs.append( "America/Los_Angeles" );
-    tzs.append( "Australia/Brisbane" );
-    tzs.append( "Europe/Oslo" );
-    tzs.append( "Asia/Tokyo" );
-    tzs.append( "Asia/Hong_Kong" );
-    return tzs;
-}
-
 void WorldTime::readInTimes( void )
 {
     Config cfg("WorldTime");
-    cfg.setGroup("Timezones");
+    cfg.setGroup("TimeZones");
     QListIterator<QPushButton> itCity( listCities );
 
     int i=0;
     nameRealTz = QString::null;
     QString zn;
-    TimeZone curZone;
     nameRealTz = "";
     for ( ; i < int(listCities.count()) ; i++ ) {
 	zn = cfg.readEntry("Zone"+QString::number(i), QString::null);
 	if ( zn.isNull() )
 	    break;
+	QString nm = cfg.readEntry("ZoneName"+QString::number(i));
 	strCityTz[i] = zn;
-	curZone = TimeZone( zn );
-	if ( !curZone.isValid()){
-	    qDebug("WorldTime::readInTimes Invalid zoneID '%s'", zn.latin1());
-	    itCity.current()->setText("");
-	}else{
-	    itCity.current()->setText( curZone.city().data() );
-	    if ( zn == strRealTz )
-    		nameRealTz = curZone.city().data();
-	}
+	itCity.current()->setText(nm);
+	if ( zn == strRealTz )
+	    nameRealTz = nm;
 	++itCity;
     }
     if ( i == 0 ) {
-        // write in our own in a shameless self promotion and some humor
-        QStringList list = timezoneDefaults_();
+        // This should never be needed as the server or qtopiadesktop should always
+	//     create this configuratation file if needed
+	qWarning("WorldTime is recreating it's configuration using non-translated city names"); // No tr
+        QStringList list = timezoneDefaults();
         int i;
         QStringList::Iterator it = list.begin();
         for ( i = 0, itCity.toFirst(); itCity.current(); i++, ++itCity ) {
             strCityTz[i] = *it++;
-	    curZone = TimeZone( strCityTz[i] );
-	    if ( !curZone.isValid()){
-		qDebug("WorldTime::readInTimes Invalid zoneID '%s'", zn.latin1());
-		itCity.current()->setText("");
-	    }else{
-		itCity.current()->setText( curZone.city().data() );
-		if ( zn == strRealTz )
-    		    nameRealTz = curZone.city().data();
-	    }
+            itCity.current()->setText( *it++ );
         }
+    }
+    if ( nameRealTz.isEmpty() ) {
+	//remember the current time zone even if we don't have room
+	//to show it.
+	zn = cfg.readEntry("Zone"+QString::number(listCities.count()),
+	    QString::null);
+	if ( zn == strRealTz )
+	    nameRealTz = cfg.readEntry("ZoneName" +
+		QString::number(listCities.count()));
+	i++;
     }
 }
